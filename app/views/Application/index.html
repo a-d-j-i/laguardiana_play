@@ -1,0 +1,16 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<h1>application main menu</h1>
+
+#{form @Application.goCounter()}
+    #{ifErrors}
+        <p class="error">
+            All fields are required!
+        </p>
+    #{/ifErrors}
+    <p>
+        <input type="submit" value="Go Counter" />
+    </p>
+#{/form}
+

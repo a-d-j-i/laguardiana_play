@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<testsuite failures="0" time="0.11" errors="0" skipped="0" tests="5" name="BasicTest">
+  <testcase classname="BasicTest" name="createAndRetrieveUser" time="0.022">
+      </testcase>
+  <testcase classname="BasicTest" name="tryConnectAsUser" time="0.018">
+      </testcase>
+  <testcase classname="BasicTest" name="checkCurrencies" time="0.014">
+      </testcase>
+  <testcase classname="BasicTest" name="testDepositAndDepositItems" time="0.053">
+      </testcase>
+  <testcase classname="BasicTest" name="testDeposit" time="0.003">
+      </testcase>
+</testsuite>
