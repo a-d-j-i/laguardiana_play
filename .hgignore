@@ -9,3 +9,4 @@ doc/schema.architect~
 .classpath
 .project
 .settings
+.*~$
