@@ -13,9 +13,12 @@ GET     /favicon.ico                            404
 GET     /public/                                staticDir:public
 
 
-*       /                                       module:secure
-
-
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
+
+# Import CRUD routes
+*      /admin                                   module:crud
+
+
+*       /                                       module:secure
 

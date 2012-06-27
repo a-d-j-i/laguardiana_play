@@ -1,7 +1,7 @@
 /** Main layout **/
 
 html, body {
-    background: #FFFF00 !important;
+    background: #FFCC00 !important;
     font-family: Helvetica, Arial, Sans !important;
 }
 
@@ -84,7 +84,7 @@ body {
 /** main area **/
 
 .mainarea {
-    background: #E4EAFF;
+    background: #fddf66;
 }
 
 /** column setup **/

@@ -1,10 +1,9 @@
 package controllers;
 
-import play.*;
-import play.mvc.*;
+import play.mvc.Before;
+import play.mvc.Controller;
+import play.mvc.With;
 
-import java.util.*;
-import models.*;
 
 
 @With(Secure.class)
@@ -13,8 +12,8 @@ public class Application extends Controller {
     @Before
     static void setConnectedUser() {
         if(Security.isConnected()) {
-            User user = User.find("byEmail", Security.connected()).first();
-            renderArgs.put("user", user.fullname);
+            /*LgUser user = LgUser.find("byEmail", Security.connected()).first();
+            renderArgs.put("user", user.fullname);*/
         }
     }
     
