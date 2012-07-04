@@ -16,7 +16,7 @@ public class LgUserProperty extends GenericModel implements java.io.Serializable
     public LgUserPropertyId id;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "user_id", nullable = false, insertable = false, updatable = false )
-    public LgUser lgUser;
+    public LgUser user;
     @Column( name = "value", nullable = false, length = 128 )
     public String value;
 }

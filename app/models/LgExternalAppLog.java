@@ -14,10 +14,10 @@ public class LgExternalAppLog extends GenericModel implements java.io.Serializab
     public int logId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "external_app_id", nullable = false )
-    public LgExternalApp lgExternalApp;
+    public LgExternalApp externalApp;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "event_id", nullable = false )
-    public LgEvent lgEvent;
+    public LgEvent event;
     @Temporal( TemporalType.DATE )
     @Column( name = "creation_date", nullable = false, length = 13 )
     public Date creationDate;

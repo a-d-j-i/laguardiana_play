@@ -16,10 +16,10 @@ public class LgDeposit extends GenericModel implements java.io.Serializable {
     public int depositId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "user_id", nullable = false )
-    public LgUser lgUser;
+    public LgUser user;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "bag_id", nullable = false )
-    public LgBag lgBag;
+    public LgBag bag;
     @Temporal( TemporalType.DATE )
     @Column( name = "creation_date", nullable = false, length = 13 )
     public Date creationDate;
@@ -33,10 +33,10 @@ public class LgDeposit extends GenericModel implements java.io.Serializable {
     public String userCode;
     @Column( name = "user_code_lov" )
     public Integer userCodeLov;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgDeposit" )
-    public Set<LgEvent> lgEvents = new HashSet<LgEvent>( 0 );
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgDeposit" )
-    public Set<LgEnvelope> lgEnvelopes = new HashSet<LgEnvelope>( 0 );
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgDeposit" )
-    public Set<LgBill> lgBills = new HashSet<LgBill>( 0 );
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit" )
+    public Set<LgEvent> events = new HashSet<LgEvent>( 0 );
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit" )
+    public Set<LgEnvelope> envelopes = new HashSet<LgEnvelope>( 0 );
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit" )
+    public Set<LgBill> bills = new HashSet<LgBill>( 0 );
 }

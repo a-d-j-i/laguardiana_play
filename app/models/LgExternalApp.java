@@ -25,8 +25,8 @@ public class LgExternalApp extends GenericModel implements java.io.Serializable 
     public int presicion;
     @Column( name = "interval", nullable = false )
     public int interval;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgExternalApp" )
-    public Set<LgUser> lgUsers = new HashSet<LgUser>( 0 );
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgExternalApp" )
-    public Set<LgExternalAppLog> lgExternalAppLogs = new HashSet<LgExternalAppLog>( 0 );
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "externalApp" )
+    public Set<LgUser> users = new HashSet<LgUser>( 0 );
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "externalApp" )
+    public Set<LgExternalAppLog> externalAppLogs = new HashSet<LgExternalAppLog>( 0 );
 }

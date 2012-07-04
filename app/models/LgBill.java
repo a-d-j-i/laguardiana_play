@@ -13,10 +13,10 @@ public class LgBill extends GenericModel implements java.io.Serializable {
     public int billId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "deposit_id", nullable = false )
-    public LgDeposit lgDeposit;
+    public LgDeposit deposit;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "batch_id", nullable = false )
-    public LgBatch lgBatch;
+    public LgBatch batch;
     @Column( name = "slot_id", nullable = false )
     public int slotId;
     @Column( name = "quantity", nullable = false )

@@ -17,6 +17,6 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     @Temporal( TemporalType.DATE )
     @Column( name = "creation_date", nullable = false, length = 13 )
     public Date creationDate;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgBatch" )
-    public Set<LgBill> lgBills = new HashSet<LgBill>( 0 );
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "batch" )
+    public Set<LgBill> bills = new HashSet<LgBill>( 0 );
 }

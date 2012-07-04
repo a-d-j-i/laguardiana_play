@@ -13,7 +13,7 @@ public class LgEnvelope extends GenericModel implements java.io.Serializable {
     public int envelopeId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "deposit_id", nullable = false )
-    public LgDeposit lgDeposit;
+    public LgDeposit deposit;
     @Column( name = "envelope_type_lov", nullable = false )
     public int envelopeTypeLov;
     @Column( name = "envelope_number", nullable = false, length = 128 )

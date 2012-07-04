@@ -22,6 +22,6 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     @Temporal( TemporalType.DATE )
     @Column( name = "withdraw_date", length = 13 )
     public Date withdrawDate;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgBag" )
-    public Set<LgDeposit> lgDeposits = new HashSet<LgDeposit>( 0 );
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "bag" )
+    public Set<LgDeposit> deposits = new HashSet<LgDeposit>( 0 );
 }

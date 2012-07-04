@@ -31,14 +31,14 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     @Temporal( TemporalType.DATE )
     @Column( name = "end_date", nullable = false, length = 13 )
     public Date endDate;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgUser" )
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user" )
     Set<LgDeposit> deposits = new HashSet<LgDeposit>( 0 );
     @ManyToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY )
     @JoinTable( name = "lg_user_role", schema = "public", joinColumns = {
         @JoinColumn( name = "user_id", nullable = false, updatable = false ) }, inverseJoinColumns = {
         @JoinColumn( name = "role_id", nullable = false, updatable = false ) } )
     Set<LgRole> roles = new HashSet<LgRole>( 0 );
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgUser" )
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user" )
     Set<LgUserProperty> userProperties = new HashSet<LgUserProperty>( 0 );
 
     public static Object connect( String username, String password ) {

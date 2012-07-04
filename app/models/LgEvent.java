@@ -16,7 +16,7 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
     public int eventId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "deposit_id" )
-    public LgDeposit lgDeposit;
+    public LgDeposit deposit;
     @Column( name = "event_type_lov", nullable = false )
     public int eventTypeLov;
     @Temporal( TemporalType.DATE )
@@ -24,6 +24,6 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
     public Date creationDate;
     @Column( name = "message", nullable = false, length = 256 )
     public String message;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgEvent" )
-    public Set<LgExternalAppLog> lgExternalAppLogs = new HashSet<LgExternalAppLog>( 0 );
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "event" )
+    public Set<LgExternalAppLog> externalAppLogs = new HashSet<LgExternalAppLog>( 0 );
 }
