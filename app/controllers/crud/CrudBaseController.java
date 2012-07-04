@@ -4,16 +4,19 @@
  */
 package controllers.crud;
 
+import controllers.BaseController;
 import controllers.CRUD;
-import controllers.Check;
-import controllers.Secure;
+import play.Logger;
 import play.mvc.With;
 
 /**
  *
  * @author adji
  */
-@With( Secure.class )
-@Check( "value" )
+@With( BaseController.class )
 public class CrudBaseController extends CRUD {
+
+    public static void index() {
+        render( "CRUD/index.html" );
+    }
 }

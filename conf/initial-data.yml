@@ -3,7 +3,10 @@
 #
 
   LgResource(ResourceAdmin):
-    name:           admin
+    name:           ADMIN
+
+  LgResource(ResourceApplicationIndex):
+    name:           Application.index
     
   LgExternalApp(PlayInternalApp):
     name:           PlayInternalApp
@@ -11,6 +14,30 @@
     executionTime:  0000-00-00
     presicion:      0000-00-00
     interval:       -1
+
+
+  LgRole(RoleAdmin):
+    name:           admin
+
+
+  LgRole(RoleGuest):
+    name:           guest
+
+
+  LgAclRule(RoleGuestApplicationIndex):
+    role:           RoleGuest
+    resource:       ResourceApplicationIndex
+    priority:       1
+    operation:      GET
+    permission:     ALLOW
+    
+  LgAclRule(RoleAdminAdmin):
+    role:           RoleAdmin
+    resource:       ResourceAdmin
+    priority:       1
+    operation:      ADMIN
+    permission:     ALLOW
+        
     
   LgUser(dave):
     externalApp:    PlayInternalApp
@@ -20,6 +47,7 @@
     locked:         #x42
     creationDate:   2012-01-01
     endDate:        2112-01-01    
+    roles:          [ RoleGuest ]
 #    password:       #x16 #x10 #x83 #x87 #x43 #xcc #x90 #xe3 #xe4 #xfd #xda #x74 #x82 #x82 #xd9 #xb8
 
   LgUser(admindave):
@@ -30,18 +58,5 @@
     locked:         #x42
     creationDate:   2012-01-01
     endDate:        2112-01-01    
-    
-  LgRole(RoleAdmin):
-    name:           admin
-    users:
-                    - admindave
-
-
-  LgAclRule(RoleAdminToResourceAdminWrite):
-    role:           RoleAdmin
-    resource:       ResourceAdmin
-    priority:       1
-    permission:     ok
-    operation:      modify
-
+    roles:          [ RoleGuest, RoleAdmin ]
 

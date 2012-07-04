@@ -1,6 +1,8 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
@@ -16,7 +18,8 @@ public class LgRole extends GenericModel implements java.io.Serializable {
     @Column( name = "name", nullable = false, length = 64 )
     public String name;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "role" )
-    public Set<LgAclRule> aclRules = new HashSet<LgAclRule>( 0 );
+    @OrderBy("priority")
+    public List<LgAclRule> aclRules = new ArrayList<LgAclRule>( 0 );
     @ManyToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "roles" )
     public Set<LgUser> users = new HashSet<LgUser>( 0 );
 }

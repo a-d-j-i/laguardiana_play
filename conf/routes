@@ -2,6 +2,7 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+
 # Home page
 GET     /                                           Application.index
 *       /Counter                                    Counter.index
@@ -12,15 +13,15 @@ GET     /favicon.ico                                404
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                    staticDir:public
 
-
-# Catch all
-*       /{controller}/{action}                      {controller}.{action}
-
 # Import CRUD routes
 #GET     /admin/?                                Admin.index
+# there is a small bug in crud module
+GET     /crud/index                            crud.CrudBaseController.index()
 *       /admin                                  module:crud
 
-*       /                                           module:secure
 
-# Import Secure routes
-*       /                                       module:secure
+# Catch all
+#*       /{controller}/{action}                      {controller}.{action}
+
+
+*       /                                           SecureController.login
