@@ -3,6 +3,7 @@ package controllers;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import models.LgRole;
 import models.LgUser;
 import play.Logger;
 import play.Play;
@@ -10,6 +11,7 @@ import play.cache.Cache;
 import play.data.validation.Required;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Http.Header;
 
 /**
  *
@@ -22,22 +24,41 @@ public class SecureController extends Controller {
     @Before( unless = { "login", "authenticate", "logout" } )
     static void checkAccess() throws Throwable {
         // Authentication
+        Header referer = request.headers.get( "referer" );
+
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
         if ( user == null ) {
-            flash.put( "url", "GET".equals( request.method ) ? request.url : Play.ctxPath + "/" ); // seems a good default
-            login();
-        } else {
-            if ( !checkPermission( request.action, request.method ) ) {
-                Logger.error( "User %s not allowed to access %s %s", user.username, request.action, request.method );
-                flash.error( "Not allowed." );
+            LgRole guestRole = LgRole.find( "byName", "guest" ).first();
+            if ( guestRole == null ) {
                 flash.put( "url", "GET".equals( request.method ) ? request.url : Play.ctxPath + "/" ); // seems a good default
+                flash.put( "lastUrl", "GET".equals( request.method ) ? referer.value() : Play.ctxPath + "/" ); // seems a good default
                 login();
+                return;
             }
+            // Create automatically the guest user.
+            user = new LgUser();
+            user.username = "guest user";
+            user.roles.add( guestRole );
+            user.postLoad();
+            Cache.set( session.getId() + "-user", user );
+
         }
+        if ( !checkPermission( request.action, request.method ) ) {
+            Logger.error( "User %s not allowed to access %s %s", user.username, request.action, request.method );
+            flash.error( "Not allowed." );
+            flash.put( "url", "GET".equals( request.method ) ? request.url : Play.ctxPath + "/" ); // seems a good default
+            flash.put( "lastUrl", "GET".equals( request.method ) ? referer.value() : Play.ctxPath + "/" ); // seems a good default
+            login();
+        }
+        renderArgs.put( "user", user );
     }
 
     public static boolean checkPermission( String resource, String operation ) {
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
+        if ( user == null ) {
+            Logger.error( "Invalid user" );
+            return false;
+        }
         if ( user.checkPermission( "ADMIN", "ADMIN" ) ) {
             return true;
         }
@@ -45,13 +66,22 @@ public class SecureController extends Controller {
     }
 
     public static void login() throws Throwable {
+        String url = flash.get( "lastUrl" );
+        if ( url == null ) {
+            url = Play.ctxPath + "/";
+        }
+        renderArgs.put( "lastUrl", url );
+        Logger.error( "URL %s", url );
+
+
         flash.keep( "url" );
+        flash.keep( "lastUrl" );
         render();
     }
 
-    public static void authenticate( @Required String username, String password, boolean remember ) throws Throwable {
+    public static void authenticate( @Required String username, String password, boolean remember, String cancel ) throws Throwable {
         // Check tokens
-
+        Logger.error( cancel );
         List<LgUser> users = LgUser.find( "byUsername", username ).fetch();
         LgUser validated = null;
         for ( LgUser user : users ) {
@@ -84,7 +114,7 @@ public class SecureController extends Controller {
         Cache.delete( session.getId() + "-user" );
         session.clear();
         flash.success( "secure.logout" );
-        login();
+        redirectToOriginalURL();
     }
 
     static void redirectToOriginalURL() throws Throwable {

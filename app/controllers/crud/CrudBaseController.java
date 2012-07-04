@@ -4,16 +4,15 @@
  */
 package controllers.crud;
 
-import controllers.BaseController;
 import controllers.CRUD;
-import play.Logger;
+import controllers.SecureController;
 import play.mvc.With;
 
 /**
  *
  * @author adji
  */
-@With( BaseController.class )
+@With( SecureController.class )
 public class CrudBaseController extends CRUD {
 
     public static void index() {

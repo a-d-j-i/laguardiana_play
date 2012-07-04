@@ -6,11 +6,9 @@ do
     echo "package controllers.crud;
 
 import controllers.CRUD;
-import controllers.Secure;
 import models.${c};
 import play.mvc.With;
 
-@With(Secure.class)
 @CRUD.For( ${c}.class )
 public class ${j}s extends CrudBaseController {
 }
