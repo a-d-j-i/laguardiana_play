@@ -1,6 +1,10 @@
 # you describe your data using the YAML notation here
 # and then load them using Fixtures.load("data.yml")
 #
+
+  LgResource(ResourceAdmin):
+    name:           admin
+    
   LgExternalApp(PlayInternalApp):
     name:           PlayInternalApp
     retryInterval:  -1
@@ -15,7 +19,29 @@
     externalId:     1515
     locked:         #x42
     creationDate:   2012-01-01
-    endDate:        2112-01-01
-    
+    endDate:        2112-01-01    
 #    password:       #x16 #x10 #x83 #x87 #x43 #xcc #x90 #xe3 #xe4 #xfd #xda #x74 #x82 #x82 #xd9 #xb8
+
+  LgUser(admindave):
+    externalApp:    PlayInternalApp
+    username:       admindave
+    password:       admindave
+    externalId:     1516
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    
+  LgRole(RoleAdmin):
+    name:           admin
+    users:
+                    - admindave
+
+
+  LgAclRule(RoleAdminToResourceAdminWrite):
+    role:           RoleAdmin
+    resource:       ResourceAdmin
+    priority:       1
+    permission:     ok
+    operation:      modify
+
 
