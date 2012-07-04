@@ -7,13 +7,14 @@ import play.db.jpa.GenericModel;
 @Table( name = "lg_user_property", schema = "public" )
 public class LgUserProperty extends GenericModel implements java.io.Serializable {
 
-    @EmbeddedId
-    @AttributeOverrides( {
-        @AttributeOverride( name = "userId", column =
-        @Column( name = "user_id", nullable = false ) ),
-        @AttributeOverride( name = "property", column =
-        @Column( name = "property", nullable = false, length = 64 ) ) } )
-    public LgUserPropertyId id;
+    @Id
+    @Column( name = "user_property_id", unique = true, nullable = false )
+    @GeneratedValue
+    public int lovId;
+    @Column( name = "user_id", nullable = false )
+    public int userId;
+    @Column( name = "property", nullable = false, length = 64 )
+    public String property;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "user_id", nullable = false, insertable = false, updatable = false )
     public LgUser user;

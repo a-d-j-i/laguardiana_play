@@ -29,7 +29,7 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     @Column( name = "creation_date", nullable = false, length = 13 )
     public Date creationDate;
     @Temporal( TemporalType.DATE )
-    @Column( name = "end_date", nullable = false, length = 13 )
+    @Column( name = "end_date", nullable = true, length = 13 )
     public Date endDate;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user" )
     Set<LgDeposit> deposits = new HashSet<LgDeposit>( 0 );
