@@ -1,18 +1,21 @@
 # you describe your data using the YAML notation here
 # and then load them using Fixtures.load("data.yml")
-
-  User(bob):
-    email:          aadjiman@gmail.com
-    password:       adji
-    fullname:       adji
-    isAdmin:        true
-        
-  CCurrency(pesos1):
-    name:           pesos1
-    validFrom:      2009-06-14
-    expired:        false
-    convRate:       1
-  
-
-
+#
+  LgExternalApp(PlayInternalApp):
+    name:           PlayInternalApp
+    retryInterval:  -1
+    executionTime:  0000-00-00
+    presicion:      0000-00-00
+    interval:       -1
+    
+  LgUser(dave):
+    externalApp:    PlayInternalApp
+    username:       dave
+    password:       dave
+    externalId:     1515
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01
+    
+#    password:       #x16 #x10 #x83 #x87 #x43 #xcc #x90 #xe3 #xe4 #xfd #xda #x74 #x82 #x82 #xd9 #xb8
 
