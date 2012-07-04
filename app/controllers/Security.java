@@ -5,6 +5,9 @@ import java.security.NoSuchAlgorithmException;
 import models.LgUser;
 import play.Logger;
 
+import models.*;
+ 
+
 public class Security extends Secure.Security {
 
     static boolean authenticate( String username, String password ) {
