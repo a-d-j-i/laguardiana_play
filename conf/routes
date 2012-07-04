@@ -22,3 +22,5 @@ GET     /public/                                    staticDir:public
 
 *       /                                           module:secure
 
+# Import Secure routes
+*       /                                       module:secure
