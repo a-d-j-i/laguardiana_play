@@ -11,9 +11,10 @@ public class LgResource extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "resource_id", unique = true, nullable = false )
-    int resourceId;
+    @GeneratedValue
+    public int resourceId;
     @Column( name = "name", nullable = false, length = 64 )
-    String name;
+    public String name;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgResource" )
-    Set<LgAclRule> lgAclRules = new HashSet<LgAclRule>( 0 );
+    public Set<LgAclRule> lgAclRules = new HashSet<LgAclRule>( 0 );
 }

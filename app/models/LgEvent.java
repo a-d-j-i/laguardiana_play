@@ -12,17 +12,18 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "event_id", unique = true, nullable = false )
-    int eventId;
+    @GeneratedValue
+    public int eventId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "deposit_id" )
-    LgDeposit lgDeposit;
+    public LgDeposit lgDeposit;
     @Column( name = "event_type_lov", nullable = false )
-    int eventTypeLov;
+    public int eventTypeLov;
     @Temporal( TemporalType.DATE )
     @Column( name = "creation_date", nullable = false, length = 13 )
-    Date creationDate;
+    public Date creationDate;
     @Column( name = "message", nullable = false, length = 256 )
-    String message;
+    public String message;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgEvent" )
-    Set<LgExternalAppLog> lgExternalAppLogs = new HashSet<LgExternalAppLog>( 0 );
+    public Set<LgExternalAppLog> lgExternalAppLogs = new HashSet<LgExternalAppLog>( 0 );
 }

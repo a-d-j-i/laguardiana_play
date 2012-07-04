@@ -12,20 +12,21 @@ public class LgExternalApp extends GenericModel implements java.io.Serializable 
 
     @Id
     @Column( name = "external_app_id", unique = true, nullable = false )
-    int externalAppId;
+    @GeneratedValue
+    public int externalAppId;
     @Column( name = "name", nullable = false, length = 128 )
-    String name;
+    public String name;
     @Column( name = "retry_interval", nullable = false )
-    int retryInterval;
+    public int retryInterval;
     @Temporal( TemporalType.TIMESTAMP )
     @Column( name = "execution_time", nullable = false, length = 29 )
-    Date executionTime;
+    public Date executionTime;
     @Column( name = "presicion", nullable = false )
-    int presicion;
+    public int presicion;
     @Column( name = "interval", nullable = false )
-    int interval;
+    public int interval;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgExternalApp" )
-    Set<LgUser> lgUsers = new HashSet<LgUser>( 0 );
+    public Set<LgUser> lgUsers = new HashSet<LgUser>( 0 );
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgExternalApp" )
-    Set<LgExternalAppLog> lgExternalAppLogs = new HashSet<LgExternalAppLog>( 0 );
+    public Set<LgExternalAppLog> lgExternalAppLogs = new HashSet<LgExternalAppLog>( 0 );
 }

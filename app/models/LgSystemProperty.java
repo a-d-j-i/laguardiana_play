@@ -1,9 +1,6 @@
 package models;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
 @Entity
@@ -12,9 +9,10 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
 
     @Id
     @Column( name = "property_id", unique = true, nullable = false )
-    int propertyId;
+    @GeneratedValue
+    public int propertyId;
     @Column( name = "name", nullable = false, length = 64 )
-    String name;
+    public String name;
     @Column( name = "value", nullable = false, length = 128 )
-    String value;
+    public String value;
 }

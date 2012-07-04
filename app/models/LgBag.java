@@ -12,15 +12,16 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "bag_id", unique = true, nullable = false )
-    int bagId;
+    @GeneratedValue
+    public int bagId;
     @Column( name = "bag_code", nullable = false, length = 128 )
-    String bagCode;
+    public String bagCode;
     @Temporal( TemporalType.DATE )
     @Column( name = "creation_date", nullable = false, length = 13 )
-    Date creationDate;
+    public Date creationDate;
     @Temporal( TemporalType.DATE )
     @Column( name = "withdraw_date", length = 13 )
-    Date withdrawDate;
+    public Date withdrawDate;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgBag" )
-    Set<LgDeposit> lgDeposits = new HashSet<LgDeposit>( 0 );
+    public Set<LgDeposit> lgDeposits = new HashSet<LgDeposit>( 0 );
 }

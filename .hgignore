@@ -11,3 +11,4 @@ doc/schema.architect~
 .settings
 .*~$
 eclipse
+modules

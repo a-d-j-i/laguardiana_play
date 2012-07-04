@@ -9,18 +9,19 @@ public class LgEnvelope extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "envelope_id", unique = true, nullable = false )
-    int envelopeId;
+    @GeneratedValue
+    public int envelopeId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "deposit_id", nullable = false )
-    LgDeposit lgDeposit;
+    public LgDeposit lgDeposit;
     @Column( name = "envelope_type_lov", nullable = false )
-    int envelopeTypeLov;
+    public int envelopeTypeLov;
     @Column( name = "envelope_number", nullable = false, length = 128 )
-    String envelopeNumber;
+    public String envelopeNumber;
     @Column( name = "content_type_lov" )
-    Integer contentTypeLov;
+    public Integer contentTypeLov;
     @Column( name = "amount", nullable = false )
-    int amount;
+    public int amount;
     @Column( name = "unit_lov", nullable = false )
-    int unitLov;
+    public int unitLov;
 }

@@ -5,11 +5,14 @@ do
 
     echo "package controllers.crud;
 
-import controllers.CRUD; 
+import controllers.CRUD;
+import controllers.Secure;
 import models.${c};
+import play.mvc.With;
 
+@With(Secure.class)
 @CRUD.For( ${c}.class )
-public class ${j}s extends CRUD {
+public class ${j}s extends CrudBaseController {
 }
 " > "../controllers/crud/${j}s.java"
 done

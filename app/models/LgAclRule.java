@@ -9,17 +9,18 @@ public class LgAclRule extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "acl_id", unique = true, nullable = false )
-    int aclId;
+    @GeneratedValue
+    public int aclId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "role_id", nullable = false )
-    LgRole lgRole;
+    public LgRole lgRole;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "resource_id", nullable = false )
-    LgResource lgResource;
+    public LgResource lgResource;
     @Column( name = "priority", nullable = false )
-    int priority;
+    public int priority;
     @Column( name = "permission", nullable = false, length = 8 )
-    String permission;
+    public String permission;
     @Column( name = "operation", nullable = false, length = 64 )
-    String operation;
+    public String operation;
 }

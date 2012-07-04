@@ -8,9 +8,9 @@ import play.db.jpa.GenericModel;
 public class LgLovId extends GenericModel implements java.io.Serializable {
 
     @Column( name = "type", nullable = false, length = 32 )
-    String type;
+    public String type;
     @Column( name = "numeric_id", nullable = false )
-    int numericId;
+    public int numericId;
     @Column( name = "text_id", nullable = false, length = 32 )
-    String textId;
+    public String textId;
 }

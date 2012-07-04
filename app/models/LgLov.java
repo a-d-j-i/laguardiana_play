@@ -16,10 +16,10 @@ public class LgLov extends GenericModel implements java.io.Serializable {
         @Column( name = "numeric_id", nullable = false ) ),
         @AttributeOverride( name = "textId", column =
         @Column( name = "text_id", nullable = false, length = 32 ) ) } )
-    LgLovId id;
+    public LgLovId id;
     @Column( name = "description", nullable = false, length = 256 )
-    String description;
+    public String description;
     @Temporal( TemporalType.DATE )
     @Column( name = "end_date", nullable = false, length = 13 )
-    Date endDate;
+    public Date endDate;
 }

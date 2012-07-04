@@ -12,10 +12,11 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "batch_id", unique = true, nullable = false )
-    int batchId;
+    @GeneratedValue
+    public int batchId;
     @Temporal( TemporalType.DATE )
     @Column( name = "creation_date", nullable = false, length = 13 )
-    Date creationDate;
+    public Date creationDate;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lgBatch" )
-    Set<LgBill> lgBills = new HashSet<LgBill>( 0 );
+    public Set<LgBill> lgBills = new HashSet<LgBill>( 0 );
 }

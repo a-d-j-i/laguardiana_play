@@ -13,10 +13,10 @@ public class LgUserProperty extends GenericModel implements java.io.Serializable
         @Column( name = "user_id", nullable = false ) ),
         @AttributeOverride( name = "property", column =
         @Column( name = "property", nullable = false, length = 64 ) ) } )
-    LgUserPropertyId id;
+    public LgUserPropertyId id;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "user_id", nullable = false, insertable = false, updatable = false )
-    LgUser lgUser;
+    public LgUser lgUser;
     @Column( name = "value", nullable = false, length = 128 )
-    String value;
+    public String value;
 }

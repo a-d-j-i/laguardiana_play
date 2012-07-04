@@ -8,7 +8,7 @@ import play.db.jpa.GenericModel;
 public class LgUserPropertyId extends GenericModel implements java.io.Serializable {
 
     @Column( name = "user_id", nullable = false )
-    int userId;
+    public int userId;
     @Column( name = "property", nullable = false, length = 64 )
-    String property;
+    public String property;
 }
