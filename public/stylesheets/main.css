@@ -1,27 +1,77 @@
 /** Main layout **/
 
-html, body {
-    background: #FFCC00 !important;
-    font-family: Helvetica, Arial, Sans !important;
+*{margin:0;padding:0;}
+
+html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym, address, big, cite, code,del, dfn, em, font, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
 }
 
-body {
-    width: 900px;
-    padding: 0 30px;
-    margin: auto;
+body { 
+    font-family: "Lucida Sans", "Arial"; 
+    background-image: url('../images/background.gif');
+    background-repeat: repeat-x;
+    background-color: #efefef;	
+    height: 98%; 
+    margin: 0 auto; 
+    padding: 0;
 }
 
-#header {
-    padding: 10px 0;
+html, div, input, textarea {
+    font-family: Verdana,Tahoma,Segoe,sans-serif;
+    font-size: 14px;
+}
+
+.container{
     position: relative;
+    width:964px;	
+    left:50%;
+    margin-left: -482px;
+    clear: both;	
 }
+
+
+#header { padding: 10px 0; position: relative; }
+
+.header{
+    background-image: url(../images/prosegur_header.gif);
+    background-repeat: no-repeat;
+    width: 964px;
+    height: 86px;
+    position:relative;
+    z-index:8000;
+}
+
+.homelink{left:56px;position:absolute;top:5px;}
+
+
+
+
+a, a:link, a:hover, a:active, a:visited { text-decoration: none; color: #666666; }
+
+
+#page-wrap { display: block; width: 90%; margin: 0 auto; text-align: center; height: 98%; min-height: 350px; }
+
+h1, h2, h3, h4 { color: #ddd; text-align: center; }
+h2 { margin: 5px; font-size: 130%; cursor: pointer; }
+
+#nav { display: block; width: auto; text-align: center; margin: 20px auto 0 auto; line-height: 45px; }
+#nav a { text-align: center; background: #000; color: #FFF; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; padding: 10px; white-space: nowrap; }
+#nav a.git { background: #006; }
+#nav a.play { background: #060; }
+#nav a.issue { background: #600; }
+#nav a:hover,#nav a.current{ background: #555; }
+
+#footer { height: 150px; }
+#footer2 div { margin: 220px auto; width: 650px; text-align: center; }
+
 
 /** basic controls in main **/
-#header {
-    padding: 10px 0;
-    position: relative;
-}
-
 #logo {
     display: block;
     height: 49px;
@@ -33,53 +83,6 @@ body {
     text-shadow: 1px 2px 2px #000;
 }
 
-#logo a {
-    text-decoration: none;
-    color: #000; /*#fff;*/
-
-    display: block;
-    height: 49px;
-    margin-left: 20px;
-
-    font-size: 48px;
-    font-weight: bold;
-    letter-spacing: -4px;
-    text-shadow: 1px 2px 2px #000;
-}
-
-
-#logo span {
-    color: #f00;
-    font-size: 70%;
-}
-
-#tools {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    position: absolute;
-    right: 0;
-    top: 30px;
-    right: 20px;
-}
-
-#tools a {
-    color: #000; /*#fff;*/
-    text-decoration: none;
-    font-weight:bold;
-}
-
-#title {
-    background: #B8C569;
-    padding: 20px 30px 30px 20px;
-    margin: 20px 0;
-    color: #3C4313;
-    position: relative;
-    -webkit-border-radius: 16px;
-    -webkit-box-shadow: 0 2px 0 #93A045;
-    -moz-border-radius: 16px;
-}
-
 
 /** main area **/
 
@@ -89,24 +92,6 @@ body {
 
 /** column setup **/
 
-#fakeTable, #faketable li{
-  list-style-type:none; //no bullets etc
-  margin:0;
-  padding:0;
-  }
 
-#fakeTable{
-  width:300px; //you could set it to any width really, just an example
-  }
-
-#fakeTable li{
-  border: 1px;
-  display:block;
-  float:left;
-  clear:none;
-  width:70px;
-  padding:0 11px 0 11px;
-  }
-  
 .numvalue { text-align:right; }
 .colheading { text-align:center; }
