@@ -8,6 +8,9 @@
   LgResource(ResourceApplicationIndex):
     name:           Application.index
     
+  LgResource(ResourceApplicationCounter):
+    name:           Application.goCounter
+    
   LgExternalApp(PlayInternalApp):
     name:           PlayInternalApp
     retryInterval:  -1
@@ -20,6 +23,10 @@
     name:           admin
 
 
+  LgRole(RoleUser):
+    name:           user
+
+
   LgRole(RoleGuest):
     name:           guest
 
@@ -27,6 +34,20 @@
   LgAclRule(RoleGuestApplicationIndex):
     role:           RoleGuest
     resource:       ResourceApplicationIndex
+    priority:       1
+    operation:      GET
+    permission:     ALLOW
+
+  LgAclRule(RoleUserApplicationCounterPost):
+    role:           RoleUser
+    resource:       ResourceApplicationCounter
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
+
+  LgAclRule(RoleUserApplicationCounterPost):
+    role:           RoleUser
+    resource:       ResourceApplicationCounter
     priority:       1
     operation:      GET
     permission:     ALLOW
@@ -47,7 +68,7 @@
     locked:         #x42
     creationDate:   2012-01-01
     endDate:        2112-01-01    
-    roles:          [ RoleGuest ]
+    roles:          [ RoleGuest, RoleUser ]
 #    password:       #x16 #x10 #x83 #x87 #x43 #xcc #x90 #xe3 #xe4 #xfd #xda #x74 #x82 #x82 #xd9 #xb8
 
   LgUser(admindave):
@@ -59,4 +80,14 @@
     creationDate:   2012-01-01
     endDate:        2112-01-01    
     roles:          [ RoleGuest, RoleAdmin ]
+
+  LgUser(expireddave):
+    externalApp:    PlayInternalApp
+    username:       expireddave
+    password:       expireddave
+    externalId:     1516
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2012-01-02    
+    roles:          [ RoleGuest, RoleUser ]
 
