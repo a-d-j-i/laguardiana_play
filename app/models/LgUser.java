@@ -90,7 +90,13 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     }
 
     public boolean authenticate( String token ) {
-        return ( password != null && password.equals( token ) );
+        if ( password == null || !password.equals( token ) ) {
+            return false;
+        }
+        if ( endDate.before(  new Date() ) ) {
+            return false;
+        }
+        return true;
     }
 
     private void writeObject( ObjectOutputStream out ) throws IOException {
@@ -128,5 +134,9 @@ public class LgUser extends GenericModel implements java.io.Serializable {
             return false;
         }
         return false;
+    }
+    
+    public String toString() {
+        return username;
     }
 }

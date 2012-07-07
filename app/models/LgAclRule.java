@@ -23,4 +23,8 @@ public class LgAclRule extends GenericModel implements java.io.Serializable {
     public String permission;
     @Column( name = "operation", nullable = false, length = 64 )
     public String operation;
+    
+    public String toString() {
+        return permission + " " + role.toString() + " to " + operation + " on "+resource;
+    }
 }

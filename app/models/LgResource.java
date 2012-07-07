@@ -17,4 +17,8 @@ public class LgResource extends GenericModel implements java.io.Serializable {
     public String name;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "resource" )
     public Set<LgAclRule> aclRules = new HashSet<LgAclRule>( 0 );
+    
+    public String toString() {
+        return name;
+    }
 }

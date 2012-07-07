@@ -29,4 +29,8 @@ public class LgExternalApp extends GenericModel implements java.io.Serializable 
     public Set<LgUser> users = new HashSet<LgUser>( 0 );
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "externalApp" )
     public Set<LgExternalAppLog> externalAppLogs = new HashSet<LgExternalAppLog>( 0 );
+    
+    public String toString() {
+        return name;
+    }
 }

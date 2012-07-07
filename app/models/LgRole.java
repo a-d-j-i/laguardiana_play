@@ -22,4 +22,8 @@ public class LgRole extends GenericModel implements java.io.Serializable {
     public List<LgAclRule> aclRules = new ArrayList<LgAclRule>( 0 );
     @ManyToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "roles" )
     public Set<LgUser> users = new HashSet<LgUser>( 0 );
+    
+    public String toString() {
+        return name;
+    } 
 }
