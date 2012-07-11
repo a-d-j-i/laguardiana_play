@@ -48,7 +48,7 @@ public class SecureController extends Controller {
             Logger.error( "User %s not allowed to access %s %s", user.username, request.action, request.method );
             flash.error( "secure.not_allowed" );
             flash.put( "url", "GET".equals( request.method ) ? request.url : Play.ctxPath + "/" ); // seems a good default
-            flash.put( "lastUrl", "GET".equals( request.method ) ? referer.value() : Play.ctxPath + "/" ); // seems a good default
+            flash.put( "lastUrl", "GET".equals( request.method ) ? ( referer != null ? referer.value() : Play.ctxPath + "/" ) : Play.ctxPath + "/" ); // seems a good default
             login();
         }
         renderArgs.put( "user", user );
@@ -99,7 +99,7 @@ public class SecureController extends Controller {
             login();
             return;
         }
-        
+
         if ( validated == null ) {
             flash.keep( "url" );
             flash.error( "secure.invalid_user_password" );

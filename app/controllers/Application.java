@@ -1,5 +1,6 @@
 package controllers;
 
+import models.TemplatePrinter;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -7,7 +8,6 @@ import play.mvc.With;
 public class Application extends Controller {
 
     public static void index() {
-        //TemplatePrinter.printTemplate( "printerOutput" );
         render();
     }
 
@@ -17,5 +17,10 @@ public class Application extends Controller {
 
     public static void goDeposit() {
         DepositReference.index();
+    }
+
+    public static void printTemplate() {
+        TemplatePrinter.printTemplate( "<h1>My First Heading</h1><p>My first paragraph.</p>" );
+        redirect( "Application.index" );
     }
 }

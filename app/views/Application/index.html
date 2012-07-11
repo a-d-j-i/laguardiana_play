@@ -3,6 +3,8 @@
 
 <h1>application main menu</h1>
 
+<a href="@{Application.printTemplate()}"><input type="button" name="PRINT" value="PRINT"/></a>
+
 #{form @Application.goCounter()}
     #{ifErrors}
         <p class="error">

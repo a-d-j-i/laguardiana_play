@@ -55,6 +55,9 @@
   LgResource(ResourceApplicationIndex):
     name:           Application.index
     
+  LgResource(ResourceApplicationPrint):
+    name:           Application.printTemplate
+    
   LgResource(ResourceCounter):
     name:           Application.goCounter
   LgResource(ResourceCounterIndex):
@@ -86,6 +89,13 @@
     operation:      GET
     permission:     ALLOW
 
+  LgAclRule(RoleGuestApplicationPrint):
+    role:           RoleGuest
+    resource:       ResourceApplicationPrint
+    priority:       1
+    operation:      GET
+    permission:     ALLOW
+
 
   LgAclRule(RoleUserCounterIndex):
     role:           RoleUser
@@ -93,18 +103,21 @@
     priority:       1
     operation:      GET
     permission:     ALLOW
+    
   LgAclRule(RoleUserCounterBeginDeposit):
     role:           RoleUser
     resource:       ResourceCounterBeginDeposit
     priority:       1
     operation:      POST
     permission:     ALLOW
+    
   LgAclRule(RoleUserCounterGet):
     role:           RoleUser
     resource:       ResourceCounter
     priority:       1
     operation:      POST
     permission:     ALLOW
+    
   LgAclRule(RoleUserCounterPost):
     role:           RoleUser
     resource:       ResourceCounter
@@ -113,19 +126,20 @@
     permission:     ALLOW
 
 
-
   LgAclRule(RoleUserResourceDepositReferenceIndex):
     role:           RoleUser
     resource:       ResourceDepositReferenceIndex
     priority:       1
     operation:      POST
     permission:     ALLOW
+    
   LgAclRule(RoleUserResourceDepositReferenceGet):
     role:           RoleUser
     resource:       ResourceDepositReference
     priority:       1
     operation:      GET
     permission:     ALLOW
+    
   LgAclRule(RoleUserResourceDepositReferencePost):
     role:           RoleUser
     resource:       ResourceDepositReference
