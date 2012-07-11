@@ -4,3 +4,8 @@
 secure.username=Your email:
 secure.password=Your password:
 secure.signin=Log in now
+secure.logout=Logout success.
+secure.not_allowed=Not allowed must login.
+secure.invalid_field=You must complete the fields.
+secure.invalid_user_password=Invalid user or password.
+

@@ -38,6 +38,7 @@ public class SecureController extends Controller {
             // Create automatically the guest user.
             user = new LgUser();
             user.username = "guest user";
+            user.setGuest( true );
             user.roles.add( guestRole );
             user.postLoad();
             Cache.set( session.getId() + "-user", user );
@@ -45,7 +46,7 @@ public class SecureController extends Controller {
         }
         if ( !checkPermission( request.action, request.method ) ) {
             Logger.error( "User %s not allowed to access %s %s", user.username, request.action, request.method );
-            flash.error( "Not allowed." );
+            flash.error( "secure.not_allowed" );
             flash.put( "url", "GET".equals( request.method ) ? request.url : Play.ctxPath + "/" ); // seems a good default
             flash.put( "lastUrl", "GET".equals( request.method ) ? referer.value() : Play.ctxPath + "/" ); // seems a good default
             login();
@@ -82,7 +83,8 @@ public class SecureController extends Controller {
     public static void authenticate( @Required String username, String password, boolean remember, String cancel ) throws Throwable {
         // Check tokens
         Logger.error( cancel );
-        List<LgUser> users = LgUser.find( "byUsername", username ).fetch();
+        List<LgUser> users = LgUser.find( "select u from LgUser u where u.username = ? and u.password = ? and "
+                + "u.endDate is null or u.endDate > CURRENT_TIMESTAMP", username, password ).fetch();
         LgUser validated = null;
         for ( LgUser user : users ) {
             if ( user.authenticate( password ) ) {
@@ -90,17 +92,22 @@ public class SecureController extends Controller {
                 break;
             }
         }
-        if ( validated == null ) {
-            flash.error( "Invalid userid or password." );
-        }
-
-        if ( validation.hasErrors() || validated == null ) {
+        if ( validation.hasErrors() ) {
             flash.keep( "url" );
-            flash.error( "secure.error" );
+            flash.error( "secure.invalid_field" );
             params.flash();
             login();
             return;
         }
+        
+        if ( validated == null ) {
+            flash.keep( "url" );
+            flash.error( "secure.invalid_user_password" );
+            params.flash();
+            login();
+            return;
+        }
+
         // Mark user as connected
         String expire = "30mn";
         if ( remember ) {

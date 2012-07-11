@@ -14,9 +14,28 @@
     <body class="home">
         <div id="page-wrap">
             <div class="container header">
-                <a href="@{Application.index()}" class="homelink"><img src="@{'/public/images/logo.gif'}" alt="Prosegur"></a>			
+                <a href="@{Application.index()}" class="homelink"><img src="@{'/public/images/logo.gif'}" alt="Prosegur"></a>		
             </div>
-
+            <div> 
+                <p class ="alert-info">
+                %{ if ( user != null && ! user.isGuest() ) {
+                }%
+                Welcome ${user.username}! <a href="@{SecureController.logout()}">Log out</a>
+                %{
+                }
+                }%
+                </p>
+                #{if flash.error}
+                <p class="alert-error">
+                    &{flash.error}
+                </p>
+                #{/if}
+                #{if flash.success}
+                <p class="alert-success">
+                    &{flash.success}
+                </p>
+                #{/if}
+            </div>
             <div class="mainarea">
                 <a href="admin/"> admin</a>
                 #{doLayout /}

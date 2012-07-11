@@ -1,6 +1,5 @@
 package controllers;
 
-import play.Logger;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -8,6 +7,7 @@ import play.mvc.With;
 public class Application extends Controller {
 
     public static void index() {
+        //TemplatePrinter.printTemplate( "printerOutput" );
         render();
     }
 

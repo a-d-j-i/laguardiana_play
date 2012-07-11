@@ -155,7 +155,6 @@
     externalId:     1516
     locked:         #x42
     creationDate:   2012-01-01
-    endDate:        2112-01-01    
     roles:          [ RoleGuest, RoleAdmin ]
 
   LgUser(expireddave):

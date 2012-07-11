@@ -41,6 +41,8 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     public Set<LgRole> roles = new HashSet<LgRole>( 0 );
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user" )
     public Set<LgUserProperty> userProperties = new HashSet<LgUserProperty>( 0 );
+    @Transient
+    transient public boolean guest = false;
 
     class PermsKey {
 
@@ -81,19 +83,23 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     @Transient
     private Map<PermsKey, LgAclRule> perms = new HashMap<PermsKey, LgAclRule>();
 
-    public static Object connect( String username, String password ) {
-        throw new UnsupportedOperationException( "Not yet implemented" );
-    }
-
     public void setPassword( String password ) {
         this.password = password;
+    }
+
+    public boolean isGuest() {
+        return guest;
+    }
+
+    public void setGuest( boolean guest ) {
+        this.guest = guest;
     }
 
     public boolean authenticate( String token ) {
         if ( password == null || !password.equals( token ) ) {
             return false;
         }
-        if ( endDate.before(  new Date() ) ) {
+        if ( endDate != null && endDate.before( new Date() ) ) {
             return false;
         }
         return true;
@@ -135,7 +141,7 @@ public class LgUser extends GenericModel implements java.io.Serializable {
         }
         return false;
     }
-    
+
     public String toString() {
         return username;
     }
