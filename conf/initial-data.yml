@@ -2,17 +2,26 @@
 # and then load them using Fixtures.load("data.yml")
 #
 
-  LgResource(ResourceAdmin):
-    name:           ADMIN
 
-  LgResource(ResourceApplicationIndex):
-    name:           Application.index
-    
-  LgResource(ResourceApplicationCounter):
-    name:           Application.goCounter
-  LgResource(ResourceApplicationCounterIndex):
-    name:           Counter.index
-    
+
+  LgLov(Reference_Enero):
+    type:           UserCodeReference
+    numericId:      1
+    textId:         Enero
+    description:    User Code Reference Enero
+    endDate:        2999-12-31
+  LgLov(Reference_Febrero):
+    type:           UserCodeReference
+    numericId:      1
+    textId:         Febrero
+    description:    User Code Reference Febrero
+    endDate:        2999-12-31
+
+
+
+#
+# External Application Codes
+#
   LgExternalApp(PlayInternalApp):
     name:           PlayInternalApp
     retryInterval:  -1
@@ -21,6 +30,9 @@
     interval:       -1
 
 
+#
+# Roles
+#
   LgRole(RoleAdmin):
     name:           admin
 
@@ -33,6 +45,40 @@
     name:           guest
 
 
+
+#
+# Resources
+#
+  LgResource(ResourceAdmin):
+    name:           ADMIN
+
+  LgResource(ResourceApplicationIndex):
+    name:           Application.index
+    
+  LgResource(ResourceCounter):
+    name:           Application.goCounter
+  LgResource(ResourceCounterIndex):
+    name:           Counter.index
+  LgResource(ResourceCounterBeginDeposit):    
+    name:           Counter.postBeginDeposit 
+    
+  LgResource(ResourceDepositReferenceIndex):
+    name:           Application.goDeposit
+  LgResource(ResourceDepositReference):
+    name:           DepositReference.index
+    
+
+
+#
+# ACLs
+#
+  LgAclRule(RoleAdminAdmin):
+    role:           RoleAdmin
+    resource:       ResourceAdmin
+    priority:       1
+    operation:      ADMIN
+    permission:     ALLOW
+        
   LgAclRule(RoleGuestApplicationIndex):
     role:           RoleGuest
     resource:       ResourceApplicationIndex
@@ -41,35 +87,56 @@
     permission:     ALLOW
 
 
-  LgAclRule(RoleUserApplicationCounterIndex):
+  LgAclRule(RoleUserCounterIndex):
     role:           RoleUser
-    resource:       ResourceApplicationCounterIndex
+    resource:       ResourceCounterIndex
     priority:       1
     operation:      GET
     permission:     ALLOW
-
-  LgAclRule(RoleUserApplicationCounterGet):
+  LgAclRule(RoleUserCounterBeginDeposit):
     role:           RoleUser
-    resource:       ResourceApplicationCounter
+    resource:       ResourceCounterBeginDeposit
     priority:       1
     operation:      POST
     permission:     ALLOW
-
-  LgAclRule(RoleUserApplicationCounterPost):
+  LgAclRule(RoleUserCounterGet):
     role:           RoleUser
-    resource:       ResourceApplicationCounter
+    resource:       ResourceCounter
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
+  LgAclRule(RoleUserCounterPost):
+    role:           RoleUser
+    resource:       ResourceCounter
     priority:       1
     operation:      GET
     permission:     ALLOW
-    
-  LgAclRule(RoleAdminAdmin):
-    role:           RoleAdmin
-    resource:       ResourceAdmin
+
+
+
+  LgAclRule(RoleUserResourceDepositReferenceIndex):
+    role:           RoleUser
+    resource:       ResourceDepositReferenceIndex
     priority:       1
-    operation:      ADMIN
+    operation:      POST
     permission:     ALLOW
-        
+  LgAclRule(RoleUserResourceDepositReferenceGet):
+    role:           RoleUser
+    resource:       ResourceDepositReference
+    priority:       1
+    operation:      GET
+    permission:     ALLOW
+  LgAclRule(RoleUserResourceDepositReferencePost):
+    role:           RoleUser
+    resource:       ResourceDepositReference
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
     
+    
+#
+# Users
+#
   LgUser(dave):
     externalApp:    PlayInternalApp
     username:       dave

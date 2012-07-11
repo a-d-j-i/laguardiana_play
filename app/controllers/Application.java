@@ -14,4 +14,8 @@ public class Application extends Controller {
     public static void goCounter() {
         Counter.index();
     }
+
+    public static void goDeposit() {
+        DepositReference.index();
+    }
 }

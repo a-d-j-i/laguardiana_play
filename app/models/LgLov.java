@@ -1,5 +1,6 @@
 package models;
 
+import java.util.List;
 import java.util.Date;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
@@ -23,4 +24,12 @@ public class LgLov extends GenericModel implements java.io.Serializable {
     @Temporal( TemporalType.DATE )
     @Column( name = "end_date", nullable = false, length = 13 )
     public Date endDate;
+    
+    public static List<LgLov> getReferenceCodes() {
+        return LgLov.find("byType", "UserCodeReference").fetch();
+    }
+    
+    public String toString() {
+        return textId;
+    }
 }

@@ -6,6 +6,7 @@
 # Home page
 GET     /                                           Application.index
 *       /Counter                                    Counter.index
+*       /DepositReference                           DepositReference.index
 
 # Ignore favicon requests
 GET     /favicon.ico                                404
@@ -24,3 +25,4 @@ GET     /crud/index                            crud.CrudBaseController.index()
 *       /{controller}/{action}                      {controller}.{action}
 
 *       /                                           SecureController.login
+*       /                                           SecureController.logout

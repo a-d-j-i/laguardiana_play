@@ -1,7 +1,11 @@
 #{extends 'main.html' /}
-#{set title:'Counting' /}
+#{set title:'Counter' /}
 
+<div>
 <h1>Counting..</h1>
+
+<span class="post-reference1">by ${reference1}</span>
+<span class="post-reference2">by ${reference2}</span>
 
 #{if cl}
     #{if cl.citems}
@@ -36,4 +40,4 @@
 #{else}
     No count data.
 #{/else}    
-
+</div>
