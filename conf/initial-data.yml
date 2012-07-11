@@ -10,6 +10,8 @@
     
   LgResource(ResourceApplicationCounter):
     name:           Application.goCounter
+  LgResource(ResourceApplicationCounterIndex):
+    name:           Counter.index
     
   LgExternalApp(PlayInternalApp):
     name:           PlayInternalApp
@@ -38,7 +40,15 @@
     operation:      GET
     permission:     ALLOW
 
-  LgAclRule(RoleUserApplicationCounterPost):
+
+  LgAclRule(RoleUserApplicationCounterIndex):
+    role:           RoleUser
+    resource:       ResourceApplicationCounterIndex
+    priority:       1
+    operation:      GET
+    permission:     ALLOW
+
+  LgAclRule(RoleUserApplicationCounterGet):
     role:           RoleUser
     resource:       ResourceApplicationCounter
     priority:       1
