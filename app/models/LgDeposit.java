@@ -49,16 +49,12 @@ public class LgDeposit extends GenericModel implements java.io.Serializable {
         this.creationDate = new Date();
     }
     
-    public LgLov getUserCode() {
+    public LgLov getUserCodeLov() {
         return LgLov.FromUserCodeReference(userCodeLov);
     }
     
     public String toString() {
-        LgLov uc = this.getUserCode();
-        Logger.error("uc is: %d %s", uc.numericId, uc.textId);
-        String ucs = uc.toString();
-        Logger.error("ucs is: %s", ucs);
-        String uuc = this.userCode.toString();
-        return "Deposit by: "+user.toString()+" in: "+bag.toString()+" codes:[";//+userCode; //+"/"+ucs+"]";
+        LgLov uc = this.getUserCodeLov();
+        return "Deposit by: "+user.toString()+" in: "+bag.toString()+" codes:["+userCode+"/"+uc.toString()+"]";
     }
 }

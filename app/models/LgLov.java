@@ -33,17 +33,12 @@ public class LgLov extends GenericModel implements java.io.Serializable {
         return LgLov.find("byType", "UserCodeReference").fetch();
     }
     
-    
     public static LgLov FromUserCodeReference(String userCodeReference) {
-        Logger.error("searching for: %s", userCodeReference);
         return LgLov.find("byTypeAndTextId", UserCodeReference, userCodeReference).first();
     }
     
     public static LgLov FromUserCodeReference(int userCodeReference) {
-        Logger.error("2searching for: %d", userCodeReference);
-        LgLov l = LgLov.find("byTypeAndNumericId", UserCodeReference, userCodeReference).first();
-        Logger.error("ref: %s", l.type); 
-        return l;
+        return LgLov.find("byTypeAndNumericId", UserCodeReference, userCodeReference).first();
     }
         
     public String toString() {

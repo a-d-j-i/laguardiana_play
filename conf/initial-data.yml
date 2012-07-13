@@ -159,7 +159,8 @@
     creationDate:   2012-01-01
     withdrawDate:   2999-12-31
 
-    
+ 
+ 
     
 #
 # Users
@@ -193,4 +194,14 @@
     creationDate:   2012-01-01
     endDate:        2012-01-02    
     roles:          [ RoleGuest, RoleUser ]
+
+
+
+  LgDeposit(SimpleDeposit):
+    bag:            FirstBag
+    user:           admindave
+    userCode:       string por el usuario
+    userCodeLov:    2
+    creationDate:   2012-01-02
+       
 
