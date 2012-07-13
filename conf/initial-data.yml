@@ -17,7 +17,12 @@
     textId:         Febrero
     description:    User Code Reference Febrero
     endDate:        2999-12-31
-
+  LgLov(Reference_Billete5pesos):
+    type:           BillCode
+    numericId:      1
+    textId:         pesos argentinos
+    description:    pesos argentinos
+    endDate:        2999-12-31
 
 
 #
