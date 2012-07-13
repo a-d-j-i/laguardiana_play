@@ -1,14 +1,16 @@
 #{extends 'main.html' /}
-#{set title:'Counter' /}
+#{set title:'Doing transaction..' /}
 
 <div>
 <h1>Counting..</h1>
 
-<span class="post-reference1">by ${reference1}</span>
-<span class="post-reference2">by ${reference2}</span>
+<span class="post-reference1">${deposit.toString()}</span>
 
-#{if cl}
-    #{if cl.citems}
+${batch.toString()}
+
+
+#{if batch}
+    #{if batch.bills}
         
         <ul id="fakeTable">
             <li> 
@@ -17,11 +19,11 @@
                 <li class="colheading">Suma</li>
             </li>
 
-            #{list items:cl.citems, as:'citem'}
+            #{list items:batch.bills, as:'bill'}
             <li> 
-                <li class="numvalue">${citem.currency.convRate}</li>
-                <li class="numvalue">${citem.quantity}</li>
-                <li class="numvalue">${citem.value()}</li>
+                <li class="numvalue">${bill.quantity}</li>
+                <li class="numvalue">${bill.denomination}</li>
+                <li class="numvalue">${bill.getTotal()}</li>
             </li>
             #{/list}
 
@@ -31,13 +33,27 @@
                 <li class="numvalue">${countResult}</li>
             </li>
         </ul>
+        
+        #{form @Application.acceptBatch(randomID)}
+            <p>
+                <input type="submit" value="Accept this?" />
+            </p>
+        #{/form}        
+        
     #{/if}
     #{else}
         No items counted.
     #{/else}    
-
 #{/if}
 #{else}
     No count data.
-#{/else}    
+#{/else} 
+
+
+#{form @Application.index()}
+    <p>
+        <input type="submit" value="Cancel and go back home" />
+    </p>
+#{/form}
+   
 </div>

@@ -12,6 +12,7 @@ import play.Logger;
 public class LgLov extends GenericModel implements java.io.Serializable {
 
     public static final String UserCodeReference = "UserCodeReference"; // used for user reference codes in deposits
+    public static final String BillCode = "BillCode";
 
     @Id
     @Column( name = "lov_id", unique = true, nullable = false )
@@ -29,10 +30,11 @@ public class LgLov extends GenericModel implements java.io.Serializable {
     @Column( name = "end_date", nullable = false, length = 13 )
     public Date endDate;
     
+    // bill unit code access
     public static List<LgLov> getReferenceCodes() {
         return LgLov.find("byType", "UserCodeReference").fetch();
     }
-    
+
     public static LgLov FromUserCodeReference(String userCodeReference) {
         return LgLov.find("byTypeAndTextId", UserCodeReference, userCodeReference).first();
     }
@@ -40,7 +42,16 @@ public class LgLov extends GenericModel implements java.io.Serializable {
     public static LgLov FromUserCodeReference(int userCodeReference) {
         return LgLov.find("byTypeAndNumericId", UserCodeReference, userCodeReference).first();
     }
-        
+    
+    // bill unit code access
+    public static LgLov FromBillCode(int billCode) {
+        return LgLov.find("byTypeAndNumericId", BillCode, billCode).first();
+    }
+    public static LgLov FromBillCode(String billCode) {
+        return LgLov.find("byTypeAndTextId", BillCode, billCode).first();
+    }
+ 
+            
     public String toString() {
         return textId;
     }

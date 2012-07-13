@@ -1,5 +1,8 @@
 package models;
 
+import java.util.List;
+import java.util.Arrays;
+
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
@@ -32,5 +35,52 @@ public class LgBill extends GenericModel implements java.io.Serializable {
         this.quantity = quantity;
         this.denomination = denomination;
         this.unitLob = unitLob;
+        batch.addBill(this);
+    }
+
+    public void addToDeposit(LgDeposit deposit) {
+        this.deposit = deposit;
+    }
+    
+    public String toString() {
+        Integer q = quantity;
+        Integer d = denomination;
+        Integer t = quantity * denomination; 
+        return q.toString() + " *  $" + d.toString() + " = " + t.toString() + "("+ LgLov.FromBillCode(unitLob).toString() +")";
+    }
+
+    public int getTotal() {
+        return quantity * denomination;
+    }    
+    
+    @Override
+    public boolean equals( Object obj ) {
+        // We need to check this
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final LgBill other = ( LgBill ) obj;
+        boolean equal;
+        
+        equal = this.quantity == other.quantity;
+        equal = equal && (this.denomination == other.denomination);
+        equal = equal && (this.unitLob == other.unitLob);
+        equal = equal && (this.slotId == other.slotId);
+        equal = equal && (this.deposit == other.deposit);
+        equal = equal && (this.batch == other.batch);
+        return equal;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 23;
+        hash = hash * batch.hashCode();
+        hash = hash * slotId;
+        hash = hash * quantity;
+        hash = hash * denomination;
+        return hash;
     }
 }

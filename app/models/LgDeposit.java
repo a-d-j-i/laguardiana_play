@@ -41,6 +41,18 @@ public class LgDeposit extends GenericModel implements java.io.Serializable {
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit" )
     public Set<LgBill> bills = new HashSet<LgBill>( 0 );
     
+    public void addBill(LgBill bill) {
+        bill.addToDeposit(this);
+        this.bills.add(bill);
+    }
+    
+    public void addBatch(LgBatch batch) {
+        for (LgBill bill: batch.bills) {
+            this.addBill(bill);
+            bill.save();
+        }
+    }
+    
     public LgDeposit( LgUser user, String userCode, LgLov userCodeLov) {
         this.bag = LgBag.GetCurrentBag();
         this.user = user;

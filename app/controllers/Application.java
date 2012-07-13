@@ -43,11 +43,27 @@ public class Application extends Controller {
             index();
             return;
         }
+
         //Logger.error("code received: %s", userCode.description);
         LgDeposit deposit = new LgDeposit(user, reference2, userCode);
         deposit.save();
+        
+        LgBatch batch = LgBatch.MakeRandom();
+        
         String randomID = Codec.UUID();
-        render(randomID, deposit);
+        Cache.set(randomID+"-deposit", deposit, "60mn");
+        Cache.set(randomID+"-batch", batch, "60mn");
+        render(randomID, deposit, batch);
+    }
+    
+    public static void acceptBatch(String randomID) {
+        // XXX To Do Dave...
+        LgDeposit deposit = Cache.get(randomID+"-deposit", LgDeposit.class);
+        //deposit.save();
+        LgBatch batch = Cache.get(randomID+"-batch", LgBatch.class);
+        deposit.addBatch(batch);
+        //batch.save();
+        //deposit.save();
     }
     
     // rest 
