@@ -24,6 +24,7 @@ GET     /crud/index                            crud.CrudBaseController.index()
 
 # Catch all
 *       /{controller}/{action}                      {controller}.{action}
+GET     /{controller}/{action}/{format}             {controller}.{action}
 
 *       /                                           SecureController.login
 *       /                                           SecureController.logout

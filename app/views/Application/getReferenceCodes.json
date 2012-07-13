@@ -1,0 +1,6 @@
+{
+#{list items:referenceCodes, as:'reference'}
+    "${reference.toString()}": "${reference.numericId}",
+#{/list}
+}
+
