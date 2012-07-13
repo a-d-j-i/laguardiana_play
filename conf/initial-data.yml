@@ -65,10 +65,10 @@
   LgResource(ResourceCounterBeginDeposit):    
     name:           Counter.postBeginDeposit 
     
-  LgResource(ResourceDepositReferenceIndex):
-    name:           Application.goDeposit
-  LgResource(ResourceDepositReference):
-    name:           DepositReference.index
+  LgResource(ResourceApplicationInputReference):
+    name:           Application.inputReference
+  LgResource(ResourceDepositGetReferenceCodes):
+    name:           Application.getReferenceCodes
     
 
 
@@ -126,25 +126,27 @@
     permission:     ALLOW
 
 
-  LgAclRule(RoleUserResourceDepositReferenceIndex):
+  LgAclRule(RoleUserResourceApplicationInputReferencePost):
     role:           RoleUser
-    resource:       ResourceDepositReferenceIndex
+    resource:       ResourceApplicationInputReference
     priority:       1
     operation:      POST
     permission:     ALLOW
     
-  LgAclRule(RoleUserResourceDepositReferenceGet):
+
+  LgAclRule(RoleUserResourceApplicationInputReferenceGet):
     role:           RoleUser
-    resource:       ResourceDepositReference
+    resource:       ResourceApplicationInputReference
     priority:       1
     operation:      GET
     permission:     ALLOW
     
-  LgAclRule(RoleUserResourceDepositReferencePost):
+
+  LgAclRule(RoleUserResourceDepositGetReferenceCodes):
     role:           RoleUser
-    resource:       ResourceDepositReference
+    resource:       ResourceDepositGetReferenceCodes
     priority:       1
-    operation:      POST
+    operation:      GET
     permission:     ALLOW
     
     
