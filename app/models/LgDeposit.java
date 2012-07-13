@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
+import play.Logger;
 
 @Entity
 @Table( name = "lg_deposit", schema = "public" )
@@ -39,4 +40,25 @@ public class LgDeposit extends GenericModel implements java.io.Serializable {
     public Set<LgEnvelope> envelopes = new HashSet<LgEnvelope>( 0 );
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit" )
     public Set<LgBill> bills = new HashSet<LgBill>( 0 );
+    
+    public LgDeposit( LgUser user, String userCode, LgLov userCodeLov) {
+        this.bag = LgBag.GetCurrentBag();
+        this.user = user;
+        this.userCode = userCode;
+        this.userCodeLov = userCodeLov.numericId;   
+        this.creationDate = new Date();
+    }
+    
+    public LgLov getUserCode() {
+        return LgLov.FromUserCodeReference(userCodeLov);
+    }
+    
+    public String toString() {
+        LgLov uc = this.getUserCode();
+        Logger.error("uc is: %d %s", uc.numericId, uc.textId);
+        String ucs = uc.toString();
+        Logger.error("ucs is: %s", ucs);
+        String uuc = this.userCode.toString();
+        return "Deposit by: "+user.toString()+" in: "+bag.toString()+" codes:[";//+userCode; //+"/"+ucs+"]";
+    }
 }

@@ -19,4 +19,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     public Date creationDate;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "batch" )
     public Set<LgBill> bills = new HashSet<LgBill>( 0 );
+    
+    public LgBatch() {
+    };
 }

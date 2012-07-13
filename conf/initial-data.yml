@@ -2,8 +2,9 @@
 # and then load them using Fixtures.load("data.yml")
 #
 
-
-
+#
+# Predefined User Reference Code for deposits
+#
   LgLov(Reference_Enero):
     type:           UserCodeReference
     numericId:      1
@@ -148,6 +149,16 @@
     priority:       1
     operation:      GET
     permission:     ALLOW
+
+
+## 
+## Basic Runnable Configuration
+##
+  LgBag(FirstBag):
+    bagCode:        4492857
+    creationDate:   2012-01-01
+    withdrawDate:   2999-12-31
+
     
     
 #

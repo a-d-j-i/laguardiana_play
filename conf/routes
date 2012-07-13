@@ -5,7 +5,6 @@
 
 # Home page
 GET     /                                           Application.index
-*       /Counter                                    Counter.index
 GET     /print                                      Application.printTemplate()
 
 # Ignore favicon requests

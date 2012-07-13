@@ -5,9 +5,13 @@ import java.util.Date;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
+import play.Logger;
+
 @Entity
 @Table( name = "lg_lov", schema = "public" )
 public class LgLov extends GenericModel implements java.io.Serializable {
+
+    public static final String UserCodeReference = "UserCodeReference"; // used for user reference codes in deposits
 
     @Id
     @Column( name = "lov_id", unique = true, nullable = false )
@@ -29,6 +33,19 @@ public class LgLov extends GenericModel implements java.io.Serializable {
         return LgLov.find("byType", "UserCodeReference").fetch();
     }
     
+    
+    public static LgLov FromUserCodeReference(String userCodeReference) {
+        Logger.error("searching for: %s", userCodeReference);
+        return LgLov.find("byTypeAndTextId", UserCodeReference, userCodeReference).first();
+    }
+    
+    public static LgLov FromUserCodeReference(int userCodeReference) {
+        Logger.error("2searching for: %d", userCodeReference);
+        LgLov l = LgLov.find("byTypeAndNumericId", UserCodeReference, userCodeReference).first();
+        Logger.error("ref: %s", l.type); 
+        return l;
+    }
+        
     public String toString() {
         return textId;
     }

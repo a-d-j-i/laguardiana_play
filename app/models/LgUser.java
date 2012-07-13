@@ -7,6 +7,8 @@ import java.util.*;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
+import play.Logger;
+
 @Entity
 @Table( name = "lg_user", schema = "public" )
 public class LgUser extends GenericModel implements java.io.Serializable {
@@ -118,9 +120,11 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     public void postLoad() {
         // TODO: Implement that with a query.
         for ( LgRole rol : roles ) {
+            Logger.info("\trole: %s", rol.toString() ); 
             for ( LgAclRule rule : rol.aclRules ) {
                 PermsKey k = new PermsKey( rule.resource.name, rule.operation );
                 perms.put( k, rule );
+                Logger.info("\t\t %s", rule.toString() ); 
             }
         }
     }
