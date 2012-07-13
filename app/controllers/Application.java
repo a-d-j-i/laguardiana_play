@@ -19,10 +19,6 @@ public class Application extends Controller {
         Counter.index();
     }
 
-    public static void goDeposit() {
-        DepositReference.index();
-    }
-
     public static void printTemplate() {
         TemplatePrinter.printTemplate( "<h1>My First Heading</h1><p>My first paragraph.</p>" );
         redirect( "Application.index" );
