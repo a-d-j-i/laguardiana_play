@@ -12,7 +12,7 @@ import models.*;
 import play.cache.Cache;
 import play.Logger;
 
-@With( SecureController.class )
+@With( Secure.class )
 public class Application extends Controller {
 
     public static void index() {

@@ -6,6 +6,7 @@
 # Home page
 GET     /                                           Application.index
 GET     /print                                      Application.printTemplate()
+GET     /glory                                      Glory.index
 
 # Ignore favicon requests
 GET     /favicon.ico                                404
@@ -24,5 +25,5 @@ GET     /crud/index                            crud.CrudBaseController.index()
 *       /{controller}/{action}                      {controller}.{action}
 GET     /{controller}/{action}/{format}             {controller}.{action}
 
-*       /                                           SecureController.login
-*       /                                           SecureController.logout
+*       /                                           Secure.login
+*       /                                           Secure.logout

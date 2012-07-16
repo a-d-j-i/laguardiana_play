@@ -2,19 +2,10 @@
 #{set title:'Home' /}
 
 <h1>application main menu</h1>
-
-<a href="@{Application.printTemplate()}"><input type="button" name="PRINT" value="PRINT"/></a>
-
-<a href="@{Application.getReferenceCodes()}">go to references!</a>
-
-#{form @Application.inputReference()}
-    #{ifErrors}
-        <p class="error">
-            All fields are required!
-        </p>
-    #{/ifErrors}
-    <p>
-        <input type="submit" value="Cash Deposit" />
-    </p>
-#{/form}
-
+<div>
+    #{menuItem resource: 'CRUD.index', operation: 'GET', title: 'admin' /}
+    #{menuItem resource: 'Glory.index', operation: 'GET', title: 'glory' /}
+    #{menuItem resource: 'Application.printTemplate', operation: 'GET', title: 'PRINT' /}
+    #{menuItem resource: 'Application.getReferenceCodes', operation: 'GET', title: 'go to references!' /}
+    #{menuItem resource: 'Application.inputReference', operation: 'GET', title: 'Cash Deposit' /}
+</div>

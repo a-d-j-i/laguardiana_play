@@ -6,7 +6,7 @@ import play.libs.F.*;
 
 
 
-@With( SecureController.class )
+@With( Secure.class )
 public class Counter extends Controller {
 
     public static void index() {

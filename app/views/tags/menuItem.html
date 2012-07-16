@@ -1,0 +1,4 @@
+%{ def url = actionBridge."$_resource".call() }%
+#{if ( controllers.Secure.checkPermission( _resource, _operation ) ) }
+    <p><a class="btn btn-primary btn-large" href="${url}">${_title}</a></p>
+#{/if}

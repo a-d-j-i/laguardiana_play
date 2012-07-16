@@ -3,29 +3,6 @@
 #
 
 #
-# Predefined User Reference Code for deposits
-#
-  LgLov(Reference_Enero):
-    type:           UserCodeReference
-    numericId:      1
-    textId:         Enero
-    description:    User Code Reference Enero
-    endDate:        2999-12-31
-  LgLov(Reference_Febrero):
-    type:           UserCodeReference
-    numericId:      2
-    textId:         Febrero
-    description:    User Code Reference Febrero
-    endDate:        2999-12-31
-  LgLov(Reference_Billete5pesos):
-    type:           BillCode
-    numericId:      1
-    textId:         pesos argentinos
-    description:    pesos argentinos
-    endDate:        2999-12-31
-
-
-#
 # External Application Codes
 #
   LgExternalApp(PlayInternalApp):
@@ -200,6 +177,13 @@
     endDate:        2012-01-02    
     roles:          [ RoleGuest, RoleUser ]
 
+  LgUser(expireddave):
+    externalApp:    PlayInternalApp
+    username:       admin
+    password:       admin
+    externalId:     0
+    locked:         #x42
+    roles:          [ RoleAdmin ]
 
 
   LgDeposit(SimpleDeposit):

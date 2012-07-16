@@ -5,14 +5,13 @@ import java.util.Date;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
-import play.Logger;
 
 @Entity
 @Table( name = "lg_lov", schema = "public" )
 public class LgLov extends GenericModel implements java.io.Serializable {
 
-    public static final String UserCodeReference = "UserCodeReference"; // used for user reference codes in deposits
-    public static final String BillCode = "BillCode";
+    public static final String UserCodeReference = "USER_CODE_REFERENCE"; // used for user reference codes in deposits
+    public static final String BillCode = "BILL_CODE";
 
     @Id
     @Column( name = "lov_id", unique = true, nullable = false )
@@ -51,8 +50,7 @@ public class LgLov extends GenericModel implements java.io.Serializable {
         return LgLov.find("byTypeAndTextId", BillCode, billCode).first();
     }
  
-            
     public String toString() {
-        return textId;
+        return description;
     }
 }

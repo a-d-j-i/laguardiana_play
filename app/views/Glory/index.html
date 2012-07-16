@@ -1,0 +1,60 @@
+#{extends 'main.html' /}
+#{set title:'Glory' /}
+<div class="row-fluid">
+
+    <div class="span2">
+        <p><a class="btn btn-primary btn-large" href="@{Glory.switchCurrency(1)}">switchCurrent1</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.switchCurrency(2)}">switchCurrent2</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.switchCurrency(3)}">switchCurrent3</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.switchCurrency(4)}">switchCurrent4</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.switchCurrency(5)}">switchCurrent5</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.switchCurrency(6)}">switchCurrent6</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.switchCurrency(7)}">switchCurrent7</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.settingDataRequest()}">settingDataRequest</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.logDataRequest()}">logDataRequest</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.deviceSettingDataLoad()}">deviceSettingDataLoad</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.programUpdate()}">programUpdate</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.setTime()}">setTime</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.downloadData()}">downloadData</a></p>
+    </div>
+
+    <div class="span2">
+        <p><a class="btn btn-primary btn-large" href="@{Glory.sense()}">Sense</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.remoteCancel()}">remoteCancel</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.setDepositMode()}">setDepositMode</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.batchDataTransmition()}">batchDataTransmition</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.stopCounting()}">stopCounting</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.countingDataRequest()}">countingDataRequest</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.amountRequest()}">amountRequest</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.setManualMode()}">setManualMode</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.setErrorRecoveryMode()}">setErrorRecoveryMode</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.resetDevice()}">resetDevice</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.setStroringErrorRecoveryMode()}">setStroringErrorRecoveryMode</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.openEscrow()}">openEscrow</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.closeEscrow()}">closeEscrow</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.storingStart()}">storingStart</a></p>
+        <p><a class="btn btn-primary btn-large" href="@{Glory.denominationDataRequest()}">denominationDataRequest</a></p>
+    </div>
+
+
+    <div class="span2">
+        
+        <p>${status?.getSRMode()}</p>
+        <p>${status?.getD1Mode()}</p>
+        #{list items:status?.getSrBits(), as:'p'}<p>${p}</p>#{/list}
+        #{list items:status?.getD2Bits(), as:'p'}<p>${p}</p>#{/list}
+        #{list items:status?.getInfo(), as:'p'}<p>${p}</p>#{/list}
+    </div>
+    <div class="span2">
+        #{if (status?.getBills() == null || status?.getBills().isEmpty() ) }<p>No bill information</p>#{/if}
+        #{else}
+            <p> Bills Data:</p>
+            #{list items:status?.getBills(), as:'p'}<p>Bill : ${p}</p>
+            #{/list}
+        #{/else}
+    </div>
+    <div class="span2">
+        <p> Data: ${status?.getData()}</p>
+    </div>
+</div>
+

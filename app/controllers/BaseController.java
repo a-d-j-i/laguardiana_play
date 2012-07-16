@@ -9,7 +9,7 @@ import play.mvc.With;
  *
  * Base controller for all lg controllers, uses security and auth.
  */
-@With( SecureController.class )
+@With( Secure.class )
 public class BaseController extends Controller {
  
 }
