@@ -3,7 +3,9 @@
 #
 secure.username=Your email:
 secure.password=Your password:
+secure.title=Log in now
 secure.signin=Log in now
+secure.remember=Remember me
 secure.logout=Logout success.
 secure.not_allowed=Not allowed must login.
 secure.invalid_field=You must complete the fields.

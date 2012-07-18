@@ -1,7 +1,7 @@
 package controllers.dbcrud;
 
 import controllers.CRUD;
-import models.LgEvent;
+import models.db.LgEvent;
 import play.mvc.With;
 
 @CRUD.For( LgEvent.class )

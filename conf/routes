@@ -5,6 +5,7 @@
 
 # Home page
 GET     /                                           Application.index
+GET     /bootstrap                                  Application.bootstrap()
 GET     /print                                      Application.printTemplate()
 GET     /glory                                      Glory.index
 

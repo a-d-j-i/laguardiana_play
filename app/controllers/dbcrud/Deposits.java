@@ -1,7 +1,7 @@
 package controllers.dbcrud;
 
 import controllers.CRUD;
-import models.LgDeposit;
+import models.db.LgDeposit;
 import play.mvc.With;
 
 @CRUD.For( LgDeposit.class )

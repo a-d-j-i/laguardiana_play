@@ -5,7 +5,7 @@
 #
 # External Application Codes
 #
-  LgExternalApp(PlayInternalApp):
+  db.LgExternalApp(PlayInternalApp):
     name:           PlayInternalApp
     retryInterval:  -1
     executionTime:  0000-00-00
@@ -16,15 +16,15 @@
 #
 # Roles
 #
-  LgRole(RoleAdmin):
+  db.LgRole(RoleAdmin):
     name:           admin
 
 
-  LgRole(RoleUser):
+  db.LgRole(RoleUser):
     name:           user
 
 
-  LgRole(RoleGuest):
+  db.LgRole(RoleGuest):
     name:           guest
 
 
@@ -32,25 +32,25 @@
 #
 # Resources
 #
-  LgResource(ResourceAdmin):
+  db.LgResource(ResourceAdmin):
     name:           ADMIN
 
-  LgResource(ResourceApplicationIndex):
+  db.LgResource(ResourceApplicationIndex):
     name:           Application.index
     
-  LgResource(ResourceApplicationPrint):
+  db.LgResource(ResourceApplicationPrint):
     name:           Application.printTemplate
     
-  LgResource(ResourceCounter):
+  db.LgResource(ResourceCounter):
     name:           Application.goCounter
-  LgResource(ResourceCounterIndex):
+  db.LgResource(ResourceCounterIndex):
     name:           Counter.index
-  LgResource(ResourceCounterBeginDeposit):    
+  db.LgResource(ResourceCounterBeginDeposit):    
     name:           Counter.postBeginDeposit 
     
-  LgResource(ResourceApplicationInputReference):
+  db.LgResource(ResourceApplicationInputReference):
     name:           Application.inputReference
-  LgResource(ResourceDepositGetReferenceCodes):
+  db.LgResource(ResourceDepositGetReferenceCodes):
     name:           Application.getReferenceCodes
     
 
@@ -58,21 +58,21 @@
 #
 # ACLs
 #
-  LgAclRule(RoleAdminAdmin):
+  db.LgAclRule(RoleAdminAdmin):
     role:           RoleAdmin
     resource:       ResourceAdmin
     priority:       1
     operation:      ADMIN
     permission:     ALLOW
         
-  LgAclRule(RoleGuestApplicationIndex):
+  db.LgAclRule(RoleGuestApplicationIndex):
     role:           RoleGuest
     resource:       ResourceApplicationIndex
     priority:       1
     operation:      GET
     permission:     ALLOW
 
-  LgAclRule(RoleGuestApplicationPrint):
+  db.LgAclRule(RoleGuestApplicationPrint):
     role:           RoleGuest
     resource:       ResourceApplicationPrint
     priority:       1
@@ -80,28 +80,28 @@
     permission:     ALLOW
 
 
-  LgAclRule(RoleUserCounterIndex):
+  db.LgAclRule(RoleUserCounterIndex):
     role:           RoleUser
     resource:       ResourceCounterIndex
     priority:       1
     operation:      GET
     permission:     ALLOW
     
-  LgAclRule(RoleUserCounterBeginDeposit):
+  db.LgAclRule(RoleUserCounterBeginDeposit):
     role:           RoleUser
     resource:       ResourceCounterBeginDeposit
     priority:       1
     operation:      POST
     permission:     ALLOW
     
-  LgAclRule(RoleUserCounterGet):
+  db.LgAclRule(RoleUserCounterGet):
     role:           RoleUser
     resource:       ResourceCounter
     priority:       1
     operation:      POST
     permission:     ALLOW
     
-  LgAclRule(RoleUserCounterPost):
+  db.LgAclRule(RoleUserCounterPost):
     role:           RoleUser
     resource:       ResourceCounter
     priority:       1
@@ -109,7 +109,7 @@
     permission:     ALLOW
 
 
-  LgAclRule(RoleUserResourceApplicationInputReferencePost):
+  db.LgAclRule(RoleUserResourceApplicationInputReferencePost):
     role:           RoleUser
     resource:       ResourceApplicationInputReference
     priority:       1
@@ -117,7 +117,7 @@
     permission:     ALLOW
     
 
-  LgAclRule(RoleUserResourceApplicationInputReferenceGet):
+  db.LgAclRule(RoleUserResourceApplicationInputReferenceGet):
     role:           RoleUser
     resource:       ResourceApplicationInputReference
     priority:       1
@@ -125,7 +125,7 @@
     permission:     ALLOW
     
 
-  LgAclRule(RoleUserResourceDepositGetReferenceCodes):
+  db.LgAclRule(RoleUserResourceDepositGetReferenceCodes):
     role:           RoleUser
     resource:       ResourceDepositGetReferenceCodes
     priority:       1
@@ -136,7 +136,7 @@
 ## 
 ## Basic Runnable Configuration
 ##
-  LgBag(FirstBag):
+  db.LgBag(FirstBag):
     bagCode:        4492857
     creationDate:   2012-01-01
     withdrawDate:   2999-12-31
@@ -147,7 +147,7 @@
 #
 # Users
 #
-  LgUser(dave):
+  User(dave):
     externalApp:    PlayInternalApp
     username:       dave
     password:       dave
@@ -158,7 +158,7 @@
     roles:          [ RoleGuest, RoleUser ]
 #    password:       #x16 #x10 #x83 #x87 #x43 #xcc #x90 #xe3 #xe4 #xfd #xda #x74 #x82 #x82 #xd9 #xb8
 
-  LgUser(admindave):
+  User(admindave):
     externalApp:    PlayInternalApp
     username:       admindave
     password:       admindave
@@ -167,7 +167,7 @@
     creationDate:   2012-01-01
     roles:          [ RoleGuest, RoleAdmin ]
 
-  LgUser(expireddave):
+  User(expireddave):
     externalApp:    PlayInternalApp
     username:       expireddave
     password:       expireddave
@@ -177,7 +177,7 @@
     endDate:        2012-01-02    
     roles:          [ RoleGuest, RoleUser ]
 
-  LgUser(expireddave):
+  User(admin):
     externalApp:    PlayInternalApp
     username:       admin
     password:       admin
@@ -186,7 +186,7 @@
     roles:          [ RoleAdmin ]
 
 
-  LgDeposit(SimpleDeposit):
+  db.LgDeposit(SimpleDeposit):
     bag:            FirstBag
     user:           admindave
     userCode:       string por el usuario

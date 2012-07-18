@@ -1,7 +1,7 @@
 package controllers;
 
 import com.google.gson.Gson;
-import devices.GloryService;
+import models.GloryService;
 import devices.glory.GloryStatus;
 import java.io.IOException;
 import play.Logger;

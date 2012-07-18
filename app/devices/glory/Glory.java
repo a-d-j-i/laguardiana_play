@@ -1,11 +1,10 @@
 package devices.glory;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-
-import play.Logger;
 import devices.SerialPortAdapter;
 import devices.glory.command.CommandAbstract;
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import play.Logger;
 
 /*
  * TODO: getCh, fifo, etc in other class.

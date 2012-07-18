@@ -1,7 +1,7 @@
 package controllers.dbcrud;
 
 import controllers.CRUD;
-import models.LgExternalApp;
+import models.db.LgExternalApp;
 import play.mvc.With;
 
 @CRUD.For( LgExternalApp.class )

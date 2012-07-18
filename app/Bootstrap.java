@@ -1,5 +1,5 @@
 
-import models.LgUser;
+import models.db.LgUser;
 import play.Logger;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;

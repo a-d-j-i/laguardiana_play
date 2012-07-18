@@ -7,11 +7,17 @@
         <meta name="author" content="">
         <meta http-equiv="Content-Type" content="text/html; charset=${_response_encoding}">
         <meta charset="${_response_encoding}">
-        <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap.min.css'}">
-        <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-responsive.css'}">
-        <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
+        #{if play.mode.isProd()}
+        <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-min.css'}">
+        <!--<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-responsive-min.css'}">-->
+        #{/if}
+        #{else}
+        <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap_laguardiana.css'}">
+        <!--<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-responsive.css'}">-->
+        #{/else}
         #{get 'moreStyles' /}
         <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
 
         <!-- 
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../assets/ico/apple-touch-icon-144-precomposed.png">
@@ -21,9 +27,9 @@
         -->
     </head>
 
-    <body class="home">
+    <body class="container">
         <div>
-            <div class="container header">
+            <div class="header">
                 <a href="@{Application.index()}" class="homelink"><img src="@{'/public/images/logo.gif'}" alt="Prosegur"></a>		
                 <p class ="userLink">
                     Welcome 
@@ -35,7 +41,7 @@
                     #{/else}
                 </p>
             </div>
-            <div class ="container navbar"> 
+            <div> 
                 #{if flash.error}
                 <p class="alert alert-error">
                     <a class="close" data-dismiss="alert" href="#">&times;</a> <strong>ERROR</strong>
@@ -50,11 +56,9 @@
                 </p>
                 #{/if}
             </div>
-            <div class="mainarea" id="page-wrap">
+            <div>
                 #{doLayout /}
             </div>
-
-            <div id="showcode"></div>
         </div>
         <footer>
             <div id="footer"></div>

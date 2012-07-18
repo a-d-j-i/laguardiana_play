@@ -1,7 +1,7 @@
 package controllers.dbcrud;
 
 import controllers.CRUD;
-import models.LgEnvelope;
+import models.db.LgEnvelope;
 import play.mvc.With;
 
 @CRUD.For( LgEnvelope.class )

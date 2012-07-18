@@ -1,14 +1,14 @@
 #
 # Predefined User Reference Code for deposits
 #
-  LgLov(Reference_Enero):
+  db.LgLov(Reference_Enero):
     type:           USER_CODE_REFERENCE
     numericId:      1
     textId:         Enero
     description:    User Code Reference Enero
     endDate:        2999-12-31
     
-  LgLov(Reference_Febrero):
+  db.LgLov(Reference_Febrero):
     type:           USER_CODE_REFERENCE
     numericId:      2
     textId:         Febrero
@@ -18,19 +18,19 @@
     
 
     
-  LgLov(Reference_ARS_BILL):
+  db.LgLov(Reference_ARS_BILL):
     type:           BILL_CODE
     numericId:      1
     textId:         ARS
     description:    Peso Argentino
 
-  LgLov(Reference_EUR_BILL):
+  db.LgLov(Reference_EUR_BILL):
     type:           BILL_CODE
     numericId:      2
     textId:         EUR
     description:    Euro
 
-  LgLov(Reference_USD_BILL):
+  db.LgLov(Reference_USD_BILL):
     type:           BILL_CODE
     numericId:      1
     textId:         USD

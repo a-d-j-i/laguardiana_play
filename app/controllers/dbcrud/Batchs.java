@@ -1,7 +1,7 @@
 package controllers.dbcrud;
 
 import controllers.CRUD;
-import models.LgBatch;
+import models.db.LgBatch;
 import play.mvc.With;
 
 @CRUD.For( LgBatch.class )

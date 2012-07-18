@@ -1,41 +1,5 @@
 /** Main layout **/
 
-*{margin:0;padding:0;}
-
-html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym, address, big, cite, code,del, dfn, em, font, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    outline: 0;
-    font-size: 100%;
-    vertical-align: baseline;
-    background: transparent;
-}
-
-body { 
-    font-family: "Lucida Sans", "Arial"; 
-    background-image: url('../images/background.gif');
-    background-repeat: repeat-x;
-    background-color: #efefef;	
-    height: 98%; 
-    margin: 0 auto; 
-    padding: 0;
-}
-
-html, div, input, textarea {
-    font-family: Verdana,Tahoma,Segoe,sans-serif;
-    font-size: 14px;
-}
-
-.container{
-    position: relative;
-    width:964px;	
-    left:50%;
-    margin-left: -482px;
-    clear: both;	
-}
-
-
 #header { padding: 10px 0; position: relative; }
 
 .header{
@@ -48,93 +12,12 @@ html, div, input, textarea {
 }
 
 .homelink{left:56px;position:absolute;top:5px;}
-.userLink{right:10px;position:absolute;bottom:27px;}
+.userLink{right:10px;position:absolute;bottom:17px;}
 
-.navbar {
-    height: 45px;
+.menu-button-fixed-size-btn {
+    width: 250px !important;
 }
 
-
-a, a:link, a:hover, a:active, a:visited { text-decoration: none; color: #666666; }
-
-
-#page-wrap { display: block; width: 90%; margin: 0 auto; text-align: center; height: 98%; min-height: 350px; }
-
-h1, h2, h3, h4 { color: #ddd; text-align: center; }
-h2 { margin: 5px; font-size: 130%; cursor: pointer; }
-
-#nav { display: block; width: auto; text-align: center; margin: 20px auto 0 auto; line-height: 45px; }
-#nav a { text-align: center; background: #000; color: #FFF; border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px; padding: 10px; white-space: nowrap; }
-#nav a.git { background: #006; }
-#nav a.play { background: #060; }
-#nav a.issue { background: #600; }
-#nav a:hover,#nav a.current{ background: #555; }
-
-#footer { height: 150px; }
-#footer2 div { margin: 220px auto; width: 650px; text-align: center; }
-
-
-/** basic controls in main **/
-#logo {
-    display: block;
-    height: 49px;
-    margin-left: 20px;
-    color: #000; /*#fff;*/
-    font-size: 48px;
-    font-weight: bold;
-    letter-spacing: -4px;
-    text-shadow: 1px 2px 2px #000;
+.glory-button-fixed-size-btn {
+    width: 250px !important;
 }
-
-
-/** main area **/
-
-.mainarea {
-    background: #fddf66;
-}
-
-/** column setup **/
-
-
-.numvalue { text-align:right; }
-.colheading { text-align:center; }
-
-.alert-heading {
-    color: inherit;
-}
-
-.alert .close {
-    position: relative;
-    top: -2px;
-    right: -21px;
-    line-height: 18px;
-}
-
-.alert-success {
-    color: #468847;
-    background-color: #dff0d8;
-    border-color: #d6e9c6;
-}
-
-.alert-danger,
-.alert-error {
-    color: #b94a48;
-    background-color: #f2dede;
-    border-color: #eed3d7;
-}
-
-.alert-info {
-    color: #3a87ad;
-    background-color: #d9edf7;
-    border-color: #bce8f1;
-}
-
-.alert-block > p,
-.alert-block > ul {
-    margin-bottom: 0;
-}
-
-.alert-block p + p {
-    margin-top: 5px;
-}
-

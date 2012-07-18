@@ -1,7 +1,7 @@
 package controllers.dbcrud;
 
 import controllers.CRUD;
-import models.LgSystemProperty;
+import models.db.LgSystemProperty;
 import play.mvc.With;
 
 @CRUD.For( LgSystemProperty.class )

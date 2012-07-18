@@ -1,14 +1,11 @@
 package controllers;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import models.LgRole;
-import models.LgUser;
+import models.User;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
@@ -26,23 +23,19 @@ public class Secure extends Controller {
         // Authentication
         Header referer = request.headers.get( "referer" );
 
-        LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
+        User user = Cache.get( session.getId() + "-user", User.class );
         if ( user == null ) {
-            LgRole guestRole = LgRole.find( "byName", "guest" ).first();
-            if ( guestRole == null ) {
+            user = new User();
+            user.setGuest();
+
+            if ( user.isGuest() ) {
+                Cache.set( session.getId() + "-user", user );
+            } else {
                 flash.put( "url", "GET".equals( request.method ) ? request.url : Play.ctxPath + "/" ); // seems a good default
                 flash.put( "lastUrl", "GET".equals( request.method ) ? referer.value() : Play.ctxPath + "/" ); // seems a good default
                 login();
                 return;
             }
-            // Create automatically the guest user.
-            user = new LgUser();
-            user.username = "guest user";
-            user.setGuest( true );
-            user.roles.add( guestRole );
-            user.postLoad();
-            Cache.set( session.getId() + "-user", user );
-
         }
         if ( !checkPermission( request.action, request.method ) ) {
             Logger.error( "User %s not allowed to access %s %s", user.username, request.action, request.method );
@@ -55,7 +48,7 @@ public class Secure extends Controller {
     }
 
     public static boolean checkPermission( String resource, String operation ) {
-        LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
+        User user = Cache.get( session.getId() + "-user", User.class );
         if ( user == null ) {
             Logger.error( "Invalid user" );
             return false;
@@ -83,16 +76,8 @@ public class Secure extends Controller {
     public static void authenticate( @Required String username, String password, boolean remember, String cancel ) throws Throwable {
         // Check tokens
         Logger.error( cancel );
-        List<LgUser> users = LgUser.find( "select u from LgUser u where u.username = ? and u.password = ? and "
-                + "u.endDate is null or u.endDate > CURRENT_TIMESTAMP", username, password ).fetch();
-        LgUser validated = null;
-        for ( LgUser user : users ) {
-            if ( user.authenticate( password ) ) {
-                validated = user;
-                break;
-            }
-        }
-        if ( validation.hasErrors() ) {
+
+        if ( Validation.hasErrors() ) {
             flash.keep( "url" );
             flash.error( "secure.invalid_field" );
             params.flash();
@@ -100,7 +85,8 @@ public class Secure extends Controller {
             return;
         }
 
-        if ( validated == null ) {
+        User user = User.authenticate( username, password );
+        if ( user == null ) {
             flash.keep( "url" );
             flash.error( "secure.invalid_user_password" );
             params.flash();
@@ -113,7 +99,7 @@ public class Secure extends Controller {
         if ( remember ) {
             expire = "30d";
         }
-        Cache.set( session.getId() + "-user", validated, expire );
+        Cache.set( session.getId() + "-user", user, expire );
         redirectToOriginalURL();
     }
 
@@ -130,19 +116,5 @@ public class Secure extends Controller {
             url = Play.ctxPath + "/";
         }
         redirect( url );
-    }
-
-    public static String md5( String password ) {
-        byte[] bytesOfMessage = password.getBytes();
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance( "MD5" );
-        } catch ( NoSuchAlgorithmException e ) {
-            Logger.fatal( e, "System configuration error" );
-            return null;
-        }
-        byte[] thedigest = md.digest( bytesOfMessage );
-        String passwordHash = new String( thedigest );
-        return passwordHash;
     }
 }
