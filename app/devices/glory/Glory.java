@@ -1,7 +1,7 @@
 package devices.glory;
 
 import devices.SerialPortAdapter;
-import devices.glory.command.CommandAbstract;
+import devices.glory.command.GloryCommandAbstract;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import play.Logger;
@@ -10,6 +10,7 @@ import play.Logger;
  * TODO: getCh, fifo, etc in other class.
  */
 public class Glory {
+
     SerialPortAdapter serialPort = null;
 
     public Glory( SerialPortAdapter serialPort ) {
@@ -22,20 +23,31 @@ public class Glory {
         this.serialPort = serialPort;
     }
 
-    public synchronized CommandAbstract sendCommand( CommandAbstract cmd ) {
+    public synchronized void close() {
+        Logger.info( String.format( "Closing serial port and glory" ) );
+        if ( serialPort != null ) {
+            try {
+                serialPort.close();
+            } catch ( IOException e ) {
+                Logger.error( "Error closing the serial port" );
+            }
+        }
+        serialPort = null;
+    }
+
+    public synchronized GloryCommandAbstract sendCommand( GloryCommandAbstract cmd ) {
         return sendCommand( cmd, null, false );
     }
 
-    public synchronized CommandAbstract sendCommand( CommandAbstract cmd, boolean debug ) {
+    public synchronized GloryCommandAbstract sendCommand( GloryCommandAbstract cmd, boolean debug ) {
         return sendCommand( cmd, null, debug );
     }
 
-    public synchronized CommandAbstract sendCommand( CommandAbstract cmd, String data, boolean debug ) {
+    public synchronized GloryCommandAbstract sendCommand( GloryCommandAbstract cmd, String data, boolean debug ) {
 
         if ( cmd == null ) {
             throw new InvalidParameterException( "Glory unknown command" );
         }
-
         byte[] d = cmd.getCmdStr();
         try {
             serialPort.write( d );
@@ -46,7 +58,7 @@ public class Glory {
 
         if ( debug ) {
             StringBuilder h = new StringBuilder( "Writed " );
-            for( byte x : d ) {
+            for ( byte x : d ) {
                 h.append( String.format( "0x%x ", x ) );
             }
             Logger.debug( h.toString() );
@@ -54,7 +66,7 @@ public class Glory {
         cmd.printCmd();
 
         byte[] b = null;
-        for( int i = 0; i < 512; i++ ) {
+        for ( int i = 0; i < 512; i++ ) {
             try {
                 byte r = serialPort.read();
                 Logger.debug( String.format( "Readed 0x%x", r ) );
@@ -66,18 +78,18 @@ public class Glory {
                         int l = d1 * 100 + d2 * 10 + d3 * 1;
                         Logger.debug( String.format( "Read len %d", l ) );
                         b = new byte[ l + 5 ];
-                        b[ 0 ] = ( byte ) ( d1 + 0x30 );
-                        b[ 1 ] = ( byte ) ( d2 + 0x30 );
-                        b[ 2 ] = ( byte ) ( d3 + 0x30 );
-                        for( int j = 0; j < l + 2; j++ ) {
-                            b[ j + 3 ] = serialPort.read();
+                        b[ 0] = ( byte ) ( d1 + 0x30 );
+                        b[ 1] = ( byte ) ( d2 + 0x30 );
+                        b[ 2] = ( byte ) ( d3 + 0x30 );
+                        for ( int j = 0; j < l + 2; j++ ) {
+                            b[ j + 3] = serialPort.read();
                         }
                         break;
                     case 0x06:
-                        b = new byte[] { 0x06 };
+                        b = new byte[]{ 0x06 };
                         break;
                     case 0x15:
-                        b = new byte[] { 0x15 };
+                        b = new byte[]{ 0x15 };
                         break;
                 }
                 if ( b != null ) {
@@ -93,7 +105,7 @@ public class Glory {
         }
         if ( debug ) {
             StringBuilder h = new StringBuilder( "Readed " );
-            for( byte x : b ) {
+            for ( byte x : b ) {
                 h.append( String.format( "0x%x ", x ) );
             }
             Logger.debug( h.toString() );
@@ -108,11 +120,11 @@ public class Glory {
         }
         return ( byte ) ( l - 0x30 );
     }
-    
+
     public byte[] getBytes( int quantity ) throws IOException {
         byte[] b = new byte[ quantity ];
-        for( int i = 0; i < quantity; i++ ) {
-            b[ i ] = serialPort.read();
+        for ( int i = 0; i < quantity; i++ ) {
+            b[ i] = serialPort.read();
         }
         return b;
     }

@@ -377,8 +377,8 @@
   <table-link relationship-ref="REL142" pk-x="101" pk-y="0" fk-x="98" fk-y="148" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="72"/>
   <table-link relationship-ref="REL134" pk-x="256" pk-y="90" fk-x="0" fk-y="43" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="33"/>
   <table-link relationship-ref="REL152" pk-x="92" pk-y="0" fk-x="98" fk-y="168" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="72"/>
-  <table-link relationship-ref="REL136" pk-x="0" pk-y="36" fk-x="255" fk-y="41" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="18"/>
-  <table-link relationship-ref="REL150" pk-x="0" pk-y="33" fk-x="212" fk-y="111" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="18"/>
+  <table-link relationship-ref="REL136" pk-x="0" pk-y="36" fk-x="255" fk-y="41" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="20"/>
+  <table-link relationship-ref="REL150" pk-x="0" pk-y="33" fk-x="188" fk-y="111" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="18"/>
   <table-link relationship-ref="REL144" pk-x="190" pk-y="64" fk-x="0" fk-y="86" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="33"/>
   <table-link relationship-ref="REL146" pk-x="215" pk-y="182" fk-x="0" fk-y="3" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="33"/>
   <table-link relationship-ref="REL132" pk-x="224" pk-y="162" fk-x="0" fk-y="6" rLineColor="0x000000" pkLabelText="" fkLabelText="" orientation="33"/>

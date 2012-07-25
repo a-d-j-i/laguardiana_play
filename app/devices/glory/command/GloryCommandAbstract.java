@@ -2,17 +2,17 @@ package devices.glory.command;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
 import play.Logger;
 
-public abstract class CommandAbstract {
+public abstract class GloryCommandAbstract {
 
-    private byte   cmdId;
+    private byte cmdId;
     private String description;
     private byte[] cmdData;
-    IOException    error = null;
+    IOException error = null;
 
     public enum DebugLevel {
+
         NONE( 0 ), DEBUG( 1 ), PRINT_INFO( 2 );
         private final int level;
 
@@ -28,18 +28,17 @@ public abstract class CommandAbstract {
             return this.getLevel() > level.getLevel();
         }
     }
-
     DebugLevel debug = DebugLevel.NONE;
 
-    CommandAbstract( byte cmdId, String description ) {
+    GloryCommandAbstract( byte cmdId, String description ) {
         this( cmdId, description, null, DebugLevel.NONE );
     }
 
-    CommandAbstract( byte cmdId, String description, byte[] cmdData ) {
+    GloryCommandAbstract( byte cmdId, String description, byte[] cmdData ) {
         this( cmdId, description, cmdData, DebugLevel.NONE );
     }
 
-    CommandAbstract( byte cmdId, String description, byte[] cmdData, DebugLevel debug ) {
+    GloryCommandAbstract( byte cmdId, String description, byte[] cmdData, DebugLevel debug ) {
         this.cmdData = cmdData;
         this.cmdId = cmdId;
         this.description = description;
@@ -64,7 +63,7 @@ public abstract class CommandAbstract {
                 bo.write( 3 );
             }
             byte cs = 2;
-            for( byte x : bo.toByteArray() ) {
+            for ( byte x : bo.toByteArray() ) {
                 cs = ( byte ) ( cs ^ ( byte ) x );
             }
             bo.write( cs );
@@ -121,6 +120,7 @@ public abstract class CommandAbstract {
         return ( byte ) ( l - 0x30 );
     }
 
-    abstract public CommandAbstract setResult( byte[] dr );
-
+    public GloryCommandAbstract setResult( byte[] dr ) {
+        return this;
+    }
 }

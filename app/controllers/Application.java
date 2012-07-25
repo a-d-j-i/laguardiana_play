@@ -1,20 +1,17 @@
 package controllers;
 
-import models.db.LgDeposit;
-import models.db.LgLov;
-import models.db.LgBatch;
-import models.db.LgUser;
 import java.util.List;
-
+import models.Deposit;
+import models.TemplatePrinter;
+import models.lov.DepositUserCodeReference;
+import models.db.LgBatch;
+import models.db.LgLov;
+import models.db.LgUser;
+import play.Logger;
+import play.cache.Cache;
+import play.libs.Codec;
 import play.mvc.Controller;
 import play.mvc.With;
-
-import play.libs.*;
-
-import models.*;
-
-import play.cache.Cache;
-import play.Logger;
 
 @With( Secure.class )
 public class Application extends Controller {
@@ -38,14 +35,14 @@ public class Application extends Controller {
 
     public static void inputReference() {
         //temporarily until we have a page using getReferences()..
-        List<LgLov> referenceCodes = LgLov.getReferenceCodes();
+        List<LgLov> referenceCodes = LgLov.findAll();
         render( referenceCodes );
         // render();
     }
 
     public static void countMoney( String reference1, String reference2 ) {
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
-        LgLov userCode = LgLov.FromUserCodeReference( reference1 );
+        LgLov userCode = DepositUserCodeReference.findByTextId( reference1 );
         if ( userCode == null ) {
             Logger.error( "countMoney: no reference received!" );
             index();
@@ -53,7 +50,7 @@ public class Application extends Controller {
         }
 
         //Logger.error("code received: %s", userCode.description);
-        LgDeposit deposit = new LgDeposit( user, reference2, userCode );
+        Deposit deposit = new Deposit( user, reference2, userCode );
         deposit.save();
 
         LgBatch batch = LgBatch.MakeRandom();
@@ -66,7 +63,7 @@ public class Application extends Controller {
 
     public static void acceptBatch( String randomID ) {
         // XXX To Do Dave...
-        LgDeposit deposit = Cache.get( randomID + "-deposit", LgDeposit.class );
+        Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
         //deposit.save();
         LgBatch batch = Cache.get( randomID + "-batch", LgBatch.class );
         deposit.addBatch( batch );
@@ -76,7 +73,7 @@ public class Application extends Controller {
 
     // rest 
     public static void getReferenceCodes() {
-        List<LgLov> referenceCodes = LgLov.getReferenceCodes();
+        List<LgLov> referenceCodes = DepositUserCodeReference.findAll();
         render( referenceCodes );
     }
 }

@@ -2,7 +2,7 @@ package devices.glory.command;
 
 import play.Logger;
 
-public class CommandWithAckResponse extends CommandAbstract {
+public class CommandWithAckResponse extends GloryCommandAbstract {
 
     CommandWithAckResponse( byte cmdId, String description ) {
         this( cmdId, description, null, DebugLevel.NONE );

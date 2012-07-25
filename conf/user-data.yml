@@ -55,7 +55,7 @@
     
 
 
-#
+
 # ACLs
 #
   db.LgAclRule(RoleAdminAdmin):
@@ -133,16 +133,6 @@
     permission:     ALLOW
 
 
-## 
-## Basic Runnable Configuration
-##
-  db.LgBag(FirstBag):
-    bagCode:        4492857
-    creationDate:   2012-01-01
-    withdrawDate:   2999-12-31
-
- 
- 
     
 #
 # Users
@@ -184,13 +174,4 @@
     externalId:     0
     locked:         #x42
     roles:          [ RoleAdmin ]
-
-
-  db.LgDeposit(SimpleDeposit):
-    bag:            FirstBag
-    user:           admindave
-    userCode:       string por el usuario
-    userCodeLov:    2
-    creationDate:   2012-01-02
-       
 

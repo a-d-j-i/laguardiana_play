@@ -20,9 +20,21 @@ public class Secure extends Controller {
 
     @Before( unless = { "login", "authenticate", "logout" } )
     static void checkAccess() throws Throwable {
-        // Authentication
-        Header referer = request.headers.get( "referer" );
 
+        if ( "GET".equals( request.method ) ) {
+            Header referer = request.headers.get( "referer" );
+            flash.put( "url", request.url ); // seems a good default
+            if ( referer != null ) {
+                flash.put( "lastUrl", referer.value() ); // seems a good default
+            } else {
+                flash.put( "lastUrl", Play.ctxPath + "/" ); // seems a good default
+            }
+        } else {
+            flash.put( "url", Play.ctxPath + "/" ); // seems a good default
+            flash.put( "lastUrl", Play.ctxPath + "/" ); // seems a good default
+        }
+
+        // Authentication
         User user = Cache.get( session.getId() + "-user", User.class );
         if ( user == null ) {
             user = new User();
@@ -31,8 +43,6 @@ public class Secure extends Controller {
             if ( user.isGuest() ) {
                 Cache.set( session.getId() + "-user", user );
             } else {
-                flash.put( "url", "GET".equals( request.method ) ? request.url : Play.ctxPath + "/" ); // seems a good default
-                flash.put( "lastUrl", "GET".equals( request.method ) ? referer.value() : Play.ctxPath + "/" ); // seems a good default
                 login();
                 return;
             }
@@ -40,8 +50,6 @@ public class Secure extends Controller {
         if ( !checkPermission( request.action, request.method ) ) {
             Logger.error( "User %s not allowed to access %s %s", user.username, request.action, request.method );
             flash.error( "secure.not_allowed" );
-            flash.put( "url", "GET".equals( request.method ) ? request.url : Play.ctxPath + "/" ); // seems a good default
-            flash.put( "lastUrl", "GET".equals( request.method ) ? ( referer != null ? referer.value() : Play.ctxPath + "/" ) : Play.ctxPath + "/" ); // seems a good default
             login();
         }
         renderArgs.put( "user", user );

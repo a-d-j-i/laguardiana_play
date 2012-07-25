@@ -1,7 +1,5 @@
 package models.db;
 
-import java.util.List;
-import java.util.Arrays;
 
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
@@ -26,33 +24,34 @@ public class LgBill extends GenericModel implements java.io.Serializable {
     public int quantity;
     @Column( name = "denomination", nullable = false )
     public int denomination;
-    @Column( name = "unit_lob", nullable = false )
-    public int unitLob;
-    
-    public LgBill(LgBatch batch, int slotId, int quantity, int denomination, int unitLob) {
+    @Column( name = "unit_lov", nullable = false )
+    public int unitLov;
+
+    public LgBill( LgBatch batch, int slotId, int quantity, int denomination, int unitLov ) {
         this.batch = batch;
         this.slotId = slotId;
         this.quantity = quantity;
         this.denomination = denomination;
-        this.unitLob = unitLob;
-        batch.addBill(this);
+        this.unitLov = unitLov;
+        batch.addBill( this );
     }
 
-    public void addToDeposit(LgDeposit deposit) {
+    public void addToDeposit( LgDeposit deposit ) {
         this.deposit = deposit;
     }
-    
+
+    @Override
     public String toString() {
         Integer q = quantity;
         Integer d = denomination;
-        Integer t = quantity * denomination; 
-        return q.toString() + " *  $" + d.toString() + " = " + t.toString() + "("+ LgLov.FromBillCode(unitLob).toString() +")";
+        Integer t = quantity * denomination;
+        return q.toString() + " *  $" + d.toString() + " = " + t.toString() + "(" + LgLov.findByNumericId( unitLov ).toString() + ")";
     }
 
     public int getTotal() {
         return quantity * denomination;
-    }    
-    
+    }
+
     @Override
     public boolean equals( Object obj ) {
         // We need to check this
@@ -64,13 +63,13 @@ public class LgBill extends GenericModel implements java.io.Serializable {
         }
         final LgBill other = ( LgBill ) obj;
         boolean equal;
-        
+
         equal = this.quantity == other.quantity;
-        equal = equal && (this.denomination == other.denomination);
-        equal = equal && (this.unitLob == other.unitLob);
-        equal = equal && (this.slotId == other.slotId);
-        equal = equal && (this.deposit == other.deposit);
-        equal = equal && (this.batch == other.batch);
+        equal = equal && ( this.denomination == other.denomination );
+        equal = equal && ( this.unitLov == other.unitLov );
+        equal = equal && ( this.slotId == other.slotId );
+        equal = equal && ( this.deposit == other.deposit );
+        equal = equal && ( this.batch == other.batch );
         return equal;
     }
 
