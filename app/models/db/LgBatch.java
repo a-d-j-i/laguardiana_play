@@ -32,7 +32,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     }
     
     public static LgBatch MakeRandom() {
-        LgLov billLob = LgLov.FromBillCode("pesos argentinos");
+        LgLov billLob = LgLov.FromBillCode("ARS");
         if (billLob == null) {
             Logger.error("no bill code for pesos argentinos!");
             return null;

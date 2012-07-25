@@ -45,9 +45,9 @@ public class Application extends Controller {
 
     public static void countMoney( String reference1, String reference2 ) {
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
-        LgLov userCode = LgLov.FromUserCodeReference( reference1 );
+        LgLov userCode = LgLov.FromUserCodeReference( Integer.parseInt(reference1) );
         if ( userCode == null ) {
-            Logger.error( "countMoney: no reference received!" );
+            Logger.error( "countMoney: no reference received! for %s", reference1 );
             index();
             return;
         }

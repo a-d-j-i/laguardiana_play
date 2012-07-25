@@ -52,6 +52,10 @@
     name:           Application.inputReference
   db.LgResource(ResourceDepositGetReferenceCodes):
     name:           Application.getReferenceCodes
+  db.LgResource(ResourceApplicationAcceptBatch):
+    name:           Application.acceptBatch
+  db.LgResource(ResourceApplicationCountMoney):
+    name:           Application.countMoney
     
 
 
@@ -132,6 +136,18 @@
     operation:      GET
     permission:     ALLOW
 
+  db.LgAclRule(RoleUserResourceApplicationCountMoneyPost):
+    role:           RoleUser
+    resource:       ResourceApplicationCountMoney
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
+  db.LgAclRule(RoleUserResourceApplication_AcceptBatch):
+    role:           RoleUser
+    resource:       ResourceApplicationAcceptBatch
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
 
 ## 
 ## Basic Runnable Configuration
@@ -165,6 +181,7 @@
     externalId:     1516
     locked:         #x42
     creationDate:   2012-01-01
+    endDate:        2112-01-01    
     roles:          [ RoleGuest, RoleAdmin ]
 
   User(expireddave):
@@ -181,6 +198,8 @@
     externalApp:    PlayInternalApp
     username:       admin
     password:       admin
+    creationDate:   2012-01-01
+    endDate:        2112-01-02    
     externalId:     0
     locked:         #x42
     roles:          [ RoleAdmin ]

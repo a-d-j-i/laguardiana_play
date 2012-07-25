@@ -31,7 +31,7 @@ public class LgLov extends GenericModel implements java.io.Serializable {
     
     // bill unit code access
     public static List<LgLov> getReferenceCodes() {
-        return LgLov.find("byType", "UserCodeReference").fetch();
+        return LgLov.find("byType", UserCodeReference).fetch();
     }
 
     public static LgLov FromUserCodeReference(String userCodeReference) {
