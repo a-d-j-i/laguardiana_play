@@ -28,38 +28,42 @@
     </head>
 
     <body class="container">
-        <div>
-            <div class="header">
-                <a href="@{Application.index()}" class="homelink"><img src="@{'/public/images/logo.gif'}" alt="Prosegur"></a>		
-                <p class ="userLink">
-                    Welcome 
-                    #{ if ( user != null && ! user.isGuest() )}
-                    ${user.username}! <a href="@{Secure.logout()}">Log out</a>
-                    #{/if}
-                    #{else}
-                    <a href="@{Secure.login()}">Login</a>
-                    #{/else}
-                </p>
+        <section>
+            <div class="row" >
+                <div class="span1 header">
+                    <a href="@{Application.index()}" class="homelink"><img src="@{'/public/images/logo.gif'}" alt="Prosegur"></a>		
+                    <p class ="userLink">
+                        Welcome 
+                        #{ if ( user != null && ! user.isGuest() )}
+                        ${user.username}! <a href="@{Secure.logout()}">Log out</a>
+                        #{/if}
+                        #{else}
+                        <a href="@{Secure.login()}">Login</a>
+                        #{/else}
+                    </p>
+                </div>
             </div>
-            <div> 
-                #{if flash.error}
-                <p class="alert alert-error">
-                    <a class="close" data-dismiss="alert" href="#">&times;</a> <strong>ERROR</strong>
-                    &{flash.error}
-                </p>
-                #{/if}
-                #{if flash.success}
-                <p class="alert alert-success">
-                    <a class="close" data-dismiss="alert" href="#">&times;</a> <strong>EXITO</strong>
-                    Comando ejecutado con exito
-                    &{flash.success}
-                </p>
-                #{/if}
-            </div>
+        </section>
+        <section>
+            #{if flash.error}
+            <p class="alert alert-error">
+                <a class="close" data-dismiss="alert" href="#">&times;</a> <strong>ERROR</strong>
+                &{flash.error}
+            </p>
+            #{/if}
+            #{if flash.success}
+            <p class="alert alert-success">
+                <a class="close" data-dismiss="alert" href="#">&times;</a> <strong>EXITO</strong>
+                Comando ejecutado con exito
+                &{flash.success}
+            </p>
+            #{/if}
+        </section>
+        <section>
             <div>
                 #{doLayout /}
             </div>
-        </div>
+        </section>
         <footer>
             <div id="footer"></div>
         </footer>

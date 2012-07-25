@@ -41,13 +41,13 @@
         #{if (status?.haveData() ) }
         <pre>
 Registers
-    ${status?.getSRMode()}
-    ${status?.getD1Mode()}
-#{list items:status?.getSrBits(), as:'p'}   ${p}
+${status?.getSRMode()}
+${status?.getD1Mode()}
+#{list items:status?.getSrBits(), as:'p'}${p}
 #{/list}
-#{list items:status?.getD2Bits(), as:'p'}   ${p}
+#{list items:status?.getD2Bits(), as:'p'}${p}
 #{/list}
-#{list items:status?.getInfo(), as:'p'} ${p}
+#{list items:status?.getInfo(), as:'p'}${p}
 #{/list}
         </pre>
         <pre> Data: ${status?.getData()}</pre>
