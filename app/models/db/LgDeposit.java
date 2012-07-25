@@ -48,7 +48,7 @@ public class LgDeposit extends GenericModel implements java.io.Serializable {
     public void addBatch(LgBatch batch) {
         for (LgBill bill: batch.bills) {
             this.addBill(bill);
-            bill.save();
+            //bill.save();
         }
     }
     
