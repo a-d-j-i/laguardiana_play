@@ -31,7 +31,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
         Logger.error( " post bills: %d", bills.size() );
     }
     
-    public static LgBatch MakeRandom() {
+    public static LgBatch MakeRandom(LgDeposit deposit) {
         LgLov billLob = LgLov.FromBillCode("ARS");
         if (billLob == null) {
             Logger.error("no bill code for pesos argentinos!");
@@ -43,7 +43,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
         for (int i = 0; i < 4; i = i + 1)
         {
             int slotid = i;
-            LgBill bill = new LgBill(thisb, slotid, i, 5, billunitCode);
+            LgBill bill = new LgBill(thisb, slotid, i, 5, billunitCode, deposit);
             Logger.info(" created: %s", bill.toString());
             //bill.save();
         }
