@@ -41,21 +41,16 @@
   db.LgResource(ResourceApplicationPrint):
     name:           Application.printTemplate
     
-  db.LgResource(ResourceCounter):
-    name:           Application.goCounter
-  db.LgResource(ResourceCounterIndex):
-    name:           Counter.index
-  db.LgResource(ResourceCounterBeginDeposit):    
-    name:           Counter.postBeginDeposit 
-    
   db.LgResource(ResourceApplicationInputReference):
     name:           Application.inputReference
   db.LgResource(ResourceDepositGetReferenceCodes):
     name:           Application.getReferenceCodes
-  db.LgResource(ResourceApplicationAcceptBatch):
-    name:           Application.acceptBatch
+  db.LgResource(ResourceApplicationAppendBatch):
+    name:           Application.appendBatch
   db.LgResource(ResourceApplicationCountMoney):
     name:           Application.countMoney
+  db.LgResource(ResourceApplicationAcceptBatch):
+    name:           Application.acceptBatch
     
 
 
@@ -79,35 +74,6 @@
   db.LgAclRule(RoleGuestApplicationPrint):
     role:           RoleGuest
     resource:       ResourceApplicationPrint
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-
-
-  db.LgAclRule(RoleUserCounterIndex):
-    role:           RoleUser
-    resource:       ResourceCounterIndex
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-    
-  db.LgAclRule(RoleUserCounterBeginDeposit):
-    role:           RoleUser
-    resource:       ResourceCounterBeginDeposit
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-    
-  db.LgAclRule(RoleUserCounterGet):
-    role:           RoleUser
-    resource:       ResourceCounter
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-    
-  db.LgAclRule(RoleUserCounterPost):
-    role:           RoleUser
-    resource:       ResourceCounter
     priority:       1
     operation:      GET
     permission:     ALLOW
@@ -145,6 +111,18 @@
   db.LgAclRule(RoleUserResourceApplication_AcceptBatch):
     role:           RoleUser
     resource:       ResourceApplicationAcceptBatch
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
+  db.LgAclRule(RoleUserResourceApplication_AcceptBatch_GET):
+    role:           RoleUser
+    resource:       ResourceApplicationAcceptBatch
+    priority:       1
+    operation:      GET 
+    permission:     ALLOW
+  db.LgAclRule(RoleUserResourceApplication_AppendBatch):
+    role:           RoleUser
+    resource:       ResourceApplicationAppendBatch
     priority:       1
     operation:      POST
     permission:     ALLOW
