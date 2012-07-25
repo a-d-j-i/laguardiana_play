@@ -35,7 +35,7 @@ public class Application extends Controller {
 
     public static void inputReference() {
         //temporarily until we have a page using getReferences()..
-        List<LgLov> referenceCodes = LgLov.findAll();
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         render( referenceCodes );
         // render();
     }
@@ -53,7 +53,7 @@ public class Application extends Controller {
         Deposit deposit = new Deposit( user, reference2, userCode );
         deposit.save();
 
-        LgBatch batch = LgBatch.MakeRandom(deposit);
+        LgBatch batch = LgBatch.MakeRandom( deposit );
         //batch.save();
         String randomID = Codec.UUID();
         //pass gathered data and let user chose what to do..
@@ -66,9 +66,9 @@ public class Application extends Controller {
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
 
         //Logger.error("code received: %s", userCode.description);
-        LgDeposit deposit = Cache.get( randomID + "-deposit", LgDeposit.class );
+        Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
 
-        LgBatch batch = LgBatch.MakeRandom(deposit);
+        LgBatch batch = LgBatch.MakeRandom( deposit );
         //batch.save();
         //String randomID = Codec.UUID();
         //pass gathered data and let user chose what to do..
@@ -83,10 +83,10 @@ public class Application extends Controller {
         //deposit.save();
         LgBatch batch = Cache.get( randomID + "-batch", LgBatch.class );
         batch.save();
-        flash.success("Deposit is done!");
+        flash.success( "Deposit is done!" );
         //tell user deposit was done rightly
         //deposit.addBatch( batch );
-        render(randomID);
+        render( randomID );
         deposit.addBatch( batch );
         //batch.save();
         //deposit.save();

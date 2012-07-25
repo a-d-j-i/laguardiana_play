@@ -27,7 +27,7 @@ abstract public class LgLov extends GenericModel implements java.io.Serializable
 
     static public LgLov findByNumericId( Integer numericId ) {
         return LgLov.find( "select l from LgLov l where numericId = ?", numericId ).first();
-        return LgLov.find("byType", UserCodeReference).fetch();
+        //return LgLov.find("byType", UserCodeReference).fetch();
     }
 
     static public LgLov findByTextId( String textId ) {

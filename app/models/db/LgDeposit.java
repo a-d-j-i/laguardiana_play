@@ -39,6 +39,4 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     public Set<LgEnvelope> envelopes = new HashSet<LgEnvelope>( 0 );
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit" )
     public Set<LgBill> bills = new HashSet<LgBill>( 0 );
-            bill.save();
-            //bill.save();
 }
