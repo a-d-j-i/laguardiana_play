@@ -1,0 +1,25 @@
+#{if flash.success}
+    <p class="success">${flash.success}</p>
+#{/if}
+
+#{extends 'main.html' /}
+#{set title:'Shall we continue the deposit?' /}
+
+<div>
+<h1>Counting..</h1>
+
+<span class="post-reference1">${randomID}</span>
+
+#{form @Application.appendBatch(randomID)}
+    <p>
+        <input type="submit" value="Continue this deposit" />
+    </p>
+#{/form}
+
+#{form @Application.index()}
+    <p>
+        <input type="submit" value="Finished. Go home now" />
+    </p>
+#{/form}
+   
+</div>

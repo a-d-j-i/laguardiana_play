@@ -44,7 +44,7 @@ public class Application extends Controller {
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
         LgLov userCode = DepositUserCodeReference.findByTextId( reference1 );
         if ( userCode == null ) {
-            Logger.error( "countMoney: no reference received!" );
+            Logger.error( "countMoney: no reference received! for %s", reference1 );
             index();
             return;
         }
@@ -53,19 +53,40 @@ public class Application extends Controller {
         Deposit deposit = new Deposit( user, reference2, userCode );
         deposit.save();
 
-        LgBatch batch = LgBatch.MakeRandom();
-
+        LgBatch batch = LgBatch.MakeRandom(deposit);
+        //batch.save();
         String randomID = Codec.UUID();
+        //pass gathered data and let user chose what to do..
+        Cache.set( randomID + "-deposit", deposit, "60mn" );
+        Cache.set( randomID + "-batch", batch, "60mn" );
+        render( randomID, deposit, batch );
+    }
+
+    public static void appendBatch( String randomID ) {
+        LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
+
+        //Logger.error("code received: %s", userCode.description);
+        LgDeposit deposit = Cache.get( randomID + "-deposit", LgDeposit.class );
+
+        LgBatch batch = LgBatch.MakeRandom(deposit);
+        //batch.save();
+        //String randomID = Codec.UUID();
+        //pass gathered data and let user chose what to do..
         Cache.set( randomID + "-deposit", deposit, "60mn" );
         Cache.set( randomID + "-batch", batch, "60mn" );
         render( randomID, deposit, batch );
     }
 
     public static void acceptBatch( String randomID ) {
-        // XXX To Do Dave...
+        //user accepted to deposit it!
         Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
         //deposit.save();
         LgBatch batch = Cache.get( randomID + "-batch", LgBatch.class );
+        batch.save();
+        flash.success("Deposit is done!");
+        //tell user deposit was done rightly
+        //deposit.addBatch( batch );
+        render(randomID);
         deposit.addBatch( batch );
         //batch.save();
         //deposit.save();

@@ -17,7 +17,7 @@
             <!-- here we should use @{Application.getReferenceCodes()} /json .. -->
             #{list items:referenceCodes, as:'reference'}
               <li class="numvalue">${reference.toString()}</li>
-              <option value="${reference.toString()}">${reference.toString()}</option>
+              <option value="${reference.numericId}">${reference.textId}</option>
             #{/list}
         </select>
     </p>

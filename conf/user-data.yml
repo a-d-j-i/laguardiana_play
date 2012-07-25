@@ -41,17 +41,16 @@
   db.LgResource(ResourceApplicationPrint):
     name:           Application.printTemplate
     
-  db.LgResource(ResourceCounter):
-    name:           Application.goCounter
-  db.LgResource(ResourceCounterIndex):
-    name:           Counter.index
-  db.LgResource(ResourceCounterBeginDeposit):    
-    name:           Counter.postBeginDeposit 
-    
   db.LgResource(ResourceApplicationInputReference):
     name:           Application.inputReference
   db.LgResource(ResourceDepositGetReferenceCodes):
     name:           Application.getReferenceCodes
+  db.LgResource(ResourceApplicationAppendBatch):
+    name:           Application.appendBatch
+  db.LgResource(ResourceApplicationCountMoney):
+    name:           Application.countMoney
+  db.LgResource(ResourceApplicationAcceptBatch):
+    name:           Application.acceptBatch
     
 
 
@@ -80,35 +79,6 @@
     permission:     ALLOW
 
 
-  db.LgAclRule(RoleUserCounterIndex):
-    role:           RoleUser
-    resource:       ResourceCounterIndex
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-    
-  db.LgAclRule(RoleUserCounterBeginDeposit):
-    role:           RoleUser
-    resource:       ResourceCounterBeginDeposit
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-    
-  db.LgAclRule(RoleUserCounterGet):
-    role:           RoleUser
-    resource:       ResourceCounter
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-    
-  db.LgAclRule(RoleUserCounterPost):
-    role:           RoleUser
-    resource:       ResourceCounter
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-
-
   db.LgAclRule(RoleUserResourceApplicationInputReferencePost):
     role:           RoleUser
     resource:       ResourceApplicationInputReference
@@ -132,6 +102,30 @@
     operation:      GET
     permission:     ALLOW
 
+  db.LgAclRule(RoleUserResourceApplicationCountMoneyPost):
+    role:           RoleUser
+    resource:       ResourceApplicationCountMoney
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
+  db.LgAclRule(RoleUserResourceApplication_AcceptBatch):
+    role:           RoleUser
+    resource:       ResourceApplicationAcceptBatch
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
+  db.LgAclRule(RoleUserResourceApplication_AcceptBatch_GET):
+    role:           RoleUser
+    resource:       ResourceApplicationAcceptBatch
+    priority:       1
+    operation:      GET 
+    permission:     ALLOW
+  db.LgAclRule(RoleUserResourceApplication_AppendBatch):
+    role:           RoleUser
+    resource:       ResourceApplicationAppendBatch
+    priority:       1
+    operation:      POST
+    permission:     ALLOW
 
     
 #
@@ -155,6 +149,7 @@
     externalId:     1516
     locked:         #x42
     creationDate:   2012-01-01
+    endDate:        2112-01-01    
     roles:          [ RoleGuest, RoleAdmin ]
 
   User(expireddave):
@@ -171,6 +166,8 @@
     externalApp:    PlayInternalApp
     username:       admin
     password:       admin
+    creationDate:   2012-01-01
+    endDate:        2112-01-02    
     externalId:     0
     locked:         #x42
     roles:          [ RoleAdmin ]

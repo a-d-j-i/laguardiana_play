@@ -20,13 +20,16 @@
     numericId:      1
     textId:         ARS
     description:    Peso Argentino
+    endDate:        2999-12-31
 
   lov.MoneyUnit(Reference_EUR_BILL):
     numericId:      2
     textId:         EUR
     description:    Euro
+    endDate:        2999-12-31
 
   lov.MoneyUnit(Reference_USD_BILL):
     numericId:      1
     textId:         USD
     description:    Dolar Estadounidense
+    endDate:        2999-12-31
