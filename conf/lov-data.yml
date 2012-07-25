@@ -23,15 +23,18 @@
     numericId:      1
     textId:         ARS
     description:    Peso Argentino
+    endDate:        2999-12-31
 
   db.LgLov(Reference_EUR_BILL):
     type:           BILL_CODE
     numericId:      2
     textId:         EUR
     description:    Euro
+    endDate:        2999-12-31
 
   db.LgLov(Reference_USD_BILL):
     type:           BILL_CODE
     numericId:      1
     textId:         USD
     description:    Dolar Estadounidense
+    endDate:        2999-12-31
