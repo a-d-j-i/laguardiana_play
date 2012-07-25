@@ -6,23 +6,30 @@ import devices.glory.GloryReturnParser;
 import devices.glory.command.*;
 import java.io.IOException;
 import java.util.GregorianCalendar;
+import play.Logger;
 import play.Play;
+import play.cache.Cache;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
 
 public class GloryController extends Controller {
-
+    
     static devices.glory.Glory glory;
-
+    
     @Before
     static void getCounter() throws Throwable {
         glory = CounterFactory.getCounter( Play.configuration.getProperty( "glory.port" ) );
     }
-
+    
     public static void index() {
         GloryReturnParser status = null;
-        String lst = flash.get( "lastStatus" );
+        String lastStatus = flash.get( "lastStatus" );
+        String lst = null;
+        if ( "true".equals( lastStatus ) ) {
+            lst = ( String ) Cache.get( "lastStatus" );
+            Cache.delete( "lastStatus" );
+        }
         if ( lst != null ) {
             if ( !lst.equalsIgnoreCase( "null" ) ) {
                 Gson gson = new Gson();
@@ -31,10 +38,10 @@ public class GloryController extends Controller {
         }
         render( status );
     }
-
+    
     private static void setStatusAndRedirect( GloryReturnParser st ) {
         if ( st == null ) {
-            flash.put( "lastStatus", null );
+            flash.put( "lastStatus", "false" );
         } else {
             if ( st.getError() != null ) {
                 flash.put( "error", st.getError() );
@@ -43,118 +50,120 @@ public class GloryController extends Controller {
             }
             Gson gson = new Gson();
             String json = gson.toJson( st );
-            flash.put( "lastStatus", json );
+            Cache.set( "lastStatus", json );
+            flash.put( "lastStatus", "true" );
         }
         redirect( Router.reverse( "GloryController.index" ).url );
     }
-
+    
     private static void setStatusAndRedirect( GloryCommandAbstract cmd ) {
         if ( cmd == null ) {
-            flash.put( "lastStatus", null );
+            flash.put( "lastStatus", "false" );
             redirect( Router.reverse( "GloryController.index" ).url );
         } else {
             GloryReturnParser st = new GloryReturnParser( cmd );
             setStatusAndRedirect( st );
         }
     }
-
+    
     public static void sense() throws IOException {
         setStatusAndRedirect( glory.sendCommand( new Sense() ) );
     }
-
+    
     public static void remoteCancel() {
         CommandWithAckResponse c = new devices.glory.command.RemoteCancel();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void setDepositMode() {
         CommandWithAckResponse c = new devices.glory.command.SetDepositMode();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void setManualMode() {
         CommandWithAckResponse c = new devices.glory.command.SetManualMode();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void setErrorRecoveryMode() {
         CommandWithAckResponse c = new devices.glory.command.SetErrorRecoveryMode();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void setStroringErrorRecoveryMode() {
         CommandWithAckResponse c = new devices.glory.command.SetStroringErrorRecoveryMode();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void openEscrow() {
         CommandWithAckResponse c = new devices.glory.command.OpenEscrow();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void closeEscrow() {
         CommandWithAckResponse c = new devices.glory.command.CloseEscrow();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
-    public static void storingStart( Integer sequenceNumber ) {
-        CommandWithAckResponse c = new devices.glory.command.StoringStart( sequenceNumber );
+    
+    public static void storingStart() {
+        CommandWithAckResponse c = new devices.glory.command.StoringStart( 0 );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void stopCounting() {
         CommandWithAckResponse c = new devices.glory.command.StopCounting();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void resetDevice() {
         CommandWithAckResponse c = new devices.glory.command.ResetDevice();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void switchCurrency( Long cu ) {
         CommandWithAckResponse c = new devices.glory.command.SwitchCurrency( cu.byteValue() );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void batchDataTransmition() {
         int[] bills = new int[ 32 ];
         for ( int i = 0; i < bills.length; i++ ) {
             bills[ i] = 0;
         }
-        bills[ 25] = 1;
-
+        //bills[ 27] = 1;
+        bills[ 26] = 2;
+        
         CommandWithAckResponse c = new devices.glory.command.BatchDataTransmition( bills );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void countingDataRequest() throws IOException {
         CommandWithAckResponse c = new devices.glory.command.CountingDataRequest();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void amountRequest() {
         CommandWithAckResponse c = new devices.glory.command.AmountRequest();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void denominationDataRequest() throws IOException {
         CommandWithAckResponse c = new devices.glory.command.DenominationDataRequest();
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void settingDataRequest() throws IOException {
         CommandWithAckResponse c = new devices.glory.command.SettingDataRequest( "ESCROW_SET" );
         // return sendCommand( new devices.glory.command.SettingDataRequest( "CASSETE_SET" ), true );
         // return sendCommand( new devices.glory.command.SettingDataRequest( "REJECT_SET" ), true );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void logDataRequest() throws IOException {
         CommandWithAckResponse c = new devices.glory.command.LogDataRequest( 0 );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void deviceSettingDataLoad() {
         byte[] b = new byte[ 512 ];
         for ( int i = 0; i < 10; i++ ) {
@@ -168,7 +177,7 @@ public class GloryController extends Controller {
         CommandWithAckResponse c = new devices.glory.command.DeviceSettingDataLoad( "settings.txt" );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void programUpdate() {
         byte[] b = new byte[ 512 ];
         for ( int i = 0; i < 10; i++ ) {
@@ -182,17 +191,17 @@ public class GloryController extends Controller {
         CommandWithAckResponse c = new devices.glory.command.ProgramUpdate( "programs.txt" );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void setTime() {
         CommandWithAckResponse c = new devices.glory.command.SetTime( GregorianCalendar.getInstance().getTime() );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
     }
-
+    
     public static void downloadData() {
         GloryReturnParser st = DownloadData( "settings.txt" );
         setStatusAndRedirect( st );
     }
-
+    
     static private GloryReturnParser UploadData( int fileSize, String fileName, byte[] data ) {
         CommandWithAckResponse c = new devices.glory.command.StartDownload( fileSize, fileName );
         GloryReturnParser st = new GloryReturnParser( glory.sendCommand( c, true ) );
@@ -200,7 +209,7 @@ public class GloryController extends Controller {
             st.setMsg( "Error in StartDownload" );
             return st;
         }
-
+        
         byte[] b = new byte[ 512 ];
         for ( int j = 0; j < ( ( fileSize + 512 ) / 512 ); j++ ) {
             // TODO: Optimize.
@@ -226,9 +235,9 @@ public class GloryController extends Controller {
         }
         return null;
     }
-
+    
     static private GloryReturnParser DownloadData( String fileName ) {
-
+        
         CommandWithFileLongResponse c = new devices.glory.command.StartUpload( fileName );
         GloryReturnParser st = new GloryReturnParser( glory.sendCommand( c, true ) );
         if ( st.isError() ) {
@@ -245,7 +254,7 @@ public class GloryController extends Controller {
             st.setMsg( "Error reading data from device" );
             return st;
         }
-
+        
         EndUpload c1 = new devices.glory.command.EndUpload();
         st = new GloryReturnParser( glory.sendCommand( c, true ) );
         if ( st.isError() ) {

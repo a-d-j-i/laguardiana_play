@@ -1,80 +1,18 @@
 package devices.glory.command;
 
 import devices.glory.GloryReturnParser;
-import java.util.HashMap;
+import devices.glory.GloryStatus.D1Mode;
+import devices.glory.GloryStatus.SR1Mode;
 import play.Logger;
 
 public class CommandWithDataResponse extends CommandWithAckResponse {
 
-    public enum D1Mode {
-
-        unknown( 0xff ), neutral( 0 ), initial( 1 ), deposit( 2 ), manual( 3 ), normal_error_recovery_mode( 4 ), storing_error_recovery_mode( 5 ), correct_mode( 6 );
-        private final byte m;
-
-        D1Mode( int m ) {
-            this.m = ( byte ) m;
-        }
-        static final HashMap< Byte, D1Mode> reverse = new HashMap< Byte, D1Mode>();
-
-        static {
-            byte i = 0;
-            for ( D1Mode s : D1Mode.values() ) {
-                reverse.put( s.getByte(), s );
-                i++;
-            }
-        }
-
-        static public D1Mode getMode( int b ) {
-            if ( !reverse.containsKey( ( byte ) b ) ) {
-                return unknown;
-            }
-            return reverse.get( ( byte ) b );
-        }
-
-        public byte getByte() {
-            return this.m;
-        }
-    }
-
-    public enum SR1Mode {
-
-        unknown( 0xff ), waiting( 0 ), counting( 1 ), counting_start_request( 2 ), abnormal_device( 3 ), being_reset( 4 ),
-        being_store( 5 ), being_restoration( 6 ), being_exchange_the_cassette( 7 ), storing_start_request( 8 ),
-        being_recover_from_storing_error( 9 ), escrow_open_request( 10 ), escrow_close_request( 11 ), escrow_open( 12 ),
-        escrow_close( 13 ), initialize_start_request( 14 ), begin_initialize( 15 ), being_set( 16 ), local_operation( 17 ),
-        storing_error( 18 ), waiting_for_an_envelope_to_set( 19 );
-        private final byte m;
-
-        SR1Mode( int m ) {
-            this.m = ( byte ) m;
-        }
-        static final HashMap< Byte, SR1Mode> reverse = new HashMap< Byte, SR1Mode>();
-
-        static {
-            byte i = 0;
-            for ( SR1Mode s : SR1Mode.values() ) {
-                reverse.put( s.getByte(), s );
-                i++;
-            }
-        }
-
-        static public SR1Mode getMode( int b ) {
-            if ( !reverse.containsKey( ( byte ) b ) ) {
-                return unknown;
-            }
-            return reverse.get( ( byte ) b );
-        }
-
-        public byte getByte() {
-            return this.m;
-        }
-    }
     SR1Mode sr1 = SR1Mode.unknown;
     byte sr2;
     byte sr3;
     byte sr4;
     byte[] data = null;
-    D1Mode d1;
+    D1Mode d1 = D1Mode.unknown;
     byte d2;
     byte d3;
     byte d4;

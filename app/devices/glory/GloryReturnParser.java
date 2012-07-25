@@ -3,21 +3,29 @@ package devices.glory;
 import devices.glory.command.CommandWithAckResponse;
 import devices.glory.command.CommandWithCountingDataResponse;
 import devices.glory.command.CommandWithDataResponse;
+import devices.glory.command.DenominationDataRequest.Denomination;
 import devices.glory.command.GloryCommandAbstract;
 import java.io.Serializable;
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.HashMap;
+import play.Logger;
 
+/**
+ * *
+ * This class correspond really to the view, but it is here for historical
+ * reasons. TODO: Reimplement or delete using GloryStatus.
+ *
+ * @author adji
+ */
 public class GloryReturnParser implements Serializable {
 
     static HashMap< Byte, String> commands = new HashMap< Byte, String>();
 
     static {
-        commands.put( ( byte ) ( byte ) 0x30, "Reserved" );
-        commands.put( ( byte ) ( byte ) 0x31, "Mode Specification" );
-        commands.put( ( byte ) ( byte ) 0x32, "Batch Data Transmission" );
-        commands.put( ( byte ) ( byte ) 0x33, "Counting Stop" );
+        commands.put( ( byte ) 0x30, "Reserved" );
+        commands.put( ( byte ) 0x31, "Mode Specification" );
+        commands.put( ( byte ) 0x32, "Batch Data Transmission" );
+        commands.put( ( byte ) 0x33, "Counting Stop" );
         commands.put( ( byte ) 0x34, "Storing Start" );
         commands.put( ( byte ) 0x35, "Escrow Open" );
         commands.put( ( byte ) 0x36, "Escrow Close" );
@@ -86,8 +94,16 @@ public class GloryReturnParser implements Serializable {
     String data = null;
     ArrayList<Integer> bills = null;
     boolean haveData = false;
+    ArrayList<Denomination> denominationData = null;
 
     public GloryReturnParser( GloryCommandAbstract response ) {
+        if ( response == null ) {
+            return;
+        }
+        if ( response instanceof devices.glory.command.DenominationDataRequest ) {
+            devices.glory.command.DenominationDataRequest cmd = ( devices.glory.command.DenominationDataRequest ) response;
+            denominationData = cmd.getDenominationData();
+        }
         if ( response instanceof CommandWithCountingDataResponse ) {
             CommandWithCountingDataResponse cmd = ( CommandWithCountingDataResponse ) response;
             bills = new ArrayList<Integer>();
@@ -122,6 +138,8 @@ public class GloryReturnParser implements Serializable {
 
             StringBuilder hexString = new StringBuilder();
             if ( cmd.getData() != null ) {
+                hexString.append( new String( cmd.getData() ) );
+                hexString.append( "\n---------------\n" );
                 for ( byte b : cmd.getData() ) {
                     hexString.append( " " );
                     hexString.append( Integer.toHexString( 0xFF & b ) );
@@ -204,5 +222,9 @@ public class GloryReturnParser implements Serializable {
 
     public boolean haveData() {
         return haveData;
+    }
+
+    public ArrayList<Denomination> getDenominationData() {
+        return denominationData;
     }
 }

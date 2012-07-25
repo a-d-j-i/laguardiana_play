@@ -5,11 +5,10 @@
 package devices.glory.manager;
 
 import devices.glory.Glory;
+import devices.glory.GloryStatus.D1Mode;
 import devices.glory.command.CommandWithDataResponse;
-import devices.glory.command.CommandWithDataResponse.D1Mode;
 import devices.glory.command.GloryCommandAbstract;
 import java.io.IOException;
-import play.Logger;
 
 /**
  *
@@ -17,19 +16,41 @@ import play.Logger;
  */
 abstract public class ManagerCommandAbstract {
 
-    private final Glory device;
+    private final ManagerStatus status;
+    private boolean cancel = false;
 
-    public ManagerCommandAbstract( Glory device ) {
-        this.device = device;
+    public ManagerCommandAbstract( ManagerStatus status ) {
+        this.status = status;
     }
 
-    private CommandWithDataResponse sendGloryCommand( GloryCommandAbstract cmd ) throws IOException {
-        CommandWithDataResponse ret = ( CommandWithDataResponse ) device.sendCommand( cmd );
+    public void cancel() {
+        cancel = true;
+    }
+
+    abstract void execute();
+
+    boolean mustStop() {
+        return false;
+    }
+
+    protected Glory getDevice() {
+        return status.getDevice();
+    }
+
+    protected boolean sendGloryCommand( GloryCommandAbstract cmd ) {
+        CommandWithDataResponse ret = ( CommandWithDataResponse ) getDevice().sendCommand( cmd );
         if ( ret.getError() != null ) {
-            Logger.error( "PollThread on start : " + ret.getError() );
-            throw new IOException( ret.getError() );
+            status.addError( "sendGloryCommand : " + ret.getError() );
+            return false;
         }
-        return ret;
+        Sense();
+        return true;
+    }
+
+    protected void Sense() {
+        CommandWithDataResponse cmd = new devices.glory.command.Sense();
+        getDevice().sendCommand( cmd );
+        status.setStatus( cmd );
     }
 
     /**
@@ -37,26 +58,26 @@ abstract public class ManagerCommandAbstract {
      *
      * @throws IOException
      */
-    private void gotoNeutral() throws IOException {
-        CommandWithDataResponse ret = sendGloryCommand( new devices.glory.command.Sense() );
-        switch ( ret.getD1() ) {
+    protected boolean gotoNeutral() {
+        Sense();
+        switch ( status.getD1Mode() ) {
             case initial:
                 sendGloryCommand( new devices.glory.command.RemoteCancel() );
-                ret = sendGloryCommand( new devices.glory.command.Sense() );
-                if ( ret.getD1() != D1Mode.neutral ) {
-                    throw new IOException( "Not in D1 Mode" );
+                if ( status.getD1Mode() != D1Mode.neutral ) {
+                    status.addError( "cant set neutral mode" );
+                    return false;
                 }
                 break;
             case neutral:
                 break;
             default:
-                throw new IOException( String.format( "Invalid SR1 mode %d", ret.getSr1() ) );
+                status.addError( String.format( "Invalid D11 mode %s", status.getD1Mode().name() ) );
+                return false;
         }
+        return true;
     }
 
-    abstract boolean execute();
-
-    boolean mustStop() {
-        return false;
+    protected boolean isError() {
+        return status.isError();
     }
 }

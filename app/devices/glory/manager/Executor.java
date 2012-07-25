@@ -17,17 +17,18 @@ public class Executor extends Thread {
         NEUTRAL,
         COMMAND_SENT,
         PROCESSING,
-        STOPPED,}
+        STOPPED,
+    }
     private ThState thState = ThState.NEUTRAL;
     // One entry queue
-    private ManagerCommandAbstract thCommand = null;
+    private ManagerCommandAbstract currentCommand = null;
 
     public boolean sendCommand( ManagerCommandAbstract cmd ) {
         synchronized ( this ) {
             switch ( thState ) {
                 case NEUTRAL:
                     thState = ThState.COMMAND_SENT;
-                    thCommand = cmd;
+                    currentCommand = cmd;
                     this.notify();
                     return true;
                 default:
@@ -36,6 +37,17 @@ public class Executor extends Thread {
         }
     }
 
+    public boolean cancelLastCommand() {
+        synchronized ( this ) {
+            switch ( thState ) {
+                case PROCESSING:
+                    currentCommand.cancel();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
     @Override
     public void run() {
         ThState state;
@@ -54,7 +66,7 @@ public class Executor extends Thread {
                     ManagerCommandAbstract cmd;
                     synchronized ( this ) {
                         thState = ThState.PROCESSING;
-                        cmd = thCommand;
+                        cmd = currentCommand;
                     }
                     cmd.execute();
                     synchronized ( this ) {

@@ -52,8 +52,7 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
                 }
             }
         } else {
-            setError( String.format( "Invalid command (%s) response length %d expected ack/noack", getDescription(),
-                    dr.length ) );
+            setError( String.format( "Invalid command (%s) response length %d expected", getDescription(), dr.length ) );
         }
         return this;
     }

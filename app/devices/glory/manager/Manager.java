@@ -4,7 +4,7 @@
  */
 package devices.glory.manager;
 
-import controllers.GloryController;
+import devices.glory.Glory;
 
 /**
  *
@@ -13,13 +13,26 @@ import controllers.GloryController;
 public class Manager {
 
     private Executor executor = null;
+    private ManagerStatus status = null;
 
-    public Manager( GloryController device ) {
+    public Manager( Glory device ) {
+        status = new ManagerStatus( device );
         executor = new Executor();
+    }
+
+    public void start() {
         executor.start();
     }
 
-    public void startDeposit() {
+    public boolean startDeposit() {
+        return executor.sendCommand( new ManagerCommandDeposit( status ) );
+    }
+
+    public boolean cancelDeposit() {
+        if ( !executor.cancelLastCommand() ) {
+            return false;
+        }
+        return executor.sendCommand( new ManagerCommandCancelDeposit( status ) );
     }
 
     public void envelopeDeposit() {
@@ -31,19 +44,18 @@ public class Manager {
     public void storeDeposit() {
     }
 
-    public void cancelDeposit() {
-    }
-
     public void startCounting() {
     }
 
     public void configure() {
     }
 
-    public void close() {/*
-         * while ( executor.sendCommand( ThCommand.STOP ) ) { try {
-         * executor.join( 1000 ); } catch ( InterruptedException ex ) { } }
-         */
-
+    public void close() {
+        while ( executor.sendCommand( new ManagerCommandStop( status ) ) ) {
+            try {
+                executor.join( 1000 );
+            } catch ( InterruptedException ex ) {
+            }
+        }
     }
 }

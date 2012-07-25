@@ -9,11 +9,11 @@
         <meta charset="${_response_encoding}">
         #{if play.mode.isProd()}
         <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-min.css'}">
-        <!--<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-responsive-min.css'}">-->
+        <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-responsive-min.css'}">
         #{/if}
         #{else}
         <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap_laguardiana.css'}">
-        <!--<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-responsive.css'}">-->
+        <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/bootstrap-responsive.css'}">
         #{/else}
         #{get 'moreStyles' /}
         <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">

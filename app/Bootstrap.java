@@ -25,7 +25,7 @@ public class Bootstrap extends Job {
         if ( Play.mode.isDev() ) {
             if ( Deposit.count() == 0 ) {
                 Logger.info( "loading dev-data.yml!" );
-                Fixtures.loadModels( "dev-data.yml" );
+                //Fixtures.loadModels( "dev-data.yml" );
             }
         }
     }
