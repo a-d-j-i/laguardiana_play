@@ -29,12 +29,13 @@ public class LgBill extends GenericModel implements java.io.Serializable {
     @Column( name = "unit_lob", nullable = false )
     public int unitLob;
     
-    public LgBill(LgBatch batch, int slotId, int quantity, int denomination, int unitLob) {
+    public LgBill(LgBatch batch, int slotId, int quantity, int denomination, int unitLob, LgDeposit deposit) {
         this.batch = batch;
         this.slotId = slotId;
         this.quantity = quantity;
         this.denomination = denomination;
         this.unitLob = unitLob;
+        this.deposit = deposit;
         batch.addBill(this);
     }
 
