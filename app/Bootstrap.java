@@ -1,4 +1,5 @@
 
+import devices.CounterFactory;
 import models.Deposit;
 import models.db.LgLov;
 import models.db.LgUser;
@@ -22,11 +23,15 @@ public class Bootstrap extends Job {
             Logger.info( "loading user-data.yml as no users were found!" );
             Fixtures.loadModels( "user-data.yml" );
         }
+        Logger.error( String.format( "Glory port : %s", Play.configuration.getProperty( "glory.port" ) ) );
         if ( Play.mode.isDev() ) {
             if ( Deposit.count() == 0 ) {
                 Logger.info( "loading dev-data.yml!" );
                 //Fixtures.loadModels( "dev-data.yml" );
             }
         }
+        // Start glory Manager
+        //CounterFactory.getManager( Play.configuration.getProperty( "glory.port" ) );
+          
     }
 }

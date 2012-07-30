@@ -10,6 +10,7 @@ public class DenominationDataRequest extends CommandWithDataResponse {
 
     public class Denomination {
 
+        public int idx;
         public String currencyCode;
         public boolean newVal;
         public boolean oldVal;
@@ -34,6 +35,7 @@ public class DenominationDataRequest extends CommandWithDataResponse {
         for ( int i = 0; i < data.length; i += 10 ) {
             if ( i + 10 <= data.length ) {
                 Denomination d = new Denomination();
+                d.idx = i / 10;
                 byte[] b = { data[i], data[i + 1], data[i + 2] };
                 d.currencyCode = new String( b );
                 d.newVal = ( data[ i + 3] != 0x30 );

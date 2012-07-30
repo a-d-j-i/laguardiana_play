@@ -1,6 +1,7 @@
 package devices;
 
 import devices.glory.Glory;
+import devices.glory.manager.Manager;
 import java.io.IOException;
 import java.util.HashMap;
 import play.Logger;
@@ -15,12 +16,24 @@ import play.Logger;
 public class CounterFactory {
 
     static HashMap<String, Glory> devices = new HashMap();
+    static HashMap<Glory, Manager> managers = new HashMap();
 
     static synchronized public Glory getCounter() {
         return getCounter( null );
     }
 
-    static synchronized public Glory getCounter( String port ) {
+    public static Manager getManager( String port ) {
+        Glory glory = getCounter( port );
+
+        if ( managers.containsKey( glory ) ) {
+            return managers.get( glory );
+        }
+        Manager m = new Manager( glory );
+        managers.put( glory, m );
+        return m;
+    }
+
+    synchronized public static Glory getCounter( String port ) {
         if ( port == null ) {
             port = "0";
         }
@@ -42,6 +55,9 @@ public class CounterFactory {
     }
 
     static synchronized public void closeAll() {
+        for ( Manager m : managers.values() ) {
+            m.close();
+        }
         for ( Glory g : devices.values() ) {
             g.close();
         }

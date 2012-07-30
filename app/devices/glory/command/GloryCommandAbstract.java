@@ -51,7 +51,7 @@ public abstract class GloryCommandAbstract {
         try {
             bo.write( 2 );
 
-            Logger.debug( String.format( "Executing command 0x%x", cmdId ) );
+            Logger.debug( String.format( "Executing command 0x%x %s", cmdId, this.toString() ) );
             if ( cmdData == null ) {
                 bo.write( String.format( "%03d", 1 ).getBytes() );
                 bo.write( cmdId );

@@ -2,13 +2,13 @@ package devices.glory;
 
 import devices.glory.command.CommandWithAckResponse;
 import devices.glory.command.CommandWithCountingDataResponse;
+import devices.glory.command.CommandWithCountingDataResponse.Bill;
 import devices.glory.command.CommandWithDataResponse;
 import devices.glory.command.DenominationDataRequest.Denomination;
 import devices.glory.command.GloryCommandAbstract;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import play.Logger;
 
 /**
  * *
@@ -92,7 +92,7 @@ public class GloryReturnParser implements Serializable {
     ArrayList<String> d2Bits = new ArrayList<String>();
     ArrayList<String> info = new ArrayList<String>();
     String data = null;
-    ArrayList<Integer> bills = null;
+    ArrayList<Bill> bills = null;
     boolean haveData = false;
     ArrayList<Denomination> denominationData = null;
 
@@ -106,7 +106,6 @@ public class GloryReturnParser implements Serializable {
         }
         if ( response instanceof CommandWithCountingDataResponse ) {
             CommandWithCountingDataResponse cmd = ( CommandWithCountingDataResponse ) response;
-            bills = new ArrayList<Integer>();
             bills = cmd.getBills();
         }
         if ( response instanceof CommandWithDataResponse ) {
@@ -216,7 +215,7 @@ public class GloryReturnParser implements Serializable {
         return data;
     }
 
-    public ArrayList< Integer> getBills() {
+    public ArrayList< Bill> getBills() {
         return bills;
     }
 

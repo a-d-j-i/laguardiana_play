@@ -44,7 +44,9 @@ public class Glory {
     }
 
     public synchronized GloryCommandAbstract sendCommand( GloryCommandAbstract cmd, String data, boolean debug ) {
-
+        if ( serialPort == null ) {
+            throw new InvalidParameterException( "Glory Serial port closed" );
+        }
         if ( cmd == null ) {
             throw new InvalidParameterException( "Glory unknown command" );
         }
@@ -122,10 +124,35 @@ public class Glory {
     }
 
     public byte[] getBytes( int quantity ) throws IOException {
+        if ( serialPort == null ) {
+            throw new InvalidParameterException( "Glory Serial port closed" );
+        }
         byte[] b = new byte[ quantity ];
         for ( int i = 0; i < quantity; i++ ) {
             b[ i] = serialPort.read();
         }
         return b;
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final Glory other = ( Glory ) obj;
+        if ( this.serialPort != other.serialPort && ( this.serialPort == null || !this.serialPort.equals( other.serialPort ) ) ) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + ( this.serialPort != null ? this.serialPort.hashCode() : 0 );
+        return hash;
     }
 }

@@ -84,7 +84,7 @@ public class CounterStatus {
             addError( cmd.getError() );
         }
         synchronized ( this ) {
-            gStatus.setStatus( cmd );
+            gStatus.setStatusOk( cmd );
         }
     }
 

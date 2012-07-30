@@ -8,6 +8,7 @@ GET     /                                           Application.index
 GET     /bootstrap                                  Application.bootstrap()
 GET     /print                                      Application.printTemplate()
 GET     /glory                                      GloryController.index
+GET     /gloryManager                               GloryManagerController.index
 
 # Ignore favicon requests
 GET     /favicon.ico                                404

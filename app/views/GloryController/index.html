@@ -58,7 +58,7 @@ ${status?.getD1Mode()}
         #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
         <pre>
 Denomination Data
-#{list items:status?.getDenominationData(), as:'p'}    Denomination : ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if} #{if (p.oldVal)}Old#{/if}
+#{list items:status?.getDenominationData(), as:'p'}    Denomination (${p.idx}): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if} #{if (p.oldVal)}Old#{/if}
 
 #{/list}
         </pre>
@@ -66,7 +66,7 @@ Denomination Data
         #{else}
         <pre>
 Bills Data:
-#{list items:status?.getBills(), as:'p'}    Bill : ${p}
+#{list items:status?.getBills(), as:'p'}    Bill (${p.idx}): ${p.value}
 #{/list}
         #{else}
         No bill information

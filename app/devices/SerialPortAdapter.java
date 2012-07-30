@@ -4,23 +4,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
-
-import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
-import jssc.SerialPortList;
+import jssc.*;
 import play.Logger;
 
 public class SerialPortAdapter implements SerialPortEventListener {
 
-    SerialPort                 serialPort;
-    ArrayBlockingQueue< Byte > fifo = new ArrayBlockingQueue< Byte >( 1024 );
+    SerialPort serialPort;
+    ArrayBlockingQueue< Byte> fifo = new ArrayBlockingQueue< Byte>( 1024 );
 
     public void serialEvent( SerialPortEvent event ) {
         if ( event.isRXCHAR() ) {
             try {
-                for( byte b : serialPort.readBytes() ) {
+                for ( byte b : serialPort.readBytes() ) {
                     fifo.add( b );
                 }
             } catch ( SerialPortException e ) {
@@ -34,7 +29,9 @@ public class SerialPortAdapter implements SerialPortEventListener {
         try {
             String[] ports = SerialPortList.getPortNames();
             Integer p = Integer.parseInt( portName );
-            portName = ports[ p ];
+            if ( p < ports.length ) {
+                portName = ports[ p];
+            }
         } catch ( NumberFormatException e ) {
         }
 
@@ -43,8 +40,7 @@ public class SerialPortAdapter implements SerialPortEventListener {
         try {
             Logger.debug( String.format( "Opening serial port %s", portName ) );
             serialPort.openPort();
-            serialPort.setParams( SerialPort.BAUDRATE_9600, SerialPort.DATABITS_7, SerialPort.STOPBITS_1,
-                            SerialPort.PARITY_EVEN );
+            serialPort.setParams( SerialPort.BAUDRATE_9600, SerialPort.DATABITS_7, SerialPort.STOPBITS_1, SerialPort.PARITY_EVEN );
             serialPort.setFlowControlMode( SerialPort.FLOWCONTROL_NONE );
             serialPort.setEventsMask( SerialPort.MASK_RXCHAR );
             serialPort.addEventListener( this );
@@ -89,6 +85,7 @@ public class SerialPortAdapter implements SerialPortEventListener {
     }
 
     class SerialInputStream extends InputStream {
+
         @Override
         public int read() throws IOException {
             Byte ch = fifo.poll();
@@ -97,5 +94,27 @@ public class SerialPortAdapter implements SerialPortEventListener {
             }
             return ch;
         }
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( obj == null ) {
+            return false;
+        }
+        if ( getClass() != obj.getClass() ) {
+            return false;
+        }
+        final SerialPortAdapter other = ( SerialPortAdapter ) obj;
+        if ( this.serialPort != other.serialPort && ( this.serialPort == null || !this.serialPort.equals( other.serialPort ) ) ) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + ( this.serialPort != null ? this.serialPort.hashCode() : 0 );
+        return hash;
     }
 }

@@ -2,6 +2,7 @@ package devices.glory;
 
 import devices.glory.command.CommandWithAckResponse;
 import devices.glory.command.CommandWithCountingDataResponse;
+import devices.glory.command.CommandWithCountingDataResponse.Bill;
 import devices.glory.command.CommandWithDataResponse;
 import devices.glory.command.GloryCommandAbstract;
 import java.io.Serializable;
@@ -111,12 +112,21 @@ public class GloryStatus implements Serializable {
     int d10;
     int d11;
     int d12;
-    ArrayList<Integer> bills = null;
+    ArrayList<Bill> bills = null;
+    String lastError = null;
 
-    public void setStatus( GloryCommandAbstract response ) {
+    public boolean setStatusOk( GloryCommandAbstract response ) {
+        if ( response == null ) {
+            lastError = "invalid response";
+            return false;
+        }
+        if ( response.getError() != null && !response.getError().isEmpty() ) {
+            lastError = response.getError();
+            return false;
+        }
+        lastError = null;
         if ( response instanceof CommandWithCountingDataResponse ) {
             CommandWithCountingDataResponse cmd = ( CommandWithCountingDataResponse ) response;
-            bills = new ArrayList<Integer>();
             bills = cmd.getBills();
         }
         if ( response instanceof CommandWithDataResponse ) {
@@ -167,6 +177,15 @@ public class GloryStatus implements Serializable {
         }
         if ( response instanceof CommandWithAckResponse ) {
         }
+        return true;
+    }
+
+    public String getLastError() {
+        return lastError;
+    }
+
+    public boolean isError() {
+        return lastError != null;
     }
 
     public boolean isAbnoramalEnd() {
@@ -185,7 +204,7 @@ public class GloryStatus implements Serializable {
         return batchEnd;
     }
 
-    public ArrayList<Integer> getBills() {
+    public ArrayList<Bill> getBills() {
         return bills;
     }
 

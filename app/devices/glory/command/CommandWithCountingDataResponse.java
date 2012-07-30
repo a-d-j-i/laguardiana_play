@@ -6,7 +6,12 @@ import play.Logger;
 
 public class CommandWithCountingDataResponse extends CommandWithDataResponse {
 
-    ArrayList< Integer> bills = new ArrayList< Integer>();
+    public class Bill {
+
+        public int idx;
+        public Integer value;
+    }
+    ArrayList< Bill> bills = new ArrayList< Bill>();
 
     CommandWithCountingDataResponse( byte cmdId, String description ) {
         this( cmdId, description, null, DebugLevel.NONE );
@@ -33,22 +38,27 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
 
         if ( data.length == 32 * 3 ) {
             for ( int i = 0; i < 32; i++ ) {
-                int v = getDigit( data[ 3 * i] ) * 100 + getDigit( data[ 3 * i + 1] ) * 10
+                Bill b = new Bill();
+                b.idx = i;
+                b.value = getDigit( data[ 3 * i] ) * 100 + getDigit( data[ 3 * i + 1] ) * 10
                         + getDigit( data[ 3 * i + 2] );
-                Logger.debug( String.format( "readed bill %d %d", i, v ) );
-                bills.add( v );
+                bills.add( b );
+                Logger.debug( String.format( "readed bill %d %d", b.idx, b.value ) );
                 if ( debug.isGratherThan( DebugLevel.NONE ) ) {
-                    Logger.debug( String.format( "Bill %d: quantity %d", i, v ) );
+                    Logger.debug( String.format( "Bill %d: quantity %d", b.idx, b.value ) );
                 }
             }
         } else if ( data.length == 65 * 4 ) {
             for ( int i = 0; i < 65; i++ ) {
-                int v = getDigit( data[ 4 * i] ) * 1000 + getDigit( data[ 4 * i + 1] ) * 100
+                Bill b = new Bill();
+
+                b.idx = i;
+                b.value = getDigit( data[ 4 * i] ) * 1000 + getDigit( data[ 4 * i + 1] ) * 100
                         + getDigit( data[ 4 * i + 2] ) * 10 + getDigit( data[ 4 * i + 3] );
-                Logger.debug( String.format( "readed bill %d %d", i, v ) );
-                bills.add( v );
+                bills.add( b );
+                Logger.debug( String.format( "readed bill %d %d", b.idx, b.value ) );
                 if ( debug.isGratherThan( DebugLevel.NONE ) ) {
-                    Logger.debug( String.format( "Bill %d: quantity %d", i, v ) );
+                    Logger.debug( String.format( "Bill %d: quantity %d", b.idx, b.value ) );
                 }
             }
         } else {
@@ -57,7 +67,7 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
         return this;
     }
 
-    public ArrayList< Integer> getBills() {
+    public ArrayList< Bill> getBills() {
         return bills;
     }
 }
