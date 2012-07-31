@@ -42,7 +42,8 @@ public class Application extends Controller {
 
     public static void countMoney( String reference1, String reference2 ) {
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
-        LgLov userCode = DepositUserCodeReference.findByTextId( reference1 );
+        Integer ref1 = Integer.parseInt(reference1);
+        LgLov userCode = DepositUserCodeReference.findByNumericId( ref1 );
         if ( userCode == null ) {
             Logger.error( "countMoney: no reference received! for %s", reference1 );
             index();

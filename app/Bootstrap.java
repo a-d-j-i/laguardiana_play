@@ -22,6 +22,7 @@ public class Bootstrap extends Job {
         if ( LgUser.count() == 0 ) {
             Logger.info( "loading user-data.yml as no users were found!" );
             Fixtures.loadModels( "user-data.yml" );
+            Fixtures.loadModels( "dev-data.yml" );
         }
         Logger.error( String.format( "Glory port : %s", Play.configuration.getProperty( "glory.port" ) ) );
         if ( Play.mode.isDev() ) {

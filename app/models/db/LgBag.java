@@ -29,6 +29,10 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     
     public static LgBag GetCurrentBag() {
         LgBag currentBag = LgBag.find("order by creationDate desc").first();
+        if (currentBag == null) {
+            Logger.error("There's no bag where to deposit!!");
+            return null;
+        }
         if ( currentBag.withdrawDate.before( new Date() ) ) {
             Logger.error("XXX Last bag found is withdraw!!!");
             return null;

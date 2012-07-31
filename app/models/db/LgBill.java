@@ -1,5 +1,6 @@
 package models.db;
 
+import models.lov.*;
 
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
@@ -32,7 +33,7 @@ public class LgBill extends GenericModel implements java.io.Serializable {
         this.slotId = slotId;
         this.quantity = quantity;
         this.denomination = denomination;
-        this.unitLov = unitLov;
+        this.unitLov = unitLob;
         this.deposit = deposit;
         batch.addBill( this );
     }
@@ -46,7 +47,8 @@ public class LgBill extends GenericModel implements java.io.Serializable {
         Integer q = quantity;
         Integer d = denomination;
         Integer t = quantity * denomination;
-        return q.toString() + " *  $" + d.toString() + " = " + t.toString() + "(" + LgLov.findByNumericId( unitLov ).toString() + ")";
+        return (q.toString() + " *  $" + d.toString() + " = " + t.toString() 
+                + "(" + MoneyUnit.findByNumericId( unitLov ).toString() + ")");
     }
 
     public int getTotal() {
