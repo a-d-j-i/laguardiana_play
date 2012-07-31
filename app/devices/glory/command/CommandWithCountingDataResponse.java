@@ -6,7 +6,7 @@ import play.Logger;
 
 public class CommandWithCountingDataResponse extends CommandWithDataResponse {
 
-    public class Bill {
+    static public class Bill {
 
         public int idx;
         public Integer value;
@@ -43,7 +43,9 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
                 b.value = getDigit( data[ 3 * i] ) * 100 + getDigit( data[ 3 * i + 1] ) * 10
                         + getDigit( data[ 3 * i + 2] );
                 bills.add( b );
-                Logger.debug( String.format( "readed bill %d %d", b.idx, b.value ) );
+                if ( debug.isGratherThan( DebugLevel.PRINT_INFO ) ) {
+                    Logger.debug( String.format( "readed bill %d %d", b.idx, b.value ) );
+                }
                 if ( debug.isGratherThan( DebugLevel.NONE ) ) {
                     Logger.debug( String.format( "Bill %d: quantity %d", b.idx, b.value ) );
                 }
@@ -56,7 +58,9 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
                 b.value = getDigit( data[ 4 * i] ) * 1000 + getDigit( data[ 4 * i + 1] ) * 100
                         + getDigit( data[ 4 * i + 2] ) * 10 + getDigit( data[ 4 * i + 3] );
                 bills.add( b );
-                Logger.debug( String.format( "readed bill %d %d", b.idx, b.value ) );
+                if ( debug.isGratherThan( DebugLevel.PRINT_INFO ) ) {
+                    Logger.debug( String.format( "readed bill %d %d", b.idx, b.value ) );
+                }
                 if ( debug.isGratherThan( DebugLevel.NONE ) ) {
                     Logger.debug( String.format( "Bill %d: quantity %d", b.idx, b.value ) );
                 }

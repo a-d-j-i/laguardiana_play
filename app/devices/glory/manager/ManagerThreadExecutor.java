@@ -4,7 +4,8 @@
  */
 package devices.glory.manager;
 
-import devices.glory.manager.Manager.ManagerCommand;
+import devices.glory.Glory;
+import devices.glory.manager.command.ManagerCommandAbstract;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -20,8 +21,8 @@ class ManagerThreadExecutor {
 
     final private ManagerThread thread;
 
-    ManagerThreadExecutor( ManagerStatus status ) {
-        thread = new ManagerThread( this, status );
+    ManagerThreadExecutor( ManagerStatus status, Glory device ) {
+        thread = new ManagerThread( this, status, device );
     }
 
     void start() {
@@ -47,15 +48,16 @@ class ManagerThreadExecutor {
         WAITING,
         COMMAND_SENT,
         PROCESSING,
+        CANCEL,
         STOP,
         STOPPED,}
     final private Lock mutex = new ReentrantLock();
     final private Condition canceled = mutex.newCondition();
     final private Condition commandSent = mutex.newCondition();
     private ThState thState = ThState.WAITING;
-    private ManagerCommand currentCommand = ManagerCommand.NONE;
+    private ManagerCommandAbstract currentCommand = null;
 
-    public boolean sendCommand( ManagerCommand cmd ) {
+    public boolean sendCommand( ManagerCommandAbstract cmd ) {
         mutex.lock();
         try {
             if ( thState == ThState.WAITING ) {
@@ -82,13 +84,14 @@ class ManagerThreadExecutor {
                     thState = ThState.WAITING;
                     break;
                 case PROCESSING:
-                    thState = ThState.STOP;
+                    thState = ThState.CANCEL;
+                // dont break
+                case CANCEL:
                     try {
                         canceled.await();
                     } catch ( InterruptedException ex ) {
                         Logger.error( "Interrupt in cancelLastCommand" );
                     }
-                    break;
                 case STOP:
                 case STOPPED:
                     break;
@@ -101,8 +104,8 @@ class ManagerThreadExecutor {
         }
     }
 
-    public ManagerCommand getNextCommand() {
-        ManagerCommand ret = ManagerCommand.NONE;
+    public ManagerCommandAbstract getNextCommand() {
+        ManagerCommandAbstract ret = null;
         mutex.lock();
         Logger.debug( String.format( "getNextCommand Executor state %s", thState.name() ) );
         try {
@@ -118,6 +121,7 @@ class ManagerThreadExecutor {
                     ret = currentCommand;
                     thState = ThState.PROCESSING;
                     break;
+                case CANCEL:
                 case PROCESSING:
                     canceled.signalAll();
                     thState = ThState.WAITING;
@@ -147,6 +151,18 @@ class ManagerThreadExecutor {
         mutex.lock();
         try {
             if ( thState == ThState.STOP || thState == ThState.STOPPED ) {
+                return true;
+            }
+        } finally {
+            mutex.unlock();
+        }
+        return false;
+    }
+
+    public boolean mustCancel() {
+        mutex.lock();
+        try {
+            if ( thState == ThState.CANCEL || thState == ThState.STOP || thState == ThState.STOPPED ) {
                 return true;
             }
         } finally {

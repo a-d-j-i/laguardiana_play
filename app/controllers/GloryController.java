@@ -24,6 +24,8 @@ public class GloryController extends Controller {
                 flash.put( "error", "Error opening port" );
                 redirect( Router.reverse( "GloryController.index" ).url );
             }
+        } else {
+            redirect( Router.reverse( "GloryController.index" ).url );
         }
     }
 

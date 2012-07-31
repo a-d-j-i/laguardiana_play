@@ -53,9 +53,11 @@ public class SerialPortAdapter implements SerialPortEventListener {
     public void close() throws IOException {
         try {
             Logger.debug( String.format( "Closing serial port %s", serialPort.getPortName() ) );
-            serialPort.closePort();
+            if ( serialPort != null ) {
+                serialPort.closePort();
+            }
         } catch ( SerialPortException e ) {
-            throw new IOException( String.format( "Error closing serial port %s", serialPort.getPortName() ), e );
+            throw new IOException( String.format( "Error closing serial port" ), e );
         }
     }
 
