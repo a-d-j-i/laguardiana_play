@@ -1,14 +1,13 @@
 package devices.glory.command;
 
 import java.util.ArrayList;
-import play.Logger;
 
 /*
  * This command is return Denomination Data.
  */
 public class DenominationDataRequest extends CommandWithDataResponse {
 
-    public class Denomination {
+    static public class Denomination {
 
         public int idx;
         public String currencyCode;

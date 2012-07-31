@@ -112,7 +112,7 @@ public class GloryStatus implements Serializable {
     int d10;
     int d11;
     int d12;
-    ArrayList<Bill> bills = null;
+    ArrayList<Bill> bills = new ArrayList<Bill>();
     String lastError = null;
 
     public boolean setStatusOk( GloryCommandAbstract response ) {
