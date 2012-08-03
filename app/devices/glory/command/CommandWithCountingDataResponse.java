@@ -1,17 +1,13 @@
 package devices.glory.command;
 
 import devices.glory.command.GloryCommandAbstract.DebugLevel;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import play.Logger;
 
 public class CommandWithCountingDataResponse extends CommandWithDataResponse {
 
-    static public class Bill {
-
-        public int idx;
-        public Integer value;
-    }
-    ArrayList< Bill> bills = new ArrayList< Bill>();
+    Map<Integer, Integer> bills = new HashMap<Integer, Integer>();
 
     CommandWithCountingDataResponse( byte cmdId, String description ) {
         this( cmdId, description, null, DebugLevel.NONE );
@@ -37,32 +33,30 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
         }
 
         if ( data.length == 32 * 3 ) {
-            for ( int i = 0; i < 32; i++ ) {
-                Bill b = new Bill();
-                b.idx = i;
-                b.value = getDigit( data[ 3 * i] ) * 100 + getDigit( data[ 3 * i + 1] ) * 10
-                        + getDigit( data[ 3 * i + 2] );
-                bills.add( b );
+            for ( int slot = 0; slot < 32; slot++ ) {
+                Integer value = getDigit( data[ 3 * slot] ) * 100
+                        + getDigit( data[ 3 * slot + 1] ) * 10
+                        + getDigit( data[ 3 * slot + 2] );
+                bills.put( slot, value );
                 if ( debug.isGratherThan( DebugLevel.PRINT_INFO ) ) {
-                    Logger.debug( String.format( "readed bill %d %d", b.idx, b.value ) );
+                    Logger.debug( String.format( "readed bill %d %d", slot, value ) );
                 }
                 if ( debug.isGratherThan( DebugLevel.NONE ) ) {
-                    Logger.debug( String.format( "Bill %d: quantity %d", b.idx, b.value ) );
+                    Logger.debug( String.format( "Bill %d: quantity %d", slot, value ) );
                 }
             }
         } else if ( data.length == 65 * 4 ) {
-            for ( int i = 0; i < 65; i++ ) {
-                Bill b = new Bill();
-
-                b.idx = i;
-                b.value = getDigit( data[ 4 * i] ) * 1000 + getDigit( data[ 4 * i + 1] ) * 100
-                        + getDigit( data[ 4 * i + 2] ) * 10 + getDigit( data[ 4 * i + 3] );
-                bills.add( b );
+            for ( int slot = 0; slot < 65; slot++ ) {
+                Integer value = getDigit( data[ 4 * slot] ) * 1000
+                        + getDigit( data[ 4 * slot + 1] ) * 100
+                        + getDigit( data[ 4 * slot + 2] ) * 10
+                        + getDigit( data[ 4 * slot + 3] );
+                bills.put( slot, value );
                 if ( debug.isGratherThan( DebugLevel.PRINT_INFO ) ) {
-                    Logger.debug( String.format( "readed bill %d %d", b.idx, b.value ) );
+                    Logger.debug( String.format( "readed bill %d %d", slot, value ) );
                 }
                 if ( debug.isGratherThan( DebugLevel.NONE ) ) {
-                    Logger.debug( String.format( "Bill %d: quantity %d", b.idx, b.value ) );
+                    Logger.debug( String.format( "Bill %d: quantity %d", slot, value ) );
                 }
             }
         } else {
@@ -71,7 +65,7 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
         return this;
     }
 
-    public ArrayList< Bill> getBills() {
+    public Map<Integer, Integer> getBills() {
         return bills;
     }
 }

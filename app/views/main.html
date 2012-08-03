@@ -45,19 +45,16 @@
             </div>
         </section>
         <section>
-            #{if flash.error}
-            <p class="alert alert-error">
-                <a class="close" data-dismiss="alert" href="#">&times;</a> <strong>ERROR</strong>
-                &{flash.error}
+            <p class="alert fade in alert-error" id="error" #{if !flash.error} style="display:none;"#{/if}>
+                <a class="close" href="#">&times;</a> <strong>ERROR</strong>
+                <span id="error_msg">#{if flash.error}&{flash.error}#{/if}</span>
             </p>
-            #{/if}
-            #{if flash.success}
-            <p class="alert alert-success">
-                <a class="close" data-dismiss="alert" href="#">&times;</a> <strong>EXITO</strong>
+
+            <p class="alert fade in alert-success" id="success" #{if !flash.success} style="display:none;"#{/if}>
+                <a class="close" href="#">&times;</a> <strong>EXITO</strong>
                 Comando ejecutado con exito
-                &{flash.success}
+                <span id="success_msg">#{if flash.success}&{flash.success}#{/if}</span>
             </p>
-            #{/if}
         </section>
         <section>
             <div>

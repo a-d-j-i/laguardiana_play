@@ -1,5 +1,4 @@
 
-import devices.CounterFactory;
 import models.Deposit;
 import models.db.LgLov;
 import models.db.LgUser;
@@ -33,6 +32,6 @@ public class Bootstrap extends Job {
         }
         // Start glory Manager
         //CounterFactory.getManager( Play.configuration.getProperty( "glory.port" ) );
-          
+
     }
 }

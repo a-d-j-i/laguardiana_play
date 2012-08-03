@@ -44,11 +44,12 @@ public class Glory {
     }
 
     public synchronized GloryCommandAbstract sendCommand( GloryCommandAbstract cmd, String data, boolean debug ) {
-        if ( serialPort == null ) {
-            throw new InvalidParameterException( "Glory Serial port closed" );
-        }
         if ( cmd == null ) {
             throw new InvalidParameterException( "Glory unknown command" );
+        }
+        if ( serialPort == null ) {
+            cmd.setError( "Glory Serial port closed" );
+            return cmd;
         }
         byte[] d = cmd.getCmdStr();
         try {

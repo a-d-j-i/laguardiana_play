@@ -4,7 +4,8 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.manager.ManagerThread;
+import devices.glory.manager.Manager;
+import play.Logger;
 
 /**
  *
@@ -12,7 +13,14 @@ import devices.glory.manager.ManagerThread;
  */
 public class Stop extends ManagerCommandAbstract {
 
+    public Stop( Manager.ThreadCommandApi threadCommandApi ) {
+        super( threadCommandApi );
+    }
+
     @Override
-    public void execute( ManagerThread thread ) {
+    public void execute() {
+        Logger.debug( "EXECUTING STOP" );
+        gotoNeutral( true, false );
+        Logger.debug( "EXECUTING STOP DONE" );
     }
 }

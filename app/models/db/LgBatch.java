@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
+import models.lov.MoneyUnit;
 import play.Logger;
 import play.db.jpa.GenericModel;
 
@@ -20,42 +21,44 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     public Date creationDate;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "batch" )
     public Set<LgBill> bills = new HashSet<LgBill>( 0 );
-    
+
     public LgBatch() {
         this.creationDate = new Date();
-    };
+    }
+
+    ;
     
-    public void addBill(LgBill bill) {
+    public void addBill( LgBill bill ) {
         Logger.error( " pre bills: %d", bills.size() );
-        bills.add(bill);
+        bills.add( bill );
         Logger.error( " post bills: %d", bills.size() );
     }
-    
-    public static LgBatch MakeRandom(LgDeposit deposit) {
-        LgLov billLob = LgLov.findByTextId("ARS");
-        if (billLob == null) {
-            Logger.error("no bill code for pesos argentinos!");
+
+    public static LgBatch MakeRandom( LgDeposit deposit ) {
+        MoneyUnit billLov = MoneyUnit.findByTextId( "Pesos Argentinos" );
+        if ( billLov == null ) {
+            Logger.error( "no bill code for pesos argentinos!" );
             return null;
         }
-        int billunitCode = billLob.numericId;
-        LgBatch thisb = new LgBatch();
+        int pesos = billLov.numericId;
+        LgBatch batch = new LgBatch();
+        LgBillType billType = LgBillType.find( 5, pesos );
         //thisb.save();
-        for (int i = 0; i < 4; i = i + 1)
-        {
+        for ( int i = 0; i < 4; i = i + 1 ) {
             int slotid = i;
-            LgBill bill = new LgBill(thisb, slotid, i, 5, billunitCode, deposit);
-            Logger.info(" created: %s", bill.toString());
+            LgBill bill = new LgBill( batch, slotid, i, billType, deposit );
+            Logger.info( " created: %s", bill.toString() );
             //bill.save();
         }
-        Logger.error( " bills: %d", thisb.bills.size() );
-        return thisb;
+        Logger.error( " bills: %d", batch.bills.size() );
+        return batch;
     }
-    
+
     @Override
     public String toString() {
         String result = "[";
-        for (LgBill bill: bills) {
-            result = result + " " +bill.toString();
+        for ( LgBill bill : bills ) {
+            result = result + " " + bill.toString();
         }
         return result + "]";
     }

@@ -1,5 +1,7 @@
 package models.db;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
@@ -18,10 +20,6 @@ public class LgEnvelope extends GenericModel implements java.io.Serializable {
     public int envelopeTypeLov;
     @Column( name = "envelope_number", nullable = false, length = 128 )
     public String envelopeNumber;
-    @Column( name = "content_type_lov" )
-    public Integer contentTypeLov;
-    @Column( name = "amount", nullable = false )
-    public int amount;
-    @Column( name = "unit_lov", nullable = false )
-    public int unitLov;
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "envelope" )
+    public Set<LgEnvelopeContent> envelopeContents = new HashSet<LgEnvelopeContent>( 0 );
 }

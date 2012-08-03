@@ -18,18 +18,60 @@
     
   lov.MoneyUnit(Reference_ARS_BILL):
     numericId:      1
-    textId:         ARS
-    description:    Peso Argentino
+    textId:         Pesos Argentinos
+    description:    $
     endDate:        2999-12-31
 
   lov.MoneyUnit(Reference_EUR_BILL):
     numericId:      2
-    textId:         EUR
-    description:    Euro
+    textId:         Euros
+    description:    EU$
     endDate:        2999-12-31
 
   lov.MoneyUnit(Reference_USD_BILL):
-    numericId:      1
-    textId:         USD
-    description:    Dolar Estadounidense
+    numericId:      3
+    textId:         Dolares
+    description:    U$S
     endDate:        2999-12-31
+
+  db.LgBillType(2pesos):
+    denomination:   2
+    unitLov:        1
+    slot:           26
+
+  db.LgBillType(5pesos):
+    denomination:   5
+    unitLov:        1
+    slot:           27
+
+  db.LgBillType(10pesos):
+    denomination:   10
+    unitLov:        1
+    slot:           0
+
+  db.LgBillType(20pesos):
+    denomination:   20
+    unitLov:        1
+    slot:           0
+
+  db.LgBillType(50pesos):
+    denomination:   50
+    unitLov:        1
+    slot:           0
+
+  db.LgBillType(100pesos):
+    denomination:   100
+    unitLov:        1
+    slot:           0
+
+  db.LgBillType(500pesos):
+    denomination:   500
+    unitLov:        1
+    slot:           0
+
+  db.LgBillType(1dolar):
+    denomination:   1
+    unitLov:        3
+    slot:           0
+
+    

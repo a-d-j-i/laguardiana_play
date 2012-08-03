@@ -10,14 +10,14 @@ import devices.glory.manager.Manager;
  *
  * @author adji
  */
-public class Reset extends ManagerCommandAbstract {
+public class StoringErrorReset extends ManagerCommandAbstract {
 
-    public Reset( Manager.ThreadCommandApi threadCommandApi ) {
+    public StoringErrorReset( Manager.ThreadCommandApi threadCommandApi ) {
         super( threadCommandApi );
     }
 
     @Override
     public void execute() {
-        gotoNeutral( true, false );
+        gotoNeutral( true, true );
     }
 }

@@ -4,16 +4,23 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.manager.ManagerThread;
+import devices.glory.manager.Manager.ThreadCommandApi;
 
 /**
  *
  * @author adji
  */
 public class Init extends ManagerCommandAbstract {
-    
+
+    public Init( ThreadCommandApi threadCommandApi ) {
+        super( threadCommandApi );
+    }
+
     @Override
-    public void execute( ManagerThread thread ) {
-        gotoNeutral( thread );
+    public void execute() {
+        String initError = "Initializing";
+        threadCommandApi.setError( initError );
+        gotoNeutral( false, false );
+        threadCommandApi.compareAndSetError( initError, null );
     }
 }

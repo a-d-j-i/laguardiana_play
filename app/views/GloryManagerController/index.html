@@ -1,17 +1,80 @@
 #{extends 'main.html' /}
 #{set title:'Glory' /}
 <div class="row">
+    <div class="span11 well">
+        <table class="table table-bordered table-striped" >
+            <thead>
+                <tr>
+                    #{list items:billData, as:'b'}
+                    <th>
+                        ${b.billType}
+                    </th>
+                    #{/list}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    #{list items:billData, as:'b'}
+                    <td id="BID_${b.billType.billTypeId}">
+                        ${b.quantity}
+                    </td>
+                    #{/list}
+                </tr>
+            </tbody>
+        </table>
 
+    </div>
+    <div class="span12">
+        #{ifAuthorized resource: 'GloryManagerController.count', operation: 'GET'}
+        <div>
+            #{form @count(), class : 'form-inline well' }
+
+            #{list items:billData, as:'b'}
+            <div class="input-prepend input-append">
+                <span class="add-on">${b.billType}</span><input value="0" class="input-mini" name="billTypeIds.${b.billType.billTypeId}" type="text">
+            </div>
+            #{/list}
+            <button type="submit" class="btn btn-primary btn-large">Count</button>
+        </div>
+        </fieldset>
+        #{/}
+
+    </div>
+    #{/ifAuthorized}
+
+</div>
+
+<div class="row">
     <div class="span3">
-
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryManagerController.billDeposit()}">BillDeposit</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryManagerController.getBillDepositData()}">GetBillDepositData</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryManagerController.cancelDeposit()}">CancelDeposit</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryManagerController.storeDeposit()}">StoreDeposit</a></p>
-
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryManagerController.reset()}">Reset</a></p>
-
-
+        #{menuButton resource: 'GloryManagerController.cancelDeposit', operation: 'GET', title: 'CancelDeposit' /}
+        #{menuButton resource: 'GloryManagerController.storeDeposit', operation: 'GET', title: 'StoreDeposit' /}
+        #{menuButton resource: 'GloryManagerController.reset', operation: 'GET', title: 'Reset' /}
+        #{menuButton resource: 'GloryManagerController.storingErrorReset', operation: 'GET', title: 'StoringErrorReset' /}
     </div>
 </div>
 
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+
+    // Reload the whole messages panel
+    function refresh() {
+        $.getJSON( '@{GloryManagerController.index}', function( data ) {
+            var error = data[0];
+            if ( error == null || error.toString() == 'null' ) {
+                $('#error').hide();
+            } else {
+                $('#error').show();                
+                $('#error_msg').html( error )
+            }
+            var billData = data[ 1 ]
+            for( var i = 0 ; i < billData.length; i ++ ) {
+                var nid = '#BID_' + billData[ i ].billType.billTypeId.toString();
+                $( nid ).html( billData[ i ].quantity);
+            }
+        })
+    }
+    // Call refresh every 5 seconds
+    setInterval(refresh, 2000)
+    refresh()
+</script>
+#{/set}

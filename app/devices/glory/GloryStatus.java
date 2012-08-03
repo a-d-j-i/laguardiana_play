@@ -2,12 +2,11 @@ package devices.glory;
 
 import devices.glory.command.CommandWithAckResponse;
 import devices.glory.command.CommandWithCountingDataResponse;
-import devices.glory.command.CommandWithCountingDataResponse.Bill;
 import devices.glory.command.CommandWithDataResponse;
 import devices.glory.command.GloryCommandAbstract;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * *
@@ -112,7 +111,7 @@ public class GloryStatus implements Serializable {
     int d10;
     int d11;
     int d12;
-    ArrayList<Bill> bills = new ArrayList<Bill>();
+    Map<Integer, Integer> bills = new HashMap<Integer, Integer>();
     String lastError = null;
 
     public boolean setStatusOk( GloryCommandAbstract response ) {
@@ -204,7 +203,7 @@ public class GloryStatus implements Serializable {
         return batchEnd;
     }
 
-    public ArrayList<Bill> getBills() {
+    public Map<Integer, Integer> getBills() {
         return bills;
     }
 

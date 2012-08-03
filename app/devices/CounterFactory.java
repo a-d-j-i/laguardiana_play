@@ -1,5 +1,6 @@
 package devices;
 
+import devices.SerialPortAdapter;
 import devices.glory.Glory;
 import devices.glory.manager.Manager;
 import java.io.IOException;
@@ -8,33 +9,33 @@ import play.Logger;
 import play.PlayPlugin;
 
 /**
- * *
+ * Glory and Glory Manager factory. Plugin to close all ports on app shutdown.
  *
- * @author adji Some day it could be a real factory with real generic counters,
- * etc. Now is just a static singleton to maintain the reference to the glory
- * instance.
+ * @author adji
  */
 public class CounterFactory extends PlayPlugin {
 
     static HashMap<String, Glory> devices = new HashMap();
-    static HashMap<Glory, Manager> managers = new HashMap();
+    static HashMap<Glory, Manager.CounterFactoryApi> managers = new HashMap();
 
     static synchronized public Glory getCounter() {
         return getCounter( null );
     }
 
-    public static Manager getManager( String port ) {
+    public static Manager.ControllerApi getManager( String port ) {
         Glory glory = getCounter( port );
 
         if ( glory == null ) {
             return null;
         }
         if ( managers.containsKey( glory ) ) {
-            return managers.get( glory );
+            return managers.get( glory ).getControllerApi();
         }
         Manager m = new Manager( glory );
-        managers.put( glory, m );
-        return m;
+        Manager.CounterFactoryApi mcf = m.getCounterFactoryApi();
+        mcf.startThread();
+        managers.put( glory, mcf );
+        return mcf.getControllerApi();
     }
 
     synchronized public static Glory getCounter( String port ) {
@@ -59,17 +60,19 @@ public class CounterFactory extends PlayPlugin {
     }
 
     static synchronized public void closeAll() {
-        for ( Manager m : managers.values() ) {
+        for ( Manager.CounterFactoryApi m : managers.values() ) {
+            Logger.debug( "Closing Manager" );
             m.close();
         }
         for ( Glory g : devices.values() ) {
+            Logger.debug( "Closing Device" );
             g.close();
         }
     }
 
     @Override
     public void onApplicationStop() {
-        Logger.error( "Close all ports" );
+        Logger.debug( "Close all ports" );
         closeAll();
     }
 }

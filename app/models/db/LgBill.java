@@ -23,18 +23,16 @@ public class LgBill extends GenericModel implements java.io.Serializable {
     public int slotId;
     @Column( name = "quantity", nullable = false )
     public int quantity;
-    @Column( name = "denomination", nullable = false )
-    public int denomination;
-    @Column( name = "unit_lov", nullable = false )
-    public int unitLov;
+    @ManyToOne( fetch = FetchType.LAZY )
+    @JoinColumn( name = "bill_type_id", nullable = false )
+    public LgBillType billType;
 
-    public LgBill(LgBatch batch, int slotId, int quantity, int denomination, int unitLob, LgDeposit deposit) {
+    public LgBill( LgBatch batch, int slotId, int quantity, LgBillType billType, LgDeposit deposit ) {
         this.batch = batch;
         this.slotId = slotId;
         this.quantity = quantity;
-        this.denomination = denomination;
-        this.unitLov = unitLob;
         this.deposit = deposit;
+        this.billType = billType;
         batch.addBill( this );
     }
 
@@ -45,14 +43,14 @@ public class LgBill extends GenericModel implements java.io.Serializable {
     @Override
     public String toString() {
         Integer q = quantity;
-        Integer d = denomination;
-        Integer t = quantity * denomination;
-        return (q.toString() + " *  $" + d.toString() + " = " + t.toString() 
-                + "(" + MoneyUnit.findByNumericId( unitLov ).toString() + ")");
+        Integer d = billType.denomination;
+        Integer t = quantity * billType.denomination;
+        return ( q.toString() + " *  $" + d.toString() + " = " + t.toString()
+                + "(" + MoneyUnit.findByNumericId( billType.unitLov ).toString() + ")" );
     }
 
     public int getTotal() {
-        return quantity * denomination;
+        return quantity * billType.denomination;
     }
 
     @Override
@@ -68,8 +66,8 @@ public class LgBill extends GenericModel implements java.io.Serializable {
         boolean equal;
 
         equal = this.quantity == other.quantity;
-        equal = equal && ( this.denomination == other.denomination );
-        equal = equal && ( this.unitLov == other.unitLov );
+        equal = equal && ( this.billType.denomination == other.billType.denomination );
+        equal = equal && ( this.billType.unitLov == other.billType.unitLov );
         equal = equal && ( this.slotId == other.slotId );
         equal = equal && ( this.deposit == other.deposit );
         equal = equal && ( this.batch == other.batch );
@@ -82,7 +80,7 @@ public class LgBill extends GenericModel implements java.io.Serializable {
         hash = hash * batch.hashCode();
         hash = hash * slotId;
         hash = hash * quantity;
-        hash = hash * denomination;
+        hash = hash * billType.denomination;
         return hash;
     }
 }
