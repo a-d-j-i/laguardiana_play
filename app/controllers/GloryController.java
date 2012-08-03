@@ -137,7 +137,7 @@ public class GloryController extends Controller {
         for ( int i = 0; i < bills.length; i++ ) {
             bills[ i] = 0;
         }
-        //bills[ 27] = 1;
+        bills[ 27] = 1;
         bills[ 26] = 2;
 
         CommandWithAckResponse c = new devices.glory.command.BatchDataTransmition( bills );

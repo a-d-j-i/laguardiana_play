@@ -2,10 +2,7 @@ package devices.glory.manager;
 
 import devices.glory.Glory;
 import devices.glory.command.GloryCommandAbstract;
-import devices.glory.manager.command.Count;
-import devices.glory.manager.command.ManagerCommandAbstract;
-import devices.glory.manager.command.Reset;
-import devices.glory.manager.command.StoringErrorReset;
+import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import play.Logger;
@@ -21,6 +18,7 @@ public class Manager {
     final private ManagerThreadState managerThreadState;
     // TODO: Better error reporting, as a class with arguments.
     final private AtomicReference<String> error = new AtomicReference<String>();
+    final private AtomicReference<String> success = new AtomicReference<String>();
 
     public Manager( Glory device ) {
         this.device = device;
@@ -66,6 +64,10 @@ public class Manager {
         public void compareAndSetError( String expect, String update ) {
             error.compareAndSet( expect, update );
         }
+
+        public void setSuccess( String successMsg ) {
+            success.set( successMsg );
+        }
     }
 
     /*
@@ -84,19 +86,15 @@ public class Manager {
             managerControllerApi = managerThreadState.getControllerApi();
         }
 
-        public boolean count( int[] bills ) {
+        public boolean count( Map<Integer, Integer> desiredQuantity ) {
             if ( managerControllerApi.getCurrentCommand() != null ) {
                 // still executing
                 return false;
             }
-            if ( bills.length != 32 ) {
-                threadCommandApi.setError( "bills length must be 32" );
-                return false;
-            }
-            return managerControllerApi.sendCommand( new Count( threadCommandApi, bills ) );
+            return managerControllerApi.sendCommand( new Count( threadCommandApi, desiredQuantity ) );
         }
 
-        public Map<Integer, Integer> getBillData() {
+        public Map<Integer, Integer> getCurrentQuantity() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if ( cmd == null ) {
                 return null;
@@ -104,13 +102,24 @@ public class Manager {
             if ( !( cmd instanceof Count ) ) {
                 return null;
             }
-            return ( ( Count ) cmd ).getBillData();
+            return ( ( Count ) cmd ).getCurrentQuantity();
+        }
+
+        public Map<Integer, Integer> getDesiredQuantity() {
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if ( cmd == null ) {
+                return null;
+            }
+            if ( !( cmd instanceof Count ) ) {
+                return null;
+            }
+            return ( ( Count ) cmd ).getDesiredQuantity();
         }
 
         public boolean cancelDeposit() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if ( cmd == null ) {
-                return true;
+                return managerControllerApi.sendCommand( new CancelCount( threadCommandApi ) );
             }
             if ( !( cmd instanceof Count ) ) {
                 return false;
@@ -152,6 +161,10 @@ public class Manager {
 
         public String getError() {
             return error.get();
+        }
+
+        public String getSuccess() {
+            return success.get();
         }
     }
     /*

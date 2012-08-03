@@ -49,26 +49,23 @@ abstract public class ManagerCommandAbstract implements Runnable {
     public ManagerCommandAbstract( ThreadCommandApi threadCommandApi ) {
         this.threadCommandApi = threadCommandApi;
     }
-
-    enum CommandState {
-
-        INIT,
-        RUN,
-        DONE;
-    }
-    private AtomicReference<CommandState> commandState = new AtomicReference<CommandState>();
+    private AtomicBoolean isDone = new AtomicBoolean( false );
     private AtomicBoolean cancel = new AtomicBoolean( false );
 
     abstract public void execute();
 
     public void run() {
-        commandState.set( CommandState.RUN );
+        isDone.set( false );
+        threadCommandApi.setSuccess( null );
+        threadCommandApi.setError( null );
         execute();
-        commandState.set( CommandState.DONE );
+        threadCommandApi.setSuccess( "Done" );
+        threadCommandApi.setError( null );
+        isDone.set( true );
     }
 
     public boolean isDone() {
-        return commandState.get() == CommandState.DONE;
+        return isDone.get();
     }
 
     public void cancel() {
@@ -161,7 +158,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         break;
                     case counting_start_request:
                         threadCommandApi.setError( "Remove bills from hoper" );
-                        return;
+                        break;
                     default:
                         sendGloryCommand( new devices.glory.command.RemoteCancel() );
                         break;
@@ -316,6 +313,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     void WaitForEmptyEscrow() {
         int i = 0;
+        threadCommandApi.setSuccess( "Remove the bills from the escrow" );
         for ( i = 0; i < 0xffff; i++ ) {
             Logger.debug( "WaitForEmptyEscrow" );
             if ( !sense() ) {
@@ -325,8 +323,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case being_recover_from_storing_error:
                 case escrow_close_request:
                     if ( !sendGloryCommand( new devices.glory.command.CloseEscrow() ) ) {
+                        threadCommandApi.setSuccess( null );
                         return;
                     }
+                    threadCommandApi.setSuccess( null );
                     break;
                 case being_restoration:
                 case escrow_open:
@@ -337,17 +337,21 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     return;
                 case abnormal_device:
                     threadCommandApi.setError( String.format( "Abnormal device, todo: get the flags" ) );
+                    threadCommandApi.setSuccess( null );
                     return;
                 case storing_error:
                     threadCommandApi.setError( String.format( "Storing error, todo: get the flags" ) );
+                    threadCommandApi.setSuccess( null );
                     return;
                 default:
                     threadCommandApi.setError( String.format( "WaitForEmptyEscrow invalid sr1 mode %s", gloryStatus.getSr1Mode().name() ) );
+                    threadCommandApi.setSuccess( null );
                     break;
             }
             sleep();
         }
         threadCommandApi.setError( "WaitForEmptyEscrow waiting too much" );
+        threadCommandApi.setSuccess( null );
     }
 
     void sleep() {

@@ -15,54 +15,51 @@ import play.Logger;
  * @author adji
  */
 public class Count extends ManagerCommandAbstract {
-
-    public Count( ThreadCommandApi threadCommandApi, int[] bills ) {
+    
+    private CountData countData;
+    
+    public Count( ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity ) {
         super( threadCommandApi );
-        this.batchBills = bills;
+        countData = new CountData( desiredQuantity );
+        
     }
-
+    
     static public class CountData extends CommandData {
-
-        private Map< Integer, Integer> billData = new HashMap<Integer, Integer>();
-        private boolean depositOk = false;
+        
+        public CountData( Map<Integer, Integer> desiredQuantity ) {
+            boolean isb = false;
+            for ( Integer k : desiredQuantity.keySet() ) {
+                Integer v = desiredQuantity.get( k );
+                this.desiredQuantity.put( k, v );
+                if ( v != 0 ) {
+                    isb = true;
+                }
+            }
+            this.isBatch = isb;
+        }
+        private Map< Integer, Integer> currentQuantity = new HashMap<Integer, Integer>();
         private boolean storeDeposit = false;
-
-        private Map< Integer, Integer> getBillData() {
+        private final Map<Integer, Integer> desiredQuantity = new HashMap<Integer, Integer>();
+        private final boolean isBatch;
+        
+        private Map< Integer, Integer> getCurrentQuantity() {
             rlock();
             try {
-                return billData;
+                return currentQuantity;
             } finally {
                 runlock();
             }
         }
-
-        private void setBillData( Map<Integer, Integer> billData ) {
+        
+        private void setCurrentQuantity( Map<Integer, Integer> billData ) {
             wlock();
             try {
-                this.billData = billData;
+                this.currentQuantity = billData;
             } finally {
                 wunlock();
             }
         }
-
-        private boolean isDepositOk() {
-            rlock();
-            try {
-                return depositOk;
-            } finally {
-                runlock();
-            }
-        }
-
-        private void setDepositOk( boolean depositOk ) {
-            wlock();
-            try {
-                this.depositOk = depositOk;
-            } finally {
-                wunlock();
-            }
-        }
-
+        
         private boolean needToStoreDeposit() {
             rlock();
             try {
@@ -71,7 +68,7 @@ public class Count extends ManagerCommandAbstract {
                 runlock();
             }
         }
-
+        
         private void storeDeposit( boolean storeDeposit ) {
             wlock();
             try {
@@ -81,11 +78,10 @@ public class Count extends ManagerCommandAbstract {
             }
         }
     }
-    private int[] batchBills = new int[ 32 ];
-    private CountData countData = new CountData();
-
+    
     @Override
     public void execute() {
+        boolean batchEnd = false;
         gotoNeutral( true, false );
         if ( !sendGloryCommand( new devices.glory.command.SetDepositMode() ) ) {
             return;
@@ -97,6 +93,7 @@ public class Count extends ManagerCommandAbstract {
             threadCommandApi.setError( String.format( "cant set deposit mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name() ) );
             return;
         }
+        threadCommandApi.setSuccess( "Put the bills on the hoper" );
         while ( !mustCancel() ) {
             Logger.debug( "Counting" );
             if ( !sense() ) {
@@ -108,8 +105,14 @@ public class Count extends ManagerCommandAbstract {
                         sendGloryCommand( new devices.glory.command.StoringStart( 0 ) );
                         break;
                     } else {
+                        if ( countData.isBatch && batchEnd ) {
+                            sleep();
+                            break;
+                        }
                         if ( gloryStatus.isHopperBillPresent() ) {
-                            resendBatch();
+                            if ( batchCountStart() ) { // batch end
+                                batchEnd = true;
+                            }
                         }
                     }
                 // dont break;
@@ -119,15 +122,21 @@ public class Count extends ManagerCommandAbstract {
                         return;
                     }
                     Map<Integer, Integer> bills = gloryStatus.getBills();
-                    countData.setBillData( bills );
+                    countData.setCurrentQuantity( bills );
                     sleep();
                     break;
                 case being_store:
                     sleep();
                     break;
-
+                
                 case counting_start_request:
-                    resendBatch();
+                    if ( countData.isBatch && batchEnd ) {
+                        threadCommandApi.setSuccess( "Counting Done" );
+                        return;
+                    }
+                    if ( batchCountStart() ) { // batch end
+                        batchEnd = true;
+                    }
                     break;
                 case abnormal_device:
                     threadCommandApi.setError( String.format( "Abnormal device, todo: get the flags" ) );
@@ -142,29 +151,53 @@ public class Count extends ManagerCommandAbstract {
         }
         gotoNeutral( true, false );
     }
-
+    
     public void storeDeposit( int sequenceNumber ) {
-        countData.setDepositOk( false );
         countData.storeDeposit( true );
     }
-
-    public Map<Integer, Integer> getBillData() {
-        return countData.getBillData();
+    
+    public Map<Integer, Integer> getCurrentQuantity() {
+        return countData.getCurrentQuantity();
     }
-
-    void resendBatch() {
-        Map<Integer, Integer> bd = countData.getBillData();
-        for ( Integer slot : bd.keySet() ) {
-            Integer value = bd.get( slot );
-            if ( slot >= batchBills.length ) {
-                threadCommandApi.setError( String.format( "Invalid bill index %d", slot ) );
-            } else {
-                if ( value > batchBills[ slot] ) {
-                    threadCommandApi.setError( String.format( "Invalid bill value %d %d", slot, value ) );
+    
+    public Map<Integer, Integer> getDesiredQuantity() {
+        return countData.desiredQuantity;
+    }
+    
+    boolean batchCountStart() {
+        boolean batchEnd = true;
+        int[] bills = new int[ 32 ];
+        
+        if ( countData.isBatch ) {
+            Logger.debug( "ISBATCH" );
+            if ( !sendGCommand( new devices.glory.command.CountingDataRequest() ) ) {
+                return false;
+            }
+            Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
+            for ( Integer slot : currentQuantity.keySet() ) {
+                int desired = 0;
+                if ( countData.desiredQuantity.get( slot ) != null ) {
+                    desired = countData.desiredQuantity.get( slot ).intValue();
                 }
-                batchBills[ slot] -= value;
+                if ( currentQuantity == null || slot >= 32 ) {
+                    threadCommandApi.setError( String.format( "Invalid bill index %d", slot ) );
+                } else {
+                    int value = currentQuantity.get( slot );
+                    if ( value > desired ) {
+                        threadCommandApi.setError( String.format( "Invalid bill value %d %d %d", slot, value, desired ) );
+                        return true;
+                    }
+                    bills[ slot] = desired - value;
+                    Logger.debug( "slot %d batch billls : %d desired %d value %d", slot, bills[ slot], desired, value );
+                }
+                if ( bills[ slot] != 0 ) {
+                    batchEnd = false;
+                }
             }
         }
-        sendGloryCommand( new devices.glory.command.BatchDataTransmition( batchBills ) );
+        if ( !countData.isBatch || !batchEnd ) {
+            sendGloryCommand( new devices.glory.command.BatchDataTransmition( bills ) );
+        }
+        return batchEnd;
     }
 }

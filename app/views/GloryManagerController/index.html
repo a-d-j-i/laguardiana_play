@@ -31,7 +31,7 @@
 
             #{list items:billData, as:'b'}
             <div class="input-prepend input-append">
-                <span class="add-on">${b.billType}</span><input value="0" class="input-mini" name="billTypeIds.${b.billType.billTypeId}" type="text">
+                <span class="add-on">${b.billType}</span><input id="DID_${b.billType.billTypeId}" value="${b.desiredQuantity}" class="input-mini" name="billTypeIds.${b.billType.billTypeId}" type="text">
             </div>
             #{/list}
             <button type="submit" class="btn btn-primary btn-large">Count</button>
@@ -55,10 +55,16 @@
 
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
-
+    var waiting = false;
+    
     // Reload the whole messages panel
     function refresh() {
+        if ( waiting ) {
+            return;
+        }
+        waiting = true;
         $.getJSON( '@{GloryManagerController.index}', function( data ) {
+            waiting = false;
             var error = data[0];
             if ( error == null || error.toString() == 'null' ) {
                 $('#error').hide();
@@ -66,15 +72,26 @@
                 $('#error').show();                
                 $('#error_msg').html( error )
             }
-            var billData = data[ 1 ]
+            var success = data[1];
+            if ( success == null || success.toString() == 'null' ) {
+                $('#success').hide();
+            } else {
+                $('#success').show();                
+                $('#success_msg').html( success )
+            }
+            var billData = data[ 2 ]
             for( var i = 0 ; i < billData.length; i ++ ) {
                 var nid = '#BID_' + billData[ i ].billType.billTypeId.toString();
                 $( nid ).html( billData[ i ].quantity);
             }
+            for( var i = 0 ; i < billData.length; i ++ ) {
+                var nid = '#DID_' + billData[ i ].billType.billTypeId.toString();
+                $( nid ).html( billData[ i ].desiredQuantity);
+            }
         })
     }
     // Call refresh every 5 seconds
-    setInterval(refresh, 2000)
+    setInterval(refresh, 500)
     refresh()
 </script>
 #{/set}
