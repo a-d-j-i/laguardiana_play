@@ -10,74 +10,74 @@ import play.Logger;
 public class SerialPortAdapter implements SerialPortEventListener {
 
     SerialPort serialPort;
-    ArrayBlockingQueue< Byte> fifo = new ArrayBlockingQueue< Byte>( 1024 );
+    ArrayBlockingQueue< Byte> fifo = new ArrayBlockingQueue< Byte>(1024);
 
-    public void serialEvent( SerialPortEvent event ) {
-        if ( event.isRXCHAR() ) {
+    public void serialEvent(SerialPortEvent event) {
+        if (event.isRXCHAR()) {
             try {
-                for ( byte b : serialPort.readBytes() ) {
-                    fifo.add( b );
+                for (byte b : serialPort.readBytes()) {
+                    fifo.add(b);
                 }
-            } catch ( SerialPortException e ) {
-                Logger.error( "Glory error reading serial port" );
+            } catch (SerialPortException e) {
+                Logger.error("Glory error reading serial port");
             }
         }
     }
 
-    public SerialPortAdapter( String portName ) throws IOException {
+    public SerialPortAdapter(String portName) throws IOException {
 
         try {
             String[] ports = SerialPortList.getPortNames();
-            Integer p = Integer.parseInt( portName );
-            if ( p < ports.length ) {
+            Integer p = Integer.parseInt(portName);
+            if (p < ports.length) {
                 portName = ports[ p];
             }
-        } catch ( NumberFormatException e ) {
+        } catch (NumberFormatException e) {
         }
 
-        Logger.debug( String.format( "Configuring serial port %s", portName ) );
-        serialPort = new SerialPort( portName );
+        Logger.debug(String.format("Configuring serial port %s", portName));
+        serialPort = new SerialPort(portName);
         try {
-            Logger.debug( String.format( "Opening serial port %s", portName ) );
+            Logger.debug(String.format("Opening serial port %s", portName));
             serialPort.openPort();
-            serialPort.setParams( SerialPort.BAUDRATE_9600, SerialPort.DATABITS_7, SerialPort.STOPBITS_1, SerialPort.PARITY_EVEN );
-            serialPort.setFlowControlMode( SerialPort.FLOWCONTROL_NONE );
-            serialPort.setEventsMask( SerialPort.MASK_RXCHAR );
-            serialPort.addEventListener( this );
-        } catch ( SerialPortException e ) {
-            Logger.error( "SerialPortAdapter : " + e.getMessage() );
-            throw new IOException( String.format( "Error initializing serial port %s", portName ), e );
+            serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_7, SerialPort.STOPBITS_1, SerialPort.PARITY_EVEN);
+            serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
+            serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
+            serialPort.addEventListener(this);
+        } catch (SerialPortException e) {
+            Logger.error("SerialPortAdapter : " + e.getMessage());
+            throw new IOException(String.format("Error initializing serial port %s", portName), e);
         }
     }
 
     public void close() throws IOException {
         try {
-            Logger.debug( String.format( "Closing serial port %s", serialPort.getPortName() ) );
-            if ( serialPort != null ) {
+            Logger.debug(String.format("Closing serial port %s", serialPort.getPortName()));
+            if (serialPort != null) {
                 serialPort.closePort();
             }
-        } catch ( SerialPortException e ) {
-            throw new IOException( String.format( "Error closing serial port" ), e );
+        } catch (SerialPortException e) {
+            throw new IOException(String.format("Error closing serial port"), e);
         }
     }
 
-    public void write( byte[] buffer ) throws IOException {
+    public void write(byte[] buffer) throws IOException {
         try {
-            serialPort.writeBytes( buffer );
-        } catch ( SerialPortException e ) {
-            throw new IOException( String.format( "Error wrting to serial port %s", serialPort.getPortName() ), e );
+            serialPort.writeBytes(buffer);
+        } catch (SerialPortException e) {
+            throw new IOException(String.format("Error wrting to serial port %s", serialPort.getPortName()), e);
         }
     }
 
     public byte read() throws IOException {
         Byte ch;
         try {
-            ch = fifo.poll( 2, TimeUnit.SECONDS );
-        } catch ( InterruptedException e ) {
-            throw new IOException( "Interrupt reading from port", e );
+            ch = fifo.poll(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new IOException("Interrupt reading from port", e);
         }
-        if ( ch == null ) {
-            throw new IOException( String.format( "Error reading from port %s", serialPort.getPortName() ) );
+        if (ch == null) {
+            throw new IOException(String.format("Error reading from port %s", serialPort.getPortName()));
         }
         return ch;
     }
@@ -91,23 +91,23 @@ public class SerialPortAdapter implements SerialPortEventListener {
         @Override
         public int read() throws IOException {
             Byte ch = fifo.poll();
-            if ( ch == null ) {
-                throw new IOException( serialPort.getPortName() + " read  fifo empty" );
+            if (ch == null) {
+                throw new IOException(serialPort.getPortName() + " read  fifo empty");
             }
             return ch;
         }
     }
 
     @Override
-    public boolean equals( Object obj ) {
-        if ( obj == null ) {
+    public boolean equals(Object obj) {
+        if (obj == null) {
             return false;
         }
-        if ( getClass() != obj.getClass() ) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
-        final SerialPortAdapter other = ( SerialPortAdapter ) obj;
-        if ( this.serialPort != other.serialPort && ( this.serialPort == null || !this.serialPort.equals( other.serialPort ) ) ) {
+        final SerialPortAdapter other = (SerialPortAdapter) obj;
+        if (this.serialPort != other.serialPort && (this.serialPort == null || !this.serialPort.equals(other.serialPort))) {
             return false;
         }
         return true;
@@ -116,7 +116,7 @@ public class SerialPortAdapter implements SerialPortEventListener {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 89 * hash + ( this.serialPort != null ? this.serialPort.hashCode() : 0 );
+        hash = 89 * hash + (this.serialPort != null ? this.serialPort.hashCode() : 0);
         return hash;
     }
 }

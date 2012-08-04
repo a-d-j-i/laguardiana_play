@@ -20,7 +20,7 @@ public class Stop extends ManagerCommandAbstract {
     @Override
     public void execute() {
         Logger.debug( "EXECUTING STOP" );
-        gotoNeutral( true, false );
+        gotoNeutral( false, false );
         Logger.debug( "EXECUTING STOP DONE" );
     }
 }
