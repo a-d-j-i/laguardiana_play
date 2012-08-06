@@ -48,7 +48,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
             Logger.info( " created: %s", bill.toString() );
             //bill.save();
         }
-        Logger.error( " bills: %d", batch.bills.size() );
+        Logger.info( " bills: %d", batch.bills.size() );
         return batch;
     }
 
