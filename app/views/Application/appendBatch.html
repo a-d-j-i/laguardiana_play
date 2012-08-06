@@ -22,7 +22,7 @@ ${batch.toString()}
             #{list items:batch.bills, as:'bill'}
             <li> 
                 <li class="numvalue">${bill.quantity}</li>
-                <li class="numvalue">${bill.denomination}</li>
+                <li class="numvalue">${bill.billType.denomination}</li>
                 <li class="numvalue">${bill.getTotal()}</li>
             </li>
             #{/list}

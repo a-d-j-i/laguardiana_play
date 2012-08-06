@@ -50,47 +50,64 @@ public class Application extends Controller {
             return;
         }
 
-        //Logger.error("code received: %s", userCode.description);
         Deposit deposit = new Deposit( user, reference2, userCode );
         deposit.save();
 
         LgBatch batch = LgBatch.MakeRandom( deposit );
-        //batch.save();
         String randomID = Codec.UUID();
         //pass gathered data and let user chose what to do..
+        Logger.info("AAAAAAAAAAAAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //prepareAndShowBatch(randomID, deposit, batch);
         Cache.set( randomID + "-deposit", deposit, "60mn" );
         Cache.set( randomID + "-batch", batch, "60mn" );
-        render( randomID, deposit, batch );
+        Logger.info("after prepare..");
+        //render( randomID, deposit, batch );
+        appendBatch(randomID);
+        Logger.info("Executing after render()!!!!");
+        
     }
 
     public static void appendBatch( String randomID ) {
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
-
         //Logger.error("code received: %s", userCode.description);
         Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
-
-        LgBatch batch = LgBatch.MakeRandom( deposit );
-        //batch.save();
-        //String randomID = Codec.UUID();
-        //pass gathered data and let user chose what to do..
-        Cache.set( randomID + "-deposit", deposit, "60mn" );
-        Cache.set( randomID + "-batch", batch, "60mn" );
+        LgBatch batch = Cache.get(randomID+"-batch", LgBatch.class); //LgBatch.MakeRandom( deposit );
         render( randomID, deposit, batch );
+        return;
+    }
+    
+    public static void appendBatch_orig( String randomID ) {
+        LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
+        //Logger.error("code received: %s", userCode.description);
+        Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
+        LgBatch batch = LgBatch.MakeRandom( deposit );
+        //pass gathered data and let user chose what to do..
+        Logger.info("Executing after render()!!!!");
+        prepareAndShowBatch(randomID, deposit, batch);
+        render( randomID, deposit, batch );
+        //Cache.set( randomID + "-deposit", deposit, "60mn" );
+        //Cache.set( randomID + "-batch", batch, "60mn" );
+    }
+    
+    public static void prepareAndShowBatch(String randomID, Deposit deposit, LgBatch batch)
+    {
+        Logger.info("1");
+        //Cache.set( randomID + "-deposit", deposit, "60mn" );
+        Logger.info("2");
+        //Cache.set( randomID + "-batch", batch, "60mn" );
+        Logger.info("3");
+        //render( randomID, deposit, batch );
     }
 
     public static void acceptBatch( String randomID ) {
         //user accepted to deposit it!
         Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
-        //deposit.save();
         LgBatch batch = Cache.get( randomID + "-batch", LgBatch.class );
         batch.save();
         flash.success( "Deposit is done!" );
         //tell user deposit was done rightly
-        //deposit.addBatch( batch );
         render( randomID );
         deposit.addBatch( batch );
-        //batch.save();
-        //deposit.save();
     }
 
     // rest 

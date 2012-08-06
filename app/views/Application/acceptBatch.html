@@ -6,13 +6,13 @@
 #{set title:'Shall we continue the deposit?' /}
 
 <div>
-<h1>Counting..</h1>
+<h1>Batch accepted..</h1>
 
 <span class="post-reference1">${randomID}</span>
 
 #{form @Application.appendBatch(randomID)}
     <p>
-        <input type="submit" value="Continue this deposit" />
+        <input type="submit" value="Continue this deposit with more money.." />
     </p>
 #{/form}
 
