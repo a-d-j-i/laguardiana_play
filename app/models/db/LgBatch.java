@@ -24,9 +24,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
 
     public LgBatch() {
         this.creationDate = new Date();
-    }
-
-    ;
+    };
     
     public void addBill( LgBill bill ) {
         Logger.error( " pre bills: %d", bills.size() );
