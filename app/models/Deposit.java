@@ -35,6 +35,8 @@ public class Deposit extends LgDeposit {
     @Override
     public String toString() {
         LgLov uc = this.findUserCodeLov();
-        return "Deposit by: " + user.toString() + " in: " + bag.toString() + " codes:[" + userCode + "/" + uc.toString() + "]";
+        Integer billcount = this.bills.size();
+        return "Deposit by: " + user.toString() + " in: " + bag.toString() + 
+                    " codes:[" + billcount.toString() +":"+ userCode + "/" + uc.toString() + "]";
     }
 }

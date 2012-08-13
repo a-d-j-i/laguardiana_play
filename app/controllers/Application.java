@@ -37,7 +37,6 @@ public class Application extends Controller {
         //temporarily until we have a page using getReferences()..
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         render( referenceCodes );
-        // render();
     }
 
     public static void countMoney( String reference1, String reference2 ) {
@@ -58,40 +57,35 @@ public class Application extends Controller {
         //pass gathered data and let user chose what to do..
         Cache.set( randomID + "-deposit", deposit, "60mn" );
         Cache.set( randomID + "-batch", batch, "60mn" );
+        Integer saved = 0;
+        Cache.set( randomID + "-saved", saved, "60mn" );
         appendBatch(randomID);
     }
 
     public static void appendBatch( String randomID ) {
         LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
-        //Logger.error("code received: %s", userCode.description);
         Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
-        LgBatch batch = Cache.get(randomID+"-batch", LgBatch.class); //LgBatch.MakeRandom( deposit );
-        render( randomID, deposit, batch );
-        return;
-    }
-    
-    public static void appendBatch_orig( String randomID ) {
-        LgUser user = Cache.get( session.getId() + "-user", LgUser.class );
-        //Logger.error("code received: %s", userCode.description);
-        Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
-        LgBatch batch = LgBatch.MakeRandom( deposit );
-        //pass gathered data and let user chose what to do..
-        Logger.info("Executing after render()!!!!");
-        Cache.set( randomID + "-deposit", deposit, "60mn" );
-        Cache.set( randomID + "-batch", batch, "60mn" );
+        LgBatch batch = Cache.get(randomID+"-batch", LgBatch.class);
         render( randomID, deposit, batch );
     }
     
-
+ 
     public static void acceptBatch( String randomID ) {
         //user accepted to deposit it!
+        Logger.info("About to restore data!!!!");
         Deposit deposit = Cache.get( randomID + "-deposit", Deposit.class );
         LgBatch batch = Cache.get( randomID + "-batch", LgBatch.class );
+        Integer saved = Cache.get( randomID + "-saved", Integer.class );
+        Logger.info("About to save1!!!!");
         batch.save();
+        Logger.info("After save1!!!!");
         flash.success( "Deposit is done!" );
         //tell user deposit was done rightly
+        LgBatch newbatch = LgBatch.MakeRandom( deposit );
+        Cache.set( randomID + "-batch", newbatch, "60mn" );
+        saved = 1;
+        Cache.set( randomID + "-saved", saved, "60mn" );
         render( randomID );
-        deposit.addBatch( batch );
     }
 
     // rest 
