@@ -16,7 +16,7 @@ public abstract class LgUser extends GenericModel implements java.io.Serializabl
     @Id
     @Column( name = "user_id", unique = true, nullable = false )
     @GeneratedValue
-    public int userId;
+    public Integer userId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "external_app_id", nullable = false )
     public LgExternalApp externalApp;

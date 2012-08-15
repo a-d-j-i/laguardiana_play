@@ -5,6 +5,7 @@ import devices.glory.manager.Manager;
 import java.io.IOException;
 import java.util.HashMap;
 import play.Logger;
+import play.Play;
 import play.PlayPlugin;
 
 /**
@@ -19,6 +20,10 @@ public class CounterFactory extends PlayPlugin {
 
     static synchronized public Glory getCounter() {
         return getCounter(null);
+    }
+
+    public static Manager.ControllerApi getGloryManager() {
+        return getManager(Play.configuration.getProperty("glory.port"));
     }
 
     public static Manager.ControllerApi getManager(String port) {
@@ -47,8 +52,8 @@ public class CounterFactory extends PlayPlugin {
 
         try {
             Logger.info(String.format("Configuring serial port %s", port));
-            SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
-            //SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port);
+            //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
+            SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port);
             Logger.info(String.format("Configuring glory"));
             Glory device = new Glory(serialPort);
             devices.put(port, device);

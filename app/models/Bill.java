@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import models.db.LgBillType;
-import play.Logger;
 import play.Play;
 
 /**

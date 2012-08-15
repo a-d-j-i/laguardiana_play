@@ -5,10 +5,10 @@
 package devices.glory.manager.command;
 
 import devices.glory.GloryStatus;
+import devices.glory.manager.Manager;
 import devices.glory.manager.Manager.ThreadCommandApi;
 import java.util.HashMap;
 import java.util.Map;
-import org.hibernate.dialect.FirebirdDialect;
 import play.Logger;
 
 /**
@@ -35,6 +35,10 @@ public class Count extends ManagerCommandAbstract {
 
         public CountData(Map<Integer, Integer> desiredQuantity) {
             currentSlot = 0;
+            if (desiredQuantity == null) {
+                isBatch = false;
+                return;
+            }
             for (Integer k : desiredQuantity.keySet()) {
                 Integer v = desiredQuantity.get(k);
                 this.desiredQuantity.put(k, v);
@@ -101,7 +105,7 @@ public class Count extends ManagerCommandAbstract {
         if (!waitUntilD1State(GloryStatus.D1Mode.deposit)) {
             return;
         }
-        threadCommandApi.setSuccess("Put the bills on the hoper");
+        threadCommandApi.setStatus(Manager.Status.PUT_THE_BILLS_ON_THE_HOPER);
         boolean storeTry = false;
         while (!mustCancel()) {
             Logger.debug("Counting");
@@ -122,7 +126,7 @@ public class Count extends ManagerCommandAbstract {
                             break;
                         }
                         if (gloryStatus.isEscrowFull()) {
-                            threadCommandApi.setSuccess("Escrow full, need to store");
+                            threadCommandApi.setStatus(Manager.Status.ESCROW_FULL);
                             break;
                         }
                         if (gloryStatus.isHopperBillPresent()) {
@@ -131,7 +135,7 @@ public class Count extends ManagerCommandAbstract {
                             }
                             break;
                         }
-                        threadCommandApi.setSuccess("Ready to store");
+                        threadCommandApi.setStatus(Manager.Status.READY_TO_STORE);
                     }
                     if (!refreshCurrentQuantity()) {
                         return;
@@ -146,8 +150,8 @@ public class Count extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        threadCommandApi.setSuccess(null);
                         gotoNeutral(true, false);
+                        threadCommandApi.setStatus(Manager.Status.IDLE);
                         return;
                     }
                     if (!refreshCurrentQuantity()) {
@@ -161,12 +165,12 @@ public class Count extends ManagerCommandAbstract {
                 case counting_start_request:
                     // If there are bills in the hoper then it comes here after storing a full escrow
                     if (countData.isBatch && batchEnd) {
-                        threadCommandApi.setSuccess("Counting Done");
                         if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
                             return;
                         }
                         WaitForEmptyEscrow();
                         gotoNeutral(true, false);
+                        threadCommandApi.setStatus(Manager.Status.IDLE);
                         return;
                     }
                     if (batchCountStart()) { // batch end
@@ -214,6 +218,7 @@ public class Count extends ManagerCommandAbstract {
         }
         Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
         if (currentQuantity == null) {
+            threadCommandApi.setStatus(Manager.Status.ERROR);        
             threadCommandApi.setError(String.format("Error getting current count"));
             return false;
         }
@@ -248,9 +253,9 @@ public class Count extends ManagerCommandAbstract {
             return false;
         }
         Map<Integer, Integer> bills = gloryStatus.getBills();
-        for (Integer k : bills.keySet()) {
-            Logger.debug("bill %d %d", k, bills.get(k));
-        }
+//        for (Integer k : bills.keySet()) {
+//            Logger.debug("bill %d %d", k, bills.get(k));
+//        }
         countData.setCurrentQuantity(bills);
         return true;
     }

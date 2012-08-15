@@ -5,10 +5,8 @@
 package devices.glory.manager.command;
 
 import devices.glory.GloryStatus;
+import devices.glory.manager.Manager;
 import devices.glory.manager.Manager.ThreadCommandApi;
-import java.util.HashMap;
-import java.util.Map;
-import play.Logger;
 
 /**
  *
@@ -62,7 +60,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
         if (!waitUntilSR1State(GloryStatus.SR1Mode.escrow_open)) {
             return;
         }
-        threadCommandApi.setSuccess("Put the envelope in the escrow");
+        threadCommandApi.setStatus(Manager.Status.PUT_THE_ENVELOPER_IN_THE_ESCROW);
         boolean storeTry = false;
         while (!mustCancel()) {
             if (!sense()) {
@@ -79,7 +77,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        threadCommandApi.setSuccess(null);
+                        threadCommandApi.setStatus(Manager.Status.IDLE);
                         gotoNeutral(true, false);
                         return;
                     }
@@ -89,7 +87,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                         }
                         break;
                     } else {
-                        threadCommandApi.setSuccess("Ready to store");
+                        threadCommandApi.setStatus(Manager.Status.READY_TO_STORE);
                     }
                     break;
                 case being_store:

@@ -43,8 +43,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
         LgBillType billType = LgBillType.find( 5, pesos );
         //thisb.save();
         for ( int i = 0; i < 4; i = i + 1 ) {
-            int slotid = i;
-            LgBill bill = new LgBill( batch, slotid, i, billType, deposit );
+            LgBill bill = new LgBill( batch, i, billType, deposit );
             Logger.info( " created: %s", bill.toString() );
             //bill.save();
         }

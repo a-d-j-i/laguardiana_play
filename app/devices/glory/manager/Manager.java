@@ -13,12 +13,25 @@ import play.Logger;
  */
 public class Manager {
 
+    public enum Status {
+
+        IDLE,
+        READY_TO_STORE,
+        ERROR,
+        PUT_THE_BILLS_ON_THE_HOPER,
+        ESCROW_FULL,
+        PUT_THE_ENVELOPER_IN_THE_ESCROW,
+        INITIALIZING,
+        REMOVE_THE_BILLS_FROM_ESCROW,
+        REMOVE_REJECTED_BILLS,
+        REMOVE_THE_BILLS_FROM_HOPER,;
+    };
     final private Thread thread;
     final private Glory device;
     final private ManagerThreadState managerThreadState;
     // TODO: Better error reporting, as a class with arguments.
+    final private AtomicReference<Status> status = new AtomicReference<Status>();
     final private AtomicReference<String> error = new AtomicReference<String>();
-    final private AtomicReference<String> success = new AtomicReference<String>();
 
     public Manager(Glory device) {
         this.device = device;
@@ -57,16 +70,13 @@ public class Manager {
             return device.sendCommand(cmd);
         }
 
+        public void setStatus(Status s) {
+            status.set(s);
+        }
+
         public void setError(String e) {
             error.set(e);
-        }
-
-        public void compareAndSetError(String expect, String update) {
-            error.compareAndSet(expect, update);
-        }
-
-        public void setSuccess(String successMsg) {
-            success.set(successMsg);
+            setStatus(Status.ERROR);
         }
     }
 
@@ -129,7 +139,7 @@ public class Manager {
             return true;
         }
 
-        public boolean storeDeposit(int sequenceNumber) {
+        public boolean storeDeposit(Integer sequenceNumber) {
             Logger.debug("storeDeposit");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
@@ -173,12 +183,8 @@ public class Manager {
             return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi));
         }
 
-        public String getError() {
-            return error.get();
-        }
-
-        public String getSuccess() {
-            return success.get();
+        public Manager.Status getStatus() {
+            return status.get();
         }
     }
     /*

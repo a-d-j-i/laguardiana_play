@@ -4,7 +4,7 @@
 <div>
 <h1>Ingrese referencia</h1>
 
-#{form @Application.countMoney()}
+#{form @BillDepositController.inputReference()}
     #{ifErrors}
         <p class="error">
             All fields are required!
@@ -14,7 +14,6 @@
     <p>
         <label for="reference1">Reference1</label>
         <select name="reference1">
-            <!-- here we should use @{Application.getReferenceCodes()} /json .. -->
             #{list items:referenceCodes, as:'reference'}
               <li class="numvalue">${reference.toString()}</li>
               <option value="${reference.numericId}">${reference.textId}</option>

@@ -8,6 +8,8 @@ import devices.glory.GloryStatus;
 import devices.glory.GloryStatus.D1Mode;
 import devices.glory.GloryStatus.SR1Mode;
 import devices.glory.command.GloryCommandAbstract;
+import devices.glory.manager.Manager;
+import devices.glory.manager.Manager.Status;
 import devices.glory.manager.Manager.ThreadCommandApi;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -55,8 +57,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     public void run() {
         isDone.set(false);
-        threadCommandApi.setSuccess(null);
-        threadCommandApi.setError(null);
         execute();
         isDone.set(true);
     }
@@ -75,7 +75,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     boolean gotoNeutral(boolean openEscrow, boolean storingError) {
         Logger.debug("GOTO NEUTRAL");
-        threadCommandApi.setError(null);
         if (!sense()) {
             return false;
         }
@@ -124,6 +123,16 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 }
                 errorRecovery();
                 break;
+            case escrow_close_request:
+                switch (gloryStatus.getD1Mode()) {
+                    case neutral:
+                        WaitForEmptyEscrow();
+                        break;
+                    default:
+                        threadCommandApi.setError(String.format("gotoNeutral Abnormal device Invalid D1-2 mode %s", gloryStatus.getD1Mode().name()));
+                        return false;
+                }
+
             default:
                 // Above are errors, rest is ok.
                 break;
@@ -186,7 +195,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 threadCommandApi.setError(String.format("gotoNeutralInvalid D1-3 mode %s", gloryStatus.getD1Mode().name()));
                 break;
         }
-        threadCommandApi.setSuccess(null);
+        threadCommandApi.setStatus(Manager.Status.IDLE);
         Logger.debug("GOTO NEUTRAL DONE");
         return true;
     }
@@ -323,7 +332,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     void WaitForEmptyEscrow() {
-        threadCommandApi.setSuccess("Remove the bills from the escrow");
+        threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
         for (int i = 0; i < 0xffff; i++) {
             Logger.debug("WaitForEmptyEscrow");
             if (!sense()) {
@@ -333,7 +342,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case being_recover_from_storing_error:
                 case escrow_close_request:
                 case waiting_for_an_envelope_to_set:
-                    threadCommandApi.setSuccess(null);
+                    threadCommandApi.setStatus(Manager.Status.IDLE);
                     if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
                         return;
                     }
@@ -368,17 +377,17 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 return false;
             }
             if (gloryStatus.isRejectBillPresent()) {
-                threadCommandApi.setSuccess("Remove rejected bills");
+                threadCommandApi.setStatus(Manager.Status.REMOVE_REJECTED_BILLS);
             } else {
                 if (gloryStatus.isHopperBillPresent()) {
-                    threadCommandApi.setSuccess("Remove bills from the hoper");
+                    threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_HOPER);
                 } else {
                     break;
                 }
             }
             sleep();
         }
-        threadCommandApi.setSuccess(null);
+        threadCommandApi.setStatus(Manager.Status.IDLE);
         return sendGloryCommand(new devices.glory.command.RemoteCancel());
     }
 

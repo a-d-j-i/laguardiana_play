@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:'Glory' /}
+#{set title:'Doing transaction..' /}
 <div class="row">
     <div class="span11 well">
         <table class="table table-bordered table-striped" >
@@ -22,33 +22,25 @@
                 </tr>
             </tbody>
         </table>
-
-    </div>
-    <div class="span12">
-        #{ifAuthorized resource: 'GloryManagerController.count', operation: 'GET'}
-        <div>
-            #{form @count(), class : 'form-inline well' }
-
-            #{list items:billData, as:'b'}
-            <div class="input-prepend input-append">
-                <span class="add-on">${b.billType}</span><input id="DID_${b.billType.billTypeId}" value="${b.desiredQuantity}" class="input-mini" name="billTypeIds.${b.billType.billTypeId}" type="text">
-            </div>
-            #{/list}
-            <button type="submit" class="btn btn-primary btn-large">Count</button>
-        </div>
-        </fieldset>
-        #{/}
-        #{/ifAuthorized}
     </div>
 </div>
 
 <div class="row">
     <div class="span3">
-        #{menuButton resource: 'GloryManagerController.cancelDeposit', operation: 'GET', title: 'CancelDeposit' /}
-        #{menuButton resource: 'GloryManagerController.storeDeposit', operation: 'GET', title: 'StoreDeposit' /}
-        #{menuButton resource: 'GloryManagerController.reset', operation: 'GET', title: 'Reset' /}
-        #{menuButton resource: 'GloryManagerController.storingErrorReset', operation: 'GET', title: 'StoringErrorReset' /}
-        #{menuButton resource: 'GloryManagerController.envelopeDeposit', operation: 'GET', title: 'EnvelopeDeposit' /}
+        #{ifAuthorized resource: 'BillDepositController.acceptBatch', operation: 'GET'}
+        <div class="control-group">
+            <div class="controls">
+                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" href="@{ BillDepositController.acceptBatch(deposit.depositId) }">Accept Batch</a>
+            </div>
+        </div>        
+        #{/ifAuthorized}
+        #{ifAuthorized resource: 'BillDepositController.cancelDeposit', operation: 'GET'}
+        <div class="control-group">
+            <div class="controls">
+                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" href="@{ BillDepositController.cancelDeposit(deposit.depositId) }">Cancel Deposit</a>
+            </div>
+        </div>
+        #{/ifAuthorized}
     </div>
 </div>
 
@@ -62,23 +54,16 @@
             return;
         }
         waiting = true;
-        $.getJSON( '@{GloryManagerController.index}', function( data ) {
+        $.getJSON( '@{BillDepositController.getCountersAndStatus}', function( data ) {
             waiting = false;
-            var error = data[0];
-            if ( error == null || error.toString() == 'null' ) {
-                $('#error').hide();
-            } else {
-                $('#error').show();                
-                $('#error_msg').html( error )
-            }
-            var success = data[1];
+            var success = data[ 0 ];
             if ( success == null || success.toString() == 'null' ) {
                 $('#success').hide();
             } else {
                 $('#success').show();                
                 $('#success_msg').html( success )
             }
-            var billData = data[ 2 ]
+            var billData = data[ 1 ]
             for( var i = 0 ; i < billData.length; i ++ ) {
                 var nid = '#BID_' + billData[ i ].billType.billTypeId.toString();
                 $( nid ).html( billData[ i ].quantity);

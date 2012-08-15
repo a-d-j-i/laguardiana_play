@@ -17,17 +17,17 @@ import play.Logger;
 @Entity
 public class User extends LgUser {
 
-    final static String GUEST_NAME = "guest";
+    final static public String GUEST_NAME = "guest";
 
     public User() {
     }
 
-    public static User authenticate( String username, String password ) {
-        List<User> users = User.find( "select u from User u where u.username = ? and u.password = ? and "
-                + "u.endDate is null or u.endDate > CURRENT_TIMESTAMP", username, password ).fetch();
+    public static User authenticate(String username, String password) {
+        List<User> users = User.find("select u from User u where u.username = ? and u.password = ? and "
+                + "u.endDate is null or u.endDate > CURRENT_TIMESTAMP", username, password).fetch();
         User validated = null;
-        for ( User user : users ) {
-            if ( user.authenticate( password ) ) {
+        for (User user : users) {
+            if (user.authenticate(password)) {
                 validated = user;
                 break;
             }
@@ -36,8 +36,8 @@ public class User extends LgUser {
     }
 
     public boolean isGuest() {
-        for ( LgRole r : roles ) {
-            if ( r.name.equalsIgnoreCase( GUEST_NAME ) ) {
+        for (LgRole r : roles) {
+            if (r.name.equalsIgnoreCase(GUEST_NAME)) {
                 return true;
             }
         }
@@ -45,13 +45,13 @@ public class User extends LgUser {
     }
 
     public void setGuest() {
-        LgRole guestRole = LgRole.find( "byName", GUEST_NAME ).first();
-        if ( guestRole == null ) {
+        LgRole guestRole = LgRole.find("byName", GUEST_NAME).first();
+        if (guestRole == null) {
             return;
         }
         // Create automatically the guest user.
         username = "Guest User";
-        roles.add( guestRole );
+        roles.add(guestRole);
         postLoad();
     }
 
@@ -60,24 +60,24 @@ public class User extends LgUser {
         String resource;
         String operation;
 
-        public PermsKey( String resource, String operation ) {
+        public PermsKey(String resource, String operation) {
             this.resource = resource;
             this.operation = operation;
         }
 
         @Override
-        public boolean equals( Object obj ) {
-            if ( obj == null ) {
+        public boolean equals(Object obj) {
+            if (obj == null) {
                 return false;
             }
-            if ( getClass() != obj.getClass() ) {
+            if (getClass() != obj.getClass()) {
                 return false;
             }
-            final PermsKey other = ( PermsKey ) obj;
-            if ( ( this.resource == null ) ? ( other.resource != null ) : !this.resource.equals( other.resource ) ) {
+            final PermsKey other = (PermsKey) obj;
+            if ((this.resource == null) ? (other.resource != null) : !this.resource.equals(other.resource)) {
                 return false;
             }
-            if ( ( this.operation == null ) ? ( other.operation != null ) : !this.operation.equals( other.operation ) ) {
+            if ((this.operation == null) ? (other.operation != null) : !this.operation.equals(other.operation)) {
                 return false;
             }
             return true;
@@ -86,19 +86,19 @@ public class User extends LgUser {
         @Override
         public int hashCode() {
             int hash = 5;
-            hash = 41 * hash + ( this.resource != null ? this.resource.hashCode() : 0 );
-            hash = 41 * hash + ( this.operation != null ? this.operation.hashCode() : 0 );
+            hash = 41 * hash + (this.resource != null ? this.resource.hashCode() : 0);
+            hash = 41 * hash + (this.operation != null ? this.operation.hashCode() : 0);
             return hash;
         }
     }
     @Transient
     transient private Map<PermsKey, LgAclRule> perms = new HashMap<PermsKey, LgAclRule>();
 
-    public boolean authenticate( String token ) {
-        if ( password == null || !password.equals( token ) ) {
+    public boolean authenticate(String token) {
+        if (password == null || !password.equals(token)) {
             return false;
         }
-        if ( endDate != null && endDate.before( new Date() ) ) {
+        if (endDate != null && endDate.before(new Date())) {
             return false;
         }
         return true;
@@ -107,28 +107,28 @@ public class User extends LgUser {
     @PostLoad
     public void postLoad() {
         // TODO: Implement that with a query.
-        for ( LgRole rol : roles ) {
-            Logger.info( "\trole: %s", rol.toString() );
-            for ( LgAclRule rule : rol.aclRules ) {
-                PermsKey k = new PermsKey( rule.resource.name, rule.operation );
-                perms.put( k, rule );
-                Logger.info( "\t\t %s", rule.toString() );
+        for (LgRole rol : roles) {
+            Logger.info("\trole: %s", rol.toString());
+            for (LgAclRule rule : rol.aclRules) {
+                PermsKey k = new PermsKey(rule.resource.name, rule.operation);
+                perms.put(k, rule);
+                Logger.info("\t\t %s", rule.toString());
             }
         }
     }
 
-    public boolean checkPermission( String resource, String operation ) {
-        PermsKey k = new PermsKey( resource, operation );
-        if ( !perms.containsKey( k ) ) {
+    public boolean checkPermission(String resource, String operation) {
+        PermsKey k = new PermsKey(resource, operation);
+        if (!perms.containsKey(k)) {
             return false;
         }
-        LgAclRule rule = perms.get( k );
-        if ( rule == null ) {
+        LgAclRule rule = perms.get(k);
+        if (rule == null) {
             return false;
         }
-        if ( rule.permission.equalsIgnoreCase( "ALLOW" ) ) {
+        if (rule.permission.equalsIgnoreCase("ALLOW")) {
             return true;
-        } else if ( rule.permission.equalsIgnoreCase( "DENY" ) ) {
+        } else if (rule.permission.equalsIgnoreCase("DENY")) {
             return false;
         }
         return false;
@@ -139,17 +139,17 @@ public class User extends LgUser {
         return username;
     }
 
-    public static String md5( String password ) {
+    public static String md5(String password) {
         byte[] bytesOfMessage = password.getBytes();
         MessageDigest md;
         try {
-            md = MessageDigest.getInstance( "MD5" );
-        } catch ( NoSuchAlgorithmException e ) {
-            Logger.fatal( e, "System configuration error" );
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            Logger.fatal(e, "System configuration error");
             return null;
         }
-        byte[] thedigest = md.digest( bytesOfMessage );
-        String passwordHash = new String( thedigest );
+        byte[] thedigest = md.digest(bytesOfMessage);
+        String passwordHash = new String(thedigest);
         return passwordHash;
     }
 }

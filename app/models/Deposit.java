@@ -8,22 +8,28 @@ import models.lov.DepositUserCodeReference;
 @Entity
 public class Deposit extends LgDeposit {
 
+    // TODO: Validate the depositId there are allways only one deposit ID
+    // unfinished.
+    public static Deposit getAndValidateOpenDeposit(String depositId) {
+        return Deposit.findById(Integer.parseInt(depositId));
+    }
+
     public Deposit() {
     }
 
-    public void addBill( LgBill bill ) {
-        bill.addToDeposit( this );
-        this.bills.add( bill );
+    public void addBill(LgBill bill) {
+        bill.addToDeposit(this);
+        this.bills.add(bill);
     }
 
-    public void addBatch( LgBatch batch ) {
-        for ( LgBill bill : batch.bills ) {
-            this.addBill( bill );
+    public void addBatch(LgBatch batch) {
+        for (LgBill bill : batch.bills) {
+            this.addBill(bill);
             bill.save();
         }
     }
 
-    public Deposit( LgUser user, String userCode, LgLov userCodeLov ) {
+    public Deposit(LgUser user, String userCode, LgLov userCodeLov) {
         this.bag = LgBag.GetCurrentBag();
         this.user = user;
         this.userCode = userCode;
@@ -32,14 +38,14 @@ public class Deposit extends LgDeposit {
     }
 
     public LgLov findUserCodeLov() {
-        return DepositUserCodeReference.findByNumericId( userCodeLov );
+        return DepositUserCodeReference.findByNumericId(userCodeLov);
     }
 
     @Override
     public String toString() {
         LgLov uc = this.findUserCodeLov();
         Integer billcount = this.bills.size();
-        return "Deposit by: " + user.toString() + " in: " + bag.toString() + 
-                    " codes:[" + billcount.toString() +":"+ userCode + "/" + uc.toString() + "]";
+        return "Deposit by: " + user.toString() + " in: " + bag.toString()
+                + " codes:[" + billcount.toString() + ":" + userCode + "/" + uc.toString() + "]";
     }
 }

@@ -172,3 +172,12 @@
     locked:         #x42
     roles:          [ RoleAdmin ]
 
+  User(guest):
+    externalApp:    PlayInternalApp
+    username:       guest
+    password:       guest
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          [ RoleGuest ]

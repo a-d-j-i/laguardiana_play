@@ -26,7 +26,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "bag" )
     public Set<LgDeposit> deposits = new HashSet<LgDeposit>( 0 );
     
-    
+    // TODO: Search for the bag that has withdraw data null.
+    // Or add a new bug logging the error.
     public static LgBag GetCurrentBag() {
         LgBag currentBag = LgBag.find("order by creationDate desc").first();
         if (currentBag == null) {

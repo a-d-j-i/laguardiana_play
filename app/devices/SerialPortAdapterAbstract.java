@@ -24,7 +24,7 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         if (ch == null) {
             throw new IOException("SerialAdapter Error reading from port");
         }
-        play.Logger.debug("Readed 0x%x", ch);
+        //play.Logger.debug("Readed 0x%x", ch);
         return ch;
     }
 
