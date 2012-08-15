@@ -77,17 +77,4 @@ public class SerialPortAdapterJSSC extends SerialPortAdapterAbstract implements 
             throw new IOException(String.format("Error wrting to serial port %s", serialPort.getPortName()), e);
         }
     }
-
-    public byte read() throws IOException {
-        Byte ch;
-        try {
-            ch = fifo.poll(2, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new IOException("Interrupt reading from port", e);
-        }
-        if (ch == null) {
-            throw new IOException(String.format("Error reading from port %s", serialPort.getPortName()));
-        }
-        return ch;
-    }
 }

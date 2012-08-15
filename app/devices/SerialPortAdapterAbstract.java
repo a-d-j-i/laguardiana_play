@@ -3,6 +3,7 @@ package devices;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInterface {
 
@@ -13,7 +14,18 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
 
     abstract public void write(byte[] buffer) throws IOException;
 
-    abstract public byte read() throws IOException;
+    public byte read() throws IOException {
+        Byte ch;
+        try {
+            ch = fifo.poll(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new IOException("Interrupt reading from port", e);
+        }
+        if (ch == null) {
+            throw new IOException("SerialAdapter Error reading from port");
+        }
+        return ch;
+    }
 
     public InputStream getInputStream() {
         return new SerialInputStream();

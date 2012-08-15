@@ -23,6 +23,7 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
             int len;
             
             len = in.read(buffer);
+            Logger.debug("---- Reader %d bytes", len);
             if (len > -1) {
                 for (int i = 0; i < len; i++) {
                     fifo.add(buffer[i]);
@@ -94,18 +95,5 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
         } catch (IOException e) {
             throw new IOException(String.format("Error wrting to serial port %s", serialPort.getName()), e);
         }
-    }
-    
-    public byte read() throws IOException {
-        Byte ch;
-        try {
-            ch = fifo.poll(2, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new IOException("Interrupt reading from port", e);
-        }
-        if (ch == null) {
-            throw new IOException(String.format("Error reading from port %s", serialPort.getName()));
-        }
-        return ch;
     }
 }
