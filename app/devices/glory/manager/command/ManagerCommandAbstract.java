@@ -19,40 +19,40 @@ import play.Logger;
  * @author adji
  */
 abstract public class ManagerCommandAbstract implements Runnable {
-    
+
     static protected class CommandData {
-        
+
         private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
         private final Lock r = rwl.readLock();
         private final Lock w = rwl.writeLock();
-        
+
         final protected void rlock() {
             r.lock();
         }
-        
+
         final protected void runlock() {
             r.unlock();
         }
-        
+
         final protected void wlock() {
             w.lock();
         }
-        
+
         final protected void wunlock() {
             w.unlock();
         }
     }
     protected final GloryStatus gloryStatus = new GloryStatus();
     protected final ThreadCommandApi threadCommandApi;
-    
+
     public ManagerCommandAbstract(ThreadCommandApi threadCommandApi) {
         this.threadCommandApi = threadCommandApi;
     }
     private AtomicBoolean isDone = new AtomicBoolean(false);
     private AtomicBoolean cancel = new AtomicBoolean(false);
-    
+
     abstract public void execute();
-    
+
     public void run() {
         isDone.set(false);
         threadCommandApi.setSuccess(null);
@@ -60,19 +60,19 @@ abstract public class ManagerCommandAbstract implements Runnable {
         execute();
         isDone.set(true);
     }
-    
+
     public boolean isDone() {
         return isDone.get();
     }
-    
+
     public void cancel() {
         cancel.set(true);
     }
-    
+
     public boolean mustCancel() {
-        return cancel.get();
+        return (cancel.get() || threadCommandApi.mustStop());
     }
-    
+
     boolean gotoNeutral(boolean openEscrow, boolean storingError) {
         Logger.debug("GOTO NEUTRAL");
         threadCommandApi.setError(null);
@@ -102,7 +102,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         return false;
                 }
                 break;
-            
+
             case abnormal_device:
                 switch (gloryStatus.getD1Mode()) {
                     case deposit:
@@ -128,7 +128,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 // Above are errors, rest is ok.
                 break;
         }
-        
+
         switch (gloryStatus.getD1Mode()) {
             case normal_error_recovery_mode:
             case storing_error_recovery_mode:
@@ -163,7 +163,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     case counting_start_request:
                         remoteCancel();
                         break;
-                    
+
                     case waiting:
                         remoteCancel();
                         break;
@@ -190,7 +190,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         Logger.debug("GOTO NEUTRAL DONE");
         return true;
     }
-    
+
     boolean sendGloryCommand(GloryCommandAbstract cmd) {
         if (cmd != null) {
             if (!sendGCommand(cmd)) {
@@ -199,7 +199,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         }
         return sense();
     }
-    
+
     boolean sense() {
         if (!sendGCommand(new devices.glory.command.Sense())) {
             return false;
@@ -207,7 +207,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         Logger.debug(String.format("D1Mode %s SR1 Mode : %s", gloryStatus.getD1Mode().name(), gloryStatus.getSr1Mode().name()));
         return true;
     }
-    
+
     boolean sendGCommand(GloryCommandAbstract cmd) {
         if (cmd == null) {
             threadCommandApi.setError("Invalid command null");
@@ -220,12 +220,12 @@ abstract public class ManagerCommandAbstract implements Runnable {
         }
         return true;
     }
-    
+
     void errorRecovery() {
         if (!sendGloryCommand(new devices.glory.command.ResetDevice())) {
             return;
         }
-        
+
         while (!mustCancel()) {
             Logger.debug("errorRecovery");
             if (!sense()) {
@@ -241,7 +241,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
         }
     }
-    
+
     void storingErrorRecovery() {
         if (!sendGloryCommand(new devices.glory.command.SetStroringErrorRecoveryMode())) {
             return;
@@ -264,7 +264,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         waitUntilSR1State(SR1Mode.waiting);
         gotoNeutral(true, false);
     }
-    
+
     boolean waitUntilSR1State(SR1Mode state) {
         for (int i = 0; i < 0xffff; i++) {
             Logger.debug("waitUntilSR1State %s", state.name());
@@ -293,7 +293,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         threadCommandApi.setError(String.format("cant set sr1 mode to %s", state.name()));
         return false;
     }
-    
+
     boolean waitUntilD1State(D1Mode state) {
         for (int i = 0; i < 0xffff; i++) {
             Logger.debug("waitUntilD1State %s", state.name());
@@ -321,7 +321,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         threadCommandApi.setError(String.format("cant set d1 mode to %s", state.name()));
         return false;
     }
-    
+
     void WaitForEmptyEscrow() {
         threadCommandApi.setSuccess("Remove the bills from the escrow");
         for (int i = 0; i < 0xffff; i++) {
@@ -360,7 +360,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         }
         threadCommandApi.setError("WaitForEmptyEscrow waiting too much");
     }
-    
+
     private boolean remoteCancel() {
         for (int i = 0; i < 0xffff; i++) {
             Logger.debug("remoteCancel");
@@ -381,7 +381,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         threadCommandApi.setSuccess(null);
         return sendGloryCommand(new devices.glory.command.RemoteCancel());
     }
-    
+
     void sleep() {
         try {
             Thread.sleep(1000);

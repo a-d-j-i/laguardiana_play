@@ -8,6 +8,7 @@ import devices.glory.GloryStatus;
 import devices.glory.manager.Manager.ThreadCommandApi;
 import java.util.HashMap;
 import java.util.Map;
+import org.hibernate.dialect.FirebirdDialect;
 import play.Logger;
 
 /**
@@ -26,21 +27,23 @@ public class Count extends ManagerCommandAbstract {
 
     static public class CountData extends CommandData {
 
-        public CountData(Map<Integer, Integer> desiredQuantity) {
-            boolean isb = false;
-            for (Integer k : desiredQuantity.keySet()) {
-                Integer v = desiredQuantity.get(k);
-                this.desiredQuantity.put(k, v);
-                if (v != 0) {
-                    isb = true;
-                }
-            }
-            this.isBatch = isb;
-        }
         private Map< Integer, Integer> currentQuantity = new HashMap<Integer, Integer>();
         private boolean storeDeposit = false;
         private final Map<Integer, Integer> desiredQuantity = new HashMap<Integer, Integer>();
+        private int currentSlot = 0;
         private final boolean isBatch;
+
+        public CountData(Map<Integer, Integer> desiredQuantity) {
+            currentSlot = 0;
+            for (Integer k : desiredQuantity.keySet()) {
+                Integer v = desiredQuantity.get(k);
+                this.desiredQuantity.put(k, v);
+                if (v == 0) {
+                    currentSlot++;
+                }
+            }
+            isBatch = (currentSlot < desiredQuantity.size());
+        }
 
         private Map< Integer, Integer> getCurrentQuantity() {
             rlock();
@@ -69,10 +72,19 @@ public class Count extends ManagerCommandAbstract {
             }
         }
 
-        private void storeDeposit(boolean storeDeposit) {
+        private void storeDeposit() {
             wlock();
             try {
-                this.storeDeposit = storeDeposit;
+                this.storeDeposit = true;
+            } finally {
+                wunlock();
+            }
+        }
+
+        private void storeDepositDone() {
+            wlock();
+            try {
+                this.storeDeposit = false;
             } finally {
                 wunlock();
             }
@@ -99,6 +111,7 @@ public class Count extends ManagerCommandAbstract {
             switch (gloryStatus.getSr1Mode()) {
                 case storing_start_request:
                     if (countData.needToStoreDeposit()) {
+                        countData.storeDepositDone();
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
@@ -106,6 +119,10 @@ public class Count extends ManagerCommandAbstract {
                     } else {
                         if (countData.isBatch && batchEnd) {
                             sleep();
+                            break;
+                        }
+                        if (gloryStatus.isEscrowFull()) {
+                            threadCommandApi.setSuccess("Escrow full, need to store");
                             break;
                         }
                         if (gloryStatus.isHopperBillPresent()) {
@@ -121,6 +138,7 @@ public class Count extends ManagerCommandAbstract {
                     }
                     break;
                 case counting:
+                    // The second time after storing.
                     if (!refreshCurrentQuantity()) {
                         return;
                     }
@@ -141,6 +159,7 @@ public class Count extends ManagerCommandAbstract {
                     break;
 
                 case counting_start_request:
+                    // If there are bills in the hoper then it comes here after storing a full escrow
                     if (countData.isBatch && batchEnd) {
                         threadCommandApi.setSuccess("Counting Done");
                         if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
@@ -170,7 +189,7 @@ public class Count extends ManagerCommandAbstract {
     }
 
     public void storeDeposit(int sequenceNumber) {
-        countData.storeDeposit(true);
+        countData.storeDeposit();
     }
 
     public Map<Integer, Integer> getCurrentQuantity() {
@@ -182,40 +201,46 @@ public class Count extends ManagerCommandAbstract {
     }
 
     boolean batchCountStart() {
-        boolean batchEnd = true;
         int[] bills = new int[32];
 
-        if (countData.isBatch) {
-            Logger.debug("ISBATCH");
-            if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
-                return false;
-            }
-            Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
-            for (Integer slot : currentQuantity.keySet()) {
-                int desired = 0;
-                if (countData.desiredQuantity.get(slot) != null) {
-                    desired = countData.desiredQuantity.get(slot).intValue();
-                }
-                if (currentQuantity == null || slot >= 32) {
-                    threadCommandApi.setError(String.format("Invalid bill index %d", slot));
-                } else {
-                    int value = currentQuantity.get(slot);
-                    if (value > desired) {
-                        threadCommandApi.setError(String.format("Invalid bill value %d %d %d", slot, value, desired));
-                        return true;
-                    }
-                    bills[ slot] = desired - value;
-                    Logger.debug("---------- slot %d batch billls : %d desired %d value %d", slot, bills[ slot], desired, value);
-                }
-                if (bills[ slot] != 0) {
-                    batchEnd = false;
-                }
-            }
-        }
-        if (!countData.isBatch || !batchEnd) {
+        if (!countData.isBatch) {
             sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills));
+            return true;
         }
-        return batchEnd;
+
+        Logger.debug("ISBATCH");
+        if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
+            return false;
+        }
+        Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
+        if (currentQuantity == null) {
+            threadCommandApi.setError(String.format("Error getting current count"));
+            return false;
+        }
+
+        while (countData.currentSlot < 32) {
+            int desired = 0;
+            if (countData.desiredQuantity.get(countData.currentSlot) != null) {
+                desired = countData.desiredQuantity.get(countData.currentSlot).intValue();
+            }
+            int current = currentQuantity.get(countData.currentSlot);
+            if (current > desired) {
+                threadCommandApi.setError(String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired));
+                return true;
+            }
+            bills[ countData.currentSlot] = desired - current;
+            Logger.debug("---------- slot %d batch billls : %d desired %d value %d", countData.currentSlot, bills[ countData.currentSlot], desired, current);
+            if (bills[ countData.currentSlot] != 0) {
+                break;
+            } else {
+                countData.currentSlot++;
+            }
+        }
+        if (countData.currentSlot < 32) {
+            sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills));
+            return false;
+        }
+        return true;
     }
 
     private boolean refreshCurrentQuantity() {
@@ -223,7 +248,22 @@ public class Count extends ManagerCommandAbstract {
             return false;
         }
         Map<Integer, Integer> bills = gloryStatus.getBills();
+        for (Integer k : bills.keySet()) {
+            Logger.debug("bill %d %d", k, bills.get(k));
+        }
         countData.setCurrentQuantity(bills);
         return true;
+    }
+
+    @Override
+    boolean sense() {
+        if (super.sense()) {
+            Map<Integer, Integer> bills = gloryStatus.getBills();
+            if (bills != null && !bills.isEmpty()) {
+                countData.setCurrentQuantity(bills);
+            }
+            return true;
+        }
+        return false;
     }
 }

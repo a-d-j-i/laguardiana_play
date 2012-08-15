@@ -45,7 +45,7 @@ public class Manager {
             return managerThreadApi.getCurrentCommand();
         }
 
-        boolean mustStop() {
+        public boolean mustStop() {
             return managerThreadApi.mustStop();
         }
 

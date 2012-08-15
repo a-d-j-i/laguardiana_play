@@ -13,6 +13,10 @@ public class SerialPortAdapter implements SerialPortEventListener {
     ArrayBlockingQueue< Byte> fifo = new ArrayBlockingQueue< Byte>(1024);
 
     public void serialEvent(SerialPortEvent event) {
+        if (serialPort == null) {
+            Logger.error("Glory error reading serial port, port closed");
+            return;
+        }
         if (event.isRXCHAR()) {
             try {
                 for (byte b : serialPort.readBytes()) {
@@ -37,6 +41,10 @@ public class SerialPortAdapter implements SerialPortEventListener {
 
         Logger.debug(String.format("Configuring serial port %s", portName));
         serialPort = new SerialPort(portName);
+        if (serialPort == null) {
+            Logger.error(String.format("SerialPortAdapter : error oppening serial port %s", portName));
+            throw new IOException(String.format("SerialPortAdapter : error oppening serial port %s", portName));
+        }
         try {
             Logger.debug(String.format("Opening serial port %s", portName));
             serialPort.openPort();
@@ -55,6 +63,7 @@ public class SerialPortAdapter implements SerialPortEventListener {
             Logger.debug(String.format("Closing serial port %s", serialPort.getPortName()));
             if (serialPort != null) {
                 serialPort.closePort();
+                serialPort = null;
             }
         } catch (SerialPortException e) {
             throw new IOException(String.format("Error closing serial port"), e);
@@ -62,6 +71,9 @@ public class SerialPortAdapter implements SerialPortEventListener {
     }
 
     public void write(byte[] buffer) throws IOException {
+        if (serialPort == null) {
+            throw new IOException("Error wrting to serial port, port closed");
+        }
         try {
             serialPort.writeBytes(buffer);
         } catch (SerialPortException e) {
@@ -92,7 +104,7 @@ public class SerialPortAdapter implements SerialPortEventListener {
         public int read() throws IOException {
             Byte ch = fifo.poll();
             if (ch == null) {
-                throw new IOException(serialPort.getPortName() + " read  fifo empty");
+                throw new IOException("read  fifo empty");
             }
             return ch;
         }

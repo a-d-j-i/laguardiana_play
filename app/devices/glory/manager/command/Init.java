@@ -19,8 +19,7 @@ public class Init extends ManagerCommandAbstract {
     @Override
     public void execute() {
         String initError = "Initializing";
-        threadCommandApi.setError( initError );
+        threadCommandApi.setSuccess( initError );
         gotoNeutral( false, false );
-        threadCommandApi.compareAndSetError( initError, null );
     }
 }

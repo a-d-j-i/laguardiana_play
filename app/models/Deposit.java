@@ -1,12 +1,15 @@
 package models;
 
-import models.lov.DepositUserCodeReference;
 import java.util.Date;
 import javax.persistence.Entity;
 import models.db.*;
+import models.lov.DepositUserCodeReference;
 
 @Entity
 public class Deposit extends LgDeposit {
+
+    public Deposit() {
+    }
 
     public void addBill( LgBill bill ) {
         bill.addToDeposit( this );
