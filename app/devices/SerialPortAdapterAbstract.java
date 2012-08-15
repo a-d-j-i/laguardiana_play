@@ -17,7 +17,7 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
     public byte read() throws IOException {
         Byte ch;
         try {
-            ch = fifo.poll(10, TimeUnit.SECONDS);
+            ch = fifo.poll(600, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new IOException("Interrupt reading from port", e);
         }

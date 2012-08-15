@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.util.concurrent.TimeUnit;
 import play.Logger;
 import play.Play;
 
@@ -23,7 +22,6 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
             int len;
             
             len = in.read(buffer);
-            Logger.debug("---- Reader %d bytes", len);
             if (len > -1) {
                 for (int i = 0; i < len; i++) {
                     fifo.add(buffer[i]);

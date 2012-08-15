@@ -100,6 +100,7 @@ public class Glory {
                     break;
                 }
             } catch (IOException e) {
+                Logger.debug("Error reading from port: %s", e);
                 cmd.setError("Error reading from port");
                 return cmd;
             }
