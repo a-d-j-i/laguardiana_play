@@ -10,20 +10,22 @@ import play.Logger;
 import play.Play;
 
 public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements SerialPortEventListener {
-    
+
     public void serialEvent(SerialPortEvent spe) {
         if (serialPort == null) {
             Logger.error("Glory error reading serial port, port closed");
             return;
         }
-        
+
         try {
             byte[] buffer = new byte[1024];
             int len;
-            
+
             len = in.read(buffer);
+
             if (len > -1) {
                 for (int i = 0; i < len; i++) {
+                    play.Logger.debug("Adapter Readed 0x%x", buffer[ i]);
                     fifo.add(buffer[i]);
                 }
             }
@@ -34,7 +36,7 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
     SerialPort serialPort;
     InputStream in;
     OutputStream out;
-    
+
     public SerialPortAdapterRxTx(String portN) throws IOException {
         portName = portN;
         CommPortIdentifier portIdentifier;
@@ -50,7 +52,7 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
                 throw new IOException("Error: Port is currently in use");
             } else {
                 CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);
-                
+
                 if (commPort instanceof CommPort) {
                     serialPort = (SerialPort) commPort;
                     serialPort.setSerialPortParams(9600, SerialPort.DATABITS_7, SerialPort.STOPBITS_1, SerialPort.PARITY_EVEN);
@@ -68,7 +70,7 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
             throw new IOException(String.format("Error initializing serial port %s", portName), ex);
         }
     }
-    
+
     public void close() throws IOException {
         try {
             Logger.debug(String.format("Closing serial port %s", serialPort.getName()));
@@ -82,12 +84,12 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
             throw new IOException(String.format("Error closing serial port"), e);
         }
     }
-    
+
     public void write(byte[] buffer) throws IOException {
         if (serialPort == null) {
             throw new IOException("Error wrting to serial port, port closed");
         }
-        
+
         try {
             out.write(buffer);
         } catch (IOException e) {

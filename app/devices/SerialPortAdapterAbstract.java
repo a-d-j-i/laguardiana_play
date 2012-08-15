@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInterface {
 
@@ -26,6 +24,7 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         if (ch == null) {
             throw new IOException("SerialAdapter Error reading from port");
         }
+        play.Logger.debug("Readed 0x%x", ch);
         return ch;
     }
 
