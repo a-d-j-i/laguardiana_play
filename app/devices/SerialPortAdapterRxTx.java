@@ -10,22 +10,8 @@ import java.util.concurrent.TimeUnit;
 import play.Logger;
 import play.Play;
 
-public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements SerialPortEventListener {
+public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract {
 
-    public void serialEvent(SerialPortEvent spe) {
-        if (serialPort == null) {
-            Logger.error("Glory error reading serial port, port closed");
-            return;
-        }
-        try {
-            int data;
-            while ((data = in.read()) > -1) {
-                fifo.add((byte) data);
-            }
-        } catch (IOException e) {
-            Logger.error("Glory error reading serial port");
-        }
-    }
     SerialPort serialPort;
     InputStream in;
     OutputStream out;
@@ -52,8 +38,7 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
                     serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
                     in = serialPort.getInputStream();
                     out = serialPort.getOutputStream();
-                    serialPort.addEventListener(this);
-                    serialPort.notifyOnDataAvailable(true);
+
                 } else {
                     System.out.println("Error: Only serial ports are handled by this example.");
                 }
@@ -61,6 +46,27 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
         } catch (Exception ex) {
             Logger.error("SerialPortAdapter : " + ex.getMessage());
             throw new IOException(String.format("Error initializing serial port %s", portName), ex);
+        }
+        (new Thread(new SerialReader())).start();
+    }
+
+    /**
+     *
+     */
+    public class SerialReader implements Runnable {
+
+        public void run() {
+            byte[] buffer = new byte[1024];
+            int len;
+            try {
+                while ((len = in.read(buffer)) > -1) {
+                    for (int i = 0; i < len; i++) {
+                        fifo.add(buffer[i]);
+                    }
+                }
+            } catch (IOException e) {
+                Logger.error("Glory error reading serial port");
+            }
         }
     }
 
