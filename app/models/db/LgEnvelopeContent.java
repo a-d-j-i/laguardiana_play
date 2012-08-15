@@ -17,7 +17,7 @@ public class LgEnvelopeContent extends GenericModel implements java.io.Serializa
     @Column( name = "content_type_lov" )
     public Integer contentTypeLov;
     @Column( name = "amount", nullable = false )
-    public int amount;
+    public Integer amount;
     @Column( name = "unit_lov", nullable = false )
-    public int unitLov;
+    public Integer unitLov;
 }

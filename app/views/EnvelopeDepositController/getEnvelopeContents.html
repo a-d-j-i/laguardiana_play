@@ -1,0 +1,46 @@
+#{extends 'main.html' /}
+#{set title:'Reference' /}
+
+<div>
+    <h1>Ingrese datos del sobre</h1>
+    #{if (confirm) }
+    CONFIRM
+    %{ def url = actionBridge.EnvelopeDepositController.acceptEnvelope.call()}%
+    <form action="${url}" method="POST">
+    #{/if}
+    #{else}
+    %{ def url = actionBridge.EnvelopeDepositController.getEnvelopeContents.call()}%
+    <form action="${url}" method="POST">
+    #{/else}
+
+
+        <select name="envelope.envelopeTypeLov">
+            #{list items:envelopeTypes, as:'envelopeType'}
+            <li class="numvalue">${envelopeType.toString()}</li>
+            <option value="${envelopeType.numericId}">${envelopeType.textId}</option>
+            #{/list}
+        </select>
+
+
+        <input type="hidden" name="depositId" value="${deposit.depositId}">
+        
+        <input type="text" name="envelope.envelopeNumber" value="100">
+
+        <p>
+            Cheque: 
+            <input type="hidden" name="envelope.envelopeContents[0].contentTypeLov" value="1">
+            <input type="text" name="envelope.envelopeContents[0].amount" value="100">
+            <input type="text" name="envelope.envelopeContents[0].unitLov" value="1">
+        </p>
+        <p>
+            Plata: 
+            <input type="hidden" name="envelope.envelopeContents[1].contentTypeLov" value="2">
+            <input type="text" name="envelope.envelopeContents[1].amount" value="200">
+            <input type="text" name="envelope.envelopeContents[1].unitLov" value="2">
+        </p>
+        <p class="buttons">
+            <input type="submit" value="Confirm" name="confirm">
+            <a href="@{index()}">Cancel</a>
+        </p>
+    </form>
+</div>

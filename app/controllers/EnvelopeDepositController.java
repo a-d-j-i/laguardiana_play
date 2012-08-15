@@ -2,19 +2,21 @@ package controllers;
 
 import devices.CounterFactory;
 import devices.glory.manager.Manager;
-import devices.glory.manager.Manager.Status;
 import java.util.Date;
 import java.util.List;
 import models.Bill;
 import models.Deposit;
 import models.db.LgBatch;
 import models.db.LgBill;
+import models.db.LgEnvelope;
+import models.db.LgEnvelopeContent;
 import models.lov.DepositUserCodeReference;
+import models.lov.EnvelopeType;
 import play.Logger;
 import play.mvc.With;
 
 @With( Secure.class)
-public class BillDepositController extends DepositController {
+public class EnvelopeDepositController extends DepositController {
 
     public static void index() {
         Application.index();
@@ -24,7 +26,7 @@ public class BillDepositController extends DepositController {
         //TODO: Validate references depending on system properties. 
         Deposit d = DepositController.createDeposit(reference1, reference2);
         if (d != null) {
-            countingPage(d.depositId.toString());
+            getEnvelopeContents(Integer.toString(d.depositId), null);
             return;
         }
         //depending on a value of LgSystemProperty, show both references or redirect 
@@ -33,55 +35,52 @@ public class BillDepositController extends DepositController {
         render(referenceCodes);
     }
 
-    public static void countingPage(String depositId) {
+    public static void getEnvelopeContents(String depositId, LgEnvelope envelope) {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
 
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        if (!manager.count(null)) {
-            //TODO: Save an event log, do something.
-            // if counting is ok, else error ??
+        if (envelope != null && envelope.envelopeTypeLov != null) {
+            // TODO: Use validate.
+            envelope.deposit = deposit;
+            Logger.debug("envelope.envelopeTypeLov : %d", envelope.envelopeTypeLov);
+            Logger.debug("envelope.number: %s", envelope.envelopeNumber);
+            for (LgEnvelopeContent l : envelope.envelopeContents) {
+                if (l != null) {
+                    Logger.debug("content amount: %d", l.amount);
+                    Logger.debug("content content: %d", l.contentTypeLov);
+                    Logger.debug("content unit: %d", l.unitLov);
+                }
+            }
+            renderArgs.put("confirm", true);
         }
-        List<Bill> billData = Bill.getCurrentCounters();
-        renderArgs.put("billData", billData);
-        render(deposit);
+        List<EnvelopeType> envelopeTypes = EnvelopeType.findAll();
+        renderArgs.put("envelopeTypes", envelopeTypes);
+        render(deposit, envelope);
     }
 
-    public static void getCountersAndStatus() {
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        Status success = manager.getStatus();
-        List<Bill> billData = Bill.getCurrentCounters();
-
-        if (request.isAjax()) {
-            Object[] o = new Object[2];
-            o[0] = success;
-            o[1] = billData;
-            renderJSON(o);
-        } else {
-            renderArgs.put("billData", billData);
-            render();
-        }
-    }
-
-    public static void acceptBatch(String depositId) {
-        //user accepted to deposit it!
-        Logger.info("About to restore data!!!!");
-
+    public static void acceptEnvelope(String depositId, LgEnvelope envelope) {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
 
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        if (manager.getStatus() != Manager.Status.READY_TO_STORE) {
-            Logger.debug("NOT READY TO STORE");
-            index();
-            return;
-        }
-        List<Bill> billData = Bill.getCurrentCounters();
-
-        if (!manager.storeDeposit(Integer.parseInt(depositId))) {
-            Logger.error("TODO: ERROR DAVE HELP ME");
+        // Validate
+        if (envelope == null || envelope.envelopeTypeLov == null) {
+            Logger.error("INVALID ");
             index();
             return;
         }
 
+        // TODO: Use validate.
+        envelope.deposit = deposit;
+        Logger.debug("envelope.envelopeTypeLov : %d", envelope.envelopeTypeLov);
+        Logger.debug("envelope.number: %s", envelope.envelopeNumber);
+        for (LgEnvelopeContent l : envelope.envelopeContents) {
+            if (l != null) {
+                Logger.debug("content amount: %d", l.amount);
+                Logger.debug("content content: %d", l.contentTypeLov);
+                Logger.debug("content unit: %d", l.unitLov);
+            }
+        }
+        renderArgs.put("confirm", true);
+        Manager.ControllerApi manager = CounterFactory.getGloryManager();
+        manager.envelopeDeposit();
         boolean done = false;
         while (!done) {
             Logger.debug("Current Status %s", manager.getStatus().name());
@@ -102,18 +101,44 @@ public class BillDepositController extends DepositController {
             }
         }
 
-        // TODO: if save fails do something interesting
-        LgBatch batch = new LgBatch();
-        for (Bill bill : billData) {
-            LgBill b = new LgBill(batch, bill.quantity, bill.billType, deposit);
-            //batch.bills.add(b);
+
+        if (manager.getStatus() != Manager.Status.READY_TO_STORE) {
+            Logger.debug("NOT READY TO STORE");
+            index();
+            return;
         }
-        batch.save();
+        if (!manager.storeDeposit(Integer.parseInt(depositId))) {
+            Logger.error("TODO: ERROR DAVE HELP ME");
+            index();
+            return;
+        }
+
+        done = false;
+        while (!done) {
+            Logger.debug("Current Status %s", manager.getStatus().name());
+            switch (manager.getStatus()) {
+                case IDLE:
+                    done = true;
+                    break;
+                case ERROR:
+                    Logger.error("TODO: ERROR DAVE HELP ME");
+                    index();
+                    return;
+                default:
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ex) {
+                    }
+                    break;
+            }
+        }
+        envelope.save();
+
         flash.success("Deposit is done!");
         render(deposit);
     }
+// TODO: Finish
 
-    // TODO: Finish
     public static void cancelDeposit(String depositId) {
         //TODO: Check if there are batches related to this deposit.
         // infrom and send cancelDeposit

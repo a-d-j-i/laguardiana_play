@@ -1,6 +1,18 @@
 #
 # Predefined User Reference Code for deposits
 #
+  lov.EnvelopeType(EnvelopeType_CHEQUE):
+    numericId:      1
+    textId:         Cheque
+    description:    User Cheque
+    
+  lov.EnvelopeType(EnvelopeType_PLATA):
+    numericId:      2
+    textId:         Plata
+    description:    User Plata
+    
+
+  
   lov.DepositUserCodeReference(Reference_Enero):
     numericId:      1
     textId:         Enero
@@ -74,4 +86,5 @@
     unitLov:        3
     slot:           0
 
+    
     
