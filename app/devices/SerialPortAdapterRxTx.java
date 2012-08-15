@@ -25,7 +25,6 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
 
             if (len > -1) {
                 for (int i = 0; i < len; i++) {
-                    play.Logger.debug("Adapter Readed 0x%x", buffer[ i]);
                     fifo.add(buffer[i]);
                 }
             }

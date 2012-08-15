@@ -47,8 +47,8 @@ public class CounterFactory extends PlayPlugin {
 
         try {
             Logger.info(String.format("Configuring serial port %s", port));
-            //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
-            SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port);
+            SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
+            //SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port);
             Logger.info(String.format("Configuring glory"));
             Glory device = new Glory(serialPort);
             devices.put(port, device);
