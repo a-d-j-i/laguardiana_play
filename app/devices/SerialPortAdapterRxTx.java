@@ -10,12 +10,32 @@ import java.util.concurrent.TimeUnit;
 import play.Logger;
 import play.Play;
 
-public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract {
-
+public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements SerialPortEventListener {
+    
+    public void serialEvent(SerialPortEvent spe) {
+        if (serialPort == null) {
+            Logger.error("Glory error reading serial port, port closed");
+            return;
+        }
+        
+        try {
+            byte[] buffer = new byte[1024];
+            int len;
+            
+            len = in.read(buffer);
+            if (len > -1) {
+                for (int i = 0; i < len; i++) {
+                    fifo.add(buffer[i]);
+                }
+            }
+        } catch (IOException e) {
+            Logger.error("Glory error reading serial port");
+        }
+    }
     SerialPort serialPort;
     InputStream in;
     OutputStream out;
-
+    
     public SerialPortAdapterRxTx(String portN) throws IOException {
         portName = portN;
         CommPortIdentifier portIdentifier;
@@ -31,14 +51,15 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract {
                 throw new IOException("Error: Port is currently in use");
             } else {
                 CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);
-
+                
                 if (commPort instanceof CommPort) {
                     serialPort = (SerialPort) commPort;
                     serialPort.setSerialPortParams(9600, SerialPort.DATABITS_7, SerialPort.STOPBITS_1, SerialPort.PARITY_EVEN);
                     serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
                     in = serialPort.getInputStream();
                     out = serialPort.getOutputStream();
-
+                    serialPort.addEventListener(this);
+                    serialPort.notifyOnDataAvailable(true);
                 } else {
                     System.out.println("Error: Only serial ports are handled by this example.");
                 }
@@ -47,29 +68,8 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract {
             Logger.error("SerialPortAdapter : " + ex.getMessage());
             throw new IOException(String.format("Error initializing serial port %s", portName), ex);
         }
-        (new Thread(new SerialReader())).start();
     }
-
-    /**
-     *
-     */
-    public class SerialReader implements Runnable {
-
-        public void run() {
-            byte[] buffer = new byte[1024];
-            int len;
-            try {
-                while ((len = in.read(buffer)) > -1) {
-                    for (int i = 0; i < len; i++) {
-                        fifo.add(buffer[i]);
-                    }
-                }
-            } catch (IOException e) {
-                Logger.error("Glory error reading serial port");
-            }
-        }
-    }
-
+    
     public void close() throws IOException {
         try {
             Logger.debug(String.format("Closing serial port %s", serialPort.getName()));
@@ -83,19 +83,19 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract {
             throw new IOException(String.format("Error closing serial port"), e);
         }
     }
-
+    
     public void write(byte[] buffer) throws IOException {
         if (serialPort == null) {
             throw new IOException("Error wrting to serial port, port closed");
         }
-
+        
         try {
             out.write(buffer);
         } catch (IOException e) {
             throw new IOException(String.format("Error wrting to serial port %s", serialPort.getName()), e);
         }
     }
-
+    
     public byte read() throws IOException {
         Byte ch;
         try {
