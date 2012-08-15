@@ -1,6 +1,5 @@
 package devices;
 
-import devices.SerialPortAdapter;
 import devices.glory.Glory;
 import devices.glory.manager.Manager;
 import java.io.IOException;
@@ -19,60 +18,61 @@ public class CounterFactory extends PlayPlugin {
     static HashMap<Glory, Manager.CounterFactoryApi> managers = new HashMap();
 
     static synchronized public Glory getCounter() {
-        return getCounter( null );
+        return getCounter(null);
     }
 
-    public static Manager.ControllerApi getManager( String port ) {
-        Glory glory = getCounter( port );
+    public static Manager.ControllerApi getManager(String port) {
+        Glory glory = getCounter(port);
 
-        if ( glory == null ) {
+        if (glory == null) {
             return null;
         }
-        if ( managers.containsKey( glory ) ) {
-            return managers.get( glory ).getControllerApi();
+        if (managers.containsKey(glory)) {
+            return managers.get(glory).getControllerApi();
         }
-        Manager m = new Manager( glory );
+        Manager m = new Manager(glory);
         Manager.CounterFactoryApi mcf = m.getCounterFactoryApi();
         mcf.startThread();
-        managers.put( glory, mcf );
+        managers.put(glory, mcf);
         return mcf.getControllerApi();
     }
 
-    synchronized public static Glory getCounter( String port ) {
-        if ( port == null ) {
+    synchronized public static Glory getCounter(String port) {
+        if (port == null) {
             port = "0";
         }
-        if ( devices.containsKey( port ) ) {
-            return devices.get( port );
+        if (devices.containsKey(port)) {
+            return devices.get(port);
         }
 
         try {
-            Logger.info( String.format( "Configuring serial port %s", port ) );
-            SerialPortAdapter serialPort = new SerialPortAdapter( port );
-            Logger.info( String.format( "Configuring glory" ) );
-            Glory device = new Glory( serialPort );
-            devices.put( port, device );
+            Logger.info(String.format("Configuring serial port %s", port));
+            //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
+            SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port);
+            Logger.info(String.format("Configuring glory"));
+            Glory device = new Glory(serialPort);
+            devices.put(port, device);
             return device;
-        } catch ( IOException e ) {
-            Logger.error( "Error opening the serial port" );
+        } catch (IOException e) {
+            Logger.error("Error opening the serial port");
             return null;
         }
     }
 
     static synchronized public void closeAll() {
-        for ( Manager.CounterFactoryApi m : managers.values() ) {
-            Logger.debug( "Closing Manager" );
+        for (Manager.CounterFactoryApi m : managers.values()) {
+            Logger.debug("Closing Manager");
             m.close();
         }
-        for ( Glory g : devices.values() ) {
-            Logger.debug( "Closing Device" );
+        for (Glory g : devices.values()) {
+            Logger.debug("Closing Device");
             g.close();
         }
     }
 
     @Override
     public void onApplicationStop() {
-        Logger.debug( "Close all ports" );
+        Logger.debug("Close all ports");
         closeAll();
     }
 }

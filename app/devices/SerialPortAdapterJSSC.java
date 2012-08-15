@@ -1,16 +1,13 @@
 package devices;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import jssc.*;
 import play.Logger;
 
-public class SerialPortAdapter implements SerialPortEventListener {
+public class SerialPortAdapterJSSC extends SerialPortAdapterAbstract implements SerialPortEventListener {
 
     SerialPort serialPort;
-    ArrayBlockingQueue< Byte> fifo = new ArrayBlockingQueue< Byte>(1024);
 
     public void serialEvent(SerialPortEvent event) {
         if (serialPort == null) {
@@ -28,8 +25,8 @@ public class SerialPortAdapter implements SerialPortEventListener {
         }
     }
 
-    public SerialPortAdapter(String portName) throws IOException {
-
+    public SerialPortAdapterJSSC(String portN) throws IOException {
+        portName = portN;
         try {
             String[] ports = SerialPortList.getPortNames();
             Integer p = Integer.parseInt(portName);
@@ -92,43 +89,5 @@ public class SerialPortAdapter implements SerialPortEventListener {
             throw new IOException(String.format("Error reading from port %s", serialPort.getPortName()));
         }
         return ch;
-    }
-
-    public InputStream getInputStream() {
-        return new SerialInputStream();
-    }
-
-    class SerialInputStream extends InputStream {
-
-        @Override
-        public int read() throws IOException {
-            Byte ch = fifo.poll();
-            if (ch == null) {
-                throw new IOException("read  fifo empty");
-            }
-            return ch;
-        }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SerialPortAdapter other = (SerialPortAdapter) obj;
-        if (this.serialPort != other.serialPort && (this.serialPort == null || !this.serialPort.equals(other.serialPort))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 89 * hash + (this.serialPort != null ? this.serialPort.hashCode() : 0);
-        return hash;
     }
 }
