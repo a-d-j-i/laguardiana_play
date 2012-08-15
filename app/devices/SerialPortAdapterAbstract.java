@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInterface {
 
@@ -17,9 +19,9 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
     public byte read() throws IOException {
         Byte ch;
         try {
-            ch = fifo.poll(600, TimeUnit.SECONDS);
+            ch = fifo.poll(2, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            throw new IOException("Interrupt reading from port", e);
+            throw new IOException("SerialAdapter Interrupt reading from port", e);
         }
         if (ch == null) {
             throw new IOException("SerialAdapter Error reading from port");
@@ -35,9 +37,14 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
 
         @Override
         public int read() throws IOException {
-            Byte ch = fifo.poll();
+            Byte ch;
+            try {
+                ch = fifo.poll(2, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new IOException("SerialInputStream Interrupt reading from port", e);
+            }
             if (ch == null) {
-                throw new IOException("read  fifo empty");
+                throw new IOException("SerialInputStream read  fifo empty");
             }
             return ch;
         }
