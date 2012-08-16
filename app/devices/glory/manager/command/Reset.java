@@ -12,12 +12,13 @@ import devices.glory.manager.Manager;
  */
 public class Reset extends ManagerCommandAbstract {
 
-    public Reset( Manager.ThreadCommandApi threadCommandApi ) {
-        super( threadCommandApi );
+    public Reset(Manager.ThreadCommandApi threadCommandApi) {
+        super(threadCommandApi);
     }
 
     @Override
     public void execute() {
-        gotoNeutral( true, false );
+        gotoNeutral(true, false);
+        threadCommandApi.setStatus(Manager.Status.IDLE);
     }
 }

@@ -195,7 +195,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 threadCommandApi.setError(String.format("gotoNeutralInvalid D1-3 mode %s", gloryStatus.getD1Mode().name()));
                 break;
         }
-        threadCommandApi.setStatus(Manager.Status.IDLE);
         Logger.debug("GOTO NEUTRAL DONE");
         return true;
     }
@@ -342,7 +341,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case being_recover_from_storing_error:
                 case escrow_close_request:
                 case waiting_for_an_envelope_to_set:
-                    threadCommandApi.setStatus(Manager.Status.IDLE);
                     if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
                         return;
                     }
@@ -387,7 +385,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             sleep();
         }
-        threadCommandApi.setStatus(Manager.Status.IDLE);
         return sendGloryCommand(new devices.glory.command.RemoteCancel());
     }
 

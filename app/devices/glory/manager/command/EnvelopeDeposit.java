@@ -14,33 +14,8 @@ import devices.glory.manager.Manager.ThreadCommandApi;
  */
 public class EnvelopeDeposit extends ManagerCommandAbstract {
 
-    private CountData countData = new CountData();
-
     public EnvelopeDeposit(ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
-    }
-
-    static public class CountData extends CommandData {
-
-        private boolean storeDeposit = false;
-
-        private boolean needToStoreDeposit() {
-            rlock();
-            try {
-                return storeDeposit;
-            } finally {
-                runlock();
-            }
-        }
-
-        private void storeDeposit(boolean storeDeposit) {
-            wlock();
-            try {
-                this.storeDeposit = storeDeposit;
-            } finally {
-                wunlock();
-            }
-        }
     }
 
     @Override
@@ -60,7 +35,6 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
         if (!waitUntilSR1State(GloryStatus.SR1Mode.escrow_open)) {
             return;
         }
-        threadCommandApi.setStatus(Manager.Status.PUT_THE_ENVELOPER_IN_THE_ESCROW);
         boolean storeTry = false;
         while (!mustCancel()) {
             if (!sense()) {
@@ -81,13 +55,8 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                         gotoNeutral(true, false);
                         return;
                     }
-                    if (countData.needToStoreDeposit()) {
-                        if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
-                            return;
-                        }
-                        break;
-                    } else {
-                        threadCommandApi.setStatus(Manager.Status.READY_TO_STORE);
+                    if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
+                        return;
                     }
                     break;
                 case being_store:
@@ -106,9 +75,5 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
             sleep();
         }
         gotoNeutral(true, false);
-    }
-
-    public void storeDeposit(int sequenceNumber) {
-        countData.storeDeposit(true);
     }
 }

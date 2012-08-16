@@ -12,12 +12,13 @@ import devices.glory.manager.Manager;
  */
 public class StoringErrorReset extends ManagerCommandAbstract {
 
-    public StoringErrorReset( Manager.ThreadCommandApi threadCommandApi ) {
-        super( threadCommandApi );
+    public StoringErrorReset(Manager.ThreadCommandApi threadCommandApi) {
+        super(threadCommandApi);
     }
 
     @Override
     public void execute() {
-        gotoNeutral( true, true );
+        gotoNeutral(true, true);
+        threadCommandApi.setStatus(Manager.Status.IDLE);
     }
 }

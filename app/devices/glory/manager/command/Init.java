@@ -13,14 +13,14 @@ import devices.glory.manager.Manager.ThreadCommandApi;
  */
 public class Init extends ManagerCommandAbstract {
 
-    public Init( ThreadCommandApi threadCommandApi ) {
-        super( threadCommandApi );
+    public Init(ThreadCommandApi threadCommandApi) {
+        super(threadCommandApi);
     }
 
     @Override
     public void execute() {
-        threadCommandApi.setStatus( Manager.Status.INITIALIZING );
-        gotoNeutral( false, false );
-        threadCommandApi.setStatus( Manager.Status.IDLE );
+        threadCommandApi.setStatus(Manager.Status.INITIALIZING);
+        gotoNeutral(false, false);
+        threadCommandApi.setStatus(Manager.Status.INITIALIZING, Manager.Status.IDLE);
     }
 }

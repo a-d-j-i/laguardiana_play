@@ -1,13 +1,11 @@
 package controllers;
 
+import controllers.dbcrud.EnvelopeContents;
 import devices.CounterFactory;
 import devices.glory.manager.Manager;
 import java.util.Date;
 import java.util.List;
-import models.Bill;
 import models.Deposit;
-import models.db.LgBatch;
-import models.db.LgBill;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.lov.DepositUserCodeReference;
@@ -17,11 +15,11 @@ import play.mvc.With;
 
 @With( Secure.class)
 public class EnvelopeDepositController extends DepositController {
-
+    
     public static void index() {
         Application.index();
     }
-
+    
     public static void inputReference(String reference1, String reference2) throws Throwable {
         //TODO: Validate references depending on system properties. 
         Deposit d = DepositController.createDeposit(reference1, reference2);
@@ -34,10 +32,10 @@ public class EnvelopeDepositController extends DepositController {
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         render(referenceCodes);
     }
-
+    
     public static void getEnvelopeContents(String depositId, LgEnvelope envelope) {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
-
+        
         if (envelope != null && envelope.envelopeTypeLov != null) {
             // TODO: Use validate.
             envelope.deposit = deposit;
@@ -56,7 +54,7 @@ public class EnvelopeDepositController extends DepositController {
         renderArgs.put("envelopeTypes", envelopeTypes);
         render(deposit, envelope);
     }
-
+    
     public static void acceptEnvelope(String depositId, LgEnvelope envelope) {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
 
@@ -80,10 +78,13 @@ public class EnvelopeDepositController extends DepositController {
         }
         renderArgs.put("confirm", true);
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        manager.envelopeDeposit();
+        if (!manager.envelopeDeposit()) {
+            Logger.error("TODO ERROR HERE ???");
+        }
+        Logger.debug("------------ > Current Status %s", manager.getStatus().name());
         boolean done = false;
         while (!done) {
-            Logger.debug("Current Status %s", manager.getStatus().name());
+            Logger.debug("------------ > Current Status %s", manager.getStatus().name());
             switch (manager.getStatus()) {
                 case IDLE:
                     done = true;
@@ -100,77 +101,16 @@ public class EnvelopeDepositController extends DepositController {
                     break;
             }
         }
-
-
-        if (manager.getStatus() != Manager.Status.READY_TO_STORE) {
-            Logger.debug("NOT READY TO STORE");
-            index();
-            return;
-        }
-        if (!manager.storeDeposit(Integer.parseInt(depositId))) {
-            Logger.error("TODO: ERROR DAVE HELP ME");
-            index();
-            return;
-        }
-
-        done = false;
-        while (!done) {
-            Logger.debug("Current Status %s", manager.getStatus().name());
-            switch (manager.getStatus()) {
-                case IDLE:
-                    done = true;
-                    break;
-                case ERROR:
-                    Logger.error("TODO: ERROR DAVE HELP ME");
-                    index();
-                    return;
-                default:
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ex) {
-                    }
-                    break;
-            }
+        // TODO: Put in a better place.
+        for (LgEnvelopeContent c : envelope.envelopeContents) {
+            c.envelope = envelope;
         }
         envelope.save();
 
-        flash.success("Deposit is done!");
-        render(deposit);
-    }
-// TODO: Finish
-
-    public static void cancelDeposit(String depositId) {
-        //TODO: Check if there are batches related to this deposit.
-        // infrom and send cancelDeposit
-        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-
-        manager.cancelDeposit();
-        boolean done = false;
-        while (!done) {
-            switch (manager.getStatus()) {
-                case IDLE:
-                    done = true;
-                    break;
-                case ERROR:
-                    Logger.error("TODO: ERROR DAVE HELP ME");
-                    index();
-                    return;
-                default:
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ex) {
-                    }
-                    break;
-            }
-        }
-        finishDeposit(depositId);
-    }
-
-    public static void finishDeposit(String depositId) {
-        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
         deposit.finishDate = new Date();
         deposit.save();
+        
+        flash.success("Deposit is done!");
         Application.index();
     }
 }

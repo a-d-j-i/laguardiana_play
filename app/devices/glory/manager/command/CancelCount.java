@@ -4,6 +4,7 @@
  */
 package devices.glory.manager.command;
 
+import devices.glory.manager.Manager;
 import devices.glory.manager.Manager.ThreadCommandApi;
 
 /**
@@ -12,12 +13,13 @@ import devices.glory.manager.Manager.ThreadCommandApi;
  */
 public class CancelCount extends ManagerCommandAbstract {
 
-    public CancelCount( ThreadCommandApi threadCommandApi ) {
-        super( threadCommandApi );
+    public CancelCount(ThreadCommandApi threadCommandApi) {
+        super(threadCommandApi);
     }
 
     @Override
     public void execute() {
-        gotoNeutral( true, false );
+        gotoNeutral(true, false);
+        threadCommandApi.setStatus(Manager.Status.IDLE);
     }
 }
