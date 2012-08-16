@@ -6,6 +6,7 @@ package devices.glory.manager.command;
 
 import devices.glory.GloryStatus;
 import devices.glory.manager.Manager;
+import devices.glory.manager.Manager.ErrorDetail;
 import devices.glory.manager.Manager.ThreadCommandApi;
 import java.util.HashMap;
 import java.util.Map;
@@ -178,13 +179,16 @@ public class Count extends ManagerCommandAbstract {
                     }
                     break;
                 case abnormal_device:
-                    threadCommandApi.setError(String.format("Count Abnormal device, todo: get the flags"));
+                    threadCommandApi.setError(Manager.Error.JAM,
+                            String.format("Count Abnormal device, todo: get the flags"));
                     return;
                 case storing_error:
-                    threadCommandApi.setError(String.format("Count Storing error, todo: get the flags"));
+                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                            String.format("Count Storing error, todo: get the flags"));
                     return;
                 default:
-                    threadCommandApi.setError(String.format("Count invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
+                    threadCommandApi.setError(Manager.Error.APP_ERROR,
+                            String.format("Count invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
                     return;
             }
             sleep();
@@ -218,8 +222,8 @@ public class Count extends ManagerCommandAbstract {
         }
         Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
         if (currentQuantity == null) {
-            threadCommandApi.setStatus(Manager.Status.ERROR);        
-            threadCommandApi.setError(String.format("Error getting current count"));
+            threadCommandApi.setError(Manager.Error.APP_ERROR,
+                    String.format("Error getting current count"));
             return false;
         }
 
@@ -230,7 +234,8 @@ public class Count extends ManagerCommandAbstract {
             }
             int current = currentQuantity.get(countData.currentSlot);
             if (current > desired) {
-                threadCommandApi.setError(String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired));
+                threadCommandApi.setError(Manager.Error.APP_ERROR,
+                        String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired));
                 return true;
             }
             bills[ countData.currentSlot] = desired - current;

@@ -81,7 +81,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
         switch (gloryStatus.getSr1Mode()) {
             case storing_error:
                 if (!storingError) {
-                    threadCommandApi.setError("Storing error must call admin");
+                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                            "Storing error must call admin");
                     return false;
                 }
                 switch (gloryStatus.getD1Mode()) {
@@ -97,7 +98,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         storingErrorRecovery();
                         break;
                     default:
-                        threadCommandApi.setError(String.format("gotoNeutral Abnormal device Invalid D1 mode %s", gloryStatus.getD1Mode().name()));
+                        threadCommandApi.setError(Manager.Error.APP_ERROR,
+                                String.format("gotoNeutral Abnormal device Invalid D1 mode %s", gloryStatus.getD1Mode().name()));
                         return false;
                 }
                 break;
@@ -118,7 +120,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     case normal_error_recovery_mode:
                         break;
                     default:
-                        threadCommandApi.setError(String.format("gotoNeutral Abnormal device Invalid D1-2 mode %s", gloryStatus.getD1Mode().name()));
+                        threadCommandApi.setError(Manager.Error.APP_ERROR,
+                                String.format("gotoNeutral Abnormal device Invalid D1-2 mode %s", gloryStatus.getD1Mode().name()));
                         return false;
                 }
                 errorRecovery();
@@ -129,7 +132,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         WaitForEmptyEscrow();
                         break;
                     default:
-                        threadCommandApi.setError(String.format("gotoNeutral Abnormal device Invalid D1-2 mode %s", gloryStatus.getD1Mode().name()));
+                        threadCommandApi.setError(Manager.Error.APP_ERROR,
+                                String.format("gotoNeutral Abnormal device Invalid D1-2 mode %s", gloryStatus.getD1Mode().name()));
                         return false;
                 }
 
@@ -146,7 +150,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 switch (gloryStatus.getSr1Mode()) {
                     case storing_start_request:
                         if (!openEscrow) {
-                            threadCommandApi.setError("There are bills in the escrow call an admin");
+                            threadCommandApi.setError(Manager.Error.BILLS_IN_ESCROW_CALL_ADMIN,
+                                    "There are bills in the escrow call an admin");
                             return false;
                         }
                         if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
@@ -165,7 +170,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             errorRecovery();
                         } else {
                             WaitForEmptyEscrow();
-                            threadCommandApi.setError("Storing error must call admin");
+                            threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                                    "Storing error must call admin");
                             remoteCancel();
                         }
                         break;
@@ -177,7 +183,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         remoteCancel();
                         break;
                     default:
-                        threadCommandApi.setError(String.format("gotoNeutral Abnormal device Invalid D1-3 mode %s", gloryStatus.getD1Mode().name()));
+                        threadCommandApi.setError(Manager.Error.APP_ERROR,
+                                String.format("gotoNeutral Abnormal device Invalid D1-3 mode %s", gloryStatus.getD1Mode().name()));
                         break;
                 }
                 break;
@@ -186,13 +193,15 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     return false;
                 }
                 if (gloryStatus.getD1Mode() != GloryStatus.D1Mode.neutral) {
-                    threadCommandApi.setError(String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
+                    threadCommandApi.setError(Manager.Error.APP_ERROR,
+                            String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
                 }
                 break;
             case neutral:
                 break;
             default:
-                threadCommandApi.setError(String.format("gotoNeutralInvalid D1-3 mode %s", gloryStatus.getD1Mode().name()));
+                threadCommandApi.setError(Manager.Error.APP_ERROR,
+                        String.format("gotoNeutralInvalid D1-3 mode %s", gloryStatus.getD1Mode().name()));
                 break;
         }
         Logger.debug("GOTO NEUTRAL DONE");
@@ -218,12 +227,13 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     boolean sendGCommand(GloryCommandAbstract cmd) {
         if (cmd == null) {
-            threadCommandApi.setError("Invalid command null");
+            threadCommandApi.setError(Manager.Error.APP_ERROR,
+                    "Invalid command null");
             return false;
         }
         if (!gloryStatus.setStatusOk(threadCommandApi.sendGloryCommand(cmd))) {
             String error = gloryStatus.getLastError();
-            threadCommandApi.setError(error);
+            threadCommandApi.setError(Manager.Error.APP_ERROR, error);
             return false;
         }
         return true;
@@ -288,17 +298,20 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             switch (m) {
                 case abnormal_device:
-                    threadCommandApi.setError("waitUntilSR1State Abnormal device, todo: get the flags");
+                    threadCommandApi.setError(Manager.Error.JAM,
+                            "waitUntilSR1State Abnormal device, todo: get the flags");
                     return false;
                 case storing_error:
-                    threadCommandApi.setError("waitUntilSR1State Storing error, todo: get the flags");
+                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                            "waitUntilSR1State Storing error, todo: get the flags");
                     return false;
                 default:
                     break;
             }
             sleep();
         }
-        threadCommandApi.setError(String.format("cant set sr1 mode to %s", state.name()));
+        threadCommandApi.setError(Manager.Error.APP_ERROR,
+                String.format("cant set sr1 mode to %s", state.name()));
         return false;
     }
 
@@ -316,17 +329,20 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             switch (gloryStatus.getSr1Mode()) {
                 case abnormal_device:
-                    threadCommandApi.setError("waitUntilD1State Abnormal device, todo: get the flags");
+                    threadCommandApi.setError(Manager.Error.JAM,
+                            "waitUntilD1State Abnormal device, todo: get the flags");
                     return false;
                 case storing_error:
-                    threadCommandApi.setError("waitUntilD1State Storing error, todo: get the flags");
+                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                            "waitUntilD1State Storing error, todo: get the flags");
                     return false;
                 default:
                     break;
             }
             sleep();
         }
-        threadCommandApi.setError(String.format("cant set d1 mode to %s", state.name()));
+        threadCommandApi.setError(Manager.Error.APP_ERROR,
+                String.format("cant set d1 mode to %s", state.name()));
         return false;
     }
 
@@ -354,18 +370,22 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case waiting:
                     return;
                 case abnormal_device:
-                    threadCommandApi.setError("Abnormal device, todo: get the flags");
+                    threadCommandApi.setError(Manager.Error.JAM,
+                            "Abnormal device, todo: get the flags");
                     return;
                 case storing_error:
-                    threadCommandApi.setError("Storing error, todo: get the flags");
+                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                            "Storing error, todo: get the flags");
                     return;
                 default:
-                    threadCommandApi.setError(String.format("WaitForEmptyEscrow invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
+                    threadCommandApi.setError(Manager.Error.APP_ERROR,
+                            String.format("WaitForEmptyEscrow invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
                     break;
             }
             sleep();
         }
-        threadCommandApi.setError("WaitForEmptyEscrow waiting too much");
+        threadCommandApi.setError(Manager.Error.APP_ERROR,
+                "WaitForEmptyEscrow waiting too much");
     }
 
     private boolean remoteCancel() {

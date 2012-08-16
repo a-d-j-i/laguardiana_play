@@ -12,9 +12,9 @@ import play.Logger;
  * @author adji
  */
 public class Manager {
-    
-    public enum Status {
-        
+
+    static public enum Status {
+
         IDLE,
         READY_TO_STORE,
         ERROR,
@@ -26,13 +26,32 @@ public class Manager {
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,;
     };
+
+    static public enum Error {
+
+        APP_ERROR,
+        JAM, 
+        STORING_ERROR_CALL_ADMIN, 
+        BILLS_IN_ESCROW_CALL_ADMIN,;
+    };
+
+    static public class ErrorDetail {
+
+        public Error code;
+        public String data;
+
+        public ErrorDetail(Error code, String data) {
+            this.code = code;
+            this.data = data;
+        }
+    }
     final private Thread thread;
     final private Glory device;
     final private ManagerThreadState managerThreadState;
     // TODO: Better error reporting, as a class with arguments.
     final private AtomicReference<Status> status = new AtomicReference<Status>();
-    final private AtomicReference<String> error = new AtomicReference<String>();
-    
+    final private AtomicReference<ErrorDetail> error = new AtomicReference<ErrorDetail>();
+
     public Manager(Glory device) {
         this.device = device;
         this.managerThreadState = new ManagerThreadState();
@@ -45,41 +64,46 @@ public class Manager {
      *
      *
      */
-    
+
     public class ThreadCommandApi {
-        
+
         private final ManagerThreadState.ThreadApi managerThreadApi;
-        
+
         public ThreadCommandApi() {
             managerThreadApi = managerThreadState.getThreadApi();
         }
-        
+
         public ManagerCommandAbstract getCurrentCommand() {
             return managerThreadApi.getCurrentCommand();
         }
-        
+
         public boolean mustStop() {
             return managerThreadApi.mustStop();
         }
-        
+
         void stopped() {
             managerThreadApi.stopped();
         }
-        
+
         public GloryCommandAbstract sendGloryCommand(GloryCommandAbstract cmd) {
             return device.sendCommand(cmd);
         }
-        
+
         public void setStatus(Status s) {
             status.set(s);
         }
-        
+
         public void setStatus(Status c, Status s) {
             status.compareAndSet(c, s);
         }
-        
-        public void setError(String e) {
+
+        public void setError(ErrorDetail e) {
             error.set(e);
+            setStatus(Status.ERROR);
+        }
+
+        public void setError(Error e, String s) {
+            error.set(new ErrorDetail(e, s));
             setStatus(Status.ERROR);
         }
     }
@@ -92,22 +116,26 @@ public class Manager {
      *
      */
     public class ControllerApi {
-        
+
         private final ManagerThreadState.ControllerApi managerControllerApi;
         private final ThreadCommandApi threadCommandApi = new ThreadCommandApi();
-        
+
         public ControllerApi() {
             managerControllerApi = managerThreadState.getControllerApi();
         }
-        
+
         public boolean count(Map<Integer, Integer> desiredQuantity) {
-            if (managerControllerApi.getCurrentCommand() != null) {
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                if (cmd instanceof Count) {
+                    return true;
+                }
                 // still executing
                 return false;
             }
             return managerControllerApi.sendCommand(new Count(threadCommandApi, desiredQuantity));
         }
-        
+
         public Map<Integer, Integer> getCurrentQuantity() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
@@ -118,7 +146,7 @@ public class Manager {
             }
             return ((Count) cmd).getCurrentQuantity();
         }
-        
+
         public Map<Integer, Integer> getDesiredQuantity() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
@@ -129,7 +157,7 @@ public class Manager {
             }
             return ((Count) cmd).getDesiredQuantity();
         }
-        
+
         public boolean cancelDeposit() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
@@ -142,7 +170,7 @@ public class Manager {
             cmd.cancel();
             return true;
         }
-        
+
         public boolean storeDeposit(Integer sequenceNumber) {
             Logger.debug("storeDeposit");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
@@ -156,37 +184,53 @@ public class Manager {
             }
             return false;
         }
-        
+
         public boolean envelopeDeposit() {
             Logger.debug("envelopeDeposit");
-            if (managerControllerApi.getCurrentCommand() != null) {
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                if (cmd instanceof EnvelopeDeposit) {
+                    return true;
+                }
                 // still executing
                 return false;
             }
             threadCommandApi.setStatus(Manager.Status.PUT_THE_ENVELOPER_IN_THE_ESCROW);
             return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi));
         }
-        
+
         public boolean reset() {
             Logger.debug("------reset");
-            if (managerControllerApi.getCurrentCommand() != null) {
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                if (cmd instanceof Reset) {
+                    return true;
+                }
                 // still executing
                 return false;
             }
             return managerControllerApi.sendCommand(new Reset(threadCommandApi));
         }
-        
+
         public boolean storingErrorReset() {
             Logger.debug("------storing error reset");
-            if (managerControllerApi.getCurrentCommand() != null) {
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                if (cmd instanceof StoringErrorReset) {
+                    return true;
+                }
                 // still executing
                 return false;
             }
             return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi));
         }
-        
+
         public Manager.Status getStatus() {
             return status.get();
+        }
+
+        public ErrorDetail getErrorDetail() {
+            return error.get();
         }
     }
     /*
@@ -196,13 +240,13 @@ public class Manager {
      *
      *
      */
-    
+
     public class CounterFactoryApi {
-        
+
         public void startThread() {
             thread.start();
         }
-        
+
         public void close() {
             Logger.debug("Closing Manager Stop");
             if (thread.isAlive()) {
@@ -217,12 +261,12 @@ public class Manager {
             }
             Logger.debug("Closing Manager done");
         }
-        
+
         public ControllerApi getControllerApi() {
             return new ControllerApi();
         }
     }
-    
+
     public CounterFactoryApi getCounterFactoryApi() {
         return new CounterFactoryApi();
     }

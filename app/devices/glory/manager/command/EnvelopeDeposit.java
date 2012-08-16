@@ -63,13 +63,16 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                     storeTry = true;
                     break;
                 case abnormal_device:
-                    threadCommandApi.setError(String.format("EnvelopeDeposit Abnormal device, todo: get the flags"));
+                    threadCommandApi.setError(Manager.Error.JAM,
+                            String.format("EnvelopeDeposit Abnormal device, todo: get the flags"));
                     return;
                 case storing_error:
-                    threadCommandApi.setError(String.format("EnvelopeDeposit Storing error, todo: get the flags"));
+                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                            String.format("EnvelopeDeposit Storing error, todo: get the flags"));
                     return;
                 default:
-                    threadCommandApi.setError(String.format("EnvelopeDeposit invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
+                    threadCommandApi.setError(Manager.Error.APP_ERROR,
+                            String.format("EnvelopeDeposit invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
                     return;
             }
             sleep();
