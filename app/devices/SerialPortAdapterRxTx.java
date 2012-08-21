@@ -39,8 +39,14 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
     public SerialPortAdapterRxTx(String portN) throws IOException {
         portName = portN;
         CommPortIdentifier portIdentifier;
+
+        Logger.error(System.getProperty("os.name"));
+        Logger.error(System.getProperty("os.arch"));
         try {
-            File f = new File(Play.applicationPath.getAbsolutePath(), "lib");
+            File f = new File( 
+                        new File(Play.applicationPath.getAbsolutePath(), "lib"),
+                        System.getProperty("os.name")
+                    );
             Logger.debug("app path %s", f.getAbsolutePath());
             System.setProperty("java.library.path", f.getAbsolutePath());
             Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
