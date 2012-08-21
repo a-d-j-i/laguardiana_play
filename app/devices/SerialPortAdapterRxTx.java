@@ -40,12 +40,11 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
         portName = portN;
         CommPortIdentifier portIdentifier;
 
-        Logger.error(System.getProperty("os.name"));
-        Logger.error(System.getProperty("os.arch"));
         try {
-            File f = new File( 
-                        new File(Play.applicationPath.getAbsolutePath(), "lib"),
-                        System.getProperty("os.name")
+            File f = new File( Play.applicationPath.getAbsolutePath() + File.separator +
+                                "lib" + File.separator +
+                                System.getProperty("os.name") + File.separator +
+                                System.getProperty("os.arch")
                     );
             Logger.debug("app path %s", f.getAbsolutePath());
             System.setProperty("java.library.path", f.getAbsolutePath());
