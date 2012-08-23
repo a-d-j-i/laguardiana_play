@@ -41,11 +41,15 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
         CommPortIdentifier portIdentifier;
 
         try {
+            String os = System.getProperty("os.name");
+            if (os.indexOf("Win")==0) {
+                os = "Win";
+            }
+            
             File f = new File( Play.applicationPath.getAbsolutePath() + File.separator +
-                                "lib" + File.separator +
-                                System.getProperty("os.name") + File.separator +
-                                System.getProperty("os.arch")
-                    );
+                                "lib" + File.separator + os + File.separator +
+                                System.getProperty("os.arch"));
+            
             Logger.debug("app path %s", f.getAbsolutePath());
             System.setProperty("java.library.path", f.getAbsolutePath());
             Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
