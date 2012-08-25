@@ -61,12 +61,12 @@ public class BillDepositController extends DepositController {
             render();
         }
     }
-
+    
     public static void acceptBatch(String depositId) {
         //user accepted to deposit it!
+        Object[] o = new Object[1];
+        Boolean storeOk;
         Logger.info("About to restore data!!!!");
-
-        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
 
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
         if (manager.getStatus() != Manager.Status.READY_TO_STORE) {
@@ -74,78 +74,87 @@ public class BillDepositController extends DepositController {
             index();
             return;
         }
+
+        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
         List<Bill> billData = Bill.getCurrentCounters();
 
-        if (!manager.storeDeposit(Integer.parseInt(depositId))) {
-            Logger.error("TODO: ERROR DAVE HELP ME");
-            index();
-            return;
+        o[0] = storeOk = manager.storeDeposit(Integer.parseInt(depositId));
+        Logger.error(" // accept deposit opened result: %b", storeOk);
+        if (!storeOk) {
+            renderJSON(o);
+            return;            
         }
 
-        boolean done = false;
-        while (!done) {
-            Logger.debug("Current Status %s", manager.getStatus().name());
-            switch (manager.getStatus()) {
-                case IDLE:
-                    done = true;
-                    break;
-                case ERROR:
-                    Logger.error("TODO: ERROR DAVE HELP ME");
-                    index();
-                    return;
-                default:
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ex) {
-                    }
-                    break;
-            }
-        }
-
-        // TODO: if save fails do something interesting
         LgBatch batch = new LgBatch();
         for (Bill bill : billData) {
+            Logger.debug(" -> quantity %d", bill.quantity);
             LgBill b = new LgBill(batch, bill.quantity, bill.billType, deposit);
             //batch.bills.add(b);
         }
         batch.save();
-        flash.success("Deposit is done!");
-        render(deposit);
+        renderJSON(o);
+        return;
     }
 
+    public static void checkAcceptBatch(String depositId) {
+        Manager.ControllerApi manager = CounterFactory.getGloryManager();
+        Object[] o = new Object[3];
+        Manager.Status status = manager.getStatus();
+        Boolean finished = (status == Manager.Status.IDLE || 
+                                    status == Manager.Status.ERROR);
+        o[0] = finished;
+        o[1] = status== Manager.Status.IDLE;
+        
+        Logger.error("-----------");
+        Logger.error(" finished: %b result: %b", finished, (status== Manager.Status.IDLE));        
+        if (!finished) {
+            renderJSON(o);
+            return;
+        }
+        renderJSON(o);
+    }
+    
     // TODO: Finish
     public static void cancelDeposit(String depositId) {
         //TODO: Check if there are batches related to this deposit.
         // infrom and send cancelDeposit
-        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
+        //Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
+        Logger.error(" / Cancel deposit");
 
         manager.cancelDeposit();
-        boolean done = false;
-        while (!done) {
-            switch (manager.getStatus()) {
-                case IDLE:
-                    done = true;
-                    break;
-                case ERROR:
-                    Logger.error("TODO: ERROR DAVE HELP ME");
-                    index();
-                    return;
-                default:
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ex) {
-                    }
-                    break;
-            }
+        Object[] o = new Object[1];
+        o[0] = 1;
+        Logger.error(" // Cancel deposit");
+        renderJSON(o);
+    }
+    
+    public static void checkCancelDeposit(String depositId) {
+        Manager.ControllerApi manager = CounterFactory.getGloryManager();
+        Object[] o = new Object[3];
+        Manager.Status status = manager.getStatus();
+        Boolean finished = (status == Manager.Status.IDLE || 
+                                    status == Manager.Status.ERROR);
+        o[0] = finished;
+        o[1] = status== Manager.Status.IDLE;
+        
+        Logger.error(" finished: %b result: %b", finished, (status== Manager.Status.IDLE));
+            
+        if (finished) {
+            //Logger.error("pre finish deposit");
+            //finishDeposit(depositId);
+            //Logger.error("after finish deposit");
+            Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
+            deposit.finishDate = new Date();
+            deposit.save();
         }
-        finishDeposit(depositId);
+        Logger.error("about to render json..");
+        renderJSON(o);
     }
 
     public static void finishDeposit(String depositId) {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
         deposit.finishDate = new Date();
         deposit.save();
-        Application.index();
     }
 }

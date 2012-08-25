@@ -30,14 +30,18 @@
         #{ifAuthorized resource: 'BillDepositController.acceptBatch', operation: 'GET'}
         <div class="control-group">
             <div class="controls">
-                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" href="@{ BillDepositController.acceptBatch(deposit.depositId) }">Accept Batch</a>
+                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" 
+                   id="acceptBatch"
+                   >Accept Batch</a>
             </div>
         </div>        
         #{/ifAuthorized}
         #{ifAuthorized resource: 'BillDepositController.cancelDeposit', operation: 'GET'}
         <div class="control-group">
             <div class="controls">
-                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" href="@{ BillDepositController.cancelDeposit(deposit.depositId) }">Cancel Deposit</a>
+                <div class="btn btn-primary btn-large menu-button-fixed-size-btn" 
+                   id="cancelBatch"
+                   >Cancel Deposit</div> 
             </div>
         </div>
         #{/ifAuthorized}
@@ -75,7 +79,89 @@
         })
     }
     // Call refresh every .5 seconds
-    setInterval(refresh, 1000)
+    setInterval(refresh, 500)
     refresh()
+</script>
+    
+<script type="text/javascript" charset="${_response_encoding}">
+    var waitingCancelationRequest = false;
+    var waitingCancelationInterval = null;
+
+    var waitAcceptanceRequest = false;
+    var waitAcceptanceInterval = null;
+
+    function setup() {
+        $("#cancelBatch").click(function(){
+            $.getJSON( '@{BillDepositController.cancelDeposit(deposit.depositId)}}', 
+            function( data ) {
+                var success = data [ 0 ];
+                if (success == 1) {
+                    //we should wait for cancellation finish..
+                    waitingCancelationInterval = setInterval(waitCancelation, 300)
+                } else {
+                    alert ("cancel batch order failed.. perhaps we should retry");
+                }
+            })
+        });
+        
+        $("#acceptBatch").click(function(){
+            $.getJSON( '@{BillDepositController.acceptBatch(deposit.depositId)}', 
+            function( data ) {
+                var success = data [ 0 ];
+                if (success == 1) {
+                    //we should wait for cancellation finish..
+                    waitAcceptanceInterval = setInterval(waitAcceptance, 300)
+                } else {
+                    alert ("accept batch order failed.. perhaps we should retry");
+                }
+            })
+        });
+    }
+
+    function waitCancelation() {
+        if (waitingCancelationRequest) {
+            return;
+        }
+        waitingCancelationRequest = true;
+        $.getJSON( '@{BillDepositController.checkCancelDeposit(deposit.depositId)}', 
+          function( data ) {
+            waitingCancelationRequest = false;
+            var finishedOp = data[0];
+            var resultOk = data[1];
+            if (finishedOp) {
+                clearInterval(waitingCancelationInterval);
+                if (resultOk) {
+                    window.location = '@{Application.index}'
+                } else {
+                    alert("XXX: cancelation failed!")
+                }
+            }
+        })
+    }
+
+    function waitAcceptance() {
+        if (waitAcceptanceRequest) {
+            return;
+        }
+        waitAcceptanceRequest = true;
+        $.getJSON( '@{BillDepositController.checkAcceptBatch(deposit.depositId)}', 
+          function( data ) {
+            waitAcceptanceRequest = false;
+            var finishedOp = data[0];
+            var resultOk = data[1];
+            if (finishedOp) {
+                clearInterval(waitAcceptanceInterval);
+                if (resultOk) {
+                    $.getJSON( '@{BillDepositController.finishDeposit(deposit.depositId)}',
+                        function( data ) { window.location = '@{Application.index}'}
+                    );
+                } else {
+                    alert("XXX: acceptance failed!")
+                }
+            }
+        })
+    }
+    
+    setup()
 </script>
 #{/set}
