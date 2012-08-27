@@ -92,5 +92,6 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
             sleep();
         }
         gotoNeutral(true, false);
+        threadCommandApi.setStatus(Manager.Status.IDLE);
     }
 }

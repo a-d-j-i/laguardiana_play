@@ -347,7 +347,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     void WaitForEmptyEscrow() {
-        threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
         for (int i = 0; i < 0xffff; i++) {
             Logger.debug("WaitForEmptyEscrow");
             if (!sense()) {
@@ -362,8 +361,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     }
                     break;
                 case being_restoration:
-                case escrow_open:
                 case escrow_close:
+                    break;
+                case escrow_open:
+                    threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
                     break;
                 case storing_start_request:
                 case counting_start_request:

@@ -23,7 +23,7 @@ public class Bootstrap extends Job {
             Fixtures.loadModels( "user-data.yml" );
             Fixtures.loadModels( "dev-data.yml" );
         }
-        Logger.error( String.format( "Glory port : %s", Play.configuration.getProperty( "glory.port" ) ) );
+        Logger.info( String.format( "Glory port : %s", Play.configuration.getProperty( "glory.port" ) ) );
         if ( Play.mode.isDev() ) {
             if ( Deposit.count() == 0 ) {
                 Logger.info( "loading dev-data.yml!" );
