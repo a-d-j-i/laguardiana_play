@@ -30,8 +30,8 @@ public class Manager {
     static public enum Error {
 
         APP_ERROR,
-        JAM, 
-        STORING_ERROR_CALL_ADMIN, 
+        JAM,
+        STORING_ERROR_CALL_ADMIN,
         BILLS_IN_ESCROW_CALL_ADMIN,;
     };
 
@@ -44,12 +44,17 @@ public class Manager {
             this.code = code;
             this.data = data;
         }
+
+        @Override
+        public String toString() {
+            return "ErrorDetail{" + "code=" + code + ", data=" + data + '}';
+        }
     }
     final private Thread thread;
     final private Glory device;
     final private ManagerThreadState managerThreadState;
     // TODO: Better error reporting, as a class with arguments.
-    final private AtomicReference<Status> status = new AtomicReference<Status>();
+    final private AtomicReference<Status> status = new AtomicReference<Status>(Status.IDLE);
     final private AtomicReference<ErrorDetail> error = new AtomicReference<ErrorDetail>();
 
     public Manager(Glory device) {
@@ -124,7 +129,7 @@ public class Manager {
             managerControllerApi = managerThreadState.getControllerApi();
         }
 
-        public boolean count(Map<Integer, Integer> desiredQuantity) {
+        public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
                 if (cmd instanceof Count) {
@@ -133,7 +138,18 @@ public class Manager {
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new Count(threadCommandApi, desiredQuantity));
+            return managerControllerApi.sendCommand(new Count(threadCommandApi, desiredQuantity, currency));
+        }
+
+        public Integer getCurrency() {
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd == null) {
+                return null;
+            }
+            if (!(cmd instanceof Count)) {
+                return null;
+            }
+            return ((Count) cmd).getCurrency();
         }
 
         public Map<Integer, Integer> getCurrentQuantity() {
@@ -195,7 +211,6 @@ public class Manager {
                 // still executing
                 return false;
             }
-            threadCommandApi.setStatus(Manager.Status.PUT_THE_ENVELOPER_IN_THE_ESCROW);
             return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi));
         }
 

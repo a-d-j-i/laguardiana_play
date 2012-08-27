@@ -1,13 +1,13 @@
 package controllers;
 
-import play.mvc.*;
-import play.cache.*;
-import play.libs.F.*;
+import play.cache.Cache;
+import play.mvc.Controller;
+import play.mvc.With;
 
 
 
 @With( Secure.class )
-public class Counter extends Controller {
+public class Counter extends BaseController {
 
     public static void index() {
 //        User user = User.find("byEmail", Security.connected()).first();

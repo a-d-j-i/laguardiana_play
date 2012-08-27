@@ -8,7 +8,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 @With( Secure.class)
-public class Application extends Controller {
+public class Application extends BaseController {
 
     public static void index() {
         render();

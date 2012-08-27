@@ -92,7 +92,7 @@ public class GloryStatus implements Serializable {
     boolean escrowFull;
     boolean dischargingFailure;
     boolean rejectBillPresent;
-    boolean escrotBillPresent;
+    boolean escrowBillPresent;
     boolean hopperBillPresent;
     boolean abnormalStorage;
     boolean abnormalDevice;
@@ -147,7 +147,7 @@ public class GloryStatus implements Serializable {
             escrowFull = ( a & 0x10 ) != 0;
             dischargingFailure = ( a & 0x08 ) != 0;
             rejectBillPresent = ( a & 0x04 ) != 0;
-            escrotBillPresent = ( a & 0x02 ) != 0;
+            escrowBillPresent = ( a & 0x02 ) != 0;
             hopperBillPresent = ( a & 0x01 ) != 0;
 
 
@@ -275,8 +275,8 @@ public class GloryStatus implements Serializable {
         return doorEscrowShutter;
     }
 
-    public boolean isEscrotBillPresent() {
-        return escrotBillPresent;
+    public boolean isEscrowBillPresent() {
+        return escrowBillPresent;
     }
 
     public boolean isEscrowFull() {

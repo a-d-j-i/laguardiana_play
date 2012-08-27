@@ -9,10 +9,9 @@ import java.util.GregorianCalendar;
 import play.Play;
 import play.cache.Cache;
 import play.mvc.Before;
-import play.mvc.Controller;
 import play.mvc.Router;
 
-public class GloryController extends Controller {
+public class GloryController extends BaseController {
 
     static devices.glory.Glory glory;
 

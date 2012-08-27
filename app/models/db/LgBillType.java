@@ -1,8 +1,6 @@
 package models.db;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.*;
 import models.lov.MoneyUnit;
 import play.db.jpa.GenericModel;
@@ -22,6 +20,8 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     // TODO: Put in some place in glory configuration.
     @Column( name = "slot", nullable = false)
     public int slot;
+    @Column( name = "currency", nullable = false)
+    public int currency;
     @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "creation_date", nullable = false, length = 13)
     public Date creationDate;

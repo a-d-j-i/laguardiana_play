@@ -35,6 +35,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
         if (!waitUntilSR1State(GloryStatus.SR1Mode.escrow_open)) {
             return;
         }
+        threadCommandApi.setStatus(Manager.Status.PUT_THE_ENVELOPER_IN_THE_ESCROW);
         boolean storeTry = false;
         while (!mustCancel()) {
             if (!sense()) {
@@ -42,10 +43,17 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
             }
             switch (gloryStatus.getSr1Mode()) {
                 case escrow_open:
+                    break;
                 case waiting_for_an_envelope_to_set:
                     break;
+                case escrow_close:
+                    break;
                 case escrow_close_request:
-                    WaitForEmptyEscrow();
+                    if (gloryStatus.isEscrowBillPresent()) {
+                        if (!sendGCommand(new devices.glory.command.CloseEscrow())) {
+                            // Ignore the error, could happen if some one takes the envelope quickly.
+                        }
+                    }
                     break;
                 case storing_start_request:
                 case waiting:
@@ -55,8 +63,14 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                         gotoNeutral(true, false);
                         return;
                     }
-                    if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
-                        return;
+                    if (!gloryStatus.isEscrowBillPresent()) {
+                        if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                            return;
+                        }
+                    } else {
+                        if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
+                            return;
+                        }
                     }
                     break;
                 case being_store:

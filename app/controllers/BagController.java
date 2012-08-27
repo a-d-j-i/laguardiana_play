@@ -5,7 +5,7 @@ import play.mvc.With;
 
 // TODO: manage the bag 
 @With( Secure.class)
-public class BagController extends Controller {
+public class BagController extends BaseController {
 
     // Show a list of deposits in this bag.
     // And print it if possible.

@@ -26,23 +26,24 @@ public class Bill {
         List<Bill> ret = new ArrayList<Bill>();
         List<LgBillType> billTypes = LgBillType.findAll();
 
+        
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
-        Manager.ControllerApi manager = CounterFactory.getManager( Play.configuration.getProperty( "glory.port" ) );
-        if ( manager != null ) {
+        Manager.ControllerApi manager = CounterFactory.getManager(Play.configuration.getProperty("glory.port"));
+        if (manager != null) {
             currentQuantity = manager.getCurrentQuantity();
             desiredQuantity = manager.getDesiredQuantity();
         }
-        for ( LgBillType bb : billTypes ) {
+        for (LgBillType bb : billTypes) {
             Bill b = new Bill();
             b.billType = bb;
-            if ( currentQuantity != null && currentQuantity.containsKey( bb.slot ) ) {
-                b.quantity = currentQuantity.get( bb.slot );
+            if (currentQuantity != null && currentQuantity.containsKey(bb.slot)) {
+                b.quantity = currentQuantity.get(bb.slot);
             }
-            if ( desiredQuantity != null && desiredQuantity.containsKey( bb.slot ) ) {
-                b.desiredQuantity = desiredQuantity.get( bb.slot );
+            if (desiredQuantity != null && desiredQuantity.containsKey(bb.slot)) {
+                b.desiredQuantity = desiredQuantity.get(bb.slot);
             }
-            ret.add( b );
+            ret.add(b);
         }
         return ret;
     }

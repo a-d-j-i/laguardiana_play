@@ -34,6 +34,17 @@
                 <span class="add-on">${b.billType}</span><input id="DID_${b.billType.billTypeId}" value="${b.desiredQuantity}" class="input-mini" name="billTypeIds.${b.billType.billTypeId}" type="text">
             </div>
             #{/list}
+            <label for="currency">Currency</label>
+            <select class="input-mini" id="currency" name="currency">
+                #{list items:currencyList, as:'b'}
+                #{if ( b == 0 ) }
+                <option value="0" #{if ( b == currency )}selected="selected"#{/if}>-</option>
+                #{/if}
+                #{else}
+                <option value="${b}" #{if ( b == currency )}selected="selected"#{/if}>${b}</option>
+                #{/else}
+                #{/list}
+            </select>
             <button type="submit" class="btn btn-primary btn-large">Count</button>
         </div>
         </fieldset>
@@ -87,6 +98,7 @@
                 var nid = '#DID_' + billData[ i ].billType.billTypeId.toString();
                 $( nid ).html( billData[ i ].desiredQuantity);
             }
+            $( "currency").html( data[3] );
         })
     }
     // Call refresh every .5 seconds

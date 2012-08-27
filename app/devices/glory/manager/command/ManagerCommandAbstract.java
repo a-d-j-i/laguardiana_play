@@ -211,6 +211,9 @@ abstract public class ManagerCommandAbstract implements Runnable {
     boolean sendGloryCommand(GloryCommandAbstract cmd) {
         if (cmd != null) {
             if (!sendGCommand(cmd)) {
+                String error = gloryStatus.getLastError();
+                Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
+                threadCommandApi.setError(Manager.Error.APP_ERROR, error);
                 return false;
             }
         }
@@ -219,6 +222,9 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     boolean sense() {
         if (!sendGCommand(new devices.glory.command.Sense())) {
+            String error = gloryStatus.getLastError();
+            Logger.error("Error %s sending cmd : SENSE", error);
+            threadCommandApi.setError(Manager.Error.APP_ERROR, error);
             return false;
         }
         Logger.debug(String.format("D1Mode %s SR1 Mode : %s", gloryStatus.getD1Mode().name(), gloryStatus.getSr1Mode().name()));
@@ -227,16 +233,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     boolean sendGCommand(GloryCommandAbstract cmd) {
         if (cmd == null) {
-            threadCommandApi.setError(Manager.Error.APP_ERROR,
-                    "Invalid command null");
+            threadCommandApi.setError(Manager.Error.APP_ERROR, "Invalid command null");
             return false;
         }
-        if (!gloryStatus.setStatusOk(threadCommandApi.sendGloryCommand(cmd))) {
-            String error = gloryStatus.getLastError();
-            threadCommandApi.setError(Manager.Error.APP_ERROR, error);
-            return false;
-        }
-        return true;
+        return gloryStatus.setStatusOk(threadCommandApi.sendGloryCommand(cmd));
     }
 
     void errorRecovery() {

@@ -4,6 +4,7 @@ import devices.glory.manager.Manager;
 import java.io.IOException;
 import java.util.Map;
 import devices.CounterFactory;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import models.Bill;
@@ -11,10 +12,9 @@ import models.db.LgBillType;
 import play.Logger;
 import play.Play;
 import play.mvc.Before;
-import play.mvc.Controller;
 
 // TODO: Manage errors.
-public class GloryManagerController extends Controller {
+public class GloryManagerController extends BaseController {
 
     static Manager.ControllerApi manager;
     static Manager.Status status = Manager.Status.ERROR;
@@ -28,36 +28,50 @@ public class GloryManagerController extends Controller {
             error = "Manager error opening port";
         } else {
             if (manager.getStatus() == Manager.Status.ERROR) {
-                error = "ERROR";
+                error = "ERROR " + manager.getErrorDetail().toString();
             } else {
+                error = null;
                 success = manager.getStatus().name();
             }
         }
     }
 
     public static void index() {
-        if (success != null) {
-            Logger.info(success);
-        }
         if (error != null) {
             Logger.error(error);
         }
 
         List<Bill> billData = Bill.getCurrentCounters();
-
+        Integer currency = 0;
+        if (manager != null) {
+            currency = manager.getCurrency();
+            if (currency == null) {
+                currency = 0;
+            }
+        }
         if (request.isAjax()) {
-            Object[] o = new Object[3];
+            Object[] o = new Object[4];
             o[0] = error;
             o[1] = success;
             o[2] = billData;
+            o[3] = currency;
             renderJSON(o);
         }
 
         renderArgs.put("billData", billData);
+        renderArgs.put("currency", currency);
+        List<Integer> currencyList = new ArrayList<Integer>();
+        for (int i = 0; i < 8; i++) {
+            currencyList.add(i);
+        }
+        renderArgs.put("currencyList", currencyList);
         render();
     }
 
-    public static void count(Map<String, String> billTypeIds) throws IOException {
+    public static void count(Map<String, String> billTypeIds, Integer currency) throws IOException {
+        if ( currency == null || currency == 0 ) {
+            index();
+        }
         if (manager != null) {
             Map<Integer, Integer> desiredQuantity = new HashMap< Integer, Integer>();
 
@@ -73,7 +87,7 @@ public class GloryManagerController extends Controller {
                     }
                 }
             }
-            if (!manager.count(desiredQuantity)) {
+            if (!manager.count(desiredQuantity, currency)) {
                 error = "Still executing another command";
             }
         }

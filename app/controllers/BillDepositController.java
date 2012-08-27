@@ -13,8 +13,8 @@ import models.lov.DepositUserCodeReference;
 import play.Logger;
 import play.mvc.With;
 
-@With( Secure.class)
-public class BillDepositController extends DepositController {
+@With(Secure.class)
+public class BillDepositController extends BaseController {
 
     public static void index() {
         Application.index();
@@ -34,10 +34,11 @@ public class BillDepositController extends DepositController {
     }
 
     public static void countingPage(String depositId) {
+        Integer currency = 1;
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
 
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        if (!manager.count(null)) {
+        if (!manager.count(null, currency)) {
             //TODO: Save an event log, do something.
             // if counting is ok, else error ??
         }
@@ -61,7 +62,7 @@ public class BillDepositController extends DepositController {
             render();
         }
     }
-    
+
     public static void acceptBatch(String depositId) {
         //user accepted to deposit it!
         Object[] o = new Object[1];
@@ -82,7 +83,7 @@ public class BillDepositController extends DepositController {
         Logger.error(" // accept deposit opened result: %b", storeOk);
         if (!storeOk) {
             renderJSON(o);
-            return;            
+            return;
         }
 
         LgBatch batch = new LgBatch();
@@ -100,20 +101,20 @@ public class BillDepositController extends DepositController {
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
         Object[] o = new Object[3];
         Manager.Status status = manager.getStatus();
-        Boolean finished = (status == Manager.Status.IDLE || 
-                                    status == Manager.Status.ERROR);
+        Boolean finished = (status == Manager.Status.IDLE
+                || status == Manager.Status.ERROR);
         o[0] = finished;
-        o[1] = status== Manager.Status.IDLE;
-        
+        o[1] = status == Manager.Status.IDLE;
+
         Logger.error("-----------");
-        Logger.error(" finished: %b result: %b", finished, (status== Manager.Status.IDLE));        
+        Logger.error(" finished: %b result: %b", finished, (status == Manager.Status.IDLE));
         if (!finished) {
             renderJSON(o);
             return;
         }
         renderJSON(o);
     }
-    
+
     // TODO: Finish
     public static void cancelDeposit(String depositId) {
         //TODO: Check if there are batches related to this deposit.
@@ -128,18 +129,18 @@ public class BillDepositController extends DepositController {
         Logger.error(" // Cancel deposit");
         renderJSON(o);
     }
-    
+
     public static void checkCancelDeposit(String depositId) {
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
         Object[] o = new Object[3];
         Manager.Status status = manager.getStatus();
-        Boolean finished = (status == Manager.Status.IDLE || 
-                                    status == Manager.Status.ERROR);
+        Boolean finished = (status == Manager.Status.IDLE
+                || status == Manager.Status.ERROR);
         o[0] = finished;
-        o[1] = status== Manager.Status.IDLE;
-        
-        Logger.error(" finished: %b result: %b", finished, (status== Manager.Status.IDLE));
-            
+        o[1] = status == Manager.Status.IDLE;
+
+        Logger.error(" finished: %b result: %b", finished, (status == Manager.Status.IDLE));
+
         if (finished) {
             //Logger.error("pre finish deposit");
             //finishDeposit(depositId);

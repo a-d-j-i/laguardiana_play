@@ -1,6 +1,5 @@
 package controllers;
 
-import controllers.dbcrud.EnvelopeContents;
 import devices.CounterFactory;
 import devices.glory.manager.Manager;
 import java.util.Date;
@@ -14,7 +13,7 @@ import play.Logger;
 import play.mvc.With;
 
 @With( Secure.class)
-public class EnvelopeDepositController extends DepositController {
+public class EnvelopeDepositController extends BaseController {
     
     public static void index() {
         Application.index();

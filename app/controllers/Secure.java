@@ -19,7 +19,7 @@ import play.mvc.Http.Header;
  */
 public class Secure extends Controller {
 
-    @Before( unless = {"login", "authenticate", "logout"})
+    @Before(unless = {"login", "authenticate", "logout"})
     static void checkAccess() throws Throwable {
 
         if ("GET".equals(request.method)) {
@@ -50,7 +50,7 @@ public class Secure extends Controller {
     }
 
     public static boolean checkPermission(String resource, String operation) {
-        if (Play.mode.isDev()) {
+        if (Play.mode.isDev() && Play.configuration.getProperty("secure.allowAll") != null) {
             Logger.info("IN DEV MODE ALL ALLOWED!!!");
             return true;
         }

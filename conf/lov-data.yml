@@ -50,41 +50,49 @@
     denomination:   2
     unitLov:        1
     slot:           26
+    currency:       1
 
   db.LgBillType(5pesos):
     denomination:   5
     unitLov:        1
     slot:           27
+    currency:       1
 
   db.LgBillType(10pesos):
     denomination:   10
     unitLov:        1
     slot:           0
+    currency:       1
 
   db.LgBillType(20pesos):
     denomination:   20
     unitLov:        1
     slot:           0
+    currency:       1
 
   db.LgBillType(50pesos):
     denomination:   50
     unitLov:        1
     slot:           0
+    currency:       0
 
   db.LgBillType(100pesos):
     denomination:   100
     unitLov:        1
     slot:           0
+    currency:       1
 
   db.LgBillType(500pesos):
     denomination:   500
     unitLov:        1
     slot:           0
+    currency:       1
 
   db.LgBillType(1dolar):
     denomination:   1
     unitLov:        3
     slot:           0
+    currency:       2
 
     
     

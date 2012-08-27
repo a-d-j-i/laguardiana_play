@@ -20,21 +20,27 @@ public class Count extends ManagerCommandAbstract {
 
     private CountData countData;
 
-    public Count(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity) {
+    public Count(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity, Integer currency) {
         super(threadCommandApi);
-        countData = new CountData(desiredQuantity);
+        countData = new CountData(desiredQuantity, currency);
 
     }
 
     static public class CountData extends CommandData {
 
         private Map< Integer, Integer> currentQuantity = new HashMap<Integer, Integer>();
+        private final Integer currency;
         private boolean storeDeposit = false;
         private final Map<Integer, Integer> desiredQuantity = new HashMap<Integer, Integer>();
         private int currentSlot = 0;
         private final boolean isBatch;
 
-        public CountData(Map<Integer, Integer> desiredQuantity) {
+        public CountData(Map<Integer, Integer> desiredQuantity, Integer currency) {
+            if (currency == null) {
+                this.currency = 0;
+            } else {
+                this.currency = currency;
+            }
             currentSlot = 0;
             if (desiredQuantity == null) {
                 isBatch = false;
@@ -48,6 +54,10 @@ public class Count extends ManagerCommandAbstract {
                 }
             }
             isBatch = (currentSlot < desiredQuantity.size());
+        }
+
+        private Integer getCurrency() {
+            return currency;
         }
 
         private Map< Integer, Integer> getCurrentQuantity() {
@@ -100,6 +110,10 @@ public class Count extends ManagerCommandAbstract {
     public void execute() {
         boolean batchEnd = false;
         gotoNeutral(true, false);
+        Logger.error("CURRENCY %d", countData.currency.byteValue());
+        if (!sendGloryCommand(new devices.glory.command.SwitchCurrency(countData.currency.byteValue()))) {
+            return;
+        }
         if (!sendGloryCommand(new devices.glory.command.SetDepositMode())) {
             return;
         }
@@ -201,6 +215,10 @@ public class Count extends ManagerCommandAbstract {
         countData.storeDeposit();
     }
 
+    public Integer getCurrency() {
+        return countData.getCurrency();
+    }
+
     public Map<Integer, Integer> getCurrentQuantity() {
         return countData.getCurrentQuantity();
     }
@@ -219,6 +237,9 @@ public class Count extends ManagerCommandAbstract {
 
         Logger.debug("ISBATCH");
         if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
+            String error = gloryStatus.getLastError();
+            Logger.error("Error %s sending cmd : CountingDataRequest", error);
+            threadCommandApi.setError(Manager.Error.APP_ERROR, error);
             return false;
         }
         Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
@@ -256,6 +277,9 @@ public class Count extends ManagerCommandAbstract {
 
     private boolean refreshCurrentQuantity() {
         if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
+            String error = gloryStatus.getLastError();
+            Logger.error("Error %s sending cmd : CountingDataRequest", error);
+            threadCommandApi.setError(Manager.Error.APP_ERROR, error);
             return false;
         }
         Map<Integer, Integer> bills = gloryStatus.getBills();
