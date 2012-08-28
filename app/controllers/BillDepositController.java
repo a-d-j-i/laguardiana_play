@@ -20,7 +20,8 @@ public class BillDepositController extends BaseController {
         Application.index();
     }
 
-    public static void inputReference(String reference1, String reference2) throws Throwable {
+    public static void inputReference(String reference1, String reference2) 
+        throws Throwable {
         //TODO: Validate references depending on system properties. 
         Deposit d = DepositController.createDeposit(reference1, reference2);
         if (d != null) {
@@ -36,6 +37,29 @@ public class BillDepositController extends BaseController {
     public static void countingPage(String depositId) {
         Integer currency = 1;
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
+        Manager.ControllerApi manager = CounterFactory.getGloryManager();
+
+        
+        Boolean countStartOk = manager.count(null, currency);
+        
+        if (request.isAjax()) {
+            Object[] o = new Object[1];
+            o[0] = countStartOk;
+            renderJSON(o);
+        } else {
+            if (!countStartOk) {
+                //TODO: Save an event log, do something.
+                // if counting is ok, else error ??
+            }
+            List<Bill> billData = Bill.getCurrentCounters();
+            renderArgs.put("billData", billData);
+            render(deposit);
+        };
+    }
+
+    public static void continueDeposit(String depositId) {
+        Integer currency = 1;
+        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
 
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
         if (!manager.count(null, currency)) {
@@ -46,16 +70,17 @@ public class BillDepositController extends BaseController {
         renderArgs.put("billData", billData);
         render(deposit);
     }
-
+    
     public static void getCountersAndStatus() {
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        Status success = manager.getStatus();
+        Status status = manager.getStatus();
         List<Bill> billData = Bill.getCurrentCounters();
 
         if (request.isAjax()) {
-            Object[] o = new Object[2];
-            o[0] = success;
+            Object[] o = new Object[3];
+            o[0] = status;
             o[1] = billData;
+            o[2] = (status == Manager.Status.READY_TO_STORE) || (status == Manager.Status.ESCROW_FULL);
             renderJSON(o);
         } else {
             renderArgs.put("billData", billData);
@@ -65,12 +90,15 @@ public class BillDepositController extends BaseController {
 
     public static void acceptBatch(String depositId) {
         //user accepted to deposit it!
-        Object[] o = new Object[1];
+        Object[] o = new Object[2];
         Boolean storeOk;
-        Logger.info("About to restore data!!!!");
 
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        if (manager.getStatus() != Manager.Status.READY_TO_STORE) {
+        Manager.Status status = manager.getStatus();
+        Logger.info("About to restore data!!!!");
+
+        if ((status != Manager.Status.READY_TO_STORE) && 
+                (status != Manager.Status.ESCROW_FULL)) {
             Logger.debug("NOT READY TO STORE");
             index();
             return;
@@ -79,7 +107,12 @@ public class BillDepositController extends BaseController {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
         List<Bill> billData = Bill.getCurrentCounters();
 
+        
+        //temporarily cancel deposit
         o[0] = storeOk = manager.storeDeposit(Integer.parseInt(depositId));
+        //o[0] = storeOk = manager.cancelDeposit();
+        o[1] = status == Manager.Status.ESCROW_FULL; //shall we continue?
+        
         Logger.error(" // accept deposit opened result: %b", storeOk);
         if (!storeOk) {
             renderJSON(o);
@@ -101,17 +134,18 @@ public class BillDepositController extends BaseController {
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
         Object[] o = new Object[3];
         Manager.Status status = manager.getStatus();
-        Boolean finished = (status == Manager.Status.IDLE
-                || status == Manager.Status.ERROR);
+        Boolean statusOk = (status == Manager.Status.IDLE || 
+                        status == Manager.Status.ESCROW_FULL ||
+                        status == Manager.Status.REMOVE_THE_BILLS_FROM_HOPER);
+        Boolean finished = (statusOk || status == Manager.Status.ERROR);
         o[0] = finished;
-        o[1] = status == Manager.Status.IDLE;
+        o[1] = statusOk;
 
-        Logger.error("-----------");
-        Logger.error(" finished: %b result: %b", finished, (status == Manager.Status.IDLE));
-        if (!finished) {
-            renderJSON(o);
-            return;
-        }
+        Logger.error(" finished: %b result: %b", finished, statusOk);
+        //if (!finished) {
+        //    renderJSON(o);
+        //    return;
+        //}
         renderJSON(o);
     }
 
