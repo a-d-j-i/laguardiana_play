@@ -1,0 +1,25 @@
+#{if flash.success}
+<p class="success">${flash.success}</p>
+#{/if}
+
+#{extends 'main.html' /}
+#{set title:'Shall we continue the deposit?' /}
+
+<div>
+    <h1>Batch accepted..</h1>
+
+    <span class="post-reference1">${deposit.depositId}</span>
+
+    #{form @BillDepositController.countingPage(deposit.depositId)}
+    <p>
+        <input type="submit" value="Continue this deposit with more money.." />
+    </p>
+    #{/form}
+
+    #{form @BillDepositController.finishDeposit(deposit.depositId)}
+    <p>
+        <input type="submit" value="Finished. Go home now" />
+    </p>
+    #{/form}
+
+</div>

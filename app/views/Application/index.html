@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:'Home' /}
+#{set depositTitle:'Home' /}
 
 <div class="row">
     <div class="span8 offset2">
@@ -22,6 +22,8 @@
         <fieldset>
             #{menuButton resource: 'BillDepositController.inputReference', operation: 'GET', title: 'Cash Deposit' /}
             #{menuButton resource: 'EnvelopeDepositController.inputReference', operation: 'GET', title: 'Envelope Deposit' /}
+            #{menuButton resource: 'CountController.chooseCurrency', operation: 'GET', title: 'Count' /}
+            #{menuButton resource: 'FilterController.chooseCurrency', operation: 'GET', title: 'Filter' /}
         </fieldset>
     </div>
 

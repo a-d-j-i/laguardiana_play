@@ -1,0 +1,167 @@
+#{extends 'main.html' /}
+#{set title:'Doing transaction..' /}
+<div class="row">
+    <div class="span11 well">
+        <table class="table table-bordered table-striped" >
+            <thead>
+                <tr>
+                    #{list items:billData, as:'b'}
+                    <th>
+                        ${b.billType}
+                    </th>
+                    #{/list}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    #{list items:billData, as:'b'}
+                    <td id="BID_${b.billType.billTypeId}">
+                        ${b.quantity}
+                    </td>
+                    #{/list}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="span3">
+        #{ifAuthorized resource: 'BillDepositController.acceptBatch', operation: 'GET'}
+        <div class="control-group">
+            <div class="controls">
+                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" 
+                   id="acceptBatch"
+                   >Accept Batch</a>
+            </div>
+        </div>        
+        #{/ifAuthorized}
+        #{ifAuthorized resource: 'BillDepositController.cancelDeposit', operation: 'GET'}
+        <div class="control-group">
+            <div class="controls">
+                <div class="btn btn-primary btn-large menu-button-fixed-size-btn" 
+                   id="cancelBatch"
+                   >Cancel Deposit</div> 
+            </div>
+        </div>
+        #{/ifAuthorized}
+    </div>
+</div>
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    var waiting = false;
+    
+    // Reload the whole messages panel
+    function refresh() {
+        if ( waiting ) {
+            return;
+        }
+        waiting = true;
+        $.getJSON( '@{BillDepositController.getCountersAndStatus}', function( data ) {
+            waiting = false;
+            var success = data[ 0 ];
+            if ( success == null || success.toString() == 'null' ) {
+                $('#success').hide();
+            } else {
+                $('#success').show();                
+                $('#success_msg').html( success )
+            }
+            var billData = data[ 1 ]
+            for( var i = 0 ; i < billData.length; i ++ ) {
+                var nid = '#BID_' + billData[ i ].billType.billTypeId.toString();
+                $( nid ).html( billData[ i ].quantity);
+            }
+            for( var i = 0 ; i < billData.length; i ++ ) {
+                var nid = '#DID_' + billData[ i ].billType.billTypeId.toString();
+                $( nid ).html( billData[ i ].desiredQuantity);
+            }
+        })
+    }
+    // Call refresh every .5 seconds
+    setInterval(refresh, 500)
+    refresh()
+</script>
+    
+<script type="text/javascript" charset="${_response_encoding}">
+    var waitingCancelationRequest = false;
+    var waitingCancelationInterval = null;
+
+    var waitAcceptanceRequest = false;
+    var waitAcceptanceInterval = null;
+
+    function setup() {
+        $("#cancelBatch").click(function(){
+            $.getJSON( '@{BillDepositController.cancelDeposit(deposit.depositId)}}', 
+            function( data ) {
+                var success = data [ 0 ];
+                if (success == 1) {
+                    //we should wait for cancellation finish..
+                    waitingCancelationInterval = setInterval(waitCancelation, 300)
+                } else {
+                    alert ("cancel batch order failed.. perhaps we should retry");
+                }
+            })
+        });
+        
+        $("#acceptBatch").click(function(){
+            $.getJSON( '@{BillDepositController.acceptBatch(deposit.depositId)}', 
+            function( data ) {
+                var success = data [ 0 ];
+                if (success == 1) {
+                    //we should wait for cancellation finish..
+                    waitAcceptanceInterval = setInterval(waitAcceptance, 300)
+                } else {
+                    alert ("accept batch order failed.. perhaps we should retry");
+                }
+            })
+        });
+    }
+
+    function waitCancelation() {
+        if (waitingCancelationRequest) {
+            return;
+        }
+        waitingCancelationRequest = true;
+        $.getJSON( '@{BillDepositController.checkCancelDeposit(deposit.depositId)}', 
+          function( data ) {
+            waitingCancelationRequest = false;
+            var finishedOp = data[0];
+            var resultOk = data[1];
+            if (finishedOp) {
+                clearInterval(waitingCancelationInterval);
+                if (resultOk) {
+                    window.location = '@{Application.index}'
+                } else {
+                    alert("XXX: cancelation failed!")
+                }
+            }
+        })
+    }
+
+    function waitAcceptance() {
+        if (waitAcceptanceRequest) {
+            return;
+        }
+        waitAcceptanceRequest = true;
+        $.getJSON( '@{BillDepositController.checkAcceptBatch(deposit.depositId)}', 
+          function( data ) {
+            waitAcceptanceRequest = false;
+            var finishedOp = data[0];
+            var resultOk = data[1];
+            if (finishedOp) {
+                clearInterval(waitAcceptanceInterval);
+                if (resultOk) {
+                    $.getJSON( '@{BillDepositController.finishDeposit(deposit.depositId)}',
+                        function( data ) { window.location = '@{Application.index}'}
+                    );
+                } else {
+                    alert("XXX: acceptance failed!")
+                }
+            }
+        })
+    }
+    
+    setup()
+</script>
+#{/set}

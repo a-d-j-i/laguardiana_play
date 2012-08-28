@@ -7,34 +7,44 @@ import java.util.List;
 import models.Deposit;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
+import models.db.LgLov;
+import models.db.LgUser;
 import models.lov.DepositUserCodeReference;
 import models.lov.EnvelopeType;
 import play.Logger;
 import play.mvc.With;
 
-@With( Secure.class)
+@With(Secure.class)
 public class EnvelopeDepositController extends BaseController {
-    
+
     public static void index() {
         Application.index();
     }
-    
+
     public static void inputReference(String reference1, String reference2) throws Throwable {
-        //TODO: Validate references depending on system properties. 
-        Deposit d = DepositController.createDeposit(reference1, reference2);
-        if (d != null) {
-            getEnvelopeContents(Integer.toString(d.depositId), null);
-            return;
+
+        if (reference1 != null && reference2 != null) {
+            LgUser user = Secure.getCurrentUser();
+            Integer ref1 = Integer.parseInt(reference1);
+            LgLov userCode = DepositUserCodeReference.findByNumericId(ref1);
+            if (userCode == null) {
+                Logger.error("countMoney: no reference received! for %s", reference1);
+            } else {
+                Deposit deposit = new Deposit(user, reference2, userCode);
+                deposit.save();
+                getEnvelopeContents(Integer.toString(deposit.depositId), null);
+                return;
+            }
         }
         //depending on a value of LgSystemProperty, show both references or redirect 
         //temporarily until we have a page using getReferences()..
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         render(referenceCodes);
     }
-    
+
     public static void getEnvelopeContents(String depositId, LgEnvelope envelope) {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
-        
+
         if (envelope != null && envelope.envelopeTypeLov != null) {
             // TODO: Use validate.
             envelope.deposit = deposit;
@@ -53,7 +63,7 @@ public class EnvelopeDepositController extends BaseController {
         renderArgs.put("envelopeTypes", envelopeTypes);
         render(deposit, envelope);
     }
-    
+
     public static void acceptEnvelope(String depositId, LgEnvelope envelope) {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
 
@@ -108,7 +118,7 @@ public class EnvelopeDepositController extends BaseController {
 
         deposit.finishDate = new Date();
         deposit.save();
-        
+
         flash.success("Deposit is done!");
         Application.index();
     }

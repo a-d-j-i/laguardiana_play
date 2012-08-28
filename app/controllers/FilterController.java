@@ -9,38 +9,21 @@ import models.Bill;
 import models.Deposit;
 import models.db.LgBatch;
 import models.db.LgBill;
-import models.db.LgLov;
-import models.db.LgUser;
-import models.lov.DepositUserCodeReference;
+import models.lov.MoneyUnit;
 import play.Logger;
 import play.mvc.With;
 
 @With(Secure.class)
-public class BillDepositController extends BaseController {
+public class FilterController extends BaseController {
 
     public static void index() {
         Application.index();
     }
 
-    public static void inputReference(String reference1, String reference2) throws Throwable {
-        //TODO: Validate references depending on system properties. 
-        if (reference1 != null && reference2 != null) {
-            LgUser user = Secure.getCurrentUser();
-            Integer ref1 = Integer.parseInt(reference1);
-            LgLov userCode = DepositUserCodeReference.findByNumericId(ref1);
-            if (userCode == null) {
-                Logger.error("countMoney: no reference received! for %s", reference1);
-            } else {
-                Deposit deposit = new Deposit(user, reference2, userCode);
-                deposit.save();
-                countingPage(deposit.depositId.toString());
-                return;
-            }
-        }
-        //depending on a value of LgSystemProperty, show both references or redirect 
-        //temporarily until we have a page using getReferences()..
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        render(referenceCodes);
+    public static void chooseCurrency(String reference1, String reference2) throws Throwable {
+        //TODO: Create event.       
+        List<MoneyUnit> moneyUnits = MoneyUnit.findAll();
+        render(moneyUnits);
     }
 
     public static void countingPage(String depositId) {

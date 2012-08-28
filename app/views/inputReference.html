@@ -1,5 +1,4 @@
 #{extends 'main.html' /}
-#{set title:'Reference' /}
 
 <div>
     <h1>Ingrese referencia</h1>
@@ -26,16 +25,7 @@
         </p>
 
         <p>
-            <input type="submit" value="Begin Deposit" />
+            <input class="btn btn-primary btn-large menu-button-fixed-size-btn"  type="submit" value="Begin Deposit" />
         </p>
     </form>
-    #{form @Application.index()}
-    #{ifErrors}
-    <p class="error">
-        All fields are required!
-    </p>
-    #{/ifErrors}
-    <p>
-        <input type="submit" value="Go Home" />
-    </p>
-    #{/form}
+    <a class="btn btn-primary btn-large menu-button-fixed-size-btn" href="@Application.index()">Cancel</a>
