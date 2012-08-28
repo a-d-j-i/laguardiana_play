@@ -27,6 +27,7 @@
 
 <div class="row">
     <div class="span3">
+        <div class="controls-pre-batch">
         #{ifAuthorized resource: 'BillDepositController.acceptBatch', operation: 'GET'}
         <div class="control-group">
             <div class="controls">
@@ -45,6 +46,29 @@
             </div>
         </div>
         #{/ifAuthorized}
+        </div>        
+        
+        <div class="controls-after-batch">
+        #{ifAuthorized resource: 'BillDepositController.acceptBatch', operation: 'GET'}
+        <div class="control-group">
+            <div class="controls">
+                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" 
+                   id="continueBatch"
+                   >Continue Batch</a>
+            </div>
+        </div>        
+        #{/ifAuthorized}
+        #{ifAuthorized resource: 'BillDepositController.finishDeposit', operation: 'GET'}
+        <div class="control-group">
+            <div class="controls">
+                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" 
+                   id="finishDeposit"
+                   >Finish Deposit</a>
+            </div>
+        </div>        
+        #{/ifAuthorized}
+        </div>        
+        
     </div>
 </div>
 
@@ -60,12 +84,18 @@
         waiting = true;
         $.getJSON( '@{BillDepositController.getCountersAndStatus}', function( data ) {
             waiting = false;
-            var success = data[ 0 ];
+            var success = data[0];
+            var readyToContinue = data[2];
             if ( success == null || success.toString() == 'null' ) {
                 $('#success').hide();
             } else {
                 $('#success').show();                
                 $('#success_msg').html( success )
+            }
+            if (readyToContinue) {
+                $('#acceptBatch').show()
+            } else {
+                $('#acceptBatch').hide()
             }
             var billData = data[ 1 ]
             for( var i = 0 ; i < billData.length; i ++ ) {
@@ -78,8 +108,8 @@
             }
         })
     }
-    // Call refresh every .5 seconds
-    setInterval(refresh, 500)
+    // Call refresh every 1.5 seconds
+    setInterval(refresh, 1500)
     refresh()
 </script>
     
@@ -91,13 +121,14 @@
     var waitAcceptanceInterval = null;
 
     function setup() {
+        $(".controls-after-batch").hide();
         $("#cancelBatch").click(function(){
             $.getJSON( '@{BillDepositController.cancelDeposit(deposit.depositId)}}', 
             function( data ) {
                 var success = data [ 0 ];
                 if (success == 1) {
                     //we should wait for cancellation finish..
-                    waitingCancelationInterval = setInterval(waitCancelation, 300)
+                    waitingCancelationInterval = setInterval(waitCancelation, 700)
                 } else {
                     alert ("cancel batch order failed.. perhaps we should retry");
                 }
@@ -110,11 +141,33 @@
                 var success = data [ 0 ];
                 if (success == 1) {
                     //we should wait for cancellation finish..
-                    waitAcceptanceInterval = setInterval(waitAcceptance, 300)
+                    waitAcceptanceInterval = setInterval(waitAcceptance, 700)
                 } else {
                     alert ("accept batch order failed.. perhaps we should retry");
                 }
             })
+        });
+
+        $("#continueBatch").click(function() {
+            $(".controls-after-batch").hide();
+            $(".controls-pre-batch").show();
+            $.getJSON( '@{BillDepositController.countingPage(deposit.depositId)}', 
+                    function( data ) { 
+                        if (data[0]) {
+                            //pass everything is ok
+                        } else {
+                            //count command was not accepted.. going to main
+                            window.location = '@{Application.index}'}
+                        }
+                        
+                );  
+            //window.location = ;
+        });
+
+        $("#finishDeposit").click(function() {
+            $.getJSON( '@{BillDepositController.finishDeposit(deposit.depositId)}', 
+                    function( data ) { window.location = '@{Application.index}'}
+                );  
         });
     }
 
@@ -144,6 +197,7 @@
             return;
         }
         waitAcceptanceRequest = true;
+        $(".controls-pre-batch").hide();
         $.getJSON( '@{BillDepositController.checkAcceptBatch(deposit.depositId)}', 
           function( data ) {
             waitAcceptanceRequest = false;
@@ -152,9 +206,8 @@
             if (finishedOp) {
                 clearInterval(waitAcceptanceInterval);
                 if (resultOk) {
-                    $.getJSON( '@{BillDepositController.finishDeposit(deposit.depositId)}',
-                        function( data ) { window.location = '@{Application.index}'}
-                    );
+                    $(".controls-pre-batch").hide();
+                    $(".controls-after-batch").show();
                 } else {
                     alert("XXX: acceptance failed!")
                 }

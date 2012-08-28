@@ -51,7 +51,7 @@ public class Secure extends Controller {
 
     public static boolean checkPermission(String resource, String operation) {
         if (Play.mode.isDev() && Play.configuration.getProperty("secure.allowAll") != null) {
-            Logger.info("IN DEV MODE ALL ALLOWED!!!");
+            //Logger.info("IN DEV MODE ALL ALLOWED!!!");
             return true;
         }
         User user = Cache.get(session.getId() + "-user", User.class);
