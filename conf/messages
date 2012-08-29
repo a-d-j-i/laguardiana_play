@@ -36,3 +36,4 @@ counting_page.total=TOTAL
 counting_page.totals=TOTALES
 counting_page.deposit_canceled=Deposito cancelado
 counting_page.thanks=MUCHAS GRACIAS POR OPERAR CON PROSEGUR
+validation.required=%s is required
