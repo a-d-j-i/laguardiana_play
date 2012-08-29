@@ -11,6 +11,7 @@ import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgLov;
 import models.db.LgUser;
+import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
 import play.mvc.With;
@@ -22,8 +23,8 @@ public class BillDepositController extends BaseController {
         Application.index();
     }
 
-    public static void inputReference(String reference1, String reference2) 
-        throws Throwable {
+    public static void inputReference(String reference1, String reference2, Integer currency)
+            throws Throwable {
         //TODO: Validate references depending on system properties. 
         if (reference1 != null && reference2 != null) {
             LgUser user = Secure.getCurrentUser();
@@ -34,24 +35,24 @@ public class BillDepositController extends BaseController {
             } else {
                 Deposit deposit = new Deposit(user, reference2, userCode);
                 deposit.save();
-                countingPage(deposit.depositId.toString());
+                countingPage(deposit.depositId.toString(), currency);
                 return;
             }
         }
         //depending on a value of LgSystemProperty, show both references or redirect 
         //temporarily until we have a page using getReferences()..
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        render(referenceCodes);
+        List<Currency> currencies = Currency.findAll();
+        render(referenceCodes, currencies);
     }
 
-    public static void countingPage(String depositId) {
-        Integer currency = 1;
+    public static void countingPage(String depositId, Integer currency) {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
 
-        
+
         Boolean countStartOk = manager.count(null, currency);
-        
+
         if (request.isAjax()) {
             Object[] o = new Object[1];
             o[0] = countStartOk;
@@ -80,7 +81,7 @@ public class BillDepositController extends BaseController {
         renderArgs.put("billData", billData);
         render(deposit);
     }
-    
+
     public static void getCountersAndStatus() {
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
         Status status = manager.getStatus();
@@ -107,8 +108,8 @@ public class BillDepositController extends BaseController {
         Manager.Status status = manager.getStatus();
         Logger.info("About to restore data!!!!");
 
-        if ((status != Manager.Status.READY_TO_STORE) && 
-                (status != Manager.Status.ESCROW_FULL)) {
+        if ((status != Manager.Status.READY_TO_STORE)
+                && (status != Manager.Status.ESCROW_FULL)) {
             Logger.debug("NOT READY TO STORE");
             index();
             return;
@@ -117,12 +118,12 @@ public class BillDepositController extends BaseController {
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
         List<Bill> billData = Bill.getCurrentCounters();
 
-        
+
         //temporarily cancel deposit
         o[0] = storeOk = manager.storeDeposit(Integer.parseInt(depositId));
         //o[0] = storeOk = manager.cancelDeposit();
         o[1] = status == Manager.Status.ESCROW_FULL; //shall we continue?
-        
+
         Logger.error(" // accept deposit opened result: %b", storeOk);
         if (!storeOk) {
             renderJSON(o);
@@ -144,9 +145,9 @@ public class BillDepositController extends BaseController {
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
         Object[] o = new Object[3];
         Manager.Status status = manager.getStatus();
-        Boolean statusOk = (status == Manager.Status.IDLE || 
-                        status == Manager.Status.ESCROW_FULL ||
-                        status == Manager.Status.REMOVE_THE_BILLS_FROM_HOPER);
+        Boolean statusOk = (status == Manager.Status.IDLE
+                || status == Manager.Status.ESCROW_FULL
+                || status == Manager.Status.REMOVE_THE_BILLS_FROM_HOPER);
         Boolean finished = (statusOk || status == Manager.Status.ERROR);
         o[0] = finished;
         o[1] = statusOk;

@@ -1,13 +1,20 @@
 # You can specialize this file for each language.
 # For example, for French create a messages.fr file
 #
-secure.username=Your email:
-secure.password=Your password:
-secure.title=Log in now
+secure.username=USUARIO
+secure.password=CONTRASEÑA
+secure.title=INGRESO DE USUARIO
 secure.signin=Log in now
 secure.remember=Remember me
 secure.logout=Logout success.
 secure.not_allowed=Not allowed must login.
 secure.invalid_field=You must complete the fields.
 secure.invalid_user_password=Invalid user or password.
-
+main_menu.title=MENÚ PRINCIPAL
+application.choose_one=Seleccione una opción
+main_menu.cash_deposit=DEPOSITAR EFECTIVO
+main_menu.envelope_deposit=DEPOSITAR SOBRE
+main_menu.count=CONTAR BILLETES
+main_menu.filter=SEPARAR BILLETES
+main_menu.other_operations=OTRAS OPERACIONES
+main_menu.login=INGRESAR AL SISTEMA

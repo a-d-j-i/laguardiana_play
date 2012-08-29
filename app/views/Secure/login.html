@@ -1,21 +1,17 @@
 #{extends 'main.html' /}
 #{set title:'Login' /}
-
-<div id="login">
-
-    <h1>&{'secure.title'}</h1>
-
-    #{form @authenticate(), class : 'well' }
-        <label for="username">&{'secure.username'}</label>
-        <input type="text" name="username" class="span3" value="${flash.username}" >
-
-        <label for="password">&{'secure.password'}</label>
-        <input type="password" name="password" class="span3" value="" />
-
-        <label class="checkbox">
-            <input type="checkbox" value="${flash.remember ? 'checked="true"' : ''}">&{'secure.remember'}
-        </label>
-        <button type="submit" class="btn" >&{'secure.signin'}</button>
-        <a href="${lastUrl}"><input type="button" name="cancel" value="Cancel" class="btn" /></a>
-    #{/form}
-</div>
+#{set 'backUrl'}
+@{Application.index}
+#{/set}
+#{set 'moreStyles'}
+#{stylesheet 'login.css' /}
+#{/set}
+<h1 class="candado">&{'secure.title'}</h1>
+<div class="mensaje"><span>Para continuar, ingrese su usuario y contraseña</span></div>
+#{form @authenticate() }
+<input type="text" value="&{'secure.username'}" />
+<input type="password" value="&{'secure.password'}" />
+<a href="#">¿No recuerda sus datos?</a>
+<button type="submit" class="btn" >&{'secure.signin'}</button>
+<a href="${lastUrl}"><input type="button" name="cancel" value="Cancel" class="btn" /></a>
+#{/form}

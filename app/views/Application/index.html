@@ -1,30 +1,36 @@
 #{extends 'main.html' /}
 #{set depositTitle:'Home' /}
+#{set 'moreStyles'}
+#{stylesheet 'menu_principal.css' /}
+#{/set}
 
-<div class="row">
-    <div class="span8 offset2">
-        <p>
-        <h1>Application main menu</h1>
-        </p>
-    </div>
-</div>
-<div class="row">
-    <div class="span6">
-        <fieldset>
-            #{menuButton resource: 'CRUD.index', operation: 'GET', title: 'admin' /}
-            #{menuButton resource: 'Application.printTemplate', operation: 'GET', title: 'PRINT' /}
-            #{menuButton resource: 'Application.getReferenceCodes', operation: 'GET', title: 'go to references!' /}
-            #{menuButton resource: 'GloryController.index', operation: 'GET', title: 'glory' /}
-            #{menuButton resource: 'GloryManagerController.index', operation: 'GET', title: 'gloryManager' /}
-        </fieldset>
-    </div>
-    <div class="span6">
-        <fieldset>
-            #{menuButton resource: 'BillDepositController.inputReference', operation: 'GET', title: 'Cash Deposit' /}
-            #{menuButton resource: 'EnvelopeDepositController.inputReference', operation: 'GET', title: 'Envelope Deposit' /}
-            #{menuButton resource: 'CountController.chooseCurrency', operation: 'GET', title: 'Count' /}
-            #{menuButton resource: 'FilterController.chooseCurrency', operation: 'GET', title: 'Filter' /}
-        </fieldset>
-    </div>
-
-</div>
+<h1 class="casa">&{'main_menu.title'}</h1>
+<div class="mensaje"><span>&{'application.choose_one'}</span></div>
+<ul class="columns">
+    <li class="column">
+        <div class="columna_1">
+            <!-- depositar_efectivo_01.html -->
+            <a href="@{BillDepositController.inputReference}" class="boton naranja full_width separar">&{'main_menu.cash_deposit'}</a>
+            <a href="@{EnvelopeDepositController.inputReference}" class="boton naranja full_width">&{'main_menu.envelope_deposit'}</a>
+        </div>
+    </li>
+    <li class="column">
+        <div class="columna_2">
+            <a href="@{CountController.chooseCurrency}" class="boton naranja full_width separar">&{'main_menu.count'}</a>
+            <a href="@{FilterController.chooseCurrency}" class="boton naranja full_width">&{'main_menu.filter'}</a>
+        </div>
+    </li>
+</ul>
+<hr />
+<ul class="columns">
+    <li class="column">
+        <div class="columna_1">
+            <a href="@{Application.otherMenu}" class="boton gris full_width">&{'main_menu.other_operations'}</a>
+        </div>
+    </li>
+    <li class="column">
+        <div class="columna_2">
+            <a href="@{Secure.login}" class="boton verde full_width">&{'main_menu.login'}</a>
+        </div>
+    </li>
+</ul>

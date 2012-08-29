@@ -1,0 +1,11 @@
+select {
+	margin-bottom: 15px;
+}
+
+input[type='text'] {
+	margin-bottom: 15px;
+}
+
+.columna_1 {
+	padding-right: 30px;
+}

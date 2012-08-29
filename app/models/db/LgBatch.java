@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import models.lov.MoneyUnit;
+import models.lov.Currency;
 import play.Logger;
 import play.db.jpa.GenericModel;
 
@@ -33,7 +33,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     }
 
     public static LgBatch MakeRandom( LgDeposit deposit ) {
-        MoneyUnit billLov = MoneyUnit.findByTextId( "Pesos Argentinos" );
+        Currency billLov = Currency.findByTextId( "Pesos Argentinos" );
         if ( billLov == null ) {
             Logger.error( "no bill code for pesos argentinos!" );
             return null;

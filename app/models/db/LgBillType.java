@@ -2,7 +2,7 @@ package models.db;
 
 import java.util.Date;
 import javax.persistence.*;
-import models.lov.MoneyUnit;
+import models.lov.Currency;
 import play.db.jpa.GenericModel;
 
 @Entity
@@ -47,6 +47,6 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     @Override
     public String toString() {
         Integer d = denomination;
-        return (d.toString() + " " + MoneyUnit.findByNumericId(unitLov));
+        return (d.toString() + " " + Currency.findByNumericId(unitLov));
     }
 }

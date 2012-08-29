@@ -1,0 +1,27 @@
+#{extends 'main.html' /}
+#{set title:'Otras operaciones' /}
+#{set 'backUrl'}
+@{Application.index}
+#{/set}
+#{set 'moreStyles'}
+#{stylesheet 'menu_principal.css' /}
+#{/set}
+
+<h1 class="casa">&{'main_menu.title'}</h1>
+<div class="mensaje"><span>&{'application.choose_one'}</span></div>
+<ul class="columns">
+    <li class="column">
+        <div class="columna_1">
+            #{menuButton resource: 'CRUD.index', operation: 'GET', title: 'admin' /}
+            #{menuButton resource: 'Application.printTemplate', operation: 'GET', title: 'PRINT' /}
+            #{menuButton resource: 'Application.getReferenceCodes', operation: 'GET', title: 'go to references!' /}
+        </div>
+    </li>
+    <li class="column">
+        <div class="columna_2">
+            #{menuButton resource: 'GloryController.index', operation: 'GET', title: 'glory' /}
+            #{menuButton resource: 'GloryManagerController.index', operation: 'GET', title: 'gloryManager' /}
+        </div>
+    </li>
+</ul>
+

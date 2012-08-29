@@ -9,7 +9,7 @@ import models.Bill;
 import models.Deposit;
 import models.db.LgBatch;
 import models.db.LgBill;
-import models.lov.MoneyUnit;
+import models.lov.Currency;
 import play.Logger;
 import play.mvc.With;
 
@@ -22,7 +22,7 @@ public class FilterController extends BaseController {
 
     public static void chooseCurrency(String reference1, String reference2) throws Throwable {
         //TODO: Create event.       
-        List<MoneyUnit> moneyUnits = MoneyUnit.findAll();
+        List<Currency> moneyUnits = Currency.findAll();
         render(moneyUnits);
     }
 

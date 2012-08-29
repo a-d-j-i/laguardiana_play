@@ -28,19 +28,19 @@
     
 
     
-  lov.MoneyUnit(Reference_ARS_BILL):
+  lov.Currency(Reference_ARS_BILL):
     numericId:      1
     textId:         Pesos Argentinos
     description:    $
     endDate:        2999-12-31
 
-  lov.MoneyUnit(Reference_EUR_BILL):
+  lov.Currency(Reference_EUR_BILL):
     numericId:      2
     textId:         Euros
     description:    EU$
     endDate:        2999-12-31
 
-  lov.MoneyUnit(Reference_USD_BILL):
+  lov.Currency(Reference_USD_BILL):
     numericId:      3
     textId:         Dolares
     description:    U$S

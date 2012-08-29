@@ -1,0 +1,19 @@
+.mensaje {
+	margin-bottom: 20px;
+}
+
+.columna_1 {
+	padding-right: 25px;
+}
+
+.columna_2 {
+	padding-left: 25px;
+}
+
+.separar {
+	margin-bottom: 50px;
+}
+
+hr {
+	margin: 35px 0;
+}

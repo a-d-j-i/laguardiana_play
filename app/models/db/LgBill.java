@@ -42,7 +42,7 @@ public class LgBill extends GenericModel implements java.io.Serializable {
         Integer d = billType.denomination;
         Integer t = quantity * billType.denomination;
         return (q.toString() + " *  $" + d.toString() + " = " + t.toString()
-                + "(" + MoneyUnit.findByNumericId(billType.unitLov).toString() + ")");
+                + "(" + Currency.findByNumericId(billType.unitLov).toString() + ")");
     }
 
     public int getTotal() {

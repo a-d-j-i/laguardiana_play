@@ -1,0 +1,250 @@
+@font-face {
+	font-family: 'DIN';
+	src: url('../fonts/DINPro-Medium.eot');
+	src: local('☺'),
+		url('../fonts/DINPro-Medium.woff') format('woff'),
+		url('../fonts/DINPro-Medium.ttf') format('truetype'),
+		url('../fonts/DINPro-Medium.svg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	background: black;
+	height: 100%;
+	font-family: DIN;
+	font-size: 62.5%;
+	font-size: 1em;
+	color: black;
+}
+
+/* defaults */
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+/* layout */
+
+section {
+	width: 800px;
+	height: 600px;
+	background: url('../gfx/fondo.png');
+	position: relative;
+	margin: 0 auto;
+}
+
+header {
+	height: 118px;
+	background: url('../gfx/logo.png') 94% 50% no-repeat;
+}
+
+article {
+	padding: 35px 60px 0 60px;
+}
+
+/* headings */
+
+h1 {
+	line-height: 42px;
+	font-size: 30pt !important;
+	margin-bottom: 25px !important;
+	background-repeat: no-repeat;
+	background-position: 0% 50%;
+}
+
+h1.candado {
+	background-image: url('../gfx/icono_candado.png');
+	padding-left: 51px;
+}
+
+h1.casa {
+	background-image: url('../gfx/icono_casa.png');
+	padding-left: 66px;
+}
+
+h1.contar_dinero {
+	background-image: url('../gfx/icono_contar_dinero.png');
+	padding-left: 62px;
+}
+
+h1.depositar_efectivo {
+	background-image: url('../gfx/icono_depositar_efectivo.png');
+	padding-left: 62px;
+}
+
+h1.depositar_sobre {
+	background-image: url('../gfx/icono_depositar_sobre.png');
+	padding-left: 63px;
+}
+
+h2 {
+	font-size: 19pt !important;
+	margin-bottom: 15px !important;
+}
+
+/* separador */
+
+hr {
+	border: none;
+	height: 1px;
+	background: url('../gfx/separador.png') top right no-repeat;
+	padding: 0;
+	margin: 10px 0;
+}
+
+/* mensaje */
+
+.mensaje {
+	background: url('../gfx/caption_flecha.png') left bottom no-repeat;
+	padding-bottom: 12px;
+	margin-bottom: 10px;
+}
+
+.mensaje span {
+	background: url('../gfx/caption_fondo.png');
+	display: inline-block;
+	font-size: 15pt;
+	padding: 10px 22px 10px 20px;
+}
+
+/* botones */
+
+.boton {
+	height: 47px;
+	line-height: 47px;
+	font-size: 15pt;
+	border-right: 1px solid;
+	display: inline-block;
+	padding: 0 18px 0 70px;
+}
+
+.boton.verde {
+	color: white;
+	background: url('../gfx/boton_verde.png') top left no-repeat;
+	border-right-color: #547a1f;
+}
+
+.boton.gris {
+	color: black;
+	background: url('../gfx/boton_gris.png') top left no-repeat;
+	border-right-color: #b3b3b3;
+}
+
+.boton.naranja {
+	color: black;
+	background: url('../gfx/boton_naranja.png') top left no-repeat;
+	border-right-color: #fcba09;
+}
+
+.boton.rojo {
+	color: white;
+	background: url('../gfx/boton_rojo.png') top left no-repeat;
+	border-right-color: #b91b0b;
+}
+
+.boton_top {
+	background: url('../gfx/boton_top_fondo.png') top left repeat-y;
+	color: black;
+	padding: 12px 15px 12px 63px;
+	min-width: 252px;
+	position: absolute;
+	top: 33px;
+	left: 0;
+	font-size: 15pt;
+}
+
+/* forms */
+
+input[type='text'], input[type='password'], textarea {
+	background: white;
+	border: 1px solid #BCBCBC;
+	padding: 10px;
+	font-size: 15pt;
+	color: #999999;
+}
+
+input[type='text'], input[type='password'] {
+	height: 28px;
+}
+
+select {
+	background: white;
+	border: 1px solid #BCBCBC;
+	padding: 10px;
+	font-size: 15pt;
+	color: #999999;
+	height: 50px;
+}
+
+select option {
+	background: white;
+	padding: 10px;
+	font-size: 15pt;
+	color: #999999;
+}
+
+/* modificadores */
+
+.full_width {
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	width: 100%;
+}
+
+/* tablas */
+
+table {
+	background: url('../gfx/tabla_fondo.png') top left repeat-x #B8B8B8;
+	border: 1px solid #BCBCBC;
+}
+
+table thead {
+
+}
+
+table thead tr {
+
+}
+
+table thead tr th {
+	color: black;
+	text-align: center;
+	padding: 5px;
+}
+
+table tbody {
+
+}
+
+table tbody tr {
+
+}
+
+table tbody tr td {
+	text-align: center;
+	color: #666666;
+	padding: 1px 5px;
+	border-top: 1px solid #B9B9B9;
+}
+
+table tfoot {
+
+}
+
+table tfoot tr {
+
+}
+
+table tfoot tr td {
+	color: black;
+	text-align: center;
+	padding: 5px;
+	border-top: 1px solid #B9B9B9;
+}

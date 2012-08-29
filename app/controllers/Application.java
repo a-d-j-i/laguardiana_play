@@ -14,6 +14,10 @@ public class Application extends BaseController {
         render();
     }
 
+    public static void otherMenu() {
+        render();
+    }
+
     public static void bootstrap() {
         render();
     }

@@ -1,2 +1,43 @@
-#{extends 'inputReference.html' /}
-#{set title:'Deposito de Efectivo' /}
+#{extends 'main.html' /}
+#{set title:'Depositar Efectivo' /}
+#{set 'backUrl'}
+@{Application.index}
+#{/set}
+#{set 'moreStyles'}
+#{stylesheet 'depositar_efectivo_01.css' /}
+#{/set}
+
+
+<h1 class="depositar_efectivo">DEPOSITAR EFECTIVO</h1>
+<ul class="columns">
+    #{form @inputReference(reference1, reference2, currency)}
+    <li class="fixed column" style="width: 60%">
+        <div class="columna_1">
+            <div class="mensaje"><span>Ingrese referencia</span></div>
+            #{ifErrors}
+            <p class="error">
+                All fields are required!
+            </p>
+            #{/ifErrors}
+            <select name="reference1">
+                #{list items:referenceCodes, as:'reference'}
+                <li class="numvalue">${reference.toString()}</li>
+                <option value="${reference.numericId}">${reference.textId}</option>
+                #{/list}
+            </select>
+            <input type="text"  name="reference2" id="reference2" value="Aplicar a:" />
+            <div class="mensaje"><span>Seleccione divisa antes de iniciar el conteo</span></div>
+            <select name="currency">
+                #{list items:currencies, as:'currency'}
+                <li class="numvalue">${currency.toString()}</li>
+                <option value="${currency.numericId}">${currency.textId}</option>
+                #{/list}
+            </select>
+        </div>
+    </li>
+    <li class="fixed column" style="width: 40%">
+        <!-- depositar_efectivo_02.html -->
+        <input type="submit" class="boton gris" value="INICIAR CONTEO"/>
+    </li>
+    #{/form}
+</ul>
