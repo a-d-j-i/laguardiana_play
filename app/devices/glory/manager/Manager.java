@@ -25,6 +25,8 @@ public class Manager {
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
+        STORING,
+        CANCELING,
         CANCELED,;
     };
 
@@ -93,6 +95,10 @@ public class Manager {
 
         public GloryCommandAbstract sendGloryCommand(GloryCommandAbstract cmd) {
             return device.sendCommand(cmd);
+        }
+
+        public Status getStatus() {
+            return status.get();
         }
 
         public void setStatus(Status s) {
@@ -177,14 +183,19 @@ public class Manager {
         }
 
         public boolean cancelDeposit() {
+            if (getStatus() == Manager.Status.STORING) {
+                return false;
+            }
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
+                threadCommandApi.setStatus(Manager.Status.CANCELING);
                 return managerControllerApi.sendCommand(new CancelCount(threadCommandApi));
             }
             // TODO: One base class
             if (!(cmd instanceof Count) && !(cmd instanceof EnvelopeDeposit)) {
                 return false;
             }
+            threadCommandApi.setStatus(Manager.Status.CANCELING);
             cmd.cancel();
             return true;
         }
@@ -197,6 +208,7 @@ public class Manager {
             }
             // TODO: One base class
             if (cmd instanceof Count) {
+                threadCommandApi.setStatus(Manager.Status.STORING);
                 ((Count) cmd).storeDeposit(sequenceNumber);
                 return true;
             }
