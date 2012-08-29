@@ -3,6 +3,7 @@ package models;
 import java.util.Date;
 import javax.persistence.Entity;
 import models.db.*;
+import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 
 @Entity
@@ -11,7 +12,11 @@ public class Deposit extends LgDeposit {
     // TODO: Validate the depositId there are allways only one deposit ID
     // unfinished.
     public static Deposit getAndValidateOpenDeposit(String depositId) {
-        return Deposit.findById(Integer.parseInt(depositId));
+        Deposit d = Deposit.findById(Integer.parseInt(depositId));
+        if (d.finishDate != null) {
+            return null;
+        }
+        return d;
     }
 
     public Deposit() {
@@ -29,12 +34,13 @@ public class Deposit extends LgDeposit {
         }
     }
 
-    public Deposit(LgUser user, String userCode, LgLov userCodeLov) {
+    public Deposit(LgUser user, String userCode, LgLov userCodeLov, Currency currency) {
         this.bag = LgBag.GetCurrentBag();
         this.user = user;
         this.userCode = userCode;
         this.userCodeLov = userCodeLov.numericId;
         this.creationDate = new Date();
+        this.currency = currency.numericId;
     }
 
     public LgLov findUserCodeLov() {

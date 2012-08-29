@@ -5,34 +5,38 @@ import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Inheritance( strategy = InheritanceType.SINGLE_TABLE )
-@Table( name = "lg_lov", schema = "public" )
-@DiscriminatorColumn( name = "type", length = 32 )
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "lg_lov", schema = "public")
+@DiscriminatorColumn(name = "type", length = 32)
 abstract public class LgLov extends GenericModel implements java.io.Serializable {
 
     @Id
-    @Column( name = "lov_id", unique = true, nullable = false )
+    @Column(name = "lov_id", unique = true, nullable = false)
     @GeneratedValue
-    public int lovId;
-    @Column( name = "type", nullable = false, updatable = false, insertable = false )
+    public Integer lovId;
+    @Column(name = "type", nullable = false, updatable = false, insertable = false)
     public String type;
-    @Column( name = "numeric_id", nullable = false )
-    public int numericId;
-    @Column( name = "text_id", nullable = false, length = 32 )
+    @Column(name = "numeric_id", nullable = false)
+    public Integer numericId;
+    @Column(name = "text_id", nullable = false, length = 32)
     public String textId;
-    @Column( name = "description", nullable = false, length = 256 )
+    @Column(name = "description", nullable = false, length = 256)
     public String description;
-    @Temporal( TemporalType.DATE )
-    @Column( name = "end_date", nullable = true, length = 13 )
+    @Temporal(TemporalType.DATE)
+    @Column(name = "end_date", nullable = true, length = 13)
     public Date endDate;
 
-    static public LgLov findByNumericId( String ctype, Integer numericId ) {
-        return LgLov.find( "select l from LgLov l where numericId = ? and l.class = ?", numericId, ctype ).first();
+    static public long count(String ctype, Integer numericId) {
+        return LgLov.find("select count(*) from LgLov l where numericId = ? and l.class = ?", numericId, ctype).first();
+    }
+
+    static public LgLov findByNumericId(String ctype, Integer numericId) {
+        return LgLov.find("select l from LgLov l where numericId = ? and l.class = ?", numericId, ctype).first();
         //return LgLov.find("byType", UserCodeReference).fetch();
     }
 
-    static public LgLov findByTextId( String ctype, String textId ) {
-        return LgLov.find( "select l from LgLov l where textId = ? and l.class = ?", textId, ctype ).first();
+    static public LgLov findByTextId(String ctype, String textId) {
+        return LgLov.find("select l from LgLov l where textId = ? and l.class = ?", textId, ctype).first();
     }
 
     @Override

@@ -1,0 +1,15 @@
+#
+# Predefined User Reference Code for deposits
+#
+  db.LgSystemProperty(billDepositShowReference1):
+    name:  "bill_deposit.show_reference1"
+    value:  "true"
+    
+  db.LgSystemProperty(billDepositShowReference2):
+    name:  "bill_deposit.show_reference2"
+    value:  "true"
+    
+        
+  db.LgSystemProperty(clientCode):
+    name:  "client_code"
+    value:  "LA Guardiana S.A."

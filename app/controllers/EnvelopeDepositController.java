@@ -9,6 +9,7 @@ import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.db.LgLov;
 import models.db.LgUser;
+import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import models.lov.EnvelopeType;
 import play.Logger;
@@ -30,7 +31,9 @@ public class EnvelopeDepositController extends BaseController {
             if (userCode == null) {
                 Logger.error("countMoney: no reference received! for %s", reference1);
             } else {
-                Deposit deposit = new Deposit(user, reference2, userCode);
+                // TODO: Finish.
+                Currency currency = null;
+                Deposit deposit = new Deposit(user, reference2, userCode, currency);
                 deposit.save();
                 getEnvelopeContents(Integer.toString(deposit.depositId), null);
                 return;

@@ -208,7 +208,11 @@ public class Count extends ManagerCommandAbstract {
             sleep();
         }
         gotoNeutral(true, false);
-        threadCommandApi.setStatus(Manager.Status.IDLE);
+        if ( mustCancel() ) {
+            threadCommandApi.setStatus(Manager.Status.CANCELED);
+        } else {
+            threadCommandApi.setStatus(Manager.Status.IDLE);
+        }
     }
 
     public void storeDeposit(int sequenceNumber) {

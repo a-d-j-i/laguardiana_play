@@ -19,19 +19,13 @@
     </head>
 
     <body>
-        <section>
-            <header></header>
-            #{if backUrl}
-            <a href="${backUrl}" class="boton_top">◄ VOLVER</a>
-            #{/if}
-            <article>
-                #{doLayout /}
-            </article>
-        </section>
+        #{doLayout /}
     </body>
     <!-- javascript Placed at the end of the document so the pages load faster -->
     <script src="@{'/public/javascripts/jquery-1.8.0.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <script src="@{'/public/javascripts/elastic.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <script src="@{'/public/javascripts/jquery.defaultvalue.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <script src="@{'/public/javascripts/code.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
         <script src="@{'/public/javascripts/html5.js'}"></script>

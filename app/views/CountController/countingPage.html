@@ -1,52 +1,78 @@
 #{extends 'main.html' /}
 #{set title:'Doing transaction..' /}
-<div class="row">
-    <div class="span11 well">
-        <table class="table table-bordered table-striped" >
-            <thead>
-                <tr>
-                    #{list items:billData, as:'b'}
-                    <th>
-                        ${b.billType}
-                    </th>
-                    #{/list}
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    #{list items:billData, as:'b'}
-                    <td id="BID_${b.billType.billTypeId}">
-                        ${b.quantity}
-                    </td>
-                    #{/list}
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
 
-<div class="row">
-    <div class="span3">
-        #{ifAuthorized resource: 'BillDepositController.acceptBatch', operation: 'GET'}
-        <div class="control-group">
-            <div class="controls">
-                <a class="btn btn-primary btn-large menu-button-fixed-size-btn" 
-                   id="acceptBatch"
-                   >Accept Batch</a>
-            </div>
-        </div>        
-        #{/ifAuthorized}
-        #{ifAuthorized resource: 'BillDepositController.cancelDeposit', operation: 'GET'}
-        <div class="control-group">
-            <div class="controls">
-                <div class="btn btn-primary btn-large menu-button-fixed-size-btn" 
-                   id="cancelBatch"
-                   >Cancel Deposit</div> 
-            </div>
+
+<section id="depositar_efectivo_02">
+    <header></header>
+    <!-- link volver -->
+    <a id ="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
+    <!-- /link volver -->
+    <article>
+        <h1 class="contar_dinero">&{ 'main_menu.count' }</h1>
+        <ul class="columns">
+            <li class="fixed column" style="width: 45%">
+                <div class="columna_1">
+                    <!-- resumen de datos -->
+                    <p>&{ 'counting_page.currency_title' }: ${currency}</p>
+                    <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                    <!-- /resumen de datos -->
+                </div>
+            </li>
+            <li class="fixed column" style="width: 55%">
+                <table class="full_width">
+                    <thead>
+                        <tr>
+                            <th>&{ 'counting_page.denomination' }</th>
+                            <th>&{ 'counting_page.quantity' }</th>
+                            <th>&{ 'counting_page.total' }</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <!-- detalle de billetes -->
+                        %{ total = 0; cnt_total = 0;}%
+                        #{list items:billData, as:'b'}
+                        <tr id="BTRID_${b.billTypeId}">
+                            <td id="bill_denomination">${b.denomination}</td>
+                            <td id="bill_quantity">${b.quantity}</td>
+                            <td id="bill_total">${b.denomination  * b.quantity}</td>
+                            %{ total += b.denomination  * b.quantity; cnt_total += b.quantity }%
+                        </tr>
+                        #{/list}
+                        <!-- /detalle de billetes -->
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <td>&{ 'counting_page.totals' }</td>
+                            <!-- totales -->
+                            <td id ="cnt_total">${ cnt_total }</td>
+                            <td id ="total">${ total }</td>
+                            <!-- /totales -->
+                        </tr>
+                    </tfoot>
+                </table>
+            </li>
+        </ul>
+
+        <div class="botonera">
+            <ul class="columns">
+                <li class="fixed column" style="width: 50%">
+                    <!-- link cancelar -->
+                    <a id ="cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+                    <!-- /link cancelar -->
+                </li>
+                <li class="fixed column" style="width: 50%">
+                    <div class="columna_2">
+                        <!-- link continuar -->
+                        <a id ="finishCountButton" href="#" class="boton gris">&{ 'application.finish' }</a>
+                        <!-- /link continuar -->
+                    </div>
+                </li>
+            </ul>
         </div>
-        #{/ifAuthorized}
-    </div>
-</div>
+    </article>
+</section>
 
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
@@ -58,110 +84,55 @@
             return;
         }
         waiting = true;
-        $.getJSON( '@{BillDepositController.getCountersAndStatus}', function( data ) {
+        $.getJSON( '@{countingPage()}', function( data ) {
             waiting = false;
-            var success = data[ 0 ];
-            if ( success == null || success.toString() == 'null' ) {
-                $('#success').hide();
-            } else {
-                $('#success').show();                
-                $('#success_msg').html( success )
+            var status = data[ 0 ];
+            var billData = data[ 1 ];
+            if ( status != null && status.toString() != 'null' ) {
+                if ( status == 'IDLE' ) {
+                } else if ( status == 'INITIALIZING' ) {
+                } else if ( status == 'READY_TO_STORE' ) {
+                    $( '#finishCountButton' ).attr( { 'class' : 'boton naranja'});
+                    $( '#finishCountButton' ).click( function(event) {
+                        $.getJSON( '@{finishCount()}', function( data ) {
+                        })
+                    });
+                } else if ( status == 'CANCELED' ) {
+                    document.location.href = "@{Application.index()}";
+                } else {
+                    alert( status );
+                }
             }
-            var billData = data[ 1 ]
+            var total = 0;
+            var cnt_total = 0;
             for( var i = 0 ; i < billData.length; i ++ ) {
-                var nid = '#BID_' + billData[ i ].billType.billTypeId.toString();
-                $( nid ).html( billData[ i ].quantity);
+                var nid = '#BTRID_' + billData[ i ].billTypeId;
+                $( nid ).children( '#bill_denomination' ).html( billData[ i ].denomination );
+                $( nid ).children( '#bill_quantity' ).html( billData[ i ].quantity );
+                var t = ( billData[ i ].denomination * billData[ i ].quantity );
+                $( nid ).children( '#bill_total' ).html( t );
+                total += t;
+                cnt_total += billData[ i ].quantity;
             }
-            for( var i = 0 ; i < billData.length; i ++ ) {
-                var nid = '#DID_' + billData[ i ].billType.billTypeId.toString();
-                $( nid ).html( billData[ i ].desiredQuantity);
-            }
+            $( '#cnt_total' ).html( cnt_total );
+            $( '#total' ).html( total );
         })
     }
-    // Call refresh every .5 seconds
-    setInterval(refresh, 500)
-    refresh()
+    $( '#finishCountButton' ).click( function(event) {
+        event.preventDefault();
+    });
+    $( '#backButton' ).click( function(event) {
+        $.getJSON( '@{finishCount()}', function( data ) {
+        })
+    });
+    $( '#cancelButton' ).click( function(event) {
+        $.getJSON( '@{finishCount()}', function( data ) {
+        })
+    });
+
+    // Call refresh every 1.5 seconds
+    setInterval(refresh, 1500);
+    refresh();
 </script>
-    
-<script type="text/javascript" charset="${_response_encoding}">
-    var waitingCancelationRequest = false;
-    var waitingCancelationInterval = null;
 
-    var waitAcceptanceRequest = false;
-    var waitAcceptanceInterval = null;
-
-    function setup() {
-        $("#cancelBatch").click(function(){
-            $.getJSON( '@{BillDepositController.cancelDeposit(deposit.depositId)}}', 
-            function( data ) {
-                var success = data [ 0 ];
-                if (success == 1) {
-                    //we should wait for cancellation finish..
-                    waitingCancelationInterval = setInterval(waitCancelation, 300)
-                } else {
-                    alert ("cancel batch order failed.. perhaps we should retry");
-                }
-            })
-        });
-        
-        $("#acceptBatch").click(function(){
-            $.getJSON( '@{BillDepositController.acceptBatch(deposit.depositId)}', 
-            function( data ) {
-                var success = data [ 0 ];
-                if (success == 1) {
-                    //we should wait for cancellation finish..
-                    waitAcceptanceInterval = setInterval(waitAcceptance, 300)
-                } else {
-                    alert ("accept batch order failed.. perhaps we should retry");
-                }
-            })
-        });
-    }
-
-    function waitCancelation() {
-        if (waitingCancelationRequest) {
-            return;
-        }
-        waitingCancelationRequest = true;
-        $.getJSON( '@{BillDepositController.checkCancelDeposit(deposit.depositId)}', 
-          function( data ) {
-            waitingCancelationRequest = false;
-            var finishedOp = data[0];
-            var resultOk = data[1];
-            if (finishedOp) {
-                clearInterval(waitingCancelationInterval);
-                if (resultOk) {
-                    window.location = '@{Application.index}'
-                } else {
-                    alert("XXX: cancelation failed!")
-                }
-            }
-        })
-    }
-
-    function waitAcceptance() {
-        if (waitAcceptanceRequest) {
-            return;
-        }
-        waitAcceptanceRequest = true;
-        $.getJSON( '@{BillDepositController.checkAcceptBatch(deposit.depositId)}', 
-          function( data ) {
-            waitAcceptanceRequest = false;
-            var finishedOp = data[0];
-            var resultOk = data[1];
-            if (finishedOp) {
-                clearInterval(waitAcceptanceInterval);
-                if (resultOk) {
-                    $.getJSON( '@{BillDepositController.finishDeposit(deposit.depositId)}',
-                        function( data ) { window.location = '@{Application.index}'}
-                    );
-                } else {
-                    alert("XXX: acceptance failed!")
-                }
-            }
-        })
-    }
-    
-    setup()
-</script>
 #{/set}

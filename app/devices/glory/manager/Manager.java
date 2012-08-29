@@ -24,7 +24,8 @@ public class Manager {
         INITIALIZING,
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
-        REMOVE_THE_BILLS_FROM_HOPER,;
+        REMOVE_THE_BILLS_FROM_HOPER,
+        CANCELED,;
     };
 
     static public enum Error {
@@ -138,6 +139,7 @@ public class Manager {
                 // still executing
                 return false;
             }
+            threadCommandApi.setStatus(Manager.Status.IDLE);
             return managerControllerApi.sendCommand(new Count(threadCommandApi, desiredQuantity, currency));
         }
 

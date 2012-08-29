@@ -18,15 +18,18 @@ import play.Play;
  */
 public class Bill {
 
-    public LgBillType billType;
+    transient public LgBillType billType;
+    public Integer billTypeId;
+    public String billTypeDescription;
+    public Integer denomination;
     public Integer desiredQuantity = 0;
     public Integer quantity = 0;
 
-    static public List<Bill> getCurrentCounters() {
+    static public List<Bill> getCurrentCounters(Integer currency) {
         List<Bill> ret = new ArrayList<Bill>();
-        List<LgBillType> billTypes = LgBillType.findAll();
+        List<LgBillType> billTypes = LgBillType.find(currency);
 
-        
+
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
         Manager.ControllerApi manager = CounterFactory.getManager(Play.configuration.getProperty("glory.port"));
@@ -37,6 +40,9 @@ public class Bill {
         for (LgBillType bb : billTypes) {
             Bill b = new Bill();
             b.billType = bb;
+            b.billTypeId = bb.billTypeId;
+            b.billTypeDescription = bb.toString();
+            b.denomination = bb.denomination;
             if (currentQuantity != null && currentQuantity.containsKey(bb.slot)) {
                 b.quantity = currentQuantity.get(bb.slot);
             }

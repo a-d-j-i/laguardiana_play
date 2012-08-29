@@ -170,7 +170,7 @@ input[type='text'], input[type='password'], textarea {
 }
 
 input[type='text'], input[type='password'] {
-	height: 28px;
+
 }
 
 select {
@@ -247,4 +247,121 @@ table tfoot tr td {
 	text-align: center;
 	padding: 5px;
 	border-top: 1px solid #B9B9B9;
+}
+
+/* section: login */
+
+#login input[type='text'] {
+	width: 200px;
+	margin-right: 15px;
+}
+
+#login input[type='password'] {
+	width: 200px;
+	margin-right: 15px;
+}
+
+/* section: menu principal */
+
+#menu_principal .mensaje {
+	margin-bottom: 20px;
+}
+
+#menu_principal .botonera {
+	height: 150px;
+	overflow: hidden;
+}
+
+#menu_principal .botonera .columna {
+	padding: 0 10px;
+}
+
+#menu_principal .botonera .columna a {
+	margin-bottom: 30px;
+}
+
+#menu_principal hr {
+	margin: 35px 0;
+}
+
+#menu_principal .botonera_pie .columna {
+	padding: 0 10px;
+}
+
+#menu_principal .botonera_pie .columna a {
+	margin-right: 20px;
+}
+
+/* section: depositar efectivo 01 */
+
+#depositar_efectivo_01 select {
+	margin-bottom: 15px;
+}
+
+#depositar_efectivo_01 input[type='text'] {
+	margin-bottom: 15px;
+}
+
+#depositar_efectivo_01 .columna_1 {
+	padding-right: 30px;
+}
+
+/* section: depositar efectivo 02 */
+
+#depositar_efectivo_02 .columna_1 {
+	padding-right: 30px;
+}
+
+#depositar_efectivo_02 .botonera {
+	margin-top: 100px;
+}
+
+#depositar_efectivo_02 .columna_2 {
+	text-align: right;
+}
+
+/* section: depositar efectivo 03 */
+
+#depositar_efectivo_03 .columna_1 {
+	padding-right: 30px;
+}
+
+#depositar_efectivo_03 .botonera {
+	margin-top: 100px;
+}
+
+#depositar_efectivo_03 .columna_2 {
+	text-align: right;
+}
+
+/* section: other menu */
+
+
+#other_menu .mensaje {
+	margin-bottom: 20px;
+}
+
+#other_menu .botonera {
+	height: 150px;
+	overflow: hidden;
+}
+
+#other_menu .botonera .columna {
+	padding: 0 10px;
+}
+
+#other_menu .botonera .columna a {
+	margin-bottom: 30px;
+}
+
+#other_menu hr {
+	margin: 35px 0;
+}
+
+#other_menu .botonera_pie .columna {
+	padding: 0 10px;
+}
+
+#other_menu .botonera_pie .columna a {
+	margin-right: 20px;
 }

@@ -1,27 +1,51 @@
 #{extends 'main.html' /}
 #{set title:'Otras operaciones' /}
-#{set 'backUrl'}
-@{Application.index}
-#{/set}
-#{set 'moreStyles'}
-#{stylesheet 'menu_principal.css' /}
-#{/set}
+<section id ="other_menu">
+    <header></header>
+    <a href="@{Application.index}" class="boton_top">◄ VOLVER</a>
+    <article>
+        <h1 class="casa">&{'other_menu.title'}</h1>
+        <div class="mensaje"><span>&{'application.choose_one'}</span></div>
 
-<h1 class="casa">&{'main_menu.title'}</h1>
-<div class="mensaje"><span>&{'application.choose_one'}</span></div>
-<ul class="columns">
-    <li class="column">
-        <div class="columna_1">
-            #{menuButton resource: 'CRUD.index', operation: 'GET', title: 'admin' /}
-            #{menuButton resource: 'Application.printTemplate', operation: 'GET', title: 'PRINT' /}
-            #{menuButton resource: 'Application.getReferenceCodes', operation: 'GET', title: 'go to references!' /}
+        <div class="botonera">
+            <ul class="on-2 columns">
+                <li class="column">
+                    <div class="columna">
+                        #{menuButton resource: 'CRUD.index', operation: 'GET', title: 'Administrar DB' /}
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        #{menuButton resource: 'Application.printTemplate', operation: 'GET', title: 'PRINT' /}
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        #{menuButton resource: 'GloryController.index', operation: 'GET', title: 'Glory (Comandos)' /}
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        #{menuButton resource: 'GloryManagerController.index', operation: 'GET', title: 'Glory (Manager)' /}
+                    </div>
+                </li>
+            </ul>
         </div>
-    </li>
-    <li class="column">
-        <div class="columna_2">
-            #{menuButton resource: 'GloryController.index', operation: 'GET', title: 'glory' /}
-            #{menuButton resource: 'GloryManagerController.index', operation: 'GET', title: 'gloryManager' /}
+
+        <hr />
+        <div class="botonera_pie">
+            <ul class="columns">
+                <li class="column">
+                    <div class="columna">
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="@{Secure.login}" class="boton verde full_width">&{'main_menu.login'}</a>
+                    </div>
+                </li>
+            </ul>
         </div>
-    </li>
-</ul>
+    </article>
+</section>
 

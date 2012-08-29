@@ -35,23 +35,23 @@ public class FilterController extends BaseController {
             //TODO: Save an event log, do something.
             // if counting is ok, else error ??
         }
-        List<Bill> billData = Bill.getCurrentCounters();
-        renderArgs.put("billData", billData);
+        //List<Bill> billData = Bill.getCurrentCounters();
+        //renderArgs.put("billData", billData);
         render(deposit);
     }
 
     public static void getCountersAndStatus() {
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
         Status success = manager.getStatus();
-        List<Bill> billData = Bill.getCurrentCounters();
+//        List<Bill> billData = Bill.getCurrentCounters();
 
         if (request.isAjax()) {
             Object[] o = new Object[2];
             o[0] = success;
-            o[1] = billData;
+            //o[1] = billData;
             renderJSON(o);
         } else {
-            renderArgs.put("billData", billData);
+            //renderArgs.put("billData", billData);
             render();
         }
     }
@@ -70,7 +70,7 @@ public class FilterController extends BaseController {
         }
 
         Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
-        List<Bill> billData = Bill.getCurrentCounters();
+        //List<Bill> billData = Bill.getCurrentCounters();
 
         o[0] = storeOk = manager.storeDeposit(Integer.parseInt(depositId));
         Logger.error(" // accept deposit opened result: %b", storeOk);
@@ -80,11 +80,11 @@ public class FilterController extends BaseController {
         }
 
         LgBatch batch = new LgBatch();
-        for (Bill bill : billData) {
+        /*for (Bill bill : billData) {
             Logger.debug(" -> quantity %d", bill.quantity);
             LgBill b = new LgBill(batch, bill.quantity, bill.billType, deposit);
             //batch.bills.add(b);
-        }
+        }*/
         batch.save();
         renderJSON(o);
         return;

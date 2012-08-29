@@ -15,14 +15,14 @@
   
   lov.DepositUserCodeReference(Reference_Enero):
     numericId:      1
-    textId:         Enero
-    description:    User Code Reference Enero
+    textId:         ENERO
+    description:    Enero
     endDate:        2999-12-31
     
   lov.DepositUserCodeReference(Reference_Febrero):
     numericId:      2
-    textId:         Febrero
-    description:    User Code Reference Febrero
+    textId:         FEBRERO
+    description:    Febrero
     endDate:        2999-12-31
     
     
@@ -74,7 +74,7 @@
     denomination:   50
     unitLov:        1
     slot:           0
-    currency:       0
+    currency:       1
 
   db.LgBillType(100pesos):
     denomination:   100
@@ -93,6 +93,3 @@
     unitLov:        3
     slot:           0
     currency:       2
-
-    
-    

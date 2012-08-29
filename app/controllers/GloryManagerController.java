@@ -41,14 +41,15 @@ public class GloryManagerController extends BaseController {
             Logger.error(error);
         }
 
-        List<Bill> billData = Bill.getCurrentCounters();
-        Integer currency = 0;
+        Integer currency = 1;
         if (manager != null) {
             currency = manager.getCurrency();
             if (currency == null) {
-                currency = 0;
+                currency = 1;
             }
         }
+
+        List<Bill> billData = Bill.getCurrentCounters(currency);
         if (request.isAjax()) {
             Object[] o = new Object[4];
             o[0] = error;
@@ -69,7 +70,7 @@ public class GloryManagerController extends BaseController {
     }
 
     public static void count(Map<String, String> billTypeIds, Integer currency) throws IOException {
-        if ( currency == null || currency == 0 ) {
+        if (currency == null || currency == 0) {
             index();
         }
         if (manager != null) {
