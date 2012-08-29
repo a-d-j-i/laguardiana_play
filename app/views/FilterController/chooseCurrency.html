@@ -1,2 +1,43 @@
-#{extends 'chooseCurrency.html' /}
-#{set title:'Contar Lotes' /}
+#{extends 'main.html' /}
+#{set title:'Depositar Efectivo' /}
+
+<section id="depositar_efectivo_01">
+    <header></header>
+    <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>
+    <article>
+        <h1 class="contar_dinero">&{ 'main_menu.filter' }</h1>
+        <ul class="columns">
+            #{form @chooseCurrency(currency), 'id' : 'startCountingForm' }
+            
+            #{ifErrors}
+            <p class="error">
+                All fields are required!
+            </p>
+            #{/ifErrors}
+            <li class="fixed column" style="width: 60%">
+                <div class="columna_1">
+                    <div class="mensaje"><span>&{ 'input_reference.choose_currency_before' }</span></div>
+                    <select name="currency" class="full_width">
+                        #{list items:currencies, as:'currency'}
+                        <option value="${currency.numericId}">${currency.textId}</option>
+                        #{/list}
+                    </select>
+                </div>
+            </li>
+            <li class="fixed column" style="width: 40%">
+                <a id ="startCountingButton" href="#" class="boton gris">&{ 'input_reference.start_counting' }</a>
+            </li>
+            #{/form}
+        </ul>
+    </article>
+</section>
+
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+
+    $( '#startCountingButton' ).click( function(event) {
+       $( '#startCountingForm').submit();
+    });
+</script>
+#{/set}

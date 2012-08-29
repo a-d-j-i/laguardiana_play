@@ -2,6 +2,9 @@
 #{set title:'Doing transaction..' /}
 
 
+<div id="dialog-modal" title="Basic modal dialog">
+    <p>Adding the modal overlay screen makes the dialog look more prominent because it dims out the page content.</p>
+</div>
 
 
 <section id="depositar_efectivo_02">
@@ -97,6 +100,7 @@
             if ( status != null && status.toString() != 'null' ) {
                 if ( status == 'IDLE' ) {
                 } else if ( status == 'INITIALIZING' ) {
+                } else if ( status == 'PUT_THE_BILLS_ON_THE_HOPER' ) {
                 } else if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                     $( '#continueButton' ).click( function(event) {
@@ -234,4 +238,22 @@
     
     setup()
 </script>
+
+
+<script>
+    $(function() {
+        // a workaround for a flaw in the demo system (http://dev.jqueryui.com/ticket/4375), ignore!
+        $( "#dialog:ui-dialog" ).dialog( "destroy" );
+	
+        $( "#dialog-modal" ).dialog({
+            height: 140,
+            modal: true,
+            autoOpen: false
+        });
+    });
+</script>
+
+
+
+
 #{/set}

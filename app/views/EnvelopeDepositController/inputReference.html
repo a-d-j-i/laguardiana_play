@@ -1,2 +1,32 @@
-#{extends 'inputReference.html' /}
+#{extends 'bootstrap_main.html' /}
 #{set title:'Deposito de Sobre' /}
+
+<div>
+    <h1>Ingrese referencia</h1>
+    <form action="${request.url}" method="POST">
+        #{ifErrors}
+        <p class="error">
+            All fields are required!
+        </p>
+        #{/ifErrors}
+
+        <p>
+            <label for="reference1">Reference1</label>
+            <select name="reference1">
+                #{list items:referenceCodes, as:'reference'}
+                <li class="numvalue">${reference.toString()}</li>
+                <option value="${reference.numericId}">${reference.textId}</option>
+                #{/list}
+            </select>
+        </p>
+
+        <p>
+            <label for="reference2">Reference2</label>
+            <input type="text" name="reference2" id="reference2" />
+        </p>
+
+        <p>
+            <input class="btn btn-primary btn-large menu-button-fixed-size-btn"  type="submit" value="Begin Deposit" />
+        </p>
+    </form>
+    <a class="btn btn-primary btn-large menu-button-fixed-size-btn" href="@Application.index()">Cancel</a>
