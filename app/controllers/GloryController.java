@@ -136,8 +136,8 @@ public class GloryController extends BaseController {
         for ( int i = 0; i < bills.length; i++ ) {
             bills[ i] = 0;
         }
-        bills[ 27] = 1;
-        bills[ 26] = 2;
+        bills[ 27] = 0;
+        bills[ 26] = 0;
 
         CommandWithAckResponse c = new devices.glory.command.BatchDataTransmition( bills );
         setStatusAndRedirect( glory.sendCommand( c, true ) );
