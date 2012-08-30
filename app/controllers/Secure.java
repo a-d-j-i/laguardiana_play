@@ -5,6 +5,7 @@ import models.User;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.data.validation.Error;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -79,11 +80,16 @@ public class Secure extends Controller {
         render();
     }
 
-    public static void authenticate(@Required String username, String password, boolean remember, String cancel) throws Throwable {
+    public static void authenticate(@Required String username, String password, 
+            boolean remember, String cancel) throws Throwable {
         // Check tokens
         Logger.error(cancel);
-
+        
         if (Validation.hasErrors()) {
+            Logger.info("validation hasErrors!!!");
+            for(Error error : validation.errors()) {
+                Logger.error("    %s",error.message());
+            }
             flash.keep("url");
             flash.error("secure.invalid_field");
             params.flash();
