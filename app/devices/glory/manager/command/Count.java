@@ -6,7 +6,6 @@ package devices.glory.manager.command;
 
 import devices.glory.GloryStatus;
 import devices.glory.manager.Manager;
-import devices.glory.manager.Manager.ErrorDetail;
 import devices.glory.manager.Manager.ThreadCommandApi;
 import java.util.HashMap;
 import java.util.Map;
