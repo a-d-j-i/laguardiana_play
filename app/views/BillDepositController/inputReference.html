@@ -29,7 +29,8 @@
                     #{/if}
 
                     #{ if ( showReference2 ) }
-                    <input name="reference2" type="text" placeholder="Aplicar a:" class="full_width" />
+                    <input name="reference2" type="text" placeholder="Aplicar a:" class="full_width" 
+                           #{if play.mode.isDev() }value="REFERENCE2 TESTVAL"#{/if}/>
                     #{/if}
 
                     <div class="mensaje"><span>&{ 'input_reference.choose_currency_before' }</span></div>

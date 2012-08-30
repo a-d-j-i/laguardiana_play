@@ -312,8 +312,14 @@ table tfoot tr td {
 	padding-right: 30px;
 }
 
+#depositar_efectivo_02 .contenido {
+	height: 280px;
+	overflow: hidden;
+	margin-bottom: 20px;
+}
+
 #depositar_efectivo_02 .botonera {
-	margin-top: 100px;
+
 }
 
 #depositar_efectivo_02 .columna_2 {
@@ -332,36 +338,4 @@ table tfoot tr td {
 
 #depositar_efectivo_03 .columna_2 {
 	text-align: right;
-}
-
-/* section: other menu */
-
-
-#other_menu .mensaje {
-	margin-bottom: 20px;
-}
-
-#other_menu .botonera {
-	height: 150px;
-	overflow: hidden;
-}
-
-#other_menu .botonera .columna {
-	padding: 0 10px;
-}
-
-#other_menu .botonera .columna a {
-	margin-bottom: 30px;
-}
-
-#other_menu hr {
-	margin: 35px 0;
-}
-
-#other_menu .botonera_pie .columna {
-	padding: 0 10px;
-}
-
-#other_menu .botonera_pie .columna a {
-	margin-right: 20px;
 }
