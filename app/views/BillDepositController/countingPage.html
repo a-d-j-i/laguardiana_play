@@ -93,7 +93,7 @@
             return;
         }
         waiting = true;
-        $.getJSON( '@{BillDepositController.countingPage}', function( data ) {
+        $.getJSON( '@{BillDepositController.info}', function( data ) {
             waiting = false;
             var status = data[ 0 ];
             var billData = data[ 1 ];
@@ -101,6 +101,7 @@
                 if ( status == 'IDLE' ) {
                 } else if ( status == 'INITIALIZING' ) {
                 } else if ( status == 'PUT_THE_BILLS_ON_THE_HOPER' ) {
+                    //alert( status );
                 } else if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                     $( '#continueButton' ).click( function(event) {
@@ -169,72 +170,29 @@
             })
         });
 
-        $("#continueBatch").click(function() {
-            $(".controls-after-batch").hide();
-            $(".controls-pre-batch").show();
-            $.getJSON( '@{BillDepositController.countingPage(deposit.depositId)}', 
-            function( data ) { 
-                if (data[0]) {
-                    //pass everything is ok
-                } else {
-                    //count command was not accepted.. going to main
-                    window.location = '@{Application.index}'}
-            }
-                        
-        );  
-            //window.location = ;
-        });
-
-        $("#finishDeposit").click(function() {
-            $.getJSON( '@{BillDepositController.finishDeposit(deposit.depositId)}', 
-            function( data ) { window.location = '@{Application.index}'}
-        );  
-        });
+//        $("#continueBatch").click(function() {
+//            $(".controls-after-batch").hide();
+//            $(".controls-pre-batch").show();
+//            $.getJSON( 'BillDepositController.countingPage(deposit.depositId)}', 
+//            function( data ) { 
+//                if (data[0]) {
+//                    //pass everything is ok
+//                } else {
+//                    //count command was not accepted.. going to main
+//                    window.location = '@{Application.index}'}
+//            }
+//                        
+//        );  
+//            //window.location = ;
+//        });
+//
+//        $("#finishDeposit").click(function() {
+//            $.getJSON( 'BillDepositController.finishDeposit(deposit.depositId)}', 
+//                function( data ) { window.location = '@{Application.index}'}
+//            );  
+//        });
     }
 
-    function waitCancelation() {
-        if (waitingCancelationRequest) {
-            return;
-        }
-        waitingCancelationRequest = true;
-        $.getJSON( '@{BillDepositController.checkCancelDeposit(deposit.depositId)}', 
-        function( data ) {
-            waitingCancelationRequest = false;
-            var finishedOp = data[0];
-            var resultOk = data[1];
-            if (finishedOp) {
-                clearInterval(waitingCancelationInterval);
-                if (resultOk) {
-                    window.location = '@{Application.index}'
-                } else {
-                    alert("XXX: cancelation failed!")
-                }
-            }
-        })
-    }
-
-    function waitAcceptance() {
-        if (waitAcceptanceRequest) {
-            return;
-        }
-        waitAcceptanceRequest = true;
-        $(".controls-pre-batch").hide();
-        $.getJSON( '@{BillDepositController.checkAcceptBatch(deposit.depositId)}', 
-        function( data ) {
-            waitAcceptanceRequest = false;
-            var finishedOp = data[0];
-            var resultOk = data[1];
-            if (finishedOp) {
-                clearInterval(waitAcceptanceInterval);
-                if (resultOk) {
-                    $(".controls-pre-batch").hide();
-                    $(".controls-after-batch").show();
-                } else {
-                    alert("XXX: acceptance failed!")
-                }
-            }
-        })
-    }
     
     setup()
 </script>

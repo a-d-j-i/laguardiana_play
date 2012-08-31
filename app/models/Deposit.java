@@ -1,10 +1,13 @@
 package models;
 
+import play.Logger;
+
 import java.util.Date;
 import javax.persistence.Entity;
 import models.db.*;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
+import controllers.BaseController;
 
 @Entity
 public class Deposit extends LgDeposit {
@@ -43,6 +46,12 @@ public class Deposit extends LgDeposit {
         this.currency = currency.numericId;
     }
 
+    public Deposit(LgUser user) {
+        this.bag = LgBag.GetCurrentBag();
+        this.user = user;
+        this.creationDate = new Date();
+    }
+    
     public LgLov findUserCodeLov() {
         return DepositUserCodeReference.findByNumericId(userCodeLov);
     }
@@ -53,5 +62,23 @@ public class Deposit extends LgDeposit {
         Integer billcount = this.bills.size();
         return "Deposit by: " + user.toString() + " in: " + bag.toString()
                 + " codes:[" + billcount.toString() + ":" + userCode + "/" + uc.toString() + "]";
+    }
+                   
+    public Boolean validateReferenceAndCurrency() {
+        if ((userCode==null) || (userCodeLov==null) || (currency==null))
+        {
+            Logger.error("usercode null? %b", userCode==null);
+            Logger.error("usercodelov null? %b", userCodeLov==null);
+            Logger.error("currency null? %b", currency==null);
+            return false;
+        }
+                // empty 
+        if ((userCode.isEmpty())) // || (userCodeLov.isEmpty()))
+                return false;
+        Currency c = controllers.BaseController.validateCurrency(currency);
+        if (c==null) {
+            return false;
+        }
+        return true;
     }
 }
