@@ -1,0 +1,33 @@
+#{extends 'main.html' /}
+#{set title:'Depositar Efectivo' /}
+<section id="depositar_efectivo_03">
+    <header></header>
+    <article>
+        <div class="contenido">
+            <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
+            <div class="mensaje"><span>&{ 'summary.ticket' }</span></div>
+            <h2>&{ 'application.thanks' }</h2>
+            <!-- datos del deposito -->
+            <p>&{ 'counting_page.reference1_title' }: ${userCode}</p>
+            <p>&{ 'counting_page.reference2_title' }: ${userCodeLov}</p>
+            <p>&{ 'summary.total' }: ${depositTotal}</p>
+            <!-- /datos del deposito -->
+        </div>
+
+        <hr />
+        <div class="botonera">
+            <ul class="columns">
+                <li class="fixed column" style="width: 50%">
+                    <!-- link cancelar -->
+                    <a href="@{Application.index()}" class="boton gris">&{ 'main_menu.title' }</a>
+                </li>
+                <li class="fixed column" style="width: 50%">
+                    <div class="columna_2">
+                        <!-- link continuar -->
+                        <a href="@{Secure.logout( "Application.index" ) }" class="boton verde">&{ 'main_menu.logout' }</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>

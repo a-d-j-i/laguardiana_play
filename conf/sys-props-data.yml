@@ -9,6 +9,14 @@
     name:  "bill_deposit.show_reference2"
     value:  "true"
     
+  db.LgSystemProperty(envelopeDepositShowReference1):
+    name:  "envelope_deposit.show_reference1"
+    value:  "true"
+    
+  db.LgSystemProperty(envelopeDepositShowReference2):
+    name:  "envelope_deposit.show_reference2"
+    value:  "true"
+    
         
   db.LgSystemProperty(clientCode):
     name:  "client_code"

@@ -9,7 +9,7 @@
 .ui-keyboard-space { width: 15em; text-indent: -999em; }
 .ui-keyboard-preview-wrapper { text-align: center; }
 .ui-keyboard-preview { text-align: left; margin: 0 0 3px 0; display: inline; width: 99%;} /* width is calculated in IE, since 99% = 99% full browser width =( */ 
-.ui-keyboard-keyset { text-align: center; }
+.ui-keyboard-keyset { text-align: center; white-space: nowrap; }
 .ui-keyboard-input { text-align: left; }
 .ui-keyboard-input-current { -moz-box-shadow: 1px 1px 10px #00f; -webkit-box-shadow: 1px 1px 10px #00f; box-shadow: 1px 1px 10px #00f; }
 .ui-keyboard-placeholder { color: #888; }
@@ -19,6 +19,12 @@
 
 /* combo key styling - toggles diacritics on/off */
 .ui-keyboard-button.ui-keyboard-combo.ui-state-default { border-color: #ffaf0f; }
+
+/* (in)valid inputs */
+button.ui-keyboard-accept.ui-keyboard-valid-input { border-color: #0c0; background: #080; color: #fff; }
+button.ui-keyboard-accept.ui-keyboard-valid-input:hover { background: #0a0; }
+button.ui-keyboard-accept.ui-keyboard-invalid-input { border-color: #c00; background: #800; color: #fff; }
+button.ui-keyboard-accept.ui-keyboard-invalid-input:hover { background: #a00; }
 
 /*** jQuery Mobile definitions ***/
 /* jQuery Mobile styles - need wider buttons because of font size and text-overflow:ellipsis */

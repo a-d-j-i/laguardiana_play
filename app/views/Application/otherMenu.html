@@ -1,37 +1,20 @@
 #{extends 'main.html' /}
 #{set title:'Otras operaciones' /}
-<section id ="other_menu">
+<section id ="menu_principal">
     <header></header>
-    <a href="@{Application.index}" class="boton_top">◄ VOLVER</a>
+    <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="casa">&{'other_menu.title'}</h1>
         <div class="mensaje"><span>&{'application.choose_one'}</span></div>
 
         <div class="botonera">
             <ul class="on-2 columns">
-                <li class="column">
-                    <div class="columna">
-                        #{menuButton resource: 'CRUD.index', operation: 'GET', title: 'Administrar DB' /}
-                    </div>
-                </li>
-                <li class="column">
-                    <div class="columna">
-                        #{menuButton resource: 'Application.printTemplate', operation: 'GET', title: 'PRINT' /}
-                    </div>
-                </li>
-                <li class="column">
-                    <div class="columna">
-                        #{menuButton resource: 'GloryController.index', operation: 'GET', title: 'Glory (Comandos)' /}
-                    </div>
-                </li>
-                <li class="column">
-                    <div class="columna">
-                        #{menuButton resource: 'GloryManagerController.index', operation: 'GET', title: 'Glory (Manager)' /}
-                    </div>
-                </li>
+                #{otherMenuButton resource: 'CRUD.index', operation: 'GET', title: 'Administrar DB' /}
+                #{otherMenuButton resource: 'Application.printTemplate', operation: 'GET', title: 'PRINT' /}
+                #{otherMenuButton resource: 'GloryController.index', operation: 'GET', title: 'Glory (Comandos)' /}
+                #{otherMenuButton resource: 'GloryManagerController.index', operation: 'GET', title: 'Glory (Manager)' /}
             </ul>
         </div>
-
         <hr />
         <div class="botonera_pie">
             <ul class="columns">
@@ -41,6 +24,7 @@
                 </li>
                 <li class="column">
                     <div class="columna">
+                        <!-- boton ingresar -->
                         <a href="@{Secure.login}" class="boton verde full_width">&{'main_menu.login'}</a>
                     </div>
                 </li>
@@ -48,4 +32,3 @@
         </div>
     </article>
 </section>
-

@@ -4,6 +4,7 @@ import models.db.LgSystemProperty;
 import models.lov.Currency;
 import play.Logger;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 /**
@@ -15,20 +16,24 @@ import play.mvc.With;
 @With(Secure.class)
 public class BaseController extends Controller {
 
+    @Util
     static public String getProperty(String name) {
         return LgSystemProperty.getProperty(name);
     }
 
+    @Util
     static public Boolean isProperty(String name) {
         return LgSystemProperty.isProperty(name);
     }
 
+    @Util
     public static Boolean localError(String message, Object... args) {
         Logger.error(message, args);
         flash.error(message, args);
         return null;
     }
 
+    @Util
     public static Currency validateCurrency(Integer currency) {
         // Validate Currency.
         if (currency == null) {
@@ -45,5 +50,28 @@ public class BaseController extends Controller {
             return null;
         }
         return c;
+    }
+
+    @Util
+    public static Boolean validateReference(Boolean r1, Boolean r2, String reference1, String reference2) {
+        if (r1) {
+            if (reference1 == null) {
+                return false;
+            }
+            if (reference1.isEmpty()) {
+                localError("inputReference: reference 1 must not be empty");
+                return false;
+            }
+        }
+        if (r2) {
+            if (reference2 == null) {
+                return false;
+            }
+            if (reference2.isEmpty()) {
+                localError("inputReference: reference 2 must not be empty");
+                return false;
+            }
+        }
+        return true;
     }
 }

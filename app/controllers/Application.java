@@ -1,17 +1,16 @@
 package controllers;
 
-import java.util.List;
 import models.TemplatePrinter;
-import models.db.LgLov;
-import models.lov.DepositUserCodeReference;
-import play.mvc.Controller;
 import play.mvc.With;
 
-
-@With( Secure.class)
+@With(Secure.class)
 public class Application extends BaseController {
 
     public static void index() {
+        mainMenu();
+    }
+
+    public static void mainMenu() {
         render();
     }
 

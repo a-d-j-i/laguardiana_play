@@ -1,0 +1,56 @@
+#{extends 'main.html' /}
+#{set title:'Contenido del sobre' /}
+%{  def action = request.action
+    def url = actionBridge."$action".call() 
+}%
+<section id="depositar_sobre_03">
+    <header></header>
+    <a href="@{ EnvelopeDepositController.getEnvelopeContents() }" class="boton_top">◄ &{ 'application.back' }</a>
+    <!-- /link volver -->
+    <article>
+        <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
+        <div class="contenido">
+            <ul class="columns">
+                <li class="fixed column" style="width: 60%">
+                    #{form url, 'id' : 'mainForm' }
+                    #{ifErrors}
+                    <p class="error">
+                        All fields are required!
+                    </p>
+                    #{/ifErrors}
+                    <input type="hidden" name="contentType" value="${contentType}">
+                    <div class="columna_1">
+                        #{doLayout /}
+                    </div>
+                    #{/form}
+                </li>
+                <li class="fixed column" style="width: 40%">
+                    <div id="keyboard_placeholder"></div>
+                </li>
+            </ul>
+        </div>
+        <div class="botonera">
+            <ul class="columns">
+                <li class="fixed column" style="width: 50%">
+                    <!-- link cancelar -->
+                    <a href="@{EnvelopeDepositController.cancelDeposit()}" class="boton rojo">&{ 'application.cancel' }</a>
+                </li>
+                <li class="fixed column" style="width: 50%">
+                    <div class="columna_2">
+                        <!-- link continuar -->
+                        <a id ="continueButton" href="#" class="boton naranja">&{ 'application.continue' }</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+
+    $( '#continueButton' ).click( function(event) {
+        $( '#mainForm').submit();
+    });
+</script>
+#{/set}

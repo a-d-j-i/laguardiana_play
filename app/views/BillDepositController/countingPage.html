@@ -5,10 +5,6 @@
     <header></header>
     <!-- link volver -->
     <a href="@{BillDepositController.cancelDeposit()}" class="boton_top">◄ &{ 'application.back' }</a>
-    <!-- /link volver -->
-    #{form @acceptBatch(depositId), 'id' : 'continueForm' }
-    <input type="hidden" name="depositId" value="${depositId}">
-    #{/form}
     <article>
         <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
 
@@ -17,10 +13,10 @@
                 <li class="fixed column" style="width: 45%">
                     <div class="columna_1">
                         <!-- resumen de datos -->
-                        <p>&{ 'counting_page.currency_title' }: ${currency}</p>
-                        <p>&{ 'counting_page.reference1_title' }: ${userCode}</p>
-                        <p>&{ 'counting_page.reference2_title' }: ${userCodeLov}</p>
-                        <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                        <p>&{ 'bill_deposit.currency_title' }: ${currency}</p>
+                        <p>&{ 'bill_deposit.reference1_title' }: ${userCode}</p>
+                        <p>&{ 'bill_deposit.reference2_title' }: ${userCodeLov}</p>
+                        <p>&{ 'bill_deposit.client_code_title' }: ${clientCode}</p>
                         <!-- /resumen de datos -->
                     </div>
                 </li>
@@ -28,12 +24,11 @@
                     <table class="full_width">
                         <thead>
                             <tr>
-                                <th>&{ 'counting_page.denomination' }</th>
-                                <th>&{ 'counting_page.quantity' }</th>
-                                <th>&{ 'counting_page.total' }</th>
+                                <th>&{ 'bill_deposit.denomination' }</th>
+                                <th>&{ 'bill_deposit.quantity' }</th>
+                                <th>&{ 'bill_deposit.total' }</th>
                             </tr>
                         </thead>
-
                         <tbody>
                             <!-- detalle de billetes -->
                             %{ total = 0; cnt_total = 0;}%
@@ -50,7 +45,7 @@
 
                         <tfoot>
                             <tr>
-                                <td>&{ 'counting_page.totals' }</td>
+                                <td>&{ 'bill_deposit.totals' }</td>
                                 <!-- totales -->
                                 <td id ="cnt_total">${ cnt_total }</td>
                                 <td id ="total">${ total }</td>
@@ -66,13 +61,11 @@
                 <li class="fixed column" style="width: 50%">
                     <!-- link cancelar -->
                     <a href="@{BillDepositController.cancelDeposit(depositId)}" class="boton rojo">&{ 'application.cancel' }</a>
-                    <!-- /link cancelar -->
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
                         <a id ="continueButton" href="#" class="boton gris">&{ 'application.continue' }</a>
-                        <!-- /link continuar -->
                     </div>
                 </li>
             </ul>
@@ -98,7 +91,7 @@
                 if ( status == 'IDLE' ) {
                 } else if ( status == 'INITIALIZING' ) {
                 } else if ( status == 'PUT_THE_BILLS_ON_THE_HOPER' ) {
-                    alert( status );
+                    //alert( status );
                 } else if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                     $( '#continueButton' ).click( function(event) {
@@ -167,27 +160,27 @@
             })
         });
 
-//        $("#continueBatch").click(function() {
-//            $(".controls-after-batch").hide();
-//            $(".controls-pre-batch").show();
-//            $.getJSON( 'BillDepositController.countingPage(deposit.depositId)}', 
-//            function( data ) { 
-//                if (data[0]) {
-//                    //pass everything is ok
-//                } else {
-//                    //count command was not accepted.. going to main
-//                    window.location = '@{Application.index}'}
-//            }
-//                        
-//        );  
-//            //window.location = ;
-//        });
-//
-//        $("#finishDeposit").click(function() {
-//            $.getJSON( 'BillDepositController.finishDeposit(deposit.depositId)}', 
-//                function( data ) { window.location = '@{Application.index}'}
-//            );  
-//        });
+        //        $("#continueBatch").click(function() {
+        //            $(".controls-after-batch").hide();
+        //            $(".controls-pre-batch").show();
+        //            $.getJSON( 'BillDepositController.countingPage(deposit.depositId)}', 
+        //            function( data ) { 
+        //                if (data[0]) {
+        //                    //pass everything is ok
+        //                } else {
+        //                    //count command was not accepted.. going to main
+        //                    window.location = '@{Application.index}'}
+        //            }
+        //                        
+        //        );  
+        //            //window.location = ;
+        //        });
+        //
+        //        $("#finishDeposit").click(function() {
+        //            $.getJSON( 'BillDepositController.finishDeposit(deposit.depositId)}', 
+        //                function( data ) { window.location = '@{Application.index}'}
+        //            );  
+        //        });
     }
 
     setup()

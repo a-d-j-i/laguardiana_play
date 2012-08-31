@@ -1,0 +1,6 @@
+<div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
+<select name="currency" class="full_width">
+    #{list items:_currencies, as:'currency'}
+    <option value="${currency.numericId}">${currency.textId}</option>
+    #{/list}
+</select>

@@ -1,46 +1,63 @@
 #{extends 'main.html' /}
-#{set title:'Reference' /}
+#{set title:'Contenido del sobre' /}
 
-<div>
-    <h1>Ingrese datos del sobre</h1>
-    #{if (confirm) }
-    CONFIRM
-    %{ def url = actionBridge.EnvelopeDepositController.acceptEnvelope.call()}%
-    <form action="${url}" method="POST">
-    #{/if}
-    #{else}
-    %{ def url = actionBridge.EnvelopeDepositController.getEnvelopeContents.call()}%
-    <form action="${url}" method="POST">
-    #{/else}
+<section id="depositar_sobre_02">
+    <header></header>
+    <a href="@{ EnvelopeDepositController.inputReference() }" class="boton_top">◄ &{ 'application.back' }</a>
+    <article>
+        <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
+        <div class="mensaje"><span>&{ 'getEnvelopeContents.select_contents' }</span></div>
+        <div class="botonera">
+            <ul class="on-2 columns">
+                <li class="column">
+                    <div class="columna">
+                        <a href="@{EnvelopeDepositController.addCash()}" class="boton naranja full_width">&{ 'getEnvelopeContents.cash' }</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="@{EnvelopeDepositController.addDocument()}" class="boton naranja full_width">&{ 'getEnvelopeContents.documents' }</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="@{EnvelopeDepositController.addCheck()}" class="boton naranja full_width">&{ 'getEnvelopeContents.checks' }</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="@{EnvelopeDepositController.addTicket()}" class="boton naranja full_width">&{ 'getEnvelopeContents.tickets' }</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="@{EnvelopeDepositController.addOther()}" class="boton naranja full_width">&{ 'getEnvelopeContents.others' }</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <hr />
+        <div class="botonera_pie">
+            <ul class="columns">
+                <li class="column">
+                    <div class="columna">
+                        <a href="@{EnvelopeDepositController.cancelDeposit()}" class="boton rojo full_width">&{ 'application.cancel' }</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        #{if hasContents}
+                        <a id ="continueButton" href="#" class="boton gris full_width">&{ 'application.continue' }</a>
+                        #{/if}
+                        #{else}
+                        <a id ="continueButton" href="#" class="boton naranja full_width">&{ 'application.continue' }</a>
+                        #{/else}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>
 
 
-        <select name="envelope.envelopeTypeLov">
-            #{list items:envelopeTypes, as:'envelopeType'}
-            <li class="numvalue">${envelopeType.toString()}</li>
-            <option value="${envelopeType.numericId}">${envelopeType.textId}</option>
-            #{/list}
-        </select>
 
-
-        <input type="hidden" name="depositId" value="${deposit.depositId}">
-        
-        <input type="text" name="envelope.envelopeNumber" value="100">
-
-        <p>
-            Cheque: 
-            <input type="hidden" name="envelope.envelopeContents[0].contentTypeLov" value="1">
-            <input type="text" name="envelope.envelopeContents[0].amount" value="100">
-            <input type="text" name="envelope.envelopeContents[0].unitLov" value="1">
-        </p>
-        <p>
-            Plata: 
-            <input type="hidden" name="envelope.envelopeContents[1].contentTypeLov" value="2">
-            <input type="text" name="envelope.envelopeContents[1].amount" value="200">
-            <input type="text" name="envelope.envelopeContents[1].unitLov" value="2">
-        </p>
-        <p class="buttons">
-            <input type="submit" value="Confirm" name="confirm">
-            <a href="@{index()}">Cancel</a>
-        </p>
-    </form>
-</div>

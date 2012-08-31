@@ -1,0 +1,8 @@
+%{ def url = actionBridge."$_resource".call() }%
+#{if ( controllers.Secure.checkPermission( _resource, _operation ) ) }
+<li class="column">
+    <div class="columna">
+        <a href="${url}" class="boton naranja full_width separar">${_title}</a>
+    </div>
+</li>
+#{/if}

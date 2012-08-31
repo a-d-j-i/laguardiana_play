@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.HashMap;
 import java.util.List;
 import models.User;
 import play.Logger;
@@ -11,6 +12,7 @@ import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
+import play.mvc.Router;
 
 /**
  *
@@ -80,15 +82,15 @@ public class Secure extends Controller {
         render();
     }
 
-    public static void authenticate(@Required String username, String password, 
+    public static void authenticate(@Required String username, String password,
             boolean remember, String cancel) throws Throwable {
         // Check tokens
         Logger.error(cancel);
-        
+
         if (Validation.hasErrors()) {
             Logger.info("validation hasErrors!!!");
-            for(Error error : validation.errors()) {
-                Logger.error("    %s",error.message());
+            for (Error error : validation.errors()) {
+                Logger.error("    %s", error.message());
             }
             flash.keep("url");
             flash.error("secure.invalid_field");
@@ -98,7 +100,7 @@ public class Secure extends Controller {
         }
 
         Logger.info("received user: %s password: %s", username, password);
-        
+
         User user = User.authenticate(username, password);
         if (user == null) {
             Logger.error("no such user!");
@@ -118,11 +120,17 @@ public class Secure extends Controller {
         redirectToOriginalURL();
     }
 
-    public static void logout() throws Throwable {
+
+    public static void logout(String toUrl) throws Throwable {
         Cache.delete(session.getId() + "-user");
         session.clear();
         //flash.success( "secure.logout" );
-        redirectToOriginalURL();
+        if (toUrl == null || toUrl.isEmpty()) {
+            redirectToOriginalURL();
+        } else {
+            String url = Router.reverse(toUrl, new HashMap()).url;
+            redirect(url);
+        }
     }
 
     static void redirectToOriginalURL() throws Throwable {

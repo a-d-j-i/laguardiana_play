@@ -1,0 +1,6 @@
+#{extends 'EnvelopeDepositController/addContent.html' /}
+
+#{currencySelect currencies: currencies /}
+&{ 'getEnvelopeContents.amountToConfirm' }
+&nbsp;&nbsp;
+<input name="amount" type="text" placeholder="&{ 'getEnvelopeContents.amountToConfirm_title' }" style="width: 230px" />

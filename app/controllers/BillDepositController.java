@@ -22,26 +22,72 @@ public class BillDepositController extends BaseController {
         Application.index();
     }
 
-    public static Integer updateDeposit(Boolean r1, Boolean r2, 
-            String reference1, String reference2, Integer currency) { //throws Throwable 
-        // empty 
-        if (r1) {
-            if (reference1 == null) {
-                return null;
-            }
-            if (reference1.isEmpty()) {
-                localError("inputReference: reference 1 must not be empty");
-                return null;
+    public static void inputReference(String reference1, String reference2, Integer currency)
+            throws Throwable {
+        ModMan modman = ModMan.get();
+
+        if (modman.currentOperation() == ModMan.Operations.IDLE) {
+            if (!modman.CreateCashDeposit()) {
+                Application.index();
             }
         }
-        if (r2) {
-            if (reference2 == null) {
-                return null;
-            }
-            if (reference2.isEmpty()) {
-                localError("inputReference: reference 2 must not be empty");
-                return null;
-            }
+
+
+        Boolean r1 = isProperty("bill_deposit.show_reference1");
+        Boolean r2 = isProperty("bill_deposit.show_reference2");
+
+        updateDeposit(r1, r2, reference1, reference2, currency);
+        Boolean ready = modman.getCashDeposit().readyFor(
+                ModMan.CashDeposit.Screens.CASH_DEPOSIT_COUNT);
+        Logger.info("ready? %b", ready);
+        if (ready) {
+            countingPage("145");
+            return;
+        }
+        //depending on a value of LgSystemProperty, show both references or redirect 
+        //temporarily until we have a page using getReferences()..
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
+        List<Currency> currencies = Currency.findAll();
+        renderArgs.put("showReference1", r1);
+        renderArgs.put("showReference2", r2);
+        render(referenceCodes, currencies);
+    }
+
+    public static void countingPage(String depositId) {
+        Manager.ControllerApi manager = CounterFactory.getGloryManager();
+        Currency c = validateCurrency(manager.getCurrency());
+        ModMan modman = ModMan.get();
+        modman.getCashDeposit().switchTo(ModMan.CashDeposit.Screens.CASH_DEPOSIT_COUNT);
+        Deposit deposit = modman.getCashDeposit().deposit;
+
+        List<Bill> billData = Bill.getCurrentCounters(deposit.currency);
+        renderArgs.put("clientCode", getProperty("client_code"));
+        renderArgs.put("depositId", deposit.depositId);
+        renderArgs.put("userCode", deposit.userCode);
+        renderArgs.put("userCodeLov", DepositUserCodeReference.findByNumericId(
+                deposit.userCodeLov).description);
+        renderArgs.put("billData", billData);
+        renderArgs.put("currency", c.textId);
+        render(deposit);
+    }
+
+    public static void summary(String depositId) {
+        List<Bill> billData = Bill.getCurrentCounters(1);//deposit.currency);
+        renderArgs.put("clientCode", getProperty("client_code"));
+        renderArgs.put("userCode", "USERCODE" );//deposit.userCode);
+        renderArgs.put("userCodeLov", "USERCODELOV" ); //DepositUserCodeReference.findByNumericId(deposit.userCodeLov).description);
+        renderArgs.put("billData", billData);
+        renderArgs.put("currency", "CURRENCY" );//c.textId);
+        renderArgs.put("depositTotal", "DEPOSITTOTAL" );//c.textId);
+        
+        render();
+    }
+
+    public static Integer updateDeposit(Boolean r1, Boolean r2,
+            String reference1, String reference2, Integer currency) { //throws Throwable 
+  
+        if (!validateReference(r1, r2, reference1, reference2)) {
+            return null;
         }
 
         // Validate Currency.
@@ -62,46 +108,13 @@ public class BillDepositController extends BaseController {
             localError("inputReference: no reference received! for %s", reference1);
             return null;
         }
-        
-        ModMan modman = ModMan.get();        
+
+        ModMan modman = ModMan.get();
         modman.getCashDeposit().deposit.userCode = reference2;
         modman.getCashDeposit().deposit.userCodeLov = userCode.numericId;
         Logger.info("currency setuped: %d", currency);
         modman.getCashDeposit().deposit.currency = currency;
         return null;
-    }
-
-    
-    public static void inputReference(String reference1, String reference2, Integer currency)
-            throws Throwable {
-        ModMan modman = ModMan.get();
-
-        if (modman.currentOperation()==ModMan.Operations.IDLE)
-        {
-            if (!modman.CreateCashDeposit())
-                Application.index();
-        }
-
-        
-        Boolean r1 = isProperty("bill_deposit.show_reference1");
-        Boolean r2 = isProperty("bill_deposit.show_reference2");
-
-        updateDeposit(r1, r2, reference1, reference2, currency);
-        Boolean ready = modman.getCashDeposit().readyFor(
-                                        ModMan.CashDeposit.Screens.CASH_DEPOSIT_COUNT);
-        Logger.info("ready? %b", ready);
-        if (ready)
-        {
-            countingPage("145");
-            return;
-        }
-        //depending on a value of LgSystemProperty, show both references or redirect 
-        //temporarily until we have a page using getReferences()..
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
-        renderArgs.put("showReference1", r1);
-        renderArgs.put("showReference2", r2);
-        render(referenceCodes, currencies);
     }
 
     public static void info() {
@@ -110,9 +123,9 @@ public class BillDepositController extends BaseController {
             return;
         }
         ModMan modman = ModMan.get();
-        
+
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        Currency c = validateCurrency(manager.getCurrency());        
+        Currency c = validateCurrency(manager.getCurrency());
         Status status = manager.getStatus();
         List<Bill> billData = Bill.getCurrentCounters(c.numericId);
 
@@ -121,24 +134,6 @@ public class BillDepositController extends BaseController {
         o[1] = billData;
         renderJSON(o);
         return;
-    }    
-    
-    public static void countingPage(String depositId) {
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        Currency c = validateCurrency(manager.getCurrency());
-        ModMan modman = ModMan.get();
-        modman.getCashDeposit().switchTo(ModMan.CashDeposit.Screens.CASH_DEPOSIT_COUNT);
-        Deposit deposit = modman.getCashDeposit().deposit; 
-
-        List<Bill> billData = Bill.getCurrentCounters(deposit.currency);
-        renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("depositId", deposit.depositId);
-        renderArgs.put("userCode", deposit.userCode);
-        renderArgs.put("userCodeLov", DepositUserCodeReference.findByNumericId(
-                                              deposit.userCodeLov).description);
-        renderArgs.put("billData", billData);
-        renderArgs.put("currency", c.textId);
-        render(deposit);
     }
 
     public static void cancelDeposit(String depositId) {
@@ -168,13 +163,11 @@ public class BillDepositController extends BaseController {
 //        renderArgs.put("billData", billData);
 //        render(deposit);
 //    }
-
     public static void acceptBatch(String depositId) {
         ModMan modman = ModMan.get();
         modman.getCashDeposit().switchTo(ModMan.CashDeposit.Screens.CASH_DEPOSIT_ACCEPT);
         Application.index();
     }
-
 //    public static void checkAcceptBatch(String depositId) {
 //        Manager.ControllerApi manager = CounterFactory.getGloryManager();
 //        Object[] o = new Object[3];
