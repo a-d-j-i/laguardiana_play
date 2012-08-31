@@ -5,6 +5,7 @@ import models.User;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.data.validation.Error;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -79,11 +80,16 @@ public class Secure extends Controller {
         render();
     }
 
-    public static void authenticate(@Required String username, String password, boolean remember, String cancel) throws Throwable {
+    public static void authenticate(@Required String username, String password, 
+            boolean remember, String cancel) throws Throwable {
         // Check tokens
         Logger.error(cancel);
-
+        
         if (Validation.hasErrors()) {
+            Logger.info("validation hasErrors!!!");
+            for(Error error : validation.errors()) {
+                Logger.error("    %s",error.message());
+            }
             flash.keep("url");
             flash.error("secure.invalid_field");
             params.flash();
@@ -91,8 +97,11 @@ public class Secure extends Controller {
             return;
         }
 
+        Logger.info("received user: %s password: %s", username, password);
+        
         User user = User.authenticate(username, password);
         if (user == null) {
+            Logger.error("no such user!");
             flash.keep("url");
             flash.error("secure.invalid_user_password");
             params.flash();
@@ -124,7 +133,8 @@ public class Secure extends Controller {
         redirect(url);
     }
 
-    static User getCurrentUser() throws Throwable {
+    // Is it ok to be public?? 
+    public static User getCurrentUser() throws Throwable {
         User user = Cache.get(session.getId() + "-user", User.class);
         if (user == null) {
             List<User> q = User.find("byUserName", User.GUEST_NAME).fetch();
