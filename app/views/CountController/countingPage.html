@@ -9,52 +9,54 @@
     <!-- /link volver -->
     <article>
         <h1 class="contar_dinero">&{ 'main_menu.count' }</h1>
-        <ul class="columns">
-            <li class="fixed column" style="width: 45%">
-                <div class="columna_1">
-                    <!-- resumen de datos -->
-                    <p>&{ 'counting_page.currency_title' }: ${currency}</p>
-                    <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
-                    <!-- /resumen de datos -->
-                </div>
-            </li>
-            <li class="fixed column" style="width: 55%">
-                <table class="full_width">
-                    <thead>
-                        <tr>
-                            <th>&{ 'counting_page.denomination' }</th>
-                            <th>&{ 'counting_page.quantity' }</th>
-                            <th>&{ 'counting_page.total' }</th>
-                        </tr>
-                    </thead>
 
-                    <tbody>
-                        <!-- detalle de billetes -->
-                        %{ total = 0; cnt_total = 0;}%
-                        #{list items:billData, as:'b'}
-                        <tr id="BTRID_${b.billTypeId}">
-                            <td id="bill_denomination">${b.denomination}</td>
-                            <td id="bill_quantity">${b.quantity}</td>
-                            <td id="bill_total">${b.denomination  * b.quantity}</td>
-                            %{ total += b.denomination  * b.quantity; cnt_total += b.quantity }%
-                        </tr>
-                        #{/list}
-                        <!-- /detalle de billetes -->
-                    </tbody>
+        <div class="contenido">
+            <ul class="columns">
+                <li class="fixed column" style="width: 45%">
+                    <div class="columna_1">
+                        <!-- resumen de datos -->
+                        <p>&{ 'counting_page.currency_title' }: ${currency}</p>
+                        <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                        <!-- /resumen de datos -->
+                    </div>
+                </li>
+                <li class="fixed column" style="width: 55%">
+                    <table class="full_width">
+                        <thead>
+                            <tr>
+                                <th>&{ 'counting_page.denomination' }</th>
+                                <th>&{ 'counting_page.quantity' }</th>
+                                <th>&{ 'counting_page.total' }</th>
+                            </tr>
+                        </thead>
 
-                    <tfoot>
-                        <tr>
-                            <td>&{ 'counting_page.totals' }</td>
-                            <!-- totales -->
-                            <td id ="cnt_total">${ cnt_total }</td>
-                            <td id ="total">${ total }</td>
-                            <!-- /totales -->
-                        </tr>
-                    </tfoot>
-                </table>
-            </li>
-        </ul>
+                        <tbody>
+                            <!-- detalle de billetes -->
+                            %{ total = 0; cnt_total = 0;}%
+                            #{list items:billData, as:'b'}
+                            <tr id="BTRID_${b.billTypeId}">
+                                <td id="bill_denomination">${b.denomination}</td>
+                                <td id="bill_quantity">${b.quantity}</td>
+                                <td id="bill_total">${b.denomination  * b.quantity}</td>
+                                %{ total += b.denomination  * b.quantity; cnt_total += b.quantity }%
+                            </tr>
+                            #{/list}
+                            <!-- /detalle de billetes -->
+                        </tbody>
 
+                        <tfoot>
+                            <tr>
+                                <td>&{ 'counting_page.totals' }</td>
+                                <!-- totales -->
+                                <td id ="cnt_total">${ cnt_total }</td>
+                                <td id ="total">${ total }</td>
+                                <!-- /totales -->
+                            </tr>
+                        </tfoot>
+                    </table>
+                </li>
+            </ul>
+        </div>
         <div class="botonera">
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
