@@ -3,15 +3,16 @@
 
 <section id ="login">
     <header></header>
-
+    
+    
     <a href="@{Application.index}" class="boton_top">◄ VOLVER</a>
     <article>
 
         <h1 class="candado">&{'secure.title'}</h1>
         <div class="mensaje"><span>Para continuar, ingrese su usuario y contraseña</span></div>
-        #{form @authenticate() }
-        <input type="text" value="&{'secure.username'}" />
-        <input type="password" value="&{'secure.password'}" />
+        #{form @authenticate() }       
+        <input type="text" value="&{'secure.username'}" name="username"/>
+        <input type="password" value="&{'secure.password'}" name="password"/>
         <a href="#">¿No recuerda sus datos?</a>
         <button type="submit" class="btn" >&{'secure.signin'}</button>
         <a href="${lastUrl}"><input type="button" name="cancel" value="Cancel" class="btn" /></a>

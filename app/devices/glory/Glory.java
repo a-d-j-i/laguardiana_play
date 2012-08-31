@@ -79,7 +79,7 @@ public class Glory {
                         byte d2 = getDigit();
                         byte d3 = getDigit();
                         int l = d1 * 100 + d2 * 10 + d3 * 1;
-                        Logger.debug("Read len %d", l);
+                        //Logger.debug("Read len %d", l);
                         b = new byte[l + 5];
                         b[ 0] = (byte) (d1 + 0x30);
                         b[ 1] = (byte) (d2 + 0x30);
