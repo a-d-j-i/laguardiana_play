@@ -68,7 +68,7 @@ public class Secure extends Controller {
         return user.checkPermission(resource, operation);
     }
 
-    public static void login() throws Throwable {
+    public static void login() {
         String url = flash.get("lastUrl");
         if (url == null) {
             url = Play.ctxPath + "/";
@@ -120,7 +120,6 @@ public class Secure extends Controller {
         redirectToOriginalURL();
     }
 
-
     public static void logout(String toUrl) throws Throwable {
         Cache.delete(session.getId() + "-user");
         session.clear();
@@ -142,7 +141,7 @@ public class Secure extends Controller {
     }
 
     // Is it ok to be public?? 
-    public static User getCurrentUser() throws Throwable {
+    public static User getCurrentUser() {
         User user = Cache.get(session.getId() + "-user", User.class);
         if (user == null) {
             List<User> q = User.find("byUserName", User.GUEST_NAME).fetch();

@@ -4,23 +4,40 @@ import devices.CounterFactory;
 import devices.glory.manager.Manager;
 import devices.glory.manager.Manager.Status;
 import java.util.List;
-import models.Bill;
+import models.ModelFacade;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import play.mvc.With;
+import play.mvc.Before;
 
 public class CountController extends Application {
 
-    public static void index() {
-        Application.index();
+    @Before
+    static void wizardFixPage() throws Throwable {
+        switch (modelFacade.getCurrentStep()) {
+            case COUNT:
+                break;
+            case NONE:
+                if (request.actionMethod.equalsIgnoreCase("chooseCurrency")) {
+                    break;
+                }
+            case BILL_DEPOSIT:
+            case BILL_DEPOSIT_FINISH:
+            case RESERVED:
+            default: // do nothing
+                Application.index();
+                break;
+        }
     }
 
     public static void chooseCurrency(Integer currency)
             throws Throwable {
         Currency c = validateCurrency(currency);
 
-        if (currency != null) {
-            countingPage(currency);
+        // TODO: Use form validation.
+        if (c != null) {
+            modelFacade.startCounting(c);
+            countingPage();
+            return;
         }
         //depending on a value of LgSystemProperty, show both references or redirect 
         //temporarily until we have a page using getReferences()..
@@ -29,55 +46,26 @@ public class CountController extends Application {
         render(referenceCodes, currencies);
     }
 
-    public static void countingPage(Integer currency) {
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        Currency c = validateCurrency(manager.getCurrency());
-        if (c == null) {
-            error("Invalid currency");
-            return;
-        }
-        if (request.isAjax()) {
-            Status status = manager.getStatus();
-            List<Bill> billData = Bill.getCurrentCounters(c.numericId);
-
-            Object[] o = new Object[2];
-            o[0] = status;
-            o[1] = billData;
-            renderJSON(o);
-            return;
-        }
-
-        // Start counting.
-        if (!manager.count(null, c.numericId)) {
-            localError("inputReference: error starting the glory %s", manager.getErrorDetail());
-            throw new NumberFormatException();
-        }
-
-        List<Bill> billData = Bill.getCurrentCounters(c.numericId);
-        renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("billData", billData);
-        renderArgs.put("currency", c.textId);
-        render();
-    }
-
-    public static void getCountersAndStatus() {
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        Status success = manager.getStatus();
-        //List<Bill> billData = Bill.getCurrentCounters();
-
+    public static void countingPage() {
+        ModelFacade.BillDepositStartData data = modelFacade.getStartBillDepositData();
         if (request.isAjax()) {
             Object[] o = new Object[2];
-            o[0] = success;
-            //o[1] = billData;
+            o[0] = data.getStatus();
+            o[1] = data.getBillData();
             renderJSON(o);
         } else {
-            //renderArgs.put("billData", billData);
-            render();
+            renderArgs.put("clientCode", getProperty("client_code"));
+            render(data);
         }
+    }
+    
+    public static void acceptBatch() {
+        modelFacade.cancelBillDeposit();
+        countingPage();
     }
 
     public static void finishCount(String depositId) {
         Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        manager.cancelDeposit();
+        modelFacade.cancelBillDeposit();
     }
 }

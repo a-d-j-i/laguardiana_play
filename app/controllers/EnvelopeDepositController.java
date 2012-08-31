@@ -16,17 +16,40 @@ import play.mvc.With;
 @With(Secure.class)
 public class EnvelopeDepositController extends Application {
 
+    public class FormDataContent {
+
+        String currencyId;
+        Integer amount;
+    }
+
+    // Is a big form loaded with a few screens so the data goes from action to action
+    public class FormData {
+
+        String reference1 = null;
+        String reference2 = null;
+        String envelopeCode = null;
+        Boolean hasDocuments = null;
+        Boolean hasOther = null;
+        FormDataContent cashData = null;
+        FormDataContent checkData = null;
+        FormDataContent ticketData = null;
+    }
+
     public static void index() {
         Application.index();
     }
 
-    public static void inputReference(String reference1, String reference2) throws Throwable {
+    public static void inputReference(FormData data) throws Throwable {
+        Boolean r1 = isProperty("bill_deposit.show_reference1");
+        Boolean r2 = isProperty("bill_deposit.show_reference2");
 
-        Boolean r1 = isProperty("envelope_deposit.show_reference1");
-        Boolean r2 = isProperty("envelope_deposit.show_reference2");
+        DepositUserCodeReference userCodeLov = validateReference1(r1, data.reference1);
+        String userCode = validateReference2(r2, data.reference2);
 
-        if (validateReference(r1, r2, reference1, reference2)) {
-            getEnvelopeContents();
+        // TODO: Use form validation.
+        if (userCodeLov != null && userCode != null) {
+
+            getEnvelopeContents(data);
         }
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
@@ -36,7 +59,7 @@ public class EnvelopeDepositController extends Application {
 
     }
 
-    public static void getEnvelopeContents() {
+    public static void getEnvelopeContents(FormData data) {
         if (true) {
             confirmDeposit(null);
             return;
@@ -46,49 +69,49 @@ public class EnvelopeDepositController extends Application {
         render();
     }
 
-    public static void addCash(Integer currency, Integer amount) {
+    public static void addCash(FormData data) {
 
-        if (currency != null || amount != null) {
-            getEnvelopeContents();
+        if (data != null) {
+            getEnvelopeContents(data);
             return;
         }
         List<Currency> currencies = Currency.findAll();
         render(currencies);
     }
 
-    public static void addDocument() {
-        getEnvelopeContents();
+    public static void addDocument(FormData data) {
+        getEnvelopeContents(data);
     }
 
-    public static void addTicket(Integer amount) {
+    public static void addTicket(FormData data) {
 
-        if (amount != null) {
-            getEnvelopeContents();
+        if (data != null) {
+            getEnvelopeContents(data);
             return;
         }
         List<Currency> currencies = Currency.findAll();
         render(currencies);
     }
 
-    public static void addCheck(Integer currency, Integer amount) {
+    public static void addCheck(FormData data) {
 
-        if (currency != null || amount != null) {
-            getEnvelopeContents();
+        if (data != null) {
+            getEnvelopeContents(data);
             return;
         }
         List<Currency> currencies = Currency.findAll();
         render(currencies);
     }
 
-    public static void addOther() {
-        getEnvelopeContents();
+    public static void addOther(FormData data) {
+        getEnvelopeContents(data);
     }
 
-    public static void cancelDeposit() {
+    public static void cancelDeposit(FormData data) {
     }
 
-    public static void confirmDeposit(Integer envelopeCode) {
-        if (envelopeCode != null) {
+    public static void confirmDeposit(FormData data) {
+        if (data != null) {
             printTicket();
         }
         render();

@@ -33,7 +33,7 @@
                         <tbody>
                             <!-- detalle de billetes -->
                             %{ total = 0; cnt_total = 0;}%
-                            #{list items:billData, as:'b'}
+                            #{list items:data.billData, as:'b'}
                             <tr id="BTRID_${b.billTypeId}">
                                 <td id="bill_denomination">${b.denomination}</td>
                                 <td id="bill_quantity">${b.quantity}</td>
@@ -86,21 +86,24 @@
             return;
         }
         waiting = true;
-        $.getJSON( '@{countingPage()}', function( data ) {
+        $.getJSON( '@{CountController.countingPage}', function( data ) {
             waiting = false;
             var status = data[ 0 ];
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
                 if ( status == 'IDLE' ) {
                 } else if ( status == 'INITIALIZING' ) {
-                } else if ( status == 'READY_TO_STORE' ) {
-                    $( '#finishCountButton' ).attr( { 'class' : 'boton naranja'});
-                    $( '#finishCountButton' ).click( function(event) {
-                        $.getJSON( '@{finishCount()}', function( data ) {
-                        })
+                } else if ( status == 'COUNT' ) {
+                } else if ( status == 'COUNT_FINISH' ) {
+                    window.location.href = "@{Application.index()}";
+                    return;
+                } else if ( status == 'PUT_THE_BILLS_ON_THE_HOPER' ) {
+                    alert( status );
+                } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
+                    $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
+                    $( '#continueButton' ).click( function(event) {
+                        $.getJSON( '@{BillDepositController.acceptBatch()}', function( data ) {});
                     });
-                } else if ( status == 'CANCELED' ) {
-                    document.location.href = "@{Application.index()}";
                 } else {
                     alert( status );
                 }
@@ -120,21 +123,16 @@
             $( '#total' ).html( total );
         })
     }
-    $( '#finishCountButton' ).click( function(event) {
+    
+    $( '#cancelButton' ).click( function(event) {
+        $.getJSON( '@{CountController.finishCount}', function( data ) {});
+    });
+    
+    $( '#continueButton' ).click( function(event) {
         event.preventDefault();
     });
-    $( '#backButton' ).click( function(event) {
-        $.getJSON( '@{finishCount()}', function( data ) {
-        })
-    });
-    $( '#cancelButton' ).click( function(event) {
-        $.getJSON( '@{finishCount()}', function( data ) {
-        })
-    });
-
     // Call refresh every 1.5 seconds
     setInterval(refresh, 1500);
     refresh();
 </script>
-
 #{/set}

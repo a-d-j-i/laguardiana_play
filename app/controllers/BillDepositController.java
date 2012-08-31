@@ -1,44 +1,47 @@
 package controllers;
 
-import devices.CounterFactory;
-import devices.glory.manager.Manager;
-import devices.glory.manager.Manager.Status;
 import java.util.List;
-import models.Bill;
 import models.Deposit;
-import models.db.*;
+import models.ModelFacade;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import models.ModMan;
-import play.Logger;
+import play.mvc.Before;
 
 public class BillDepositController extends Application {
 
-    public static void index() {
-        ModMan modman = ModMan.get();
-        Application.index();
+    @Before
+    static void wizardFixPage() throws Throwable {
+        switch (modelFacade.getCurrentStep()) {
+            case BILL_DEPOSIT:
+            case BILL_DEPOSIT_FINISH:
+                break;
+            case NONE:
+                if (request.actionMethod.equalsIgnoreCase("inputReference")) {
+                    break;
+                }
+            case RESERVED:
+            default: // do nothing
+                Application.index();
+                break;
+        }
     }
 
-    public static void inputReference(String reference1, String reference2, Integer currency)
-            throws Throwable {
-        ModMan modman = ModMan.get();
-
-        if (modman.currentOperation() == ModMan.Operations.IDLE) {
-            if (!modman.CreateCashDeposit()) {
-                Application.index();
-            }
-        }
-
-
+    public static void inputReference(String reference1, String reference2, Integer currency) throws Throwable {
         Boolean r1 = isProperty("bill_deposit.show_reference1");
         Boolean r2 = isProperty("bill_deposit.show_reference2");
 
-        updateDeposit(r1, r2, reference1, reference2, currency);
-        Boolean ready = modman.getCashDeposit().readyFor(
-                ModMan.CashDeposit.Screens.CASH_DEPOSIT_COUNT);
-        Logger.info("ready? %b", ready);
-        if (ready) {
-            countingPage("145");
+        // Validate Currency.
+        Currency c = validateCurrency(currency);
+        if (c == null) {
+            localError("inputReference: invalid currency %d", currency);
+        }
+        DepositUserCodeReference userCodeLov = validateReference1(r1, reference1);
+        String userCode = validateReference2(r2, reference2);
+
+        // TODO: Use form validation.
+        if (c != null && userCodeLov != null && userCode != null) {
+            modelFacade.startBillDeposit(userCodeLov, userCode, c);
+            countingPage();
             return;
         }
         //depending on a value of LgSystemProperty, show both references or redirect 
@@ -50,98 +53,45 @@ public class BillDepositController extends Application {
         render(referenceCodes, currencies);
     }
 
-    public static void countingPage(String depositId) {
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        Currency c = validateCurrency(manager.getCurrency());
-        ModMan modman = ModMan.get();
-        modman.getCashDeposit().switchTo(ModMan.CashDeposit.Screens.CASH_DEPOSIT_COUNT);
-        Deposit deposit = modman.getCashDeposit().deposit;
-
-        List<Bill> billData = Bill.getCurrentCounters(deposit.currency);
-        renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("depositId", deposit.depositId);
-        renderArgs.put("userCode", deposit.userCode);
-        renderArgs.put("userCodeLov", DepositUserCodeReference.findByNumericId(
-                deposit.userCodeLov).description);
-        renderArgs.put("billData", billData);
-        renderArgs.put("currency", c.textId);
-        render(deposit);
+    public static void countingPage() {
+        ModelFacade.BillDepositStartData data = modelFacade.getStartBillDepositData();
+        if (request.isAjax()) {
+            Object[] o = new Object[2];
+            o[0] = data.getStatus();
+            o[1] = data.getBillData();
+            renderJSON(o);
+        } else {
+            renderArgs.put("clientCode", getProperty("client_code"));
+            render(data);
+        }
     }
 
-    public static void summary(String depositId) {
-        List<Bill> billData = Bill.getCurrentCounters(1);//deposit.currency);
-        renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("userCode", "USERCODE" );//deposit.userCode);
-        renderArgs.put("userCodeLov", "USERCODELOV" ); //DepositUserCodeReference.findByNumericId(deposit.userCodeLov).description);
-        renderArgs.put("billData", billData);
-        renderArgs.put("currency", "CURRENCY" );//c.textId);
-        renderArgs.put("depositTotal", "DEPOSITTOTAL" );//c.textId);
-        
-        render();
+    public static void cancelDeposit() {
+        modelFacade.cancelBillDeposit();
+        countingPage();
     }
 
-    public static Integer updateDeposit(Boolean r1, Boolean r2,
-            String reference1, String reference2, Integer currency) { //throws Throwable 
-  
-        if (!validateReference(r1, r2, reference1, reference2)) {
-            return null;
-        }
-
-        // Validate Currency.
-        Currency c = validateCurrency(currency);
-        if (c == null) {
-            localError("inputReference: invalid currency %d", currency);
-            return null;
-        }
-
-        LgLov userCode;
-        try {
-            userCode = DepositUserCodeReference.findByNumericId(Integer.parseInt(reference1));
-        } catch (NumberFormatException e) {
-            localError("inputReference: invalid number for reference %s", reference1);
-            return null;
-        }
-        if (userCode == null) {
-            localError("inputReference: no reference received! for %s", reference1);
-            return null;
-        }
-
-        ModMan modman = ModMan.get();
-        modman.getCashDeposit().deposit.userCode = reference2;
-        modman.getCashDeposit().deposit.userCodeLov = userCode.numericId;
-        Logger.info("currency setuped: %d", currency);
-        modman.getCashDeposit().deposit.currency = currency;
-        return null;
+    public static void acceptBatch() {
+        modelFacade.acceptBillDeposit();
+        countingPage();
     }
 
-    public static void info() {
-        if (!request.isAjax()) {
+    public static void finishDeposit() {
+        Deposit data = modelFacade.getDeposit();
+        modelFacade.finishDeposit();
+        if (data == null) {
             Application.index();
             return;
         }
-        ModMan modman = ModMan.get();
-
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        Currency c = validateCurrency(manager.getCurrency());
-        Status status = manager.getStatus();
-        List<Bill> billData = Bill.getCurrentCounters(c.numericId);
-
-        Object[] o = new Object[2];
-        o[0] = status;
-        o[1] = billData;
-        renderJSON(o);
-        return;
+        renderArgs.put("clientCode", getProperty("client_code"));
+        renderArgs.put("userCode", data.userCode);
+        if ( data.userCodeData != null ) {
+            renderArgs.put("userCodeLov", data.userCodeData.description);
+        }
+        renderArgs.put("currency", data.currencyData.textId);
+        renderArgs.put("depositTotal", data.getTotal());
+        render();
     }
-
-    public static void cancelDeposit(String depositId) {
-        ModMan modman = ModMan.get();
-        Logger.info("in cancel batch");
-        Deposit deposit = modman.getCashDeposit().deposit;
-        modman.getCashDeposit().switchTo(ModMan.CashDeposit.Screens.CASH_DEPOSIT_CANCEL);
-        String clientCode = getProperty("client_code");
-        render(deposit, clientCode);
-    }
-
 //    ///////////////////////////////
 //    public static void continueDeposit(String depositId) {
 //        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
@@ -160,11 +110,6 @@ public class BillDepositController extends Application {
 //        renderArgs.put("billData", billData);
 //        render(deposit);
 //    }
-    public static void acceptBatch(String depositId) {
-        ModMan modman = ModMan.get();
-        modman.getCashDeposit().switchTo(ModMan.CashDeposit.Screens.CASH_DEPOSIT_ACCEPT);
-        Application.index();
-    }
 //    public static void checkAcceptBatch(String depositId) {
 //        Manager.ControllerApi manager = CounterFactory.getGloryManager();
 //        Object[] o = new Object[3];

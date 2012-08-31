@@ -49,7 +49,7 @@ public class FilterController extends Application {
         }
 
         // Start counting.
-        if (!manager.count(null, c.numericId)) {
+        if (!manager.count(null, null, c.numericId)) {
             localError("inputReference: error starting the glory %s", manager.getErrorDetail());
             throw new NumberFormatException();
         }

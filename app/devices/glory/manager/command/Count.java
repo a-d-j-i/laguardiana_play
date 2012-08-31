@@ -17,10 +17,12 @@ import play.Logger;
  */
 public class Count extends ManagerCommandAbstract {
 
-    private CountData countData;
+    private final CountData countData;
+    private final Runnable onCountDone;
 
-    public Count(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public Count(ThreadCommandApi threadCommandApi, Runnable onCountDone, Map<Integer, Integer> desiredQuantity, Integer currency) {
         super(threadCommandApi);
+        this.onCountDone = onCountDone;
         countData = new CountData(desiredQuantity, currency);
 
     }
@@ -166,6 +168,9 @@ public class Count extends ManagerCommandAbstract {
                     if (storeTry) {
                         gotoNeutral(true, false);
                         threadCommandApi.setStatus(Manager.Status.IDLE);
+                        if (onCountDone != null) {
+                            onCountDone.run();
+                        }   
                         return;
                     }
                     if (!refreshCurrentQuantity()) {
@@ -207,11 +212,15 @@ public class Count extends ManagerCommandAbstract {
             sleep();
         }
         gotoNeutral(true, false);
-        if ( mustCancel() ) {
+        if (mustCancel()) {
             threadCommandApi.setStatus(Manager.Status.CANCELED);
         } else {
             threadCommandApi.setStatus(Manager.Status.IDLE);
         }
+        if (onCountDone != null) {
+            onCountDone.run();
+        }
+        threadCommandApi.setStatus(Manager.Status.IDLE);
     }
 
     public void storeDeposit(int sequenceNumber) {

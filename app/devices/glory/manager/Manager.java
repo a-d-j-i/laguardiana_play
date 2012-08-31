@@ -26,8 +26,7 @@ public class Manager {
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
         STORING,
-        CANCELING,
-        CANCELED,;
+        CANCELING, CANCELED,;
     };
 
     static public enum Error {
@@ -136,7 +135,7 @@ public class Manager {
             managerControllerApi = managerThreadState.getControllerApi();
         }
 
-        public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
+        public boolean count(Runnable onCountDone, Map<Integer, Integer> desiredQuantity, Integer currency) {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
                 if (cmd instanceof Count) {
@@ -146,7 +145,7 @@ public class Manager {
                 return false;
             }
             threadCommandApi.setStatus(Manager.Status.IDLE);
-            return managerControllerApi.sendCommand(new Count(threadCommandApi, desiredQuantity, currency));
+            return managerControllerApi.sendCommand(new Count(threadCommandApi, onCountDone, desiredQuantity, currency));
         }
 
         public Integer getCurrency() {

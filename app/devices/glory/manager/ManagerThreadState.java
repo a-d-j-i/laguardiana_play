@@ -35,10 +35,10 @@ class ManagerThreadState {
             }
         }
 
-        boolean sendCommand( ManagerCommandAbstract cmd ) {
+        boolean sendCommand(ManagerCommandAbstract cmd) {
             mutex.lock();
             try {
-                if ( currentCommand == null ) {
+                if (currentCommand == null) {
                     currentCommand = cmd;
                     commandSent.signal();
                     return true;
@@ -50,10 +50,10 @@ class ManagerThreadState {
             }
         }
 
-        void cancelCommand() {
+        void cancelCommand(Runnable cancelDone) {
             mutex.lock();
             try {
-                if ( currentCommand != null ) {
+                if (currentCommand != null) {
                     currentCommand.cancel();
                 }
             } finally {
@@ -70,8 +70,8 @@ class ManagerThreadState {
             }
         }
 
-        void waitUntilWaiting( int timeout ) throws InterruptedException {
-            waitUntilStop( timeout );
+        void waitUntilWaiting(int timeout) throws InterruptedException {
+            waitUntilStop(timeout);
         }
     }
 
@@ -85,18 +85,18 @@ class ManagerThreadState {
             ManagerCommandAbstract ret = null;
             mutex.lock();
             try {
-                if ( currentCommand != null && currentCommand.isDone() ) {
+                if (currentCommand != null && currentCommand.isDone()) {
                     currentCommand = null;
                 }
-                if ( currentCommand == null ) {
+                if (currentCommand == null) {
                     waitingWait.signalAll();
                     try {
                         commandSent.await();
-                    } catch ( InterruptedException ex ) {
-                        Logger.error( "getCurrentCommand await interrupted" );
+                    } catch (InterruptedException ex) {
+                        Logger.error("getCurrentCommand await interrupted");
                     }
                 }
-                if ( !mustStop ) {
+                if (!mustStop) {
                     ret = currentCommand;
                 }
             } finally {
@@ -138,10 +138,10 @@ class ManagerThreadState {
         }
     }
 
-    void waitUntilStop( int timeout ) throws InterruptedException {
+    void waitUntilStop(int timeout) throws InterruptedException {
         mutex.lock();
         try {
-            waitingWait.await( timeout, TimeUnit.MILLISECONDS );
+            waitingWait.await(timeout, TimeUnit.MILLISECONDS);
         } finally {
             mutex.unlock();
         }

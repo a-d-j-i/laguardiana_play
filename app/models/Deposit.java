@@ -10,6 +10,9 @@ import play.Logger;
 @Entity
 public class Deposit extends LgDeposit {
 
+    transient public final DepositUserCodeReference userCodeData;
+    transient public final Currency currencyData;
+
     // TODO: Validate the depositId there are allways only one deposit ID
     // unfinished.
     public static Deposit getAndValidateOpenDeposit(String depositId) {
@@ -18,9 +21,6 @@ public class Deposit extends LgDeposit {
             return null;
         }
         return d;
-    }
-
-    public Deposit() {
     }
 
     public void addBill(LgBill bill) {
@@ -35,19 +35,19 @@ public class Deposit extends LgDeposit {
         }
     }
 
-    public Deposit(LgUser user, String userCode, LgLov userCodeLov, Currency currency) {
+    public Deposit(LgUser user, String userCode, DepositUserCodeReference userCodeLov, Currency currency) {
+        this.userCodeData = userCodeLov;
+        this.currencyData = currency;
         this.bag = LgBag.GetCurrentBag();
         this.user = user;
         this.userCode = userCode;
-        this.userCodeLov = userCodeLov.numericId;
+        if ( userCodeLov == null ) {
+            this.userCodeLov = 0;
+        } else {
+            this.userCodeLov = userCodeLov.numericId;
+        }
         this.creationDate = new Date();
         this.currency = currency.numericId;
-    }
-
-    public Deposit(LgUser user) {
-        this.bag = LgBag.GetCurrentBag();
-        this.user = user;
-        this.creationDate = new Date();
     }
 
     public LgLov findUserCodeLov() {
@@ -97,5 +97,12 @@ public class Deposit extends LgDeposit {
             return null;
         }
         return c;
+    }
+
+    public Integer getTotal() {
+        return Deposit.find("select sum(b.quantity * bt.denomination) "
+                + " from Deposit d, LgBill b, LgBillType bt " 
+                + " where b.deposit = d and b.billType = bt"
+                + " and d.depositId = ?", depositId).first();
     }
 }

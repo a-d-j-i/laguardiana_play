@@ -88,7 +88,7 @@ public class GloryManagerController extends Application {
                     }
                 }
             }
-            if (!manager.count(desiredQuantity, currency)) {
+            if (!manager.count(null, desiredQuantity, currency)) {
                 error = "Still executing another command";
             }
         }

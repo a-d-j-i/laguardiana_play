@@ -9,9 +9,9 @@ import devices.glory.GloryStatus.D1Mode;
 import devices.glory.GloryStatus.SR1Mode;
 import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.Manager;
-import devices.glory.manager.Manager.Status;
 import devices.glory.manager.Manager.ThreadCommandApi;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import play.Logger;
@@ -51,7 +51,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         this.threadCommandApi = threadCommandApi;
     }
     private AtomicBoolean isDone = new AtomicBoolean(false);
-    private AtomicBoolean cancel = new AtomicBoolean(false);
+    private AtomicBoolean mustCancel = new AtomicBoolean(false);
 
     abstract public void execute();
 
@@ -66,11 +66,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     public void cancel() {
-        cancel.set(true);
+        mustCancel.set(true);
     }
 
     public boolean mustCancel() {
-        return (cancel.get() || threadCommandApi.mustStop());
+        return (mustCancel.get() || threadCommandApi.mustStop());
     }
 
     boolean gotoNeutral(boolean openEscrow, boolean storingError) {

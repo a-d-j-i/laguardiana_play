@@ -1,16 +1,49 @@
 package controllers;
 
 import models.Deposit;
+import models.ModelFacade;
 import models.TemplatePrinter;
+import models.db.LgDeposit;
 import models.db.LgSystemProperty;
 import models.lov.Currency;
+import models.lov.DepositUserCodeReference;
 import play.Logger;
+import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Router;
 import play.mvc.Util;
 import play.mvc.With;
 
 @With(Secure.class)
 public class Application extends Controller {
+
+    @Before
+    static void wizardFixPage() throws Throwable {
+        if (request.isAjax()) {
+            return;
+        }
+        switch (modelFacade.getCurrentStep()) {
+            case COUNT:
+                if (!request.action.equalsIgnoreCase("CountController.countingPage")) {
+                    redirect(Router.getFullUrl("CountController.countingPage"));
+                }
+                break;
+            case BILL_DEPOSIT:
+                if (!request.action.equalsIgnoreCase("BillDepositController.countingPage")) {
+                    redirect(Router.getFullUrl("BillDepositController.countingPage"));
+                }
+                break;
+            case BILL_DEPOSIT_FINISH:
+                if (!request.action.equalsIgnoreCase("BillDepositController.finishDeposit")) {
+                    redirect(Router.getFullUrl("BillDepositController.finishDeposit"));
+                }
+                break;
+            case NONE:
+            case RESERVED:
+            default: // do nothing
+                break;
+        }
+    }
 
     public static void index() {
         mainMenu();
@@ -23,6 +56,7 @@ public class Application extends Controller {
     public static void otherMenu() {
         render();
     }
+    static ModelFacade modelFacade = ModelFacade.get();
 
     public static void printTemplate() {
         TemplatePrinter.printTemplate("<h1>My First Heading</h1><p>My first paragraph.</p>");
@@ -57,25 +91,35 @@ public class Application extends Controller {
     }
 
     @Util
-    public static Boolean validateReference(Boolean r1, Boolean r2, String reference1, String reference2) {
+    public static DepositUserCodeReference validateReference1(Boolean r1, String reference1) {
         if (r1) {
             if (reference1 == null) {
-                return false;
+                return null;
             }
             if (reference1.isEmpty()) {
                 localError("inputReference: reference 1 must not be empty");
-                return false;
+                return null;
             }
         }
+        try {
+            return DepositUserCodeReference.findByNumericId(Integer.parseInt(reference1));
+        } catch (NumberFormatException e) {
+            localError("inputReference: invalid number for reference %s", reference1);
+        }
+        return null;
+    }
+
+    @Util
+    public static String validateReference2(Boolean r2, String reference2) {
         if (r2) {
             if (reference2 == null) {
-                return false;
+                return null;
             }
             if (reference2.isEmpty()) {
                 localError("inputReference: reference 2 must not be empty");
-                return false;
+                return null;
             }
         }
-        return true;
+        return reference2;
     }
 }
