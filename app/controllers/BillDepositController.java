@@ -3,19 +3,16 @@ package controllers;
 import devices.CounterFactory;
 import devices.glory.manager.Manager;
 import devices.glory.manager.Manager.Status;
-import java.util.Date;
 import java.util.List;
 import models.Bill;
 import models.Deposit;
 import models.db.*;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import models.manager.ModMan;
+import models.ModMan;
 import play.Logger;
-import play.mvc.With;
 
-@With(Secure.class)
-public class BillDepositController extends BaseController {
+public class BillDepositController extends Application {
 
     public static void index() {
         ModMan modman = ModMan.get();

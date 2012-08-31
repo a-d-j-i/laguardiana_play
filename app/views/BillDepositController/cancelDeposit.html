@@ -4,28 +4,30 @@
 <section id="depositar_efectivo_03">
     <header></header>
     <article>
-        <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
-        <div class="mensaje"><span>&{ 'counting_page.deposit_canceled' }</span></div>
-        <h2>&{ 'counting_page.thanks' }</h2>
-        <!-- datos del deposito -->
-        <p>&{ 'counting_page.reference1_title' }: ${deposit.userCode}</p>
-        <p>&{ 'counting_page.reference2_title' }: ${deposit.userCodeLov}</p>
-        <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
-        <!-- /datos del deposito -->
-        
+        <div class="contenido">
+            <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
+            <div class="mensaje"><span>&{ 'bill_deposit.deposit_canceled' }</span></div>
+            <h2>&{ 'application.thanks' }</h2>
+            <!-- datos del deposito -->
+            <p>&{ 'bill_deposit.reference1_title' }: ${deposit.userCode}</p>
+            <p>&{ 'bill_deposit.reference2_title' }: ${deposit.userCodeLov}</p>
+            <p>&{ 'bill_deposit.client_code_title' }: ${clientCode}</p>
+            <!-- /datos del deposito -->
+        </div>
+        <hr />
         <div class="botonera">
             <ul class="columns">
-                <!-- li class="fixed column" style="width: 50%">
-                    <a href="@{BillDepositController.cancelDeposit(depositId)}" class="boton rojo">&{ 'application.cancel' }</a>
-                </li-->
+                <li class="fixed column" style="width: 50%">
+                    <!-- link cancelar -->
+                    <a href="@{Application.index()}" class="boton gris">&{ 'main_menu.title' }</a>
+                </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a id ="continueButton" href="@{Application.index}" class="boton gris">&{ 'application.continue' }</a>
-                        <!-- /link continuar -->
+                        <a href="@{Secure.logout( "Application.index" ) }" class="boton verde">&{ 'main_menu.logout' }</a>
                     </div>
                 </li>
             </ul>
-        </div>        
+        </div>
     </article>
 </section>

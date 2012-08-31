@@ -11,7 +11,7 @@ import play.cache.Cache;
 import play.mvc.Before;
 import play.mvc.Router;
 
-public class GloryController extends BaseController {
+public class GloryController extends Application {
 
     static devices.glory.Glory glory;
 

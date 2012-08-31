@@ -11,11 +11,10 @@ import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import models.lov.EnvelopeType;
 import play.Logger;
-import play.mvc.Router;
 import play.mvc.With;
 
 @With(Secure.class)
-public class EnvelopeDepositController extends BaseController {
+public class EnvelopeDepositController extends Application {
 
     public static void index() {
         Application.index();

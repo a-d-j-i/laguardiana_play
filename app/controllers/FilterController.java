@@ -3,19 +3,14 @@ package controllers;
 import devices.CounterFactory;
 import devices.glory.manager.Manager;
 import devices.glory.manager.Manager.Status;
-import java.util.Date;
 import java.util.List;
 import models.Bill;
-import models.Deposit;
-import models.db.LgBatch;
-import models.db.LgBill;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import play.Logger;
 import play.mvc.With;
 
 @With(Secure.class)
-public class FilterController extends BaseController {
+public class FilterController extends Application {
 
     public static void index() {
         Application.index();
