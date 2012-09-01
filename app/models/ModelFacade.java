@@ -16,6 +16,7 @@ import models.db.LgUser;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
+import play.db.jpa.JPA;
 
 /**
  *
@@ -35,9 +36,9 @@ public class ModelFacade {
 
         NONE,
         RESERVED,
+        ERROR,
         BILL_DEPOSIT,
         BILL_DEPOSIT_FINISH,
-        BILL_DEPOSIT_ERROR,
         COUNT,
         COUNT_FINISH,;
     }
@@ -69,40 +70,44 @@ public class ModelFacade {
 
         public void run() {
             synchronized (ModelFacade.this) {
-                Logger.error("COUNTDONECOUNTDONECOUNTDONECOUNTDONE %s", manager.getStatus().name());
+                Logger.error("COUNTDONECOUNTDONECOUNTDONECOUNTDONE %s %s", manager.getStatus().name(), currentStep.name());
                 Manager.Status m = manager.getStatus();
-                if (currentStep == CurrentStep.COUNT) {
-                    if (m != Manager.Status.CANCELED) {
-                        Logger.error("OnCountDone invalid manager status");
-                        currentStep = CurrentStep.BILL_DEPOSIT_ERROR;
-                    }
-                    currentStep = CurrentStep.COUNT_FINISH;
-                    return;
-                }
-                if (currentStep != CurrentStep.BILL_DEPOSIT) {
-                    Logger.error("OnCountDone invalid step");
-                    currentStep = CurrentStep.BILL_DEPOSIT_ERROR;
-                }
-                switch (m) {
-                    case CANCELED:
-                        currentDeposit = null;
-                        currentStep = CurrentStep.BILL_DEPOSIT_FINISH;
-                        break;
+                switch (currentStep) {
+                    case COUNT:
+                        if (m != Manager.Status.CANCELED) {
+                            Logger.error(String.format("OnCountDone invalid manager status %s", m.name()));
+                            currentStep = CurrentStep.ERROR;
+                            return;
+                        }
+                        currentStep = CurrentStep.COUNT_FINISH;
+                        return;
+                    case BILL_DEPOSIT:
+                        switch (m) {
+                            case CANCELED:
+                                currentDeposit = null;
+                                currentStep = CurrentStep.BILL_DEPOSIT_FINISH;
+                                break;
 
-                    case IDLE:
-                        //saveDeposit();
-                        currentStep = CurrentStep.BILL_DEPOSIT_FINISH;
-                        break;
-                    case ESCROW_FULL:
-                        //saveDeposit();
-                        break;
-                    case ERROR:
-                        Logger.error("OnCountDone invalid machine error %s", manager.getErrorDetail().toString());
-                        currentStep = CurrentStep.BILL_DEPOSIT_ERROR;
+                            case IDLE:
+                                saveDeposit();
+                                currentStep = CurrentStep.BILL_DEPOSIT_FINISH;
+                                break;
+                            case ESCROW_FULL:
+                                saveDeposit();
+                                break;
+                            case ERROR:
+                                Logger.error("OnCountDone invalid machine error %s", manager.getErrorDetail().toString());
+                                currentStep = CurrentStep.ERROR;
+                                break;
+                            default:
+                                Logger.error("OnCountDone invalid machine status %s", m);
+                                currentStep = CurrentStep.ERROR;
+                                break;
+                        }
                         break;
                     default:
-                        Logger.error("OnCountDone invalid machine status %s", m);
-                        currentStep = CurrentStep.BILL_DEPOSIT_ERROR;
+                        Logger.error(String.format("OnCountDone invalid step %s", currentStep.name()));
+                        currentStep = CurrentStep.ERROR;
                         break;
                 }
             }
@@ -158,10 +163,11 @@ public class ModelFacade {
         }
     }
 
-    synchronized public void cancelBillDeposit() {
+    synchronized public void cancelDeposit() {
+        CurrentStep c = getCurrentStep();
         if (currentDeposit == null
-                || (getCurrentStep() != CurrentStep.BILL_DEPOSIT && getCurrentStep() != CurrentStep.COUNT)) {
-            error("cancelBillDeposit Invalid step");
+                || (c != CurrentStep.BILL_DEPOSIT && c != CurrentStep.COUNT)) {
+            error(String.format("cancelDeposit Invalid step %s", c.name()));
             return;
         }
         if (!manager.cancelDeposit()) {
@@ -170,8 +176,10 @@ public class ModelFacade {
     }
 
     synchronized public void finishDeposit() {
-        if (getCurrentStep() != CurrentStep.BILL_DEPOSIT_FINISH) {
-            error("finishDeposit Invalid step");
+        CurrentStep c = getCurrentStep();
+        if (c != CurrentStep.BILL_DEPOSIT_FINISH
+                && c != CurrentStep.COUNT_FINISH) {
+            error(String.format("finishDeposit Invalid step %s", c.name()));
             return;
         }
         currentUser = null;
@@ -230,7 +238,7 @@ public class ModelFacade {
     synchronized public BillDepositStartData getStartBillDepositData() {
         CurrentStep s = getCurrentStep();
         if (s != CurrentStep.BILL_DEPOSIT && s != CurrentStep.BILL_DEPOSIT_FINISH
-                && s != CurrentStep.COUNT) {
+                && s != CurrentStep.COUNT && s != CurrentStep.COUNT_FINISH) {
             error(String.format("getStartBillDepositData Invalid step %s", currentStep.name()));
             return null;
         }
@@ -243,6 +251,7 @@ public class ModelFacade {
 
     // TODO: Manage the db error here.
     private void saveDeposit() {
+        JPA.em().getTransaction().begin();
         LgBatch batch = new LgBatch();
         for (Bill bill : Bill.getCurrentCounters(currentDeposit.currency)) {
             Logger.debug(" -> quantity %d", bill.quantity);
@@ -251,6 +260,7 @@ public class ModelFacade {
             //batch.bills.add(b);
         }
         batch.save();
+        JPA.em().getTransaction().commit();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////

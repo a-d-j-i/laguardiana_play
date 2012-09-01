@@ -23,18 +23,27 @@ public class Application extends Controller {
             return;
         }
         switch (modelFacade.getCurrentStep()) {
+            case COUNT_FINISH:
+                if (!request.action.equalsIgnoreCase("CountController.finishCount")) {
+                    Logger.info("Redirect to CountController.finishCount");
+                    redirect(Router.getFullUrl("CountController.finishCount"));
+                }
+                break;
             case COUNT:
                 if (!request.action.equalsIgnoreCase("CountController.countingPage")) {
+                    Logger.info("Redirect to CountController.countingPage");
                     redirect(Router.getFullUrl("CountController.countingPage"));
                 }
                 break;
             case BILL_DEPOSIT:
                 if (!request.action.equalsIgnoreCase("BillDepositController.countingPage")) {
+                    Logger.info("Redirect to BillDepositController.countingPage");
                     redirect(Router.getFullUrl("BillDepositController.countingPage"));
                 }
                 break;
             case BILL_DEPOSIT_FINISH:
                 if (!request.action.equalsIgnoreCase("BillDepositController.finishDeposit")) {
+                    Logger.info("Redirect to BillDepositController.finishDeposit");
                     redirect(Router.getFullUrl("BillDepositController.finishDeposit"));
                 }
                 break;

@@ -9,52 +9,54 @@
     <!-- /link volver -->
     <article>
         <h1 class="contar_dinero">&{ 'main_menu.count' }</h1>
-        <ul class="columns">
-            <li class="fixed column" style="width: 45%">
-                <div class="columna_1">
-                    <!-- resumen de datos -->
-                    <p>&{ 'counting_page.currency_title' }: ${currency}</p>
-                    <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
-                    <!-- /resumen de datos -->
-                </div>
-            </li>
-            <li class="fixed column" style="width: 55%">
-                <table class="full_width">
-                    <thead>
-                        <tr>
-                            <th>&{ 'counting_page.denomination' }</th>
-                            <th>&{ 'counting_page.quantity' }</th>
-                            <th>&{ 'counting_page.total' }</th>
-                        </tr>
-                    </thead>
 
-                    <tbody>
-                        <!-- detalle de billetes -->
-                        %{ total = 0; cnt_total = 0;}%
-                        #{list items:billData, as:'b'}
-                        <tr id="BTRID_${b.billTypeId}">
-                            <td id="bill_denomination">${b.denomination}</td>
-                            <td id="bill_quantity">${b.quantity}</td>
-                            <td id="bill_total">${b.denomination  * b.quantity}</td>
-                            %{ total += b.denomination  * b.quantity; cnt_total += b.quantity }%
-                        </tr>
-                        #{/list}
-                        <!-- /detalle de billetes -->
-                    </tbody>
+        <div class="contenido">
+            <ul class="columns">
+                <li class="fixed column" style="width: 45%">
+                    <div class="columna_1">
+                        <!-- resumen de datos -->
+                        <p>&{ 'counting_page.currency_title' }: ${currency}</p>
+                        <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                        <!-- /resumen de datos -->
+                    </div>
+                </li>
+                <li class="fixed column" style="width: 55%">
+                    <table class="full_width">
+                        <thead>
+                            <tr>
+                                <th>&{ 'counting_page.denomination' }</th>
+                                <th>&{ 'counting_page.quantity' }</th>
+                                <th>&{ 'counting_page.total' }</th>
+                            </tr>
+                        </thead>
 
-                    <tfoot>
-                        <tr>
-                            <td>&{ 'counting_page.totals' }</td>
-                            <!-- totales -->
-                            <td id ="cnt_total">${ cnt_total }</td>
-                            <td id ="total">${ total }</td>
-                            <!-- /totales -->
-                        </tr>
-                    </tfoot>
-                </table>
-            </li>
-        </ul>
+                        <tbody>
+                            <!-- detalle de billetes -->
+                            %{ total = 0; cnt_total = 0;}%
+                            #{list items:data.billData, as:'b'}
+                            <tr id="BTRID_${b.billTypeId}">
+                                <td id="bill_denomination">${b.denomination}</td>
+                                <td id="bill_quantity">${b.quantity}</td>
+                                <td id="bill_total">${b.denomination  * b.quantity}</td>
+                                %{ total += b.denomination  * b.quantity; cnt_total += b.quantity }%
+                            </tr>
+                            #{/list}
+                            <!-- /detalle de billetes -->
+                        </tbody>
 
+                        <tfoot>
+                            <tr>
+                                <td>&{ 'counting_page.totals' }</td>
+                                <!-- totales -->
+                                <td id ="cnt_total">${ cnt_total }</td>
+                                <td id ="total">${ total }</td>
+                                <!-- /totales -->
+                            </tr>
+                        </tfoot>
+                    </table>
+                </li>
+            </ul>
+        </div>
         <div class="botonera">
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
@@ -65,7 +67,7 @@
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a id ="finishCountButton" href="#" class="boton gris">&{ 'application.finish' }</a>
+                        <a id ="continueButton" href="#" class="boton gris">&{ 'application.finish' }</a>
                         <!-- /link continuar -->
                     </div>
                 </li>
@@ -77,6 +79,7 @@
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     var waiting = false;
+    var lastStatus = false;
     
     // Reload the whole messages panel
     function refresh() {
@@ -84,23 +87,27 @@
             return;
         }
         waiting = true;
-        $.getJSON( '@{countingPage()}', function( data ) {
+        $.getJSON( '@{CountController.countingPage}', function( data ) {
             waiting = false;
             var status = data[ 0 ];
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
                 if ( status == 'IDLE' ) {
                 } else if ( status == 'INITIALIZING' ) {
-                } else if ( status == 'READY_TO_STORE' ) {
-                    $( '#finishCountButton' ).attr( { 'class' : 'boton naranja'});
-                    $( '#finishCountButton' ).click( function(event) {
-                        $.getJSON( '@{finishCount()}', function( data ) {
-                        })
+                } else if ( status == 'COUNT' ) {
+                } else if ( status == 'COUNT_FINISH' ) {
+                    window.location.href = "@{CountController.finishCount()}";
+                    return;
+                } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
+                    $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
+                    $( '#continueButton' ).click( function(event) {
+                        $.getJSON( '@{CountController.cancelCount()}', function( data ) {});
                     });
-                } else if ( status == 'CANCELED' ) {
-                    document.location.href = "@{Application.index()}";
                 } else {
-                    alert( status );
+                    if ( lastStatus != status ) {
+                        alert( status );
+                    }
+                    lastStatus = status
                 }
             }
             var total = 0;
@@ -118,21 +125,16 @@
             $( '#total' ).html( total );
         })
     }
-    $( '#finishCountButton' ).click( function(event) {
+    
+    $( '#cancelButton' ).click( function(event) {
+        $.getJSON( '@{CountController.cancelCount}', function( data ) {});
+    });
+    
+    $( '#continueButton' ).click( function(event) {
         event.preventDefault();
     });
-    $( '#backButton' ).click( function(event) {
-        $.getJSON( '@{finishCount()}', function( data ) {
-        })
-    });
-    $( '#cancelButton' ).click( function(event) {
-        $.getJSON( '@{finishCount()}', function( data ) {
-        })
-    });
-
     // Call refresh every 1.5 seconds
-    setInterval(refresh, 1500);
+    setInterval(refresh, 500);
     refresh();
 </script>
-
 #{/set}

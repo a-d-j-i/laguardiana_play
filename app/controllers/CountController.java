@@ -1,12 +1,10 @@
 package controllers;
 
-import devices.CounterFactory;
-import devices.glory.manager.Manager;
-import devices.glory.manager.Manager.Status;
 import java.util.List;
 import models.ModelFacade;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
 import play.mvc.Before;
 
 public class CountController extends Application {
@@ -15,6 +13,7 @@ public class CountController extends Application {
     static void wizardFixPage() throws Throwable {
         switch (modelFacade.getCurrentStep()) {
             case COUNT:
+            case COUNT_FINISH:
                 break;
             case NONE:
                 if (request.actionMethod.equalsIgnoreCase("chooseCurrency")) {
@@ -58,14 +57,14 @@ public class CountController extends Application {
             render(data);
         }
     }
-    
-    public static void acceptBatch() {
-        modelFacade.cancelBillDeposit();
+
+    public static void cancelCount() {
+        modelFacade.cancelDeposit();
         countingPage();
     }
 
-    public static void finishCount(String depositId) {
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        modelFacade.cancelBillDeposit();
+    public static void finishCount() {
+        modelFacade.finishDeposit();
+        Application.index();
     }
 }

@@ -93,15 +93,16 @@
                 } else if ( status == 'BILL_DEPOSIT_FINISH' ) {
                     window.location.href = "@{BillDepositController.finishDeposit}";
                     return;
-                } else if ( status == 'PUT_THE_BILLS_ON_THE_HOPER' ) {
-                    alert( status );
                 } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                     $( '#continueButton' ).click( function(event) {
                         $.getJSON( '@{BillDepositController.acceptBatch()}', function( data ) {});
                     });
-                } else {
-                    alert( status );
+                } else {          
+                    if ( lastStatus != status ) {
+                        alert( status );
+                    }
+                    lastStatus = status
                 }
             }
             var total = 0;
@@ -128,7 +129,7 @@
         event.preventDefault();
     });
     // Call refresh every 1.5 seconds
-    setInterval(refresh, 1500);
+    setInterval(refresh, 500);
     refresh();
 </script>
 #{/set}

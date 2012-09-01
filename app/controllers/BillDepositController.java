@@ -19,6 +19,8 @@ public class BillDepositController extends Application {
                 if (request.actionMethod.equalsIgnoreCase("inputReference")) {
                     break;
                 }
+            case COUNT:
+            case COUNT_FINISH:
             case RESERVED:
             default: // do nothing
                 Application.index();
@@ -67,7 +69,7 @@ public class BillDepositController extends Application {
     }
 
     public static void cancelDeposit() {
-        modelFacade.cancelBillDeposit();
+        modelFacade.cancelDeposit();
         countingPage();
     }
 
@@ -85,7 +87,7 @@ public class BillDepositController extends Application {
         }
         renderArgs.put("clientCode", getProperty("client_code"));
         renderArgs.put("userCode", data.userCode);
-        if ( data.userCodeData != null ) {
+        if (data.userCodeData != null) {
             renderArgs.put("userCodeLov", data.userCodeData.description);
         }
         renderArgs.put("currency", data.currencyData.textId);

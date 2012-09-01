@@ -169,8 +169,12 @@ public class Count extends ManagerCommandAbstract {
                         gotoNeutral(true, false);
                         threadCommandApi.setStatus(Manager.Status.IDLE);
                         if (onCountDone != null) {
-                            onCountDone.run();
-                        }   
+                            try {
+                                onCountDone.run();
+                            } catch (Exception e) {
+                                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
+                            }
+                        }
                         return;
                     }
                     if (!refreshCurrentQuantity()) {
@@ -218,7 +222,11 @@ public class Count extends ManagerCommandAbstract {
             threadCommandApi.setStatus(Manager.Status.IDLE);
         }
         if (onCountDone != null) {
-            onCountDone.run();
+            try {
+                onCountDone.run();
+            } catch (Exception e) {
+                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
+            }
         }
         threadCommandApi.setStatus(Manager.Status.IDLE);
     }

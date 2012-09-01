@@ -6,6 +6,8 @@ import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import play.Logger;
+import play.jobs.Job;
+import play.libs.F;
 
 /**
  *
@@ -34,7 +36,7 @@ public class Manager {
         APP_ERROR,
         JAM,
         STORING_ERROR_CALL_ADMIN,
-        BILLS_IN_ESCROW_CALL_ADMIN,;
+        BILLS_IN_ESCROW_CALL_ADMIN;
     };
 
     static public class ErrorDetail {
@@ -52,7 +54,9 @@ public class Manager {
             return "ErrorDetail{" + "code=" + code + ", data=" + data + '}';
         }
     }
-    final private Thread thread;
+    final private Job job;
+    private F.Promise jobPromise = null;
+//    final private Thread thread;
     final private Glory device;
     final private ManagerThreadState managerThreadState;
     // TODO: Better error reporting, as a class with arguments.
@@ -62,7 +66,7 @@ public class Manager {
     public Manager(Glory device) {
         this.device = device;
         this.managerThreadState = new ManagerThreadState();
-        this.thread = new Thread(new ManagerThread(new ThreadCommandApi()));
+        this.job = new ManagerThread(new ThreadCommandApi());
     }
     /*
      *
@@ -272,17 +276,17 @@ public class Manager {
     public class CounterFactoryApi {
 
         public void startThread() {
-            thread.start();
+            jobPromise = job.now();
         }
 
         public void close() {
             Logger.debug("Closing Manager Stop");
-            if (thread.isAlive()) {
+//            if (thread.isAlive()) {
+            if (jobPromise != null && !jobPromise.isDone()) {
                 managerThreadState.stop();
                 try {
                     Logger.debug("Closing Manager waitUntilStop");
                     managerThreadState.waitUntilStop(60000);
-                    thread.join(1000);
                 } catch (InterruptedException ex) {
                     Logger.info("Manager thread don't die");
                 }

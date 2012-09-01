@@ -67,7 +67,7 @@
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a id ="finishCountButton" href="#" class="boton gris">&{ 'application.finish' }</a>
+                        <a id ="continueButton" href="#" class="boton gris">&{ 'application.finish' }</a>
                         <!-- /link continuar -->
                     </div>
                 </li>
@@ -79,6 +79,7 @@
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     var waiting = false;
+    var lastStatus = false;
     
     // Reload the whole messages panel
     function refresh() {
@@ -95,17 +96,18 @@
                 } else if ( status == 'INITIALIZING' ) {
                 } else if ( status == 'COUNT' ) {
                 } else if ( status == 'COUNT_FINISH' ) {
-                    window.location.href = "@{Application.index()}";
+                    window.location.href = "@{CountController.finishCount()}";
                     return;
-                } else if ( status == 'PUT_THE_BILLS_ON_THE_HOPER' ) {
-                    alert( status );
                 } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                     $( '#continueButton' ).click( function(event) {
-                        $.getJSON( '@{BillDepositController.acceptBatch()}', function( data ) {});
+                        $.getJSON( '@{CountController.cancelCount()}', function( data ) {});
                     });
                 } else {
-                    alert( status );
+                    if ( lastStatus != status ) {
+                        alert( status );
+                    }
+                    lastStatus = status
                 }
             }
             var total = 0;
@@ -125,14 +127,14 @@
     }
     
     $( '#cancelButton' ).click( function(event) {
-        $.getJSON( '@{CountController.finishCount}', function( data ) {});
+        $.getJSON( '@{CountController.cancelCount}', function( data ) {});
     });
     
     $( '#continueButton' ).click( function(event) {
         event.preventDefault();
     });
     // Call refresh every 1.5 seconds
-    setInterval(refresh, 1500);
+    setInterval(refresh, 500);
     refresh();
 </script>
 #{/set}
