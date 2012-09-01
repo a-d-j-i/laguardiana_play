@@ -9,52 +9,52 @@ import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Table( name = "lg_batch", schema = "public" )
+@Table(name = "lg_batch", schema = "public")
 public class LgBatch extends GenericModel implements java.io.Serializable {
 
     @Id
-    @Column( name = "batch_id", unique = true, nullable = false )
+    @Column(name = "batch_id", unique = true, nullable = false)
     @GeneratedValue
     public int batchId;
-    @Temporal( TemporalType.DATE )
-    @Column( name = "creation_date", nullable = false, length = 13 )
+    @Temporal(TemporalType.DATE)
+    @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "batch" )
-    public Set<LgBill> bills = new HashSet<LgBill>( 0 );
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "batch")
+    public Set<LgBill> bills = new HashSet<LgBill>(0);
 
     public LgBatch() {
         this.creationDate = new Date();
-    };
-    
-    public void addBill( LgBill bill ) {
-        Logger.error( " pre bills: %d", bills.size() );
-        bills.add( bill );
-        Logger.error( " post bills: %d", bills.size() );
     }
 
-    public static LgBatch MakeRandom( LgDeposit deposit ) {
-        Currency billLov = Currency.findByTextId( "Pesos Argentinos" );
-        if ( billLov == null ) {
-            Logger.error( "no bill code for pesos argentinos!" );
+    public void addBill(LgBill b) {
+        b.batch = this;
+        bills.add(b);
+    }
+
+    public static LgBatch MakeRandom(LgDeposit deposit) {
+        Currency billLov = Currency.findByTextId("Pesos Argentinos");
+        if (billLov == null) {
+            Logger.error("no bill code for pesos argentinos!");
             return null;
         }
         int pesos = billLov.numericId;
         LgBatch batch = new LgBatch();
-        LgBillType billType = LgBillType.find( 5, pesos );
+        LgBillType billType = LgBillType.find(5, pesos);
         //thisb.save();
-        for ( int i = 0; i < 4; i = i + 1 ) {
-            LgBill bill = new LgBill( batch, i, billType, deposit );
-            Logger.info( " created: %s", bill.toString() );
+        for (int i = 0; i < 4; i = i + 1) {
+            LgBill bill = new LgBill(i, billType);
+            batch.addBill(bill);
+            Logger.info(" created: %s", bill.toString());
             //bill.save();
         }
-        Logger.info( " bills: %d", batch.bills.size() );
+        Logger.info(" bills: %d", batch.bills.size());
         return batch;
     }
 
     @Override
     public String toString() {
         String result = "[";
-        for ( LgBill bill : bills ) {
+        for (LgBill bill : bills) {
             result = result + " " + bill.toString();
         }
         return result + "]";

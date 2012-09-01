@@ -113,11 +113,13 @@ public class Manager {
         }
 
         public void setError(ErrorDetail e) {
+            Logger.error("MANAGER ERROR : %s %s", e.code.name(), e.data);
             error.set(e);
             setStatus(Status.ERROR);
         }
 
         public void setError(Error e, String s) {
+            Logger.error("MANAGER ERROR : %s %s", e.name(), s);
             error.set(new ErrorDetail(e, s));
             setStatus(Status.ERROR);
         }
@@ -185,14 +187,15 @@ public class Manager {
             return ((Count) cmd).getDesiredQuantity();
         }
 
-        public boolean cancelDeposit() {
+        // TODO: Fix this.
+        public boolean cancelDeposit(Runnable onCommandDone) {
             if (getStatus() == Manager.Status.STORING) {
                 return false;
             }
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
                 threadCommandApi.setStatus(Manager.Status.CANCELING);
-                return managerControllerApi.sendCommand(new CancelCount(threadCommandApi));
+                return managerControllerApi.sendCommand(new CancelCount(threadCommandApi, onCommandDone));
             }
             // TODO: One base class
             if (!(cmd instanceof Count) && !(cmd instanceof EnvelopeDeposit)) {
@@ -228,7 +231,7 @@ public class Manager {
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi));
+            return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi, null));
         }
 
         public boolean reset() {
@@ -241,7 +244,7 @@ public class Manager {
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new Reset(threadCommandApi));
+            return managerControllerApi.sendCommand(new Reset(threadCommandApi, null));
         }
 
         public boolean storingErrorReset() {
@@ -254,7 +257,7 @@ public class Manager {
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi));
+            return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi, null));
         }
 
         public Manager.Status getStatus() {

@@ -1,8 +1,8 @@
 package controllers;
 
 import java.util.List;
-import models.Deposit;
 import models.ModelFacade;
+import models.ModelFacade.DepositData;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.mvc.Before;
@@ -56,11 +56,13 @@ public class BillDepositController extends Application {
     }
 
     public static void countingPage() {
-        ModelFacade.BillDepositStartData data = modelFacade.getStartBillDepositData();
+        ModelFacade.DepositData data = modelFacade.getDepositData();
         if (request.isAjax()) {
             Object[] o = new Object[2];
-            o[0] = data.getStatus();
-            o[1] = data.getBillData();
+            if (data != null) {
+                o[0] = data.getStatus();
+                o[1] = data.getBillData();
+            }
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
@@ -79,19 +81,18 @@ public class BillDepositController extends Application {
     }
 
     public static void finishDeposit() {
-        Deposit data = modelFacade.getDeposit();
+        String total = modelFacade.getDepositTotal();
+        DepositData data = modelFacade.getDepositData();
         modelFacade.finishDeposit();
-        if (data == null) {
+        if (data.isCurrentDepositCanceled()) {
             Application.index();
             return;
         }
         renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("userCode", data.userCode);
-        if (data.userCodeData != null) {
-            renderArgs.put("userCodeLov", data.userCodeData.description);
-        }
-        renderArgs.put("currency", data.currencyData.textId);
-        renderArgs.put("depositTotal", data.getTotal());
+        renderArgs.put("userCode", data.getUserCode());
+        renderArgs.put("userCodeLov", data.getUserCodeLov());
+        renderArgs.put("currency", data.getCurrency());
+        renderArgs.put("depositTotal", total);
         render();
     }
 //    ///////////////////////////////

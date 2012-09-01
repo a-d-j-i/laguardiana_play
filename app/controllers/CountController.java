@@ -46,7 +46,7 @@ public class CountController extends Application {
     }
 
     public static void countingPage() {
-        ModelFacade.BillDepositStartData data = modelFacade.getStartBillDepositData();
+        ModelFacade.DepositData data = modelFacade.getDepositData();
         if (request.isAjax()) {
             Object[] o = new Object[2];
             o[0] = data.getStatus();

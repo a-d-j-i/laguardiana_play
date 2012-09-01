@@ -23,15 +23,10 @@ public class Deposit extends LgDeposit {
         return d;
     }
 
-    public void addBill(LgBill bill) {
-        bill.addToDeposit(this);
-        this.bills.add(bill);
-    }
-
     public void addBatch(LgBatch batch) {
         for (LgBill bill : batch.bills) {
-            this.addBill(bill);
-            bill.save();
+            bills.add(bill);
+            bill.deposit = this;
         }
     }
 
@@ -41,7 +36,7 @@ public class Deposit extends LgDeposit {
         this.bag = LgBag.GetCurrentBag();
         this.user = user;
         this.userCode = userCode;
-        if ( userCodeLov == null ) {
+        if (userCodeLov == null) {
             this.userCodeLov = 0;
         } else {
             this.userCodeLov = userCodeLov.numericId;
@@ -99,10 +94,14 @@ public class Deposit extends LgDeposit {
         return c;
     }
 
-    public Integer getTotal() {
-        return Deposit.find("select sum(b.quantity * bt.denomination) "
-                + " from Deposit d, LgBill b, LgBillType bt " 
+    public Long getTotal() {
+        Long r = Deposit.find("select sum(b.quantity * bt.denomination) "
+                + " from Deposit d, LgBill b, LgBillType bt "
                 + " where b.deposit = d and b.billType = bt"
                 + " and d.depositId = ?", depositId).first();
+        if (r == null) {
+            return new Long(0);
+        }
+        return r;
     }
 }

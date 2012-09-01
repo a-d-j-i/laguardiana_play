@@ -11,14 +11,14 @@ import java.util.Date;
 import java.util.List;
 import models.db.LgBatch;
 import models.db.LgBill;
-import models.db.LgBillType;
 import models.db.LgUser;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
-import play.db.jpa.JPA;
 
 /**
+ * TODO: Review this with another thread/job that has a input queue for events
+ * and react according to events from the glory and the electronics in the cage.
  *
  * @author aweil
  */
@@ -44,7 +44,6 @@ public class ModelFacade {
     }
     private Manager.ControllerApi manager = CounterFactory.getGloryManager();
     private CurrentStep currentStep = CurrentStep.NONE;
-    private User currentUser = null;
     private Deposit currentDeposit = null;
 
     private void error(String msg) {
@@ -53,20 +52,25 @@ public class ModelFacade {
     }
 
     synchronized public CurrentStep getCurrentStep() {
-        if (currentUser == null) {
+        if (currentDeposit == null || currentDeposit.user == null) {
+            // unfinished Cancelation.
+            if (currentStep == CurrentStep.BILL_DEPOSIT_FINISH || currentStep == CurrentStep.COUNT_FINISH) {
+                return currentStep;
+            }
             if (currentStep != CurrentStep.NONE) {
-                error(String.format("startDeposit Invalid step %s", currentStep.name()));
+                error(String.format("getCurrentStep Invalid step %s", currentStep.name()));
             }
             return CurrentStep.NONE;
         }
-        if (currentUser.equals(Secure.getCurrentUser())) {
+        if (currentDeposit.user.equals(Secure.getCurrentUser())) {
             return currentStep;
         } else {
             return CurrentStep.RESERVED;
         }
     }
+    final private WhenDone whenDone = new WhenDone();
 
-    protected class OnCountDone implements Runnable {
+    protected class WhenDone implements Runnable {
 
         public void run() {
             synchronized (ModelFacade.this) {
@@ -84,16 +88,32 @@ public class ModelFacade {
                     case BILL_DEPOSIT:
                         switch (m) {
                             case CANCELED:
+                                if (Deposit.em().getTransaction().isActive()) {
+                                    Deposit.em().getTransaction().rollback();
+                                }
                                 currentDeposit = null;
                                 currentStep = CurrentStep.BILL_DEPOSIT_FINISH;
                                 break;
 
                             case IDLE:
-                                saveDeposit();
+
+                                addBatchToDeposit();
+                                currentDeposit.finishDate = new Date();
+                                currentDeposit.merge();
+                                Logger.debug("--------- presave");
+                                if (Deposit.em().getTransaction().isActive()) {
+                                    Deposit.em().getTransaction().commit();
+                                    Deposit.em().getTransaction().begin();
+                                }
                                 currentStep = CurrentStep.BILL_DEPOSIT_FINISH;
                                 break;
                             case ESCROW_FULL:
-                                saveDeposit();
+                                addBatchToDeposit();
+                                currentDeposit.merge();
+                                if (Deposit.em().getTransaction().isActive()) {
+                                    Deposit.em().getTransaction().commit();
+                                    Deposit.em().getTransaction().begin();
+                                }
                                 break;
                             case ERROR:
                                 Logger.error("OnCountDone invalid machine error %s", manager.getErrorDetail().toString());
@@ -119,13 +139,8 @@ public class ModelFacade {
             error(String.format("startBillDeposit Invalid step %s", currentStep.name()));
             return;
         }
-        currentUser = Secure.getCurrentUser();
-        if (currentDeposit != null) {
-            error("startBillDeposit Invalid deposit");
-            return;
-        }
-        currentDeposit = new Deposit(currentUser, null, null, c);
-        if (!manager.count(new OnCountDone(), null, c.numericId)) {
+        currentDeposit = new Deposit(Secure.getCurrentUser(), null, null, c);
+        if (!manager.count(whenDone, null, c.numericId)) {
             error("startBillDeposit can't start glory");
             return;
         }
@@ -137,13 +152,11 @@ public class ModelFacade {
             error(String.format("startBillDeposit Invalid step %s", currentStep.name()));
             return;
         }
-        currentUser = Secure.getCurrentUser();
-        if (currentDeposit != null) {
-            error("startBillDeposit Invalid deposit");
-            return;
-        }
-        currentDeposit = new Deposit(currentUser, userCode, userCodeLov, c);
-        if (!manager.count(new OnCountDone(), null, c.numericId)) {
+        currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov, c);
+        currentDeposit.save();
+        Deposit.em().getTransaction().commit();
+        Deposit.em().getTransaction().begin();
+        if (!manager.count(whenDone, null, c.numericId)) {
             error("startBillDeposit can't start glory");
             return;
         }
@@ -155,9 +168,6 @@ public class ModelFacade {
             error("cancelBillDeposit Invalid step");
             return;
         }
-
-        currentDeposit.save();
-        // TODO: Commit transaction, check errors
         if (!manager.storeDeposit(currentDeposit.depositId)) {
             error("startBillDeposit can't cancel glory");
         }
@@ -170,7 +180,7 @@ public class ModelFacade {
             error(String.format("cancelDeposit Invalid step %s", c.name()));
             return;
         }
-        if (!manager.cancelDeposit()) {
+        if (!manager.cancelDeposit(whenDone)) {
             error("startBillDeposit can't cancel glory");
         }
     }
@@ -182,13 +192,13 @@ public class ModelFacade {
             error(String.format("finishDeposit Invalid step %s", c.name()));
             return;
         }
-        currentUser = null;
-        currentStep = CurrentStep.NONE;
+        // Allready detached.
         currentDeposit = null;
+        currentStep = CurrentStep.NONE;
     }
 
     // Protect private items, todo check current status.
-    public class BillDepositStartData {
+    public class DepositData {
 
         public String getUserCode() {
             synchronized (ModelFacade.this) {
@@ -226,6 +236,12 @@ public class ModelFacade {
             }
         }
 
+        public Boolean isCurrentDepositCanceled() {
+            synchronized (ModelFacade.this) {
+                return (currentDeposit == null);
+            }
+        }
+
         public String getStatus() {
             if (currentStep == CurrentStep.BILL_DEPOSIT || currentStep == CurrentStep.COUNT) {
                 return manager.getStatus().name();
@@ -235,32 +251,38 @@ public class ModelFacade {
         }
     }
 
-    synchronized public BillDepositStartData getStartBillDepositData() {
+    synchronized public DepositData getDepositData() {
         CurrentStep s = getCurrentStep();
         if (s != CurrentStep.BILL_DEPOSIT && s != CurrentStep.BILL_DEPOSIT_FINISH
                 && s != CurrentStep.COUNT && s != CurrentStep.COUNT_FINISH) {
             error(String.format("getStartBillDepositData Invalid step %s", currentStep.name()));
             return null;
         }
-        return new BillDepositStartData();
+        return new DepositData();
     }
 
-    synchronized public Deposit getDeposit() {
-        return currentDeposit;
+    synchronized public String getDepositTotal() {
+        if (currentDeposit != null) {
+            Logger.error( "TOTAL : %d", currentDeposit.getTotal());
+            return currentDeposit.getTotal().toString();
+        }
+        return null;
     }
 
     // TODO: Manage the db error here.
-    private void saveDeposit() {
-        JPA.em().getTransaction().begin();
+    private void addBatchToDeposit() {
+        if (currentDeposit == null) {
+            error("addBatchToDeposit current deposit is null");
+            return;
+        }
         LgBatch batch = new LgBatch();
         for (Bill bill : Bill.getCurrentCounters(currentDeposit.currency)) {
             Logger.debug(" -> quantity %d", bill.quantity);
-            LgBillType bt = LgBillType.findById(bill.billTypeId);
-            LgBill b = new LgBill(batch, bill.quantity, bt, currentDeposit);
-            //batch.bills.add(b);
+            LgBill b = new LgBill(bill.quantity, bill.billType);
+            batch.addBill(b);
         }
+        currentDeposit.addBatch(batch);
         batch.save();
-        JPA.em().getTransaction().commit();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -362,7 +384,7 @@ public class ModelFacade {
                         return false;
                     }
                     // XXX on callback:
-                    saveDeposit(billData);
+                    //saveDeposit(billData);
                     closeDeposit();
                     ModelFacade.get().resetOperation();
                 default:
@@ -371,21 +393,14 @@ public class ModelFacade {
             screen = targetScreen;
             return true;
         }
-
-        private void saveDeposit(List<Bill> billData) {
-            if (!deposit_saved) {
-                deposit.save();
-                deposit_saved = true;
-            }
-            LgBatch batch = new LgBatch();
-            for (Bill bill : billData) {
-                Logger.debug(" -> quantity %d", bill.quantity);
-                LgBillType bt = LgBillType.findById(bill.billTypeId);
-                LgBill b = new LgBill(batch, bill.quantity, bt, deposit);
-                //batch.bills.add(b);
-            }
-            batch.save();
-        }
+        /*
+         * private void saveDeposit(List<Bill> billData) { if (!deposit_saved) {
+         * deposit.save(); deposit_saved = true; } LgBatch batch = new
+         * LgBatch(); for (Bill bill : billData) { Logger.debug(" -> quantity
+         * %d", bill.quantity); LgBillType bt =
+         * LgBillType.findById(bill.billTypeId); LgBill b = new LgBill(batch,
+         * bill.quantity, bt, deposit); //batch.bills.add(b); } batch.save(); }
+         */
 
         private void closeDeposit() {
             deposit.finishDate = new Date();

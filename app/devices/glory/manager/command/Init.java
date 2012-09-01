@@ -14,7 +14,7 @@ import devices.glory.manager.Manager.ThreadCommandApi;
 public class Init extends ManagerCommandAbstract {
 
     public Init(ThreadCommandApi threadCommandApi) {
-        super(threadCommandApi);
+        super(threadCommandApi, null);
     }
 
     @Override

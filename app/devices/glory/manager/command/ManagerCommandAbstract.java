@@ -11,7 +11,6 @@ import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.Manager;
 import devices.glory.manager.Manager.ThreadCommandApi;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import play.Logger;
@@ -46,9 +45,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
     protected final GloryStatus gloryStatus = new GloryStatus();
     protected final ThreadCommandApi threadCommandApi;
+    private final Runnable onCommandDone;
 
-    public ManagerCommandAbstract(ThreadCommandApi threadCommandApi) {
+    public ManagerCommandAbstract(ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
         this.threadCommandApi = threadCommandApi;
+        this.onCommandDone = onCommandDone;
     }
     private AtomicBoolean isDone = new AtomicBoolean(false);
     private AtomicBoolean mustCancel = new AtomicBoolean(false);
@@ -58,6 +59,19 @@ abstract public class ManagerCommandAbstract implements Runnable {
     public void run() {
         isDone.set(false);
         execute();
+        if (mustCancel()) {
+            threadCommandApi.setStatus(Manager.Status.CANCELED);
+        } else {
+            threadCommandApi.setStatus(Manager.Status.IDLE);
+        }
+        if (onCommandDone != null) {
+            try {
+                onCommandDone.run();
+            } catch (Exception e) {
+                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
+            }
+        }
+        threadCommandApi.setStatus(Manager.Status.IDLE);
         isDone.set(true);
     }
 

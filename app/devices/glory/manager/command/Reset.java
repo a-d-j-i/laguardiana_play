@@ -12,8 +12,8 @@ import devices.glory.manager.Manager;
  */
 public class Reset extends ManagerCommandAbstract {
 
-    public Reset(Manager.ThreadCommandApi threadCommandApi) {
-        super(threadCommandApi);
+    public Reset(Manager.ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
+        super(threadCommandApi, onCommandDone);
     }
 
     @Override

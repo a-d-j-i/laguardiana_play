@@ -18,13 +18,10 @@ import play.Logger;
 public class Count extends ManagerCommandAbstract {
 
     private final CountData countData;
-    private final Runnable onCountDone;
 
-    public Count(ThreadCommandApi threadCommandApi, Runnable onCountDone, Map<Integer, Integer> desiredQuantity, Integer currency) {
-        super(threadCommandApi);
-        this.onCountDone = onCountDone;
+    public Count(ThreadCommandApi threadCommandApi, Runnable onCommandDone, Map<Integer, Integer> desiredQuantity, Integer currency) {
+        super(threadCommandApi, onCommandDone);
         countData = new CountData(desiredQuantity, currency);
-
     }
 
     static public class CountData extends CommandData {
@@ -168,13 +165,6 @@ public class Count extends ManagerCommandAbstract {
                     if (storeTry) {
                         gotoNeutral(true, false);
                         threadCommandApi.setStatus(Manager.Status.IDLE);
-                        if (onCountDone != null) {
-                            try {
-                                onCountDone.run();
-                            } catch (Exception e) {
-                                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
-                            }
-                        }
                         return;
                     }
                     if (!refreshCurrentQuantity()) {
@@ -216,19 +206,6 @@ public class Count extends ManagerCommandAbstract {
             sleep();
         }
         gotoNeutral(true, false);
-        if (mustCancel()) {
-            threadCommandApi.setStatus(Manager.Status.CANCELED);
-        } else {
-            threadCommandApi.setStatus(Manager.Status.IDLE);
-        }
-        if (onCountDone != null) {
-            try {
-                onCountDone.run();
-            } catch (Exception e) {
-                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
-            }
-        }
-        threadCommandApi.setStatus(Manager.Status.IDLE);
     }
 
     public void storeDeposit(int sequenceNumber) {

@@ -98,7 +98,7 @@ public class GloryManagerController extends Application {
 
     public static void cancelDeposit() throws IOException {
         if (manager != null) {
-            if (!manager.cancelDeposit()) {
+            if (!manager.cancelDeposit(null)) {
                 error = "Not counting cant cancel";
             }
         }

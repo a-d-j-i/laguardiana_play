@@ -76,6 +76,7 @@
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     var waiting = false;
+    var lastStatus = false;
     
     // Reload the whole messages panel
     function refresh() {
@@ -95,15 +96,12 @@
                     return;
                 } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
-                    $( '#continueButton' ).click( function(event) {
-                        $.getJSON( '@{BillDepositController.acceptBatch()}', function( data ) {});
-                    });
                 } else {          
                     if ( lastStatus != status ) {
                         alert( status );
                     }
-                    lastStatus = status
                 }
+                lastStatus = status
             }
             var total = 0;
             var cnt_total = 0;
@@ -126,7 +124,7 @@
     });
     
     $( '#continueButton' ).click( function(event) {
-        event.preventDefault();
+        $.getJSON( '@{BillDepositController.acceptBatch()}', function( data ) {});
     });
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);

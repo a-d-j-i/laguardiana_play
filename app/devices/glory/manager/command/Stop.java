@@ -13,14 +13,14 @@ import play.Logger;
  */
 public class Stop extends ManagerCommandAbstract {
 
-    public Stop( Manager.ThreadCommandApi threadCommandApi ) {
-        super( threadCommandApi );
+    public Stop(Manager.ThreadCommandApi threadCommandApi) {
+        super(threadCommandApi, null);
     }
 
     @Override
     public void execute() {
-        Logger.debug( "EXECUTING STOP" );
-        gotoNeutral( false, false );
-        Logger.debug( "EXECUTING STOP DONE" );
+        Logger.debug("EXECUTING STOP");
+        gotoNeutral(false, false);
+        Logger.debug("EXECUTING STOP DONE");
     }
 }

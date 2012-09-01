@@ -14,8 +14,8 @@ import devices.glory.manager.Manager.ThreadCommandApi;
  */
 public class EnvelopeDeposit extends ManagerCommandAbstract {
 
-    public EnvelopeDeposit(ThreadCommandApi threadCommandApi) {
-        super(threadCommandApi);
+    public EnvelopeDeposit(ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
+        super(threadCommandApi, onCommandDone);
     }
 
     @Override

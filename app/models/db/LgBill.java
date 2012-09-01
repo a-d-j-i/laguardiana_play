@@ -5,35 +5,28 @@ import models.lov.*;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Table( name = "lg_bill", schema = "public")
+@Table(name = "lg_bill", schema = "public")
 public class LgBill extends GenericModel implements java.io.Serializable {
 
     @Id
-    @Column( name = "bill_id", unique = true, nullable = false)
+    @Column(name = "bill_id", unique = true, nullable = false)
     @GeneratedValue
     public int billId;
-    @ManyToOne( fetch = FetchType.LAZY)
-    @JoinColumn( name = "deposit_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deposit_id", nullable = false)
     public LgDeposit deposit;
-    @ManyToOne( fetch = FetchType.LAZY)
-    @JoinColumn( name = "batch_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "batch_id", nullable = false)
     public LgBatch batch;
-    @Column( name = "quantity", nullable = false)
+    @Column(name = "quantity", nullable = false)
     public int quantity;
-    @ManyToOne( fetch = FetchType.LAZY)
-    @JoinColumn( name = "bill_type_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bill_type_id", nullable = false)
     public LgBillType billType;
 
-    public LgBill(LgBatch batch, int quantity, LgBillType billType, LgDeposit deposit) {
-        this.batch = batch;
+    public LgBill(int quantity, LgBillType billType) {
         this.quantity = quantity;
-        this.deposit = deposit;
         this.billType = billType;
-        batch.addBill(this);
-    }
-
-    public void addToDeposit(LgDeposit deposit) {
-        this.deposit = deposit;
     }
 
     @Override

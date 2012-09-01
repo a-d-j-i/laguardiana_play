@@ -6,7 +6,6 @@ package devices.glory.manager;
 
 import devices.glory.manager.command.ManagerCommandAbstract;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
