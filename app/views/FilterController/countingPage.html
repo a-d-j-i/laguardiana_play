@@ -87,7 +87,7 @@
             return;
         }
         waiting = true;
-        $.getJSON( '@{CountController.countingPage}', function( data ) {
+        $.getJSON( '@{FilterController.countingPage}', function( data ) {
             waiting = false;
             var status = data[ 0 ];
             var billData = data[ 1 ];
@@ -96,19 +96,16 @@
                 } else if ( status == 'INITIALIZING' ) {
                 } else if ( status == 'COUNT' ) {
                 } else if ( status == 'COUNT_FINISH' ) {
-                    window.location.href = "@{CountController.finishCount()}";
+                    window.location.href = "@{FilterController.finishCount()}";
                     return;
                 } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
-                    $( '#continueButton' ).click( function(event) {
-                        $.getJSON( '@{CountController.cancelCount()}', function( data ) {});
-                    });
                 } else {
                     if ( lastStatus != status ) {
                         alert( status );
                     }
-                    lastStatus = status
                 }
+                lastStatus = status
             }
             var total = 0;
             var cnt_total = 0;
@@ -127,11 +124,11 @@
     }
     
     $( '#cancelButton' ).click( function(event) {
-        $.getJSON( '@{CountController.cancelCount}', function( data ) {});
+        $.getJSON( '@{FilterController.cancelCount}', function( data ) {});
     });
     
     $( '#continueButton' ).click( function(event) {
-        event.preventDefault();
+        $.getJSON( '@{FilterController.cancelCount()}', function( data ) {});
     });
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);

@@ -100,15 +100,12 @@
                     return;
                 } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
-                    $( '#continueButton' ).click( function(event) {
-                        $.getJSON( '@{CountController.cancelCount()}', function( data ) {});
-                    });
                 } else {
                     if ( lastStatus != status ) {
                         alert( status );
                     }
-                    lastStatus = status
                 }
+                lastStatus = status
             }
             var total = 0;
             var cnt_total = 0;
@@ -131,7 +128,7 @@
     });
     
     $( '#continueButton' ).click( function(event) {
-        event.preventDefault();
+        $.getJSON( '@{CountController.cancelCount()}', function( data ) {});
     });
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);

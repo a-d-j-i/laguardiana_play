@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:'Depositar Efectivo' /}
+#{set title:'Depositar Sobre' /}
 <section id="depositar_sobre_01">
     <header></header>
     <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>
@@ -8,7 +8,7 @@
 
         <div class="contenido">
             <ul class="columns">
-                #{form @inputReference(reference1, reference2), 'id' : 'mainForm' }
+                #{form @inputReference(data), 'id' : 'mainForm' }
                 #{ifErrors}
                 <p class="error">
                     All fields are required!
@@ -21,7 +21,7 @@
                         #{/if}
 
                         #{ if ( showReference1 ) }
-                        <select name="reference1" class="full_width">
+                        <select name="formData.reference1" class="full_width">
                             #{list items:referenceCodes, as:'reference'}
                             <option value="${reference.numericId}">${reference.textId}</option>
                             #{/list}
@@ -29,10 +29,24 @@
                         #{/if}
 
                         #{ if ( showReference2 ) }
-                        <input name="reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
+                        <input name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
                                #{if play.mode.isDev() }value="REFERENCE2 TESTVAL"#{/if} /> #{/if}
                     </div>
                 </li>
+                <!--
+                <input type="hidden" name="formData?.reference1" value="${formData?.reference1}"/>
+                <input type="hidden" name="formData?.reference2" value="${formData?.reference2}"/>
+                -->
+                <input type="hidden" name="formData.envelopeCode" value="${formData?.envelopeCode}"/>
+                <input type="hidden" name="formData.hasDocuments" value="${formData?.hasDocuments}"/>
+                <input type="hidden" name="formData.hasOther" value="${formData?.hasOther}"/>
+                <input type="hidden" name="formData.cashData" value="${formData?.cashData?.currencyId}"/>
+                <input type="hidden" name="formData.cashData" value="${formData?.cashData?.amount}"/>
+                <input type="hidden" name="formData.checkData" value="${formData?.checkData?.currencyId}"/>
+                <input type="hidden" name="formData.checkData" value="${formData?.checkData?.amount}"/>
+                <input type="hidden" name="formData.ticketData" value="${formData?.ticketData?.currencyId}"/>
+                <input type="hidden" name="formData.ticketData" value="${formData?.ticketData?.amount}"/>
+                <input type="hidden" name="formData.doDeposit" value="${formData?.doDeposit}"/>
                 #{/form}
                 <li class="fixed column" style="width: 40%">
                     <div id="keyboard_placeholder">KEYBOARD</div>

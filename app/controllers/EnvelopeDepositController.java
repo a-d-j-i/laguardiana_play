@@ -16,41 +16,49 @@ import play.mvc.With;
 @With(Secure.class)
 public class EnvelopeDepositController extends Application {
 
-    public class FormDataContent {
+    static public class FormDataContent {
 
-        String currencyId;
-        Integer amount;
+        public String currencyId;
+        public Integer amount;
     }
 
     // Is a big form loaded with a few screens so the data goes from action to action
-    public class FormData {
+    static public class FormData {
 
-        String reference1 = null;
-        String reference2 = null;
-        String envelopeCode = null;
-        Boolean hasDocuments = null;
-        Boolean hasOther = null;
-        FormDataContent cashData = null;
-        FormDataContent checkData = null;
-        FormDataContent ticketData = null;
+        public String reference1 = null;
+        public String reference2 = null;
+        public String envelopeCode = null;
+        public Boolean hasDocuments = null;
+        public Boolean hasOther = null;
+        public FormDataContent cashData = null;
+        public FormDataContent checkData = null;
+        public FormDataContent ticketData = null;
+        public Boolean doDeposit = false;
+
+        @Override
+        public String toString() {
+            return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + ", envelopeCode=" + envelopeCode + ", hasDocuments=" + hasDocuments + ", hasOther=" + hasOther + ", cashData=" + cashData + ", checkData=" + checkData + ", ticketData=" + ticketData + ", doDeposit=" + doDeposit + '}';
+        }
     }
 
     public static void index() {
         Application.index();
     }
 
-    public static void inputReference(FormData data) throws Throwable {
+    public static void inputReference(FormData formData) {
+        Logger.error("inputReference data %s", formData);
         Boolean r1 = isProperty("bill_deposit.show_reference1");
         Boolean r2 = isProperty("bill_deposit.show_reference2");
+        if (formData != null) {
+            DepositUserCodeReference userCodeLov = validateReference1(r1, formData.reference1);
+            String userCode = validateReference2(r2, formData.reference2);
 
-        DepositUserCodeReference userCodeLov = validateReference1(r1, data.reference1);
-        String userCode = validateReference2(r2, data.reference2);
-
-        // TODO: Use form validation.
-        if (userCodeLov != null && userCode != null) {
-
-            getEnvelopeContents(data);
+            // TODO: Use form validation.
+            if (userCodeLov != null && userCode != null) {
+                getEnvelopeContents(formData);
+            }
         }
+        renderArgs.put("formData", formData);
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
         renderArgs.put("showReference1", r1);
@@ -59,59 +67,89 @@ public class EnvelopeDepositController extends Application {
 
     }
 
-    public static void getEnvelopeContents(FormData data) {
-        if (true) {
-            confirmDeposit(null);
+    public static void getEnvelopeContents(FormData formData) {
+        Logger.error("getEnvelopeContents data %s", formData);
+        if (formData == null) {
+            inputReference(formData);
             return;
         }
+        Boolean r1 = isProperty("bill_deposit.show_reference1");
+        Boolean r2 = isProperty("bill_deposit.show_reference2");
+        if (formData != null) {
+            DepositUserCodeReference userCodeLov = validateReference1(r1, formData.reference1);
+            String userCode = validateReference2(r2, formData.reference2);
+            // TODO: Use form validation.
+            if (userCodeLov == null || userCode == null) {
+                inputReference(formData);
+            }
+        }
+
+        if (formData.doDeposit != null && formData.doDeposit) {
+            confirmDeposit(formData);
+            return;
+        }
+        renderArgs.put("formData", formData);
         List<EnvelopeType> envelopeTypes = EnvelopeType.findAll();
         renderArgs.put("envelopeTypes", envelopeTypes);
         render();
     }
 
-    public static void addCash(FormData data) {
+    public static void addCash(FormData formData, String currency, Integer amount) {
+        Logger.error("addCash data %s", formData);
 
-        if (data != null) {
-            getEnvelopeContents(data);
+        if (formData != null) {
+            if (currency != null && amount != null) {
+                formData.cashData = new FormDataContent();
+                formData.cashData.amount = amount;
+                formData.cashData.currencyId = currency;
+            }
+            getEnvelopeContents(formData);
+            return;
+        }
+        renderArgs.put("formData", formData);
+        List<Currency> currencies = Currency.findAll();
+        render(currencies);
+    }
+
+    public static void addDocument(FormData formData) {
+        Logger.error("addDocument data %s", formData);
+        getEnvelopeContents(formData);
+    }
+
+    public static void addTicket(FormData formData) {
+        Logger.error("addTicket data %s", formData);
+
+        if (formData != null) {
+            getEnvelopeContents(formData);
             return;
         }
         List<Currency> currencies = Currency.findAll();
         render(currencies);
     }
 
-    public static void addDocument(FormData data) {
-        getEnvelopeContents(data);
-    }
+    public static void addCheck(FormData formData) {
+        Logger.error("addCheck data %s", formData);
 
-    public static void addTicket(FormData data) {
-
-        if (data != null) {
-            getEnvelopeContents(data);
+        if (formData != null) {
+            getEnvelopeContents(formData);
             return;
         }
         List<Currency> currencies = Currency.findAll();
         render(currencies);
     }
 
-    public static void addCheck(FormData data) {
-
-        if (data != null) {
-            getEnvelopeContents(data);
-            return;
-        }
-        List<Currency> currencies = Currency.findAll();
-        render(currencies);
+    public static void addOther(FormData formData) {
+        Logger.error("addOther data %s", formData);
+        getEnvelopeContents(formData);
     }
 
-    public static void addOther(FormData data) {
-        getEnvelopeContents(data);
+    public static void cancelDeposit(FormData formData) {
+        Logger.error("cancelDeposit data %s", formData);
     }
 
-    public static void cancelDeposit(FormData data) {
-    }
-
-    public static void confirmDeposit(FormData data) {
-        if (data != null) {
+    public static void confirmDeposit(FormData formData) {
+        Logger.error("confirmDeposit data %s", formData);
+        if (formData != null) {
             printTicket();
         }
         render();

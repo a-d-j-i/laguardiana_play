@@ -1,45 +1,55 @@
-#{extends 'bootstrap_main.html' /}
+#{extends 'main.html' /}
 #{set title:'Glory (Comandos)' /}
-<div class="row">
-
-    <div class="span3">
-
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.sense()}">Sense</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.remoteCancel()}">remoteCancel</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.setDepositMode()}">setDepositMode</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.batchDataTransmition()}">batchDataTransmition</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.stopCounting()}">stopCounting</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.countingDataRequest()}">countingDataRequest</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.amountRequest()}">amountRequest</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.setManualMode()}">setManualMode</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.setErrorRecoveryMode()}">setErrorRecoveryMode</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.resetDevice()}">resetDevice</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.setStroringErrorRecoveryMode()}">StroringErrorRecovery</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.openEscrow()}">openEscrow</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.closeEscrow()}">closeEscrow</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.storingStart()}">storingStart</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.denominationDataRequest()}">denominationData</a></p>
-
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.switchCurrency(1)}">switchCurrent1</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.switchCurrency(2)}">switchCurrent2</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.switchCurrency(3)}">switchCurrent3</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.switchCurrency(4)}">switchCurrent4</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.switchCurrency(5)}">switchCurrent5</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.switchCurrency(6)}">switchCurrent6</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.switchCurrency(7)}">switchCurrent7</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.settingDataRequest()}">settingDataRequest</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.logDataRequest()}">logDataRequest</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.deviceSettingDataLoad()}">deviceSettingDataLoad</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.programUpdate()}">programUpdate</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.setTime()}">setTime</a></p>
-        <p><a class="btn btn-primary btn-large glory-button-fixed-size-btn" href="@{GloryController.downloadData()}">downloadData</a></p>
-
-    </div>
-
-
-    <div class="span4">
-        #{if (status?.haveData() ) }
-        <pre>
+<div style="background: wheat;">
+    <header></header>
+    <!-- link volver -->
+    <a id ="backButton" href="@{Application.otherMenu()}" class="boton_top">◄ &{ 'application.back' }</a>
+    <!-- /link volver -->
+    <ul class="columns">
+        <li class="fixed column" style="width: 2%">
+            &nbsp;
+        </li>
+        <li class="fixed column" style="width: 20%">
+            <a class="boton naranja full_width" href="@{GloryController.sense()}">Sense</a>
+            <a class="boton naranja full_width" href="@{GloryController.remoteCancel()}">remoteCancel</a>
+            <a class="boton naranja full_width" href="@{GloryController.setDepositMode()}">setDepositMode</a>
+            <a class="boton naranja full_width" href="@{GloryController.batchDataTransmition()}">batchDataTransmition</a>
+            <a class="boton naranja full_width" href="@{GloryController.stopCounting()}">stopCounting</a>
+            <a class="boton naranja full_width" href="@{GloryController.countingDataRequest()}">countingDataRequest</a>
+            <a class="boton naranja full_width" href="@{GloryController.amountRequest()}">amountRequest</a>
+            <a class="boton naranja full_width" href="@{GloryController.setManualMode()}">setManualMode</a>
+            <a class="boton naranja full_width" href="@{GloryController.setErrorRecoveryMode()}">setErrorRecoveryMode</a>
+            <a class="boton naranja full_width" href="@{GloryController.resetDevice()}">resetDevice</a>
+            <a class="boton naranja full_width" href="@{GloryController.setStroringErrorRecoveryMode()}">StroringErrorRecovery</a>
+            <a class="boton naranja full_width" href="@{GloryController.openEscrow()}">openEscrow</a>
+            <a class="boton naranja full_width" href="@{GloryController.closeEscrow()}">closeEscrow</a>
+            <a class="boton naranja full_width" href="@{GloryController.storingStart()}">storingStart</a>
+            <a class="boton naranja full_width" href="@{GloryController.denominationDataRequest()}">denominationData</a>
+        </li>
+        <li class="fixed column" style="width: 2%">
+            &nbsp;
+        </li>
+        <li class="fixed column" style="width: 20%">
+            <a class="boton naranja full_width" href="@{GloryController.switchCurrency(1)}">switchCurrent1</a>
+            <a class="boton naranja full_width" href="@{GloryController.switchCurrency(2)}">switchCurrent2</a>
+            <a class="boton naranja full_width" href="@{GloryController.switchCurrency(3)}">switchCurrent3</a>
+            <a class="boton naranja full_width" href="@{GloryController.switchCurrency(4)}">switchCurrent4</a>
+            <a class="boton naranja full_width" href="@{GloryController.switchCurrency(5)}">switchCurrent5</a>
+            <a class="boton naranja full_width" href="@{GloryController.switchCurrency(6)}">switchCurrent6</a>
+            <a class="boton naranja full_width" href="@{GloryController.switchCurrency(7)}">switchCurrent7</a>
+            <a class="boton naranja full_width" href="@{GloryController.settingDataRequest()}">settingDataRequest</a>
+            <a class="boton naranja full_width" href="@{GloryController.logDataRequest()}">logDataRequest</a>
+            <a class="boton naranja full_width" href="@{GloryController.deviceSettingDataLoad()}">deviceSettingDataLoad</a>
+            <a class="boton naranja full_width" href="@{GloryController.programUpdate()}">programUpdate</a>
+            <a class="boton naranja full_width" href="@{GloryController.setTime()}">setTime</a>
+            <a class="boton naranja full_width" href="@{GloryController.downloadData()}">downloadData</a>
+        </li>
+        <li class="fixed column" style="width: 2%">
+            &nbsp;
+        </li>
+        <li class="fixed column" style="width: 20%">
+            #{if (status?.haveData() ) }
+            <pre>
 Registers
 ${status?.getSRMode()}
 ${status?.getD1Mode()}
@@ -49,31 +59,36 @@ ${status?.getD1Mode()}
 #{/list}
 #{list items:status?.getInfo(), as:'p'}${p}
 #{/list}
-        </pre>
-        <pre> Data: ${status?.getData()}</pre>
-        #{/if}
-    </div>
-    <div class="span5">
-        #{if (status?.haveData() ) }
-        #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
-        <pre>
+            </pre>
+            <pre> Data: ${status?.getData()}</pre>
+            #{/if}
+        </li>
+        <li class="fixed column" style="width: 2%">
+            &nbsp;
+        </li>
+
+        <li class="fixed column" style="width: 20%">
+
+            #{if (status?.haveData() ) }
+            #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
+            <pre>
 Denomination Data
 #{list items:status?.getDenominationData(), as:'p'}    Denomination (${p.idx}): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if} #{if (p.oldVal)}Old#{/if}
 
 #{/list}
-        </pre>
-        #{/if}
-        #{else}
-        <pre>
+            </pre>
+            #{/if}
+            #{else}
+            <pre>
 Bills Data:
 #{list items:status?.getBills(), as:'p'} Bill ${p}
 #{/list}
         #{else}
         No bill information
         #{/else}
-        </pre>
-        #{/else}
-        #{/if}
-    </div>
+            </pre>
+            #{/else}
+            #{/if}
+        </li>
+    </ul>
 </div>
-
