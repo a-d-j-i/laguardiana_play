@@ -1,0 +1,228 @@
+#{extends 'main.html' /}
+#{set title:'Depositar Sobre' /}
+#{form @printTicket(data), 'id' : 'mainForm', 'class' : "bbq" }
+<section id="depositar_sobre_01">
+    <header></header>
+    <a id="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
+    <article>
+        <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
+        <div class="contenido">
+            <div class="step" id="first">
+                <ul class="columns">
+                    #{ifErrors}
+                    <p class="error">
+                        All fields are required!
+                    </p>
+                    #{/ifErrors}
+
+                    <li class="fixed column" style="width: 60%">
+                        <div class="columna_1">
+                            #{ if ( showReference1 || showReference2 ) }
+                            <div class="mensaje"><span>&{ 'input_reference.input_reference' }</span></div>
+                            #{/if}
+
+                            #{ if ( showReference1 ) }
+                            <select name="formData.reference1" class="full_width">
+                                #{list items:referenceCodes, as:'reference'}
+                                <option value="${reference.numericId}">${reference.textId}</option>
+                                #{/list}
+                            </select>
+                            #{/if}
+
+                            #{ if ( showReference2 ) }
+                            <input name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
+                                   #{if play.mode.isDev() }value="REFERENCE2 TESTVAL"#{/if} /> #{/if}
+                        </div>
+                    </li>
+                    <li class="fixed column" style="width: 40%">
+                        <div id="keyboard_placeholder">KEYBOARD</div>
+                    </li>
+                </ul>
+            </div>
+            <div class="step" id="second">
+                <input name="second_next" id="second_next" type="hidden" class="link" value="envelope_code">
+                <div class="mensaje"><span>&{ 'envelope_deposit.select_contents' }</span></div>
+                <div class="botonera">
+                    <ul class="on-2 columns">
+                        <li class="column">
+                            <div class="columna">
+                                <a name="cash_link" id="cash_link" href="#" class="link boton naranja full_width">&{ 'envelope_deposit.cash' }</a>
+                            </div>
+                        </li>
+                        <li class="column">
+                            <div class="columna">
+                                <a name="document_link" id="document_link" href="#" class="boton naranja full_width">&{ 'envelope_deposit.documents' }</a>
+                                <input type="hidden" id="hasDocuments" name="formData.hasDocuments" value="${formData?.hasDocuments}"/>
+                            </div>
+                        </li>
+                        <li class="column">
+                            <div class="columna">
+                                <a name="checks_link" id="checks_link" href="#" class="link boton naranja full_width">&{ 'envelope_deposit.checks' }</a>
+                            </div>
+                        </li>
+                        <li class="column">
+                            <div class="columna">
+                                <a name="tickets_link" id="tickets_link" href="#" class="link boton naranja full_width">&{ 'envelope_deposit.tickets' }</a>
+                            </div>
+                        </li>
+                        <li class="column">
+                            <div class="columna">
+                                <a name="others_link" id="others_link" href="#" class="boton naranja full_width">&{ 'envelope_deposit.others' }</a>
+                                <input type="hidden" id="hasOther" name="formData.hasOther" value="${formData?.hasOther}"/>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div id="envelope_code" class="step submit_step">
+                <input name="envelope_code_next" id="envelope_code_next" type="hidden" class="link" value="print_ticket">
+                <ul class="columns">
+                    <li class="fixed column" style="width: 60%">
+                        <div class="columna_1">
+                            <div class="mensaje"><span>&{ 'envelope_deposit.envelope_code_title' }</span></div>
+                            <input name="envelopeCode" type="text" placeholder="&{ 'envelope_deposit.envelope_code_title' }" style="width: 268px" />
+                        </div>
+                    </li>
+                    <li class="fixed column" style="width: 40%">
+                        <div id="keyboard_placeholder"></div>
+                    </li>
+                </ul>
+            </div>
+            <div id="cash" class="step">
+                <input name="cash_second" id="cash_second" type="hidden" class="link" value="second">
+                <ul class="columns">
+                    <li class="fixed column" style="width: 60%">
+                        <div class="columna_1">
+                            <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
+                            <select name="formData.cashData" class="full_width">
+                                #{list items:currencies, as:'currency'}
+                                #{if ( formData!=null && fromData.cashData!=null && currency.numericId == formData.cashData.currencyId )}
+                                <option selected="selected" value="${currency.numericId}">${currency.textId}</option>
+                                #{/if}
+                                #{else}
+                                <option value="${currency.numericId}">${currency.textId}</option>
+                                #{/else}
+                                #{/list}
+                            </select>
+                            &{ 'envelope_deposit.amount_to_confirm' }
+                            &nbsp;&nbsp;
+                            <input name="formData.cashData.amount" value="${formData?.cashData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
+                        </div>
+                    </li>
+                    <li class="fixed column" style="width: 40%">
+                        <div id="keyboard_placeholder"></div>
+                    </li>
+                </ul>
+            </div>
+            <div id="checks" class="step">
+                <input name="checks_second" id="checks_second" type="hidden" class="link" value="second">
+                <ul class="columns">
+                    <li class="fixed column" style="width: 60%">
+                        <div class="columna_1">
+                            <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
+                            <select name="formData.checkData" class="full_width">
+                                #{list items:currencies, as:'currency'}
+                                #{if ( formData!=null && fromData.checkData!=null && currency.numericId == formData.checkData.currencyId )}
+                                <option selected="selected" value="${currency.numericId}">${currency.textId}</option>
+                                #{/if}
+                                #{else}
+                                <option value="${currency.numericId}">${currency.textId}</option>
+                                #{/else}
+                                #{/list}
+                            </select>
+                            &{ 'envelope_deposit.amount_to_confirm' }
+                            &nbsp;&nbsp;
+                            <input name="formData.checkData.amount" value="${formData?.checkData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
+                        </div>                    </li>
+                    <li class="fixed column" style="width: 40%">
+                        <div id="keyboard_placeholder"></div>
+                    </li>
+                </ul>
+            </div>
+            <div id="tickets" class="step">
+                <input name="tickets_second" id="tickets_second" type="hidden" class="link" value="second">
+                <ul class="columns">
+                    <li class="fixed column" style="width: 60%">
+                        <input name="tickets_second" id="cash_second" type="hidden" class="link" value="second">
+                        <div class="columna_1">
+                            <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
+                            <select name="formData.ticketData" class="full_width">
+                                #{list items:currencies, as:'currency'}
+                                #{if ( formData!=null && fromData.ticketData!=null && currency.numericId == formData.ticketData.currencyId )}
+                                <option selected="selected" value="${currency.numericId}">${currency.textId}</option>
+                                #{/if}
+                                #{else}
+                                <option value="${currency.numericId}">${currency.textId}</option>
+                                #{/else}
+                                #{/list}
+                            </select>
+                            &{ 'envelope_deposit.amount_to_confirm' }
+                            &nbsp;&nbsp;
+                            <input name="formData.ticketData.amount" value="${formData?.ticketData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
+                        </div>
+                    </li>
+                    <li class="fixed column" style="width: 40%">
+                        <div id="keyboard_placeholder"></div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <hr />
+        <div class="botonera">
+            <ul class="columns">
+                <li class="fixed column" style="width: 50%">
+                    <!-- link cancelar -->
+                    <a href="@{ Application.index() }" class="boton rojo">&{ 'application.cancel' }</a>
+                    <!-- /link cancelar -->
+                </li>
+                <li class="fixed column" style="width: 50%">
+                    <div class="columna_2">
+                        <!-- link continuar -->
+                        <input type="submit" id ="continueButton" href="#" class="boton naranja"/>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>
+#{/form}
+
+
+#{set 'moreScripts'}
+<script src="@{'/public/javascripts/jquery/jquery.form.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/jquery/jquery.validate.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/jquery/bbq.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/jquery/jquery.form.wizard.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script type="text/javascript" charset="${_response_encoding}">
+    $(function(){
+        $("#mainForm").formwizard({ 
+            formPluginEnabled: false,
+            validationEnabled: false,
+            focusFirstInput : true,
+            textSubmit: "&{ 'application.continue' }",
+            textNext: "&{ 'application.continue' }",
+            textBack: "&{ 'application.back' }",
+         }
+    );
+    });
+    $( '#cash_link' ).click( function(event) {
+        $("#mainForm").formwizard("show","cash");
+    });
+    $( '#checks_link' ).click( function(event) {
+        $("#mainForm").formwizard("show","checks");
+    });
+    $( '#tickets_link' ).click( function(event) {
+        $("#mainForm").formwizard("show","tickets");
+    });
+    $( '#document_link' ).click( function(event) {
+        $("#hasDocument").val("true");
+    });
+    $( '#other_link' ).click( function(event) {
+        $("#hasOther").val("true");
+    });
+    $( '#backButton' ).click( function(event) {
+        $("#mainForm").formwizard("back");
+    });
+</script>
+#{/set}

@@ -31,10 +31,10 @@
                 </li>
                 #{/ifAuthorized}
                 <!-- boton depositar sobre -->
-                #{ifAuthorized resource: 'EnvelopeDepositController.inputReference', operation: 'GET'}
+                #{ifAuthorized resource: 'EnvelopeDepositController.wizard', operation: 'GET'}
                 <li class="column">
                     <div class="columna">
-                        <a href="@{EnvelopeDepositController.inputReference}" class="boton naranja full_width">&{'main_menu.envelope_deposit'}</a>
+                        <a href="@{EnvelopeDepositController.wizard}" class="boton naranja full_width">&{'main_menu.envelope_deposit'}</a>
                     </div>
                 </li>
                 #{/ifAuthorized}

@@ -45,8 +45,8 @@ public class EnvelopeDepositController extends Application {
         Application.index();
     }
 
-    public static void inputReference(FormData formData) {
-        Logger.error("inputReference data %s", formData);
+    public static void wizard(FormData formData) {
+        Logger.debug("inputReference data %s", formData);
         Boolean r1 = isProperty("bill_deposit.show_reference1");
         Boolean r2 = isProperty("bill_deposit.show_reference2");
         if (formData != null) {
@@ -67,8 +67,29 @@ public class EnvelopeDepositController extends Application {
 
     }
 
+    public static void inputReference(FormData formData) {
+        Logger.debug("inputReference data %s", formData);
+        Boolean r1 = isProperty("bill_deposit.show_reference1");
+        Boolean r2 = isProperty("bill_deposit.show_reference2");
+        if (formData != null) {
+            DepositUserCodeReference userCodeLov = validateReference1(r1, formData.reference1);
+            String userCode = validateReference2(r2, formData.reference2);
+
+            // TODO: Use form validation.
+            if (userCodeLov != null && userCode != null) {
+                getEnvelopeContents(formData);
+            }
+        }
+        renderArgs.put("formData", formData);
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
+        List<Currency> currencies = Currency.findAll();
+        renderArgs.put("showReference1", r1);
+        renderArgs.put("showReference2", r2);
+        render(referenceCodes, currencies);
+    }
+
     public static void getEnvelopeContents(FormData formData) {
-        Logger.error("getEnvelopeContents data %s", formData);
+        Logger.debug("getEnvelopeContents data %s", formData);
         if (formData == null) {
             inputReference(formData);
             return;
@@ -95,7 +116,7 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void addCash(FormData formData, String currency, Integer amount) {
-        Logger.error("addCash data %s", formData);
+        Logger.debug("addCash data %s", formData);
 
         if (formData != null) {
             if (currency != null && amount != null) {
@@ -112,12 +133,12 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void addDocument(FormData formData) {
-        Logger.error("addDocument data %s", formData);
+        Logger.debug("addDocument data %s", formData);
         getEnvelopeContents(formData);
     }
 
     public static void addTicket(FormData formData) {
-        Logger.error("addTicket data %s", formData);
+        Logger.debug("addTicket data %s", formData);
 
         if (formData != null) {
             getEnvelopeContents(formData);
@@ -128,7 +149,7 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void addCheck(FormData formData) {
-        Logger.error("addCheck data %s", formData);
+        Logger.debug("addCheck data %s", formData);
 
         if (formData != null) {
             getEnvelopeContents(formData);
@@ -139,24 +160,25 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void addOther(FormData formData) {
-        Logger.error("addOther data %s", formData);
+        Logger.debug("addOther data %s", formData);
         getEnvelopeContents(formData);
     }
 
     public static void cancelDeposit(FormData formData) {
-        Logger.error("cancelDeposit data %s", formData);
+        Logger.debug("cancelDeposit data %s", formData);
     }
 
     public static void confirmDeposit(FormData formData) {
-        Logger.error("confirmDeposit data %s", formData);
+        Logger.debug("confirmDeposit data %s", formData);
         if (formData != null) {
-            printTicket();
+            printTicket(formData);
         }
         render();
     }
 
-    public static void printTicket() {
-        render();
+    public static void printTicket(FormData formData) {
+        Logger.debug("printTicket data %s", formData);
+        render(formData);
     }
 
     public static void summary() {
