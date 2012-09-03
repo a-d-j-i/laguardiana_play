@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 package models;
-
+//TODO: This is wrong, the current user must be known.
 import controllers.Secure;
 import devices.CounterFactory;
 import devices.glory.manager.Manager;
@@ -11,10 +11,11 @@ import java.util.Date;
 import java.util.List;
 import models.db.LgBatch;
 import models.db.LgBill;
-import models.db.LgUser;
+import models.db.LgEnvelope;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
+import validation.Bill;
 
 /**
  * TODO: Review this with another thread/job that has a input queue for events
@@ -32,29 +33,42 @@ public class ModelFacade {
     }
 
     // Used by the controllers to fix the current page.
+    // The finish xxxxx_finish states can be changed by a mode + a single finish state
     static public enum CurrentStep {
 
-        NONE,
         RESERVED,
         ERROR,
+        NONE,
+        RUNNING,
+        FINISH,;
+    }
+
+    static public enum CurrentMode {
+
+        NONE,
         BILL_DEPOSIT,
-        BILL_DEPOSIT_FINISH,
-        COUNT,
-        COUNT_FINISH,;
+        COUNTING,
+        ENVELOPE_DEPOSIT,;
     }
     private Manager.ControllerApi manager = CounterFactory.getGloryManager();
     private CurrentStep currentStep = CurrentStep.NONE;
+    private CurrentMode currentMode = CurrentMode.NONE;
     private Deposit currentDeposit = null;
+    private Object currentFormData = null;
 
     private void error(String msg) {
         Logger.error("ERROR IN ModelFacade %s", msg);
         throw new play.mvc.results.Error(msg);
     }
 
+    synchronized public CurrentMode getCurrentMode() {
+        return currentMode;
+    }
+
     synchronized public CurrentStep getCurrentStep() {
         if (currentDeposit == null || currentDeposit.user == null) {
             // unfinished Cancelation.
-            if (currentStep == CurrentStep.BILL_DEPOSIT_FINISH || currentStep == CurrentStep.COUNT_FINISH) {
+            if (currentStep == CurrentStep.FINISH) {
                 return currentStep;
             }
             if (currentStep != CurrentStep.NONE) {
@@ -74,16 +88,52 @@ public class ModelFacade {
 
         public void run() {
             synchronized (ModelFacade.this) {
-                Logger.error("COUNTDONECOUNTDONECOUNTDONECOUNTDONE %s %s", manager.getStatus().name(), currentStep.name());
+                Logger.debug("When Done %s %s %s", manager.getStatus().name(), currentStep.name(), currentMode.name());
                 Manager.Status m = manager.getStatus();
-                switch (currentStep) {
-                    case COUNT:
+                if (currentStep != CurrentStep.RUNNING) {
+                    // TODO: Log the event.
+                    Logger.error("WhenDone not running");
+                    currentStep = CurrentStep.ERROR;
+                    return;
+                }
+                currentStep = CurrentStep.FINISH;
+                switch (currentMode) {
+                    case ENVELOPE_DEPOSIT:
+                        switch (m) {
+                            case CANCELED:
+                                if (Deposit.em().getTransaction().isActive()) {
+                                    Deposit.em().getTransaction().rollback();
+                                }
+                                currentDeposit = null;
+                                break;
+
+                            case IDLE:
+                                Deposit.em().getTransaction().commit();
+                                Deposit.em().getTransaction().begin();
+                                currentDeposit.finishDate = new Date();
+                                currentDeposit.save();
+                                Logger.debug("--------- presave");
+                                if (Deposit.em().getTransaction().isActive()) {
+                                    Deposit.em().getTransaction().commit();
+                                    Deposit.em().getTransaction().begin();
+                                }
+                                break;
+                            case ERROR:
+                                Logger.error("WhenDone invalid machine error %s", manager.getErrorDetail().toString());
+                                currentStep = CurrentStep.ERROR;
+                                break;
+                            default:
+                                Logger.error("WhenDone invalid machine status %s", m);
+                                currentStep = CurrentStep.ERROR;
+                                break;
+                        }
+                        break;
+                    case COUNTING:
                         if (m != Manager.Status.CANCELED) {
-                            Logger.error(String.format("OnCountDone invalid manager status %s", m.name()));
+                            Logger.error(String.format("WhenDone invalid manager status %s", m.name()));
                             currentStep = CurrentStep.ERROR;
                             return;
                         }
-                        currentStep = CurrentStep.COUNT_FINISH;
                         return;
                     case BILL_DEPOSIT:
                         switch (m) {
@@ -92,7 +142,6 @@ public class ModelFacade {
                                     Deposit.em().getTransaction().rollback();
                                 }
                                 currentDeposit = null;
-                                currentStep = CurrentStep.BILL_DEPOSIT_FINISH;
                                 break;
 
                             case IDLE:
@@ -105,7 +154,6 @@ public class ModelFacade {
                                     Deposit.em().getTransaction().commit();
                                     Deposit.em().getTransaction().begin();
                                 }
-                                currentStep = CurrentStep.BILL_DEPOSIT_FINISH;
                                 break;
                             case ESCROW_FULL:
                                 addBatchToDeposit();
@@ -116,17 +164,17 @@ public class ModelFacade {
                                 }
                                 break;
                             case ERROR:
-                                Logger.error("OnCountDone invalid machine error %s", manager.getErrorDetail().toString());
+                                Logger.error("WhenDone invalid machine error %s", manager.getErrorDetail().toString());
                                 currentStep = CurrentStep.ERROR;
                                 break;
                             default:
-                                Logger.error("OnCountDone invalid machine status %s", m);
+                                Logger.error("WhenDone invalid machine status %s", m);
                                 currentStep = CurrentStep.ERROR;
                                 break;
                         }
                         break;
                     default:
-                        Logger.error(String.format("OnCountDone invalid step %s", currentStep.name()));
+                        Logger.error(String.format("WhenDone invalid step %s", currentStep.name()));
                         currentStep = CurrentStep.ERROR;
                         break;
                 }
@@ -134,37 +182,59 @@ public class ModelFacade {
         }
     }
 
-    synchronized public void startCounting(Currency c) {
+    // TODO: Generalize, at start fromData is a kind on context saved
+    synchronized public void depositEnvelope(Object formData, DepositUserCodeReference userCodeLov, String userCode, LgEnvelope envelope) {
         if (getCurrentStep() != CurrentStep.NONE) {
-            error(String.format("startBillDeposit Invalid step %s", currentStep.name()));
+            error(String.format("depositEnvelope Invalid step %s", currentStep.name()));
             return;
         }
-        currentDeposit = new Deposit(Secure.getCurrentUser(), null, null, c);
-        if (!manager.count(whenDone, null, c.numericId)) {
-            error("startBillDeposit can't start glory");
+        currentFormData = formData;
+        currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov, null);
+        currentDeposit.addEnvelope(envelope);
+        currentMode = CurrentMode.ENVELOPE_DEPOSIT;
+        currentStep = CurrentStep.RUNNING;
+        if (!manager.envelopeDeposit(whenDone)) {
+            error("depositEnvelope can't start glory");
             return;
         }
-        currentStep = CurrentStep.COUNT;
     }
 
-    synchronized public void startBillDeposit(DepositUserCodeReference userCodeLov, String userCode, Currency c) {
+    synchronized public void startCounting(Object formData, Currency currency) {
+        if (getCurrentStep() != CurrentStep.NONE) {
+            error(String.format("startCounting Invalid step %s", currentStep.name()));
+            return;
+        }
+        currentFormData = formData;
+        currentDeposit = new Deposit(Secure.getCurrentUser(), null, null, currency);
+        currentMode = CurrentMode.COUNTING;
+        currentStep = CurrentStep.RUNNING;
+        if (!manager.count(whenDone, null, currency.numericId)) {
+            error("startCounting can't start glory");
+            return;
+        }
+    }
+
+    synchronized public void startBillDeposit(Object formData, DepositUserCodeReference userCodeLov, String userCode, Currency currency) {
         if (getCurrentStep() != CurrentStep.NONE) {
             error(String.format("startBillDeposit Invalid step %s", currentStep.name()));
             return;
         }
-        currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov, c);
+        currentFormData = formData;
+        currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov, currency);
         currentDeposit.save();
         Deposit.em().getTransaction().commit();
         Deposit.em().getTransaction().begin();
-        if (!manager.count(whenDone, null, c.numericId)) {
+        currentMode = CurrentMode.BILL_DEPOSIT;
+        currentStep = CurrentStep.RUNNING;
+        if (!manager.count(whenDone, null, currency.numericId)) {
             error("startBillDeposit can't start glory");
             return;
         }
-        currentStep = CurrentStep.BILL_DEPOSIT;
     }
 
-    synchronized public void acceptBillDeposit() {
-        if (getCurrentStep() != CurrentStep.BILL_DEPOSIT || currentDeposit == null) {
+    synchronized public void acceptDeposit() {
+        if (getCurrentStep() != CurrentStep.RUNNING || currentDeposit == null
+                || (currentMode != CurrentMode.BILL_DEPOSIT && currentMode != CurrentMode.ENVELOPE_DEPOSIT)) {
             error("cancelBillDeposit Invalid step");
             return;
         }
@@ -175,95 +245,62 @@ public class ModelFacade {
 
     synchronized public void cancelDeposit() {
         CurrentStep c = getCurrentStep();
-        if (currentDeposit == null
-                || (c != CurrentStep.BILL_DEPOSIT && c != CurrentStep.COUNT)) {
+        if (currentDeposit == null || c != CurrentStep.RUNNING) {
             error(String.format("cancelDeposit Invalid step %s", c.name()));
             return;
         }
         if (!manager.cancelDeposit(whenDone)) {
-            error("startBillDeposit can't cancel glory");
+            error("cancelDeposit can't cancel glory");
         }
     }
 
     synchronized public void finishDeposit() {
         CurrentStep c = getCurrentStep();
-        if (c != CurrentStep.BILL_DEPOSIT_FINISH
-                && c != CurrentStep.COUNT_FINISH) {
+        if (c != CurrentStep.FINISH) {
             error(String.format("finishDeposit Invalid step %s", c.name()));
             return;
         }
         // Allready detached.
         currentDeposit = null;
+        currentFormData = null;
         currentStep = CurrentStep.NONE;
+        currentMode = CurrentMode.NONE;
     }
 
-    // Protect private items, todo check current status.
-    public class DepositData {
-
-        public String getUserCode() {
-            synchronized (ModelFacade.this) {
-                if (currentDeposit != null) {
-                    return currentDeposit.userCode;
-                }
-                return null;
-            }
-        }
-
-        public String getUserCodeLov() {
-            synchronized (ModelFacade.this) {
-                if (currentDeposit == null || currentDeposit.userCodeData == null) {
-                    return null;
-                }
-                return currentDeposit.userCodeData.description;
-            }
-        }
-
-        public String getCurrency() {
-            synchronized (ModelFacade.this) {
-                if (currentDeposit != null) {
-                    return currentDeposit.currencyData.textId;
-                }
-                return null;
-            }
-        }
-
-        public List<Bill> getBillData() {
-            synchronized (ModelFacade.this) {
-                if (currentDeposit != null) {
-                    return Bill.getCurrentCounters(currentDeposit.currency);
-                }
-                return null;
-            }
-        }
-
-        public Boolean isCurrentDepositCanceled() {
-            synchronized (ModelFacade.this) {
-                return (currentDeposit == null);
-            }
-        }
-
-        public String getStatus() {
-            if (currentStep == CurrentStep.BILL_DEPOSIT || currentStep == CurrentStep.COUNT) {
-                return manager.getStatus().name();
-            } else {
-                return currentStep.name();
-            }
-        }
-    }
-
-    synchronized public DepositData getDepositData() {
+    private Boolean checkCurrentStep() {
         CurrentStep s = getCurrentStep();
-        if (s != CurrentStep.BILL_DEPOSIT && s != CurrentStep.BILL_DEPOSIT_FINISH
-                && s != CurrentStep.COUNT && s != CurrentStep.COUNT_FINISH) {
-            error(String.format("getStartBillDepositData Invalid step %s", currentStep.name()));
-            return null;
+        if (s == CurrentStep.NONE || s == CurrentStep.RESERVED || s == CurrentStep.ERROR) {
+            error(String.format("checkCurrentStep Invalid step %s", currentStep.name()));
+            return false;
         }
-        return new DepositData();
+        if (currentDeposit == null) {
+            return false;
+        }
+        return true;
+    }
+
+    synchronized public Object getFormData() {
+        return currentFormData;
+    }
+
+    synchronized public List<Bill> getBillData() {
+        if (checkCurrentStep()) {
+            return Bill.getCurrentCounters(currentDeposit.currency);
+        }
+        return null;
+    }
+
+    synchronized public String getStatus() {
+        if (currentStep == CurrentStep.RUNNING) {
+            return manager.getStatus().name();
+        } else {
+            return currentStep.name();
+        }
     }
 
     synchronized public String getDepositTotal() {
         if (currentDeposit != null) {
-            Logger.error( "TOTAL : %d", currentDeposit.getTotal());
+            Logger.error("TOTAL : %d", currentDeposit.getTotal());
             return currentDeposit.getTotal().toString();
         }
         return null;
@@ -283,194 +320,5 @@ public class ModelFacade {
         }
         currentDeposit.addBatch(batch);
         batch.save();
-    }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-    static public enum Operations {
-
-        IDLE,
-        CASH_DEPOSIT,
-        ENVELOP_DEPOSIT,
-        CASH_COUNT,
-        CASH_SPLIT,;
-    }
-
-    public static class CashDeposit {
-
-        public CashDeposit(LgUser user) {
-            screen = Screens.REFERENCE_INPUT;
-            deposit_saved = false;
-        }
-
-        static public enum Screens {
-
-            REFERENCE_INPUT,
-            CASH_DEPOSIT_COUNT,
-            CASH_DEPOSIT_CANCEL,
-            CASH_DEPOSIT_ACCEPT,;
-        }
-        public Deposit deposit;
-        public Boolean deposit_saved;
-        private Screens screen;
-
-        public Boolean readyFor(Screens targetScreen) {
-            if (screen == targetScreen) {
-                return true;
-            }
-            Manager.ControllerApi manager = CounterFactory.getGloryManager();
-            Manager.Status status = manager.getStatus();
-
-            switch (targetScreen) {
-                case REFERENCE_INPUT:
-                    return (status == Manager.Status.IDLE) && (!deposit_saved);
-                case CASH_DEPOSIT_COUNT:
-                    if (!deposit.validateReferenceAndCurrency()) {
-                        return false;
-                    }
-                    if (status != Manager.Status.IDLE) {
-                        Logger.error("machine is not idle! %s", manager.getStatus());
-                        return false;
-                    }
-                    return true;
-                case CASH_DEPOSIT_CANCEL:
-                    return screen == Screens.CASH_DEPOSIT_COUNT;
-                case CASH_DEPOSIT_ACCEPT:
-                    return (screen == Screens.CASH_DEPOSIT_COUNT)
-                            && (status == Manager.Status.READY_TO_STORE);
-                default:
-                    break;
-            };
-            return false;
-        }
-
-        public Boolean switchTo(Screens targetScreen) {
-            assert readyFor(targetScreen);
-            Logger.info("in switch to: %s", targetScreen);
-
-            if (screen == targetScreen) {
-                return true;
-            }
-
-            //we don't want to repeat readyFor() checks here..
-            if (!readyFor(targetScreen)) {
-                return false;
-            }
-
-            Manager.ControllerApi manager = CounterFactory.getGloryManager();
-
-            switch (targetScreen) {
-                case REFERENCE_INPUT:
-                    return true;
-                case CASH_DEPOSIT_COUNT:
-                    /*
-                     * if (!manager.count(null, deposit.currency)) { return
-                     * false; }
-                     */
-                    break;
-                case CASH_DEPOSIT_CANCEL:
-                    Logger.info("switching to: %s", targetScreen);
-                    //manager.cancelDeposit();
-                    // on callback:
-                    manager.reset();
-                    ModelFacade.get().resetOperation();
-                    break;
-                case CASH_DEPOSIT_ACCEPT:
-                    Logger.info("switching to: %s", targetScreen);
-                    Integer what = 42;
-                    List<Bill> billData = Bill.getCurrentCounters(
-                            deposit.currency);
-                    if (!manager.storeDeposit(what)) {
-                        // if can't send command now we go back.
-                        return false;
-                    }
-                    // XXX on callback:
-                    //saveDeposit(billData);
-                    closeDeposit();
-                    ModelFacade.get().resetOperation();
-                default:
-                    return false;
-            }
-            screen = targetScreen;
-            return true;
-        }
-        /*
-         * private void saveDeposit(List<Bill> billData) { if (!deposit_saved) {
-         * deposit.save(); deposit_saved = true; } LgBatch batch = new
-         * LgBatch(); for (Bill bill : billData) { Logger.debug(" -> quantity
-         * %d", bill.quantity); LgBillType bt =
-         * LgBillType.findById(bill.billTypeId); LgBill b = new LgBill(batch,
-         * bill.quantity, bt, deposit); //batch.bills.add(b); } batch.save(); }
-         */
-
-        private void closeDeposit() {
-            deposit.finishDate = new Date();
-            deposit.save();
-        }
-    }
-    //private 
-    private ModelFacade.Operations operation = Operations.IDLE;
-    private ModelFacade.CashDeposit cashDeposit = null;
-
-    public Operations currentOperation() {
-        return operation;
-    }
-
-    private Boolean setOperation(Operations newOperation) {
-        if (newOperation != Operations.IDLE) {
-            if (currentOperation() != Operations.IDLE) {
-                return false;
-            }
-            operation = newOperation;
-            return true;
-        } else {
-            //newOperation is IDLE so..
-            operation = Operations.IDLE;
-            return true;
-        }
-    }
-
-    public void resetOperation() {
-        assert currentOperation() != Operations.IDLE;
-        switch (currentOperation()) {
-            case IDLE:
-                break;
-            case CASH_DEPOSIT:
-                cashDeposit = null;
-                break;
-        }
-        setOperation(Operations.IDLE);
-    }
-
-    // CashDeposit
-    public Boolean CreateCashDeposit() {
-        Manager.Status status = manager.getStatus();
-        while (status != Manager.Status.IDLE) {
-            Logger.error("machine status is not idle! it's: %s", status);
-            if (status != Manager.Status.READY_TO_STORE) {
-                Logger.error(" -> performing reset!");
-                manager.reset();
-            }
-            return false;
-        }
-
-        LgUser user;
-        try {
-            user = Secure.getCurrentUser();
-        } catch (Throwable ex) {
-            //
-            return false;
-        }
-
-        Boolean r = setOperation(Operations.CASH_DEPOSIT);
-        if (r) {
-            Logger.info("cash deposit created!!!");
-            cashDeposit = new CashDeposit(user);
-        }
-        return r;
-    }
-
-    public CashDeposit getCashDeposit() {
-        Logger.info("returning cash deposit! ==null? %b", cashDeposit == null);
-        return cashDeposit;
     }
 }

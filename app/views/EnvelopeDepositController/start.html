@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 #{set title:'Depositar Sobre' /}
-#{form @printTicket(data), 'id' : 'mainForm', 'class' : "bbq" }
+#{form @start(deposit), 'id' : 'mainForm', 'class' : "bbq" }
 <section id="depositar_sobre_01">
     <header></header>
     <a id="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
@@ -17,21 +17,20 @@
 
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
-                            #{ if ( showReference1 || showReference2 ) }
+                            #{ if ( formData.showReference1 || formData.showReference2 ) }
                             <div class="mensaje"><span>&{ 'input_reference.input_reference' }</span></div>
                             #{/if}
 
-                            #{ if ( showReference1 ) }
-                            <select name="formData.reference1" class="full_width">
-                                #{list items:referenceCodes, as:'reference'}
-                                <option value="${reference.numericId}">${reference.textId}</option>
-                                #{/list}
-                            </select>
+                            #{ if ( formData.showReference1 ) }
+                            #{select 'formData.reference1.value', items: referenceCodes, valueProperty:'numericId', labelProperty:'description', value:formData.reference1.value, class : 'full_width' /}
                             #{/if}
 
-                            #{ if ( showReference2 ) }
+                            #{ if ( formData.showReference2 ) }
+                            #{error 'formData.reference2' /}
                             <input name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
-                                   #{if play.mode.isDev() }value="REFERENCE2 TESTVAL"#{/if} /> #{/if}
+                                   value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if} "
+                                   /> 
+                            #{/if}
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
@@ -52,7 +51,9 @@
                         <li class="column">
                             <div class="columna">
                                 <a name="document_link" id="document_link" href="#" class="boton naranja full_width">&{ 'envelope_deposit.documents' }</a>
-                                <input type="hidden" id="hasDocuments" name="formData.hasDocuments" value="${formData?.hasDocuments}"/>
+                                <input type="hidden" id="hasDocuments" name="formData.hasDocuments"
+                                       value="#{if ( formData.hasDocuments ) }true#{/if}#{else}false#{/else}"
+                                       />
                             </div>
                         </li>
                         <li class="column">
@@ -68,7 +69,9 @@
                         <li class="column">
                             <div class="columna">
                                 <a name="others_link" id="others_link" href="#" class="boton naranja full_width">&{ 'envelope_deposit.others' }</a>
-                                <input type="hidden" id="hasOther" name="formData.hasOther" value="${formData?.hasOther}"/>
+                                <input type="hidden" id="hasOthers" name="formData.hasOthers" 
+                                       value="#{if ( formData.hasOthers ) }true#{/if}#{else}false#{/else}"
+                                       />
                             </div>
                         </li>
                     </ul>
@@ -80,7 +83,9 @@
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'envelope_deposit.envelope_code_title' }</span></div>
-                            <input name="envelopeCode" type="text" placeholder="&{ 'envelope_deposit.envelope_code_title' }" style="width: 268px" />
+                            <input name="formData.envelopeCode" type="text" placeholder="&{ 'envelope_deposit.envelope_code_title' }" style="width: 268px" 
+                                   value="#{if play.mode.isDev() }ENVELOPE CODE TESTVAL#{/if} "
+                                   />
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
@@ -94,16 +99,8 @@
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
-                            <select name="formData.cashData" class="full_width">
-                                #{list items:currencies, as:'currency'}
-                                #{if ( formData!=null && fromData.cashData!=null && currency.numericId == formData.cashData.currencyId )}
-                                <option selected="selected" value="${currency.numericId}">${currency.textId}</option>
-                                #{/if}
-                                #{else}
-                                <option value="${currency.numericId}">${currency.textId}</option>
-                                #{/else}
-                                #{/list}
-                            </select>
+                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.currency.value } }%
+                            #{select 'formData.cashData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
                             <input name="formData.cashData.amount" value="${formData?.cashData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
@@ -120,16 +117,8 @@
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
-                            <select name="formData.checkData" class="full_width">
-                                #{list items:currencies, as:'currency'}
-                                #{if ( formData!=null && fromData.checkData!=null && currency.numericId == formData.checkData.currencyId )}
-                                <option selected="selected" value="${currency.numericId}">${currency.textId}</option>
-                                #{/if}
-                                #{else}
-                                <option value="${currency.numericId}">${currency.textId}</option>
-                                #{/else}
-                                #{/list}
-                            </select>
+                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.currency.value } }%
+                            #{select 'formData.checkData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
                             <input name="formData.checkData.amount" value="${formData?.checkData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
@@ -146,16 +135,8 @@
                         <input name="tickets_second" id="cash_second" type="hidden" class="link" value="second">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
-                            <select name="formData.ticketData" class="full_width">
-                                #{list items:currencies, as:'currency'}
-                                #{if ( formData!=null && fromData.ticketData!=null && currency.numericId == formData.ticketData.currencyId )}
-                                <option selected="selected" value="${currency.numericId}">${currency.textId}</option>
-                                #{/if}
-                                #{else}
-                                <option value="${currency.numericId}">${currency.textId}</option>
-                                #{/else}
-                                #{/list}
-                            </select>
+                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.currency.value } }%
+                            #{select 'formData.ticketData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
                             <input name="formData.ticketData.amount" value="${formData?.ticketData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
@@ -190,10 +171,10 @@
 
 
 #{set 'moreScripts'}
-<script src="@{'/public/javascripts/jquery/jquery.form.js'}" type="text/javascript" charset="${_response_encoding}"></script>
-<script src="@{'/public/javascripts/jquery/jquery.validate.js'}" type="text/javascript" charset="${_response_encoding}"></script>
-<script src="@{'/public/javascripts/jquery/bbq.js'}" type="text/javascript" charset="${_response_encoding}"></script>
-<script src="@{'/public/javascripts/jquery/jquery.form.wizard.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+#{script 'jquery/jquery.form.js' /}
+#{script 'jquery/jquery.validate.js' /}
+#{script 'jquery/bbq.js' /}
+#{script 'jquery/jquery.form.wizard.js' /}
 <script type="text/javascript" charset="${_response_encoding}">
     $(function(){
         $("#mainForm").formwizard({ 
@@ -202,8 +183,8 @@
             focusFirstInput : true,
             textSubmit: "&{ 'application.continue' }",
             textNext: "&{ 'application.continue' }",
-            textBack: "&{ 'application.back' }",
-         }
+            textBack: "&{ 'application.back' }"
+        }
     );
     });
     $( '#cash_link' ).click( function(event) {
@@ -216,10 +197,10 @@
         $("#mainForm").formwizard("show","tickets");
     });
     $( '#document_link' ).click( function(event) {
-        $("#hasDocument").val("true");
+        $("#hasDocuments").val("true");
     });
     $( '#other_link' ).click( function(event) {
-        $("#hasOther").val("true");
+        $("#hasOthers").val("true");
     });
     $( '#backButton' ).click( function(event) {
         $("#mainForm").formwizard("back");

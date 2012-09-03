@@ -1,263 +1,156 @@
 package controllers;
 
-import devices.CounterFactory;
-import devices.glory.manager.Manager;
-import java.util.Date;
 import java.util.List;
-import models.Deposit;
+import models.ModelFacade;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
+import models.db.LgEnvelopeContent.EnvelopeContentType;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import models.lov.EnvelopeType;
 import play.Logger;
+import play.data.validation.CheckWith;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.With;
+import validation.FormCurrency;
+import validation.FormLov;
 
 @With(Secure.class)
 public class EnvelopeDepositController extends Application {
 
-    static public class FormDataContent {
-
-        public String currencyId;
-        public Integer amount;
+    @Before
+    static void wizardFixPage() throws Throwable {
+        switch (modelFacade.getCurrentStep()) {
+            case NONE:
+                if (!request.actionMethod.equalsIgnoreCase("start")) {
+                    Application.index();
+                    break;
+                }
+                break;
+            case FINISH:
+            case RUNNING:
+                if (modelFacade.getCurrentMode() != ModelFacade.CurrentMode.ENVELOPE_DEPOSIT) {
+                    Logger.info("Redirect to index 1");
+                    Application.index();
+                }
+                break;
+            default:
+                Logger.info("Redirect to index 2");
+                Application.index();
+                break;
+        }
     }
 
-    // Is a big form loaded with a few screens so the data goes from action to action
+    static public class FormDataContent {
+
+        static public class Validate extends FormCurrency.Validate {
+        }
+        public FormCurrency currency = null;
+        public Integer amount = null;
+    }
+
     static public class FormData {
 
-        public String reference1 = null;
+        final public Boolean showReference1 = isProperty("bill_deposit.show_reference1");
+        final public Boolean showReference2 = isProperty("bill_deposit.show_reference2");
+        @CheckWith(FormLov.Validate.class)
+        public FormLov reference1 = new FormLov();
+        @Required(message = "validation.required.reference2")
         public String reference2 = null;
+        @Required(message = "validation.required.envelopeCode")
         public String envelopeCode = null;
         public Boolean hasDocuments = null;
-        public Boolean hasOther = null;
+        public Boolean hasOthers = null;
+        @CheckWith(FormDataContent.Validate.class)
         public FormDataContent cashData = null;
+        @CheckWith(FormDataContent.Validate.class)
         public FormDataContent checkData = null;
+        @CheckWith(FormDataContent.Validate.class)
         public FormDataContent ticketData = null;
-        public Boolean doDeposit = false;
 
         @Override
         public String toString() {
-            return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + ", envelopeCode=" + envelopeCode + ", hasDocuments=" + hasDocuments + ", hasOther=" + hasOther + ", cashData=" + cashData + ", checkData=" + checkData + ", ticketData=" + ticketData + ", doDeposit=" + doDeposit + '}';
+            return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + ", envelopeCode=" + envelopeCode + ", hasDocuments=" + hasDocuments + ", hasOther=" + hasOthers + ", cashData=" + cashData + ", checkData=" + checkData + ", ticketData=" + ticketData + '}';
         }
     }
 
-    public static void index() {
-        Application.index();
-    }
-
-    public static void wizard(FormData formData) {
-        Logger.debug("inputReference data %s", formData);
-        Boolean r1 = isProperty("bill_deposit.show_reference1");
-        Boolean r2 = isProperty("bill_deposit.show_reference2");
-        if (formData != null) {
-            DepositUserCodeReference userCodeLov = validateReference1(r1, formData.reference1);
-            String userCode = validateReference2(r2, formData.reference2);
-
-            // TODO: Use form validation.
-            if (userCodeLov != null && userCode != null) {
-                getEnvelopeContents(formData);
+    public static void start(@Valid FormData formData) {
+        Logger.debug("wizard data %s", formData);
+        if (Validation.hasErrors()) {
+            for (play.data.validation.Error error : Validation.errors()) {
+                Logger.error("Wizard : %s %s", error.getKey(), error.message());
+            }
+            params.flash(); // add http parameters to the flash scope
+        } else {
+            if (formData != null) {
+                LgEnvelope e = new LgEnvelope(0, formData.envelopeCode);
+                if (formData.cashData != null) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.CASH, formData.cashData.amount, formData.cashData.currency.value));
+                }
+                if (formData.checkData != null) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.CHECKS, formData.checkData.amount, formData.checkData.currency.value));
+                }
+                if (formData.ticketData != null) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.TICKETS, formData.ticketData.amount, formData.ticketData.currency.value));
+                }
+                if (formData.hasDocuments != null) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.DOCUMENTS, null, null));
+                }
+                if (formData.hasOthers != null) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
+                }
+                modelFacade.depositEnvelope(formData, (DepositUserCodeReference) formData.reference1.lov, formData.reference2, e);
+                mainLoop();
             }
         }
-        renderArgs.put("formData", formData);
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
-        renderArgs.put("showReference1", r1);
-        renderArgs.put("showReference2", r2);
-        render(referenceCodes, currencies);
-
-    }
-
-    public static void inputReference(FormData formData) {
-        Logger.debug("inputReference data %s", formData);
-        Boolean r1 = isProperty("bill_deposit.show_reference1");
-        Boolean r2 = isProperty("bill_deposit.show_reference2");
-        if (formData != null) {
-            DepositUserCodeReference userCodeLov = validateReference1(r1, formData.reference1);
-            String userCode = validateReference2(r2, formData.reference2);
-
-            // TODO: Use form validation.
-            if (userCodeLov != null && userCode != null) {
-                getEnvelopeContents(formData);
-            }
-        }
-        renderArgs.put("formData", formData);
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
-        renderArgs.put("showReference1", r1);
-        renderArgs.put("showReference2", r2);
-        render(referenceCodes, currencies);
-    }
-
-    public static void getEnvelopeContents(FormData formData) {
-        Logger.debug("getEnvelopeContents data %s", formData);
         if (formData == null) {
-            inputReference(formData);
-            return;
+            formData = new FormData();
         }
-        Boolean r1 = isProperty("bill_deposit.show_reference1");
-        Boolean r2 = isProperty("bill_deposit.show_reference2");
-        if (formData != null) {
-            DepositUserCodeReference userCodeLov = validateReference1(r1, formData.reference1);
-            String userCode = validateReference2(r2, formData.reference2);
-            // TODO: Use form validation.
-            if (userCodeLov == null || userCode == null) {
-                inputReference(formData);
-            }
-        }
-
-        if (formData.doDeposit != null && formData.doDeposit) {
-            confirmDeposit(formData);
-            return;
-        }
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
+        List<Currency> currencies = Currency.findAll();
         renderArgs.put("formData", formData);
-        List<EnvelopeType> envelopeTypes = EnvelopeType.findAll();
-        renderArgs.put("envelopeTypes", envelopeTypes);
+        renderArgs.put("referenceCodes", referenceCodes);
+        renderArgs.put("currencies", currencies);
         render();
     }
 
-    public static void addCash(FormData formData, String currency, Integer amount) {
-        Logger.debug("addCash data %s", formData);
-
-        if (formData != null) {
-            if (currency != null && amount != null) {
-                formData.cashData = new FormDataContent();
-                formData.cashData.amount = amount;
-                formData.cashData.currencyId = currency;
-            }
-            getEnvelopeContents(formData);
+    public static void mainLoop() {
+        if (request.isAjax()) {
+            Object[] o = new Object[2];
+            o[0] = modelFacade.getStatus();
+            o[1] = null;
+            renderJSON(o);
             return;
         }
+        FormData formData = (FormData) modelFacade.getFormData();
+        Logger.debug("deposit data %s", formData);
         renderArgs.put("formData", formData);
-        List<Currency> currencies = Currency.findAll();
-        render(currencies);
-    }
-
-    public static void addDocument(FormData formData) {
-        Logger.debug("addDocument data %s", formData);
-        getEnvelopeContents(formData);
-    }
-
-    public static void addTicket(FormData formData) {
-        Logger.debug("addTicket data %s", formData);
-
-        if (formData != null) {
-            getEnvelopeContents(formData);
-            return;
-        }
-        List<Currency> currencies = Currency.findAll();
-        render(currencies);
-    }
-
-    public static void addCheck(FormData formData) {
-        Logger.debug("addCheck data %s", formData);
-
-        if (formData != null) {
-            getEnvelopeContents(formData);
-            return;
-        }
-        List<Currency> currencies = Currency.findAll();
-        render(currencies);
-    }
-
-    public static void addOther(FormData formData) {
-        Logger.debug("addOther data %s", formData);
-        getEnvelopeContents(formData);
-    }
-
-    public static void cancelDeposit(FormData formData) {
-        Logger.debug("cancelDeposit data %s", formData);
-    }
-
-    public static void confirmDeposit(FormData formData) {
-        Logger.debug("confirmDeposit data %s", formData);
-        if (formData != null) {
-            printTicket(formData);
-        }
         render();
     }
 
-    public static void printTicket(FormData formData) {
-        Logger.debug("printTicket data %s", formData);
-        render(formData);
+    public static void cancel() {
+        modelFacade.cancelDeposit();
+        mainLoop();
     }
 
-    public static void summary() {
-        render();
+    public static void accept() {
+        modelFacade.acceptDeposit();
+        mainLoop();
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /*
-     * public static void getEnvelopeContents(String depositId, LgEnvelope
-     * envelope) { Deposit deposit =
-     * Deposit.getAndValidateOpenDeposit(depositId);
-     *
-     * if (envelope != null && envelope.envelopeTypeLov != null) { // TODO: Use
-     * validate. envelope.deposit = deposit;
-     * Logger.debug("envelope.envelopeTypeLov : %d", envelope.envelopeTypeLov);
-     * Logger.debug("envelope.number: %s", envelope.envelopeNumber); for
-     * (LgEnvelopeContent l : envelope.envelopeContents) { if (l != null) {
-     * Logger.debug("content amount: %d", l.amount); Logger.debug("content
-     * content: %d", l.contentTypeLov); Logger.debug("content unit: %d",
-     * l.unitLov); } } renderArgs.put("confirm", true); } List<EnvelopeType>
-     * envelopeTypes = EnvelopeType.findAll(); renderArgs.put("envelopeTypes",
-     * envelopeTypes); render(deposit, envelope); }
-     */
-    public static void acceptEnvelope(String depositId, LgEnvelope envelope) {
-        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
-
-        // Validate
-        if (envelope == null || envelope.envelopeTypeLov == null) {
-            Logger.error("INVALID ");
-            index();
+    public static void finish() {
+        String total = modelFacade.getDepositTotal();
+        FormData formData = (FormData) modelFacade.getFormData();
+        modelFacade.finishDeposit();
+        if (formData == null) {
+            Application.index();
             return;
         }
-
-        // TODO: Use validate.
-        envelope.deposit = deposit;
-        Logger.debug("envelope.envelopeTypeLov : %d", envelope.envelopeTypeLov);
-        Logger.debug("envelope.number: %s", envelope.envelopeNumber);
-        for (LgEnvelopeContent l : envelope.envelopeContents) {
-            if (l != null) {
-                Logger.debug("content amount: %d", l.amount);
-                Logger.debug("content content: %d", l.contentTypeLov);
-                Logger.debug("content unit: %d", l.unitLov);
-            }
-        }
-        renderArgs.put("confirm", true);
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-        if (!manager.envelopeDeposit()) {
-            Logger.error("TODO ERROR HERE ???");
-        }
-        Logger.debug("------------ > Current Status %s", manager.getStatus().name());
-        boolean done = false;
-        while (!done) {
-            Logger.debug("------------ > Current Status %s", manager.getStatus().name());
-            switch (manager.getStatus()) {
-                case IDLE:
-                    done = true;
-                    break;
-                case ERROR:
-                    Logger.error("TODO: ERROR DAVE HELP ME");
-                    index();
-                    return;
-                default:
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ex) {
-                    }
-                    break;
-            }
-        }
-        // TODO: Put in a better place.
-        for (LgEnvelopeContent c : envelope.envelopeContents) {
-            c.envelope = envelope;
-        }
-        envelope.save();
-
-        deposit.finishDate = new Date();
-        deposit.save();
-
-        flash.success("Deposit is done!");
-        Application.index();
+        renderArgs.put("clientCode", getProperty("client_code"));
+        renderArgs.put("formData", formData);
+        renderArgs.put("depositTotal", total);
+        render();
     }
 }

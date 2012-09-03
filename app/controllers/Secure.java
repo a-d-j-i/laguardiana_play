@@ -95,6 +95,7 @@ public class Secure extends Controller {
             flash.keep("url");
             flash.error("secure.invalid_field");
             params.flash();
+            validation.keep(); // keep the errors for the next request
             login();
             return;
         }

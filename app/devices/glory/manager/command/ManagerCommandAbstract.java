@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import play.Logger;
 
 /**
- *
+ * TODO: Use play jobs for this.
  * @author adji
  */
 abstract public class ManagerCommandAbstract implements Runnable {

@@ -5,7 +5,6 @@ import javax.persistence.Entity;
 import models.db.*;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import play.Logger;
 
 @Entity
 public class Deposit extends LgDeposit {
@@ -30,19 +29,25 @@ public class Deposit extends LgDeposit {
         }
     }
 
-    public Deposit(LgUser user, String userCode, DepositUserCodeReference userCodeLov, Currency currency) {
-        this.userCodeData = userCodeLov;
-        this.currencyData = currency;
+    public void addEnvelope(LgEnvelope envelope) {
+        envelopes.add(envelope);
+        envelope.deposit = this;
+    }
+
+    public Deposit(LgUser user, String userCode, DepositUserCodeReference userCodeData, Currency currency) {
         this.bag = LgBag.GetCurrentBag();
         this.user = user;
         this.userCode = userCode;
-        if (userCodeLov == null) {
-            this.userCodeLov = 0;
-        } else {
-            this.userCodeLov = userCodeLov.numericId;
+
+        this.userCodeData = userCodeData;
+        if (userCodeData != null) {
+            this.userCodeLov = userCodeData.numericId;
         }
         this.creationDate = new Date();
-        this.currency = currency.numericId;
+        this.currencyData = currency;
+        if (currency != null) {
+            this.currency = currency.numericId;
+        }
     }
 
     public LgLov findUserCodeLov() {
@@ -54,44 +59,8 @@ public class Deposit extends LgDeposit {
         LgLov uc = this.findUserCodeLov();
         Integer billcount = this.bills.size();
         return "Deposit by: " + user.toString() + " in: " + bag.toString()
-                + " codes:[" + billcount.toString() + ":" + userCode + "/" + uc.toString() + "]";
-    }
-
-    public Boolean validateReferenceAndCurrency() {
-        if ((userCode == null) || (userCodeLov == null) || (currency == null)) {
-            Logger.error("usercode null? %b", userCode == null);
-            Logger.error("usercodelov null? %b", userCodeLov == null);
-            Logger.error("currency null? %b", currency == null);
-            return false;
-        }
-        // empty 
-        if ((userCode.isEmpty())) // || (userCodeLov.isEmpty()))
-        {
-            return false;
-        }
-        Currency c = controllers.Application.validateCurrency(currency);
-        if (c == null) {
-            return false;
-        }
-        return true;
-    }
-
-    public static Currency validateCurrency(Integer currency) {
-        // Validate Currency.
-        if (currency == null) {
-            try {
-                String dc = LgSystemProperty.getProperty("bill_deposit.default_currency");
-                currency = Integer.parseInt(dc);
-            } catch (NumberFormatException e) {
-                currency = 1; // Fixed.
-            }
-        }
-        Currency c = Currency.findByNumericId(currency);
-        if (c == null) {
-            Logger.error("validateCurrency: invalid currency %d", currency);
-            return null;
-        }
-        return c;
+                + " codes:[" + billcount.toString() + ":" + userCode + "/" + uc.toString() + "]"
+                + " TOTAL : " + getTotal() + " FINISH DATE : " + finishDate;
     }
 
     public Long getTotal() {

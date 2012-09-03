@@ -33,7 +33,7 @@
                         <tbody>
                             <!-- detalle de billetes -->
                             %{ total = 0; cnt_total = 0;}%
-                            #{list items:data.billData, as:'b'}
+                            #{list items:billData, as:'b'}
                             <tr id="BTRID_${b.billTypeId}">
                                 <td id="bill_denomination">${b.denomination}</td>
                                 <td id="bill_quantity">${b.quantity}</td>
@@ -61,13 +61,13 @@
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
                     <!-- link cancelar -->
-                    <a id ="cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a id ="cancelButton" href="@{cancel()}" class="boton rojo">&{ 'application.cancel' }</a>
                     <!-- /link cancelar -->
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a id ="continueButton" href="#" class="boton gris">&{ 'application.finish' }</a>
+                        <a id ="continueButton" href="@{accept()}" class="boton gris">&{ 'application.finish' }</a>
                         <!-- /link continuar -->
                     </div>
                 </li>
@@ -87,7 +87,7 @@
             return;
         }
         waiting = true;
-        $.getJSON( '@{CountController.countingPage}', function( data ) {
+        $.getJSON( '@{mainLoop()}', function( data ) {
             waiting = false;
             var status = data[ 0 ];
             var billData = data[ 1 ];
@@ -95,8 +95,8 @@
                 if ( status == 'IDLE' ) {
                 } else if ( status == 'INITIALIZING' ) {
                 } else if ( status == 'COUNT' ) {
-                } else if ( status == 'COUNT_FINISH' ) {
-                    window.location.href = "@{CountController.finishCount()}";
+                } else if ( status == 'FINISH' ) {
+                    window.location.href = "@{finish()}";
                     return;
                 } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
@@ -123,13 +123,6 @@
         })
     }
     
-    $( '#cancelButton' ).click( function(event) {
-        $.getJSON( '@{CountController.cancelCount}', function( data ) {});
-    });
-    
-    $( '#continueButton' ).click( function(event) {
-        $.getJSON( '@{CountController.cancelCount()}', function( data ) {});
-    });
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);
     refresh();

@@ -62,6 +62,7 @@ public class Manager {
     // TODO: Better error reporting, as a class with arguments.
     final private AtomicReference<Status> status = new AtomicReference<Status>(Status.IDLE);
     final private AtomicReference<ErrorDetail> error = new AtomicReference<ErrorDetail>();
+    // TODO: Change onCountDont to an observable.
 
     public Manager(Glory device) {
         this.device = device;
@@ -141,7 +142,7 @@ public class Manager {
             managerControllerApi = managerThreadState.getControllerApi();
         }
 
-        public boolean count(Runnable onCountDone, Map<Integer, Integer> desiredQuantity, Integer currency) {
+        public boolean count(Runnable onCommandDone, Map<Integer, Integer> desiredQuantity, Integer currency) {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
                 if (cmd instanceof Count) {
@@ -151,7 +152,7 @@ public class Manager {
                 return false;
             }
             threadCommandApi.setStatus(Manager.Status.IDLE);
-            return managerControllerApi.sendCommand(new Count(threadCommandApi, onCountDone, desiredQuantity, currency));
+            return managerControllerApi.sendCommand(new Count(threadCommandApi, onCommandDone, desiredQuantity, currency));
         }
 
         public Integer getCurrency() {
@@ -221,7 +222,7 @@ public class Manager {
             return false;
         }
 
-        public boolean envelopeDeposit() {
+        public boolean envelopeDeposit(Runnable onCommandDone) {
             Logger.debug("envelopeDeposit");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
@@ -231,7 +232,7 @@ public class Manager {
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi, null));
+            return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi, onCommandDone));
         }
 
         public boolean reset() {

@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import models.Bill;
 import models.db.LgBillType;
 import play.Logger;
 import play.Play;
 import play.mvc.Before;
+import validation.Bill;
 
 // TODO: Manage errors.
 public class GloryManagerController extends Application {
@@ -135,7 +135,7 @@ public class GloryManagerController extends Application {
 
     public static void envelopeDeposit() throws IOException {
         if (manager != null) {
-            if (!manager.envelopeDeposit()) {
+            if (!manager.envelopeDeposit(null)) {
                 error = "Executing another command";
             }
         }

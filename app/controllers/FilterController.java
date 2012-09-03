@@ -3,66 +3,97 @@ package controllers;
 import java.util.List;
 import models.ModelFacade;
 import models.lov.Currency;
-import models.lov.DepositUserCodeReference;
+import play.Logger;
+import play.data.validation.CheckWith;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Before;
+import validation.FormCurrency;
 
 public class FilterController extends Application {
 
     @Before
     static void wizardFixPage() throws Throwable {
         switch (modelFacade.getCurrentStep()) {
-            case COUNT:
-            case COUNT_FINISH:
-                break;
             case NONE:
-                if (request.actionMethod.equalsIgnoreCase("chooseCurrency")) {
+                if (!request.actionMethod.equalsIgnoreCase("start")) {
+                    Application.index();
                     break;
                 }
-            case BILL_DEPOSIT:
-            case BILL_DEPOSIT_FINISH:
-            case RESERVED:
-            default: // do nothing
+                break;
+            case FINISH:
+            case RUNNING:
+                if (modelFacade.getCurrentMode() != ModelFacade.CurrentMode.COUNTING) {
+                    Application.index();
+                }
+                break;
+            default:
                 Application.index();
                 break;
         }
     }
 
-    public static void chooseCurrency(Integer currency)
-            throws Throwable {
-        Currency c = validateCurrency(currency);
+    static public class FormData {
 
-        // TODO: Use form validation.
-        if (c != null) {
-            modelFacade.startCounting(c);
-            countingPage();
-            return;
+        @CheckWith(FormCurrency.Validate.class)
+        public FormCurrency currency = null;
+
+        @Override
+        public String toString() {
+            return "FormData{" + "currency=" + currency + '}';
         }
-        //depending on a value of LgSystemProperty, show both references or redirect 
-        //temporarily until we have a page using getReferences()..
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
-        render(referenceCodes, currencies);
     }
 
-    public static void countingPage() {
-        ModelFacade.DepositData data = modelFacade.getDepositData();
+    public static void start(@Valid CountController.FormData formData)
+            throws Throwable {
+        Logger.debug("chooseCurrency data %s", formData);
+        if (Validation.hasErrors()) {
+            for (play.data.validation.Error error : Validation.errors()) {
+                Logger.error("Wizard : %s %s", error.getKey(), error.message());
+            }
+            params.flash(); // add http parameters to the flash scope
+        } else {
+            if (formData != null) {
+                modelFacade.startCounting(formData, formData.currency.currency);
+                mainLoop();
+                return;
+            }
+        }
+        if (formData == null) {
+            formData = new CountController.FormData();
+        }
+
+        //depending on a value of LgSystemProperty, show both references or redirect 
+        //temporarily until we have a page using getReferences()..
+        List<Currency> currencies = Currency.findAll();
+        renderArgs.put("formData", formData);
+        renderArgs.put("currencies", currencies);
+        render();
+    }
+
+    public static void mainLoop() {
         if (request.isAjax()) {
             Object[] o = new Object[2];
-            o[0] = data.getStatus();
-            o[1] = data.getBillData();
+            o[0] = modelFacade.getStatus();
+            o[1] = modelFacade.getBillData();
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
-            render(data);
+            renderArgs.put("billData", modelFacade.getBillData());
+            render();
         }
     }
 
-    public static void cancelCount() {
+    public static void cancel() {
         modelFacade.cancelDeposit();
-        countingPage();
+        mainLoop();
     }
 
-    public static void finishCount() {
+    public static void accept() {
+        cancel();
+    }
+
+    public static void finish() {
         modelFacade.finishDeposit();
         Application.index();
     }

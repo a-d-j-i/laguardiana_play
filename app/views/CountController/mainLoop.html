@@ -1,21 +1,21 @@
 #{extends 'main.html' /}
 #{set title:'Doing transaction..' /}
 
+
 <section id="depositar_efectivo_02">
     <header></header>
     <!-- link volver -->
-    <a href="@{BillDepositController.cancelDeposit()}" class="boton_top">◄ &{ 'application.back' }</a>
+    <a id ="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
+    <!-- /link volver -->
     <article>
-        <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
+        <h1 class="contar_dinero">&{ 'main_menu.count' }</h1>
 
         <div class="contenido">
             <ul class="columns">
                 <li class="fixed column" style="width: 45%">
                     <div class="columna_1">
                         <!-- resumen de datos -->
-                        <p>&{ 'counting_page.currency_title' }: ${data.currency}</p>
-                        <p>&{ 'counting_page.reference1_title' }: ${data.userCode}</p>
-                        <p>&{ 'counting_page.reference2_title' }: ${data.userCodeLov}</p>
+                        <p>&{ 'counting_page.currency_title' }: ${currency}</p>
                         <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
                         <!-- /resumen de datos -->
                     </div>
@@ -29,10 +29,11 @@
                                 <th>&{ 'counting_page.total' }</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             <!-- detalle de billetes -->
                             %{ total = 0; cnt_total = 0;}%
-                            #{list items:data.billData, as:'b'}
+                            #{list items:billData, as:'b'}
                             <tr id="BTRID_${b.billTypeId}">
                                 <td id="bill_denomination">${b.denomination}</td>
                                 <td id="bill_quantity">${b.quantity}</td>
@@ -60,12 +61,14 @@
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
                     <!-- link cancelar -->
-                    <a id ="cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a id ="cancelButton" href="@{cancel()}" class="boton rojo">&{ 'application.cancel' }</a>
+                    <!-- /link cancelar -->
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a id ="continueButton" href="#" class="boton gris">&{ 'application.continue' }</a>
+                        <a id ="continueButton" href="@{accept()}" class="boton gris">&{ 'application.finish' }</a>
+                        <!-- /link continuar -->
                     </div>
                 </li>
             </ul>
@@ -84,19 +87,20 @@
             return;
         }
         waiting = true;
-        $.getJSON( '@{BillDepositController.countingPage}', function( data ) {
+        $.getJSON( '@{mainLoop()}', function( data ) {
             waiting = false;
             var status = data[ 0 ];
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
                 if ( status == 'IDLE' ) {
                 } else if ( status == 'INITIALIZING' ) {
-                } else if ( status == 'BILL_DEPOSIT_FINISH' ) {
-                    window.location.href = "@{BillDepositController.finishDeposit}";
+                } else if ( status == 'COUNT' ) {
+                } else if ( status == 'FINISH' ) {
+                    window.location.href = "@{finish()}";
                     return;
                 } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
-                } else {          
+                } else {
                     if ( lastStatus != status ) {
                         alert( status );
                     }
@@ -119,13 +123,6 @@
         })
     }
     
-    $( '#cancelButton' ).click( function(event) {
-        $.getJSON( '@{BillDepositController.cancelDeposit}', function( data ) {});
-    });
-    
-    $( '#continueButton' ).click( function(event) {
-        $.getJSON( '@{BillDepositController.acceptBatch()}', function( data ) {});
-    });
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);
     refresh();

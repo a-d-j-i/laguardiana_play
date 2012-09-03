@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package models;
+package validation;
 
 import devices.CounterFactory;
 import devices.glory.manager.Manager;
@@ -13,7 +13,6 @@ import models.db.LgBillType;
 import play.Play;
 
 /**
- *
  * @author adji
  */
 public class Bill {

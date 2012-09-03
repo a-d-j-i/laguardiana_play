@@ -2,162 +2,117 @@ package controllers;
 
 import java.util.List;
 import models.ModelFacade;
-import models.ModelFacade.DepositData;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
+import play.data.validation.CheckWith;
+import play.data.validation.Required;
+import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Before;
+import validation.FormCurrency;
+import validation.FormLov;
 
 public class BillDepositController extends Application {
 
     @Before
     static void wizardFixPage() throws Throwable {
         switch (modelFacade.getCurrentStep()) {
-            case BILL_DEPOSIT:
-            case BILL_DEPOSIT_FINISH:
-                break;
             case NONE:
-                if (request.actionMethod.equalsIgnoreCase("inputReference")) {
+                if (!request.actionMethod.equalsIgnoreCase("start")) {
+                    Application.index();
                     break;
                 }
-            case COUNT:
-            case COUNT_FINISH:
-            case RESERVED:
-            default: // do nothing
+                break;
+            case FINISH:
+            case RUNNING:
+                if (modelFacade.getCurrentMode() != ModelFacade.CurrentMode.BILL_DEPOSIT) {
+                    Application.index();
+                }
+                break;
+            default:
                 Application.index();
                 break;
         }
     }
 
-    public static void inputReference(String reference1, String reference2, Integer currency) throws Throwable {
-        Boolean r1 = isProperty("bill_deposit.show_reference1");
-        Boolean r2 = isProperty("bill_deposit.show_reference2");
+    static public class FormData {
 
-        // Validate Currency.
-        Currency c = validateCurrency(currency);
-        if (c == null) {
-            localError("inputReference: invalid currency %d", currency);
-        }
-        DepositUserCodeReference userCodeLov = validateReference1(r1, reference1);
-        String userCode = validateReference2(r2, reference2);
+        final public Boolean showReference1 = isProperty("bill_deposit.show_reference1");
+        final public Boolean showReference2 = isProperty("bill_deposit.show_reference2");
+        @CheckWith(FormLov.Validate.class)
+        public FormLov reference1 = null;
+        @Required(message = "validation.required.reference2")
+        public String reference2 = null;
+        @CheckWith(FormCurrency.Validate.class)
+        public FormCurrency currency = new FormCurrency();
 
-        // TODO: Use form validation.
-        if (c != null && userCodeLov != null && userCode != null) {
-            modelFacade.startBillDeposit(userCodeLov, userCode, c);
-            countingPage();
-            return;
+        @Override
+        public String toString() {
+            return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + '}';
         }
-        //depending on a value of LgSystemProperty, show both references or redirect 
-        //temporarily until we have a page using getReferences()..
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
-        renderArgs.put("showReference1", r1);
-        renderArgs.put("showReference2", r2);
-        render(referenceCodes, currencies);
     }
 
-    public static void countingPage() {
-        ModelFacade.DepositData data = modelFacade.getDepositData();
+    public static void start(@Valid FormData formData) throws Throwable {
+        Logger.debug("inputReference data %s", formData);
+        if (Validation.hasErrors()) {
+            for (play.data.validation.Error error : Validation.errors()) {
+                Logger.error("Wizard : %s %s", error.getKey(), error.message());
+            }
+            params.flash(); // add http parameters to the flash scope
+        } else {
+            if (formData != null) {
+                modelFacade.startBillDeposit(formData, (DepositUserCodeReference) formData.reference1.lov, formData.reference2, formData.currency.currency);
+                mainLoop();
+                return;
+            }
+        }
+        if (formData == null) {
+            formData = new FormData();
+        }
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
+        List<Currency> currencies = Currency.findAll();
+        renderArgs.put("formData", formData);
+        renderArgs.put("referenceCodes", referenceCodes);
+        renderArgs.put("currencies", currencies);
+        render();
+    }
+
+    public static void mainLoop() {
         if (request.isAjax()) {
             Object[] o = new Object[2];
-            if (data != null) {
-                o[0] = data.getStatus();
-                o[1] = data.getBillData();
-            }
+            o[0] = modelFacade.getStatus();
+            o[1] = modelFacade.getBillData();
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
-            render(data);
+            renderArgs.put("billData", modelFacade.getBillData());
+            renderArgs.put("formData", modelFacade.getFormData());
+            render();
         }
     }
 
-    public static void cancelDeposit() {
+    public static void cancel() {
         modelFacade.cancelDeposit();
-        countingPage();
+        mainLoop();
     }
 
-    public static void acceptBatch() {
-        modelFacade.acceptBillDeposit();
-        countingPage();
+    public static void accept() {
+        modelFacade.acceptDeposit();
+        mainLoop();
     }
 
-    public static void finishDeposit() {
+    public static void finish() {
         String total = modelFacade.getDepositTotal();
-        DepositData data = modelFacade.getDepositData();
+        FormData formData = (FormData) modelFacade.getFormData();
         modelFacade.finishDeposit();
-        if (data.isCurrentDepositCanceled()) {
+        if (formData == null) {
             Application.index();
             return;
         }
         renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("userCode", data.getUserCode());
-        renderArgs.put("userCodeLov", data.getUserCodeLov());
-        renderArgs.put("currency", data.getCurrency());
+        renderArgs.put("formData", formData);
         renderArgs.put("depositTotal", total);
         render();
     }
-//    ///////////////////////////////
-//    public static void continueDeposit(String depositId) {
-//        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
-//        if (deposit == null) {
-//            error("continueDeposit: invalid deposit");
-//        }
-//        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-//        Currency c = validateCurrency(manager.getCurrency());
-//        if (c == null) {
-//            error("Invalid currency");
-//            return;
-//        }
-//
-//        List<Bill> billData = Bill.getCurrentCounters(deposit.currency);
-//
-//        renderArgs.put("billData", billData);
-//        render(deposit);
-//    }
-//    public static void checkAcceptBatch(String depositId) {
-//        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-//        Object[] o = new Object[3];
-//        Manager.Status status = manager.getStatus();
-//        Boolean statusOk = (status == Manager.Status.IDLE
-//                || status == Manager.Status.ESCROW_FULL
-//                || status == Manager.Status.REMOVE_THE_BILLS_FROM_HOPER);
-//        Boolean finished = (statusOk || status == Manager.Status.ERROR);
-//        o[0] = finished;
-//        o[1] = statusOk;
-//
-//        Logger.error(" finished: %b result: %b", finished, statusOk);
-//        //if (!finished) {
-//        //    renderJSON(o);
-//        //    return;
-//        //}
-//        renderJSON(o);
-//    }
-//
-//    public static void checkCancelDeposit(String depositId) {
-//        Manager.ControllerApi manager = CounterFactory.getGloryManager();
-//        Object[] o = new Object[3];
-//        Manager.Status status = manager.getStatus();
-//        Boolean finished = (status == Manager.Status.IDLE
-//                || status == Manager.Status.ERROR);
-//        o[0] = finished;
-//        o[1] = status == Manager.Status.IDLE;
-//
-//        Logger.error(" finished: %b result: %b", finished, (status == Manager.Status.IDLE));
-//
-//        if (finished) {
-//            //Logger.error("pre finish deposit");
-//            //finishDeposit(depositId);
-//            //Logger.error("after finish deposit");
-//            Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
-//            deposit.finishDate = new Date();
-//            deposit.save();
-//        }
-//        Logger.error("about to render json..");
-//        renderJSON(o);
-//    }
-//
-//    public static void finishDeposit(String depositId) {
-//        Deposit deposit = Deposit.getAndValidateOpenDeposit(depositId);
-//        deposit.finishDate = new Date();
-//        deposit.save();
-//    }
 }

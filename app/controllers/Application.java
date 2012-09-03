@@ -1,12 +1,8 @@
 package controllers;
 
-import models.Deposit;
 import models.ModelFacade;
 import models.TemplatePrinter;
-import models.db.LgDeposit;
 import models.db.LgSystemProperty;
-import models.lov.Currency;
-import models.lov.DepositUserCodeReference;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -22,30 +18,39 @@ public class Application extends Controller {
         if (request.isAjax()) {
             return;
         }
-        switch (modelFacade.getCurrentStep()) {
-            case COUNT_FINISH:
-                if (!request.action.equalsIgnoreCase("CountController.finishCount")) {
-                    Logger.info("Redirect to CountController.finishCount");
-                    redirect(Router.getFullUrl("CountController.finishCount"));
-                }
-                break;
-            case COUNT:
-                if (!request.action.equalsIgnoreCase("CountController.countingPage")) {
-                    Logger.info("Redirect to CountController.countingPage");
-                    redirect(Router.getFullUrl("CountController.countingPage"));
-                }
+        String neededController;
+        switch (modelFacade.getCurrentMode()) {
+            case COUNTING:
+                neededController = "CountController";
                 break;
             case BILL_DEPOSIT:
-                if (!request.action.equalsIgnoreCase("BillDepositController.countingPage")) {
-                    Logger.info("Redirect to BillDepositController.countingPage");
-                    redirect(Router.getFullUrl("BillDepositController.countingPage"));
+                neededController = "BillDepositController";
+                break;
+            case ENVELOPE_DEPOSIT:
+                neededController = "EnvelopeDepositController";
+                break;
+            default:
+                return;
+        }
+        if (!request.controller.equalsIgnoreCase(neededController)) {
+            Logger.info("Redirect to %s.mainLoop", neededController);
+            redirect(Router.getFullUrl(neededController + ".mainLoog"));
+        }
+        switch (modelFacade.getCurrentStep()) {
+            case RUNNING:
+                if (!request.actionMethod.equalsIgnoreCase("mainLoop")
+                        && !request.actionMethod.equalsIgnoreCase("cancel")
+                        && !request.actionMethod.equalsIgnoreCase("accept")) {
+                    redirect(Router.getFullUrl(neededController + ".mainLoop"));
                 }
                 break;
-            case BILL_DEPOSIT_FINISH:
-                if (!request.action.equalsIgnoreCase("BillDepositController.finishDeposit")) {
-                    Logger.info("Redirect to BillDepositController.finishDeposit");
-                    redirect(Router.getFullUrl("BillDepositController.finishDeposit"));
+            case FINISH:
+                if (!request.actionMethod.equalsIgnoreCase("finish")) {
+                    redirect(Router.getFullUrl(neededController + ".finish"));
                 }
+                break;
+            case ERROR:
+                error("APPLICATION ERROR !!!");
                 break;
             case NONE:
             case RESERVED:
@@ -87,48 +92,5 @@ public class Application extends Controller {
         Logger.error(message, args);
         flash.error(message, args);
         return null;
-    }
-
-    @Util
-    public static Currency validateCurrency(Integer currency) {
-        Currency c = Deposit.validateCurrency(currency);
-        if (c == null) {
-            localError("validateCurrency: invalid currency %d", currency);
-            return null;
-        }
-        return c;
-    }
-
-    @Util
-    public static DepositUserCodeReference validateReference1(Boolean r1, String reference1) {
-        if (r1) {
-            if (reference1 == null) {
-                return null;
-            }
-            if (reference1.isEmpty()) {
-                localError("inputReference: reference 1 must not be empty");
-                return null;
-            }
-        }
-        try {
-            return DepositUserCodeReference.findByNumericId(Integer.parseInt(reference1));
-        } catch (NumberFormatException e) {
-            localError("inputReference: invalid number for reference %s", reference1);
-        }
-        return null;
-    }
-
-    @Util
-    public static String validateReference2(Boolean r2, String reference2) {
-        if (r2) {
-            if (reference2 == null) {
-                return null;
-            }
-            if (reference2.isEmpty()) {
-                localError("inputReference: reference 2 must not be empty");
-                return null;
-            }
-        }
-        return reference2;
     }
 }

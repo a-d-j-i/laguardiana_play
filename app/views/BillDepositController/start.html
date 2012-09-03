@@ -6,7 +6,7 @@
     <article>
         <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
         <ul class="columns">
-            #{form @inputReference(reference1, reference2, currency), 'id' : 'startCountingForm' }
+            #{form @start(formData), 'id' : 'startCountingForm' }
             #{ifErrors}
             <p class="error">
                 All fields are required!
@@ -14,24 +14,22 @@
             #{/ifErrors}
             <li class="fixed column" style="width: 60%">
                 <div class="columna_1">
-                    #{ if ( showReference1 || showReference2 ) }
+                    #{ if ( formData.showReference1 || formData.showReference2 ) }
                     <div class="mensaje"><span>&{ 'input_reference.input_reference' }</span></div>
                     #{/if}
 
-                    #{ if ( showReference1 ) }
-                    <select name="reference1" class="full_width">
-                        #{list items:referenceCodes, as:'reference'}
-                        <option value="${reference.numericId}">${reference.textId}</option>
-                        #{/list}
-                    </select>
+                    #{ if ( formData.showReference1 ) }
+                    #{select 'formData.reference1.value', items: referenceCodes, valueProperty:'numericId', labelProperty:'description', value:formData.reference1, class : 'full_width' /}
                     #{/if}
 
-                    #{ if ( showReference2 ) }
-                    <input name="reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
-                           #{if play.mode.isDev() }value="REFERENCE2 TESTVAL"#{/if}/>
+                    #{ if ( formData.showReference2 ) }
+                    #{error 'formData.reference2' /}
+                    <input name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
+                           value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if} "
+                           /> 
                     #{/if}
-                    
-                    #{currencySelect currencies: currencies /}
+                    <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
+                    #{select 'formData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:formData.currency.value, class : 'full_width' /}
                 </div>
             </li>
             <li class="fixed column" style="width: 40%">
@@ -49,7 +47,7 @@
 <script type="text/javascript" charset="${_response_encoding}">
 
     $( '#startCountingButton' ).click( function(event) {
-       $( '#startCountingForm').submit();
+        $( '#startCountingForm').submit();
     });
 </script>
 #{/set}
