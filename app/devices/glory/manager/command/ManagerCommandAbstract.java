@@ -45,7 +45,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
     protected final GloryStatus gloryStatus = new GloryStatus();
     protected final ThreadCommandApi threadCommandApi;
-    private final Runnable onCommandDone;
+    protected final Runnable onCommandDone;
 
     public ManagerCommandAbstract(ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
         this.threadCommandApi = threadCommandApi;

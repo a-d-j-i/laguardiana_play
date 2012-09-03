@@ -186,6 +186,19 @@ public class Count extends ManagerCommandAbstract {
                         threadCommandApi.setStatus(Manager.Status.IDLE);
                         return;
                     }
+                    if (storeTry) {
+                        // TODO: Review this !!!
+                        // The command must end or not ???
+                        if (onCommandDone != null) {
+                            try {
+                                onCommandDone.run();
+                            } catch (Exception e) {
+                                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
+                            }
+                        }
+                        //gotoNeutral(true, false);
+                        threadCommandApi.setStatus(Manager.Status.IDLE);
+                    }
                     if (batchCountStart()) { // batch end
                         batchEnd = true;
                     }

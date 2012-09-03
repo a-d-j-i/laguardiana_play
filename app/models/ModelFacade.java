@@ -145,7 +145,7 @@ public class ModelFacade {
                                 break;
 
                             case IDLE:
-
+                                Logger.debug("--------- idle SAVE");
                                 addBatchToDeposit();
                                 currentDeposit.finishDate = new Date();
                                 currentDeposit.merge();
@@ -155,13 +155,15 @@ public class ModelFacade {
                                     Deposit.em().getTransaction().begin();
                                 }
                                 break;
-                            case ESCROW_FULL:
+                            case STORING: // ESCROW_FULL
+                                Logger.debug("--------- escrow full SAVE");
                                 addBatchToDeposit();
                                 currentDeposit.merge();
                                 if (Deposit.em().getTransaction().isActive()) {
                                     Deposit.em().getTransaction().commit();
                                     Deposit.em().getTransaction().begin();
                                 }
+                                currentStep = CurrentStep.RUNNING;
                                 break;
                             case ERROR:
                                 Logger.error("WhenDone invalid machine error %s", manager.getErrorDetail().toString());
