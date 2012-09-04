@@ -34,7 +34,7 @@ public class Application extends Controller {
         }
         if (!request.controller.equalsIgnoreCase(neededController)) {
             Logger.info("Redirect to %s.mainLoop", neededController);
-            redirect(Router.getFullUrl(neededController + ".mainLoog"));
+            redirect(Router.getFullUrl(neededController + ".mainLoop"));
         }
         switch (modelFacade.getCurrentStep()) {
             case RUNNING:
