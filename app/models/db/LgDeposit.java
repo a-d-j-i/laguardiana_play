@@ -20,8 +20,6 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bag_id", nullable = false)
     public LgBag bag;
-    @Column(name = "currency", nullable = false)
-    public Integer currency;
     @Temporal(TemporalType.DATE)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;

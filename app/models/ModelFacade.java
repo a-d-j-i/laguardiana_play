@@ -47,8 +47,9 @@ public class ModelFacade {
 
         NONE,
         BILL_DEPOSIT,
+        ENVELOPE_DEPOSIT,
         COUNTING,
-        ENVELOPE_DEPOSIT,;
+        FILTERING,;
     }
     private Manager.ControllerApi manager = CounterFactory.getGloryManager();
     private CurrentStep currentStep = CurrentStep.NONE;
@@ -271,7 +272,7 @@ public class ModelFacade {
 
     private Boolean checkCurrentStep() {
         CurrentStep s = getCurrentStep();
-        if (s == CurrentStep.NONE || s == CurrentStep.RESERVED || s == CurrentStep.ERROR) {
+        if (s != CurrentStep.RUNNING && s != CurrentStep.FINISH) {
             error(String.format("checkCurrentStep Invalid step %s", currentStep.name()));
             return false;
         }
@@ -287,7 +288,7 @@ public class ModelFacade {
 
     synchronized public List<Bill> getBillData() {
         if (checkCurrentStep()) {
-            return Bill.getCurrentCounters(currentDeposit.currency);
+            return Bill.getCurrentCounters(currentDeposit.currency.numericId);
         }
         return null;
     }
@@ -315,7 +316,7 @@ public class ModelFacade {
             return;
         }
         LgBatch batch = new LgBatch();
-        for (Bill bill : Bill.getCurrentCounters(currentDeposit.currency)) {
+        for (Bill bill : Bill.getCurrentCounters(currentDeposit.currency.numericId)) {
             Logger.debug(" -> quantity %d", bill.quantity);
             LgBill b = new LgBill(bill.quantity, bill.billType);
             batch.addBill(b);

@@ -13,6 +13,10 @@ html {
     height: 100%;
 }
 
+.error {
+    background: red;
+}
+
 body {
     background: black;
     height: 100%;
@@ -164,7 +168,6 @@ hr {
 /* forms */
 
 input[type='text'], input[type='password'], textarea {
-    background: white;
     border: 1px solid #BCBCBC;
     padding: 10px;
     font-size: 15pt;

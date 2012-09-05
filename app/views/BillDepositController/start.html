@@ -6,7 +6,7 @@
     <article>
         <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
         <ul class="columns">
-            #{form @start(formData), 'id' : 'startCountingForm' }
+            #{form @start(formData), 'id' : 'startForm' }
             #{ifErrors}
             <p class="error">
                 All fields are required!
@@ -19,14 +19,20 @@
                     #{/if}
 
                     #{ if ( formData.showReference1 ) }
-                    #{select 'formData.reference1.value', items: referenceCodes, valueProperty:'numericId', labelProperty:'description', value:formData.reference1, class : 'full_width' /}
+                    #{select 'formData.reference1.value', items: referenceCodes, valueProperty:'numericId', labelProperty:'description', value:formData.reference1.value, class : 'full_width' /}
+                    #{ifError 'formData.reference1'}
+                    <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required' }</label>
+                    #{/ifError}
                     #{/if}
+                    #{error 'formData.reference1' /}
 
                     #{ if ( formData.showReference2 ) }
-                    #{error 'formData.reference2' /}
                     <input name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
                            value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if} "
                            /> 
+                    #{ifError 'formData.reference2'}
+                    <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required.reference2' }</label>
+                    #{/ifError}
                     #{/if}
                     <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
                     #{select 'formData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:formData.currency.value, class : 'full_width' /}
@@ -44,10 +50,28 @@
 
 
 #{set 'moreScripts'}
+#{script 'jquery/jquery.form.js' /}
+#{script 'jquery/jquery.validate.js' /}
 <script type="text/javascript" charset="${_response_encoding}">
 
     $( '#startCountingButton' ).click( function(event) {
-        $( '#startCountingForm').submit();
+        $("#startForm").validate( {
+            errorPlacement: function(error, element) {
+            },
+            showErrors: function(errorMap, errorList) {
+                $("#summary").html("Your form contains "
+                    + this.numberOfInvalids() 
+                    + " errors, see details below.");
+                this.defaultShowErrors();
+            },
+            rules: {
+                'formData.reference2' : "required",
+            },
+            messages: {
+                'formData.reference2': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
+            }
+        });
+        $( '#startForm').submit();
     });
 </script>
 #{/set}

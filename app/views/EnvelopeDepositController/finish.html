@@ -18,8 +18,9 @@
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
-                        <!-- link continuar -->
-                        <a href="@{Secure.logout( "Application.index" ) }" class="boton verde">&{ 'main_menu.logout' }</a>
+                        #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
+                        <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde">&{'main_menu.logout'}</a>
+                        #{/if}
                     </div>
                 </li>
             </ul>

@@ -106,7 +106,10 @@ public class Manager {
         }
 
         public void setStatus(Status s) {
-            status.set(s);
+            // TODO: This is not thread safe. Review
+            if ( status.get() != Status.ERROR) {
+                status.set(s);
+            }
         }
 
         public void setStatus(Status c, Status s) {
@@ -151,7 +154,6 @@ public class Manager {
                 // still executing
                 return false;
             }
-            threadCommandApi.setStatus(Manager.Status.IDLE);
             return managerControllerApi.sendCommand(new Count(threadCommandApi, onCommandDone, desiredQuantity, currency));
         }
 
@@ -195,14 +197,12 @@ public class Manager {
             }
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
-                threadCommandApi.setStatus(Manager.Status.CANCELING);
                 return managerControllerApi.sendCommand(new CancelCount(threadCommandApi, onCommandDone));
             }
             // TODO: One base class
             if (!(cmd instanceof Count) && !(cmd instanceof EnvelopeDeposit)) {
                 return false;
             }
-            threadCommandApi.setStatus(Manager.Status.CANCELING);
             cmd.cancel();
             return true;
         }
@@ -215,7 +215,6 @@ public class Manager {
             }
             // TODO: One base class
             if (cmd instanceof Count) {
-                threadCommandApi.setStatus(Manager.Status.STORING);
                 ((Count) cmd).storeDeposit(sequenceNumber);
                 return true;
             }

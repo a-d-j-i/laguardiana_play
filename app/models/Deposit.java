@@ -10,7 +10,7 @@ import models.lov.DepositUserCodeReference;
 public class Deposit extends LgDeposit {
 
     transient public final DepositUserCodeReference userCodeData;
-    transient public final Currency currencyData;
+    transient public final Currency currency;
 
     // TODO: Validate the depositId there are allways only one deposit ID
     // unfinished.
@@ -44,10 +44,7 @@ public class Deposit extends LgDeposit {
             this.userCodeLov = userCodeData.numericId;
         }
         this.creationDate = new Date();
-        this.currencyData = currency;
-        if (currency != null) {
-            this.currency = currency.numericId;
-        }
+        this.currency = currency;
     }
 
     public LgLov findUserCodeLov() {

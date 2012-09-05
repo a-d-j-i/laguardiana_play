@@ -11,23 +11,20 @@
             <ul class="columns">
                 <li class="column">
                     #{if ( formData.showReference1 ) }
-                    <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.value}</p>
+                    <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
                     #{/if}
                     #{if ( formData.showReference2 ) }
                     <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                     #{/if}
-                    #{if ( formData.cashData != null ) }
-                    <p>&{ 'envelope_deposit.amount_cash' }: ${ formData.cashData.textId } ${ formData.cashData.amount }</p>
+                    #{if ( formData.cashData.amount > 0 ) }
+                    <p>&{ 'envelope_deposit.amount_cash' }: ${ formData.cashData.amount } ${ formData.cashData.currency.textId } </p>
                     #{/if}
-                    #{if ( formData.checkData != null ) }
-                    <p>&{ 'envelope_deposit.amount_checks' }:   ${ formData.checkData.textId }</p>
+                    #{if ( formData.checkData.amount > 0 ) }
+                    <p>&{ 'envelope_deposit.amount_checks' }: ${ formData.checkData.amount } ${ formData.checkData.currency.textId } </p>
                     #{/if}
-                    #{if ( formData.ticketData != null ) }
-                    <p>&{ 'envelope_deposit.amount_tickets' }:   ${ formData.ticketData.textId }</p>
+                    #{if ( formData.ticketData.amount > 0  ) }
+                    <p>&{ 'envelope_deposit.amount_tickets' }: ${ formData.ticketData.amount } ${ formData.ticketData.currency.textId } </p>
                     #{/if}
-
-                </li>
-                <li class="column">
                     #{if formData.hasDocuments }
                     <p>&{ 'envelope_deposit.has_documents' }</p>
                     #{/if}
@@ -42,7 +39,7 @@
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
                     <!-- link cancelar -->
-                    <a id="cancelButton" href="@{EnvelopeDepositController.cancel()}" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a id="cancelButton" href="@{cancel()}" class="boton rojo">&{ 'application.cancel' }</a>
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
@@ -75,7 +72,7 @@
                 if ( status == 'IDLE' ) {
                 } else if ( status == 'INITIALIZING' ) {
                 } else if ( status == 'FINISH' ) {
-                    window.location.href = "@{EnvelopeDepositController.finish}";
+                    window.location.href = "@{finish}";
                     return;
                 } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
@@ -103,7 +100,11 @@
     }
     
     $( '#continueButton' ).click( function(event) {
-        $.getJSON( '@{EnvelopeDepositController.accept()}', function( data ) {});
+        $.getJSON( '@{accept()}', function( data ) {});
+    });
+    
+    $( '#cancelButton' ).click( function(event) {
+        $.getJSON( '@{cancel()}', function( data ) {});
     });
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);

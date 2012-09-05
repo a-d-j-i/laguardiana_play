@@ -11,7 +11,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import validation.FormCurrency;
-import validation.FormLov;
+import validation.FormDepositUserCodeReference;
 
 public class BillDepositController extends Application {
 
@@ -40,8 +40,8 @@ public class BillDepositController extends Application {
 
         final public Boolean showReference1 = isProperty("bill_deposit.show_reference1");
         final public Boolean showReference2 = isProperty("bill_deposit.show_reference2");
-        @CheckWith(FormLov.Validate.class)
-        public FormLov reference1 = null;
+        @CheckWith(FormDepositUserCodeReference.Validate.class)
+        public FormDepositUserCodeReference reference1 = new FormDepositUserCodeReference();
         @Required(message = "validation.required.reference2")
         public String reference2 = null;
         @CheckWith(FormCurrency.Validate.class)

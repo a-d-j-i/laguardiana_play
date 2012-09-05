@@ -17,6 +17,7 @@ import play.Logger;
 
 /**
  * TODO: Use play jobs for this.
+ *
  * @author adji
  */
 abstract public class ManagerCommandAbstract implements Runnable {
@@ -59,19 +60,25 @@ abstract public class ManagerCommandAbstract implements Runnable {
     public void run() {
         isDone.set(false);
         execute();
-        if (mustCancel()) {
-            threadCommandApi.setStatus(Manager.Status.CANCELED);
-        } else {
-            threadCommandApi.setStatus(Manager.Status.IDLE);
+
+        switch (threadCommandApi.getStatus()) {
+            case ERROR:
+                break;
+            default:
+                if (mustCancel()) {
+                    threadCommandApi.setStatus(Manager.Status.CANCELED);
+                } else {
+                    threadCommandApi.setStatus(Manager.Status.IDLE);
+                }
+                if (onCommandDone != null) {
+                    try {
+                        onCommandDone.run();
+                    } catch (Exception e) {
+                        threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
+                    }
+                }
+                threadCommandApi.setStatus(Manager.Status.IDLE);
         }
-        if (onCommandDone != null) {
-            try {
-                onCommandDone.run();
-            } catch (Exception e) {
-                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
-            }
-        }
-        threadCommandApi.setStatus(Manager.Status.IDLE);
         isDone.set(true);
     }
 

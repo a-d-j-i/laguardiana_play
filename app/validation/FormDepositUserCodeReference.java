@@ -12,16 +12,16 @@ import play.data.validation.Check;
  *
  * @author adji
  */
-public class FormLov {
+public class FormDepositUserCodeReference {
 
     static public class Validate extends Check {
 
         @Override
         public boolean isSatisfied(Object validatedObject, Object data) {
-            return isSatisfied(validatedObject, (FormLov) data);
+            return isSatisfied(validatedObject, (FormDepositUserCodeReference) data);
         }
 
-        public boolean isSatisfied(Object validatedObject, FormLov data) {
+        public boolean isSatisfied(Object validatedObject, FormDepositUserCodeReference data) {
             try {
                 if (data == null || data.value == null || data.value.isEmpty()) {
                     setMessage("validation.required.reference1");
@@ -47,6 +47,4 @@ public class FormLov {
     public String toString() {
         return "FormLov{" + "lov=" + lov + ", value=" + value + '}';
     }
-    
-    
 }

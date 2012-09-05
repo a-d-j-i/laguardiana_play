@@ -19,6 +19,7 @@ public class CancelCount extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
+        threadCommandApi.setStatus(Manager.Status.CANCELING);
         gotoNeutral(true, false);
         cancel();
         threadCommandApi.setStatus(Manager.Status.CANCELED);

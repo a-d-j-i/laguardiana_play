@@ -5,10 +5,10 @@
     <header></header>
     <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
-        <h1 class="contar_dinero">&{ 'main_menu.count' }</h1>
+        <h1 class="contar_dinero">&{ 'main_menu.filter' }</h1>
         <ul class="columns">
             #{form @start(formData), 'id' : 'startCountingForm' }
-            
+
             #{ifErrors}
             <p class="error">
                 All fields are required!
@@ -16,8 +16,10 @@
             #{/ifErrors}
             <li class="fixed column" style="width: 60%">
                 <div class="columna_1">
-                    <div class="mensaje"><span>&{ 'input_reference.choose_currency_before' }</span></div>
-                    #{select 'formData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:formData.currency, class : 'full_width' /}
+                    <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
+                    #{select 'formData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:formData.currency, class : 'full_width', id: 'currency' /}
+                    <div class="mensaje"><span>&{ 'filter.choose_denomination' }</span></div>
+                    #{select 'formData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:formData.currency, class : 'full_width', id: 'currency' /}
                 </div>
             </li>
             <li class="fixed column" style="width: 40%">
@@ -33,7 +35,7 @@
 <script type="text/javascript" charset="${_response_encoding}">
 
     $( '#startCountingButton' ).click( function(event) {
-       $( '#startCountingForm').submit();
+        $( '#startCountingForm').submit();
     });
 </script>
 #{/set}

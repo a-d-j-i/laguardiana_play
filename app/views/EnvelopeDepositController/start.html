@@ -7,14 +7,8 @@
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
         <div class="contenido">
-            <div class="step" id="first">
+            <div class="step" id="first" >
                 <ul class="columns">
-                    #{ifErrors}
-                    <p class="error">
-                        All fields are required!
-                    </p>
-                    #{/ifErrors}
-
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
                             #{ if ( formData.showReference1 || formData.showReference2 ) }
@@ -23,13 +17,19 @@
 
                             #{ if ( formData.showReference1 ) }
                             #{select 'formData.reference1.value', items: referenceCodes, valueProperty:'numericId', labelProperty:'description', value:formData.reference1.value, class : 'full_width' /}
+                            #{ifError 'formData.reference1'}
+                            <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required' }</label>
+                            #{/ifError}
                             #{/if}
+                            #{error 'formData.reference1' /}
 
                             #{ if ( formData.showReference2 ) }
-                            #{error 'formData.reference2' /}
                             <input name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
                                    value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if} "
                                    /> 
+                            #{ifError 'formData.reference2'}
+                            <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required.reference2' }</label>
+                            #{/ifError}
                             #{/if}
                         </div>
                     </li>
@@ -38,7 +38,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="step" id="second">
+            <div class="step" id="second" style="display: none">
                 <input name="second_next" id="second_next" type="hidden" class="link" value="envelope_code">
                 <div class="mensaje"><span>&{ 'envelope_deposit.select_contents' }</span></div>
                 <div class="botonera">
@@ -50,7 +50,7 @@
                         </li>
                         <li class="column">
                             <div class="columna">
-                                <a name="document_link" id="document_link" href="#" class="boton naranja full_width">&{ 'envelope_deposit.documents' }</a>
+                                <a name="documents_link" id="documents_link" href="#" class="boton naranja full_width">&{ 'envelope_deposit.documents' }</a>
                                 <input type="hidden" id="hasDocuments" name="formData.hasDocuments"
                                        value="#{if ( formData.hasDocuments ) }true#{/if}#{else}false#{/else}"
                                        />
@@ -77,33 +77,20 @@
                     </ul>
                 </div>
             </div>
-            <div id="envelope_code" class="step submit_step">
-                <input name="envelope_code_next" id="envelope_code_next" type="hidden" class="link" value="print_ticket">
-                <ul class="columns">
-                    <li class="fixed column" style="width: 60%">
-                        <div class="columna_1">
-                            <div class="mensaje"><span>&{ 'envelope_deposit.envelope_code_title' }</span></div>
-                            <input name="formData.envelopeCode" type="text" placeholder="&{ 'envelope_deposit.envelope_code_title' }" style="width: 268px" 
-                                   value="#{if play.mode.isDev() }ENVELOPE CODE TESTVAL#{/if} "
-                                   />
-                        </div>
-                    </li>
-                    <li class="fixed column" style="width: 40%">
-                        <div id="keyboard_placeholder"></div>
-                    </li>
-                </ul>
-            </div>
-            <div id="cash" class="step">
+            <div id="cash" class="step" style="display: none">
                 <input name="cash_second" id="cash_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
-                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.currency.value } }%
-                            #{select 'formData.cashData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
+                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.value } }%
+                            #{select 'formData.cashData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input name="formData.cashData.amount" value="${formData?.cashData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
+                            <input name="formData.cashData.amount" id="cashData" value="${formData?.cashData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            #{ifError 'formData.cashData.amount'}
+                            <label for="formData.cashData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.cashData_amount' }</label>
+                            #{/ifError}
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
@@ -111,35 +98,60 @@
                     </li>
                 </ul>
             </div>
-            <div id="checks" class="step">
+            <div id="checks" class="step" style="display: none">
                 <input name="checks_second" id="checks_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
-                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.currency.value } }%
-                            #{select 'formData.checkData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
+                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.value } }%
+                            #{select 'formData.checkData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input name="formData.checkData.amount" value="${formData?.checkData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
+                            <input name="formData.checkData.amount" id="checkData" value="${formData?.checkData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            #{ifError 'formData.checkData.amount'}
+                            <label for="formData.checkData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.checkData_amount' }</label>
+                            #{/ifError}
                         </div>                    </li>
                     <li class="fixed column" style="width: 40%">
                         <div id="keyboard_placeholder"></div>
                     </li>
                 </ul>
             </div>
-            <div id="tickets" class="step">
+            <div id="tickets" class="step" style="display: none">
                 <input name="tickets_second" id="tickets_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
                         <input name="tickets_second" id="cash_second" type="hidden" class="link" value="second">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
-                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.currency.value } }%
-                            #{select 'formData.ticketData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
+                            %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.value } }%
+                            #{select 'formData.ticketData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input name="formData.ticketData.amount" value="${formData?.ticketData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" style="width: 230px" />
+                            <input name="formData.ticketData.amount" id="ticketData" value="${formData?.ticketData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            #{ifError 'formData.ticketData.amount'}
+                            <label for="formData.ticketData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.ticketData_amount' }</label>
+                            #{/ifError}          </div>
+                    </li>
+                    <li class="fixed column" style="width: 40%">
+                        <div id="keyboard_placeholder"></div>
+                    </li>
+                </ul>
+            </div>
+            <div id="envelope_code" class="step submit_step" style="display: none">
+                <input name="envelope_code_next" id="envelope_code_next" type="hidden" class="link" value="print_ticket">
+                <ul class="columns">
+                    <li class="fixed column" style="width: 60%">
+                        <div class="columna_1">
+                            <div class="mensaje"><span>&{ 'envelope_deposit.envelope_code_title' }</span></div>
+                            <input name="formData.envelopeCode" type="text" placeholder="&{ 'envelope_deposit.envelope_code_title' }" class="full_width"
+                                   value="#{if play.mode.isDev() }ENVELOPE CODE TESTVAL#{/if} "
+                                   />
+                            #{ifError 'formData.envelopeCode'}
+                            <label for="formData.envelopeCode" generated="true" class="error" style="display: inline; ">&{ 'validation.required.envelopeCode' }</label>
+                            #{/ifError}
+
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
@@ -179,31 +191,96 @@
     $(function(){
         $("#mainForm").formwizard({ 
             formPluginEnabled: false,
-            validationEnabled: false,
+            validationEnabled: true,
             focusFirstInput : true,
             textSubmit: "&{ 'application.continue' }",
             textNext: "&{ 'application.continue' }",
-            textBack: "&{ 'application.back' }"
+            textBack: "&{ 'application.back' }",
+            inAnimation : {height: 'none'},
+            outAnimation: {height: 'none'},
+            inDuration : 0,
+            outDuration: 0,
+            validationOptions : {
+                rules: {
+                    'formData.reference2' : "required",
+                    'formData.envelopeCode' : "required",
+                    'formData.cashData.amount' : "number",
+                    'formData.checkData.amount' : "number",
+                    'formData.ticketData.amount' : "number",
+                },
+                messages: {
+                    'formData.reference2': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
+                    'formData.envelopeCode': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
+                    'formData.cashData.amount': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
+                    'formData.checkData.amount': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
+                    'formData.ticketData.amount': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
+                }
+            },
         }
     );
+        
+        $("#mainForm").bind("step_shown", function(event, data){
+            function checkAndSet( check, set ) {
+                str = $( check ).val();
+                if ( ! ( ! str ) && ! /^\s*$/.test( str ) && str > 0 ) {
+                    $( set ).addClass( 'verde' ).removeClass( 'naranja');
+                } else {
+                    $( set ).addClass( 'naranja' ).removeClass( 'verde');
+                }
+            };
+            
+            if (data.currentStep == 'second') {
+                checkAndSet( '#cashData' , '#cash_link' );
+                checkAndSet( '#checkData' , '#checks_link' );
+                checkAndSet( '#ticketData' , '#tickets_link' );
+                if ( $( '#hasDocuments' ).val() == 'true' ) {
+                    $( '#documents_link').addClass( 'verde' ).removeClass( 'naranja');
+                }
+                if ( $( '#hasOthers' ).val() == 'true' ) {
+                    $( '#others_link').addClass( 'verde' ).removeClass( 'naranja');
+                }
+            } else if ( data.currentStep == 'envelope_code') {
+                // last step activate all input, (hack).
+                $(":input").not(".wizard-ignore").removeAttr("disabled")
+            }
+            
+        });
+        $( '#cash_link' ).click( function(event) {
+            $("#mainForm").formwizard("show","cash");
+        });
+        $( '#checks_link' ).click( function(event) {
+            $("#mainForm").formwizard("show","checks");
+        });
+        $( '#tickets_link' ).click( function(event) {
+            $("#mainForm").formwizard("show","tickets");
+        });
+        $( '#documents_link' ).click( function(event) {
+            if ( $("#hasDocuments").val() == 'true' ) {
+                $("#hasDocuments").val("false");
+                $( '#documents_link').addClass( 'naranja' ).removeClass( 'verde');
+            } else {
+                $("#hasDocuments").val("true");
+                $( '#documents_link').addClass( 'verde' ).removeClass( 'naranja');
+
+            }
+        });
+        $( '#others_link' ).click( function(event) {
+            if ( $("#hasOthers").val() == 'true' ) {
+                $("#hasOthers").val("false");
+                $( '#others_link').addClass( 'naranja' ).removeClass( 'verde');
+            } else {
+                $("#hasOthers").val("true");
+                $( '#others_link').addClass( 'verde' ).removeClass( 'naranja');
+            }
+        });
+        $( '#backButton' ).click( function(event) {
+            state = $("#mainForm").formwizard("state");
+            if ( state.isFirstStep ) {
+                window.location.href = "@{ Application.index() }";
+            };
+            $("#mainForm").formwizard("back");
+        });
     });
-    $( '#cash_link' ).click( function(event) {
-        $("#mainForm").formwizard("show","cash");
-    });
-    $( '#checks_link' ).click( function(event) {
-        $("#mainForm").formwizard("show","checks");
-    });
-    $( '#tickets_link' ).click( function(event) {
-        $("#mainForm").formwizard("show","tickets");
-    });
-    $( '#document_link' ).click( function(event) {
-        $("#hasDocuments").val("true");
-    });
-    $( '#other_link' ).click( function(event) {
-        $("#hasOthers").val("true");
-    });
-    $( '#backButton' ).click( function(event) {
-        $("#mainForm").formwizard("back");
-    });
+    
 </script>
 #{/set}

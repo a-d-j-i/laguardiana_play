@@ -8,7 +8,7 @@ import play.data.validation.CheckWith;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Before;
-import validation.FormCurrency;
+import validation.FormCurrencyBills;
 
 public class FilterController extends Application {
 
@@ -35,8 +35,10 @@ public class FilterController extends Application {
 
     static public class FormData {
 
-        @CheckWith(FormCurrency.Validate.class)
-        public FormCurrency currency = null;
+        @CheckWith(FormCurrencyBills.Validate.class)
+        public FormCurrencyBills currency = null;
+        public Integer billQuantity = null;
+        public Integer batchQuantity = null;
 
         @Override
         public String toString() {
@@ -44,12 +46,12 @@ public class FilterController extends Application {
         }
     }
 
-    public static void start(@Valid CountController.FormData formData)
+    public static void start(@Valid FormData formData)
             throws Throwable {
-        Logger.debug("chooseCurrency data %s", formData);
+        Logger.debug("start data %s", formData);
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
-                Logger.error("Wizard : %s %s", error.getKey(), error.message());
+                Logger.error("start : %s %s", error.getKey(), error.message());
             }
             params.flash(); // add http parameters to the flash scope
         } else {
@@ -60,7 +62,7 @@ public class FilterController extends Application {
             }
         }
         if (formData == null) {
-            formData = new CountController.FormData();
+            formData = new FormData();
         }
 
         //depending on a value of LgSystemProperty, show both references or redirect 

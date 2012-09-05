@@ -23,7 +23,7 @@ public class FormCurrency {
 
         public boolean isSatisfied(Object validatedObject, FormCurrency data) {
             // Validate Currency.
-            if ( data == null ) {
+            if (data == null) {
                 // Accept null properites, this isn't a required property.
                 return true;
             }

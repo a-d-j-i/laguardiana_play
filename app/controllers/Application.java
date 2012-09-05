@@ -23,6 +23,9 @@ public class Application extends Controller {
             case COUNTING:
                 neededController = "CountController";
                 break;
+            case FILTERING:
+                neededController = "FilterController";
+                break;
             case BILL_DEPOSIT:
                 neededController = "BillDepositController";
                 break;
@@ -32,11 +35,12 @@ public class Application extends Controller {
             default:
                 return;
         }
-        if (!request.controller.equalsIgnoreCase(neededController)) {
-            Logger.info("Redirect to %s.mainLoop", neededController);
-            redirect(Router.getFullUrl(neededController + ".mainLoop"));
-        }
         switch (modelFacade.getCurrentStep()) {
+            case NONE: // really don't happend.
+                if (!request.actionMethod.equalsIgnoreCase("start")) {
+                    redirect(Router.getFullUrl(neededController + ".start"));
+                }
+                break;
             case RUNNING:
                 if (!request.actionMethod.equalsIgnoreCase("mainLoop")
                         && !request.actionMethod.equalsIgnoreCase("cancel")
@@ -52,7 +56,6 @@ public class Application extends Controller {
             case ERROR:
                 error("APPLICATION ERROR !!!");
                 break;
-            case NONE:
             case RESERVED:
             default: // do nothing
                 break;

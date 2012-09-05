@@ -106,6 +106,8 @@ public class Count extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
+        threadCommandApi.setStatus(Manager.Status.IDLE);
+
         boolean batchEnd = false;
         gotoNeutral(true, false);
         Logger.error("CURRENCY %d", countData.currency.byteValue());
@@ -129,6 +131,7 @@ public class Count extends ManagerCommandAbstract {
                 case storing_start_request:
                     if (countData.needToStoreDeposit()) {
                         countData.storeDepositDone();
+                        threadCommandApi.setStatus(Manager.Status.STORING);
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
@@ -177,7 +180,7 @@ public class Count extends ManagerCommandAbstract {
 
                 case counting_start_request:
                     // If there are bills in the hoper then it comes here after storing a full escrow
-                    if (countData.isBatch && batchEnd) {
+                    if (countData.isBatch && batchEnd) { //BATCH END
                         if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
                             return;
                         }
@@ -217,6 +220,9 @@ public class Count extends ManagerCommandAbstract {
                     return;
             }
             sleep();
+        }
+        if (mustCancel()) {
+            threadCommandApi.setStatus(Manager.Status.CANCELING);
         }
         gotoNeutral(true, false);
     }
@@ -279,7 +285,11 @@ public class Count extends ManagerCommandAbstract {
             }
         }
         if (countData.currentSlot < 32) {
-            sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills));
+            if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
+                String error = gloryStatus.getLastError();
+                Logger.error("Error %s sending cmd : BatchDataTransmition", error);
+                threadCommandApi.setError(Manager.Error.APP_ERROR, error);
+            }
             return false;
         }
         return true;

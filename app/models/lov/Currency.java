@@ -2,7 +2,6 @@ package models.lov;
 
 import javax.persistence.Entity;
 import models.db.LgLov;
-import play.Logger;
 
 /**
  *

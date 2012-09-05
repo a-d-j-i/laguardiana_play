@@ -8,9 +8,9 @@
             <div class="mensaje"><span>&{ 'summary.ticket' }</span></div>
             <h2>&{ 'application.thanks' }</h2>
             <!-- datos del deposito -->
-            <p>&{ 'counting_page.reference1_title' }: ${userCode}</p>
-            <p>&{ 'counting_page.reference2_title' }: ${userCodeLov}</p>
-            <p>&{ 'summary.total' }: ${depositTotal}</p>
+            <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+            <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+            <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.textId}</p>
             <!-- /datos del deposito -->
         </div>
         <hr />
@@ -22,8 +22,9 @@
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
-                        <!-- link continuar -->
-                        <a href="@{Secure.logout( "Application.index" ) }" class="boton verde">&{ 'main_menu.logout' }</a>
+                        #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
+                        <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde">&{'main_menu.logout'}</a>
+                        #{/if}
                     </div>
                 </li>
             </ul>
