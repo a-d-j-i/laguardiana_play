@@ -73,10 +73,7 @@ public class CountController extends Application {
 
     public static void mainLoop() {
         if (request.isAjax()) {
-            Object[] o = new Object[2];
-            o[0] = modelFacade.getStatus();
-            o[1] = modelFacade.getBillData();
-            renderJSON(o);
+            renderJSON(getCountingStatus());
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
             renderArgs.put("billData", modelFacade.getBillData());

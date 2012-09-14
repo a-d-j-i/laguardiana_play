@@ -23,15 +23,15 @@ public class GloryManagerController extends Application {
 
     @Before
     static void getManager() throws Throwable {
-        manager = CounterFactory.getManager(Play.configuration.getProperty("glory.port"));
+        manager = CounterFactory.getGloryManager();
         if (manager == null) {
             error = "Manager error opening port";
         } else {
+            success = manager.getStatus().name();
             if (manager.getStatus() == Manager.Status.ERROR) {
-                error = "ERROR " + manager.getErrorDetail().toString();
+                error = manager.getErrorDetail().toString();
             } else {
                 error = null;
-                success = manager.getStatus().name();
             }
         }
     }
@@ -48,7 +48,6 @@ public class GloryManagerController extends Application {
                 currency = 1;
             }
         }
-
         List<Bill> billData = Bill.getCurrentCounters(currency);
         if (request.isAjax()) {
             Object[] o = new Object[4];
@@ -59,6 +58,8 @@ public class GloryManagerController extends Application {
             renderJSON(o);
         }
 
+        renderArgs.put("status", success);
+        renderArgs.put("error", error);
         renderArgs.put("billData", billData);
         renderArgs.put("currency", currency);
         List<Integer> currencyList = new ArrayList<Integer>();
@@ -117,7 +118,7 @@ public class GloryManagerController extends Application {
 
     public static void reset() throws IOException {
         if (manager != null) {
-            if (!manager.reset()) {
+            if (!manager.reset(null)) {
                 error = "Executing another command";
             }
         }
@@ -126,7 +127,7 @@ public class GloryManagerController extends Application {
 
     public static void storingErrorReset() throws IOException {
         if (manager != null) {
-            if (!manager.storingErrorReset()) {
+            if (!manager.storingErrorReset(null)) {
                 error = "Executing another command";
             }
         }

@@ -18,7 +18,8 @@ public class Reset extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        gotoNeutral(true, false);
-        threadCommandApi.setStatus(Manager.Status.IDLE);
+        if (gotoNeutral(true, false)) {
+            threadCommandApi.clearStatus();
+        }
     }
 }

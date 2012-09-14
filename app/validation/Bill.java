@@ -18,11 +18,16 @@ import play.Play;
 public class Bill {
 
     transient public LgBillType billType;
-    public Integer billTypeId;
-    public String billTypeDescription;
-    public Integer denomination;
-    public Integer desiredQuantity = 0;
-    public Integer quantity = 0;
+    // Bill type id
+    public Integer tid;
+    // Bill type description
+    public String btd;
+    // Denomination
+    public Integer d;
+    // Desired Quantity
+    public Integer dq = 0;
+    // Quantity
+    public Integer q = 0;
 
     static public List<Bill> getCurrentCounters(Integer currency) {
         List<Bill> ret = new ArrayList<Bill>();
@@ -39,14 +44,14 @@ public class Bill {
         for (LgBillType bb : billTypes) {
             Bill b = new Bill();
             b.billType = bb;
-            b.billTypeId = bb.billTypeId;
-            b.billTypeDescription = bb.toString();
-            b.denomination = bb.denomination;
+            b.tid = bb.billTypeId;
+            b.btd = bb.toString();
+            b.d = bb.denomination;
             if (currentQuantity != null && currentQuantity.containsKey(bb.slot)) {
-                b.quantity = currentQuantity.get(bb.slot);
+                b.q = currentQuantity.get(bb.slot);
             }
             if (desiredQuantity != null && desiredQuantity.containsKey(bb.slot)) {
-                b.desiredQuantity = desiredQuantity.get(bb.slot);
+                b.dq = desiredQuantity.get(bb.slot);
             }
             ret.add(b);
         }

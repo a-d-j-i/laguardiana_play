@@ -22,6 +22,8 @@ import play.Logger;
  */
 abstract public class ManagerCommandAbstract implements Runnable {
 
+    final static int retries = 0xfff;
+
     static protected class CommandData {
 
         private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
@@ -95,138 +97,155 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     boolean gotoNeutral(boolean openEscrow, boolean storingError) {
-        Logger.debug("GOTO NEUTRAL");
-        if (!sense()) {
-            return false;
-        }
-        switch (gloryStatus.getSr1Mode()) {
-            case storing_error:
-                if (!storingError) {
-                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
-                            "Storing error must call admin");
-                    return false;
-                }
-                switch (gloryStatus.getD1Mode()) {
-                    case storing_error_recovery_mode:
-                    case normal_error_recovery_mode:
-                    case deposit:
-                    case manual:
-                        if (!remoteCancel()) {
-                            return false;
-                        }
-                    // dont break;
-                    case neutral:
-                        storingErrorRecovery();
-                        break;
-                    default:
-                        threadCommandApi.setError(Manager.Error.APP_ERROR,
-                                String.format("gotoNeutral Abnormal device Invalid D1 mode %s", gloryStatus.getD1Mode().name()));
+        for (int i = 0; i < retries; i++) {
+            Logger.debug("GOTO NEUTRAL");
+            if (!sense()) {
+                return false;
+            }
+            switch (gloryStatus.getSr1Mode()) {
+                case storing_error:
+                    if (!storingError) {
+                        threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                                "Storing error must call admin");
                         return false;
-                }
-                break;
-
-            case abnormal_device:
-                switch (gloryStatus.getD1Mode()) {
-                    case deposit:
-                    case manual:
-                        if (!remoteCancel()) {
-                            return false;
-                        }
-                    // dont break;
-                    case neutral:
-                        if (!sendGloryCommand(new devices.glory.command.SetErrorRecoveryMode())) {
-                            return false;
-                        }
-                        break;
-                    case normal_error_recovery_mode:
-                        break;
-                    default:
-                        threadCommandApi.setError(Manager.Error.APP_ERROR,
-                                String.format("gotoNeutral Abnormal device Invalid D1-2 mode %s", gloryStatus.getD1Mode().name()));
-                        return false;
-                }
-                errorRecovery();
-                break;
-            case escrow_close_request:
-                switch (gloryStatus.getD1Mode()) {
-                    case neutral:
-                        WaitForEmptyEscrow();
-                        break;
-                    default:
-                        threadCommandApi.setError(Manager.Error.APP_ERROR,
-                                String.format("gotoNeutral Abnormal device Invalid D1-2 mode %s", gloryStatus.getD1Mode().name()));
-                        return false;
-                }
-
-            default:
-                // Above are errors, rest is ok.
-                break;
-        }
-
-        switch (gloryStatus.getD1Mode()) {
-            case normal_error_recovery_mode:
-            case storing_error_recovery_mode:
-            case deposit:
-            case manual:
-                switch (gloryStatus.getSr1Mode()) {
-                    case storing_start_request:
-                        if (!openEscrow) {
-                            threadCommandApi.setError(Manager.Error.BILLS_IN_ESCROW_CALL_ADMIN,
-                                    "There are bills in the escrow call an admin");
-                            return false;
-                        }
-                        if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                    }
+                    switch (gloryStatus.getD1Mode()) {
+                        case storing_error_recovery_mode:
+                        case normal_error_recovery_mode:
+                        case deposit:
+                        case manual:
+                            if (canSendRemoteCancel()) {
+                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                    return false;
+                                }
+                            }
+                        // dont break;
+                        case neutral:
+                            storingErrorRecovery();
                             break;
-                        }
-                    // dont break
-                    case escrow_open:
-                    case escrow_close_request:
-                    case being_restoration:
-                    case waiting_for_an_envelope_to_set:
-                        WaitForEmptyEscrow();
-                        remoteCancel();
-                        break;
-                    case being_recover_from_storing_error:
-                        if (storingError) {
-                            errorRecovery();
-                        } else {
-                            WaitForEmptyEscrow();
-                            threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
-                                    "Storing error must call admin");
-                            remoteCancel();
-                        }
-                        break;
-                    case counting_start_request:
-                        remoteCancel();
-                        break;
+                        default:
+                            threadCommandApi.setError(Manager.Error.APP_ERROR,
+                                    String.format("gotoNeutral Abnormal device Invalid D1 mode %s", gloryStatus.getD1Mode().name()));
+                            return false;
+                    }
+                    break;
 
-                    case waiting:
-                        remoteCancel();
-                        break;
-                    default:
+                case abnormal_device:
+                    switch (gloryStatus.getD1Mode()) {
+                        case deposit:
+                        case manual:
+                            if (canSendRemoteCancel()) {
+                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                    return false;
+                                }
+                            }
+                        // dont break;
+                        case neutral:
+                            if (!sendGloryCommand(new devices.glory.command.SetErrorRecoveryMode())) {
+                                return false;
+                            }
+                            break;
+                        case normal_error_recovery_mode:
+                            break;
+                        default:
+                            threadCommandApi.setError(Manager.Error.APP_ERROR,
+                                    String.format("gotoNeutral Abnormal device Invalid D1-1 mode %s", gloryStatus.getD1Mode().name()));
+                            return false;
+                    }
+                    errorRecovery();
+                    break;
+                default:
+                    // Above are errors, rest is ok.
+                    break;
+            }
+
+            switch (gloryStatus.getD1Mode()) {
+                case normal_error_recovery_mode:
+                case storing_error_recovery_mode:
+                case deposit:
+                case manual:
+                    switch (gloryStatus.getSr1Mode()) {
+                        case storing_start_request:
+                            if (!openEscrow) {
+                                threadCommandApi.setError(Manager.Error.BILLS_IN_ESCROW_CALL_ADMIN,
+                                        "There are bills in the escrow call an admin");
+                                return false;
+                            }
+                            if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                                break;
+                            }
+                        // dont break
+                        case escrow_open:
+                        case escrow_close_request:
+                        case being_restoration:
+                        case waiting_for_an_envelope_to_set:
+                            WaitForEmptyEscrow();
+                            if (canSendRemoteCancel()) {
+                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                    return false;
+                                }
+                            }
+                            break;
+                        case being_recover_from_storing_error:
+                            if (storingError) {
+                                errorRecovery();
+                            } else {
+                                WaitForEmptyEscrow();
+                                threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
+                                if (canSendRemoteCancel()) {
+                                    if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            break;
+                        case counting_start_request:
+                            if (canSendRemoteCancel()) {
+                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                    return false;
+                                }
+                            }
+                            break;
+                        case counting:
+                            // Japaneese hack...
+                            break;
+                        case waiting:
+                            if (canSendRemoteCancel()) {
+                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                    return false;
+                                }
+                            }
+                            break;
+                        default:
+                            threadCommandApi.setError(Manager.Error.APP_ERROR,
+                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
+                            break;
+                    }
+                    break;
+                case initial:
+                    if (canSendRemoteCancel()) {
+                        if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                            return false;
+                        }
+                    }
+                    if (gloryStatus.getD1Mode() != GloryStatus.D1Mode.neutral) {
                         threadCommandApi.setError(Manager.Error.APP_ERROR,
-                                String.format("gotoNeutral Abnormal device Invalid D1-3 mode %s", gloryStatus.getD1Mode().name()));
-                        break;
-                }
-                break;
-            case initial:
-                if (!remoteCancel()) {
-                    return false;
-                }
-                if (gloryStatus.getD1Mode() != GloryStatus.D1Mode.neutral) {
+                                String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
+                    }
+                    break;
+                case neutral:
+                    Logger.debug("GOTO NEUTRAL DONE");
+                    return true;
+                default:
                     threadCommandApi.setError(Manager.Error.APP_ERROR,
-                            String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
-                }
-                break;
-            case neutral:
-                break;
-            default:
-                threadCommandApi.setError(Manager.Error.APP_ERROR,
-                        String.format("gotoNeutralInvalid D1-3 mode %s", gloryStatus.getD1Mode().name()));
-                break;
+                            String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name()));
+                    break;
+            }
+            sleep();
         }
-        Logger.debug("GOTO NEUTRAL DONE");
-        return true;
+        threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN, "GOTO NEUTRAL TIMEOUT");
+        Logger.debug("GOTO NEUTRAL TIMEOUT!!!");
+        return false;
     }
 
     boolean sendGloryCommand(GloryCommandAbstract cmd) {
@@ -305,7 +324,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     boolean waitUntilSR1State(SR1Mode state) {
-        for (int i = 0; i < 0xffff; i++) {
+        for (int i = 0; i < retries; i++) {
             Logger.debug("waitUntilSR1State %s", state.name());
             if (mustCancel()) {
                 return true;
@@ -337,7 +356,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     boolean waitUntilD1State(D1Mode state) {
-        for (int i = 0; i < 0xffff; i++) {
+        for (int i = 0; i < retries; i++) {
             Logger.debug("waitUntilD1State %s", state.name());
             if (mustCancel()) {
                 return true;
@@ -368,7 +387,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     void WaitForEmptyEscrow() {
-        for (int i = 0; i < 0xffff; i++) {
+        for (int i = 0; i < retries; i++) {
             Logger.debug("WaitForEmptyEscrow");
             if (!sense()) {
                 return;
@@ -382,12 +401,12 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     }
                     break;
                 case being_restoration:
+                case counting:
                 case escrow_close:
                     break;
                 case escrow_open:
                     threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
                     break;
-                case storing_start_request:
                 case counting_start_request:
                 case waiting:
                     return;
@@ -395,6 +414,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     threadCommandApi.setError(Manager.Error.JAM,
                             "Abnormal device, todo: get the flags");
                     return;
+                case storing_start_request:
                 case storing_error:
                     threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
                             "Storing error, todo: get the flags");
@@ -410,24 +430,23 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 "WaitForEmptyEscrow waiting too much");
     }
 
-    private boolean remoteCancel() {
-        for (int i = 0; i < 0xffff; i++) {
-            Logger.debug("remoteCancel");
-            if (!sense()) {
-                return false;
-            }
-            if (gloryStatus.isRejectBillPresent()) {
-                threadCommandApi.setStatus(Manager.Status.REMOVE_REJECTED_BILLS);
-            } else {
-                if (gloryStatus.isHopperBillPresent()) {
-                    threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_HOPER);
-                } else {
-                    break;
-                }
-            }
-            sleep();
+    private boolean canSendRemoteCancel() {
+        // Under this conditions the remoteCancel command fails.
+        if (gloryStatus.isRejectBillPresent()) {
+            threadCommandApi.setStatus(Manager.Status.REMOVE_REJECTED_BILLS);
+            return false;
         }
-        return sendGloryCommand(new devices.glory.command.RemoteCancel());
+        if (gloryStatus.isHopperBillPresent()) {
+            threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_HOPER);
+            return false;
+        }
+        switch (gloryStatus.getSr1Mode()) {
+            case counting:
+            case storing_start_request:
+                return false;
+            default:
+                return true;
+        }
     }
 
     void sleep() {

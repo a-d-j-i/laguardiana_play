@@ -138,7 +138,7 @@ public class EnvelopeDepositController extends Application {
     public static void mainLoop() {
         if (request.isAjax()) {
             Object[] o = new Object[2];
-            o[0] = modelFacade.getStatus();
+            o[0] = modelFacade.getCurrentStep();
             o[1] = null;
             renderJSON(o);
             return;

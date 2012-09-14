@@ -1,0 +1,58 @@
+#{extends 'main.html' /}
+#{set title:'Depositar Efectivo' /}
+<section id="depositar_efectivo_03">
+    <header></header>
+    <article>
+        <div class="contenido">
+            <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
+            <div class="mensaje"><span>&{ 'application.error' }</span></div>
+            <p id="status">${ status }</p>
+            <p id="gstatus">${ gstatus }</p>
+            <p id="gerror">${ gError }</p>
+            <a class="boton naranja full_width" href="@{Application.counterError(1)}">Reset</a>
+            <a class="boton naranja full_width" href="@{Application.counterError(2)}">StoringErrorReset</a>
+            <!-- datos del deposito -->
+            <!-- /datos del deposito -->
+        </div>
+        <hr />
+        <div class="botonera">
+            <ul class="columns">
+                <li class="fixed column" style="width: 50%">
+                    <!-- link cancelar -->
+                    <a href="@{Application.index()}" class="boton gris">&{ 'main_menu.title' }</a>
+                </li>
+                <li class="fixed column" style="width: 50%">
+                    <div class="columna_2">
+                        #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
+                        <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde">&{'main_menu.logout'}</a>
+                        #{/if}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>
+
+
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    var waiting = false;
+    
+    // Reload the whole messages panel
+    function refresh() {
+        if ( waiting ) {
+            return;
+        }
+        waiting = true;
+        $.getJSON( '@{counterError}', function( data ) {
+            waiting = false;
+            $( '#gstatus' ).html(  data[ 0 ] );
+            $( '#gerror' ).html(  data[ 1 ] );
+        });
+    }
+    // Call refresh every 1.5 seconds
+    setInterval(refresh, 1500);
+    refresh();
+</script>
+#{/set}

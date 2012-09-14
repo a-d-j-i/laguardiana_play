@@ -17,7 +17,11 @@
                         <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
                         <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                         <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                        <p>&nbsp;</p>
                         <!-- /resumen de datos -->
+                        <div id="info_message" style="color: green;"> 
+
+                        </div>
                     </div>
                 </li>
                 <li class="fixed column" style="width: 55%">
@@ -33,11 +37,11 @@
                             <!-- detalle de billetes -->
                             %{ total = 0; cnt_total = 0;}%
                             #{list items:billData, as:'b'}
-                            <tr id="BTRID_${b.billTypeId}">
-                                <td id="bill_denomination">${b.denomination}</td>
-                                <td id="bill_quantity">${b.quantity}</td>
-                                <td id="bill_total">${b.denomination  * b.quantity}</td>
-                                %{ total += b.denomination  * b.quantity; cnt_total += b.quantity }%
+                            <tr id="BTRID_${b.tid}">
+                                <td id="bill_denomination">${b.d}</td>
+                                <td id="bill_quantity">${b.q}</td>
+                                <td id="bill_total">${b.d  * b.q}</td>
+                                %{ total += b.d  * b.q; cnt_total += b.q }%
                             </tr>
                             #{/list}
                             <!-- /detalle de billetes -->
@@ -71,12 +75,24 @@
             </ul>
         </div>
     </article>
+    <div id="alerta_escrow_full" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'bill_deposit.escrow_full' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'bill_deposit.escrow_full_text' }</span>
+            </div>
+            <div id="alerta_botonera">
+                <a id ="alerta_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+                <a id="alerta_continueButton" class="boton naranja">&{ 'application.close' }</a>
+            </div>
+        </div>
+    </div>
 </section>
 
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     var waiting = false;
-    var lastStatus = false;
+    var lastStatus = "false";
     
     // Reload the whole messages panel
     function refresh() {
@@ -89,30 +105,36 @@
             var status = data[ 0 ];
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
+                $( '#info_message' ).html(  data[ 2 ] );
                 if ( status == 'IDLE' ) {
-                } else if ( status == 'INITIALIZING' ) {
+                } else if ( status == 'ESCROW_FULL' ) {
+                    if ( lastStatus != status ) {
+                        waiting = true;
+                        $("#alerta_escrow_full").overlay().load();
+                        $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
+                    }
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
-                } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
+                } else if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
+                } else if ( status == 'ERROR' ) {
+                    window.location.href = "@{Application.counterError()}";
                 } else {          
-                    if ( lastStatus != status ) {
-                        alert( status );
-                    }
+                    alert( "Invalid status : " + status + " last status : " + lastStatus );
                 }
                 lastStatus = status
             }
             var total = 0;
             var cnt_total = 0;
             for( var i = 0 ; i < billData.length; i ++ ) {
-                var nid = '#BTRID_' + billData[ i ].billTypeId;
-                $( nid ).children( '#bill_denomination' ).html( billData[ i ].denomination );
-                $( nid ).children( '#bill_quantity' ).html( billData[ i ].quantity );
-                var t = ( billData[ i ].denomination * billData[ i ].quantity );
+                var nid = '#BTRID_' + billData[ i ].tid;
+                $( nid ).children( '#bill_denomination' ).html( billData[ i ].d );
+                $( nid ).children( '#bill_quantity' ).html( billData[ i ].q );
+                var t = ( billData[ i ].d * billData[ i ].q );
                 $( nid ).children( '#bill_total' ).html( t );
                 total += t;
-                cnt_total += billData[ i ].quantity;
+                cnt_total += billData[ i ].q;
             }
             $( '#cnt_total' ).html( cnt_total );
             $( '#total' ).html( total );
@@ -124,7 +146,30 @@
     });
     
     $( '#continueButton' ).click( function(event) {
-        $.getJSON( '@{accept()}', function( data ) {});
+        if ( lastStatus == 'ESCROW_FULL' ) {
+            $("#alerta_escrow_full").overlay().load();
+        } else if ( lastStatus == 'READY_TO_STORE' ) {
+            $.getJSON( '@{accept()}', function( data ) {});
+        } else {
+            alert( "Invalid last status : " + lastStatus );
+        }
+    });
+    
+    
+    $( '#alerta_cancelButton' ).click( function(event) {
+        $("#alerta_escrow_full").overlay().close();
+        waiting = false;
+        $.getJSON( '@{cancel()}', function( data ) {});
+    });
+    
+    $( '#alerta_continueButton' ).click( function(event) {
+        $("#alerta_escrow_full").overlay().close();
+        waiting = false;
+        if ( lastStatus == 'ESCROW_FULL' ) {
+            $.getJSON( '@{accept()}', function( data ) {});
+        } else {
+            alert( "Invalid last status : " + lastStatus );
+        }
     });
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);

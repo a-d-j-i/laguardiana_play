@@ -107,13 +107,19 @@ public class Manager {
 
         public void setStatus(Status s) {
             // TODO: This is not thread safe. Review
-            if ( status.get() != Status.ERROR) {
+            if (status.get() != Status.ERROR) {
                 status.set(s);
             }
         }
 
+        public void clearStatus() {
+            status.set(Status.IDLE);
+        }
+
         public void setStatus(Status c, Status s) {
-            status.compareAndSet(c, s);
+            if (status.get() != Status.ERROR) {
+                status.compareAndSet(c, s);
+            }
         }
 
         public void setError(ErrorDetail e) {
@@ -234,30 +240,32 @@ public class Manager {
             return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi, onCommandDone));
         }
 
-        public boolean reset() {
+        public boolean reset(Runnable onCommandDone) {
             Logger.debug("------reset");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
                 if (cmd instanceof Reset) {
                     return true;
                 }
+                cmd.cancel();
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new Reset(threadCommandApi, null));
+            return managerControllerApi.sendCommand(new Reset(threadCommandApi, onCommandDone));
         }
 
-        public boolean storingErrorReset() {
+        public boolean storingErrorReset(Runnable onCommandDone) {
             Logger.debug("------storing error reset");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
                 if (cmd instanceof StoringErrorReset) {
                     return true;
                 }
+                cmd.cancel();
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi, null));
+            return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi, onCommandDone));
         }
 
         public Manager.Status getStatus() {

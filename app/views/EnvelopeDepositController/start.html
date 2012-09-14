@@ -1,18 +1,18 @@
 #{extends 'main.html' /}
 #{set title:'Depositar Sobre' /}
 #{form @start(deposit), 'id' : 'mainForm', 'class' : "bbq" }
-<section id="depositar_sobre_01">
+<section id="depositar_sobre">
     <header></header>
     <a id="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
-        <div class="contenido">
-            <div class="step" id="first" >
+        <div class="step" id="first" >
+            <div class="contenido">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
                             #{ if ( formData.showReference1 || formData.showReference2 ) }
-                            <div class="mensaje"><span>&{ 'input_reference.input_reference' }</span></div>
+                            <div class="mensaje"><span>&{ 'application.input_reference' }</span></div>
                             #{/if}
 
                             #{ if ( formData.showReference1 ) }
@@ -34,11 +34,13 @@
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
-                        <div id="keyboard_placeholder">KEYBOARD</div>
+                        #{ keyboard /}
                     </li>
                 </ul>
             </div>
-            <div class="step" id="second" style="display: none">
+        </div>
+        <div class="step" id="second" style="display: none">
+            <div class="contenido">
                 <input name="second_next" id="second_next" type="hidden" class="link" value="envelope_code">
                 <div class="mensaje"><span>&{ 'envelope_deposit.select_contents' }</span></div>
                 <div class="botonera">
@@ -77,7 +79,9 @@
                     </ul>
                 </div>
             </div>
-            <div id="cash" class="step" style="display: none">
+        </div>
+        <div id="cash" class="step amount_input" style="display: none">
+            <div class="contenido">
                 <input name="cash_second" id="cash_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
@@ -94,11 +98,13 @@
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
-                        <div id="keyboard_placeholder"></div>
+                        #{ keyboard /}
                     </li>
                 </ul>
             </div>
-            <div id="checks" class="step" style="display: none">
+        </div>
+        <div id="checks" class="step amount_input" style="display: none">
+            <div class="contenido">
                 <input name="checks_second" id="checks_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
@@ -112,13 +118,16 @@
                             #{ifError 'formData.checkData.amount'}
                             <label for="formData.checkData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.checkData_amount' }</label>
                             #{/ifError}
-                        </div>                    </li>
+                        </div>                    
+                    </li>
                     <li class="fixed column" style="width: 40%">
-                        <div id="keyboard_placeholder"></div>
+                        #{ keyboard /}
                     </li>
                 </ul>
             </div>
-            <div id="tickets" class="step" style="display: none">
+        </div>
+        <div id="tickets" class="step amount_input" style="display: none">
+            <div class="contenido">
                 <input name="tickets_second" id="tickets_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
@@ -132,14 +141,17 @@
                             <input name="formData.ticketData.amount" id="ticketData" value="${formData?.ticketData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
                             #{ifError 'formData.ticketData.amount'}
                             <label for="formData.ticketData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.ticketData_amount' }</label>
-                            #{/ifError}          </div>
+                            #{/ifError}         
+                        </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
-                        <div id="keyboard_placeholder"></div>
+                        #{ keyboard /}
                     </li>
                 </ul>
             </div>
-            <div id="envelope_code" class="step submit_step" style="display: none">
+        </div>
+        <div id="envelope_code" class="step submit_step" style="display: none">
+            <div class="contenido">
                 <input name="envelope_code_next" id="envelope_code_next" type="hidden" class="link" value="print_ticket">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
@@ -151,7 +163,6 @@
                             #{ifError 'formData.envelopeCode'}
                             <label for="formData.envelopeCode" generated="true" class="error" style="display: inline; ">&{ 'validation.required.envelopeCode' }</label>
                             #{/ifError}
-
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
@@ -159,20 +170,21 @@
                     </li>
                 </ul>
             </div>
-
         </div>
         <hr />
-        <div class="botonera">
+        <div class="botonera_pie">
             <ul class="columns">
-                <li class="fixed column" style="width: 50%">
-                    <!-- link cancelar -->
-                    <a href="@{ Application.index() }" class="boton rojo">&{ 'application.cancel' }</a>
-                    <!-- /link cancelar -->
+                <li class="column">
+                    <div class="columna" >
+                        <!-- link cancelar -->
+                        <a href="@{ Application.index() }" class="boton rojo full_width">&{ 'application.cancel' }</a>
+                        <!-- /link cancelar -->
+                    </div>
                 </li>
-                <li class="fixed column" style="width: 50%">
-                    <div class="columna_2">
+                <li class="column">
+                    <div class="columna">
                         <!-- link continuar -->
-                        <input type="submit" id ="continueButton" href="#" class="boton naranja"/>
+                        <input type="submit" id ="continueButton" href="#" class="boton naranja full_width"/>
                     </div>
                 </li>
             </ul>

@@ -1,5 +1,6 @@
 package controllers;
 
+import devices.glory.manager.Manager;
 import java.util.List;
 import models.ModelFacade;
 import models.lov.Currency;
@@ -9,6 +10,7 @@ import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeReference;
@@ -26,6 +28,7 @@ public class BillDepositController extends Application {
                 break;
             case FINISH:
             case RUNNING:
+            case ERROR:
                 if (modelFacade.getCurrentMode() != ModelFacade.CurrentMode.BILL_DEPOSIT) {
                     Application.index();
                 }
@@ -54,7 +57,6 @@ public class BillDepositController extends Application {
     }
 
     public static void start(@Valid FormData formData) throws Throwable {
-        Logger.debug("inputReference data %s", formData);
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
@@ -80,10 +82,7 @@ public class BillDepositController extends Application {
 
     public static void mainLoop() {
         if (request.isAjax()) {
-            Object[] o = new Object[2];
-            o[0] = modelFacade.getStatus();
-            o[1] = modelFacade.getBillData();
-            renderJSON(o);
+            renderJSON(getCountingStatus());
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
             renderArgs.put("billData", modelFacade.getBillData());

@@ -46,6 +46,8 @@ public class ModelFacade {
     static public enum CurrentMode {
 
         NONE,
+        ERROR_RECOVERY,
+        STORING_ERROR_RECOVERY,
         BILL_DEPOSIT,
         ENVELOPE_DEPOSIT,
         COUNTING,
@@ -69,7 +71,7 @@ public class ModelFacade {
     synchronized public CurrentStep getCurrentStep() {
         if (currentDeposit == null || currentDeposit.user == null) {
             // unfinished Cancelation.
-            if (currentStep == CurrentStep.FINISH) {
+            if (currentStep == CurrentStep.FINISH || currentStep == CurrentStep.ERROR) {
                 return currentStep;
             }
             if (currentStep != CurrentStep.NONE) {
@@ -91,7 +93,7 @@ public class ModelFacade {
             synchronized (ModelFacade.this) {
                 Logger.debug("When Done %s %s %s", manager.getStatus().name(), currentStep.name(), currentMode.name());
                 Manager.Status m = manager.getStatus();
-                if (currentStep != CurrentStep.RUNNING) {
+                if (currentStep != CurrentStep.RUNNING && currentStep != CurrentStep.ERROR) {
                     // TODO: Log the event.
                     Logger.error("WhenDone not running");
                     currentStep = CurrentStep.ERROR;
@@ -99,6 +101,15 @@ public class ModelFacade {
                 }
                 currentStep = CurrentStep.FINISH;
                 switch (currentMode) {
+                    case ERROR_RECOVERY:
+                    case STORING_ERROR_RECOVERY:
+                        if (Deposit.em().getTransaction().isActive()) {
+                            Deposit.em().getTransaction().rollback();
+                        }
+                        currentDeposit = null;
+                        currentStep = CurrentStep.NONE;
+                        currentMode = CurrentMode.NONE;
+                        break;
                     case ENVELOPE_DEPOSIT:
                         switch (m) {
                             case CANCELED:
@@ -183,6 +194,32 @@ public class ModelFacade {
                 }
             }
         }
+    }
+
+    synchronized public void reset() {
+        CurrentStep c = getCurrentStep();
+        if (c == CurrentStep.NONE || c == CurrentStep.FINISH) {
+            return;
+        }
+        if (currentDeposit == null || c != CurrentStep.ERROR) {
+            error(String.format("reset Invalid step %s", c.name()));
+            return;
+        }
+        currentMode = CurrentMode.ERROR_RECOVERY;
+        manager.reset(whenDone);
+    }
+
+    synchronized public void storingErrorReset() {
+        CurrentStep c = getCurrentStep();
+        if (c == CurrentStep.NONE || c == CurrentStep.FINISH) {
+            return;
+        }
+        if (currentDeposit == null || c != CurrentStep.ERROR) {
+            error(String.format("storingErrorReset Invalid step %s", c.name()));
+            return;
+        }
+        currentMode = CurrentMode.STORING_ERROR_RECOVERY;
+        manager.storingErrorReset(whenDone);
     }
 
     // TODO: Generalize, at start fromData is a kind on context saved
@@ -272,7 +309,7 @@ public class ModelFacade {
 
     private Boolean checkCurrentStep() {
         CurrentStep s = getCurrentStep();
-        if (s != CurrentStep.RUNNING && s != CurrentStep.FINISH) {
+        if (s != CurrentStep.RUNNING && s != CurrentStep.FINISH && s != CurrentStep.ERROR) {
             error(String.format("checkCurrentStep Invalid step %s", currentStep.name()));
             return false;
         }
@@ -293,12 +330,24 @@ public class ModelFacade {
         return null;
     }
 
-    synchronized public String getStatus() {
-        if (currentStep == CurrentStep.RUNNING) {
-            return manager.getStatus().name();
-        } else {
-            return currentStep.name();
+    synchronized public Manager.Status getExtraInfo() {
+        if (checkCurrentStep()) {
+            Manager.Status m = manager.getStatus();
+            switch (m) {
+                case INITIALIZING:
+                    if (getCurrentStep() == CurrentStep.RUNNING) {
+                        Logger.error("Initializing is an invalid state");
+                        currentStep = CurrentStep.ERROR;
+                    }
+                    break;
+                case ERROR:
+                    Logger.error("Error in manager");
+                    currentStep = CurrentStep.ERROR;
+                    break;
+            }
+            return m;
         }
+        return Manager.Status.ERROR;
     }
 
     synchronized public String getDepositTotal() {
@@ -317,8 +366,8 @@ public class ModelFacade {
         }
         LgBatch batch = new LgBatch();
         for (Bill bill : Bill.getCurrentCounters(currentDeposit.currency.numericId)) {
-            Logger.debug(" -> quantity %d", bill.quantity);
-            LgBill b = new LgBill(bill.quantity, bill.billType);
+            Logger.debug(" -> quantity %d", bill.q);
+            LgBill b = new LgBill(bill.q, bill.billType);
             batch.addBill(b);
         }
         currentDeposit.addBatch(batch);

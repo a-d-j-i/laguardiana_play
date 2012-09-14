@@ -9,6 +9,7 @@ import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
@@ -84,8 +85,13 @@ public class Secure extends Controller {
 
     public static void authenticate(@Required String username, String password,
             boolean remember, String cancel) throws Throwable {
-        // Check tokens
-        Logger.error(cancel);
+        // The keyboard only types uppercase.
+        if (password != null) {
+            password = password.toLowerCase();
+        }
+        if (username != null) {
+            username = username.toLowerCase();
+        }
 
         if (Validation.hasErrors()) {
             Logger.info("validation hasErrors!!!");
@@ -96,8 +102,14 @@ public class Secure extends Controller {
             flash.error("secure.invalid_field");
             params.flash();
             validation.keep(); // keep the errors for the next request
-            login();
-            return;
+            if (request.isAjax()) {
+                String[] d = {"error", Messages.get("secure.invalid_field")};
+                renderJSON(d);
+                return;
+            } else {
+                login();
+                return;
+            }
         }
 
         Logger.info("received user: %s password: %s", username, password);
@@ -108,8 +120,14 @@ public class Secure extends Controller {
             flash.keep("url");
             flash.error("secure.invalid_user_password");
             params.flash();
-            login();
-            return;
+            if (request.isAjax()) {
+                String[] d = {"error", Messages.get("secure.invalid_user_password")};
+                renderJSON(d);
+                return;
+            } else {
+                login();
+                return;
+            }
         }
 
         // Mark user as connected
@@ -118,7 +136,12 @@ public class Secure extends Controller {
             expire = "30d";
         }
         Cache.set(session.getId() + "-user", user, expire);
-        redirectToOriginalURL();
+        if (request.isAjax()) {
+            String[] d = {"success", getOriginalUrl()};
+            renderJSON(d);
+        } else {
+            redirect(getOriginalUrl());
+        }
     }
 
     public static void logout(String toUrl) throws Throwable {
@@ -126,19 +149,19 @@ public class Secure extends Controller {
         session.clear();
         //flash.success( "secure.logout" );
         if (toUrl == null || toUrl.isEmpty()) {
-            redirectToOriginalURL();
+            redirect(getOriginalUrl());
         } else {
             String url = Router.reverse(toUrl, new HashMap()).url;
             redirect(url);
         }
     }
 
-    static void redirectToOriginalURL() throws Throwable {
+    static String getOriginalUrl() throws Throwable {
         String url = flash.get("url");
         if (url == null) {
             url = Play.ctxPath + "/";
         }
-        redirect(url);
+        return url;
     }
 
     // Is it ok to be public?? 

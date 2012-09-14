@@ -109,7 +109,10 @@ public class Count extends ManagerCommandAbstract {
         threadCommandApi.setStatus(Manager.Status.IDLE);
 
         boolean batchEnd = false;
-        gotoNeutral(true, false);
+        if (!gotoNeutral(false, false)) {
+            // ERROR.
+            return;
+        }
         Logger.error("CURRENCY %d", countData.currency.byteValue());
         if (!sendGloryCommand(new devices.glory.command.SwitchCurrency(countData.currency.byteValue()))) {
             return;

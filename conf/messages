@@ -8,10 +8,14 @@ secure.signin=Log in now
 secure.remember=Remember me
 secure.logout=Logout success.
 secure.not_allowed=Not allowed must login.
-secure.invalid_field=You must complete the fields.
-secure.invalid_user_password=Invalid user or password.
+secure.invalid_field=Error debe completar todos los campos.
+secure.invalid_user_password=Error usuario o clave invalida.
 secure.continue_message=Para continuar, ingrese su usuario y contraseña
 secure.pass_forget=¿No recuerda sus datos?
+
+keyboard.continue=SIGUIENTE
+keyboard.space=ESPACIO
+
 application.back=VOLVER
 application.continue=CONTINUAR
 application.cancel=CANCELAR
@@ -20,6 +24,13 @@ application.choose_one=Seleccione una opción
 application.wellcome=Bienvenido %s
 application.choose_currency=Seleccione divisa
 application.thanks=MUCHAS GRACIAS POR OPERAR CON PROSEGUR
+application.error=ERROR
+application.close=CERRAR
+
+application.start_counting=INICIAR CONTEO
+application.choose_currency_before=Seleccione divisa antes de iniciar el conteo
+application.input_reference=Ingrese Referencia
+
 main_menu.title=MENÚ PRINCIPAL
 main_menu.cash_deposit=DEPOSITAR EFECTIVO
 main_menu.envelope_deposit=DEPOSITAR SOBRE
@@ -29,9 +40,19 @@ main_menu.other_operations=OTRAS OPERACIONES
 main_menu.login=INGRESAR AL SISTEMA
 main_menu.logout=SALIR DEL SISTEMA
 other_menu.title=OTRAS OPERACIONES
-input_reference.input_reference=Ingresar Referencia
-input_reference.choose_currency_before=Seleccione divisa antes de iniciar el conteo
-input_reference.start_counting=INICIAR CONTEO
+
+bill_deposit.put_the_bills_on_the_hoper=Coloque los billetes en la maquina
+bill_deposit.escrow_full=Se lleno el escrow, esta listo para depositar ?
+bill_deposit.escrow_full_text=Se lleno el escrow. <br/>Esta listo para depositar ?<br/>Tenga en cuenta que esta operacion no se puede deshacer!!!
+bill_deposit.remove_the_bills_from_escrow=Retire los billetes de la maquina.
+bill_deposit.remove_the_bills_from_hoper=Retire los billetes de la parte superior de la maquina.
+bill_deposit.remove_rejected_bills=Retire los billetes rechazados.
+bill_deposit.ready_to_store=Presione continuar para depositar
+bill_deposit.storing=Depositando.
+bill_deposit.canceling=Cancelando.
+bill_deposit.deposit_canceled=Deposito cancelado
+
+counting_page.escrow_full_text=Se lleno el escrow. <br/>Retire los billetes del escrow.
 counting_page.currency_title=Divisa
 counting_page.reference1_title=Referencia
 counting_page.reference2_title=Aplicar a
@@ -40,9 +61,10 @@ counting_page.denomination=DENOMINACIÓN
 counting_page.quantity=CANTIDAD
 counting_page.total=TOTAL
 counting_page.totals=TOTALES
-bill_deposit.deposit_canceled=Deposito cancelado
+
 summary.ticket=Retire su ticket
 summary.total=Monto
+
 envelope_deposit.select_contents=Seleccione los contenidos del sobre
 envelope_deposit.cash=EFECTIVO
 envelope_deposit.documents=DOCUMENTOS
@@ -64,6 +86,7 @@ envelope_deposit.amount_tickets=Monto en tickets
 envelope_deposit.required.reference1=Debe ingresar la referencia
 envelope_deposit.required.reference2=Debe ingresar la referencia
 envelope_deposit.required.envelopeCode=Falta el codigo del sobre
+
 validation.required=%s es un campo obligatorio
 validation.required=campo obligatorio
 validation.must_be_a_number=el campo debe ser numerico
@@ -72,4 +95,5 @@ validation.required.envelopeCode=campo obligatorio
 validation.required.cashData_amount=campo obligatorio
 validation.required.checkData_amount=campo obligatorio
 validation.required.ticketData_amount=campo obligatorio
+
 filter.choose_denomination=Elija la denominacion

@@ -25,14 +25,14 @@
                     <!-- detalle de billetes -->
                     %{ total = 0; cnt_total = 0;}%
                     #{list items:billData, as:'b'}
-                    <tr id="BTRID_${b.billTypeId}">
-                        <td id="bill_denomination">${b.billType}</td>
-                        <td id="bill_quantity">${b.quantity}</td>
-                        <td id="bill_total">${b.denomination  * b.quantity}</td>
+                    <tr id="BTRID_${b.tid}">
+                        <td id="bill_denomination">${b.d}</td>
+                        <td id="bill_quantity">${b.q}</td>
+                        <td id="bill_total">${b.d  * b.q}</td>
                         <td>
-                            <input id="DID_${b.billType.billTypeId}" value="${b.desiredQuantity}" name="billTypeIds.${b.billType.billTypeId}" type="text">
+                            <input id="DID_${b.billType.billTypeId}" value="${b.dq}" name="billTypeIds.${b.billType.billTypeId}" type="text">
                         </td>
-                        %{ total += b.denomination  * b.quantity; cnt_total += b.quantity }%
+                        %{ total += b.d  * b.q; cnt_total += b.q }%
                     </tr>
                     #{/list}
                     <!-- /detalle de billetes -->
@@ -68,8 +68,8 @@
                 </select>
                 <button type="submit" class="boton naranja full_width">Count</button>
             </div>
-            Status: <div id="statusMsg" class="mensaje">NONE</div>
-            Error: <div id="errorMsg" class="mensaje">NONE</div>
+            Status: <div id="statusMsg" class="mensaje">${ status }</div>
+            Error: <div id="errorMsg" class="mensaje">${ error }</div>
         </li>
         <li class="fixed column" style="width: 5%">
             &nbsp;
