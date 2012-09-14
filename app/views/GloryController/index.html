@@ -1,7 +1,8 @@
 #{extends 'main.html' /}
 #{set title:'Glory (Comandos)' /}
 <div style="background: wheat;">
-    <header></header>
+    <header>
+    </header>
     <!-- link volver -->
     <a id ="backButton" href="@{Application.otherMenu()}" class="boton_top">◄ &{ 'application.back' }</a>
     <!-- /link volver -->
@@ -37,56 +38,77 @@
             <a class="boton naranja full_width" href="@{GloryController.switchCurrency(5)}">switchCurrent5</a>
             <a class="boton naranja full_width" href="@{GloryController.switchCurrency(6)}">switchCurrent6</a>
             <a class="boton naranja full_width" href="@{GloryController.switchCurrency(7)}">switchCurrent7</a>
-            <a class="boton naranja full_width" href="@{GloryController.settingDataRequest()}">settingDataRequest</a>
+            <a class="boton naranja full_width" href="@{GloryController.settingDataRequestEscrow()}">settingDataRequestEscrow</a>
+<!--            <a class="boton naranja full_width" href="@{GloryController.settingDataRequestCassete()}">settingDataRequestCassete</a>-->
+            <a class="boton naranja full_width" href="@{GloryController.settingDataRequestReject()}">settingDataRequestReject</a>
+            <a class="boton naranja full_width" href="@{GloryController.deviceSettingDataLoad()}">deviceSettingDataLoad</a><br/>
+
+            NAK is returned when DE is not started download by the command ‘Start Upload’.<br/>
+            Download the file by 'Start Download', 'Request Download' and 'End Download', before this command.<br/>
             <a class="boton naranja full_width" href="@{GloryController.logDataRequest()}">logDataRequest</a>
-            <a class="boton naranja full_width" href="@{GloryController.deviceSettingDataLoad()}">deviceSettingDataLoad</a>
             <a class="boton naranja full_width" href="@{GloryController.programUpdate()}">programUpdate</a>
             <a class="boton naranja full_width" href="@{GloryController.setTime()}">setTime</a>
-            <a class="boton naranja full_width" href="@{GloryController.downloadData()}">downloadData</a>
         </li>
         <li class="fixed column" style="width: 2%">
             &nbsp;
         </li>
         <li class="fixed column" style="width: 20%">
+            <p>${status?.getError()}
+            </p>
             #{if (status?.haveData() ) }
-            <pre>
-Registers
-${status?.getSRMode()}
-${status?.getD1Mode()}
-#{list items:status?.getSrBits(), as:'p'}${p}
-#{/list}
-#{list items:status?.getD2Bits(), as:'p'}${p}
-#{/list}
-#{list items:status?.getInfo(), as:'p'}${p}
-#{/list}
-            </pre>
-            <pre> Data: ${status?.getData()}</pre>
+            <p style="word-wrap: break-word;"> 
+                Registers<br/>
+                ${status?.getSRMode()}<br/>
+                ${status?.getD1Mode()}<br/>
+                #{list items:status?.getSrBits(), as:'p'}${p}<br/>
+                #{/list}
+                #{list items:status?.getD2Bits(), as:'p'}${p}<br/>
+                #{/list}
+                #{list items:status?.getInfo(), as:'p'}${p}<br/>
+                #{/list}
+            </p>
+            <p style="word-wrap: break-word;"> Data: ${status?.getData()}</p>
             #{/if}
         </li>
         <li class="fixed column" style="width: 2%">
             &nbsp;
         </li>
 
-        <li class="fixed column" style="width: 20%">
+        <li class="fixed column" style="width: 30%">
 
             #{if (status?.haveData() ) }
             #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
-            <pre>
-Denomination Data
-#{list items:status?.getDenominationData(), as:'p'}    Denomination (${p.idx}): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if} #{if (p.oldVal)}Old#{/if}
-
-#{/list}
-            </pre>
+            <p style="word-wrap: break-word;"> 
+                Denomination Data
+            <table>
+                <thead></thead>
+                <tbody>
+                    #{list items:status?.getDenominationData(), as:'p'}    
+                    #{if ( p_index - 1 ) % 2 == 0}<tr>#{/if}
+                        <td>Denomination ( ${p.idx}, ${p.denominationCode} ): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if}</td>
+                        #{if ( p_index -1 ) % 2 == 1}</tr>#{/if}
+                    #{/list}
+                </tbody>
+            </table>
+            </p>
             #{/if}
             #{else}
-            <pre>
-Bills Data:
-#{list items:status?.getBills(), as:'p'} Bill ${p}
-#{/list}
-        #{else}
-        No bill information
-        #{/else}
-            </pre>
+            <p style="word-wrap: break-word;"> 
+                Bills Data:
+            <table>
+                <thead></thead>
+                <tbody>
+                    #{list items:status?.getBills(), as:'p'} 
+                    #{if ( p_index - 1 ) % 4 == 0}<tr>#{/if}
+                        <td>Bill ${p}</td>
+                        #{if ( p_index -1 ) % 4 == 3}</tr>#{/if}
+                    #{/list}
+                </tbody>
+            </table>
+            #{else}
+            No bill information
+            #{/else}
+            </p>
             #{/else}
             #{/if}
         </li>

@@ -25,88 +25,93 @@ public class CommandWithDataResponse extends CommandWithAckResponse {
     byte d11;
     byte d12;
 
-    CommandWithDataResponse( byte cmdId, String description ) {
-        this( cmdId, description, null, DebugLevel.NONE );
+    CommandWithDataResponse(byte cmdId, String description) {
+        this(cmdId, description, null, DebugLevel.NONE);
     }
 
-    CommandWithDataResponse( byte cmdId, String description, byte[] cmdData ) {
-        this( cmdId, description, cmdData, DebugLevel.NONE );
+    CommandWithDataResponse(byte cmdId, String description, byte[] cmdData) {
+        this(cmdId, description, cmdData, DebugLevel.NONE);
     }
 
-    CommandWithDataResponse( byte cmdId, String description, byte[] cmdData, DebugLevel debug ) {
-        super( cmdId, description, cmdData, debug );
+    CommandWithDataResponse(byte cmdId, String description, byte[] cmdData, DebugLevel debug) {
+        super(cmdId, description, cmdData, debug);
     }
 
-    public CommandWithDataResponse setResult( byte[] dr ) {
+    @Override
+    public CommandWithDataResponse setResult(byte[] dr) {
+        if (dr == null) {
+            setError("Invalid argument dr == null");
+            return this;
+        }
         int l = dr.length;
 
-        if ( l == 1 ) {
-            return ( CommandWithDataResponse ) super.setResult( dr );
+        if (l == 1) {
+            return (CommandWithDataResponse) super.setResult(dr);
         } else {
-            byte[] sdr = new byte[ 1 ];
+            byte[] sdr = new byte[1];
             sdr[ 0] = 0x6;
-            super.setResult( sdr );
+            super.setResult(sdr);
         }
-        if ( getError() != null ) {
+        if (getError() != null) {
             return this;
         }
-        if ( dr.length < 21 ) {
-            setError( String.format( "Invalid command (%s) response length %d expected ack/noack", getDescription(),
-                    dr.length ) );
+        if (dr.length < 21) {
+            setError(String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(),
+                    dr.length));
             return this;
         }
 
-        if ( dr[ l - 2] != 3 ) {
-            setError( String.format( "Invalid command (%s) message end not found", getDescription() ) );
+        if (dr[ l - 2] != 3) {
+            setError(String.format("Invalid command (%s) message end not found", getDescription()));
             return this;
         }
 
         byte retCs = 0;
-        for ( int i = 0; i < l - 1; i++ ) {
-            retCs = ( byte ) ( retCs ^ dr[ i] );
+        for (int i = 0; i < l - 1; i++) {
+            retCs = (byte) (retCs ^ dr[ i]);
         }
 
-        if ( dr[ l - 1] != ( byte ) retCs ) {
-            setError( String.format( "CHECKSUM don't match 0x%x != 0x%x", dr[ l - 1], retCs ) );
+        if (dr[ l - 1] != (byte) retCs) {
+            setError(String.format("CHECKSUM don't match 0x%x != 0x%x", dr[ l - 1], retCs));
             return this;
         }
 
-        sr1 = SR1Mode.getMode( dr[ 3] & 0x3F );
-        sr2 = ( byte ) ( dr[ 4] & 0x3F );
-        sr3 = ( byte ) ( dr[ 5] & 0x3F );
-        sr4 = ( byte ) ( dr[ 6] & 0x0F );
+        sr1 = SR1Mode.getMode(dr[ 3] & 0x3F);
+        sr2 = (byte) (dr[ 4] & 0x3F);
+        sr3 = (byte) (dr[ 5] & 0x3F);
+        sr4 = (byte) (dr[ 6] & 0x0F);
 
-        if ( l - 21 > 0 ) {
-            data = new byte[ l - 21 ];
-            System.arraycopy( dr, 7, data, 0, l - 21 );
+        if (l - 21 > 0) {
+            data = new byte[l - 21];
+            System.arraycopy(dr, 7, data, 0, l - 21);
         }
 
-        d1 = D1Mode.getMode( dr[ l - 14] & 0x1F );
-        d2 = ( byte ) ( dr[ l - 13] & 0x3F );
-        d3 = ( byte ) ( dr[ l - 12] & 0x07 );
-        d4 = ( byte ) ( dr[ l - 11] & 0x3F );
-        d5 = ( byte ) ( dr[ l - 10] & 0x07 );
-        d6 = ( byte ) ( dr[ l - 9] & 0x07 );
-        d7 = ( byte ) ( dr[ l - 8] & 0x07 );
-        d8 = ( byte ) ( dr[ l - 7] & 0x07 );
-        d9 = ( byte ) ( dr[ l - 6] & 0x7F );
-        d10 = ( byte ) ( dr[ l - 5] & 0x7F );
-        d11 = ( byte ) ( dr[ l - 4] & 0x7F );
-        d12 = ( byte ) ( dr[ l - 3] & 0x7F );
+        d1 = D1Mode.getMode(dr[ l - 14] & 0x1F);
+        d2 = (byte) (dr[ l - 13] & 0x3F);
+        d3 = (byte) (dr[ l - 12] & 0x07);
+        d4 = (byte) (dr[ l - 11] & 0x3F);
+        d5 = (byte) (dr[ l - 10] & 0x07);
+        d6 = (byte) (dr[ l - 9] & 0x07);
+        d7 = (byte) (dr[ l - 8] & 0x07);
+        d8 = (byte) (dr[ l - 7] & 0x07);
+        d9 = (byte) (dr[ l - 6] & 0x7F);
+        d10 = (byte) (dr[ l - 5] & 0x7F);
+        d11 = (byte) (dr[ l - 4] & 0x7F);
+        d12 = (byte) (dr[ l - 3] & 0x7F);
 
-        if ( debug.isGratherThan( DebugLevel.NONE ) ) {
-            GloryReturnParser s = new GloryReturnParser( this );
-            Logger.debug( s.getSRMode() );
-            for ( String ss : s.getSrBits() ) {
-                Logger.debug( ss );
+        if (debug.isGratherThan(DebugLevel.NONE)) {
+            GloryReturnParser s = new GloryReturnParser(this);
+            Logger.debug(s.getSRMode());
+            for (String ss : s.getSrBits()) {
+                Logger.debug(ss);
             }
-            Logger.debug( s.getD1Mode() );
-            if ( debug.isGratherThan( DebugLevel.DEBUG ) ) {
-                for ( String ss : s.getD2Bits() ) {
-                    Logger.debug( ss );
+            Logger.debug(s.getD1Mode());
+            if (debug.isGratherThan(DebugLevel.DEBUG)) {
+                for (String ss : s.getD2Bits()) {
+                    Logger.debug(ss);
                 }
-                for ( String ss : s.getInfo() ) {
-                    Logger.debug( ss );
+                for (String ss : s.getInfo()) {
+                    Logger.debug(ss);
                 }
             }
         }

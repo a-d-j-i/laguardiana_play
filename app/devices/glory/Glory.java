@@ -73,11 +73,15 @@ public class Glory {
         for (int i = 0; i < 512; i++) {
             try {
                 byte r = serialPort.read();
+                Logger.debug("readed result %d 0x%x", r, r);
                 switch (r) {
                     case 0x02:
                         byte d1 = getDigit();
+                        Logger.debug("get digit 1 %d 0x%x", d1, d1);
                         byte d2 = getDigit();
+                        Logger.debug("get digit 2 %d 0x%x", d2, d2);
                         byte d3 = getDigit();
+                        Logger.debug("get digit 3 %d 0x%x", d3, d3);
                         int l = d1 * 100 + d2 * 10 + d3 * 1;
                         //Logger.debug("Read len %d", l);
                         b = new byte[l + 5];
@@ -122,7 +126,12 @@ public class Glory {
     private byte getDigit() throws IOException {
         byte l = serialPort.read();
         if (l > 0x39 || l < 0x30) {
-            throw new IOException("Length digit invalid");
+            Logger.debug("Reading error : %d 0x%x", l, l);
+            for (int i = 0; i < 100; i++) {
+                byte b = serialPort.read();
+                Logger.debug("Reading %d : %d 0x%x", i, b, b);
+            }
+            throw new IOException(String.format("Length digit invalid %d == 0x%x", l, l));
         }
         return (byte) (l - 0x30);
     }
