@@ -1,8 +1,8 @@
 package controllers;
 
-import devices.glory.manager.Manager;
 import java.util.List;
 import models.ModelFacade;
+import models.actions.BillDepositAction;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -17,25 +17,20 @@ import validation.FormDepositUserCodeReference;
 
 public class BillDepositController extends Application {
 
+    static BillDepositAction currentAction = null;
+
     @Before
+    // currentAction allways valid
     static void wizardFixPage() throws Throwable {
-        switch (modelFacade.getCurrentStep()) {
-            case NONE:
-                if (!request.actionMethod.equalsIgnoreCase("start")) {
-                    Application.index();
-                    break;
-                }
-                break;
-            case FINISH:
-            case RUNNING:
-            case ERROR:
-                if (modelFacade.getCurrentMode() != ModelFacade.CurrentMode.BILL_DEPOSIT) {
-                    Application.index();
-                }
-                break;
-            default:
+        if (currentAction == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start")) {
                 Application.index();
-                break;
+            }
+        } else {
+            if (!(currentAction instanceof BillDepositAction)) {
+                Application.index();
+            }
+            currentAction = (BillDepositAction) userAction;
         }
     }
 
@@ -64,7 +59,8 @@ public class BillDepositController extends Application {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                modelFacade.startBillDeposit(formData, (DepositUserCodeReference) formData.reference1.lov, formData.reference2, formData.currency.currency);
+                currentAction = new BillDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, formData.currency.currency, formData);
+                ModelFacade.startAction(currentAction);
                 mainLoop();
                 return;
             }
@@ -82,29 +78,38 @@ public class BillDepositController extends Application {
 
     public static void mainLoop() {
         if (request.isAjax()) {
-            renderJSON(getCountingStatus());
+            Object[] o = new Object[3];
+            o[0] = currentAction.getAction();
+            o[1] = currentAction.getBillData();
+            o[2] = Messages.get("bill_deposit." + currentAction.getMessageName());
+            renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
-            renderArgs.put("billData", modelFacade.getBillData());
-            renderArgs.put("formData", modelFacade.getFormData());
+            renderArgs.put("billData", currentAction.getBillData());
+            renderArgs.put("formData", currentAction.getFormData());
             render();
         }
     }
 
     public static void cancel() {
-        modelFacade.cancelDeposit();
+        currentAction.cancelDeposit();
         mainLoop();
     }
 
     public static void accept() {
-        modelFacade.acceptDeposit();
+        currentAction.acceptDeposit();
         mainLoop();
     }
 
+    public String getDepositTotal() {
+        Logger.error("TOTAL : %d", currentAction.getTotal());
+        return currentAction.getTotal().toString();
+    }
+
     public static void finish() {
-        String total = modelFacade.getDepositTotal();
-        FormData formData = (FormData) modelFacade.getFormData();
-        modelFacade.finishDeposit();
+        String total = currentAction.getTotal().toString();
+        FormData formData = (FormData) currentAction.getFormData();
+        ModelFacade.finishDeposit();
         if (formData == null) {
             Application.index();
             return;

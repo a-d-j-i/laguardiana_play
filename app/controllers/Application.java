@@ -4,20 +4,38 @@ import devices.CounterFactory;
 import devices.glory.manager.Manager;
 import models.ModelFacade;
 import models.TemplatePrinter;
+import models.actions.UserAction;
 import models.db.LgSystemProperty;
 import play.Logger;
-import play.i18n.Messages;
 import play.mvc.*;
-import validation.FixWizard;
 
-@With({Secure.class, FixWizard.class})
+@With({Secure.class})
 public class Application extends Controller {
 
-    static ModelFacade modelFacade = ModelFacade.get();
+    static UserAction userAction = ModelFacade.getCurrentUserAction();
 
     @Before
-    static void basicProperties() throws Throwable {
+    static void basicPropertiesAndFixWizard() throws Throwable {
+
+        if (request.isAjax()) {
+            return;
+        }
         renderArgs.put("useHardwareKeyboard", isProperty("useHardwareKeyboard"));
+
+        if (userAction == null) {
+            return;
+        }
+
+        String neededController = userAction.getNeededController();
+        String neededAction = userAction.getCurrentStep().getAction();
+        if (neededController == null || neededAction == null) {
+            return;
+        }
+        if (!request.controller.equalsIgnoreCase(neededController)
+                || !request.actionMethod.equalsIgnoreCase(neededAction)) {
+            Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
+            redirect(Router.getFullUrl(neededController + "." + neededAction));
+        }
     }
 
     public static void index() {
@@ -32,51 +50,48 @@ public class Application extends Controller {
         render();
     }
 
-    @Util
-    public static Object[] getCountingStatus() {
-        Manager.Status m = modelFacade.getExtraInfo();
-        Object[] o = new Object[3];
-        o[1] = modelFacade.getBillData();
-        o[2] = Messages.get("bill_deposit." + m.name().toLowerCase());
-        switch (modelFacade.getCurrentStep()) {
-            case FINISH:
-                o[0] = "FINISH";
-                break;
-            case ERROR:
-                o[0] = "ERROR";
-                break;
-            case RUNNING:
-                Logger.debug("STATE : %s MANAGER STATE : %s", modelFacade.getCurrentStep(), modelFacade.getExtraInfo().name());
-                switch (m) {
-                    case READY_TO_STORE:
-                        o[0] = "READY_TO_STORE";
-                        break;
-                    case ESCROW_FULL:
-                        o[0] = "ESCROW_FULL";
-                        break;
-                    case PUT_THE_BILLS_ON_THE_HOPER:
-                    case REMOVE_THE_BILLS_FROM_HOPER:
-                    case REMOVE_THE_BILLS_FROM_ESCROW:
-                    case REMOVE_REJECTED_BILLS:
-                    case CANCELING:
-                        o[0] = "IDLE";
-                        break;
-                    case IDLE:
-                        o[0] = "IDLE";
-                        o[2] = "";
-                        break;
-                    default:
-                        o[0] = modelFacade.getExtraInfo();
-                        break;
-                }
-                break;
-        }
-        return o;
-    }
-    // Do something about errors.
-
+//    public static Object[] getCountingStatus() {
+//        Manager.Status m = modelFacade.getExtraInfo();
+//        Object[] o = new Object[3];
+//        o[1] = modelFacade.getBillData();
+//        o[2] = Messages.get("bill_deposit." + m.name().toLowerCase());
+//        switch (modelFacade.getCurrentStep()) {
+//            case FINISH:
+//                o[0] = "FINISH";
+//                break;
+//            case ERROR:
+//                o[0] = "ERROR";
+//                break;
+//            case RUNNING:
+//                Logger.debug("STATE : %s MANAGER STATE : %s", modelFacade.getCurrentStep(), modelFacade.getExtraInfo().name());
+//                switch (m) {
+//                    case READY_TO_STORE:
+//                        o[0] = "READY_TO_STORE";
+//                        break;
+//                    case ESCROW_FULL:
+//                        o[0] = "ESCROW_FULL";
+//                        break;
+//                    case PUT_THE_BILLS_ON_THE_HOPER:
+//                    case REMOVE_THE_BILLS_FROM_HOPER:
+//                    case REMOVE_THE_BILLS_FROM_ESCROW:
+//                    case REMOVE_REJECTED_BILLS:
+//                    case CANCELING:
+//                        o[0] = "IDLE";
+//                        break;
+//                    case IDLE:
+//                        o[0] = "IDLE";
+//                        o[2] = "";
+//                        break;
+//                    default:
+//                        o[0] = modelFacade.getExtraInfo();
+//                        break;
+//                }
+//                break;
+//        }
+//        return o;
+//    }
     public static void counterError(Integer cmd) {
-        Logger.debug("COUNTE ERROR");
+        Logger.debug("COUNTER ERROR");
         Manager.Status gstatus = null;
         Manager.ErrorDetail gerror = null;
         String status = "";
@@ -88,10 +103,10 @@ public class Application extends Controller {
         if (cmd != null) {
             switch (cmd) {
                 case 1:
-                    modelFacade.reset();
+                    //modelFacade.reset();
                     break;
                 case 2:
-                    modelFacade.storingErrorReset();
+                    //modelFacade.storingErrorReset();
                     break;
             }
         }
@@ -109,23 +124,23 @@ public class Application extends Controller {
             renderArgs.put("status", status);
             renderArgs.put("gerror", gstatus);
             renderArgs.put("gstatus", gerror);
-            switch (modelFacade.getCurrentMode()) {
-                case STORING_ERROR_RECOVERY:
-                case ERROR_RECOVERY:
-                    break;
-                case COUNTING:
-                case FILTERING:
-                case BILL_DEPOSIT:
-                case ENVELOPE_DEPOSIT:
-                    break;
-                default:
-                    Application.index();
-                    break;
-            }
-            if (modelFacade.getCurrentStep() == ModelFacade.CurrentStep.FINISH) {
-                // Error Solved.
-                Application.index();
-            }
+//            switch (modelFacade.getCurrentMode()) {
+//                case STORING_ERROR_RECOVERY:
+//                case ERROR_RECOVERY:
+//                    break;
+//                case COUNTING:
+//                case FILTERING:
+//                case BILL_DEPOSIT:
+//                case ENVELOPE_DEPOSIT:
+//                    break;
+//                default:
+//                    Application.index();
+//                    break;
+//            }
+//            if (modelFacade.getCurrentStep() == ModelFacade.CurrentStep.FINISH) {
+//                // Error Solved.
+//                Application.index();
+//            }
             render();
         }
     }
