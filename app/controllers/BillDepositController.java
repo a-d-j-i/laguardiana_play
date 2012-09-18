@@ -79,7 +79,7 @@ public class BillDepositController extends Application {
     public static void mainLoop() {
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = currentAction.getAction();
+            o[0] = currentAction.getFrontEndAction();
             o[1] = currentAction.getBillData();
             o[2] = Messages.get("bill_deposit." + currentAction.getMessageName());
             renderJSON(o);
@@ -101,15 +101,15 @@ public class BillDepositController extends Application {
         mainLoop();
     }
 
-    public String getDepositTotal() {
+/*    public String getDepositTotal() {
         Logger.error("TOTAL : %d", currentAction.getTotal());
         return currentAction.getTotal().toString();
-    }
+    }*/
 
     public static void finish() {
         String total = currentAction.getTotal().toString();
         FormData formData = (FormData) currentAction.getFormData();
-        ModelFacade.finishDeposit();
+        ModelFacade.finishAction();
         if (formData == null) {
             Application.index();
             return;

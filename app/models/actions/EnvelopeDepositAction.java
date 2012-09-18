@@ -6,11 +6,12 @@ package models.actions;
 
 import controllers.Secure;
 import devices.glory.manager.Manager;
+import devices.glory.manager.Manager.ErrorDetail;
+import devices.glory.manager.Manager.Status;
 import java.util.Date;
 import models.Deposit;
 import models.ModelFacade;
 import models.db.LgEnvelope;
-import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
 
@@ -23,7 +24,6 @@ public class EnvelopeDepositAction extends UserAction {
     public DepositUserCodeReference userCodeLov;
     public String userCode;
     public LgEnvelope envelope;
-    public Deposit currentDeposit = null;
 
     public EnvelopeDepositAction(DepositUserCodeReference userCodeLov, String userCode, LgEnvelope envelope, Object formData) {
         super(formData);
@@ -37,18 +37,10 @@ public class EnvelopeDepositAction extends UserAction {
     }
 
     public void start() {
-
-        // TODO: Generalize, at start fromData is a kind on context saved
-        //synchronized 
-    }
-        
-    public void depositEnvelope(Object formData ) {
-        /*
         if (getCurrentStep() != ModelFacade.CurrentStep.NONE) {
-            error(String.format("depositEnvelope Invalid step %s", currentStep.name()));
+            Logger.error(String.format("depositEnvelope Invalid step %s", currentStep.name()));
             return;
         }
-        currentFormData = formData;
         currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov, null);
         currentDeposit.addEnvelope(envelope);
         currentMode = ModelFacade.CurrentMode.ENVELOPE_DEPOSIT;
@@ -56,27 +48,15 @@ public class EnvelopeDepositAction extends UserAction {
         if (!manager.envelopeDeposit(whenDone)) {
             error("depositEnvelope can't start glory");
             return;
-        } */
-        currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, 
-                                                    userCodeLov, null);
-        currentDeposit.save();
-        Deposit.em().getTransaction().commit();
-        Deposit.em().getTransaction().begin();
-        currentStep = CurrentStep.RUNNING;
-        // TODO this!
-//        if (!userActionApi.count(currency.numericId)) {
-//            currentStep = CurrentStep.ERROR;
-//            error = "startBillDeposit can't start glory";
-//        }
+        }
     }
-
     
+        final private BillDepositAction.WhenGloryDone whenDone = new BillDepositAction.WhenGloryDone();
+
     @Override
-    public void gloryDone(Manager.Status m, Manager.ErrorDetail me) {
-        Logger.debug("EnvelopeDepositAction When Done %s %s", m.name(), currentStep.name());
+    public void gloryDone(Status m, ErrorDetail me) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
-    /*
-    final private BillDepositAction.WhenGloryDone whenDone = new BillDepositAction.WhenGloryDone();
 
     protected class WhenGloryDone implements Runnable {
 
@@ -185,7 +165,6 @@ public class EnvelopeDepositAction extends UserAction {
                 }
             }
         }
-        
-    }*/
+    }
 
 }

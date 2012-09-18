@@ -10,7 +10,6 @@ import java.util.Date;
 import models.Deposit;
 import models.ModelFacade;
 import models.ModelFacade.CurrentMode;
-import models.ModelFacade.CurrentStep;
 import models.lov.Currency;
 import play.Logger;
 

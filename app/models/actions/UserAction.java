@@ -5,7 +5,7 @@
 package models.actions;
 
 import devices.glory.manager.Manager;
-import models.ModelFacade.UserActionApi;
+import models.ModelFacade.ActionApi;
 
 /**
  *
@@ -34,7 +34,7 @@ abstract public class UserAction {
     protected CurrentStep currentStep = CurrentStep.NONE;
     protected String error = null;
     final protected Object formData;
-    protected UserActionApi userActionApi = null;
+    protected ActionApi userActionApi = null;
 
     public UserAction(Object formData) {
         this.formData = formData;
@@ -61,7 +61,7 @@ abstract public class UserAction {
 //        }
 //    }
 
-    public void start(UserActionApi userActionApi) {
+    public void start(ActionApi userActionApi) {
         this.userActionApi = userActionApi;
     }
 

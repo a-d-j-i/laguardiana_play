@@ -12,7 +12,7 @@ import play.mvc.*;
 @With({Secure.class})
 public class Application extends Controller {
 
-    static UserAction userAction = ModelFacade.getCurrentUserAction();
+    static UserAction userAction = ModelFacade.getCurrentAction();
 
     @Before
     static void basicPropertiesAndFixWizard() throws Throwable {

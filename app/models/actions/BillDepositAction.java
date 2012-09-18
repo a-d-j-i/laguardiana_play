@@ -85,7 +85,7 @@ public class BillDepositAction extends UserAction {
         this.currency = currency;
     }
 
-    public Action getAction() {
+    public Action getFrontEndAction() {
         ActionMessage m = getMessage();
         if (m == null) {
             return null;
@@ -137,7 +137,7 @@ public class BillDepositAction extends UserAction {
     }
 
     public List<Bill> getBillData() {
-        return Bill.getCurrentCounters(currency.numericId);
+        return userActionApi.getCurrentCounters(currency.numericId);
     }
 
     public Long getTotal() {
@@ -223,7 +223,7 @@ public class BillDepositAction extends UserAction {
             return;
         }
         LgBatch batch = new LgBatch();
-        for (Bill bill : Bill.getCurrentCounters(currentDeposit.currency.numericId)) {
+        for (Bill bill : userActionApi.getCurrentCounters(currentDeposit.currency.numericId)) {
             Logger.debug(" -> quantity %d", bill.q);
             LgBill b = new LgBill(bill.q, bill.billType);
             batch.addBill(b);
