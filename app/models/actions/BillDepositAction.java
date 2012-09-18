@@ -77,7 +77,8 @@ public class BillDepositAction extends UserAction {
     public String userCode;
     public Currency currency;
 
-    public BillDepositAction(DepositUserCodeReference userCodeLov, String userCode, Currency currency, Object formData) {
+    public BillDepositAction(DepositUserCodeReference userCodeLov, 
+                        String userCode, Currency currency, Object formData) {
         super(formData);
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;

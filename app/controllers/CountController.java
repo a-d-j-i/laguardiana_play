@@ -1,7 +1,7 @@
 package controllers;
 
 import java.util.List;
-import models.ModelFacade;
+import models.actions.EnvelopeDepositAction;
 import models.lov.Currency;
 import play.Logger;
 import play.data.validation.CheckWith;
@@ -12,9 +12,21 @@ import validation.FormCurrency;
 
 public class CountController extends Application {
 
+    static EnvelopeDepositAction currentAction = null;
+    
     @Before
     static void wizardFixPage() throws Throwable {
-        switch (modelFacade.getCurrentStep()) {
+        if (currentAction==null) {
+            if (!request.actionMethod.equalsIgnoreCase("start")) {
+                Application.index();
+            } else {
+                if (!(currentAction instanceof EnvelopeDepositAction)) {
+                    Application.index();
+                }
+                currentAction = (EnvelopeDepositAction) userAction;
+            }
+        }
+/*        switch (modelFacade.getCurrentStep()) {
             case NONE:
                 if (!request.actionMethod.equalsIgnoreCase("start")) {
                     Application.index();
@@ -31,6 +43,7 @@ public class CountController extends Application {
                 Application.index();
                 break;
         }
+        */
     }
 
     static public class FormData {
@@ -54,7 +67,7 @@ public class CountController extends Application {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                modelFacade.startCounting(formData, formData.currency.currency);
+                //modelFacade.startCounting(formData, formData.currency.currency);
                 mainLoop();
                 return;
             }
@@ -73,16 +86,16 @@ public class CountController extends Application {
 
     public static void mainLoop() {
         if (request.isAjax()) {
-            renderJSON(getCountingStatus());
+            //renderJSON(getCountingStatus());
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
-            renderArgs.put("billData", modelFacade.getBillData());
+            //renderArgs.put("billData", modelFacade.getBillData());
             render();
         }
     }
 
     public static void cancel() {
-        modelFacade.cancelDeposit();
+        //modelFacade.cancelDeposit();
         mainLoop();
     }
 
@@ -91,7 +104,7 @@ public class CountController extends Application {
     }
 
     public static void finish() {
-        modelFacade.finishDeposit();
+        //modelFacade.finishDeposit();
         Application.index();
     }
 }

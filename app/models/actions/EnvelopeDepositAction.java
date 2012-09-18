@@ -23,6 +23,7 @@ public class EnvelopeDepositAction extends UserAction {
     public DepositUserCodeReference userCodeLov;
     public String userCode;
     public LgEnvelope envelope;
+    public Deposit currentDeposit = null;
 
     public EnvelopeDepositAction(DepositUserCodeReference userCodeLov, String userCode, LgEnvelope envelope, Object formData) {
         super(formData);
@@ -38,9 +39,11 @@ public class EnvelopeDepositAction extends UserAction {
     public void start() {
 
         // TODO: Generalize, at start fromData is a kind on context saved
-        synchronized 
-
-    public void depositEnvelope(Object formData, ) {
+        //synchronized 
+    }
+        
+    public void depositEnvelope(Object formData ) {
+        /*
         if (getCurrentStep() != ModelFacade.CurrentStep.NONE) {
             error(String.format("depositEnvelope Invalid step %s", currentStep.name()));
             return;
@@ -53,10 +56,27 @@ public class EnvelopeDepositAction extends UserAction {
         if (!manager.envelopeDeposit(whenDone)) {
             error("depositEnvelope can't start glory");
             return;
-        }
+        } */
+        currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, 
+                                                    userCodeLov, null);
+        currentDeposit.save();
+        Deposit.em().getTransaction().commit();
+        Deposit.em().getTransaction().begin();
+        currentStep = CurrentStep.RUNNING;
+        // TODO this!
+//        if (!userActionApi.count(currency.numericId)) {
+//            currentStep = CurrentStep.ERROR;
+//            error = "startBillDeposit can't start glory";
+//        }
     }
+
     
-        final private BillDepositAction.WhenGloryDone whenDone = new BillDepositAction.WhenGloryDone();
+    @Override
+    public void gloryDone(Manager.Status m, Manager.ErrorDetail me) {
+        Logger.debug("EnvelopeDepositAction When Done %s %s", m.name(), currentStep.name());
+    }
+    /*
+    final private BillDepositAction.WhenGloryDone whenDone = new BillDepositAction.WhenGloryDone();
 
     protected class WhenGloryDone implements Runnable {
 
@@ -165,6 +185,7 @@ public class EnvelopeDepositAction extends UserAction {
                 }
             }
         }
-    }
+        
+    }*/
 
 }
