@@ -91,6 +91,10 @@ public class ModelFacade {
             return manager.storeDeposit(depositId);
         }
 
+        public boolean withdrawDeposit() {
+            return manager.withdrawDeposit();
+        }
+
         public boolean cancelDeposit() {
             return manager.cancelDeposit(whenGloryDone);
         }
@@ -101,6 +105,16 @@ public class ModelFacade {
 
         public void finishAction() {
             ModelFacade.finishAction();
+        }
+
+        public boolean envelopeDeposit() {
+            synchronized (ModelFacade.class) {
+                if (ModelFacade.currentUserAction == null) {
+                    Logger.error("count currentAction is null");
+                    return false;
+                }
+                return manager.envelopeDeposit(whenGloryDone);
+            }
         }
     }
 

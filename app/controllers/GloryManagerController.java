@@ -116,6 +116,16 @@ public class GloryManagerController extends Application {
         index();
     }
 
+    public static void withdrawDeposit() throws IOException {
+        if (manager != null) {
+            int sequenceNumber = 1;
+            if (!manager.withdrawDeposit()) {
+                error = "Not counting cant store";
+            }
+        }
+        index();
+    }
+
     public static void reset() throws IOException {
         if (manager != null) {
             if (!manager.reset(null)) {

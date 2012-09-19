@@ -27,6 +27,7 @@ public class Application extends Controller {
         }
         String neededController = userActionTuple._1.getNeededController();
         String neededAction = userActionTuple._1.getControllerAction();
+        Logger.debug("Needed action : %s  Needed controller : %s", neededAction, neededController);
         if (neededController == null || neededAction == null) {
             return;
         }

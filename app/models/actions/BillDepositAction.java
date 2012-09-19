@@ -84,6 +84,7 @@ public class BillDepositAction extends UserAction {
         return "BillDepositController";
     }
 
+    @Override
     public void start() {
         currentDeposit = new Deposit(currentUser, userCode, userCodeLov, currency);
         currentDeposit.save();
@@ -105,8 +106,7 @@ public class BillDepositAction extends UserAction {
     }
 
     public void acceptDeposit() {
-        if ((state != ActionState.READY_TO_STORE
-                && state != ActionState.ESCROW_FULL)
+        if ((state != ActionState.READY_TO_STORE && state != ActionState.ESCROW_FULL)
                 || currentDeposit == null) {
             Logger.error("acceptDeposit Invalid step");
             return;

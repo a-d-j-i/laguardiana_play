@@ -32,6 +32,9 @@
                     <p>&{ 'envelope_deposit.has_others' }</p>
                     #{/if}
                     <p>&{ 'envelope_deposit.envelope_code' }: ${ formData.envelopeCode }</p>
+                    <p>&nbsp;</p>
+                    <!-- /resumen de datos -->
+                    <div id="info_message" style="color: green;"> 
                 </li>
             </ul>
         </div>
@@ -39,12 +42,12 @@
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
                     <!-- link cancelar -->
-                    <a id="cancelButton" href="@{cancel()}" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a id="cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a href="@{ finish() }" class="boton gris">&{ 'application.continue' }</a>
+                        <a href="#" class="boton gris">&{ 'application.continue' }</a>
                     </div>
                 </li>
             </ul>
@@ -69,17 +72,17 @@
             var status = data[ 0 ];
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
-                if ( status == 'IDLE' ) {
-                } else if ( status == 'INITIALIZING' ) {
+                $( '#info_message' ).html(  data[ 2 ] );
+                if ( status == 'IDLE' || status == 'CANCELING' ) {
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
-                } else if ( status == 'READY_TO_STORE' || status == 'ESCROW_FULL' ) {
+                } else if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
+                } else if ( status == 'ERROR' ) {
+                    window.location.href = "@{Application.counterError()}";
                 } else {          
-                    if ( lastStatus != status ) {
-                        alert( status );
-                    }
+                    alert( "Invalid status : " + status + " last status : " + lastStatus );
                 }
                 lastStatus = status
             }

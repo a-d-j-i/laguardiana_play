@@ -73,15 +73,11 @@ public class Glory {
         for (int i = 0; i < 512; i++) {
             try {
                 byte r = serialPort.read();
-                Logger.debug("readed result %d 0x%x", r, r);
                 switch (r) {
                     case 0x02:
                         byte d1 = getDigit();
-                        Logger.debug("get digit 1 %d 0x%x", d1, d1);
                         byte d2 = getDigit();
-                        Logger.debug("get digit 2 %d 0x%x", d2, d2);
                         byte d3 = getDigit();
-                        Logger.debug("get digit 3 %d 0x%x", d3, d3);
                         int l = d1 * 100 + d2 * 10 + d3 * 1;
                         //Logger.debug("Read len %d", l);
                         b = new byte[l + 5];

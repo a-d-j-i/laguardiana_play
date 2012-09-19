@@ -6,7 +6,6 @@ import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import play.Logger;
-import play.libs.F;
 
 /**
  *
@@ -21,7 +20,7 @@ public class Manager {
         ERROR,
         PUT_THE_BILLS_ON_THE_HOPER,
         ESCROW_FULL,
-        PUT_THE_ENVELOPER_IN_THE_ESCROW,
+        PUT_THE_ENVELOPE_IN_THE_ESCROW,
         INITIALIZING,
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
@@ -215,6 +214,20 @@ public class Manager {
             // TODO: One base class
             if (cmd instanceof Count) {
                 ((Count) cmd).storeDeposit(sequenceNumber);
+                return true;
+            }
+            return false;
+        }
+
+        public boolean withdrawDeposit() {
+            Logger.debug("withDrawDeposit");
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd == null) {
+                return true;
+            }
+            // TODO: One base class
+            if (cmd instanceof Count) {
+                ((Count) cmd).withdrawDeposit();
                 return true;
             }
             return false;

@@ -63,30 +63,19 @@
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
                     <!-- link cancelar -->
-                    <a id ="cancelButton" href="@{cancel()}" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a id ="cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
                     <!-- /link cancelar -->
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a id ="continueButton" href="@{accept()}" class="boton gris">&{ 'application.finish' }</a>
+                        <a id ="continueButton" href="#" class="boton gris">&{ 'application.finish' }</a>
                         <!-- /link continuar -->
                     </div>
                 </li>
             </ul>
         </div>
     </article>
-    <div id="alerta_escrow_full" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'bill_deposit.escrow_full' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'count.escrow_full_text' }</span>
-            </div>
-            <div id="alerta_botonera">
-                <a id="alerta_continueButton" class="boton naranja">&{ 'application.close' }</a>
-            </div>
-        </div>
-    </div>
 </section>
 
 #{set 'moreScripts'}
@@ -106,11 +95,9 @@
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
                 $( '#info_message' ).html(  data[ 2 ] );
-                if ( status == 'IDLE' ) {
+                if ( status == 'IDLE' || status == 'CANCELING' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
                     if ( lastStatus != status ) {
-                        waiting = true;
-                        $("#alerta_escrow_full").overlay().load();
                         $.getJSON( '@{accept()}', function( data ) {});
                         $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                     }
@@ -145,23 +132,17 @@
     $( '#cancelButton' ).click( function(event) {
         $.getJSON( '@{cancel()}', function( data ) {});
     });
-        
-    $( '#alerta_cancelButton' ).click( function(event) {
-        $("#alerta_escrow_full").overlay().close();
-        waiting = false;
-        $.getJSON( '@{cancel()}', function( data ) {});
-    });
-    
-    $( '#alerta_continueButton' ).click( function(event) {
-        $("#alerta_escrow_full").overlay().close();
-        waiting = false;
+            
+    $( '#continueButton' ).click( function(event) {
         if ( lastStatus == 'ESCROW_FULL' ) {
+            $.getJSON( '@{accept()}', function( data ) {});
+        } else if ( lastStatus == 'READY_TO_STORE' ) {
             $.getJSON( '@{accept()}', function( data ) {});
         } else {
             alert( "Invalid last status : " + lastStatus );
         }
     });
-
+    
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);
     refresh();

@@ -29,6 +29,7 @@ public class Count extends ManagerCommandAbstract {
         private Map< Integer, Integer> currentQuantity = new HashMap<Integer, Integer>();
         private final Integer currency;
         private boolean storeDeposit = false;
+        private boolean withdrawDeposit = false;
         private final Map<Integer, Integer> desiredQuantity = new HashMap<Integer, Integer>();
         private int currentSlot = 0;
         private final boolean isBatch;
@@ -102,6 +103,33 @@ public class Count extends ManagerCommandAbstract {
                 wunlock();
             }
         }
+
+        private boolean needToWithdrawDeposit() {
+            rlock();
+            try {
+                return withdrawDeposit;
+            } finally {
+                runlock();
+            }
+        }
+
+        private void withdrawDeposit() {
+            wlock();
+            try {
+                this.withdrawDeposit = true;
+            } finally {
+                wunlock();
+            }
+        }
+
+        private void withdrawDepositDone() {
+            wlock();
+            try {
+                this.withdrawDeposit = false;
+            } finally {
+                wunlock();
+            }
+        }
     }
 
     @Override
@@ -136,6 +164,21 @@ public class Count extends ManagerCommandAbstract {
                         countData.storeDepositDone();
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
+                        }
+                        break;
+                    } else if (countData.needToWithdrawDeposit()) {
+                        countData.withdrawDepositDone();
+                        if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                            return;
+                        }
+                        WaitForEmptyEscrow();
+                        threadCommandApi.setStatus(Manager.Status.IDLE);
+                        if (onCommandDone != null) {
+                            try {
+                                onCommandDone.run();
+                            } catch (Exception e) {
+                                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
+                            }
                         }
                         break;
                     } else {
@@ -179,7 +222,6 @@ public class Count extends ManagerCommandAbstract {
                 case being_store:
                     storeTry = true;
                     break;
-
                 case counting_start_request:
                     // If there are bills in the hoper then it comes here after storing a full escrow
                     if (countData.isBatch && batchEnd) { //BATCH END
@@ -192,8 +234,6 @@ public class Count extends ManagerCommandAbstract {
                         return;
                     }
                     if (storeTry) {
-                        // TODO: Review this !!!
-                        // The command must end or not ???
                         threadCommandApi.setStatus(Manager.Status.IDLE);
                         if (onCommandDone != null) {
                             try {
@@ -230,6 +270,10 @@ public class Count extends ManagerCommandAbstract {
 
     public void storeDeposit(int sequenceNumber) {
         countData.storeDeposit();
+    }
+
+    public void withdrawDeposit() {
+        countData.withdrawDeposit();
     }
 
     public Integer getCurrency() {
