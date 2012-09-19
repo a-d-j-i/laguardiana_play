@@ -4,16 +4,16 @@
  */
 package models;
 
+import controllers.Secure;
 import devices.CounterFactory;
 import devices.glory.manager.Manager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import devices.glory.manager.Manager.ErrorDetail;
+import devices.glory.manager.Manager.Status;
 import models.actions.UserAction;
-import models.actions.UserAction.CurrentStep;
-import models.db.LgBillType;
 import play.Logger;
-import validation.Bill;
+import play.jobs.Job;
+import play.libs.F;
+import play.libs.F.Promise;
 
 /**
  * TODO: Review this with another thread/job that has a input queue for events
@@ -22,47 +22,69 @@ import validation.Bill;
  * @author aweil
  */
 public class ModelFacade {
-    
-    static public enum CurrentState {
-
-        RESERVED,
-        ERROR,
-        IDLE,
-        RUNNING,
-        FINISH;
-    }
     // FACTORY
 
-    //public final F.EventStream event = new F.EventStream();
-
-    
-    
-    private static UserAction currentAction = null;
-    final static private GloryEvent gloryEvent = new GloryEvent();
+    private static UserAction currentUserAction = null;
+    private static User currentUser = null;
+    final static private WhenGloryDone whenGloryDone = new WhenGloryDone();
     final static private Manager.ControllerApi manager = CounterFactory.getGloryManager();
 
-    static protected class GloryEvent implements Runnable {
+    static class ActionCallback extends Job {
+
+        Manager.Status status;
+        ErrorDetail errorDetail;
+
+        public ActionCallback(Status status, ErrorDetail errorDetail) {
+            this.status = status;
+            this.errorDetail = errorDetail;
+        }
+
+        @Override
+        public void doJob() throws Exception {
+            currentUserAction.gloryDone(status, errorDetail);
+        }
+    }
+
+    static protected class WhenGloryDone implements Runnable {
 
         public void run() {
             // TODO: Pass this to the orchestrator as an event.
-            if (currentAction == null) {
-                Logger.error("GloryEvent current user action is null");
+            if (currentUserAction == null) {
+                Logger.error("Current user action is null");
             } else {
-                currentAction.gloryDone(manager.getStatus(), manager.getErrorDetail());
+                Promise now = new ActionCallback(manager.getStatus(), manager.getErrorDetail()).now();
             }
         }
     }
 
-    static public class ActionApi {
+    synchronized static public F.Tuple<UserAction, Boolean> getCurrentUserAction() {
+        if (currentUser == null) {
+            if (currentUserAction != null) {
+                Logger.error("getCurrentStep Invalid action state %s", currentUserAction.getActionState());
+            }
+            return new F.Tuple<UserAction, Boolean>(null, true);
+        }
+        if (currentUser.equals(Secure.getCurrentUser())) {
+            return new F.Tuple<UserAction, Boolean>(currentUserAction, true);
+        } else {
+            return new F.Tuple<UserAction, Boolean>(null, false);
+        }
+    }
+
+    static public class UserActionApi {
 
         public boolean count(Integer numericId) {
             synchronized (ModelFacade.class) {
-                if (ModelFacade.currentAction == null) {
+                if (ModelFacade.currentUserAction == null) {
                     Logger.error("count currentAction is null");
                     return false;
                 }
-                return manager.count(gloryEvent, null, numericId);
+                return manager.count(whenGloryDone, null, numericId);
             }
+        }
+
+        public Manager.Status getManagerStatus() {
+            return manager.getStatus();
         }
 
         public boolean storeDeposit(Integer depositId) {
@@ -70,61 +92,33 @@ public class ModelFacade {
         }
 
         public boolean cancelDeposit() {
-            return manager.cancelDeposit(gloryEvent);
+            return manager.cancelDeposit(whenGloryDone);
         }
 
-        public List<Bill> getCurrentCounters(Integer currency) {
-            List<Bill> ret = new ArrayList<Bill>();
-            List<LgBillType> billTypes = LgBillType.find(currency);
-
-
-            Map<Integer, Integer> desiredQuantity = null;
-            Map<Integer, Integer> currentQuantity = null;
-            if (manager != null) {
-                currentQuantity = manager.getCurrentQuantity();
-                desiredQuantity = manager.getDesiredQuantity();
-            }
-            for (LgBillType bb : billTypes) {
-                Bill b = new Bill();
-                b.billType = bb;
-                b.tid = bb.billTypeId;
-                b.btd = bb.toString();
-                b.d = bb.denomination;
-                if (currentQuantity != null && currentQuantity.containsKey(bb.slot)) {
-                    b.q = currentQuantity.get(bb.slot);
-                }
-                if (desiredQuantity != null && desiredQuantity.containsKey(bb.slot)) {
-                    b.dq = desiredQuantity.get(bb.slot);
-                }
-                ret.add(b);
-            }
-            return ret;
+        public Manager.ErrorDetail getErrorDetail() {
+            return manager.getErrorDetail();
         }
-    }
 
-    synchronized static public UserAction getCurrentAction() {
-        return ModelFacade.currentAction;
+        public void finishAction() {
+            ModelFacade.finishAction();
+        }
     }
 
     synchronized static public void startAction(UserAction userAction) {
-        if (ModelFacade.currentAction != null) {
+        if (currentUserAction != null || currentUser != null) {
             Logger.error("startAction currentAction is not null");
             return;
         }
-        ModelFacade.currentAction = userAction;
-        ModelFacade.currentAction.start(new ActionApi());
+        currentUser = Secure.getCurrentUser();
+        currentUserAction = userAction;
+        currentUserAction.start(currentUser, new UserActionApi());
     }
 
-    synchronized public static void finishAction() {
-        if (ModelFacade.currentAction == null) {
+    synchronized private static void finishAction() {
+        if (currentUserAction == null || currentUser == null) {
             Logger.error("finishDeposit currentAction is null");
-            return;
         }
-        CurrentStep c = ModelFacade.currentAction.getCurrentStep();
-        if (c != CurrentStep.FINISH) {
-            Logger.error("finishDeposit Invalid step %s", c.name());
-            return;
-        }
-        ModelFacade.currentAction = null;
+        currentUserAction = null;
+        currentUser = null;
     }
 }

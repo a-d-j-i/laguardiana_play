@@ -13,12 +13,12 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
     @Id
     @Column( name = "event_id", unique = true, nullable = false )
     @GeneratedValue
-    public Integer eventId;
+    public int eventId;
     @ManyToOne( fetch = FetchType.LAZY )
     @JoinColumn( name = "deposit_id" )
     public LgDeposit deposit;
     @Column( name = "event_type_lov", nullable = false )
-    public Integer eventTypeLov;
+    public int eventTypeLov;
     @Temporal( TemporalType.DATE )
     @Column( name = "creation_date", nullable = false, length = 13 )
     public Date creationDate;

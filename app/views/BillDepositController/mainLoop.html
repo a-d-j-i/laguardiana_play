@@ -83,7 +83,7 @@
             </div>
             <div id="alerta_botonera">
                 <a id ="alerta_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
-                <a id="alerta_continueButton" class="boton naranja">&{ 'application.close' }</a>
+                <a id="alerta_continueButton" class="boton naranja">&{ 'application.continue' }</a>
             </div>
         </div>
     </div>
@@ -106,7 +106,7 @@
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
                 $( '#info_message' ).html(  data[ 2 ] );
-                if ( status == 'IDLE' ) {
+                if ( status == 'IDLE' || status == 'CANCELING' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
                     if ( lastStatus != status ) {
                         waiting = true;

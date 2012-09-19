@@ -134,7 +134,6 @@ public class Count extends ManagerCommandAbstract {
                 case storing_start_request:
                     if (countData.needToStoreDeposit()) {
                         countData.storeDepositDone();
-                        threadCommandApi.setStatus(Manager.Status.STORING);
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
@@ -195,6 +194,7 @@ public class Count extends ManagerCommandAbstract {
                     if (storeTry) {
                         // TODO: Review this !!!
                         // The command must end or not ???
+                        threadCommandApi.setStatus(Manager.Status.IDLE);
                         if (onCommandDone != null) {
                             try {
                                 onCommandDone.run();
@@ -202,8 +202,6 @@ public class Count extends ManagerCommandAbstract {
                                 threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
                             }
                         }
-                        //gotoNeutral(true, false);
-                        threadCommandApi.setStatus(Manager.Status.IDLE);
                     }
                     if (batchCountStart()) { // batch end
                         batchEnd = true;

@@ -9,13 +9,12 @@ import devices.glory.manager.command.Init;
 import devices.glory.manager.command.ManagerCommandAbstract;
 import devices.glory.manager.command.Stop;
 import play.Logger;
-import play.jobs.Job;
 
 /**
  *
  * @author adji
  */
-public class ManagerThread extends Job {
+public class ManagerThread extends Thread {
 
     private final ThreadCommandApi threadCommandApi;
 
@@ -24,8 +23,7 @@ public class ManagerThread extends Job {
     }
 
     @Override
-    //public void run() {
-    public void doJob() {
+    public void run() {
         ManagerCommandAbstract currentCommand;
         currentCommand = new Init( threadCommandApi );
         currentCommand.run();

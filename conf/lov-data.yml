@@ -79,7 +79,7 @@
   db.LgBillType(100pesos):
     denomination:   100
     unitLov:        1
-    slot:           0
+    slot:           31
     currency:       1
 
   db.LgBillType(500pesos):
