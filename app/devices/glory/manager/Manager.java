@@ -6,7 +6,6 @@ import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import play.Logger;
-import play.jobs.Job;
 import play.libs.F;
 
 /**
@@ -27,7 +26,6 @@ public class Manager {
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
-        STORING,
         CANCELING, CANCELED,;
     };
 
@@ -54,9 +52,7 @@ public class Manager {
             return "ErrorDetail{" + "code=" + code + ", data=" + data + '}';
         }
     }
-    final private Job job;
-    private F.Promise jobPromise = null;
-//    final private Thread thread;
+    final private Thread thread;
     final private Glory device;
     final private ManagerThreadState managerThreadState;
     // TODO: Better error reporting, as a class with arguments.
@@ -67,7 +63,7 @@ public class Manager {
     public Manager(Glory device) {
         this.device = device;
         this.managerThreadState = new ManagerThreadState();
-        this.job = new ManagerThread(new ThreadCommandApi());
+        this.thread = new ManagerThread(new ThreadCommandApi());
     }
     /*
      *
@@ -198,9 +194,6 @@ public class Manager {
 
         // TODO: Fix this.
         public boolean cancelDeposit(Runnable onCommandDone) {
-            if (getStatus() == Manager.Status.STORING) {
-                return false;
-            }
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
                 return managerControllerApi.sendCommand(new CancelCount(threadCommandApi, onCommandDone));
@@ -287,17 +280,18 @@ public class Manager {
     public class CounterFactoryApi {
 
         public void startThread() {
-            jobPromise = job.now();
+            thread.start();
         }
 
         public void close() {
             Logger.debug("Closing Manager Stop");
 //            if (thread.isAlive()) {
-            if (jobPromise != null && !jobPromise.isDone()) {
+            if (thread != null && thread.isAlive()) {
                 managerThreadState.stop();
                 try {
                     Logger.debug("Closing Manager waitUntilStop");
                     managerThreadState.waitUntilStop(60000);
+                    thread.join(10000);
                 } catch (InterruptedException ex) {
                     Logger.info("Manager thread don't die");
                 }

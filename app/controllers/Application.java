@@ -7,35 +7,43 @@ import models.TemplatePrinter;
 import models.actions.UserAction;
 import models.db.LgSystemProperty;
 import play.Logger;
+import play.libs.F.Tuple;
 import play.mvc.*;
 
 @With({Secure.class})
 public class Application extends Controller {
 
-    static UserAction userAction = ModelFacade.getCurrentUserAction();
-
     @Before
     static void basicPropertiesAndFixWizard() throws Throwable {
+        Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
 
         if (request.isAjax()) {
             return;
         }
         renderArgs.put("useHardwareKeyboard", isProperty("useHardwareKeyboard"));
 
-        if (userAction == null) {
+        if (userActionTuple._1 == null) {
             return;
         }
-
-        String neededController = userAction.getNeededController();
-        String neededAction = userAction.getCurrentStep().getAction();
+        String neededController = userActionTuple._1.getNeededController();
+        String neededAction = userActionTuple._1.getControllerAction();
         if (neededController == null || neededAction == null) {
             return;
+        }
+        if (neededAction.equalsIgnoreCase("counterError")) {
+            neededController = "Application";
         }
         if (!request.controller.equalsIgnoreCase(neededController)
                 || !request.actionMethod.equalsIgnoreCase(neededAction)) {
             Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
             redirect(Router.getFullUrl(neededController + "." + neededAction));
         }
+    }
+
+    @Util
+    static public <T> T getCurrentAction() {
+        Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
+        return (T) userActionTuple._1;
     }
 
     public static void index() {
@@ -55,7 +63,7 @@ public class Application extends Controller {
 //        Object[] o = new Object[3];
 //        o[1] = modelFacade.getBillData();
 //        o[2] = Messages.get("bill_deposit." + m.name().toLowerCase());
-//        switch (modelFacade.getCurrentStep()) {
+//        switch (modelFacade.getCurrentActionState()) {
 //            case FINISH:
 //                o[0] = "FINISH";
 //                break;
@@ -63,7 +71,7 @@ public class Application extends Controller {
 //                o[0] = "ERROR";
 //                break;
 //            case RUNNING:
-//                Logger.debug("STATE : %s MANAGER STATE : %s", modelFacade.getCurrentStep(), modelFacade.getExtraInfo().name());
+//                Logger.debug("STATE : %s MANAGER STATE : %s", modelFacade.getCurrentActionState(), modelFacade.getExtraInfo().name());
 //                switch (m) {
 //                    case READY_TO_STORE:
 //                        o[0] = "READY_TO_STORE";
@@ -137,7 +145,7 @@ public class Application extends Controller {
 //                    Application.index();
 //                    break;
 //            }
-//            if (modelFacade.getCurrentStep() == ModelFacade.CurrentStep.FINISH) {
+//            if (modelFacade.getCurrentActionState() == ModelFacade.ActionState.FINISH) {
 //                // Error Solved.
 //                Application.index();
 //            }

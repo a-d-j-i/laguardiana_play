@@ -1,8 +1,9 @@
 package controllers;
 
 import java.util.List;
-import models.ModelFacade;
+import models.ModelFacade; 
 import models.actions.BillDepositAction;
+import models.actions.UserAction;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -11,26 +12,26 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.F;
 import play.mvc.Before;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeReference;
 
 public class BillDepositController extends Application {
 
-    static BillDepositAction currentAction = null;
-
     @Before
     // currentAction allways valid
-    static void wizardFixPage() throws Throwable {
-        if (currentAction == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start")) {
+    static void wizardFixPage() {
+
+        F.Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
+        if (userActionTuple._1 == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start") || !userActionTuple._2) {
                 Application.index();
             }
         } else {
-            if (!(currentAction instanceof BillDepositAction)) {
+            if (!(userActionTuple._1 instanceof BillDepositAction)) {
                 Application.index();
             }
-            currentAction = (BillDepositAction) userAction;
         }
     }
 
@@ -59,7 +60,7 @@ public class BillDepositController extends Application {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                currentAction = new BillDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, formData.currency.currency, formData);
+                BillDepositAction currentAction = new BillDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, formData.currency.currency, formData);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
                 return;
@@ -77,11 +78,12 @@ public class BillDepositController extends Application {
     }
 
     public static void mainLoop() {
+        BillDepositAction currentAction = getCurrentAction();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = currentAction.getAction();
+            o[0] = currentAction.getActionState()._1;
             o[1] = currentAction.getBillData();
-            o[2] = Messages.get("bill_deposit." + currentAction.getMessageName());
+            o[2] = Messages.get("bill_deposit." + currentAction.getActionState()._2.toLowerCase());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
@@ -92,24 +94,22 @@ public class BillDepositController extends Application {
     }
 
     public static void cancel() {
+        BillDepositAction currentAction = getCurrentAction();
         currentAction.cancelDeposit();
         mainLoop();
     }
 
     public static void accept() {
+        BillDepositAction currentAction = getCurrentAction();
         currentAction.acceptDeposit();
         mainLoop();
     }
 
-    public String getDepositTotal() {
-        Logger.error("TOTAL : %d", currentAction.getTotal());
-        return currentAction.getTotal().toString();
-    }
-
     public static void finish() {
+        BillDepositAction currentAction = getCurrentAction();
         String total = currentAction.getTotal().toString();
         FormData formData = (FormData) currentAction.getFormData();
-        ModelFacade.finishDeposit();
+        currentAction.finishAction();
         if (formData == null) {
             Application.index();
             return;

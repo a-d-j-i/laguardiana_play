@@ -23,7 +23,7 @@ public class CountController extends Application {
                 if (!(currentAction instanceof EnvelopeDepositAction)) {
                     Application.index();
                 }
-                currentAction = (EnvelopeDepositAction) userAction;
+//                currentAction = (EnvelopeDepositAction) userAction;
             }
         }
 /*        switch (modelFacade.getCurrentStep()) {

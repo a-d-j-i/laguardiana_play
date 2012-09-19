@@ -13,6 +13,7 @@ import models.db.LgEnvelope;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
+import play.libs.F.Tuple;
 
 /**
  *
@@ -44,15 +45,15 @@ public class EnvelopeDepositAction extends UserAction {
         
     public void depositEnvelope(Object formData ) {
         /*
-        if (getCurrentStep() != ModelFacade.CurrentStep.NONE) {
-            error(String.format("depositEnvelope Invalid step %s", currentStep.name()));
+        if (getCurrentActionState() != ModelFacade.ActionState.START) {
+            error(String.format("depositEnvelope Invalid step %s", actionState.name()));
             return;
         }
         currentFormData = formData;
         currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov, null);
         currentDeposit.addEnvelope(envelope);
         currentMode = ModelFacade.CurrentMode.ENVELOPE_DEPOSIT;
-        currentStep = ModelFacade.CurrentStep.RUNNING;
+        actionState = ModelFacade.ActionState.RUNNING;
         if (!manager.envelopeDeposit(whenDone)) {
             error("depositEnvelope can't start glory");
             return;
@@ -62,10 +63,10 @@ public class EnvelopeDepositAction extends UserAction {
         currentDeposit.save();
         Deposit.em().getTransaction().commit();
         Deposit.em().getTransaction().begin();
-        currentStep = CurrentStep.RUNNING;
+        //actionState = ActionState.RUNNING;
         // TODO this!
 //        if (!userActionApi.count(currency.numericId)) {
-//            currentStep = CurrentStep.ERROR;
+//            actionState = ActionState.ERROR;
 //            error = "startBillDeposit can't start glory";
 //        }
     }
@@ -73,7 +74,7 @@ public class EnvelopeDepositAction extends UserAction {
     
     @Override
     public void gloryDone(Manager.Status m, Manager.ErrorDetail me) {
-        Logger.debug("EnvelopeDepositAction When Done %s %s", m.name(), currentStep.name());
+//        Logger.debug("EnvelopeDepositAction When Done %s %s", m.name(), actionState.name());
     }
     /*
     final private BillDepositAction.WhenGloryDone whenDone = new BillDepositAction.WhenGloryDone();
@@ -82,15 +83,15 @@ public class EnvelopeDepositAction extends UserAction {
 
         public void run() {
             synchronized (ModelFacade.this) {
-                Logger.debug("When Done %s %s %s", manager.getStatus().name(), currentStep.name(), currentMode.name());
+                Logger.debug("When Done %s %s %s", manager.getStatus().name(), actionState.name(), currentMode.name());
                 Manager.Status m = manager.getStatus();
-                if (currentStep != ModelFacade.CurrentStep.RUNNING && currentStep != ModelFacade.CurrentStep.ERROR) {
+                if (actionState != ModelFacade.ActionState.RUNNING && actionState != ModelFacade.ActionState.ERROR) {
                     // TODO: Log the event.
                     Logger.error("WhenDone not running");
-                    currentStep = ModelFacade.CurrentStep.ERROR;
+                    actionState = ModelFacade.ActionState.ERROR;
                     return;
                 }
-                currentStep = ModelFacade.CurrentStep.FINISH;
+                actionState = ModelFacade.ActionState.FINISH;
                 switch (currentMode) {
                     case ERROR_RECOVERY:
                     case STORING_ERROR_RECOVERY:
@@ -98,8 +99,8 @@ public class EnvelopeDepositAction extends UserAction {
                             Deposit.em().getTransaction().rollback();
                         }
                         currentDeposit = null;
-                        currentStep = ModelFacade.CurrentStep.NONE;
-                        currentMode = CurrentMode.NONE;
+                        actionState = ModelFacade.ActionState.START;
+                        currentMode = CurrentMode.START;
                         break;
                     case ENVELOPE_DEPOSIT:
                         switch (m) {
@@ -123,18 +124,18 @@ public class EnvelopeDepositAction extends UserAction {
                                 break;
                             case ERROR:
                                 Logger.error("WhenDone invalid machine error %s", manager.getErrorDetail().toString());
-                                currentStep = ModelFacade.CurrentStep.ERROR;
+                                actionState = ModelFacade.ActionState.ERROR;
                                 break;
                             default:
                                 Logger.error("WhenDone invalid machine status %s", m);
-                                currentStep = ModelFacade.CurrentStep.ERROR;
+                                actionState = ModelFacade.ActionState.ERROR;
                                 break;
                         }
                         break;
                     case COUNTING:
                         if (m != Manager.Status.CANCELED) {
                             Logger.error(String.format("WhenDone invalid manager status %s", m.name()));
-                            currentStep = ModelFacade.CurrentStep.ERROR;
+                            actionState = ModelFacade.ActionState.ERROR;
                             return;
                         }
                         return;
@@ -166,26 +167,36 @@ public class EnvelopeDepositAction extends UserAction {
                                     Deposit.em().getTransaction().commit();
                                     Deposit.em().getTransaction().begin();
                                 }
-                                currentStep = ModelFacade.CurrentStep.RUNNING;
+                                actionState = ModelFacade.ActionState.RUNNING;
                                 break;
                             case ERROR:
                                 Logger.error("WhenDone invalid machine error %s", manager.getErrorDetail().toString());
-                                currentStep = ModelFacade.CurrentStep.ERROR;
+                                actionState = ModelFacade.ActionState.ERROR;
                                 break;
                             default:
                                 Logger.error("WhenDone invalid machine status %s", m);
-                                currentStep = ModelFacade.CurrentStep.ERROR;
+                                actionState = ModelFacade.ActionState.ERROR;
                                 break;
                         }
                         break;
                     default:
-                        Logger.error(String.format("WhenDone invalid step %s", currentStep.name()));
-                        currentStep = ModelFacade.CurrentStep.ERROR;
+                        Logger.error(String.format("WhenDone invalid step %s", actionState.name()));
+                        actionState = ModelFacade.ActionState.ERROR;
                         break;
                 }
             }
         }
         
     }*/
+
+    @Override
+    public String getControllerAction() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Tuple<String, String> getActionState() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
 }

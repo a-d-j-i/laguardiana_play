@@ -2,6 +2,8 @@ package controllers;
 
 import java.util.List;
 import models.ModelFacade;
+import models.actions.EnvelopeDepositAction;
+import models.actions.FilteringAction;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.db.LgEnvelopeContent.EnvelopeContentType;
@@ -20,9 +22,22 @@ import validation.FormDepositUserCodeReference;
 @With(Secure.class)
 public class EnvelopeDepositController extends Application {
 
+    static EnvelopeDepositAction currentAction = null;
+    
     @Before
     static void wizardFixPage() throws Throwable {
-        switch (modelFacade.getCurrentStep()) {
+        if (currentAction==null) {
+            if (!request.actionMethod.equalsIgnoreCase("start")) {
+                Application.index();
+            } else {
+                if (!(currentAction instanceof EnvelopeDepositAction)) {
+                    Application.index();
+                }
+                //currentAction = (EnvelopeDepositAction) userAction;
+            }
+        }
+        
+    /*        switch (modelFacade.getCurrentStep()) {
             case NONE:
                 if (!request.actionMethod.equalsIgnoreCase("start")) {
                     Application.index();
@@ -40,7 +55,7 @@ public class EnvelopeDepositController extends Application {
                 Logger.info("Redirect to index 2");
                 Application.index();
                 break;
-        }
+        }*/
     }
 
     static public class FormDataContent extends FormCurrency {
@@ -120,7 +135,7 @@ public class EnvelopeDepositController extends Application {
                 if (formData.hasOthers != null) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
                 }
-                modelFacade.depositEnvelope(formData, (DepositUserCodeReference) formData.reference1.lov, formData.reference2, e);
+                //modelFacade.depositEnvelope(formData, (DepositUserCodeReference) formData.reference1.lov, formData.reference2, e);
                 mainLoop();
             }
         }
@@ -138,38 +153,38 @@ public class EnvelopeDepositController extends Application {
     public static void mainLoop() {
         if (request.isAjax()) {
             Object[] o = new Object[2];
-            o[0] = modelFacade.getCurrentStep();
+            //o[0] = modelFacade.getCurrentStep();
             o[1] = null;
             renderJSON(o);
             return;
         }
-        FormData formData = (FormData) modelFacade.getFormData();
-        Logger.debug("deposit data %s", formData);
-        renderArgs.put("formData", formData);
+        //FormData formData = (FormData) modelFacade.getFormData();
+        //Logger.debug("deposit data %s", formData);
+        //renderArgs.put("formData", formData);
         render();
     }
 
     public static void cancel() {
-        modelFacade.cancelDeposit();
+        //modelFacade.cancelDeposit();
         mainLoop();
     }
 
     public static void accept() {
-        modelFacade.acceptDeposit();
+        //modelFacade.acceptDeposit();
         mainLoop();
     }
 
     public static void finish() {
-        String total = modelFacade.getDepositTotal();
-        FormData formData = (FormData) modelFacade.getFormData();
-        modelFacade.finishDeposit();
-        if (formData == null) {
-            Application.index();
-            return;
-        }
-        renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("formData", formData);
-        renderArgs.put("depositTotal", total);
+//        String total = modelFacade.getDepositTotal();
+//        FormData formData = (FormData) modelFacade.getFormData();
+//        modelFacade.finishDeposit();
+//        if (formData == null) {
+//            Application.index();
+//            return;
+//        }
+//        renderArgs.put("clientCode", getProperty("client_code"));
+//        renderArgs.put("formData", formData);
+//        renderArgs.put("depositTotal", total);
         render();
     }
 }

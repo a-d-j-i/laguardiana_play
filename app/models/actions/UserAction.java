@@ -6,6 +6,9 @@ package models.actions;
 
 import devices.glory.manager.Manager;
 import models.ModelFacade.UserActionApi;
+import models.User;
+import play.Logger;
+import play.libs.F;
 
 /**
  *
@@ -13,56 +16,45 @@ import models.ModelFacade.UserActionApi;
  */
 abstract public class UserAction {
 
-    static public enum CurrentStep {
-
-        RESERVED(null),
-        ERROR("counterError"),
-        NONE("start"),
-        RUNNING("mainLoop"),
-        FINISH("finish"),;
-        final private String action;
-
-        private CurrentStep(String action) {
-            this.action = action;
-
-        }
-
-        public String getAction() {
-            return action;
-        }
-    }
-    protected CurrentStep currentStep = CurrentStep.NONE;
-    protected String error = null;
+    public String error = null;
     final protected Object formData;
     protected UserActionApi userActionApi = null;
+    protected User currentUser = null;
 
     public UserAction(Object formData) {
         this.formData = formData;
     }
 
-    public CurrentStep getCurrentStep() {
-        return currentStep;
+    protected void error(String message, Object... args) {
+        Logger.error(message, args);
+        error = String.format(message, args);
     }
+
+    abstract public F.Tuple<String, String> getActionState();
+
+    abstract public String getControllerAction();
+
 //    {
 //        if (currentUserAction == null || currentDeposit.user == null) {
 //            // unfinished Cancelation.
-//            if (currentStep == ModelFacade.CurrentStep.FINISH || currentStep == ModelFacade.CurrentStep.ERROR) {
-//                return currentStep;
+//            if (actionState == ModelFacade.ActionState.FINISH || actionState == ModelFacade.ActionState.ERROR) {
+//                return actionState;
 //            }
-//            if (currentStep != ModelFacade.CurrentStep.NONE) {
-//                error(String.format("getCurrentStep Invalid step %s", currentStep.name()));
+//            if (actionState != ModelFacade.ActionState.START) {
+//                error(String.format("getCurrentActionState Invalid step %s", actionState.name()));
 //            }
-//            return ModelFacade.CurrentStep.NONE;
+//            return ModelFacade.ActionState.START;
 //        }
 //        if (currentDeposit.user.equals(Secure.getCurrentUser())) {
-//            return currentStep;
+//            return actionState;
 //        } else {
-//            return ModelFacade.CurrentStep.RESERVED;
+//            return ModelFacade.ActionState.RESERVED;
 //        }
 //    }
-
-    public void start(UserActionApi userActionApi) {
+    public void start(User currentUser, UserActionApi userActionApi) {
         this.userActionApi = userActionApi;
+        this.currentUser = currentUser;
+        start();
     }
 
     public Object getFormData() {
@@ -74,4 +66,8 @@ abstract public class UserAction {
     abstract public void gloryDone(Manager.Status m, Manager.ErrorDetail me);
 
     abstract public String getNeededController();
+
+    public void finishAction() {
+        userActionApi.finishAction();
+    }
 }
