@@ -7,14 +7,11 @@ package models.actions;
 import controllers.Secure;
 import devices.glory.manager.Manager;
 import java.util.Date;
+import java.util.EnumMap;
 import models.Deposit;
-import models.db.LgBatch;
-import models.db.LgBill;
 import models.db.LgEnvelope;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
-import play.libs.F;
-import validation.Bill;
 
 /**
  *
@@ -22,56 +19,23 @@ import validation.Bill;
  */
 public class EnvelopeDepositAction extends UserAction {
 
-    static public enum ActionState {
+    static final EnumMap<Manager.Status, String> messageMap = new EnumMap<Manager.Status, String>(Manager.Status.class);
 
-        ERROR,
-        IDLE,
-        READY_TO_STORE,
-        FINISH,
-        CANCELING,;
-    };
+    static {
+        messageMap.put(Manager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
+        messageMap.put(Manager.Status.CANCELING, "counting_page.canceling");
+        messageMap.put(Manager.Status.CANCELED, "counting_page.deposit_canceled");
+        messageMap.put(Manager.Status.ERROR, "application.error");
+    }
     public DepositUserCodeReference userCodeLov;
     public String userCode;
     public LgEnvelope envelope;
-    public Deposit currentDeposit = null;
-    public ActionState state = ActionState.IDLE;
 
     public EnvelopeDepositAction(DepositUserCodeReference userCodeLov, String userCode, LgEnvelope envelope, Object formData) {
-        super(formData);
+        super(formData, messageMap);
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;
         this.envelope = envelope;
-    }
-
-    @Override
-    public String getControllerAction() {
-        switch (state) {
-            case ERROR:
-                return "counterError";
-            case FINISH:
-                return "finish";
-            default:
-                return "mainLoop";
-        }
-    }
-
-    @Override
-    public F.Tuple<String, String> getActionState() {
-        if (state == ActionState.IDLE) {
-            switch (userActionApi.getManagerStatus()) {
-                case ERROR:
-                    state = ActionState.ERROR;
-                    break;
-                case PUT_THE_ENVELOPE_IN_THE_ESCROW:
-                    state = ActionState.READY_TO_STORE;
-                    break;
-                default:
-                    Logger.debug("getControllerAction Current manager state %s %s",
-                            state.name(), userActionApi.getManagerStatus().name());
-                    break;
-            }
-        }
-        return new F.Tuple<String, String>(state.name(), userActionApi.getManagerStatus().name());
     }
 
     @Override
@@ -85,7 +49,7 @@ public class EnvelopeDepositAction extends UserAction {
         currentDeposit.addEnvelope(envelope);
         if (!userActionApi.envelopeDeposit()) {
             state = ActionState.ERROR;
-            error = String.format("startBillDeposit can't start glory %s", userActionApi.getErrorDetail());
+            error = String.format("startEnvelopeDeposit can't start glory %s", userActionApi.getErrorDetail());
         }
     }
 
@@ -95,7 +59,7 @@ public class EnvelopeDepositAction extends UserAction {
             return;
         }
         if (!userActionApi.storeDeposit(currentDeposit.depositId)) {
-            Logger.error("startBillDeposit can't cancel glory");
+            Logger.error("startEnvelopeDeposit can't cancel glory");
         }
     }
 
@@ -110,22 +74,32 @@ public class EnvelopeDepositAction extends UserAction {
         }
     }
 
-    protected void error(String message, Object... args) {
-        super.error(message, args);
-        state = ActionState.ERROR;
-    }
-
     @Override
     public void gloryDone(Manager.Status m, Manager.ErrorDetail me) {
-        Logger.debug("BillDepositAction When Done %s %s", m.name(), state.name());
+        Logger.debug("EnvelopeDepositAction When Done %s %s", m.name(), state.name());
+        if (m == Manager.Status.ERROR) {
+            error("Glory Error : %s", me);
+            return;
+        }
         switch (state) {
+            case IDLE:
+                switch (m) {
+                    case PUT_THE_ENVELOPE_IN_THE_ESCROW:
+                        state = ActionState.READY_TO_STORE;
+                        break;
+                    default:
+                        Logger.debug("getControllerAction Current manager state %s %s",
+                                state.name(), userActionApi.getManagerStatus().name());
+                        break;
+                }
+                break;
             case CANCELING:
                 if (m != Manager.Status.CANCELED) {
                     error("CANCELING Invalid manager status %s", m.name());
                 } else {
                     state = ActionState.FINISH;
-                    currentDeposit = null;
                 }
+                currentDeposit = null;
                 break;
             case READY_TO_STORE:
                 if (m != Manager.Status.IDLE) {
@@ -133,22 +107,12 @@ public class EnvelopeDepositAction extends UserAction {
                 }
                 state = ActionState.FINISH;
                 currentDeposit.finishDate = new Date();
+                currentDeposit.save();
+                currentDeposit = null;
                 break;
-
             default:
                 error("WhenDone invalid status %s %s %s", state.name(), m.name(), me);
-                return;
+                break;
         }
-        if (state == ActionState.ERROR) {
-            currentDeposit = null;
-            return;
-        }
-
-        Logger.debug("--------- esNewClasscrow full SAVE");
-        if (currentDeposit == null) {
-            Logger.error("addBatchToDeposit current deposit is null");
-            return;
-        }
-        currentDeposit.save();
     }
 }

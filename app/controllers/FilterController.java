@@ -2,58 +2,39 @@ package controllers;
 
 import java.util.List;
 import models.ModelFacade;
-import models.actions.EnvelopeDepositAction;
-import models.actions.FilteringAction;
+import models.actions.CountingAction;
+import models.actions.UserAction;
 import models.lov.Currency;
 import play.Logger;
 import play.data.validation.CheckWith;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.i18n.Messages;
+import play.libs.F;
 import play.mvc.Before;
-import validation.FormCurrencyBills;
+import validation.FormCurrency;
 
 public class FilterController extends Application {
 
-    static FilteringAction currentAction=null;
-    
     @Before
-    static void wizardFixPage() throws Throwable {
-        if (currentAction==null) {
-            if (!request.actionMethod.equalsIgnoreCase("start")) {
+    // currentAction allways valid
+    static void wizardFixPage() {
+        F.Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
+        if (userActionTuple._1 == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start") || !userActionTuple._2) {
                 Application.index();
-            } else {
-                if (!(currentAction instanceof FilteringAction)) {
-                    Application.index();
-                }
-                //currentAction = (FilteringAction) userAction;
+            }
+        } else {
+            if (!(userActionTuple._1 instanceof CountingAction)) {
+                Application.index();
             }
         }
-        
-    /*    switch (modelFacade.getCurrentStep()) {
-            case NONE:
-                if (!request.actionMethod.equalsIgnoreCase("start")) {
-                    Application.index();
-                    break;
-                }
-                break;
-            case FINISH:
-            case RUNNING:
-                if (modelFacade.getCurrentMode() != ModelFacade.CurrentMode.COUNTING) {
-                    Application.index();
-                }
-                break;
-            default:
-                Application.index();
-                break;
-        }*/
     }
 
     static public class FormData {
 
-        @CheckWith(FormCurrencyBills.Validate.class)
-        public FormCurrencyBills currency = null;
-        public Integer billQuantity = null;
-        public Integer batchQuantity = null;
+        @CheckWith(FormCurrency.Validate.class)
+        public FormCurrency currency = null;
 
         @Override
         public String toString() {
@@ -64,54 +45,59 @@ public class FilterController extends Application {
     public static void start(@Valid FormData formData)
             throws Throwable {
         Logger.debug("start data %s", formData);
-//        if (Validation.hasErrors()) {
-//            for (play.data.validation.Error error : Validation.errors()) {
-//                Logger.error("start : %s %s", error.getKey(), error.message());
-//            }
-//            params.flash(); // add http parameters to the flash scope
-//        } else {
-//            if (formData != null) {
-//                modelFacade.startCounting(formData, formData.currency.currency);
-//                mainLoop();
-//                return;
-//            }
-//        }
-//        if (formData == null) {
-//            formData = new FormData();
-//        }
-//
-//        //depending on a value of LgSystemProperty, show both references or redirect 
-//        //temporarily until we have a page using getReferences()..
-//        List<Currency> currencies = Currency.findAll();
-//        renderArgs.put("formData", formData);
-//        renderArgs.put("currencies", currencies);
+        if (Validation.hasErrors()) {
+            for (play.data.validation.Error error : Validation.errors()) {
+                Logger.error("Wizard : %s %s", error.getKey(), error.message());
+            }
+            params.flash(); // add http parameters to the flash scope
+        } else {
+            if (formData != null) {
+                CountingAction currentAction = new CountingAction(formData.currency.currency, formData);
+                ModelFacade.startAction(currentAction);
+                mainLoop();
+                return;
+            }
+        }
+        if (formData == null) {
+            formData = new FormData();
+        }
+        List<Currency> currencies = Currency.findAll();
+        renderArgs.put("formData", formData);
+        renderArgs.put("currencies", currencies);
         render();
     }
 
     public static void mainLoop() {
+        CountingAction currentAction = getCurrentAction();
         if (request.isAjax()) {
-            Object[] o = new Object[2];
-            //o[0] = modelFacade.getCurrentStep();
-            //o[1] = modelFacade.getBillData();
+            Object[] o = new Object[3];
+            o[0] = currentAction.getActionState();
+            o[1] = currentAction.getBillData();
+            o[2] = Messages.get(currentAction.getActionMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
-            //renderArgs.put("billData", modelFacade.getBillData());
+            renderArgs.put("billData", currentAction.getBillData());
+            renderArgs.put("formData", currentAction.getFormData());
             render();
         }
     }
 
     public static void cancel() {
-        //modelFacade.cancelDeposit();
+        CountingAction currentAction = getCurrentAction();
+        currentAction.cancelDeposit();
         mainLoop();
     }
 
     public static void accept() {
-        cancel();
+        CountingAction currentAction = getCurrentAction();
+        currentAction.acceptDeposit();
+        mainLoop();
     }
 
     public static void finish() {
-        //modelFacade.finishDeposit();
+        CountingAction currentAction = getCurrentAction();
+        currentAction.finishAction();
         Application.index();
     }
 }

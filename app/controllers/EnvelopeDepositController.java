@@ -138,9 +138,9 @@ public class EnvelopeDepositController extends Application {
         EnvelopeDepositAction currentAction = getCurrentAction();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = currentAction.getActionState()._1;
+            o[0] = currentAction.getActionState();
             o[1] = null;
-            o[2] = Messages.get("envelope_deposit." + currentAction.getActionState()._2.toLowerCase());
+            o[2] = Messages.get(currentAction.getActionMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));

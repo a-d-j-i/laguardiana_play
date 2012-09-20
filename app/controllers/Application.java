@@ -7,6 +7,7 @@ import models.TemplatePrinter;
 import models.actions.UserAction;
 import models.db.LgSystemProperty;
 import play.Logger;
+import play.libs.F;
 import play.libs.F.Tuple;
 import play.mvc.*;
 
@@ -59,63 +60,37 @@ public class Application extends Controller {
         render();
     }
 
-//    public static Object[] getCountingStatus() {
-//        Manager.Status m = modelFacade.getExtraInfo();
-//        Object[] o = new Object[3];
-//        o[1] = modelFacade.getBillData();
-//        o[2] = Messages.get("bill_deposit." + m.name().toLowerCase());
-//        switch (modelFacade.getCurrentActionState()) {
-//            case FINISH:
-//                o[0] = "FINISH";
-//                break;
-//            case ERROR:
-//                o[0] = "ERROR";
-//                break;
-//            case RUNNING:
-//                Logger.debug("STATE : %s MANAGER STATE : %s", modelFacade.getCurrentActionState(), modelFacade.getExtraInfo().name());
-//                switch (m) {
-//                    case READY_TO_STORE:
-//                        o[0] = "READY_TO_STORE";
-//                        break;
-//                    case ESCROW_FULL:
-//                        o[0] = "ESCROW_FULL";
-//                        break;
-//                    case PUT_THE_BILLS_ON_THE_HOPER:
-//                    case REMOVE_THE_BILLS_FROM_HOPER:
-//                    case REMOVE_THE_BILLS_FROM_ESCROW:
-//                    case REMOVE_REJECTED_BILLS:
-//                    case CANCELING:
-//                        o[0] = "IDLE";
-//                        break;
-//                    case IDLE:
-//                        o[0] = "IDLE";
-//                        o[2] = "";
-//                        break;
-//                    default:
-//                        o[0] = modelFacade.getExtraInfo();
-//                        break;
-//                }
-//                break;
-//        }
-//        return o;
-//    }
     public static void counterError(Integer cmd) {
-        Logger.debug("COUNTER ERROR");
         Manager.Status gstatus = null;
         Manager.ErrorDetail gerror = null;
         String status = "";
-        Manager.ControllerApi manager = CounterFactory.getGloryManager();
+        final Manager.ControllerApi manager = CounterFactory.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
             gerror = manager.getErrorDetail();
         }
+        F.Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
+        if (userActionTuple._1 != null) {
+            status = userActionTuple._1.error;
+        }
         if (cmd != null) {
+            if (userActionTuple._1 != null) {
+                userActionTuple._1.finishAction();
+            }
             switch (cmd) {
                 case 1:
-                    //modelFacade.reset();
+                    manager.cancelDeposit(new Runnable() {
+                        public void run() {
+                            manager.reset(null);
+                        }
+                    });
                     break;
                 case 2:
-                    //modelFacade.storingErrorReset();
+                    manager.cancelDeposit(new Runnable() {
+                        public void run() {
+                            manager.storingErrorReset(null);
+                        }
+                    });
                     break;
             }
         }

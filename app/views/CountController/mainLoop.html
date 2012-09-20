@@ -95,12 +95,7 @@
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
                 $( '#info_message' ).html(  data[ 2 ] );
-                if ( status == 'IDLE' || status == 'CANCELING' ) {
-                } else if ( status == 'ESCROW_FULL' ) {
-                    if ( lastStatus != status ) {
-                        $.getJSON( '@{accept()}', function( data ) {});
-                        $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
-                    }
+                if ( status == 'IDLE' || status == 'CANCELING' || status == 'ESCROW_FULL' ) {
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;

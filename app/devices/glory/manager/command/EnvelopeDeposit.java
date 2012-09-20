@@ -35,7 +35,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
         if (!waitUntilSR1State(GloryStatus.SR1Mode.escrow_open)) {
             return;
         }
-        threadCommandApi.setStatus(Manager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW);
+        setStatus(Manager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW, true);
         boolean storeTry = false;
         while (!mustCancel()) {
             if (!sense()) {
@@ -59,7 +59,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        threadCommandApi.setStatus(Manager.Status.IDLE);
+                        setStatus(Manager.Status.IDLE, false);
                         gotoNeutral(true, false);
                         return;
                     }
@@ -77,21 +77,23 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                     storeTry = true;
                     break;
                 case abnormal_device:
-                    threadCommandApi.setError(Manager.Error.JAM,
+                    setError(Manager.Error.JAM,
                             String.format("EnvelopeDeposit Abnormal device, todo: get the flags"));
                     return;
                 case storing_error:
-                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                    setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
                             String.format("EnvelopeDeposit Storing error, todo: get the flags"));
                     return;
                 default:
-                    threadCommandApi.setError(Manager.Error.APP_ERROR,
+                    setError(Manager.Error.APP_ERROR,
                             String.format("EnvelopeDeposit invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
                     return;
             }
             sleep();
         }
+        if (mustCancel()) {
+            setStatus(Manager.Status.CANCELING, false);
+        }
         gotoNeutral(true, false);
-        threadCommandApi.setStatus(Manager.Status.IDLE);
     }
 }

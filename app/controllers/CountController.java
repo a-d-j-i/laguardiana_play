@@ -44,7 +44,7 @@ public class CountController extends Application {
 
     public static void start(@Valid FormData formData)
             throws Throwable {
-        Logger.debug("chooseCurrency data %s", formData);
+        Logger.debug("start data %s", formData);
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
@@ -71,9 +71,9 @@ public class CountController extends Application {
         CountingAction currentAction = getCurrentAction();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = currentAction.getActionState()._1;
+            o[0] = currentAction.getActionState();
             o[1] = currentAction.getBillData();
-            o[2] = Messages.get("counting." + currentAction.getActionState()._2.toLowerCase());
+            o[2] = Messages.get(currentAction.getActionMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));

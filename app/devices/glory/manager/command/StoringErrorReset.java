@@ -19,6 +19,6 @@ public class StoringErrorReset extends ManagerCommandAbstract {
     @Override
     public void execute() {
         gotoNeutral(true, true);
-        threadCommandApi.setStatus(Manager.Status.IDLE);
+        setStatus(Manager.Status.IDLE, false);
     }
 }

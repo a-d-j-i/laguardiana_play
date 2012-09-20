@@ -10,6 +10,7 @@ import devices.glory.manager.Manager;
 import devices.glory.manager.Manager.ErrorDetail;
 import devices.glory.manager.Manager.Status;
 import models.actions.UserAction;
+import models.db.LgEvent;
 import play.Logger;
 import play.jobs.Job;
 import play.libs.F;
@@ -41,6 +42,7 @@ public class ModelFacade {
 
         @Override
         public void doJob() throws Exception {
+            LgEvent.save(currentUserAction.getDeposit(), LgEvent.Type.GLORY, status.name());
             currentUserAction.gloryDone(status, errorDetail);
         }
     }
@@ -119,12 +121,14 @@ public class ModelFacade {
     }
 
     synchronized static public void startAction(UserAction userAction) {
+        LgEvent.save(userAction.getDeposit(), LgEvent.Type.ACTION_START_TRY, userAction.getNeededController());
         if (currentUserAction != null || currentUser != null) {
             Logger.error("startAction currentAction is not null");
             return;
         }
         currentUser = Secure.getCurrentUser();
         currentUserAction = userAction;
+        LgEvent.save(currentUserAction.getDeposit(), LgEvent.Type.ACTION_START, userAction.getNeededController());
         currentUserAction.start(currentUser, new UserActionApi());
     }
 
@@ -132,6 +136,7 @@ public class ModelFacade {
         if (currentUserAction == null || currentUser == null) {
             Logger.error("finishDeposit currentAction is null");
         }
+        LgEvent.save(currentUserAction.getDeposit(), LgEvent.Type.ACTION_FINISH, currentUserAction.getNeededController());
         currentUserAction = null;
         currentUser = null;
     }

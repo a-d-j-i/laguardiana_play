@@ -5,10 +5,11 @@
 package models.actions;
 
 import devices.glory.manager.Manager;
+import java.util.EnumMap;
+import models.Deposit;
 import models.ModelFacade.UserActionApi;
 import models.User;
 import play.Logger;
-import play.libs.F;
 
 /**
  *
@@ -16,41 +17,47 @@ import play.libs.F;
  */
 abstract public class UserAction {
 
+    static public enum ActionState {
+
+        IDLE,
+        ERROR,
+        READY_TO_STORE,
+        ESCROW_FULL,
+        FINISH,
+        CANCELING,;
+    };
     public String error = null;
     final protected Object formData;
     protected UserActionApi userActionApi = null;
     protected User currentUser = null;
+    protected final EnumMap<Manager.Status, String> messages;
+    protected ActionState state = ActionState.IDLE;
+    protected Deposit currentDeposit = null;
 
-    public UserAction(Object formData) {
+    public UserAction(Object formData, EnumMap<Manager.Status, String> messages) {
         this.formData = formData;
+        this.messages = messages;
     }
 
-    protected void error(String message, Object... args) {
-        Logger.error(message, args);
-        error = String.format(message, args);
+    public String getActionState() {
+        return state.name();
     }
 
-    abstract public F.Tuple<String, String> getActionState();
+    public String getActionMessage() {
+        return messages.get(userActionApi.getManagerStatus());
+    }
 
-    abstract public String getControllerAction();
+    public String getControllerAction() {
+        switch (state) {
+            case ERROR:
+                return "counterError";
+            case FINISH:
+                return "finish";
+            default:
+                return "mainLoop";
+        }
+    }
 
-//    {
-//        if (currentUserAction == null || currentDeposit.user == null) {
-//            // unfinished Cancelation.
-//            if (actionState == ModelFacade.ActionState.FINISH || actionState == ModelFacade.ActionState.ERROR) {
-//                return actionState;
-//            }
-//            if (actionState != ModelFacade.ActionState.START) {
-//                error(String.format("getCurrentActionState Invalid step %s", actionState.name()));
-//            }
-//            return ModelFacade.ActionState.START;
-//        }
-//        if (currentDeposit.user.equals(Secure.getCurrentUser())) {
-//            return actionState;
-//        } else {
-//            return ModelFacade.ActionState.RESERVED;
-//        }
-//    }
     public void start(User currentUser, UserActionApi userActionApi) {
         this.userActionApi = userActionApi;
         this.currentUser = currentUser;
@@ -67,7 +74,17 @@ abstract public class UserAction {
 
     abstract public String getNeededController();
 
+    public Deposit getDeposit() {
+        return currentDeposit;
+    }
+
     public void finishAction() {
         userActionApi.finishAction();
+    }
+
+    protected void error(String message, Object... args) {
+        Logger.error(message, args);
+        error = String.format(message, args);
+        state = ActionState.ERROR;
     }
 }

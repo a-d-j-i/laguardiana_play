@@ -19,8 +19,8 @@ public class Init extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        threadCommandApi.setStatus(Manager.Status.INITIALIZING);
+        setStatus(Manager.Status.INITIALIZING, false);
         gotoNeutral(false, false);
-        threadCommandApi.setStatus(Manager.Status.INITIALIZING, Manager.Status.IDLE);
+        setStatus(Manager.Status.IDLE, false);
     }
 }

@@ -134,7 +134,7 @@ public class Count extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        threadCommandApi.setStatus(Manager.Status.IDLE);
+        setStatus(Manager.Status.IDLE, false);
 
         boolean batchEnd = false;
         if (!gotoNeutral(false, false)) {
@@ -151,7 +151,7 @@ public class Count extends ManagerCommandAbstract {
         if (!waitUntilD1State(GloryStatus.D1Mode.deposit)) {
             return;
         }
-        threadCommandApi.setStatus(Manager.Status.PUT_THE_BILLS_ON_THE_HOPER);
+        setStatus(Manager.Status.PUT_THE_BILLS_ON_THE_HOPER, false);
         boolean storeTry = false;
         while (!mustCancel()) {
             Logger.debug("Counting");
@@ -172,14 +172,7 @@ public class Count extends ManagerCommandAbstract {
                             return;
                         }
                         WaitForEmptyEscrow();
-                        threadCommandApi.setStatus(Manager.Status.IDLE);
-                        if (onCommandDone != null) {
-                            try {
-                                onCommandDone.run();
-                            } catch (Exception e) {
-                                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
-                            }
-                        }
+                        setStatus(Manager.Status.IDLE, true);
                         break;
                     } else {
                         if (countData.isBatch && batchEnd) {
@@ -187,7 +180,7 @@ public class Count extends ManagerCommandAbstract {
                             break;
                         }
                         if (gloryStatus.isEscrowFull()) {
-                            threadCommandApi.setStatus(Manager.Status.ESCROW_FULL);
+                            setStatus(Manager.Status.ESCROW_FULL, true);
                             break;
                         }
                         if (gloryStatus.isHopperBillPresent()) {
@@ -196,7 +189,7 @@ public class Count extends ManagerCommandAbstract {
                             }
                             break;
                         }
-                        threadCommandApi.setStatus(Manager.Status.READY_TO_STORE);
+                        setStatus(Manager.Status.READY_TO_STORE, true);
                     }
                     if (!refreshCurrentQuantity()) {
                         return;
@@ -212,7 +205,7 @@ public class Count extends ManagerCommandAbstract {
                     // The second time after storing.
                     if (storeTry) {
                         gotoNeutral(true, false);
-                        threadCommandApi.setStatus(Manager.Status.IDLE);
+                        setStatus(Manager.Status.IDLE, false);
                         return;
                     }
                     if (!refreshCurrentQuantity()) {
@@ -230,40 +223,33 @@ public class Count extends ManagerCommandAbstract {
                         }
                         WaitForEmptyEscrow();
                         gotoNeutral(true, false);
-                        threadCommandApi.setStatus(Manager.Status.IDLE);
+                        setStatus(Manager.Status.IDLE, false);
                         return;
                     }
                     if (storeTry) {
-                        threadCommandApi.setStatus(Manager.Status.IDLE);
-                        if (onCommandDone != null) {
-                            try {
-                                onCommandDone.run();
-                            } catch (Exception e) {
-                                threadCommandApi.setError(Manager.Error.APP_ERROR, e.getMessage());
-                            }
-                        }
+                        setStatus(Manager.Status.IDLE, true);
                     }
                     if (batchCountStart()) { // batch end
                         batchEnd = true;
                     }
                     break;
                 case abnormal_device:
-                    threadCommandApi.setError(Manager.Error.JAM,
+                    setError(Manager.Error.JAM,
                             String.format("Count Abnormal device, todo: get the flags"));
                     return;
                 case storing_error:
-                    threadCommandApi.setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                    setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
                             String.format("Count Storing error, todo: get the flags"));
                     return;
                 default:
-                    threadCommandApi.setError(Manager.Error.APP_ERROR,
+                    setError(Manager.Error.APP_ERROR,
                             String.format("Count invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
                     return;
             }
             sleep();
         }
         if (mustCancel()) {
-            threadCommandApi.setStatus(Manager.Status.CANCELING);
+            setStatus(Manager.Status.CANCELING, false);
         }
         gotoNeutral(true, false);
     }
@@ -300,12 +286,12 @@ public class Count extends ManagerCommandAbstract {
         if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
             String error = gloryStatus.getLastError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            threadCommandApi.setError(Manager.Error.APP_ERROR, error);
+            setError(Manager.Error.APP_ERROR, error);
             return false;
         }
         Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
         if (currentQuantity == null) {
-            threadCommandApi.setError(Manager.Error.APP_ERROR,
+            setError(Manager.Error.APP_ERROR,
                     String.format("Error getting current count"));
             return false;
         }
@@ -317,7 +303,7 @@ public class Count extends ManagerCommandAbstract {
             }
             int current = currentQuantity.get(countData.currentSlot);
             if (current > desired) {
-                threadCommandApi.setError(Manager.Error.APP_ERROR,
+                setError(Manager.Error.APP_ERROR,
                         String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired));
                 return true;
             }
@@ -333,7 +319,7 @@ public class Count extends ManagerCommandAbstract {
             if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
                 String error = gloryStatus.getLastError();
                 Logger.error("Error %s sending cmd : BatchDataTransmition", error);
-                threadCommandApi.setError(Manager.Error.APP_ERROR, error);
+                setError(Manager.Error.APP_ERROR, error);
             }
             return false;
         }
@@ -344,7 +330,7 @@ public class Count extends ManagerCommandAbstract {
         if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
             String error = gloryStatus.getLastError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            threadCommandApi.setError(Manager.Error.APP_ERROR, error);
+            setError(Manager.Error.APP_ERROR, error);
             return false;
         }
         Map<Integer, Integer> bills = gloryStatus.getBills();

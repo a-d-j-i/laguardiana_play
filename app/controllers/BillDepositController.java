@@ -1,7 +1,7 @@
 package controllers;
 
 import java.util.List;
-import models.ModelFacade; 
+import models.ModelFacade;
 import models.actions.BillDepositAction;
 import models.actions.UserAction;
 import models.lov.Currency;
@@ -81,9 +81,9 @@ public class BillDepositController extends Application {
         BillDepositAction currentAction = getCurrentAction();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = currentAction.getActionState()._1;
+            o[0] = currentAction.getActionState();
             o[1] = currentAction.getBillData();
-            o[2] = Messages.get("bill_deposit." + currentAction.getActionState()._2.toLowerCase());
+            o[2] = Messages.get(currentAction.getActionMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));

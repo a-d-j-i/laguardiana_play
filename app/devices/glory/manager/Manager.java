@@ -5,6 +5,7 @@ import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.ivy.core.event.publish.PublishEvent;
 import play.Logger;
 
 /**
@@ -107,26 +108,14 @@ public class Manager {
             }
         }
 
-        public void clearStatus() {
-            status.set(Status.IDLE);
-        }
-
         public void setStatus(Status c, Status s) {
             if (status.get() != Status.ERROR) {
                 status.compareAndSet(c, s);
             }
         }
 
-        public void setError(ErrorDetail e) {
-            Logger.error("MANAGER ERROR : %s %s", e.code.name(), e.data);
+        public void setError(Manager.ErrorDetail e) {
             error.set(e);
-            setStatus(Status.ERROR);
-        }
-
-        public void setError(Error e, String s) {
-            Logger.error("MANAGER ERROR : %s %s", e.name(), s);
-            error.set(new ErrorDetail(e, s));
-            setStatus(Status.ERROR);
         }
     }
 
