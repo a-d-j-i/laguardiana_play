@@ -5,7 +5,6 @@ import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.ivy.core.event.publish.PublishEvent;
 import play.Logger;
 
 /**
@@ -93,8 +92,8 @@ public class Manager {
             managerThreadApi.stopped();
         }
 
-        public GloryCommandAbstract sendGloryCommand(GloryCommandAbstract cmd) {
-            return device.sendCommand(cmd);
+        public GloryCommandAbstract sendGloryCommand(GloryCommandAbstract cmd, boolean debug) {
+            return device.sendCommand(cmd, debug);
         }
 
         public Status getStatus() {

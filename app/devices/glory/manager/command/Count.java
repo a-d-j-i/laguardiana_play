@@ -205,7 +205,7 @@ public class Count extends ManagerCommandAbstract {
                     // The second time after storing.
                     if (storeTry) {
                         gotoNeutral(true, false);
-                        setStatus(Manager.Status.IDLE, false);
+                        setStatus(Manager.Status.IDLE, true);
                         return;
                     }
                     if (!refreshCurrentQuantity()) {

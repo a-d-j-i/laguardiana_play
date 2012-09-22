@@ -136,12 +136,12 @@ public abstract class GloryCommandAbstract {
     }
 
     protected byte getDigit(byte l) {
-        if (l >= 0x30 && l <= 0x3F) {
+        if (l >= 0x30 && l <= 0x39) {
             return (byte) (l - 0x30);
         }
-        if (l >= 0x70 && l <= 0x7F) {
+        /*if (l >= 0x70 && l <= 0x7F) {
             return (byte) (l - 0x70);
-        }
+        }*/
         setError(String.format("invalid digit 0x%x", l));
         return 0;
 

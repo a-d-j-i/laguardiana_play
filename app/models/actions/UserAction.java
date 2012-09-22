@@ -44,7 +44,12 @@ abstract public class UserAction {
     }
 
     public String getActionMessage() {
-        return messages.get(userActionApi.getManagerStatus());
+        Manager.Status m = userActionApi.getManagerStatus();
+        Logger.debug("Manager Status %s", m.name());
+        if (m == Manager.Status.ERROR) {
+            state = ActionState.ERROR;
+        }
+        return messages.get(m);
     }
 
     public String getControllerAction() {

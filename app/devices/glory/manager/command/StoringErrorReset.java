@@ -5,6 +5,7 @@
 package devices.glory.manager.command;
 
 import devices.glory.manager.Manager;
+import play.Logger;
 
 /**
  *
@@ -18,7 +19,12 @@ public class StoringErrorReset extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        gotoNeutral(true, true);
-        setStatus(Manager.Status.IDLE, false);
+        Logger.debug("StoringErrorReset command");
+        if (gotoNeutral(true, true)) {
+            Logger.debug("StoringErrorReset command done");
+            setStatus(Manager.Status.IDLE, false);
+        } else {
+            Logger.debug("StoringErrorReset command faileds");
+        }
     }
 }

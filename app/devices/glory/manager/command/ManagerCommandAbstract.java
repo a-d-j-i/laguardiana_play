@@ -22,6 +22,7 @@ import play.Logger;
  */
 abstract public class ManagerCommandAbstract implements Runnable {
 
+    final static boolean DEBUG = true;
     final static int retries = 0xfff;
 
     static protected class CommandData {
@@ -278,7 +279,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             setError(Manager.Error.APP_ERROR, "Invalid command null");
             return false;
         }
-        return gloryStatus.setStatusOk(threadCommandApi.sendGloryCommand(cmd));
+        return gloryStatus.setStatusOk(threadCommandApi.sendGloryCommand(cmd, DEBUG));
     }
 
     void errorRecovery() {

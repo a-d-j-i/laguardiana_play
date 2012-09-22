@@ -7,7 +7,7 @@ package devices.glory.command;
  * If there is no end information, the response pattern c is used.
  * If there is any end information, the response pattern d is used.
  */
-public class Sense extends CommandWithCountingDataResponse {
+public class Sense extends CommandWithDataResponse {
 
     public Sense() {
         super( ( byte ) 0x40, "Sense" );

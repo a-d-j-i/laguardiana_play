@@ -120,6 +120,10 @@ public class BillDepositAction extends UserAction {
                     case ESCROW_FULL:
                         state = ActionState.ESCROW_FULL;
                         break;
+                    case IDLE:
+                        Logger.debug("Seting state to finish...");
+                        state = ActionState.FINISH;
+                        break;
                 }
                 break;
             case CANCELING:
