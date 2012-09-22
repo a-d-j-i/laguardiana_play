@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import devices.CounterFactory;
 import devices.glory.GloryReturnParser;
 import devices.glory.command.*;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.GregorianCalendar;
 import play.Logger;
@@ -100,6 +102,11 @@ public class GloryController extends Application {
         setStatusAndRedirect(glory.sendCommand(c, true));
     }
 
+    public static void setCollectMode() {
+        CommandWithAckResponse c = new devices.glory.command.SetCollectMode();
+        setStatusAndRedirect(glory.sendCommand(c, true));
+    }
+
     public static void openEscrow() {
         CommandWithAckResponse c = new devices.glory.command.OpenEscrow();
         setStatusAndRedirect(glory.sendCommand(c, true));
@@ -173,36 +180,63 @@ public class GloryController extends Application {
     }
 
     public static void logDataRequest() throws IOException {
-        CommandWithFileSizeResponse c = new devices.glory.command.StartUpload(StartUpload.Files.ERROR_C);
+        CommandWithFileSizeResponse c = new devices.glory.command.StartUpload(StartUpload.Files.COUNTER_INFO);
         GloryReturnParser st = new GloryReturnParser(glory.sendCommand(c, true));
         if (st.isError()) {
             st.setMsg("Error in StartUpload");
             setStatusAndRedirect(st);
             return;
         }
-        Long fileSize = c.getFileSize();
-        int readed;
-        for (readed = 0; (readed * 512) < fileSize; readed++) {
-            LogDataRequest l = new devices.glory.command.LogDataRequest(readed);
-            st = new GloryReturnParser(glory.sendCommand(l, true));
-            if (st.isError()) {
-                st.setMsg("Error in LogDataRequest");
-                setStatusAndRedirect(st);
-                return;
+        int fileSize = c.getFileSize();
+        Logger.debug("Filesize : %d", fileSize);
+        int block;
+        FileWriter fstream = null;
+        BufferedWriter out = null;
+        try {
+            fstream = new FileWriter("/tmp/test.txt");
+            out = new BufferedWriter(fstream);
+            for (block = 0; (block * 512) < fileSize; block++) {
+                LogDataRequest l = new devices.glory.command.LogDataRequest(block);
+                st = new GloryReturnParser(glory.sendCommand(l, true));
+                if (st.isError()) {
+                    st.setMsg("Error in LogDataRequest");
+                    setStatusAndRedirect(st);
+                    return;
+                }
+                byte[] b = l.getData();
+                int i;
+                for (i = 0; i < (b.length - 8) / 2 && (block * 512 + i) < fileSize; i++) {
+                    char ch = (char) (16 * (b[2 * i + 8] - 0x30) + ((b[ 2 * i + 9] - 0x30)));
+                    out.write(ch);
+                }
+
+                Logger.debug("-----> READED   %d", block * 512 + i);
+            }
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+            if (fstream != null) {
+                fstream.close();
             }
         }
 
-
         EndUpload c1 = new devices.glory.command.EndUpload();
-        st = new GloryReturnParser(glory.sendCommand(c, true));
+        st = new GloryReturnParser(glory.sendCommand(c1, true));
         if (st.isError()) {
             st.setMsg("Error in EndDownload");
             setStatusAndRedirect(st);
             return;
         }
-        st.setMsg(String.format("Readed %d bytes", readed));
+        /*Logger.debug("Request data readed : %d", fileSize);
+         StringBuilder h = new StringBuilder("Readed ");
+         for (byte x : data) {
+         h.append(String.format("0x%x ", x));
+         }
+         Logger.debug(h.toString());
+         st.setMsg(String.format("Readed %d bytes : %s", fileSize, h.toString()));*/
+        st.setMsg("Writed to file /tmp/test.txt");
         setStatusAndRedirect(st);
-        return;
     }
     /*
      * If you want to update ‘Device Setting Data’, write data to a file by the
@@ -213,7 +247,8 @@ public class GloryController extends Application {
      */
 
     public static void deviceSettingDataLoad() {
-        String s = "ESCROW_SET=200,\r\nREJECT_SET=1111111111111111111111111111111110000000000000000000000000000000,\r\n";
+        //String s = "ESCROW_SET=100,\r\nREJECT_SET=1001111111111111111111111111111110000000000000000000000000000000,\r\n";
+        String s = "ESCROW_SET=100,\r\nREJECT_SET=0000000000000000000000000000000000000000000000000000000000000000,\r\n";
         GloryReturnParser st = UploadData(s.length(), "settings.txt", s.getBytes());
         if (st != null) {
             setStatusAndRedirect(st);
@@ -224,7 +259,8 @@ public class GloryController extends Application {
     }
 
     public static void programUpdate() {
-        String filename = "/home/adji/Desktop/work/laguardiana/permaquim/last_sep_07_2012/DE-50/A0v0196.mot";
+        //String filename = "/home/adji/Desktop/work/laguardiana/permaquim/last_sep_07_2012/DE-50/A0v0196.mot";
+        String filename = "/tmp/test.txt";
         File f = new File(filename);
         byte b[] = new byte[(int) f.length()];
         try {
@@ -259,7 +295,7 @@ public class GloryController extends Application {
 
         byte[] b = new byte[512];
         for (int j = 0; j < ((fileSize + 512) / 512); j++) {
-            // TODO: Optimize.
+            // TODO: Optimize using System.arraycopy.
             for (int i = 0; i < 512; i++) {
                 if (j * 512 + i < data.length) {
                     b[ i] = data[ j * 512 + i];
@@ -267,7 +303,7 @@ public class GloryController extends Application {
                     b[ i] = 0;
                 }
             }
-            Logger.debug("Packet no %d", j );
+            Logger.debug("Packet no %d", j);
             c = new devices.glory.command.RequestDownload(j, b);
             st = new GloryReturnParser(glory.sendCommand(c, true));
             if (st.isError()) {

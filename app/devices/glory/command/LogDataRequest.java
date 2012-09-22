@@ -13,8 +13,9 @@ package devices.glory.command;
  */
 public class LogDataRequest extends CommandWithDataResponse {
 
-    public LogDataRequest( long packetNo ){
-        super( ( byte ) 0x45, "LogDataRequest" );
-        setCmdData( String.format( "%08x", packetNo ).getBytes() );
+    public LogDataRequest(long packetNo) {
+        super((byte) 0x45, "LogDataRequest");
+
+        setCmdData(getXXFormat(packetNo, 0x30, 8));
     }
 }

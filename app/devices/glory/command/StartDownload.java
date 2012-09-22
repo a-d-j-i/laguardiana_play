@@ -16,8 +16,13 @@ public class StartDownload extends CommandWithAckResponse {
         if (fileName.length() != 12) {
             setError("The file name must be in 8.3 format");
         }
-        String s = String.format("%08X", fileSize) + fileName;
-        Logger.debug("File size : %d, string %s", fileSize, s);
-        setCmdData(s.getBytes());
+        byte[] a, b;
+        a = getXXFormat(fileSize, 0x30, 8);
+        b = fileName.getBytes();
+        byte[] c = new byte[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        Logger.debug("File size : %d, string %s", fileSize, c.toString());
+        setCmdData(c);
     }
 }

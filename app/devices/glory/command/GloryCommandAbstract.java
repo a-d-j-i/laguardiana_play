@@ -45,6 +45,23 @@ public abstract class GloryCommandAbstract {
         this.debug = debug;
     }
 
+    protected byte[] getXXFormat(long data, int base, int len) {
+        if (len < 1) {
+            setError(String.format("Invalid len %d", len));
+            len = 1;
+        }
+        if (data >= ((long) 1 << (len * 4 + 1))) {
+            setError(String.format("Invalid data 0x%x for len %d", data, len));
+            data = ((long) 1 << (len * 4 + 1)) - 1;
+        }
+        byte[] ret = new byte[len];
+        for (int i = 0; len > 0; i += 4) {
+            long m = ((long) 0xF) << i;
+            ret[--len] = (byte) (((data & m) >>> i) + base);
+        }
+        return ret;
+    }
+
     public byte[] getCmdStr() {
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
 
@@ -57,10 +74,12 @@ public abstract class GloryCommandAbstract {
                 bo.write(cmdId);
                 bo.write(3);
             } else {
-                if (cmdData.length < 1000) {
+                if (cmdData.length <= 999) {
                     bo.write(String.format("%03d", cmdData.length + 1).getBytes());
+                } else if (cmdData.length <= 0xFFF) {
+                    bo.write(getXXFormat(cmdData.length + 1, 0x70, 3));
                 } else {
-                    bo.write(String.format("%03X", cmdData.length + 1).getBytes());
+                    setError(String.format("Error in getCmdStr invalid cmd len %d", cmdData.length));
                 }
                 bo.write(cmdId);
                 bo.write(cmdData);
@@ -120,16 +139,8 @@ public abstract class GloryCommandAbstract {
         if (l >= 0x30 && l <= 0x39) {
             return (byte) (l - 0x30);
         }
-        if (l >= 0x3a && l <= 0x3f) {
-            return (byte) (l - 0x3a + 10);
-        }
-        // 'A' - 'F'
-        if (l >= 0x41 && l <= 0x46) {
-            return (byte) (l - 0x40 + 10);
-        }
-        // 'a' - 'f'
-        if (l >= 0x61 && l <= 0x66) {
-            return (byte) (l - 0x60 + 10);
+        if (l >= 0x70 && l <= 0x7F) {
+            return (byte) (l - 0x70);
         }
         setError(String.format("invalid digit 0x%x", l));
         return 0;

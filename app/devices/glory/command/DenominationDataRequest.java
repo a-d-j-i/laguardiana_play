@@ -38,7 +38,8 @@ public class DenominationDataRequest extends CommandWithDataResponse {
                 byte[] b = {data[i], data[i + 1], data[i + 2]};
                 d.currencyCode = new String(b);
                 d.newVal = (data[ i + 3] != 0x30);
-                d.denominationCode = new Integer(getDigit(data[ i + 4]));
+                // TODO: Check for 0x4X
+                d.denominationCode = new Integer(data[ i + 4] & 0x0F);
 
                 Double dd = (Math.pow(10, getDigit(data[i + 6])) * (getDigit(data[i + 7]) * 100 + getDigit(data[i + 8]) * 10 + getDigit(data[i + 9]) * 1));
                 d.value = dd.intValue();

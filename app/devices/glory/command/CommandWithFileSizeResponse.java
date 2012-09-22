@@ -2,7 +2,7 @@ package devices.glory.command;
 
 public class CommandWithFileSizeResponse extends CommandWithDataResponse {
 
-    Long fileSize = new Long(-1);
+    int fileSize = -1;
 
     CommandWithFileSizeResponse(byte cmdId, String description) {
         super(cmdId, description);
@@ -24,11 +24,20 @@ public class CommandWithFileSizeResponse extends CommandWithDataResponse {
                     getDescription(), dr.length));
             return this;
         }
-        fileSize = Long.parseLong(new String(getData()), 16);
+        byte[] b = getData();
+        int l = 0;
+        for (int i = 0; i < b.length; i++) {
+            if (b[i] >= 0x30 && b[i] <= 0x3F) {
+                l += (b[i] - 0x30) * Math.pow(16, b.length - i - 1);
+            } else {
+                setError(String.format("Invalid digit %d == 0x%x", b[i], b[i]));
+            }
+        }
+        fileSize = l;
         return this;
     }
 
-    public Long getFileSize() {
+    public int getFileSize() {
         return fileSize;
     }
 }

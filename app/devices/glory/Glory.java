@@ -75,15 +75,16 @@ public class Glory {
                 byte r = serialPort.read();
                 switch (r) {
                     case 0x02:
-                        byte d1 = getDigit();
-                        byte d2 = getDigit();
-                        byte d3 = getDigit();
-                        int l = d1 * 100 + d2 * 10 + d3 * 1;
-                        //Logger.debug("Read len %d", l);
+                        byte[] a = new byte[3];
+                        a[ 0] = serialPort.read();
+                        a[ 1] = serialPort.read();
+                        a[ 2] = serialPort.read();
+                        int l = getXXVal(a);
+                        Logger.debug("Read len %d", l);
                         b = new byte[l + 5];
-                        b[ 0] = (byte) (d1 + 0x30);
-                        b[ 1] = (byte) (d2 + 0x30);
-                        b[ 2] = (byte) (d3 + 0x30);
+                        b[0] = a[0];
+                        b[1] = a[1];
+                        b[2] = a[2];
                         for (int j = 0; j < l + 2; j++) {
                             b[ j + 3] = serialPort.read();
                         }
@@ -119,17 +120,18 @@ public class Glory {
         return cmd.setResult(b);
     }
 
-    private byte getDigit() throws IOException {
-        byte l = serialPort.read();
-        if (l > 0x39 || l < 0x30) {
-            Logger.debug("Reading error : %d 0x%x", l, l);
-            for (int i = 0; i < 100; i++) {
-                byte b = serialPort.read();
-                Logger.debug("Reading %d : %d 0x%x", i, b, b);
+    private int getXXVal(byte[] b) throws IOException {
+        int l = 0;
+        for (int i = 0; i < b.length; i++) {
+            if (b[i] >= 0x70 && b[i] < 0x80) {
+                l += (b[i] - 0x70) * Math.pow(16, b.length - i - 1);
+            } else if (b[i] >= 0x30 && b[i] < 0x3A) {
+                l += (b[i] - 0x30) * Math.pow(10, b.length - i - 1);
+            } else {
+                throw new IOException(String.format("Invalid digit %d == 0x%x", b[i], b[i]));
             }
-            throw new IOException(String.format("Length digit invalid %d == 0x%x", l, l));
         }
-        return (byte) (l - 0x30);
+        return l;
     }
 
     public byte[] getBytes(int quantity) throws IOException {
