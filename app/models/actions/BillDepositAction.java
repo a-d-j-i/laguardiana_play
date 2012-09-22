@@ -126,7 +126,6 @@ public class BillDepositAction extends UserAction {
                 if (m != Manager.Status.CANCELED) {
                     error("CANCELING Invalid manager status %s", m.name());
                     currentDeposit = null;
-                    return;
                 } else {
                     state = ActionState.FINISH;
                     currentDeposit = null;

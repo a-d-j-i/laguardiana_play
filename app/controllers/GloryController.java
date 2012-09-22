@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import play.Logger;
 import play.Play;
@@ -281,7 +283,10 @@ public class GloryController extends Application {
     }
 
     public static void setTime() {
-        CommandWithAckResponse c = new devices.glory.command.SetTime(GregorianCalendar.getInstance().getTime());
+        Date now = new Date();
+        //Calendar calendar = new GregorianCalendar(2007, Calendar.JANUARY, 1);
+        //GregorianCalendar.getInstance().getTime()
+        CommandWithAckResponse c = new devices.glory.command.SetTime(now);
         setStatusAndRedirect(glory.sendCommand(c, true));
     }
 

@@ -19,8 +19,8 @@ GET     /public/                                    staticDir:public
 # Import CRUD routes
 #GET     /admin/?                                Admin.index
 # there is a small bug in crud module
-GET     /crud/index                            crud.CrudBaseController.index()
-*       /admin                                  module:crud
+GET     /crud/index                              crud.CrudBaseController.index()
+*       /admin                                   module:crud
 
 
 # Catch all

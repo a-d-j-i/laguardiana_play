@@ -1,6 +1,11 @@
 # You can specialize this file for each language.
 # For example, for French create a messages.fr file
+#Crud label examples.
+username=Nombre de usuario
+password=Clave
+externalId=Id externo
 #
+
 secure.username=USUARIO
 secure.password=CONTRASEÑA
 secure.title=INGRESO DE USUARIO
@@ -103,3 +108,5 @@ validation.required.checkData_amount=campo obligatorio
 validation.required.ticketData_amount=campo obligatorio
 
 filter.choose_denomination=Elija la denominacion
+
+

@@ -2,6 +2,7 @@ package models;
 
 import java.util.Date;
 import javax.persistence.Entity;
+import javax.persistence.PostUpdate;
 import models.db.*;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
@@ -45,6 +46,11 @@ public class Deposit extends LgDeposit {
         }
         this.creationDate = new Date();
         this.currency = currency;
+    }
+
+    @PostUpdate
+    public void DepositCreatedEvent() {
+        LgEvent.save(this, LgEvent.Type.DEPOSIT_CHANGE, String.format("Deposit changed by userId : %d", user.userId));
     }
 
     public LgLov findUserCodeLov() {

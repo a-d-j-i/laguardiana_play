@@ -136,7 +136,7 @@ public abstract class GloryCommandAbstract {
     }
 
     protected byte getDigit(byte l) {
-        if (l >= 0x30 && l <= 0x39) {
+        if (l >= 0x30 && l <= 0x3F) {
             return (byte) (l - 0x30);
         }
         if (l >= 0x70 && l <= 0x7F) {

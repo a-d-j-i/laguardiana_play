@@ -47,6 +47,7 @@ public class EnvelopeDepositAction extends UserAction {
     public void start() {
         currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov, null);
         currentDeposit.addEnvelope(envelope);
+        currentDeposit.save();
         if (!userActionApi.envelopeDeposit()) {
             state = ActionState.ERROR;
             error = String.format("startEnvelopeDeposit can't start glory %s", userActionApi.getErrorDetail());
@@ -107,7 +108,7 @@ public class EnvelopeDepositAction extends UserAction {
                 }
                 state = ActionState.FINISH;
                 currentDeposit.finishDate = new Date();
-                currentDeposit.save();
+                currentDeposit.merge();
                 currentDeposit = null;
                 break;
             default:
