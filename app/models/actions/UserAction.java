@@ -23,6 +23,8 @@ abstract public class UserAction {
         ERROR,
         READY_TO_STORE,
         ESCROW_FULL,
+        READY_TO_STORE_STORING,
+        ESCROW_FULL_STORING,
         FINISH,
         CANCELING,;
     };

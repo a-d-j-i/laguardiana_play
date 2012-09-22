@@ -88,9 +88,15 @@ public class BillDepositAction extends UserAction {
         currentDeposit.addBatch(batch);
         batch.save();
         currentDeposit.merge();
+        if (state == ActionState.READY_TO_STORE) {
+            state = ActionState.READY_TO_STORE_STORING;
+        } else if (state == ActionState.ESCROW_FULL) {
+            state = ActionState.ESCROW_FULL_STORING;
+        }
         if (!userActionApi.storeDeposit(currentDeposit.depositId)) {
             Logger.error("startBillDeposit can't cancel glory");
         }
+
     }
 
     public void cancelDeposit() {
@@ -135,19 +141,24 @@ public class BillDepositAction extends UserAction {
                     currentDeposit = null;
                 }
                 break;
-            case ESCROW_FULL:
+            case ESCROW_FULL_STORING:
                 if (m != Manager.Status.IDLE) {
                     Logger.error("ESCROW_FULL Invalid manager status %s", m.name());
                 }
                 state = ActionState.IDLE;
                 break;
-            case READY_TO_STORE:
+            case READY_TO_STORE_STORING:
                 if (m != Manager.Status.IDLE) {
                     Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
                 }
                 state = ActionState.FINISH;
                 currentDeposit.finishDate = new Date();
                 currentDeposit.merge();
+                break;
+            case FINISH:
+                if (m != Manager.Status.IDLE) {
+                    error("WhenDone invalid status %s %s %s", state.name(), m.name(), me);
+                }
                 break;
             default:
                 error("WhenDone invalid status %s %s %s", state.name(), m.name(), me);

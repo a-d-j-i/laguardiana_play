@@ -107,6 +107,7 @@
             if ( status != null && status.toString() != 'null' ) {
                 $( '#info_message' ).html(  data[ 2 ] );
                 if ( status == 'IDLE' || status == 'CANCELING' ) {
+                } else if ( status == 'ESCROW_FULL_STORING' || status == 'READY_TO_STORE_STORING' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
                     if ( lastStatus != status ) {
                         waiting = true;
@@ -165,7 +166,9 @@
     $( '#alerta_continueButton' ).click( function(event) {
         $("#alerta_escrow_full").overlay().close();
         waiting = false;
-        if ( lastStatus == 'ESCROW_FULL' ) {
+        if ( lastStatus == 'IDLE' || lastStatus == 'ESCROW_FULL_STORING' ) {
+            // waiting the glory.
+        } else if ( lastStatus == 'ESCROW_FULL' ) {
             $.getJSON( '@{accept()}', function( data ) {});
         } else {
             alert( "Invalid last status : " + lastStatus );
