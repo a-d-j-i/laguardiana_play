@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
+import models.db.LgLov.LovCol;
+import models.lov.DepositUserCodeReference;
 import play.db.jpa.GenericModel;
 
 @Entity
@@ -32,6 +34,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     @Column(name = "user_code", length = 128)
     public String userCode;
     @Column(name = "user_code_lov")
+    @LovCol(DepositUserCodeReference.class)
     public Integer userCodeLov;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit")
     public Set<LgEvent> events = new HashSet<LgEvent>(0);

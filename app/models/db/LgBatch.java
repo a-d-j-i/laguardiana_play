@@ -53,10 +53,16 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
 
     @Override
     public String toString() {
+        long sum = 0;
+        Integer depositId = 0;
         String result = "[";
         for (LgBill bill : bills) {
-            result = result + " " + bill.toString();
+            if (bill.quantity > 0) {
+                depositId = bill.deposit.depositId;
+                sum += bill.quantity * bill.billType.denomination;
+                result += bill.toString();
+            }
         }
-        return result + "]";
+        return result + " == " + Long.toString(sum) + "]" + " {" + depositId.toString() + "}";
     }
 }

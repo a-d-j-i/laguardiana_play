@@ -1,5 +1,9 @@
 package models.db;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Date;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
@@ -10,6 +14,11 @@ import play.db.jpa.GenericModel;
 @DiscriminatorColumn(name = "type", length = 32)
 abstract public class LgLov extends GenericModel implements java.io.Serializable {
 
+    @Target(value = {ElementType.METHOD, ElementType.FIELD})
+    @Retention(value = RetentionPolicy.RUNTIME)
+    public @interface LovCol {
+        Class value();
+    }
     @Id
     @Column(name = "lov_id", unique = true, nullable = false)
     @GeneratedValue

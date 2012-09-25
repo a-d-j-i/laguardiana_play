@@ -1,5 +1,6 @@
 package models.db;
 
+import java.util.HashMap;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
@@ -15,9 +16,23 @@ public class LgEnvelopeContent extends GenericModel implements java.io.Serializa
         DOCUMENTS(4),
         OTHERS(5),;
         final private Integer lov;
+        final private static HashMap<Integer, EnvelopeContentType> reverse = new HashMap<Integer, EnvelopeContentType>();
+
+        static {
+            for (EnvelopeContentType e : EnvelopeContentType.values()) {
+                reverse.put(e.getLov(), e);
+            }
+        }
 
         private EnvelopeContentType(Integer lov) {
             this.lov = lov;
+        }
+
+        static public EnvelopeContentType find(Integer lov) {
+            if (reverse.containsKey(lov)) {
+                return reverse.get(lov);
+            }
+            return null;
         }
 
         public Integer getLov() {
@@ -42,5 +57,14 @@ public class LgEnvelopeContent extends GenericModel implements java.io.Serializa
         this.contentTypeLov = contentTypeLov.getLov();
         this.amount = amount;
         this.unitLov = unitLov;
+    }
+
+    @Override
+    public String toString() {
+        String ct = null;
+        if (EnvelopeContentType.find(contentTypeLov) != null) {
+            ct = EnvelopeContentType.find(contentTypeLov).name();
+        }
+        return "envelopeContentId=" + envelopeContentId + ", envelope=" + envelope.envelopeId + ", contentTypeLov=" + ct + ", amount=" + amount + ", unitLov=" + unitLov;
     }
 }

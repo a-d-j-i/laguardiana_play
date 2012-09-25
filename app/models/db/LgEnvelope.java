@@ -3,6 +3,7 @@ package models.db;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.*;
+import models.lov.EnvelopeType;
 import play.db.jpa.GenericModel;
 
 @Entity
@@ -31,5 +32,18 @@ public class LgEnvelope extends GenericModel implements java.io.Serializable {
     public void addContent(LgEnvelopeContent c) {
         c.envelope = this;
         envelopeContents.add(c);
+    }
+
+    @Override
+    public String toString() {
+        String et = null;
+        if (envelopeTypeLov != null) {
+            EnvelopeType evt = EnvelopeType.findByNumericId(envelopeTypeLov);
+            if (evt != null) {
+                et = evt.description;
+            }
+        }
+        return "LgEnvelope{" + "envelopeId=" + envelopeId + ", deposit=" + deposit + ", envelopeTypeLov=" + et + ", envelopeNumber=" + envelopeNumber + ", envelopeContents=" + envelopeContents
+                + '}';
     }
 }

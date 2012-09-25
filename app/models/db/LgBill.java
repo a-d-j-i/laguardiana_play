@@ -34,7 +34,7 @@ public class LgBill extends GenericModel implements java.io.Serializable {
         Integer q = quantity;
         Integer d = billType.denomination;
         Integer t = quantity * billType.denomination;
-        return (q.toString() + " *  $" + d.toString() + " = " + t.toString()
+        return ( q.toString() + " *  $" + d.toString() + " = " + t.toString()
                 + "(" + Currency.findByNumericId(billType.unitLov).toString() + ")");
     }
 
