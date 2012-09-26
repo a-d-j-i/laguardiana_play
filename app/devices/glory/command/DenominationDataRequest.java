@@ -41,7 +41,7 @@ public class DenominationDataRequest extends CommandWithDataResponse {
                 // TODO: Check for 0x4X
                 d.denominationCode = new Integer(data[ i + 4] & 0x0F);
 
-                Double dd = (Math.pow(10, getDigit(data[i + 6])) * (getDigit(data[i + 7]) * 100 + getDigit(data[i + 8]) * 10 + getDigit(data[i + 9]) * 1));
+                Double dd = (Math.pow(10, getDecDigit(data[i + 6])) * (getDecDigit(data[i + 7]) * 100 + getDecDigit(data[i + 8]) * 10 + getDecDigit(data[i + 9]) * 1));
                 d.value = dd.intValue();
                 if (data[ i + 5] != 0x30) {
                     d.value = -d.value;

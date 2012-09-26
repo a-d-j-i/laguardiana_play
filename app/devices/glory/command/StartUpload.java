@@ -6,7 +6,7 @@ package devices.glory.command;
  * NAK is returned when file access is failure. Refer to the Appendix 2 for the
  * file name.
  */
-public class StartUpload extends CommandWithFileSizeResponse {
+public class StartUpload extends CommandWithDataResponse {
 
     public enum Files {
 
@@ -39,5 +39,39 @@ public class StartUpload extends CommandWithFileSizeResponse {
     public StartUpload(Files fileName) {
         super((byte) 0x52, "StartUpload");
         setCmdData(fileName.name().getBytes());
+    }
+    int fileSize = -1;
+
+    @Override
+    public CommandWithDataResponse setResult(byte[] dr) {
+        super.setResult(dr);
+        if (getError() != null) {
+            return this;
+        }
+
+        if (getData() == null) {
+            setError("Data is null");
+            return this;
+        }
+        if (getData().length != 8) {
+            setError(String.format("Invalid command (%s) response length %d expected 8 bytes hex number",
+                    getDescription(), dr.length));
+            return this;
+        }
+        byte[] b = getData();
+        int l = 0;
+        for (int i = 0; i < b.length; i++) {
+            if (b[i] >= 0x30 && b[i] <= 0x3F) {
+                l += getHexDigit(b[i]) * Math.pow(16, b.length - i - 1);
+            } else {
+                setError(String.format("Invalid digit %d == 0x%x", b[i], b[i]));
+            }
+        }
+        fileSize = l;
+        return this;
+    }
+
+    public int getFileSize() {
+        return fileSize;
     }
 }

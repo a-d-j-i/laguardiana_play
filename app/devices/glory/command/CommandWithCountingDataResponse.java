@@ -34,9 +34,9 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
 
         if ( data.length == 32 * 3 ) {
             for ( int slot = 0; slot < 32; slot++ ) {
-                Integer value = getDigit( data[ 3 * slot] ) * 100
-                        + getDigit( data[ 3 * slot + 1] ) * 10
-                        + getDigit( data[ 3 * slot + 2] );
+                Integer value = getDecDigit( data[ 3 * slot] ) * 100
+                        + getDecDigit( data[ 3 * slot + 1] ) * 10
+                        + getDecDigit( data[ 3 * slot + 2] );
                 bills.put( slot, value );
                 if ( debug.isGratherThan( DebugLevel.PRINT_INFO ) ) {
                     Logger.debug( String.format( "readed bill %d %d", slot, value ) );
@@ -47,10 +47,10 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
             }
         } else if ( data.length == 65 * 4 ) {
             for ( int slot = 0; slot < 65; slot++ ) {
-                Integer value = getDigit( data[ 4 * slot] ) * 1000
-                        + getDigit( data[ 4 * slot + 1] ) * 100
-                        + getDigit( data[ 4 * slot + 2] ) * 10
-                        + getDigit( data[ 4 * slot + 3] );
+                Integer value = getHexDigit( data[ 4 * slot] ) * 1000
+                        + getHexDigit( data[ 4 * slot + 1] ) * 100
+                        + getHexDigit( data[ 4 * slot + 2] ) * 10
+                        + getHexDigit( data[ 4 * slot + 3] );
                 bills.put( slot, value );
                 if ( debug.isGratherThan( DebugLevel.PRINT_INFO ) ) {
                     Logger.debug( String.format( "readed bill %d %d", slot, value ) );

@@ -9,9 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -182,7 +180,7 @@ public class GloryController extends Application {
     }
 
     public static void logDataRequest() throws IOException {
-        CommandWithFileSizeResponse c = new devices.glory.command.StartUpload(StartUpload.Files.COUNTER_INFO);
+        StartUpload c = new devices.glory.command.StartUpload(StartUpload.Files.COUNTER_INFO);
         GloryReturnParser st = new GloryReturnParser(glory.sendCommand(c, true));
         if (st.isError()) {
             st.setMsg("Error in StartUpload");
@@ -261,6 +259,7 @@ public class GloryController extends Application {
     }
 
     public static void programUpdate() {
+        String gFileName = "UPGRADES.TXT";
         //String filename = "/home/adji/Desktop/work/laguardiana/permaquim/last_sep_07_2012/DE-50/A0v0196.mot";
         String filename = "/tmp/test.txt";
         File f = new File(filename);
@@ -268,7 +267,7 @@ public class GloryController extends Application {
         try {
             FileInputStream fis = new FileInputStream(f);
             int readed = fis.read(b);
-            GloryReturnParser st = UploadData(readed, "upgrades.txt", b);
+            GloryReturnParser st = UploadData(readed, gFileName, b);
             if (st != null) {
                 setStatusAndRedirect(st);
                 return;
@@ -278,8 +277,20 @@ public class GloryController extends Application {
             redirect(Router.reverse("GloryController.index").url);
         }
 
-        CommandWithAckResponse c = new devices.glory.command.ProgramUpdate("upgrades.txt");
+        CommandWithAckResponse c = new devices.glory.command.ProgramUpdate(gFileName);
         setStatusAndRedirect(glory.sendCommand(c, true));
+    }
+
+    public static void getFileInformation() {
+        String gFileName = "UPGRADES.TXT";
+        GetFileInformation c = new devices.glory.command.GetFileInformation(gFileName);
+        c = (GetFileInformation) glory.sendCommand(c, true);
+        if ( c.getFileSize()>0 && c.getDate() != null) {
+            Logger.debug("Filesize : %d, Date : %s", c.getFileSize(), c.getDate().toString());
+        } else {
+            Logger.debug("File not");
+        }
+        setStatusAndRedirect(c);
     }
 
     public static void setTime() {

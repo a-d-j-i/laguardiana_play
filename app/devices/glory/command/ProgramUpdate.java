@@ -9,8 +9,8 @@ package devices.glory.command;
  */
 public class ProgramUpdate extends CommandWithAckResponse {
 
-    public ProgramUpdate( String fileName ){
-        super( ( byte ) 0x50, "ProgramUpdate" );
-        setError( "Must finish ProgramUpdate" );
+    public ProgramUpdate(String fileName) {
+        super((byte) 0x50, "ProgramUpdate");
+        setCmdData(fileName.getBytes());
     }
 }
