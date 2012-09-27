@@ -5,6 +5,7 @@
 package models.actions;
 
 import devices.glory.manager.GloryManager;
+import devices.io_board.IoBoard;
 import java.util.EnumMap;
 import java.util.List;
 import models.lov.Currency;
@@ -121,5 +122,10 @@ public class CountingAction extends UserAction {
         }
 
         Logger.debug("--------- esNewClasscrow full SAVE");
+    }
+
+    @Override
+    public void ioBoardEvent(IoBoard.IoBoardStatus status) {
+        Logger.debug("CountingAction ioBoardEvent %s %s", status.status.name(), state.name());
     }
 }

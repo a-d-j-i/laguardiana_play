@@ -8,7 +8,9 @@ import controllers.Secure;
 import devices.CounterFactory;
 import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManager.ErrorDetail;
-import devices.glory.manager.GloryManager.Status;
+import devices.io_board.IoBoard;
+import java.util.Observable;
+import java.util.Observer;
 import models.actions.UserAction;
 import models.db.LgEvent;
 import play.Logger;
@@ -29,13 +31,14 @@ public class ModelFacade {
     private static User currentUser = null;
     final static private WhenGloryDone whenGloryDone = new WhenGloryDone();
     final static private GloryManager.ControllerApi manager = CounterFactory.getGloryManager();
+    final static private IoBoard ioBoard = CounterFactory.getIoBoard();
 
-    static class ActionCallback extends Job {
+    static class GloryActionCalblack extends Job {
 
         GloryManager.Status status;
         ErrorDetail errorDetail;
 
-        public ActionCallback(Status status, ErrorDetail errorDetail) {
+        public GloryActionCalblack(GloryManager.Status status, ErrorDetail errorDetail) {
             this.status = status;
             this.errorDetail = errorDetail;
         }
@@ -47,6 +50,37 @@ public class ModelFacade {
         }
     }
 
+    static class IoBoardActionCalblack extends Job {
+
+        IoBoard.IoBoardStatus status;
+
+        public IoBoardActionCalblack(IoBoard.IoBoardStatus status) {
+            this.status = status;
+        }
+
+        @Override
+        public void doJob() throws Exception {
+            LgEvent.save(currentUserAction.getDeposit(), LgEvent.Type.IO_BOARD, status.toString());
+            //TODO: Call the cops.
+            currentUserAction.ioBoardEvent(status);
+        }
+    }
+
+    static {
+        ioBoard.addObserver(new WhenIoBoardDone());
+    }
+
+    static protected class WhenIoBoardDone implements Observer {
+
+        public void update(Observable o, Object status) {
+            if (currentUserAction == null) {
+                Logger.error("Current user action is null");
+            } else {
+                Promise now = new IoBoardActionCalblack((IoBoard.IoBoardStatus) status).now();
+            }
+        }
+    }
+
     static protected class WhenGloryDone implements Runnable {
 
         public void run() {
@@ -54,7 +88,7 @@ public class ModelFacade {
             if (currentUserAction == null) {
                 Logger.error("Current user action is null");
             } else {
-                Promise now = new ActionCallback(manager.getStatus(), manager.getErrorDetail()).now();
+                Promise now = new GloryActionCalblack(manager.getStatus(), manager.getErrorDetail()).now();
             }
         }
     }
@@ -70,6 +104,8 @@ public class ModelFacade {
             return new F.Tuple<UserAction, Boolean>(currentUserAction, true);
         } else {
             return new F.Tuple<UserAction, Boolean>(null, false);
+
+
         }
     }
 

@@ -1,9 +1,11 @@
 package devices.io_board;
 
 import devices.SerialPortAdapterInterface;
+import devices.io_board.IoBoard.IoBoardStatus;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.Date;
+import java.util.Observable;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -13,7 +15,7 @@ import play.Logger;
 /*
  * TODO: getCh, fifo, etc in other class.
  */
-public class IoBoard {
+public class IoBoard extends Observable {
     // read timeout in ms
 
     public static final int IOBOARD_READ_TIMEOUT = 10000;
@@ -25,10 +27,12 @@ public class IoBoard {
         OPENNING,
         OPEN,
         CLOSING,
-        CLOSED,;
+        CLOSED,
+        //
+        READY_TO_STORE,;
     }
 
-    public class IoBoardStatus {
+    public class IoBoardStatus implements Cloneable {
 
         public Integer A = 0;
         public Integer B = 0;
@@ -37,6 +41,20 @@ public class IoBoard {
         public Status status = Status.IDLE;
         public boolean isRunning;
         public String error = null;
+
+        private IoBoardStatus copy() {
+            try {
+                return (IoBoardStatus) this.clone();
+            } catch (CloneNotSupportedException ex) {
+                Logger.debug("in copy CloneNotSupportedException");
+                return null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "IoBoardStatus{" + "A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ", status=" + status + ", isRunning=" + isRunning + ", error=" + error + '}';
+        }
     }
 
     private class StatusThread extends Thread {
@@ -44,10 +62,10 @@ public class IoBoard {
         private IoBoardStatus currentStatus = new IoBoardStatus();
         final private Lock mutex = new ReentrantLock();
 
-        public IoBoardStatus getLastStatus(int timeout) throws InterruptedException {
+        public IoBoardStatus getStatus() throws InterruptedException {
             mutex.lock();
             try {
-                return currentStatus;
+                return currentStatus.copy();
             } finally {
                 mutex.unlock();
             }
@@ -92,6 +110,11 @@ public class IoBoard {
                         Date currTime = new Date();
                         if (lastCmdSentTime != null && (currTime.getTime() - lastCmdSentTime.getTime()) > IOBOARD_READ_TIMEOUT) {
                             setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
+                            try {
+                                serialPort.reconect();
+                            } catch (IOException ex1) {
+                                Logger.debug("Error in reconection %s", ex1.getMessage());
+                            }
                         } else {
                             sendCmd('S');
                         }
@@ -116,12 +139,16 @@ public class IoBoard {
         }
 
         private void setStatus(Status s) {
+            IoBoardStatus status;
             mutex.lock();
             try {
                 currentStatus.status = s;
+                status = currentStatus.copy();
             } finally {
                 mutex.unlock();
             }
+            setChanged();
+            notifyObservers(status);
         }
 
         private void setError(String error) {
@@ -193,12 +220,17 @@ public class IoBoard {
             }
             serialPort.write(b);
         } catch (IOException e) {
-            Logger.error("IoBoard Error writing to port");
+            Logger.error("IoBoard Error writing to port %s", e.getMessage());
+            try {
+                serialPort.reconect();
+            } catch (IOException ex1) {
+                Logger.debug("Error in reconection %s", ex1.getMessage());
+            }
         }
     }
 
-    public IoBoardStatus getStatus(int timeout) throws InterruptedException {
-        return statusThread.getLastStatus(timeout);
+    public IoBoardStatus getStatus() throws InterruptedException {
+        return statusThread.getStatus();
     }
 
     @Override

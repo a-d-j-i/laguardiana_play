@@ -5,8 +5,6 @@ import java.io.InputStream;
 
 public interface SerialPortAdapterInterface {
 
-    public void close() throws IOException;
-
     public void write(byte[] buffer) throws IOException;
 
     public byte read(int timeout) throws IOException;
@@ -14,4 +12,8 @@ public interface SerialPortAdapterInterface {
     public String readLine(int timeout) throws IOException;
 
     public InputStream getInputStream();
+
+    public void reconect() throws IOException;
+
+    public void close() throws IOException;
 }

@@ -29,7 +29,7 @@ public class IoBoardController extends Application {
         }
         IoBoardStatus s = null;
         try {
-            s = ioBoard.getStatus(500);
+            s = ioBoard.getStatus();
         } catch (InterruptedException ex) {
             Logger.error("Timeout waiting for status %s", ex.getMessage());
         }

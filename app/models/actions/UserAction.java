@@ -5,6 +5,7 @@
 package models.actions;
 
 import devices.glory.manager.GloryManager;
+import devices.io_board.IoBoard;
 import java.util.EnumMap;
 import models.Deposit;
 import models.ModelFacade.UserActionApi;
@@ -78,6 +79,8 @@ abstract public class UserAction {
     abstract public void start();
 
     abstract public void gloryDone(GloryManager.Status m, GloryManager.ErrorDetail me);
+
+    abstract public void ioBoardEvent(IoBoard.IoBoardStatus status);
 
     abstract public String getNeededController();
 

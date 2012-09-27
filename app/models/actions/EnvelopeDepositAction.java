@@ -6,6 +6,7 @@ package models.actions;
 
 import controllers.Secure;
 import devices.glory.manager.GloryManager;
+import devices.io_board.IoBoard;
 import java.util.Date;
 import java.util.EnumMap;
 import models.Deposit;
@@ -115,5 +116,10 @@ public class EnvelopeDepositAction extends UserAction {
                 error("WhenDone invalid status %s %s %s", state.name(), m.name(), me);
                 break;
         }
+    }
+
+    @Override
+    public void ioBoardEvent(IoBoard.IoBoardStatus status) {
+        Logger.debug("CountingAction ioBoardEvent %s %s", status.status.name(), state.name());
     }
 }

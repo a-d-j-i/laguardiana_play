@@ -25,8 +25,12 @@ public class SerialPortAdapterJSSC extends SerialPortAdapterAbstract implements 
     }
 
     public SerialPortAdapterJSSC(String portN, PortConfiguration conf) throws IOException {
-
+        super(conf);
         portName = portN;
+    }
+
+    @Override
+    protected void open() throws IOException {
         try {
             String[] ports = SerialPortList.getPortNames();
             Integer p = Integer.parseInt(portName);

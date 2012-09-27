@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.util.logging.Level;
 import play.Logger;
 import play.Play;
 
@@ -36,25 +37,45 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
     InputStream in;
     OutputStream out;
 
+    // Hack the library path once!!!
+    {
+        String os = System.getProperty("os.name");
+        if (os.indexOf("Win") == 0) {
+            os = "Win";
+        }
+
+        File f = new File(Play.applicationPath.getAbsolutePath() + File.separator
+                + "lib" + File.separator + os + File.separator
+                + System.getProperty("os.arch"));
+
+        Logger.debug("app path %s", f.getAbsolutePath());
+        System.setProperty("java.library.path", f.getAbsolutePath());
+        Field fieldSysPath;
+        try {
+            fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+            fieldSysPath.setAccessible(true);
+            fieldSysPath.set(null, null);
+        } catch (NoSuchFieldException ex) {
+            Logger.error("Error setting library path %s", ex.getMessage());
+        } catch (SecurityException ex) {
+            Logger.error("Error setting library path %s", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            Logger.error("Error setting library path %s", ex.getMessage());
+        } catch (IllegalAccessException ex) {
+            Logger.error("Error setting library path %s", ex.getMessage());
+        }
+    }
+
     public SerialPortAdapterRxTx(String portN, PortConfiguration conf) throws IOException {
+        super(conf);
         portName = portN;
+    }
+
+    @Override
+    protected void open() throws IOException {
         CommPortIdentifier portIdentifier;
 
         try {
-            String os = System.getProperty("os.name");
-            if (os.indexOf("Win") == 0) {
-                os = "Win";
-            }
-
-            File f = new File(Play.applicationPath.getAbsolutePath() + File.separator
-                    + "lib" + File.separator + os + File.separator
-                    + System.getProperty("os.arch"));
-
-            Logger.debug("app path %s", f.getAbsolutePath());
-            System.setProperty("java.library.path", f.getAbsolutePath());
-            Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
-            fieldSysPath.setAccessible(true);
-            fieldSysPath.set(null, null);
             portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
             if (portIdentifier.isCurrentlyOwned()) {
                 throw new IOException("Error: Port is currently in use");
@@ -81,8 +102,8 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
 
     public void close() throws IOException {
         try {
-            Logger.debug(String.format("Closing serial port %s", serialPort.getName()));
             if (serialPort != null) {
+                Logger.debug(String.format("Closing serial port %s", serialPort.getName()));
                 in.close();
                 out.close();
                 serialPort.close();

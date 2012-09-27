@@ -65,6 +65,10 @@ public class CounterFactory extends PlayPlugin {
         }
     }
 
+    public static IoBoard getIoBoard() {
+        return getIoBoard(Play.configuration.getProperty("io_board.port"));
+    }
+
     synchronized public static IoBoard getIoBoard(String port) {
         if (port == null) {
             port = "0";

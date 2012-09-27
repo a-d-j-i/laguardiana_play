@@ -17,7 +17,8 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
         ACTION_START_TRY(2),
         ACTION_START(4),
         ACTION_FINISH(5),
-        DEPOSIT_CHANGE(6);
+        DEPOSIT_CHANGE(6),
+        IO_BOARD(7),;
         private Integer eventTypeLov;
 
         private Type(Integer eventTypeLov) {
@@ -55,5 +56,4 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
         this.eventTypeLov = type.getEventTypeLov();
         this.message = message;
     }
-
 }

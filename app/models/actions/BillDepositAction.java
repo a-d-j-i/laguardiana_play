@@ -5,6 +5,7 @@
 package models.actions;
 
 import devices.glory.manager.GloryManager;
+import devices.io_board.IoBoard;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
@@ -165,5 +166,10 @@ public class BillDepositAction extends UserAction {
                 currentDeposit = null;
                 break;
         }
+    }
+
+    @Override
+    public void ioBoardEvent(IoBoard.IoBoardStatus status) {
+        Logger.debug("CountingAction ioBoardEvent %s %s", status.status.name(), state.name());
     }
 }

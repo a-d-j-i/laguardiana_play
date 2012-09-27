@@ -99,8 +99,20 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
             this.parity = parity;
         }
     }
+    PortConfiguration conf;
     String portName = null;
     private ArrayBlockingQueue< Byte> fifo = new ArrayBlockingQueue< Byte>(1024);
+
+    public SerialPortAdapterAbstract(PortConfiguration conf) {
+        this.conf = conf;
+    }
+
+    public void reconect() throws IOException {
+        close();
+        open();
+    }
+
+    abstract protected void open() throws IOException;
 
     abstract public void close() throws IOException;
 
