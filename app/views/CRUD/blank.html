@@ -5,25 +5,24 @@
 #{/set}
 
 <section id="menu_principal">
-    <header></header>
+    <header>
+        <h2 id="crudBlankTitle">&{'crud.blank.title', type.modelName}</h2>
+    </header>
     <a href="@{CRUD.index}" class="boton_top">◄ &{ 'application.back' }</a>
-    <article>
 
-        <div id="crudBlank" class="${type.name}">
+    <div id="crudBlank" class="${type.name}">
 
-            <h2 id="crudBlankTitle">&{'crud.blank.title', type.modelName}</h2>
 
-            <div class="objectForm">
-                #{form action:@create(), enctype:'multipart/form-data'}
-                #{crud.form /}
-                <p class="crudButtons">
-                    <input type="submit" name="_save" value="&{'crud.save', type.modelName}" />
-                    <input type="submit" name="_saveAndContinue" value="&{'crud.saveAndContinue', type.modelName}" />
-                    <input type="submit" name="_saveAndAddAnother" value="&{'crud.saveAndAddAnother', type.modelName}" />
-                </p>
-                #{/form}
-            </div>
-
+        <div class="objectForm">
+            #{form action:@create(), enctype:'multipart/form-data'}
+            #{crud.form /}
+            <p class="crudButtons">
+                <input type="submit" name="_save" value="&{'crud.save', type.modelName}" />
+                <input type="submit" name="_saveAndContinue" value="&{'crud.saveAndContinue', type.modelName}" />
+                <input type="submit" name="_saveAndAddAnother" value="&{'crud.saveAndAddAnother', type.modelName}" />
+            </p>
+            #{/form}
         </div>
-    </article>
+
+    </div>
 </section>

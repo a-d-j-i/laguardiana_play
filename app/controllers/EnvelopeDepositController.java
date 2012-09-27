@@ -2,6 +2,7 @@ package controllers;
 
 import devices.DeviceFactory;
 import devices.Printer;
+import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.util.List;
 import models.ModelFacade;
@@ -96,7 +97,7 @@ public class EnvelopeDepositController extends Application {
         }
     }
 
-    public static void start(@Valid FormData formData) throws Throwable {
+    public static void start(@Valid FormData formData) {
         Logger.debug("wizard data %s", formData);
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
@@ -122,19 +123,16 @@ public class EnvelopeDepositController extends Application {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
                 }
 
-                // Print the ticket.
-                final Printer p = DeviceFactory.getPrinter();
-                if (p != null) {
+                try {
+                    // Print the ticket.
                     prepareStartRenderArgs(formData);
-                    p.print("envelopeDeposit", renderArgs);
-                } else {
-                    Logger.debug("Printer is null");
+                    DeviceFactory.getPrinter().print("envelopeDeposit", renderArgs);
+                    EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
+                    ModelFacade.startAction(currentAction);
+                    mainLoop();
+                } catch (PrinterException ex) {
+                    Logger.error(ex.getMessage());
                 }
-
-                EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
-                ModelFacade.startAction(currentAction);
-                mainLoop();
-                return;
             }
         }
         if (formData == null) {

@@ -4,8 +4,8 @@
  */
 package models.actions;
 
-import devices.glory.manager.GloryManager;
 import devices.IoBoard;
+import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;

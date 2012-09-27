@@ -4,6 +4,7 @@ import devices.DeviceFactory;
 import devices.Printer;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
 import models.ModelFacade;
 import models.actions.BillDepositAction;
 import models.actions.UserAction;
@@ -108,7 +109,7 @@ public class BillDepositController extends Application {
         mainLoop();
     }
 
-    public static void finish() throws Throwable {
+    public static void finish() {
         BillDepositAction currentAction = getCurrentAction();
         Long total = currentAction.getTotal();
         FormData formData = (FormData) currentAction.getFormData();
@@ -116,20 +117,14 @@ public class BillDepositController extends Application {
             renderArgs.put("clientCode", getProperty("client_code"));
             renderArgs.put("formData", formData);
             renderArgs.put("depositTotal", total);
-
-
-            // Print the ticket.
-            final Printer p = DeviceFactory.getPrinter();
-            if (p != null) {
-                p.print("billDeposit", renderArgs);
-            } else {
-                Logger.debug("Printer is null");
+            try {
+                // Print the ticket.
+                DeviceFactory.getPrinter().print("billDeposit", renderArgs);
+                currentAction.finishAction();
+            } catch (Throwable ex) {
+                Logger.debug(ex.getMessage());
             }
-        }
-
-        currentAction.finishAction();
-
-        if (formData == null) {
+        } else {
             Application.index();
             return;
         }

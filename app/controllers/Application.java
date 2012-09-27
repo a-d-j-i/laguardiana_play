@@ -4,6 +4,7 @@ import devices.DeviceFactory;
 import devices.Printer;
 import devices.glory.manager.GloryManager;
 import java.io.IOException;
+import java.util.logging.Level;
 import models.ModelFacade;
 import models.actions.UserAction;
 import models.db.LgSystemProperty;
@@ -115,13 +116,18 @@ public class Application extends Controller {
         }
     }
 
-    public static void printTemplate() throws Throwable {
-        DeviceFactory.getPrinter().print("test", null);
+    public static void printTemplate() {
+        try {
+            renderArgs.put("testarg", "ADJI");
+            DeviceFactory.getPrinter().print("test", renderArgs);
+        } catch (Throwable ex) {
+            Logger.error(ex.getMessage());
+        }
         redirect("Application.otherMenu");
     }
 
-    public static void listPrinters() throws Throwable {
-        renderArgs.put("printers", DeviceFactory.getPrinter().printers);
+    public static void listPrinters() {
+        renderArgs.put("printers", DeviceFactory.getPrinter().printers.values());
         render();
     }
 

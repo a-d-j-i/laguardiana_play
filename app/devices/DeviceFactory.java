@@ -9,6 +9,7 @@ import devices.glory.Glory;
 import devices.glory.manager.GloryManager;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.*;
@@ -30,7 +31,7 @@ public class DeviceFactory extends PlayPlugin {
     static HashMap<String, IoBoard> ioBoardDevices = new HashMap();
     static Printer printer = null;
 
-    public static Printer getPrinter() throws IOException {
+    public static Printer getPrinter() {
         if (printer == null) {
             PrintRequestAttributeSet attrs = new HashPrintRequestAttributeSet();
             // http://docs.oracle.com/javase/1.4.2/docs/api/javax/print/attribute/PrintRequestAttribute.html
@@ -42,7 +43,6 @@ public class DeviceFactory extends PlayPlugin {
             //attrs.add(new PrinterResolution(600, 600, PrinterResolution.DPI));
             //attrs.add(new MediaPrintableArea(0, 0, 10, 10, MediaPrintableArea.MM));
             // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
-
             printer = new Printer(Play.configuration.getProperty("printer.port"), attrs);
         }
         return printer;
