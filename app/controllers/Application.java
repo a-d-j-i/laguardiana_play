@@ -1,9 +1,10 @@
 package controllers;
 
-import devices.CounterFactory;
+import devices.DeviceFactory;
+import devices.Printer;
 import devices.glory.manager.GloryManager;
+import java.io.IOException;
 import models.ModelFacade;
-import models.TemplatePrinter;
 import models.actions.UserAction;
 import models.db.LgSystemProperty;
 import play.Logger;
@@ -68,7 +69,7 @@ public class Application extends Controller {
         GloryManager.Status gstatus = null;
         GloryManager.ErrorDetail gerror = null;
         String status = "";
-        final GloryManager.ControllerApi manager = CounterFactory.getGloryManager();
+        final GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
             gerror = manager.getErrorDetail();
@@ -104,30 +105,24 @@ public class Application extends Controller {
             renderArgs.put("status", status);
             renderArgs.put("gerror", gstatus);
             renderArgs.put("gstatus", gerror);
-//            switch (modelFacade.getCurrentMode()) {
-//                case STORING_ERROR_RECOVERY:
-//                case ERROR_RECOVERY:
-//                    break;
-//                case COUNTING:
-//                case FILTERING:
-//                case BILL_DEPOSIT:
-//                case ENVELOPE_DEPOSIT:
-//                    break;
-//                default:
-//                    Application.index();
-//                    break;
-//            }
-//            if (modelFacade.getCurrentActionState() == ModelFacade.ActionState.FINISH) {
-//                // Error Solved.
-//                Application.index();
-//            }
+            userActionTuple = ModelFacade.getCurrentUserAction();
+
+            if (userActionTuple._1 == null && gstatus == GloryManager.Status.IDLE) {
+                // Error Solved.
+                Application.index();
+            }
             render();
         }
     }
 
-    public static void printTemplate() {
-        TemplatePrinter.printTemplate("<h1>My First Heading</h1><p>My first paragraph.</p>");
-        redirect("Application.index");
+    public static void printTemplate() throws Throwable {
+        DeviceFactory.getPrinter().print("test", null);
+        redirect("Application.otherMenu");
+    }
+
+    public static void listPrinters() throws Throwable {
+        renderArgs.put("printers", DeviceFactory.getPrinter().printers);
+        render();
     }
 
     @Util

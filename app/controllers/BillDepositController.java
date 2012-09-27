@@ -1,5 +1,8 @@
 package controllers;
 
+import devices.DeviceFactory;
+import devices.Printer;
+import java.io.IOException;
 import java.util.List;
 import models.ModelFacade;
 import models.actions.BillDepositAction;
@@ -105,18 +108,31 @@ public class BillDepositController extends Application {
         mainLoop();
     }
 
-    public static void finish() {
+    public static void finish() throws Throwable {
         BillDepositAction currentAction = getCurrentAction();
         Long total = currentAction.getTotal();
         FormData formData = (FormData) currentAction.getFormData();
+        if (formData != null) {
+            renderArgs.put("clientCode", getProperty("client_code"));
+            renderArgs.put("formData", formData);
+            renderArgs.put("depositTotal", total);
+
+
+            // Print the ticket.
+            final Printer p = DeviceFactory.getPrinter();
+            if (p != null) {
+                p.print("billDeposit", renderArgs);
+            } else {
+                Logger.debug("Printer is null");
+            }
+        }
+
         currentAction.finishAction();
+
         if (formData == null) {
             Application.index();
             return;
         }
-        renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("formData", formData);
-        renderArgs.put("depositTotal", total);
         render();
     }
 }

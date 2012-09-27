@@ -5,10 +5,10 @@
 package models;
 
 import controllers.Secure;
-import devices.CounterFactory;
+import devices.DeviceFactory;
 import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManager.ErrorDetail;
-import devices.io_board.IoBoard;
+import devices.IoBoard;
 import java.util.Observable;
 import java.util.Observer;
 import models.actions.UserAction;
@@ -30,8 +30,8 @@ public class ModelFacade {
     private static UserAction currentUserAction = null;
     private static User currentUser = null;
     final static private WhenGloryDone whenGloryDone = new WhenGloryDone();
-    final static private GloryManager.ControllerApi manager = CounterFactory.getGloryManager();
-    final static private IoBoard ioBoard = CounterFactory.getIoBoard();
+    final static private GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
+    final static private IoBoard ioBoard = DeviceFactory.getIoBoard();
 
     static class GloryActionCalblack extends Job {
 

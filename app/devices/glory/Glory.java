@@ -1,19 +1,22 @@
 package devices.glory;
 
 import devices.SerialPortAdapterInterface;
+import devices.SerialPortAdapterInterface;
+import devices.SerialPortAdapterInterface;
 import devices.glory.command.GloryCommandAbstract;
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.logging.Level;
 import play.Logger;
 
 /*
  * TODO: getCh, fifo, etc in other class.
  */
 public class Glory {
-
+    
     final public static int GLORY_READ_TIMEOUT = 5000;
     SerialPortAdapterInterface serialPort = null;
-
+    
     public Glory(SerialPortAdapterInterface serialPort) {
         if (serialPort == null) {
             throw new InvalidParameterException("Glory invalid parameter serial port");
@@ -23,7 +26,7 @@ public class Glory {
         }
         this.serialPort = serialPort;
     }
-
+    
     public synchronized void close() {
         Logger.info("Closing glory serial port ");
         if (serialPort != null) {
@@ -35,15 +38,15 @@ public class Glory {
         }
         serialPort = null;
     }
-
+    
     public synchronized GloryCommandAbstract sendCommand(GloryCommandAbstract cmd) {
         return sendCommand(cmd, null, false);
     }
-
+    
     public synchronized GloryCommandAbstract sendCommand(GloryCommandAbstract cmd, boolean debug) {
         return sendCommand(cmd, null, debug);
     }
-
+    
     public synchronized GloryCommandAbstract sendCommand(GloryCommandAbstract cmd, String data, boolean debug) {
         if (cmd == null) {
             throw new InvalidParameterException("Glory unknown command");
@@ -57,9 +60,14 @@ public class Glory {
             serialPort.write(d);
         } catch (IOException e) {
             cmd.setError("Error writing to port");
+            try {
+                serialPort.reconect();
+            } catch (IOException ex) {
+                cmd.setError("Error reconecting to port");
+            }
             return cmd;
         }
-
+        
         if (debug) {
             StringBuilder h = new StringBuilder("Writed ");
             for (byte x : d) {
@@ -68,7 +76,7 @@ public class Glory {
             Logger.debug(h.toString());
         }
         cmd.printCmd();
-
+        
         byte[] b = null;
         for (int i = 0; i < 512; i++) {
             try {
@@ -119,7 +127,7 @@ public class Glory {
         }
         return cmd.setResult(b);
     }
-
+    
     private int getXXVal(byte[] b) throws IOException {
         int l = 0;
         for (int i = 0; i < b.length; i++) {
@@ -133,7 +141,7 @@ public class Glory {
         }
         return l;
     }
-
+    
     public byte[] getBytes(int quantity) throws IOException {
         if (serialPort == null) {
             throw new InvalidParameterException("Glory Serial port closed");
@@ -144,11 +152,11 @@ public class Glory {
         }
         return b;
     }
-
+    
     private byte read() throws IOException {
         return serialPort.read(GLORY_READ_TIMEOUT);
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -163,7 +171,7 @@ public class Glory {
         }
         return true;
     }
-
+    
     @Override
     public int hashCode() {
         int hash = 5;

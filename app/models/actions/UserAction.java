@@ -5,7 +5,7 @@
 package models.actions;
 
 import devices.glory.manager.GloryManager;
-import devices.io_board.IoBoard;
+import devices.IoBoard;
 import java.util.EnumMap;
 import models.Deposit;
 import models.ModelFacade.UserActionApi;

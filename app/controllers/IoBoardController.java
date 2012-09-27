@@ -1,7 +1,7 @@
 package controllers;
 
-import devices.CounterFactory;
-import devices.io_board.IoBoard.IoBoardStatus;
+import devices.DeviceFactory;
+import devices.IoBoard.IoBoardStatus;
 import java.io.IOException;
 import play.Logger;
 import play.Play;
@@ -10,11 +10,11 @@ import play.mvc.Router;
 
 public class IoBoardController extends Application {
 
-    static devices.io_board.IoBoard ioBoard;
+    static devices.IoBoard ioBoard;
 
     @Before
     static void getBoard() throws Throwable {
-        ioBoard = CounterFactory.getIoBoard(Play.configuration.getProperty("io_board.port"));
+        ioBoard = DeviceFactory.getIoBoard(Play.configuration.getProperty("io_board.port"));
         if (ioBoard == null) {
             flash.put("error", "Error opening port");
             redirect(Router.reverse("IoBoardController.index").url);

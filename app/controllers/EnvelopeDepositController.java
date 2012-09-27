@@ -1,5 +1,8 @@
 package controllers;
 
+import devices.DeviceFactory;
+import devices.Printer;
+import java.io.IOException;
 import java.util.List;
 import models.ModelFacade;
 import models.actions.EnvelopeDepositAction;
@@ -17,6 +20,7 @@ import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
 import play.mvc.Before;
+import play.mvc.Util;
 import play.mvc.With;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeReference;
@@ -92,7 +96,7 @@ public class EnvelopeDepositController extends Application {
         }
     }
 
-    public static void start(@Valid FormData formData) {
+    public static void start(@Valid FormData formData) throws Throwable {
         Logger.debug("wizard data %s", formData);
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
@@ -117,6 +121,16 @@ public class EnvelopeDepositController extends Application {
                 if (formData.hasOthers != null) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
                 }
+
+                // Print the ticket.
+                final Printer p = DeviceFactory.getPrinter();
+                if (p != null) {
+                    prepareStartRenderArgs(formData);
+                    p.print("envelopeDeposit", renderArgs);
+                } else {
+                    Logger.debug("Printer is null");
+                }
+
                 EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
@@ -126,12 +140,17 @@ public class EnvelopeDepositController extends Application {
         if (formData == null) {
             formData = new FormData();
         }
+        prepareStartRenderArgs(formData);
+        render();
+    }
+
+    @Util
+    static private void prepareStartRenderArgs(FormData formData) {
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
         renderArgs.put("formData", formData);
         renderArgs.put("referenceCodes", referenceCodes);
         renderArgs.put("currencies", currencies);
-        render();
     }
 
     public static void mainLoop() {

@@ -7,9 +7,11 @@ import devices.SerialPortAdapterAbstract.PORTSTOPBITS;
 import devices.SerialPortAdapterAbstract.PortConfiguration;
 import devices.glory.Glory;
 import devices.glory.manager.GloryManager;
-import devices.io_board.IoBoard;
 import java.io.IOException;
 import java.util.HashMap;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.*;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -19,13 +21,32 @@ import play.PlayPlugin;
  *
  * @author adji
  */
-public class CounterFactory extends PlayPlugin {
+public class DeviceFactory extends PlayPlugin {
 
     static final PortConfiguration iBoardPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_19200, PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
     static final PortConfiguration gloryPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_9600, PORTBITS.BITS_7, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_EVEN);
     static HashMap<String, Glory> gloryDevices = new HashMap();
     static HashMap<Glory, GloryManager.CounterFactoryApi> gloryManagers = new HashMap();
     static HashMap<String, IoBoard> ioBoardDevices = new HashMap();
+    static Printer printer = null;
+
+    public static Printer getPrinter() throws IOException {
+        if (printer == null) {
+            PrintRequestAttributeSet attrs = new HashPrintRequestAttributeSet();
+            // http://docs.oracle.com/javase/1.4.2/docs/api/javax/print/attribute/PrintRequestAttribute.html
+            attrs.add(new Copies(1));
+            attrs.add(Sides.ONE_SIDED);
+            attrs.add(MediaSizeName.ISO_A4);
+            //attrs.add(PrintQuality.DRAFT);
+            //attrs.add(OrientationRequested.LANDSCAPE);
+            //attrs.add(new PrinterResolution(600, 600, PrinterResolution.DPI));
+            //attrs.add(new MediaPrintableArea(0, 0, 10, 10, MediaPrintableArea.MM));
+            // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
+
+            printer = new Printer(Play.configuration.getProperty("printer.port"), attrs);
+        }
+        return printer;
+    }
 
     public static GloryManager.ControllerApi getGloryManager() {
         Glory glory = getCounter(Play.configuration.getProperty("glory.port"));

@@ -1,7 +1,7 @@
-package devices.io_board;
+package devices;
 
 import devices.SerialPortAdapterInterface;
-import devices.io_board.IoBoard.IoBoardStatus;
+import devices.IoBoard.IoBoardStatus;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.Date;

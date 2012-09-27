@@ -1,6 +1,6 @@
 package controllers;
 
-import devices.CounterFactory;
+import devices.DeviceFactory;
 import devices.glory.manager.GloryManager;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class GloryManagerController extends Application {
 
     @Before
     static void getManager() throws Throwable {
-        manager = CounterFactory.getGloryManager();
+        manager = DeviceFactory.getGloryManager();
         if (manager == null) {
             error = "Manager error opening port";
         } else {

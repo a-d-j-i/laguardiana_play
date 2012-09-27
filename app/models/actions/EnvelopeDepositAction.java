@@ -6,7 +6,7 @@ package models.actions;
 
 import controllers.Secure;
 import devices.glory.manager.GloryManager;
-import devices.io_board.IoBoard;
+import devices.IoBoard;
 import java.util.Date;
 import java.util.EnumMap;
 import models.Deposit;

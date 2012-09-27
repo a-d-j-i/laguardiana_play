@@ -31,6 +31,7 @@ application.choose_currency=Seleccione divisa
 application.thanks=MUCHAS GRACIAS POR OPERAR CON PROSEGUR
 application.error=ERROR
 application.close=CERRAR
+application.printers=Impresoras
 
 application.start_counting=INICIAR CONTEO
 application.choose_currency_before=Seleccione divisa antes de iniciar el conteo

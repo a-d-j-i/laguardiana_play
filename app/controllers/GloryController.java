@@ -1,7 +1,7 @@
 package controllers;
 
 import com.google.gson.Gson;
-import devices.CounterFactory;
+import devices.DeviceFactory;
 import devices.glory.GloryReturnParser;
 import devices.glory.command.*;
 import java.io.BufferedWriter;
@@ -23,7 +23,7 @@ public class GloryController extends Application {
     @Before
     static void getCounter() throws Throwable {
         if (flash.get("error") == null) {
-            glory = CounterFactory.getCounter(Play.configuration.getProperty("glory.port"));
+            glory = DeviceFactory.getCounter(Play.configuration.getProperty("glory.port"));
             if (glory == null) {
                 flash.put("error", "Error opening port");
                 redirect(Router.reverse("GloryController.index").url);
