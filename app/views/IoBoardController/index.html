@@ -1,0 +1,31 @@
+#{extends 'main.html' /}
+#{set title:'Glory (Comandos)' /}
+<div style="background: wheat;">
+    <header>
+    </header>
+    <!-- link volver -->
+    <a id ="backButton" href="@{Application.otherMenu()}" class="boton_top">◄ &{ 'application.back' }</a>
+    <!-- /link volver -->
+    <ul class="columns">
+        <li class="fixed column" style="width: 2%">
+            &nbsp;
+        </li>
+        <li class="fixed column" style="width: 20%">
+            <a class="boton naranja full_width" href="@{index()}">status</a>
+            <a class="boton naranja full_width" href="@{openGate()}">openGate</a>
+            <a class="boton naranja full_width" href="@{closeGate()}">closeGate</a>
+        </li>
+
+        <li class="fixed column" style="width: 2%">
+            &nbsp;
+        </li>
+        <li class="fixed column" style="width: 20%">
+            <p>${error}</p>
+            <p>STATUS : ${status?.status?.name()}</p>
+            <p>A : ${A}</p>
+            <p>B : ${B}</p>
+            <p>C : ${C}</p>
+            <p>D : ${D}</p>
+        </li>
+    </ul>
+</div>

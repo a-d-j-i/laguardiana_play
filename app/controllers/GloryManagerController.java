@@ -1,7 +1,7 @@
 package controllers;
 
 import devices.CounterFactory;
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +16,8 @@ import validation.Bill;
 // TODO: Manage errors.
 public class GloryManagerController extends Application {
 
-    static Manager.ControllerApi manager;
-    static Manager.Status status = Manager.Status.ERROR;
+    static GloryManager.ControllerApi manager;
+    static GloryManager.Status status = GloryManager.Status.ERROR;
     static String error = null;
     static String success = null;
 
@@ -28,7 +28,7 @@ public class GloryManagerController extends Application {
             error = "Manager error opening port";
         } else {
             success = manager.getStatus().name();
-            if (manager.getStatus() == Manager.Status.ERROR) {
+            if (manager.getStatus() == GloryManager.Status.ERROR) {
                 error = manager.getErrorDetail().toString();
             } else {
                 error = null;

@@ -4,7 +4,7 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import play.Logger;
 
 /**
@@ -13,7 +13,7 @@ import play.Logger;
  */
 public class Reset extends ManagerCommandAbstract {
 
-    public Reset(Manager.ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
+    public Reset(GloryManager.ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
         super(threadCommandApi, onCommandDone);
     }
 
@@ -22,7 +22,7 @@ public class Reset extends ManagerCommandAbstract {
         Logger.debug("Reset command");
         if (gotoNeutral(true, false)) {
             Logger.debug("Reset command done");
-            setStatus(Manager.Status.IDLE, false);
+            clearError(false);
         } else {
             Logger.debug("Reset command failed");
         }

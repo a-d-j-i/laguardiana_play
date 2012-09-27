@@ -8,8 +8,8 @@ import devices.glory.GloryStatus;
 import devices.glory.GloryStatus.D1Mode;
 import devices.glory.GloryStatus.SR1Mode;
 import devices.glory.command.GloryCommandAbstract;
-import devices.glory.manager.Manager;
-import devices.glory.manager.Manager.ThreadCommandApi;
+import devices.glory.manager.GloryManager;
+import devices.glory.manager.GloryManager.ThreadCommandApi;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -66,21 +66,28 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
         switch (threadCommandApi.getStatus()) {
             case ERROR:
+                if (onCommandDone != null) {
+                    try {
+                        onCommandDone.run();
+                    } catch (Exception e) {
+                        setError(GloryManager.Error.APP_ERROR, e.getMessage());
+                    }
+                }
                 break;
             default:
                 if (mustCancel()) {
-                    threadCommandApi.setStatus(Manager.Status.CANCELED);
+                    threadCommandApi.setStatus(GloryManager.Status.CANCELED);
                 } else {
-                    threadCommandApi.setStatus(Manager.Status.IDLE);
+                    threadCommandApi.setStatus(GloryManager.Status.IDLE);
                 }
                 if (onCommandDone != null) {
                     try {
                         onCommandDone.run();
                     } catch (Exception e) {
-                        setError(Manager.Error.APP_ERROR, e.getMessage());
+                        setError(GloryManager.Error.APP_ERROR, e.getMessage());
                     }
                 }
-                threadCommandApi.setStatus(Manager.Status.IDLE);
+                threadCommandApi.setStatus(GloryManager.Status.IDLE);
         }
         isDone.set(true);
     }
@@ -106,7 +113,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             switch (gloryStatus.getSr1Mode()) {
                 case storing_error:
                     if (!storingError) {
-                        setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                        setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN,
                                 "Storing error must call admin");
                         return false;
                     }
@@ -125,7 +132,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             storingErrorRecovery();
                             break;
                         default:
-                            setError(Manager.Error.APP_ERROR,
+                            setError(GloryManager.Error.APP_ERROR,
                                     String.format("gotoNeutral Abnormal device Invalid D1 mode %s", gloryStatus.getD1Mode().name()));
                             return false;
                     }
@@ -149,7 +156,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case normal_error_recovery_mode:
                             break;
                         default:
-                            setError(Manager.Error.APP_ERROR,
+                            setError(GloryManager.Error.APP_ERROR,
                                     String.format("gotoNeutral Abnormal device Invalid D1-1 mode %s", gloryStatus.getD1Mode().name()));
                             return false;
                     }
@@ -170,7 +177,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             break;
                         case storing_start_request:
                             if (!openEscrow) {
-                                setError(Manager.Error.BILLS_IN_ESCROW_CALL_ADMIN,
+                                setError(GloryManager.Error.BILLS_IN_ESCROW_CALL_ADMIN,
                                         "There are bills in the escrow call an admin");
                                 return false;
                             }
@@ -194,7 +201,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 errorRecovery();
                             } else {
                                 WaitForEmptyEscrow();
-                                setError(Manager.Error.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
+                                setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
                                 if (canSendRemoteCancel()) {
                                     if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
                                         return false;
@@ -220,7 +227,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             }
                             break;
                         default:
-                            setError(Manager.Error.APP_ERROR,
+                            setError(GloryManager.Error.APP_ERROR,
                                     String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
                             break;
                     }
@@ -232,21 +239,25 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         }
                     }
                     if (gloryStatus.getD1Mode() != GloryStatus.D1Mode.neutral) {
-                        setError(Manager.Error.APP_ERROR,
+                        setError(GloryManager.Error.APP_ERROR,
                                 String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
                     }
                     break;
                 case neutral:
+                    // Wait until bills are from anyware removed.
+                    if (!canSendRemoteCancel()) {
+                        break;
+                    }
                     Logger.debug("GOTO NEUTRAL DONE");
                     return true;
                 default:
-                    setError(Manager.Error.APP_ERROR,
+                    setError(GloryManager.Error.APP_ERROR,
                             String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name()));
                     break;
             }
             sleep();
         }
-        setError(Manager.Error.STORING_ERROR_CALL_ADMIN, "GOTO NEUTRAL TIMEOUT");
+        setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN, "GOTO NEUTRAL TIMEOUT");
         Logger.debug("GOTO NEUTRAL TIMEOUT!!!");
         return false;
     }
@@ -256,7 +267,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             if (!sendGCommand(cmd)) {
                 String error = gloryStatus.getLastError();
                 Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
-                setError(Manager.Error.APP_ERROR, error);
+                setError(GloryManager.Error.APP_ERROR, error);
                 return false;
             }
         }
@@ -267,7 +278,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         if (!sendGCommand(new devices.glory.command.Sense())) {
             String error = gloryStatus.getLastError();
             Logger.error("Error %s sending cmd : SENSE", error);
-            setError(Manager.Error.APP_ERROR, error);
+            setError(GloryManager.Error.APP_ERROR, error);
             return false;
         }
         Logger.debug(String.format("D1Mode %s SR1 Mode : %s", gloryStatus.getD1Mode().name(), gloryStatus.getSr1Mode().name()));
@@ -276,7 +287,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     boolean sendGCommand(GloryCommandAbstract cmd) {
         if (cmd == null) {
-            setError(Manager.Error.APP_ERROR, "Invalid command null");
+            setError(GloryManager.Error.APP_ERROR, "Invalid command null");
             return false;
         }
         return gloryStatus.setStatusOk(threadCommandApi.sendGloryCommand(cmd, DEBUG));
@@ -341,11 +352,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             switch (m) {
                 case abnormal_device:
-                    setError(Manager.Error.JAM,
+                    setError(GloryManager.Error.JAM,
                             "waitUntilSR1State Abnormal device, todo: get the flags");
                     return false;
                 case storing_error:
-                    setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                    setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN,
                             "waitUntilSR1State Storing error, todo: get the flags");
                     return false;
                 default:
@@ -353,7 +364,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             sleep();
         }
-        setError(Manager.Error.APP_ERROR,
+        setError(GloryManager.Error.APP_ERROR,
                 String.format("cant set sr1 mode to %s", state.name()));
         return false;
     }
@@ -372,11 +383,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             switch (gloryStatus.getSr1Mode()) {
                 case abnormal_device:
-                    setError(Manager.Error.JAM,
+                    setError(GloryManager.Error.JAM,
                             "waitUntilD1State Abnormal device, todo: get the flags");
                     return false;
                 case storing_error:
-                    setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                    setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN,
                             "waitUntilD1State Storing error, todo: get the flags");
                     return false;
                 default:
@@ -384,7 +395,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             sleep();
         }
-        setError(Manager.Error.APP_ERROR,
+        setError(GloryManager.Error.APP_ERROR,
                 String.format("cant set d1 mode to %s", state.name()));
         return false;
     }
@@ -411,39 +422,39 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case escrow_close:
                     break;
                 case escrow_open:
-                    threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
+                    threadCommandApi.setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
                     break;
                 case counting_start_request:
                 case waiting:
                     return;
                 case abnormal_device:
-                    setError(Manager.Error.JAM,
+                    setError(GloryManager.Error.JAM,
                             "Abnormal device, todo: get the flags");
                     return;
                 case storing_start_request:
                 case storing_error:
-                    setError(Manager.Error.STORING_ERROR_CALL_ADMIN,
+                    setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN,
                             "Storing error, todo: get the flags");
                     return;
                 default:
-                    setError(Manager.Error.APP_ERROR,
+                    setError(GloryManager.Error.APP_ERROR,
                             String.format("WaitForEmptyEscrow invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
                     break;
             }
             sleep();
         }
-        setError(Manager.Error.APP_ERROR,
+        setError(GloryManager.Error.APP_ERROR,
                 "WaitForEmptyEscrow waiting too much");
     }
 
     private boolean canSendRemoteCancel() {
         // Under this conditions the remoteCancel command fails.
         if (gloryStatus.isRejectBillPresent()) {
-            threadCommandApi.setStatus(Manager.Status.REMOVE_REJECTED_BILLS);
+            threadCommandApi.setStatus(GloryManager.Status.REMOVE_REJECTED_BILLS);
             return false;
         }
         if (gloryStatus.isHopperBillPresent()) {
-            threadCommandApi.setStatus(Manager.Status.REMOVE_THE_BILLS_FROM_HOPER);
+            threadCommandApi.setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER);
             return false;
         }
         switch (gloryStatus.getSr1Mode()) {
@@ -462,14 +473,14 @@ abstract public class ManagerCommandAbstract implements Runnable {
         }
     }
 
-    protected void setError(Manager.Error e, String s) {
+    protected void setError(GloryManager.Error e, String s) {
         Logger.error("MANAGER ERROR : %s %s", e.name(), s);
-        threadCommandApi.setError(new Manager.ErrorDetail(e, s));
-        setStatus(Manager.Status.ERROR, true);
+        threadCommandApi.setError(new GloryManager.ErrorDetail(e, s));
+        setStatus(GloryManager.Status.ERROR, true);
     }
 
-    protected void setStatus(Manager.Status status, boolean publish) {
-        Manager.Status oldStatus = threadCommandApi.getStatus();
+    protected void setStatus(GloryManager.Status status, boolean publish) {
+        GloryManager.Status oldStatus = threadCommandApi.getStatus();
         threadCommandApi.setStatus(status);
 
         if (oldStatus != status && publish) {
@@ -477,7 +488,20 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 try {
                     onCommandDone.run();
                 } catch (Exception e) {
-                    setError(Manager.Error.APP_ERROR, e.getMessage());
+                    setError(GloryManager.Error.APP_ERROR, e.getMessage());
+                }
+            }
+        }
+    }
+
+    protected void clearError(boolean publish) {
+        threadCommandApi.clearError();
+        if (publish) {
+            if (onCommandDone != null) {
+                try {
+                    onCommandDone.run();
+                } catch (Exception e) {
+                    setError(GloryManager.Error.APP_ERROR, e.getMessage());
                 }
             }
         }

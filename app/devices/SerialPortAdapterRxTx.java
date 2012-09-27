@@ -13,7 +13,7 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
 
     public void serialEvent(SerialPortEvent spe) {
         if (serialPort == null) {
-            Logger.error("Glory error reading serial port, port closed");
+            Logger.error("Error reading serial port, port closed");
             return;
         }
 
@@ -25,31 +25,31 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
 
             if (len > -1) {
                 for (int i = 0; i < len; i++) {
-                    fifo.add(buffer[i]);
+                    fifoAdd(buffer[i]);
                 }
             }
         } catch (IOException e) {
-            Logger.error("Glory error reading serial port");
+            Logger.error("Error reading serial port %s", e.getMessage());
         }
     }
     SerialPort serialPort;
     InputStream in;
     OutputStream out;
 
-    public SerialPortAdapterRxTx(String portN) throws IOException {
+    public SerialPortAdapterRxTx(String portN, PortConfiguration conf) throws IOException {
         portName = portN;
         CommPortIdentifier portIdentifier;
 
         try {
             String os = System.getProperty("os.name");
-            if (os.indexOf("Win")==0) {
+            if (os.indexOf("Win") == 0) {
                 os = "Win";
             }
-            
-            File f = new File( Play.applicationPath.getAbsolutePath() + File.separator +
-                                "lib" + File.separator + os + File.separator +
-                                System.getProperty("os.arch"));
-            
+
+            File f = new File(Play.applicationPath.getAbsolutePath() + File.separator
+                    + "lib" + File.separator + os + File.separator
+                    + System.getProperty("os.arch"));
+
             Logger.debug("app path %s", f.getAbsolutePath());
             System.setProperty("java.library.path", f.getAbsolutePath());
             Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
@@ -63,7 +63,7 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
 
                 if (commPort instanceof CommPort) {
                     serialPort = (SerialPort) commPort;
-                    serialPort.setSerialPortParams(9600, SerialPort.DATABITS_7, SerialPort.STOPBITS_1, SerialPort.PARITY_EVEN);
+                    serialPort.setSerialPortParams(conf.speed.getQ(), conf.bits.getQ(), conf.stop_bits.getQ(), conf.parity.getQ());
                     serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
                     in = serialPort.getInputStream();
                     out = serialPort.getOutputStream();

@@ -5,7 +5,7 @@
 package models.actions;
 
 import controllers.Secure;
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.EnumMap;
 import models.Deposit;
@@ -19,13 +19,13 @@ import play.Logger;
  */
 public class EnvelopeDepositAction extends UserAction {
 
-    static final EnumMap<Manager.Status, String> messageMap = new EnumMap<Manager.Status, String>(Manager.Status.class);
+    static final EnumMap<GloryManager.Status, String> messageMap = new EnumMap<GloryManager.Status, String>(GloryManager.Status.class);
 
     static {
-        messageMap.put(Manager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
-        messageMap.put(Manager.Status.CANCELING, "counting_page.canceling");
-        messageMap.put(Manager.Status.CANCELED, "counting_page.deposit_canceled");
-        messageMap.put(Manager.Status.ERROR, "application.error");
+        messageMap.put(GloryManager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
+        messageMap.put(GloryManager.Status.CANCELING, "counting_page.canceling");
+        messageMap.put(GloryManager.Status.CANCELED, "counting_page.deposit_canceled");
+        messageMap.put(GloryManager.Status.ERROR, "application.error");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;
@@ -76,9 +76,9 @@ public class EnvelopeDepositAction extends UserAction {
     }
 
     @Override
-    public void gloryDone(Manager.Status m, Manager.ErrorDetail me) {
+    public void gloryDone(GloryManager.Status m, GloryManager.ErrorDetail me) {
         Logger.debug("EnvelopeDepositAction When Done %s %s", m.name(), state.name());
-        if (m == Manager.Status.ERROR) {
+        if (m == GloryManager.Status.ERROR) {
             error("Glory Error : %s", me);
             return;
         }
@@ -95,7 +95,7 @@ public class EnvelopeDepositAction extends UserAction {
                 }
                 break;
             case CANCELING:
-                if (m != Manager.Status.CANCELED) {
+                if (m != GloryManager.Status.CANCELED) {
                     error("CANCELING Invalid manager status %s", m.name());
                 } else {
                     state = ActionState.FINISH;
@@ -103,7 +103,7 @@ public class EnvelopeDepositAction extends UserAction {
                 currentDeposit = null;
                 break;
             case READY_TO_STORE:
-                if (m != Manager.Status.IDLE) {
+                if (m != GloryManager.Status.IDLE) {
                     Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
                 }
                 state = ActionState.FINISH;

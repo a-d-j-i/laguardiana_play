@@ -61,7 +61,7 @@ counting_page.remove_the_bills_from_hoper=Retire los billetes de la parte superi
 counting_page.remove_rejected_bills=Retire los billetes rechazados.
 counting_page.storing=Depositando.
 counting_page.canceling=Cancelando.
-counting_page.deposit_canceled=Cancelado.
+counting_page.deposit_canceled=Desposito Cancelado.
 
 counting_page.escrow_full_text=Se lleno el escrow. <br/>Retire los billetes del escrow.
 counting_page.currency_title=Divisa

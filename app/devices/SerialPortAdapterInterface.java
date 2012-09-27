@@ -9,7 +9,9 @@ public interface SerialPortAdapterInterface {
 
     public void write(byte[] buffer) throws IOException;
 
-    public byte read() throws IOException;
+    public byte read(int timeout) throws IOException;
+
+    public String readLine(int timeout) throws IOException;
 
     public InputStream getInputStream();
 }

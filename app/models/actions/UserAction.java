@@ -4,7 +4,7 @@
  */
 package models.actions;
 
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import java.util.EnumMap;
 import models.Deposit;
 import models.ModelFacade.UserActionApi;
@@ -32,11 +32,11 @@ abstract public class UserAction {
     final protected Object formData;
     protected UserActionApi userActionApi = null;
     protected User currentUser = null;
-    protected final EnumMap<Manager.Status, String> messages;
+    protected final EnumMap<GloryManager.Status, String> messages;
     protected ActionState state = ActionState.IDLE;
     protected Deposit currentDeposit = null;
 
-    public UserAction(Object formData, EnumMap<Manager.Status, String> messages) {
+    public UserAction(Object formData, EnumMap<GloryManager.Status, String> messages) {
         this.formData = formData;
         this.messages = messages;
     }
@@ -46,9 +46,9 @@ abstract public class UserAction {
     }
 
     public String getActionMessage() {
-        Manager.Status m = userActionApi.getManagerStatus();
+        GloryManager.Status m = userActionApi.getManagerStatus();
         Logger.debug("Manager Status %s", m.name());
-        if (m == Manager.Status.ERROR) {
+        if (m == GloryManager.Status.ERROR) {
             state = ActionState.ERROR;
         }
         return messages.get(m);
@@ -77,7 +77,7 @@ abstract public class UserAction {
 
     abstract public void start();
 
-    abstract public void gloryDone(Manager.Status m, Manager.ErrorDetail me);
+    abstract public void gloryDone(GloryManager.Status m, GloryManager.ErrorDetail me);
 
     abstract public String getNeededController();
 

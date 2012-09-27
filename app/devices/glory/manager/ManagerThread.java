@@ -4,7 +4,7 @@
  */
 package devices.glory.manager;
 
-import devices.glory.manager.Manager.ThreadCommandApi;
+import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.command.Init;
 import devices.glory.manager.command.ManagerCommandAbstract;
 import devices.glory.manager.command.Stop;
@@ -18,7 +18,7 @@ public class ManagerThread extends Thread {
 
     private final ThreadCommandApi threadCommandApi;
 
-    ManagerThread( Manager.ThreadCommandApi threadCommandApi ) {
+    ManagerThread( GloryManager.ThreadCommandApi threadCommandApi ) {
         this.threadCommandApi = threadCommandApi;
     }
 

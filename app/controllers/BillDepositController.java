@@ -107,7 +107,7 @@ public class BillDepositController extends Application {
 
     public static void finish() {
         BillDepositAction currentAction = getCurrentAction();
-        String total = currentAction.getTotal().toString();
+        Long total = currentAction.getTotal();
         FormData formData = (FormData) currentAction.getFormData();
         currentAction.finishAction();
         if (formData == null) {

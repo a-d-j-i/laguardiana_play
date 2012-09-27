@@ -1,7 +1,7 @@
 package controllers;
 
 import devices.CounterFactory;
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import models.ModelFacade;
 import models.TemplatePrinter;
 import models.actions.UserAction;
@@ -60,11 +60,15 @@ public class Application extends Controller {
         render();
     }
 
+    public static void hardwareMenu() {
+        render();
+    }
+
     public static void counterError(Integer cmd) {
-        Manager.Status gstatus = null;
-        Manager.ErrorDetail gerror = null;
+        GloryManager.Status gstatus = null;
+        GloryManager.ErrorDetail gerror = null;
         String status = "";
-        final Manager.ControllerApi manager = CounterFactory.getGloryManager();
+        final GloryManager.ControllerApi manager = CounterFactory.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
             gerror = manager.getErrorDetail();
@@ -79,18 +83,10 @@ public class Application extends Controller {
             }
             switch (cmd) {
                 case 1:
-                    manager.cancelDeposit(new Runnable() {
-                        public void run() {
-                            manager.reset(null);
-                        }
-                    });
+                    manager.reset(null);
                     break;
                 case 2:
-                    manager.cancelDeposit(new Runnable() {
-                        public void run() {
-                            manager.storingErrorReset(null);
-                        }
-                    });
+                    manager.storingErrorReset(null);
                     break;
             }
         }

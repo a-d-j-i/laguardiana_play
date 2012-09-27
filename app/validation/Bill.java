@@ -5,7 +5,7 @@
 package validation;
 
 import devices.CounterFactory;
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class Bill {
 
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
-        Manager.ControllerApi manager = CounterFactory.getManager(Play.configuration.getProperty("glory.port"));
+        GloryManager.ControllerApi manager = CounterFactory.getGloryManager();
         if (manager != null) {
             currentQuantity = manager.getCurrentQuantity();
             desiredQuantity = manager.getDesiredQuantity();

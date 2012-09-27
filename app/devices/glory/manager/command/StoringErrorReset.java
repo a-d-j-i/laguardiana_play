@@ -4,7 +4,7 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import play.Logger;
 
 /**
@@ -13,7 +13,7 @@ import play.Logger;
  */
 public class StoringErrorReset extends ManagerCommandAbstract {
 
-    public StoringErrorReset(Manager.ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
+    public StoringErrorReset(GloryManager.ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
         super(threadCommandApi, onCommandDone);
     }
 
@@ -22,7 +22,7 @@ public class StoringErrorReset extends ManagerCommandAbstract {
         Logger.debug("StoringErrorReset command");
         if (gotoNeutral(true, true)) {
             Logger.debug("StoringErrorReset command done");
-            setStatus(Manager.Status.IDLE, false);
+            clearError(false);
         } else {
             Logger.debug("StoringErrorReset command faileds");
         }

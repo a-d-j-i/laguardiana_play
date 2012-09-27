@@ -10,21 +10,22 @@ public class SerialPortAdapterJSSC extends SerialPortAdapterAbstract implements 
 
     public void serialEvent(SerialPortEvent event) {
         if (serialPort == null) {
-            Logger.error("Glory error reading serial port, port closed");
+            Logger.error("Error reading serial port, port closed");
             return;
         }
         if (event.isRXCHAR()) {
             try {
                 for (byte b : serialPort.readBytes()) {
-                    fifo.add(b);
+                    fifoAdd(b);
                 }
             } catch (SerialPortException e) {
-                Logger.error("Glory error reading serial port");
+                Logger.error("Error reading serial port %s", e.getMessage());
             }
         }
     }
 
-    public SerialPortAdapterJSSC(String portN) throws IOException {
+    public SerialPortAdapterJSSC(String portN, PortConfiguration conf) throws IOException {
+
         portName = portN;
         try {
             String[] ports = SerialPortList.getPortNames();
@@ -44,7 +45,7 @@ public class SerialPortAdapterJSSC extends SerialPortAdapterAbstract implements 
         try {
             Logger.debug(String.format("Opening serial port %s", portName));
             serialPort.openPort();
-            serialPort.setParams(SerialPort.BAUDRATE_9600, SerialPort.DATABITS_7, SerialPort.STOPBITS_1, SerialPort.PARITY_EVEN);
+            serialPort.setParams(conf.speed.getQ(), conf.bits.getQ(), conf.stop_bits.getQ(), conf.parity.getQ());
             serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
             serialPort.setEventsMask(SerialPort.MASK_RXCHAR);
             serialPort.addEventListener(this);

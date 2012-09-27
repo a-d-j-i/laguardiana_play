@@ -6,9 +6,9 @@ package models;
 
 import controllers.Secure;
 import devices.CounterFactory;
-import devices.glory.manager.Manager;
-import devices.glory.manager.Manager.ErrorDetail;
-import devices.glory.manager.Manager.Status;
+import devices.glory.manager.GloryManager;
+import devices.glory.manager.GloryManager.ErrorDetail;
+import devices.glory.manager.GloryManager.Status;
 import models.actions.UserAction;
 import models.db.LgEvent;
 import play.Logger;
@@ -28,11 +28,11 @@ public class ModelFacade {
     private static UserAction currentUserAction = null;
     private static User currentUser = null;
     final static private WhenGloryDone whenGloryDone = new WhenGloryDone();
-    final static private Manager.ControllerApi manager = CounterFactory.getGloryManager();
+    final static private GloryManager.ControllerApi manager = CounterFactory.getGloryManager();
 
     static class ActionCallback extends Job {
 
-        Manager.Status status;
+        GloryManager.Status status;
         ErrorDetail errorDetail;
 
         public ActionCallback(Status status, ErrorDetail errorDetail) {
@@ -85,7 +85,7 @@ public class ModelFacade {
             }
         }
 
-        public Manager.Status getManagerStatus() {
+        public GloryManager.Status getManagerStatus() {
             return manager.getStatus();
         }
 
@@ -101,7 +101,7 @@ public class ModelFacade {
             return manager.cancelDeposit(whenGloryDone);
         }
 
-        public Manager.ErrorDetail getErrorDetail() {
+        public GloryManager.ErrorDetail getErrorDetail() {
             return manager.getErrorDetail();
         }
 

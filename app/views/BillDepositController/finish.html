@@ -8,9 +8,14 @@
             <div class="mensaje"><span>&{ 'summary.ticket' }</span></div>
             <h2>&{ 'application.thanks' }</h2>
             <!-- datos del deposito -->
+            #{if depositTotal > 0 }
             <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
             <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
             <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.textId}</p>
+            #{/if}
+            #{else}
+                &{ 'counting_page.deposit_canceled' }
+            #{/else}
             <!-- /datos del deposito -->
         </div>
         <hr />

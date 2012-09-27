@@ -11,7 +11,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class Manager {
+public class GloryManager {
 
     static public enum Status {
 
@@ -59,7 +59,7 @@ public class Manager {
     final private AtomicReference<ErrorDetail> error = new AtomicReference<ErrorDetail>();
     // TODO: Change onCountDont to an observable.
 
-    public Manager(Glory device) {
+    public GloryManager(Glory device) {
         this.device = device;
         this.managerThreadState = new ManagerThreadState();
         this.thread = new ManagerThread(new ThreadCommandApi());
@@ -113,7 +113,11 @@ public class Manager {
             }
         }
 
-        public void setError(Manager.ErrorDetail e) {
+        public void clearError() {
+            status.compareAndSet(Status.ERROR, Status.IDLE);
+        }
+
+        public void setError(GloryManager.ErrorDetail e) {
             error.set(e);
         }
     }
@@ -183,6 +187,7 @@ public class Manager {
         public boolean cancelDeposit(Runnable onCommandDone) {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
+                Logger.debug("cancelDeposit executing cancelcount");
                 return managerControllerApi.sendCommand(new CancelCount(threadCommandApi, onCommandDone));
             }
             // TODO: One base class
@@ -235,21 +240,24 @@ public class Manager {
         }
 
         public boolean reset(Runnable onCommandDone) {
-            Logger.debug("------reset");
+            Logger.debug("reset");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
                 if (cmd instanceof Reset) {
+                    Logger.debug("reset RUNNING");
                     return true;
                 }
                 cmd.cancel();
                 // still executing
+                Logger.debug("cmd still executing");
                 return false;
             }
+            Logger.debug("executing reset");
             return managerControllerApi.sendCommand(new Reset(threadCommandApi, onCommandDone));
         }
 
         public boolean storingErrorReset(Runnable onCommandDone) {
-            Logger.debug("------storing error reset");
+            Logger.debug("storing error reset");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
                 if (cmd instanceof StoringErrorReset) {
@@ -262,7 +270,7 @@ public class Manager {
             return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi, onCommandDone));
         }
 
-        public Manager.Status getStatus() {
+        public GloryManager.Status getStatus() {
             return status.get();
         }
 
@@ -291,8 +299,8 @@ public class Manager {
                 managerThreadState.stop();
                 try {
                     Logger.debug("Closing Manager waitUntilStop");
-                    managerThreadState.waitUntilStop(60000);
-                    thread.join(10000);
+                    managerThreadState.waitUntilStop(Glory.GLORY_READ_TIMEOUT * 2);
+                    thread.join(Glory.GLORY_READ_TIMEOUT * 2);
                 } catch (InterruptedException ex) {
                     Logger.info("Manager thread don't die");
                 }

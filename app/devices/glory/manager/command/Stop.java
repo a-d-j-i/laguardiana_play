@@ -4,7 +4,7 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import play.Logger;
 
 /**
@@ -13,7 +13,7 @@ import play.Logger;
  */
 public class Stop extends ManagerCommandAbstract {
 
-    public Stop(Manager.ThreadCommandApi threadCommandApi) {
+    public Stop(GloryManager.ThreadCommandApi threadCommandApi) {
         super(threadCommandApi, null);
     }
 

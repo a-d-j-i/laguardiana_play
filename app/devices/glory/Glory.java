@@ -1,7 +1,6 @@
 package devices.glory;
 
 import devices.SerialPortAdapterInterface;
-import devices.SerialPortAdapterJSSC;
 import devices.glory.command.GloryCommandAbstract;
 import java.io.IOException;
 import java.security.InvalidParameterException;
@@ -12,6 +11,7 @@ import play.Logger;
  */
 public class Glory {
 
+    final public static int GLORY_READ_TIMEOUT = 5000;
     SerialPortAdapterInterface serialPort = null;
 
     public Glory(SerialPortAdapterInterface serialPort) {
@@ -25,7 +25,7 @@ public class Glory {
     }
 
     public synchronized void close() {
-        Logger.info(String.format("Closing serial port and glory"));
+        Logger.info("Closing glory serial port ");
         if (serialPort != null) {
             try {
                 serialPort.close();
@@ -72,13 +72,13 @@ public class Glory {
         byte[] b = null;
         for (int i = 0; i < 512; i++) {
             try {
-                byte r = serialPort.read();
+                byte r = read();
                 switch (r) {
                     case 0x02:
                         byte[] a = new byte[3];
-                        a[ 0] = serialPort.read();
-                        a[ 1] = serialPort.read();
-                        a[ 2] = serialPort.read();
+                        a[ 0] = read();
+                        a[ 1] = read();
+                        a[ 2] = read();
                         int l = getXXVal(a);
                         Logger.debug("Read len %d", l);
                         b = new byte[l + 5];
@@ -86,7 +86,7 @@ public class Glory {
                         b[1] = a[1];
                         b[2] = a[2];
                         for (int j = 0; j < l + 2; j++) {
-                            b[ j + 3] = serialPort.read();
+                            b[ j + 3] = read();
                         }
                         break;
                     case 0x06:
@@ -140,9 +140,13 @@ public class Glory {
         }
         byte[] b = new byte[quantity];
         for (int i = 0; i < quantity; i++) {
-            b[ i] = serialPort.read();
+            b[ i] = read();
         }
         return b;
+    }
+
+    private byte read() throws IOException {
+        return serialPort.read(GLORY_READ_TIMEOUT);
     }
 
     @Override

@@ -101,6 +101,7 @@ class ManagerThreadState {
             } finally {
                 mutex.unlock();
             }
+            Logger.debug("getCurrentCommand ret %s", ret);
             return ret;
         }
 

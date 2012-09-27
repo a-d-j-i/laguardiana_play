@@ -4,7 +4,7 @@
  */
 package models.actions;
 
-import devices.glory.manager.Manager;
+import devices.glory.manager.GloryManager;
 import java.util.EnumMap;
 import java.util.List;
 import models.lov.Currency;
@@ -17,17 +17,17 @@ import validation.Bill;
  */
 public class FilteringAction extends UserAction {
 
-    static final EnumMap<Manager.Status, String> messageMap = new EnumMap<Manager.Status, String>(Manager.Status.class);
+    static final EnumMap<GloryManager.Status, String> messageMap = new EnumMap<GloryManager.Status, String>(GloryManager.Status.class);
 
     static {
-        messageMap.put(Manager.Status.IDLE, "counting_page.put_the_bills_on_the_hoper");
-        messageMap.put(Manager.Status.READY_TO_STORE, "counting.ready_to_store");
-        messageMap.put(Manager.Status.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
-        messageMap.put(Manager.Status.ESCROW_FULL, "counting.escrow_full");
-        messageMap.put(Manager.Status.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
-        messageMap.put(Manager.Status.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
-        messageMap.put(Manager.Status.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
-        messageMap.put(Manager.Status.ERROR, "application.error");
+        messageMap.put(GloryManager.Status.IDLE, "counting_page.put_the_bills_on_the_hoper");
+        messageMap.put(GloryManager.Status.READY_TO_STORE, "counting.ready_to_store");
+        messageMap.put(GloryManager.Status.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
+        messageMap.put(GloryManager.Status.ESCROW_FULL, "counting.escrow_full");
+        messageMap.put(GloryManager.Status.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
+        messageMap.put(GloryManager.Status.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
+        messageMap.put(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
+        messageMap.put(GloryManager.Status.ERROR, "application.error");
     }
     public Currency currency;
 
@@ -76,7 +76,7 @@ public class FilteringAction extends UserAction {
     }
 
     @Override
-    public void gloryDone(Manager.Status m, Manager.ErrorDetail me) {
+    public void gloryDone(GloryManager.Status m, GloryManager.ErrorDetail me) {
         Logger.debug("CountingAction When Done %s %s", m.name(), state.name());
         switch (state) {
             case IDLE:
@@ -100,14 +100,14 @@ public class FilteringAction extends UserAction {
                 return;
             case CANCELING:
                 // IDLE is when we canceled after an full escrow
-                if (m != Manager.Status.CANCELED) {
+                if (m != GloryManager.Status.CANCELED) {
                     error("CANCELING Invalid manager status %s", m.name());
                 } else {
                     state = ActionState.FINISH;
                 }
                 break;
             case READY_TO_STORE:
-                if (m != Manager.Status.CANCELED) {
+                if (m != GloryManager.Status.CANCELED) {
                     Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
                 }
                 state = ActionState.FINISH;
