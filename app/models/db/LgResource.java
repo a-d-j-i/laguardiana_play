@@ -6,20 +6,20 @@ import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Table( name = "lg_resource", schema = "public" )
+@Table( name = "lg_resource", schema = "public")
 public class LgResource extends GenericModel implements java.io.Serializable {
 
     @Id
-    @Column( name = "resource_id", unique = true, nullable = false )
+    @Column( name = "resource_id", unique = true, nullable = false)
     @GeneratedValue
-    public int resourceId;
-    @Column( name = "name", nullable = false, length = 64 )
+    public Integer resourceId;
+    @Column( name = "name", nullable = false, length = 64)
     public String name;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "resource" )
-    public Set<LgAclRule> aclRules = new HashSet<LgAclRule>( 0 );
-    
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "resource")
+    public Set<LgAclRule> aclRules = new HashSet<LgAclRule>(0);
+
     @Override
     public String toString() {
-        return name;
+        return "LgResource{" + "resourceId=" + resourceId + ", name=" + name + '}';
     }
 }

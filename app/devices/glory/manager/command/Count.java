@@ -340,16 +340,4 @@ public class Count extends ManagerCommandAbstract {
         countData.setCurrentQuantity(bills);
         return true;
     }
-
-    @Override
-    boolean sense() {
-        if (super.sense()) {
-            Map<Integer, Integer> bills = gloryStatus.getBills();
-            if (bills != null && !bills.isEmpty()) {
-                countData.setCurrentQuantity(bills);
-            }
-            return true;
-        }
-        return false;
-    }
 }

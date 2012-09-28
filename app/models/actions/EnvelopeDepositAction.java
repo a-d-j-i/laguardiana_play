@@ -60,6 +60,9 @@ public class EnvelopeDepositAction extends UserAction {
             Logger.error("acceptDeposit Invalid step");
             return;
         }
+        Deposit d = Deposit.findById(currentDeposit.depositId);
+        d.startDate = new Date();
+        d.save();
         if (!userActionApi.storeDeposit(currentDeposit.depositId)) {
             Logger.error("startEnvelopeDeposit can't cancel glory");
         }
@@ -108,8 +111,9 @@ public class EnvelopeDepositAction extends UserAction {
                     Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
                 }
                 state = ActionState.FINISH;
-                currentDeposit.finishDate = new Date();
-                currentDeposit.merge();
+                Deposit d = Deposit.findById(currentDeposit.depositId);
+                d.finishDate = new Date();
+                d.save();
                 currentDeposit = null;
                 break;
             default:

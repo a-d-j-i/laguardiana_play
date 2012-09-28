@@ -5,10 +5,10 @@
 ## 
 ## Basic Runnable Configuration
 ##
-  db.LgBag(FirstBag):
-    bagCode:        4492857
-    creationDate:   2012-01-01
-    withdrawDate:   2999-12-31
+#  db.LgBag(FirstBag):
+#    bagCode:        4492857
+#    creationDate:   2012-01-01
+#    withdrawDate:   2999-12-31
 
  
  

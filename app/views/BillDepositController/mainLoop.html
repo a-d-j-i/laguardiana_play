@@ -147,7 +147,8 @@
     });
     
     $( '#continueButton' ).click( function(event) {
-        if ( lastStatus == 'ESCROW_FULL' ) {
+        if ( lastStatus == 'IDLE' ) {
+        } else if ( lastStatus == 'ESCROW_FULL' ) {
             $("#alerta_escrow_full").overlay().load();
         } else if ( lastStatus == 'READY_TO_STORE' ) {
             $.getJSON( '@{accept()}', function( data ) {});

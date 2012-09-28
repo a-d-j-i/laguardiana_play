@@ -18,7 +18,8 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
         ACTION_START(4),
         ACTION_FINISH(5),
         DEPOSIT_CHANGE(6),
-        IO_BOARD(7),;
+        IO_BOARD(7),
+        INVALID_BAG(8),;
         private Integer eventTypeLov;
 
         private Type(Integer eventTypeLov) {
@@ -38,7 +39,7 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
     public LgDeposit deposit;
     @Column( name = "event_type_lov", nullable = true)
     public Integer eventTypeLov;
-    @Temporal( TemporalType.DATE)
+    @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "creation_date", nullable = false, length = 13)
     public Date creationDate = new Date();
     @Column( name = "message", nullable = false, length = 256)
@@ -55,5 +56,10 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
         this.deposit = deposit;
         this.eventTypeLov = type.getEventTypeLov();
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "LgEvent{" + "eventId=" + eventId + ", deposit=" + deposit + ", eventTypeLov=" + eventTypeLov + ", creationDate=" + creationDate + ", message=" + message + '}';
     }
 }

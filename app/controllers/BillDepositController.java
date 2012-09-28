@@ -120,10 +120,10 @@ public class BillDepositController extends Application {
             try {
                 // Print the ticket.
                 DeviceFactory.getPrinter().print("billDeposit", renderArgs);
-                currentAction.finishAction();
             } catch (Throwable ex) {
                 Logger.debug(ex.getMessage());
             }
+            currentAction.finishAction();
         } else {
             Application.index();
             return;

@@ -32,10 +32,10 @@ public abstract class LgUser extends GenericModel implements java.io.Serializabl
     public String externalId;
     @Column( name = "locked", nullable = false, length = 1)
     public char locked;
-    @Temporal( TemporalType.DATE)
+    @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
-    @Temporal( TemporalType.DATE)
+    @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "end_date", nullable = true, length = 13)
     public Date endDate;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
@@ -59,5 +59,10 @@ public abstract class LgUser extends GenericModel implements java.io.Serializabl
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+    }
+
+    @Override
+    public String toString() {
+        return "LgUser{" + "userId=" + userId + ", externalApp=" + externalApp + ", username=" + username + ", externalId=" + externalId + ", locked=" + locked + ", creationDate=" + creationDate + ", endDate=" + endDate + '}';
     }
 }

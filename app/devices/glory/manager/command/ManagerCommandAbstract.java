@@ -22,7 +22,7 @@ import play.Logger;
  */
 abstract public class ManagerCommandAbstract implements Runnable {
 
-    final static boolean DEBUG = true;
+    final static boolean DEBUG = false;
     final static int retries = 0xfff;
 
     static protected class CommandData {

@@ -48,7 +48,7 @@ abstract public class UserAction {
 
     public String getActionMessage() {
         GloryManager.Status m = userActionApi.getManagerStatus();
-        Logger.debug("getActionMessage Manager Status %s %s", m.name(), userActionApi.getErrorDetail());
+        //Logger.debug("getActionMessage Manager Status %s %s", m.name(), userActionApi.getErrorDetail());
         if (m == GloryManager.Status.ERROR) {
             state = ActionState.ERROR;
         }

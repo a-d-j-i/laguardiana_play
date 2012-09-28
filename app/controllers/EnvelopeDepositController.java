@@ -127,12 +127,12 @@ public class EnvelopeDepositController extends Application {
                     // Print the ticket.
                     prepareStartRenderArgs(formData);
                     DeviceFactory.getPrinter().print("envelopeDeposit", renderArgs);
-                    EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
-                    ModelFacade.startAction(currentAction);
-                    mainLoop();
                 } catch (PrinterException ex) {
                     Logger.error(ex.getMessage());
                 }
+                EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
+                ModelFacade.startAction(currentAction);
+                mainLoop();
             }
         }
         if (formData == null) {

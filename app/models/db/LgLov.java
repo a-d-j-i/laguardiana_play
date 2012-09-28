@@ -17,6 +17,7 @@ abstract public class LgLov extends GenericModel implements java.io.Serializable
     @Target(value = {ElementType.METHOD, ElementType.FIELD})
     @Retention(value = RetentionPolicy.RUNTIME)
     public @interface LovCol {
+
         Class value();
     }
     @Id
@@ -31,7 +32,7 @@ abstract public class LgLov extends GenericModel implements java.io.Serializable
     public String textId;
     @Column(name = "description", nullable = false, length = 256)
     public String description;
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date", nullable = true, length = 13)
     public Date endDate;
 

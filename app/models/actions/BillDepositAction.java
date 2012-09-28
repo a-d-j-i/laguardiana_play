@@ -88,7 +88,9 @@ public class BillDepositAction extends UserAction {
         }
         currentDeposit.addBatch(batch);
         batch.save();
-        currentDeposit.merge();
+        Deposit d = Deposit.findById(currentDeposit.depositId);
+        d.startDate = new Date();
+        d.save();
         if (state == ActionState.READY_TO_STORE) {
             state = ActionState.READY_TO_STORE_STORING;
         } else if (state == ActionState.ESCROW_FULL) {
@@ -153,8 +155,9 @@ public class BillDepositAction extends UserAction {
                     Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
                 }
                 state = ActionState.FINISH;
-                currentDeposit.finishDate = new Date();
-                currentDeposit.merge();
+                Deposit d = Deposit.findById(currentDeposit.depositId);
+                d.finishDate = new Date();
+                d.save();
                 break;
             case FINISH:
                 if (m != GloryManager.Status.IDLE) {

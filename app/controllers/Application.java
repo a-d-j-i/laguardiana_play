@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import models.ModelFacade;
 import models.actions.UserAction;
+import models.db.LgBag;
 import models.db.LgSystemProperty;
 import play.Logger;
 import play.libs.F;

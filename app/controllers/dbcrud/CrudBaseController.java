@@ -87,7 +87,6 @@ public class CrudBaseController extends CRUD {
 
             @Override
             public List<Object> getChoices() {
-                Logger.debug("BLBLBLBBLBLBL %s", lovClass.getSimpleName());
                 List<LgLov> ll = LgLov.find("select l from LgLov l where l.class = ?", lovClass.getSimpleName()).fetch();
                 List<Object> ret = new ArrayList<Object>();
                 for (LgLov l : ll) {

@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import play.Logger;
 import play.Play;
 
-public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements SerialPortEventListener {
+public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements SerialPortEventListener {
 
     public void serialEvent(SerialPortEvent spe) {
         if (serialPort == null) {
@@ -69,6 +69,7 @@ public class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements 
     public SerialPortAdapterRxTx(String portN, PortConfiguration conf) throws IOException {
         super(conf);
         portName = portN;
+        open();
     }
 
     @Override

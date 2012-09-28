@@ -4,7 +4,7 @@ import java.io.IOException;
 import jssc.*;
 import play.Logger;
 
-public class SerialPortAdapterJSSC extends SerialPortAdapterAbstract implements SerialPortEventListener {
+public final class SerialPortAdapterJSSC extends SerialPortAdapterAbstract implements SerialPortEventListener {
 
     SerialPort serialPort;
 
@@ -27,6 +27,7 @@ public class SerialPortAdapterJSSC extends SerialPortAdapterAbstract implements 
     public SerialPortAdapterJSSC(String portN, PortConfiguration conf) throws IOException {
         super(conf);
         portName = portN;
+        open();
     }
 
     @Override

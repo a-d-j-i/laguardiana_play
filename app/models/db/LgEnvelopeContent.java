@@ -42,7 +42,7 @@ public class LgEnvelopeContent extends GenericModel implements java.io.Serializa
     @Id
     @Column(name = "envelope_content_id", unique = true, nullable = false)
     @GeneratedValue
-    public int envelopeContentId;
+    public Integer envelopeContentId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "envelope_id", nullable = false)
     public LgEnvelope envelope;

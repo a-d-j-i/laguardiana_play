@@ -2,10 +2,11 @@ package models;
 
 import java.util.Date;
 import javax.persistence.Entity;
-import javax.persistence.PostUpdate;
+import javax.persistence.PostPersist;
 import models.db.*;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
+import play.db.jpa.JPABase;
 
 @Entity
 public class Deposit extends LgDeposit {
@@ -15,14 +16,13 @@ public class Deposit extends LgDeposit {
 
     // TODO: Validate the depositId there are allways only one deposit ID
     // unfinished.
-    public static Deposit getAndValidateOpenDeposit(String depositId) {
-        Deposit d = Deposit.findById(Integer.parseInt(depositId));
-        if (d.finishDate != null) {
-            return null;
-        }
-        return d;
-    }
-
+//    public static Deposit getAndValidateOpenDeposit(String depositId) {
+//        Deposit d = Deposit.findById(Integer.parseInt(depositId));
+//        if (d.finishDate != null) {
+//            return null;
+//        }
+//        return d;
+//    }
     public void addBatch(LgBatch batch) {
         for (LgBill bill : batch.bills) {
             bills.add(bill);
@@ -36,7 +36,7 @@ public class Deposit extends LgDeposit {
     }
 
     public Deposit(LgUser user, String userCode, DepositUserCodeReference userCodeData, Currency currency) {
-        this.bag = LgBag.GetCurrentBag();
+        this.bag = LgBag.getCurrentBag();
         this.user = user;
         this.userCode = userCode;
 
@@ -48,9 +48,12 @@ public class Deposit extends LgDeposit {
         this.currency = currency;
     }
 
-    @PostUpdate
-    public void DepositCreatedEvent() {
-        LgEvent.save(this, LgEvent.Type.DEPOSIT_CHANGE, String.format("Deposit changed by userId : %d", user.userId));
+    @Override
+    public <T extends JPABase> T save() {
+        if (!JPABase.em().contains(this)) {
+            LgEvent event = new LgEvent(this, LgEvent.Type.DEPOSIT_CHANGE, String.format("Deposit changed by userId : %d", user.userId));
+        }
+        return super.save();
     }
 
     public LgLov findUserCodeLov() {

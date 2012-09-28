@@ -22,13 +22,13 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bag_id", nullable = false)
     public LgBag bag;
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "start_date", length = 13)
     public Date startDate;
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "finish_date", length = 13)
     public Date finishDate;
     @Column(name = "user_code", length = 128)
@@ -42,4 +42,9 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     public Set<LgEnvelope> envelopes = new HashSet<LgEnvelope>(0);
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit")
     public Set<LgBill> bills = new HashSet<LgBill>(0);
+
+    @Override
+    public String toString() {
+        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", bag=" + bag + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + '}';
+    }
 }

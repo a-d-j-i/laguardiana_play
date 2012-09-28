@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import models.lov.Currency;
-import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
@@ -15,8 +13,8 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     @Id
     @Column(name = "batch_id", unique = true, nullable = false)
     @GeneratedValue
-    public int batchId;
-    @Temporal(TemporalType.DATE)
+    public Integer batchId;
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "batch")
@@ -29,26 +27,6 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     public void addBill(LgBill b) {
         b.batch = this;
         bills.add(b);
-    }
-
-    public static LgBatch MakeRandom(LgDeposit deposit) {
-        Currency billLov = Currency.findByTextId("Pesos Argentinos");
-        if (billLov == null) {
-            Logger.error("no bill code for pesos argentinos!");
-            return null;
-        }
-        int pesos = billLov.numericId;
-        LgBatch batch = new LgBatch();
-        LgBillType billType = LgBillType.find(5, pesos);
-        //thisb.save();
-        for (int i = 0; i < 4; i = i + 1) {
-            LgBill bill = new LgBill(i, billType);
-            batch.addBill(bill);
-            Logger.info(" created: %s", bill.toString());
-            //bill.save();
-        }
-        Logger.info(" bills: %d", batch.bills.size());
-        return batch;
     }
 
     @Override
