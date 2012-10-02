@@ -19,6 +19,7 @@ public class IoBoard extends Observable {
 
     public static final int IOBOARD_READ_TIMEOUT = 10000;
     public static final int IOBOARD_STATUS_CHECK_FREQ = 2000;
+    public static final int IOBOARD_MAX_RETRIES = 5;
 
     public enum Status {
 
@@ -73,6 +74,7 @@ public class IoBoard extends Observable {
 
         @Override
         public void run() {
+            int retries = 0;
             Logger.debug("IoBoard status thread started");
             while (!mustStop.get()) {
                 try {
@@ -80,6 +82,8 @@ public class IoBoard extends Observable {
                         throw new IOException("IoBoard StatusThread IoBoard Serial port closed");
                     }
                     String l = serialPort.readLine(IOBOARD_STATUS_CHECK_FREQ);
+                    Logger.debug("IOBOARD reader %s", l);
+                    retries = 0;
                     if (l.startsWith("STATUS :") && l.length() == 31) {
                         try {
                             Integer A = Integer.parseInt(l.substring(11, 13), 16);
@@ -110,9 +114,14 @@ public class IoBoard extends Observable {
                         setError(String.format("StatusThread exception %s", ex.getMessage()));
                     } else { // timeout
                         // Try again
-                        sendCmd('S');
-
                         if (getStatus().status != Status.ERROR) {
+                            sendCmd('S');
+                            retries++;
+
+                            if (retries == IOBOARD_MAX_RETRIES) {
+                                setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
+                                retries = 0;
+                            }
                             Date currTime = new Date();
                             if (lastCmdSentTime != null && (currTime.getTime() - lastCmdSentTime.getTime()) > IOBOARD_READ_TIMEOUT) {
                                 setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
@@ -155,7 +164,7 @@ public class IoBoard extends Observable {
         }
 
         private void setError(String error) {
-            Logger.error(error);
+            Logger.error("------- > IoBoard error : %s", error);
             mutex.lock();
             try {
                 currentStatus.status = Status.ERROR;
@@ -185,9 +194,7 @@ public class IoBoard extends Observable {
             try {
                 byte[] b = new byte[1];
                 b[0] = (byte) cmd;
-                if (cmd != 'S') {
-                    Logger.debug("IoBoard writting %c", cmd);
-                }
+                Logger.debug("IoBoard writting %c", cmd);
                 serialPort.write(b);
                 lastCmdSentTime = new Date();
             } catch (IOException e) {

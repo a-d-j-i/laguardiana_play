@@ -113,7 +113,7 @@ public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract imple
                 serialPort.close();
                 serialPort = null;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new IOException(String.format("Error closing serial port"), e);
         }
     }

@@ -113,12 +113,12 @@ public class BillDepositController extends Application {
             if (deposit != null) {
                 renderArgs.put("depositTotal", deposit.getTotal());
                 renderArgs.put("depositId", deposit.depositId);
-            }
-            try {
-                // Print the ticket.
-                DeviceFactory.getPrinter().print("billDeposit", renderArgs);
-            } catch (Throwable ex) {
-                Logger.debug(ex.getMessage());
+                try {
+                    // Print the ticket.
+                    DeviceFactory.getPrinter().print("billDeposit", renderArgs);
+                } catch (Throwable ex) {
+                    Logger.debug(ex.getMessage());
+                }
             }
             ModelFacade.finishAction();
         } else {

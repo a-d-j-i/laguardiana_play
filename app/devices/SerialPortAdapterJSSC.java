@@ -67,7 +67,7 @@ public final class SerialPortAdapterJSSC extends SerialPortAdapterAbstract imple
                 serialPort.closePort();
                 serialPort = null;
             }
-        } catch (SerialPortException e) {
+        } catch (Exception e) {
             throw new IOException(String.format("Error closing serial port"), e);
         }
     }

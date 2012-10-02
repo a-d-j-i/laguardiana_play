@@ -177,6 +177,9 @@ public class ModelFacade {
         if (manager.getStatus() == GloryManager.Status.ERROR) {
             setError(String.format("Glory error : %s", manager.getErrorDetail()));
         }
+        if (ioBoard.getStatus().status == IoBoard.Status.ERROR) {
+            setError(String.format("IoBoeard error : %s", ioBoard.getStatus().error));
+        }
         if (isError()) {
             return "ERROR";
         }
@@ -303,6 +306,7 @@ public class ModelFacade {
         currentUserAction.accept();
     }
 
+    // TODO: Implement this as an action with some screens.
     synchronized public static void reset() {
         if (!isError()) {
             return;
@@ -315,8 +319,10 @@ public class ModelFacade {
                 }
             }
         });
+        ioBoard.clearError();
     }
 
+    // TODO: Implement this as an action with some screens.
     synchronized public static void storingErrorReset() {
         if (!isError()) {
             return;
@@ -329,5 +335,6 @@ public class ModelFacade {
                 }
             }
         });
+        ioBoard.clearError();
     }
 }

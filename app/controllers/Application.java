@@ -105,10 +105,7 @@ public class Application extends Controller {
             }
             renderJSON(o);
         } else {
-            if (!ModelFacade.isError()) {
-                // Error Solved.
-                Application.index();
-            }
+            renderArgs.put("isError", ModelFacade.isError());
             render();
         }
     }

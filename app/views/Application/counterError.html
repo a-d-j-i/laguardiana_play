@@ -20,7 +20,12 @@
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
                     <!-- link cancelar -->
+                    #{if isError }
+                    <a href="@{Application.counterError()}" class="boton gris">Refresh</a>
+                    #{/if}
+                    #{else}
                     <a href="@{Application.index()}" class="boton gris">&{ 'main_menu.title' }</a>
+                    #{/else}
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
