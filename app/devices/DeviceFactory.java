@@ -7,9 +7,7 @@ import devices.SerialPortAdapterAbstract.PORTSTOPBITS;
 import devices.SerialPortAdapterAbstract.PortConfiguration;
 import devices.glory.Glory;
 import devices.glory.manager.GloryManager;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.logging.Level;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.*;
@@ -71,19 +69,13 @@ public class DeviceFactory extends PlayPlugin {
         if (gloryDevices.containsKey(port)) {
             return gloryDevices.get(port);
         }
-
-        try {
-            Logger.info(String.format("Configuring glory on serial port %s", port));
-            //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
-            SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, gloryPortConf);
-            Logger.info(String.format("Configuring glory"));
-            Glory device = new Glory(serialPort);
-            gloryDevices.put(port, device);
-            return device;
-        } catch (IOException e) {
-            Logger.error("Error opening the serial port");
-            return null;
-        }
+        Logger.info(String.format("Configuring glory on serial port %s", port));
+        //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
+        SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, gloryPortConf);
+        Logger.info(String.format("Configuring glory"));
+        Glory device = new Glory(serialPort);
+        gloryDevices.put(port, device);
+        return device;
     }
 
     public static IoBoard getIoBoard() {
@@ -98,19 +90,14 @@ public class DeviceFactory extends PlayPlugin {
             return ioBoardDevices.get(port);
         }
 
-        try {
-            Logger.info(String.format("Configuring ioboard on serial port %s", port));
-            //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
-            SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, iBoardPortConf);
-            Logger.info(String.format("Configuring glory"));
-            IoBoard device = new IoBoard(serialPort);
-            device.startStatusThread();
-            ioBoardDevices.put(port, device);
-            return device;
-        } catch (IOException e) {
-            Logger.error("Error opening the serial port");
-            return null;
-        }
+        Logger.info(String.format("Configuring ioboard on serial port %s", port));
+        //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
+        SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, iBoardPortConf);
+        Logger.info(String.format("Configuring glory"));
+        IoBoard device = new IoBoard(serialPort);
+        device.startStatusThread();
+        ioBoardDevices.put(port, device);
+        return device;
     }
 
     static synchronized public void closeAll() {

@@ -1,36 +1,36 @@
 package controllers;
 
 import devices.DeviceFactory;
-import devices.Printer;
+import devices.IoBoard;
 import devices.glory.manager.GloryManager;
-import java.io.IOException;
-import java.util.logging.Level;
 import models.ModelFacade;
-import models.actions.UserAction;
-import models.db.LgBag;
 import models.db.LgSystemProperty;
 import play.Logger;
-import play.libs.F;
-import play.libs.F.Tuple;
+import play.Play;
 import play.mvc.*;
 
 @With({Secure.class})
 public class Application extends Controller {
 
+    static int defaultTimeout = 60;
+
     @Before
     static void basicPropertiesAndFixWizard() throws Throwable {
-        Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
-
         if (request.isAjax()) {
             return;
         }
         renderArgs.put("useHardwareKeyboard", isProperty("useHardwareKeyboard"));
+        try {
+            defaultTimeout = Integer.parseInt(Play.configuration.getProperty("timer.timeout"));
+        } catch (NumberFormatException e) {
+            Logger.debug("Error parsing timer.timeout %s", e.getMessage());
+        }
 
-        if (userActionTuple._1 == null) {
+        String neededController = ModelFacade.getNeededController();
+        if (neededController == null) {
             return;
         }
-        String neededController = userActionTuple._1.getNeededController();
-        String neededAction = userActionTuple._1.getControllerAction();
+        String neededAction = ModelFacade.getNeededAction();
         Logger.debug("Needed action : %s  Needed controller : %s", neededAction, neededController);
         if (neededController == null || neededAction == null) {
             return;
@@ -40,15 +40,9 @@ public class Application extends Controller {
         }
         if (!request.controller.equalsIgnoreCase(neededController)
                 || !request.actionMethod.equalsIgnoreCase(neededAction)) {
-            Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
+            Logger.debug("basicPropertiesAndFixWizard REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
             redirect(Router.getFullUrl(neededController + "." + neededAction));
         }
-    }
-
-    @Util
-    static public <T> T getCurrentAction() {
-        Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
-        return (T) userActionTuple._1;
     }
 
     public static void index() {
@@ -70,29 +64,36 @@ public class Application extends Controller {
     public static void counterError(Integer cmd) {
         GloryManager.Status gstatus = null;
         GloryManager.ErrorDetail gerror = null;
-        String status = "";
+        IoBoard.Status istatus = null;
+        String ierror = null;
+
         final GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
             gerror = manager.getErrorDetail();
         }
-        F.Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
-        if (userActionTuple._1 != null) {
-            status = userActionTuple._1.error;
+        final IoBoard ioBoard = DeviceFactory.getIoBoard();
+        if (ioBoard != null) {
+            IoBoard.IoBoardStatus s = ioBoard.getStatus();
+            istatus = s.status;
+            ierror = s.error;
         }
         if (cmd != null) {
-            if (userActionTuple._1 != null) {
-                userActionTuple._1.finishAction();
-            }
             switch (cmd) {
                 case 1:
-                    manager.reset(null);
+                    ModelFacade.reset();
                     break;
                 case 2:
-                    manager.storingErrorReset(null);
+                    ModelFacade.storingErrorReset();
                     break;
             }
         }
+        renderArgs.put("mstatus", ModelFacade.getState());
+        renderArgs.put("merror", ModelFacade.getError());
+        renderArgs.put("gstatus", gstatus);
+        renderArgs.put("gerror", gerror);
+        renderArgs.put("istatus", istatus);
+        renderArgs.put("ierror", ierror);
 
         if (request.isAjax()) {
             Object[] o = new Object[3];
@@ -104,12 +105,7 @@ public class Application extends Controller {
             }
             renderJSON(o);
         } else {
-            renderArgs.put("status", status);
-            renderArgs.put("gerror", gstatus);
-            renderArgs.put("gstatus", gerror);
-            userActionTuple = ModelFacade.getCurrentUserAction();
-
-            if (userActionTuple._1 == null && gstatus == GloryManager.Status.IDLE) {
+            if (!ModelFacade.isError()) {
                 // Error Solved.
                 Application.index();
             }

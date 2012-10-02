@@ -4,32 +4,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
-import models.Deposit;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Table( name = "lg_event", schema = "public")
-public class LgEvent extends GenericModel implements java.io.Serializable {
+abstract public class LgEvent extends GenericModel implements java.io.Serializable {
 
-    public static enum Type {
-
-        GLORY(1),
-        ACTION_START_TRY(2),
-        ACTION_START(4),
-        ACTION_FINISH(5),
-        DEPOSIT_CHANGE(6),
-        IO_BOARD(7),
-        INVALID_BAG(8),;
-        private Integer eventTypeLov;
-
-        private Type(Integer eventTypeLov) {
-            this.eventTypeLov = eventTypeLov;
-        }
-
-        private Integer getEventTypeLov() {
-            return eventTypeLov;
-        }
-    }
     @Id
     @Column( name = "event_id", unique = true, nullable = false)
     @GeneratedValue
@@ -46,17 +25,6 @@ public class LgEvent extends GenericModel implements java.io.Serializable {
     public String message;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "event")
     public Set<LgExternalAppLog> externalAppLogs = new HashSet<LgExternalAppLog>(0);
-
-    public static void save(Deposit deposit, Type type, String message) {
-        LgEvent e = new LgEvent(deposit, type, message);
-        e.save();
-    }
-
-    public LgEvent(Deposit deposit, Type type, String message) {
-        this.deposit = deposit;
-        this.eventTypeLov = type.getEventTypeLov();
-        this.message = message;
-    }
 
     @Override
     public String toString() {

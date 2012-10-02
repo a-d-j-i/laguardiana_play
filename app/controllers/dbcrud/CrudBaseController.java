@@ -12,9 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import models.db.LgLov;
 import models.db.LgLov.LovCol;
-import play.Logger;
+import play.db.Model;
 import play.db.Model.Property;
-import play.db.jpa.Model;
 import play.exceptions.UnexpectedException;
 import play.mvc.With;
 

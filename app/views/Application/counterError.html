@@ -4,11 +4,12 @@
     <header></header>
     <article>
         <div class="contenido">
-            <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
-            <div class="mensaje"><span>&{ 'application.error' }</span></div>
-            <p id="status">${ status }</p>
-            <p id="gstatus">${ gstatus }</p>
-            <p id="gerror">${ gError }</p>
+            <p id="mstatus">ModelFacade status ${ mstatus }</p>
+            <p id="merror">ModelFacade error ${ merror }</p>
+            <p id="gstatus">Glory Status ${ gstatus }</p>
+            <p id="gerror">Glory Error ${ gError }</p>
+            <p id="ierror">IOBoard Status ${ istatus }</p>
+            <p id="ierror">IOBoard Error ${ ierror }</p>
             <a class="boton naranja full_width" href="@{Application.counterError(1)}">Reset</a>
             <a class="boton naranja full_width" href="@{Application.counterError(2)}">StoringErrorReset</a>
             <!-- datos del deposito -->
@@ -47,12 +48,12 @@
         waiting = true;
         $.getJSON( '@{counterError}', function( data ) {
             waiting = false;
-            $( '#gstatus' ).html(  data[ 0 ] );
-            $( '#gerror' ).html(  data[ 1 ] );
+            //$( '#gstatus' ).html(  data[ 0 ] );
+            //$( '#gerror' ).html(  data[ 1 ] );
         });
     }
     // Call refresh every 1.5 seconds
-    setInterval(refresh, 1500);
-    refresh();
+    //setInterval(refresh, 1500);
+    //refresh();
 </script>
 #{/set}

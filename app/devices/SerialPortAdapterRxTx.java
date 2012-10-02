@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.util.logging.Level;
 import play.Logger;
 import play.Play;
 
@@ -66,10 +65,14 @@ public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract imple
         }
     }
 
-    public SerialPortAdapterRxTx(String portN, PortConfiguration conf) throws IOException {
+    public SerialPortAdapterRxTx(String portN, PortConfiguration conf) {
         super(conf);
         portName = portN;
-        open();
+        try {
+            open();
+        } catch (IOException ex) {
+            Logger.error("Error opening the serial port, must reopen later");
+        }
     }
 
     @Override
@@ -117,13 +120,13 @@ public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract imple
 
     public void write(byte[] buffer) throws IOException {
         if (serialPort == null) {
-            throw new IOException("Error wrting to serial port, port closed");
+            throw new IOException("Error writing to serial port, port closed");
         }
 
         try {
             out.write(buffer);
         } catch (IOException e) {
-            throw new IOException(String.format("Error wrting to serial port %s", serialPort.getName()), e);
+            throw new IOException(String.format("Error writing to serial port %s", serialPort.getName()), e);
         }
     }
 }

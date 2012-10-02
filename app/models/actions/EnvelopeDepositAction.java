@@ -5,8 +5,8 @@
 package models.actions;
 
 import controllers.Secure;
-import devices.glory.manager.GloryManager;
 import devices.IoBoard;
+import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.EnumMap;
 import models.Deposit;
@@ -32,44 +32,44 @@ public class EnvelopeDepositAction extends UserAction {
     public String userCode;
     public LgEnvelope envelope;
 
-    public EnvelopeDepositAction(DepositUserCodeReference userCodeLov, String userCode, LgEnvelope envelope, Object formData) {
-        super(formData, messageMap);
+    public EnvelopeDepositAction(DepositUserCodeReference userCodeLov, String userCode, LgEnvelope envelope, Object formData, int timeout) {
+        super(null, formData, messageMap, timeout);
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;
         this.envelope = envelope;
     }
 
     @Override
-    final public String getNeededController() {
+    final public String getActionNeededController() {
         return "EnvelopeDepositController";
     }
 
     @Override
     public void start() {
-        currentDeposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov, null);
-        currentDeposit.addEnvelope(envelope);
-        currentDeposit.save();
-        if (!userActionApi.envelopeDeposit()) {
-            state = ActionState.ERROR;
-            error = String.format("startEnvelopeDeposit can't start glory %s", userActionApi.getErrorDetail());
-        }
+        Deposit deposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov);
+        deposit.addEnvelope(envelope);
+        deposit.save();
+        currentDepositId = deposit.depositId;
+        userActionApi.envelopeDeposit();
     }
 
-    public void acceptDeposit() {
-        if (state != ActionState.READY_TO_STORE || currentDeposit == null) {
+    @Override
+    public void accept() {
+        if (state != ActionState.READY_TO_STORE || currentDepositId == null) {
             Logger.error("acceptDeposit Invalid step");
             return;
         }
-        Deposit d = Deposit.findById(currentDeposit.depositId);
+        Deposit d = Deposit.findById(currentDepositId);
         d.startDate = new Date();
         d.save();
-        if (!userActionApi.storeDeposit(currentDeposit.depositId)) {
+        if (!userActionApi.store(currentDepositId)) {
             Logger.error("startEnvelopeDeposit can't cancel glory");
         }
     }
 
-    public void cancelDeposit() {
-        if (currentDeposit == null) {
+    @Override
+    public void cancel() {
+        if (currentDepositId == null) {
             Logger.error("cancelDeposit Invalid step %s", state.name());
             return;
         }
@@ -80,12 +80,8 @@ public class EnvelopeDepositAction extends UserAction {
     }
 
     @Override
-    public void gloryDone(GloryManager.Status m, GloryManager.ErrorDetail me) {
+    public void onGloryEvent(GloryManager.Status m) {
         Logger.debug("EnvelopeDepositAction When Done %s %s", m.name(), state.name());
-        if (m == GloryManager.Status.ERROR) {
-            error("Glory Error : %s", me);
-            return;
-        }
         switch (state) {
             case IDLE:
                 switch (m) {
@@ -93,37 +89,41 @@ public class EnvelopeDepositAction extends UserAction {
                         state = ActionState.READY_TO_STORE;
                         break;
                     default:
-                        Logger.debug("getControllerAction Current manager state %s %s",
-                                state.name(), userActionApi.getManagerStatus().name());
+                        Logger.debug("getControllerAction Current manager state %s %s", state.name(), m.name());
                         break;
                 }
                 break;
             case CANCELING:
                 if (m != GloryManager.Status.CANCELED) {
-                    error("CANCELING Invalid manager status %s", m.name());
+                    Logger.error("CANCELING Invalid manager status %s", m.name());
                 } else {
                     state = ActionState.FINISH;
                 }
-                currentDeposit = null;
+                currentDepositId = null;
                 break;
             case READY_TO_STORE:
                 if (m != GloryManager.Status.IDLE) {
                     Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
                 }
                 state = ActionState.FINISH;
-                Deposit d = Deposit.findById(currentDeposit.depositId);
+                Deposit d = Deposit.findById(currentDepositId);
                 d.finishDate = new Date();
                 d.save();
-                currentDeposit = null;
+                currentDepositId = null;
                 break;
             default:
-                error("WhenDone invalid status %s %s %s", state.name(), m.name(), me);
+                Logger.error("WhenDone invalid status %s %s", state.name(), m.name());
                 break;
         }
     }
 
     @Override
-    public void ioBoardEvent(IoBoard.IoBoardStatus status) {
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.debug("CountingAction ioBoardEvent %s %s", status.status.name(), state.name());
+    }
+
+    @Override
+    public void onTimeoutEvent() {
+        Logger.debug("CountingAction timeoutEvent");
     }
 }

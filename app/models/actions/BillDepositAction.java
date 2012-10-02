@@ -8,14 +8,13 @@ import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.List;
+import models.Bill;
 import models.Deposit;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
-import validation.Bill;
 
 /**
  *
@@ -38,72 +37,31 @@ public class BillDepositAction extends UserAction {
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;
-    public Currency currency;
 
     public BillDepositAction(DepositUserCodeReference userCodeLov,
-            String userCode, Currency currency, Object formData) {
-        super(formData, messageMap);
+            String userCode, Currency currency, Object formData, int timeout) {
+        super(currency, formData, messageMap, timeout);
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;
-        this.currency = currency;
     }
 
     @Override
-    final public String getNeededController() {
+    final public String getActionNeededController() {
         return "BillDepositController";
     }
 
     @Override
     public void start() {
-        currentDeposit = new Deposit(currentUser, userCode, userCodeLov, currency);
-        currentDeposit.save();
-        if (!userActionApi.count(currency.numericId)) {
-            state = ActionState.ERROR;
-            error = String.format("startBillDeposit can't start glory %s", userActionApi.getErrorDetail());
-        }
+        Deposit deposit = new Deposit(currentUser, userCode, userCodeLov);
+        deposit.save();
+        currentDepositId = deposit.depositId;
+        userActionApi.count(currency.numericId);
+        startTimer();
     }
 
-    public List<Bill> getBillData() {
-        return Bill.getCurrentCounters(currency.numericId);
-    }
-
-    public Long getTotal() {
-        if (currentDeposit == null) {
-            return new Long(0);
-        }
-        return currentDeposit.getTotal();
-    }
-
-    public void acceptDeposit() {
-        if ((state != ActionState.READY_TO_STORE && state != ActionState.ESCROW_FULL)
-                || currentDeposit == null) {
-            Logger.error("acceptDeposit Invalid step");
-            return;
-        }
-        LgBatch batch = new LgBatch();
-        for (Bill bill : Bill.getCurrentCounters(currentDeposit.currency.numericId)) {
-            Logger.debug(" -> quantity %d", bill.q);
-            LgBill b = new LgBill(bill.q, bill.billType);
-            batch.addBill(b);
-        }
-        currentDeposit.addBatch(batch);
-        batch.save();
-        Deposit d = Deposit.findById(currentDeposit.depositId);
-        d.startDate = new Date();
-        d.save();
-        if (state == ActionState.READY_TO_STORE) {
-            state = ActionState.READY_TO_STORE_STORING;
-        } else if (state == ActionState.ESCROW_FULL) {
-            state = ActionState.ESCROW_FULL_STORING;
-        }
-        if (!userActionApi.storeDeposit(currentDeposit.depositId)) {
-            Logger.error("startBillDeposit can't cancel glory");
-        }
-
-    }
-
-    public void cancelDeposit() {
-        if (currentDeposit == null) {
+    @Override
+    public void cancel() {
+        if (currentDepositId == null) {
             Logger.error("cancelDeposit Invalid step %s", state.name());
             return;
         }
@@ -114,12 +72,37 @@ public class BillDepositAction extends UserAction {
     }
 
     @Override
-    public void gloryDone(GloryManager.Status m, GloryManager.ErrorDetail me) {
-        Logger.debug("BillDepositAction When Done %s %s", m.name(), state.name());
-        if (m == GloryManager.Status.ERROR) {
-            error("Glory Error : %s", me);
+    public void accept() {
+        if ((state != ActionState.READY_TO_STORE && state != ActionState.ESCROW_FULL)
+                || currentDepositId == null) {
+            Logger.error("acceptDeposit Invalid step");
             return;
         }
+        Deposit deposit = Deposit.findById(currentDepositId);
+        LgBatch batch = new LgBatch();
+        for (Bill bill : Bill.getBillList(currency.numericId)) {
+            Logger.debug(" -> quantity %d", bill.q);
+            LgBill b = new LgBill(bill.q, bill.billType);
+            batch.addBill(b);
+        }
+        deposit.addBatch(batch);
+        batch.save();
+        deposit.startDate = new Date();
+        deposit.save();
+        if (state == ActionState.READY_TO_STORE) {
+            state = ActionState.READY_TO_STORE_STORING;
+        } else if (state == ActionState.ESCROW_FULL) {
+            state = ActionState.ESCROW_FULL_STORING;
+        }
+        if (!userActionApi.store(currentDepositId)) {
+            Logger.error("startBillDeposit can't cancel glory");
+        }
+
+    }
+
+    @Override
+    public void onGloryEvent(GloryManager.Status m) {
+        Logger.debug("BillDepositAction When Done %s %s", m.name(), state.name());
         switch (state) {
             case IDLE:
                 switch (m) {
@@ -137,11 +120,11 @@ public class BillDepositAction extends UserAction {
                 break;
             case CANCELING:
                 if (m != GloryManager.Status.CANCELED) {
-                    error("CANCELING Invalid manager status %s", m.name());
-                    currentDeposit = null;
+                    Logger.error("CANCELING Invalid manager status %s", m.name());
+                    currentDepositId = null;
                 } else {
                     state = ActionState.FINISH;
-                    currentDeposit = null;
+                    currentDepositId = null;
                 }
                 break;
             case ESCROW_FULL_STORING:
@@ -155,24 +138,29 @@ public class BillDepositAction extends UserAction {
                     Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
                 }
                 state = ActionState.FINISH;
-                Deposit d = Deposit.findById(currentDeposit.depositId);
+                Deposit d = Deposit.findById(currentDepositId);
                 d.finishDate = new Date();
                 d.save();
                 break;
             case FINISH:
                 if (m != GloryManager.Status.IDLE) {
-                    error("WhenDone invalid status %s %s %s", state.name(), m.name(), me);
+                    Logger.error("WhenDone invalid status %s %s", state.name(), m.name());
                 }
                 break;
             default:
-                error("WhenDone invalid status %s %s %s", state.name(), m.name(), me);
-                currentDeposit = null;
+                Logger.error("WhenDone invalid status %s %s", state.name(), m.name());
+                currentDepositId = null;
                 break;
         }
     }
 
     @Override
-    public void ioBoardEvent(IoBoard.IoBoardStatus status) {
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.debug("CountingAction ioBoardEvent %s %s", status.status.name(), state.name());
+    }
+
+    @Override
+    public void onTimeoutEvent() {
+        Logger.debug("CountingAction timeoutEvent");
     }
 }

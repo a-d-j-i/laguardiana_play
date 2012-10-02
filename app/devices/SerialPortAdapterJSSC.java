@@ -74,12 +74,12 @@ public final class SerialPortAdapterJSSC extends SerialPortAdapterAbstract imple
 
     public void write(byte[] buffer) throws IOException {
         if (serialPort == null) {
-            throw new IOException("Error wrting to serial port, port closed");
+            throw new IOException("Error writing to serial port, port closed");
         }
         try {
             serialPort.writeBytes(buffer);
         } catch (SerialPortException e) {
-            throw new IOException(String.format("Error wrting to serial port %s", serialPort.getPortName()), e);
+            throw new IOException(String.format("Error writing to serial port %s", serialPort.getPortName()), e);
         }
     }
 }

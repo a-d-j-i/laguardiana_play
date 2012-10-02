@@ -4,13 +4,16 @@
  */
 package models.actions;
 
-import devices.glory.manager.GloryManager;
 import devices.IoBoard;
+import devices.glory.manager.GloryManager;
+import java.util.Date;
 import java.util.EnumMap;
-import models.Deposit;
+import models.Event;
 import models.ModelFacade.UserActionApi;
 import models.User;
-import play.Logger;
+import models.lov.Currency;
+import play.jobs.Job;
+import play.libs.F.Promise;
 
 /**
  *
@@ -21,7 +24,6 @@ abstract public class UserAction {
     static public enum ActionState {
 
         IDLE,
-        ERROR,
         READY_TO_STORE,
         ESCROW_FULL,
         READY_TO_STORE_STORING,
@@ -29,41 +31,25 @@ abstract public class UserAction {
         FINISH,
         CANCELING,;
     };
-    public String error = null;
     final protected Object formData;
+    final protected Currency currency;
     protected UserActionApi userActionApi = null;
     protected User currentUser = null;
     protected final EnumMap<GloryManager.Status, String> messages;
     protected ActionState state = ActionState.IDLE;
-    protected Deposit currentDeposit = null;
+    protected Integer currentDepositId = null;
+    protected int timeout = 60;
+    private Promise timer = null;
 
-    public UserAction(Object formData, EnumMap<GloryManager.Status, String> messages) {
+    public UserAction(Currency currency, Object formData, EnumMap<GloryManager.Status, String> messages, int timeout) {
         this.formData = formData;
         this.messages = messages;
+        this.timeout = timeout;
+        this.currency = currency;
     }
 
-    public String getActionState() {
+    public String getStateName() {
         return state.name();
-    }
-
-    public String getActionMessage() {
-        GloryManager.Status m = userActionApi.getManagerStatus();
-        //Logger.debug("getActionMessage Manager Status %s %s", m.name(), userActionApi.getErrorDetail());
-        if (m == GloryManager.Status.ERROR) {
-            state = ActionState.ERROR;
-        }
-        return messages.get(m);
-    }
-
-    public String getControllerAction() {
-        switch (state) {
-            case ERROR:
-                return "counterError";
-            case FINISH:
-                return "finish";
-            default:
-                return "mainLoop";
-        }
     }
 
     public void start(User currentUser, UserActionApi userActionApi) {
@@ -78,23 +64,69 @@ abstract public class UserAction {
 
     abstract public void start();
 
-    abstract public void gloryDone(GloryManager.Status m, GloryManager.ErrorDetail me);
+    abstract public void cancel();
 
-    abstract public void ioBoardEvent(IoBoard.IoBoardStatus status);
+    abstract public void accept();
 
-    abstract public String getNeededController();
+    abstract public void onGloryEvent(GloryManager.Status m);
 
-    public Deposit getDeposit() {
-        return currentDeposit;
+    abstract public void onIoBoardEvent(IoBoard.IoBoardStatus status);
+
+    abstract public String getActionNeededController();
+
+    public Currency getCurrency() {
+        return currency;
     }
 
+    public String getNeededActionAction() {
+        switch (state) {
+            case FINISH:
+                return "finish";
+            default:
+                return "mainLoop";
+        }
+    }
+
+    public String getActionMessage() {
+        return messages.get(userActionApi.getManagerStatus());
+    }
+
+    public Integer getDepositId() {
+        return currentDepositId;
+    }
+//    protected void error(String message, Object... args) {
+//        Logger.error(message, args);
+//        error = String.format(message, args);
+//        state = ActionState.ERROR;
+//    }
+
+    // TODO: Review what else I must do?.
     public void finishAction() {
-        userActionApi.finishAction();
+        cancelTimer();
     }
 
-    protected void error(String message, Object... args) {
-        Logger.error(message, args);
-        error = String.format(message, args);
-        state = ActionState.ERROR;
+    protected void startTimer() {
+        timer = new OnTimeout().in(timeout);
+    }
+
+    protected void cancelTimer() {
+        if (timer != null) {
+            timer.cancel(true);
+            timer = null;
+        }
+    }
+
+    abstract public void onTimeoutEvent();
+
+    protected class OnTimeout extends Job {
+
+        @Override
+        public void doJob() {
+            Date currentDate = new Date();
+            Event.save(getDepositId(), Event.Type.TIMEOUT, currentDate.toString());
+            onTimeoutEvent();
+            // TODO: Review Reschedule
+            timer = new OnTimeout().in(timeout);
+        }
     }
 }

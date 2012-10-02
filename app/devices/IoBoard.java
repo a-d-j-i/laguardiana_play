@@ -1,6 +1,5 @@
 package devices;
 
-import devices.SerialPortAdapterInterface;
 import devices.IoBoard.IoBoardStatus;
 import java.io.IOException;
 import java.security.InvalidParameterException;
@@ -24,6 +23,7 @@ public class IoBoard extends Observable {
     public enum Status {
 
         IDLE,
+        ERROR,
         OPENNING,
         OPEN,
         CLOSING,
@@ -62,7 +62,7 @@ public class IoBoard extends Observable {
         private IoBoardStatus currentStatus = new IoBoardStatus();
         final private Lock mutex = new ReentrantLock();
 
-        public IoBoardStatus getStatus() throws InterruptedException {
+        public IoBoardStatus getStatus() {
             mutex.lock();
             try {
                 return currentStatus.copy();
@@ -73,53 +73,56 @@ public class IoBoard extends Observable {
 
         @Override
         public void run() {
+            Logger.debug("IoBoard status thread started");
             while (!mustStop.get()) {
                 try {
                     if (serialPort == null) {
-                        setError("StatusThread IoBoard Serial port closed");
+                        throw new IOException("IoBoard StatusThread IoBoard Serial port closed");
+                    }
+                    String l = serialPort.readLine(IOBOARD_STATUS_CHECK_FREQ);
+                    if (l.startsWith("STATUS :") && l.length() == 31) {
+                        try {
+                            Integer A = Integer.parseInt(l.substring(11, 13), 16);
+                            Integer B = Integer.parseInt(l.substring(17, 19), 16);
+                            Integer C = Integer.parseInt(l.substring(23, 25), 16);
+                            Integer D = Integer.parseInt(l.substring(29, 31), 16);
+                            setABCD(A, B, C, D);
+                        } catch (NumberFormatException e) {
+                            Logger.warn("checkStatus invalid number: %s", e.getMessage());
+                        }
                     } else {
-                        String l = serialPort.readLine(IOBOARD_STATUS_CHECK_FREQ);
-                        if (l.startsWith("STATUS :") && l.length() == 31) {
-                            try {
-                                Integer A = Integer.parseInt(l.substring(11, 13), 16);
-                                Integer B = Integer.parseInt(l.substring(17, 19), 16);
-                                Integer C = Integer.parseInt(l.substring(23, 25), 16);
-                                Integer D = Integer.parseInt(l.substring(29, 31), 16);
-                                setABCD(A, B, C, D);
-                            } catch (NumberFormatException e) {
-                                Logger.warn("checkStatus invalid number: %s", e.getMessage());
-                            }
+                        if (l.equalsIgnoreCase("START OPEN")) {
+                            setStatus(Status.OPENNING);
+                        } else if (l.equalsIgnoreCase("START CLOSE")) {
+                            setStatus(Status.CLOSING);
+                        } else if (l.equalsIgnoreCase("OPEN")) {
+                            setStatus(Status.OPEN);
+                        } else if (l.equalsIgnoreCase("CLOSE")) {
+                            setStatus(Status.CLOSED);
+                        } else if (l.equalsIgnoreCase("ERROR OPEN TIMEOUT")) {
+                            setError("Open timeout");
                         } else {
-                            if (l.equalsIgnoreCase("START OPEN")) {
-                                setStatus(Status.OPENNING);
-                            } else if (l.equalsIgnoreCase("START CLOSE")) {
-                                setStatus(Status.CLOSING);
-                            } else if (l.equalsIgnoreCase("OPEN")) {
-                                setStatus(Status.OPEN);
-                            } else if (l.equalsIgnoreCase("CLOSE")) {
-                                setStatus(Status.CLOSED);
-                            } else if (l.equalsIgnoreCase("ERROR OPEN TIMEOUT")) {
-                                setError("Open timeout");
-                            } else {
-                                Logger.warn("StatusThread Ignoring line : %s", l);
-                            }
+                            Logger.warn("StatusThread Ignoring line : %s", l);
                         }
                     }
                 } catch (Exception ex) {
-                    if (ex.getCause() instanceof TimeoutException) {
-                        Date currTime = new Date();
-                        if (lastCmdSentTime != null && (currTime.getTime() - lastCmdSentTime.getTime()) > IOBOARD_READ_TIMEOUT) {
-                            setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
-                            try {
-                                serialPort.reconect();
-                            } catch (IOException ex1) {
-                                Logger.debug("Error in reconection %s", ex1.getMessage());
-                            }
-                        } else {
-                            sendCmd('S');
-                        }
-                    } else {
+                    if (!(ex.getCause() instanceof TimeoutException)) {
                         setError(String.format("StatusThread exception %s", ex.getMessage()));
+                    } else { // timeout
+                        // Try again
+                        sendCmd('S');
+
+                        if (getStatus().status != Status.ERROR) {
+                            Date currTime = new Date();
+                            if (lastCmdSentTime != null && (currTime.getTime() - lastCmdSentTime.getTime()) > IOBOARD_READ_TIMEOUT) {
+                                setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
+                                try {
+                                    serialPort.reconect();
+                                } catch (IOException ex1) {
+                                    setError(String.format("Error in reconection %s", ex1.getMessage()));
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -155,9 +158,47 @@ public class IoBoard extends Observable {
             Logger.error(error);
             mutex.lock();
             try {
+                currentStatus.status = Status.ERROR;
                 currentStatus.error = error;
             } finally {
                 mutex.unlock();
+            }
+        }
+
+        private void clearError() {
+            mutex.lock();
+            try {
+                // Don't overwrite the first error!!!.
+                if (currentStatus.status == Status.ERROR) {
+                    currentStatus.status = Status.IDLE;
+                }
+            } finally {
+                mutex.unlock();
+            }
+        }
+
+        private void sendCmd(char cmd) {
+            if (serialPort == null) {
+                Logger.error("IoBoard Serial port closed");
+                return;
+            }
+            try {
+                byte[] b = new byte[1];
+                b[0] = (byte) cmd;
+                if (cmd != 'S') {
+                    Logger.debug("IoBoard writting %c", cmd);
+                }
+                serialPort.write(b);
+                lastCmdSentTime = new Date();
+            } catch (IOException e) {
+                Logger.error("IoBoard Error writing to port %s", e.getMessage());
+                try {
+                    serialPort.reconect();
+                } catch (IOException ex1) {
+                    if (getStatus().status != Status.ERROR) {
+                        setError(String.format("Error in reconection %s", ex1.getMessage()));
+                    }
+                }
             }
         }
     }
@@ -178,6 +219,7 @@ public class IoBoard extends Observable {
     }
 
     public void startStatusThread() {
+        Logger.debug("IoBoard status thread start");
         statusThread.start();
     }
 
@@ -199,38 +241,19 @@ public class IoBoard extends Observable {
     }
 
     public void openGate() {
-        sendCmd('O');
+        statusThread.sendCmd('O');
     }
 
     public void closeGate() {
-        sendCmd('C');
+        statusThread.sendCmd('C');
     }
 
-    private synchronized void sendCmd(char cmd) {
-        if (serialPort == null) {
-            Logger.error("IoBoard Serial port closed");
-            return;
-        }
-        lastCmdSentTime = new Date();
-        try {
-            byte[] b = new byte[1];
-            b[0] = (byte) cmd;
-            if (cmd != 'S') {
-                Logger.debug("IoBoard writting %c", cmd);
-            }
-            serialPort.write(b);
-        } catch (IOException e) {
-            Logger.error("IoBoard Error writing to port %s", e.getMessage());
-            try {
-                serialPort.reconect();
-            } catch (IOException ex1) {
-                Logger.debug("Error in reconection %s", ex1.getMessage());
-            }
-        }
-    }
-
-    public IoBoardStatus getStatus() throws InterruptedException {
+    public IoBoardStatus getStatus() {
         return statusThread.getStatus();
+    }
+
+    public void clearError() {
+        statusThread.clearError();
     }
 
     @Override

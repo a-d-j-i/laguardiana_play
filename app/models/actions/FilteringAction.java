@@ -4,13 +4,11 @@
  */
 package models.actions;
 
-import devices.glory.manager.GloryManager;
 import devices.IoBoard;
+import devices.glory.manager.GloryManager;
 import java.util.EnumMap;
-import java.util.List;
 import models.lov.Currency;
 import play.Logger;
-import validation.Bill;
 
 /**
  *
@@ -30,31 +28,31 @@ public class FilteringAction extends UserAction {
         messageMap.put(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
         messageMap.put(GloryManager.Status.ERROR, "application.error");
     }
-    public Currency currency;
 
-    public FilteringAction(Currency currency, Object formData) {
-        super(formData, messageMap);
-        this.currency = currency;
+    public FilteringAction(Currency currency, Object formData, int timeout) {
+        super(currency, formData, messageMap, timeout);
     }
 
     @Override
-    final public String getNeededController() {
+    final public String getActionNeededController() {
         return "CountController";
     }
 
     @Override
     public void start() {
-        if (!userActionApi.count(currency.numericId)) {
-            state = ActionState.ERROR;
-            error = String.format("startCounting can't start glory %s", userActionApi.getErrorDetail());
+        userActionApi.count(currency.numericId);
+    }
+
+    @Override
+    public void cancel() {
+        state = ActionState.CANCELING;
+        if (!userActionApi.cancelDeposit()) {
+            Logger.error("cancelDeposit can't cancel glory");
         }
     }
 
-    public List<Bill> getBillData() {
-        return Bill.getCurrentCounters(currency.numericId);
-    }
-
-    public void acceptDeposit() {
+    @Override
+    public void accept() {
         if (state != ActionState.READY_TO_STORE) {
             Logger.error("acceptDeposit Invalid step");
             return;
@@ -64,45 +62,27 @@ public class FilteringAction extends UserAction {
         }
     }
 
-    public void cancelDeposit() {
-        state = ActionState.CANCELING;
-        if (!userActionApi.cancelDeposit()) {
-            Logger.error("cancelDeposit can't cancel glory");
-        }
-    }
-
-    protected void error(String message, Object... args) {
-        super.error(message, args);
-        state = ActionState.ERROR;
-    }
-
     @Override
-    public void gloryDone(GloryManager.Status m, GloryManager.ErrorDetail me) {
+    public void onGloryEvent(GloryManager.Status m) {
         Logger.debug("CountingAction When Done %s %s", m.name(), state.name());
         switch (state) {
             case IDLE:
-                switch (userActionApi.getManagerStatus()) {
-                    case ERROR:
-                        state = ActionState.ERROR;
-                        break;
+                switch (m) {
                     case READY_TO_STORE:
                         state = ActionState.READY_TO_STORE;
                         break;
                     case ESCROW_FULL:
-                        if (!userActionApi.withdrawDeposit()) {
-                            error("startCounting can't withdrawDeposit glory");
-                        }
+                        userActionApi.withdraw();
                         break;
                     default:
-                        Logger.debug("getControllerAction Current manager state %s %s",
-                                state.name(), userActionApi.getManagerStatus().name());
+                        Logger.debug("getControllerAction Current manager state %s %s", state.name(), m.name());
                         break;
                 }
                 return;
             case CANCELING:
                 // IDLE is when we canceled after an full escrow
                 if (m != GloryManager.Status.CANCELED) {
-                    error("CANCELING Invalid manager status %s", m.name());
+                    Logger.error("CANCELING Invalid manager status %s", m.name());
                 } else {
                     state = ActionState.FINISH;
                 }
@@ -114,18 +94,19 @@ public class FilteringAction extends UserAction {
                 state = ActionState.FINISH;
                 break;
             default:
-                error("WhenDone invalid status %s %s %s", state.name(), m.name(), me);
+                Logger.error("WhenDone invalid status %s %s %s", state.name(), m.name());
                 return;
         }
-        if (state == ActionState.ERROR) {
-            return;
-        }
-
         Logger.debug("--------- esNewClasscrow full SAVE");
     }
 
     @Override
-    public void ioBoardEvent(IoBoard.IoBoardStatus status) {
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.debug("CountingAction ioBoardEvent %s %s", status.status.name(), state.name());
+    }
+
+    @Override
+    public void onTimeoutEvent() {
+        Logger.debug("CountingAction timeoutEvent");
     }
 }

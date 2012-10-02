@@ -11,7 +11,7 @@ import models.db.LgBillType;
 import play.Logger;
 import play.Play;
 import play.mvc.Before;
-import validation.Bill;
+import models.Bill;
 
 // TODO: Manage errors.
 public class GloryManagerController extends Application {
@@ -48,7 +48,7 @@ public class GloryManagerController extends Application {
                 currency = 1;
             }
         }
-        List<Bill> billData = Bill.getCurrentCounters(currency);
+        List<Bill> billData = Bill.getBillList(currency);
         if (request.isAjax()) {
             Object[] o = new Object[4];
             o[0] = error;

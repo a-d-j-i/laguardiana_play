@@ -3,14 +3,12 @@ package controllers;
 import java.util.List;
 import models.ModelFacade;
 import models.actions.CountingAction;
-import models.actions.UserAction;
 import models.lov.Currency;
 import play.Logger;
 import play.data.validation.CheckWith;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
-import play.libs.F;
 import play.mvc.Before;
 import validation.FormCurrency;
 
@@ -19,13 +17,14 @@ public class CountController extends Application {
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
-        F.Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
-        if (userActionTuple._1 == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start") || !userActionTuple._2) {
+        String neededAction = ModelFacade.getNeededAction();
+        if (neededAction == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
                 Application.index();
             }
         } else {
-            if (!(userActionTuple._1 instanceof CountingAction)) {
+            if (ModelFacade.getNeededController() == null
+                    || !(request.controller.equalsIgnoreCase(ModelFacade.getNeededController()))) {
                 Application.index();
             }
         }
@@ -52,7 +51,7 @@ public class CountController extends Application {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                CountingAction currentAction = new CountingAction(formData.currency.currency, formData);
+                CountingAction currentAction = new CountingAction(formData.currency.currency, formData, defaultTimeout);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
                 return;
@@ -68,36 +67,32 @@ public class CountController extends Application {
     }
 
     public static void mainLoop() {
-        CountingAction currentAction = getCurrentAction();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = currentAction.getActionState();
-            o[1] = currentAction.getBillData();
-            o[2] = Messages.get(currentAction.getActionMessage());
+            o[0] = ModelFacade.getState();
+            o[1] = ModelFacade.getCurrentCounters();
+            o[2] = Messages.get(ModelFacade.getActionMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
-            renderArgs.put("billData", currentAction.getBillData());
-            renderArgs.put("formData", currentAction.getFormData());
+            renderArgs.put("billData", ModelFacade.getCurrentCounters());
+            renderArgs.put("formData", ModelFacade.getFormData());
             render();
         }
     }
 
     public static void cancel() {
-        CountingAction currentAction = getCurrentAction();
-        currentAction.cancelDeposit();
+        ModelFacade.cancel();
         mainLoop();
     }
 
     public static void accept() {
-        CountingAction currentAction = getCurrentAction();
-        currentAction.acceptDeposit();
+        ModelFacade.accept();
         mainLoop();
     }
 
     public static void finish() {
-        CountingAction currentAction = getCurrentAction();
-        currentAction.finishAction();
+        ModelFacade.finishAction();
         Application.index();
     }
 }

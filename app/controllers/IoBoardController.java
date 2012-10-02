@@ -28,11 +28,7 @@ public class IoBoardController extends Application {
             render();
         }
         IoBoardStatus s = null;
-        try {
-            s = ioBoard.getStatus();
-        } catch (InterruptedException ex) {
-            Logger.error("Timeout waiting for status %s", ex.getMessage());
-        }
+        s = ioBoard.getStatus();
         if (s != null) {
             renderArgs.put("status", s);
             renderArgs.put("A", Integer.toHexString(s.A));

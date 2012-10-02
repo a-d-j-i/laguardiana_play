@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package validation;
+package models;
 
 import devices.DeviceFactory;
 import devices.glory.manager.GloryManager;
@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import models.db.LgBillType;
-import play.Play;
 
 /**
  * @author adji
@@ -29,7 +28,7 @@ public class Bill {
     // Quantity
     public Integer q = 0;
 
-    static public List<Bill> getCurrentCounters(Integer currency) {
+    static public List<Bill> getBillList(Integer currency) {
         List<Bill> ret = new ArrayList<Bill>();
         List<LgBillType> billTypes = LgBillType.find(currency);
 

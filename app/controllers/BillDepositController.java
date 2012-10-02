@@ -1,13 +1,10 @@
 package controllers;
 
 import devices.DeviceFactory;
-import devices.Printer;
-import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
+import models.Deposit;
 import models.ModelFacade;
 import models.actions.BillDepositAction;
-import models.actions.UserAction;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -16,7 +13,6 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
-import play.libs.F;
 import play.mvc.Before;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeReference;
@@ -26,14 +22,14 @@ public class BillDepositController extends Application {
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
-
-        F.Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
-        if (userActionTuple._1 == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start") || !userActionTuple._2) {
+        String neededAction = ModelFacade.getNeededAction();
+        if (neededAction == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
                 Application.index();
             }
         } else {
-            if (!(userActionTuple._1 instanceof BillDepositAction)) {
+            if (ModelFacade.getNeededController() == null
+                    || !(request.controller.equalsIgnoreCase(ModelFacade.getNeededController()))) {
                 Application.index();
             }
         }
@@ -64,7 +60,9 @@ public class BillDepositController extends Application {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                BillDepositAction currentAction = new BillDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, formData.currency.currency, formData);
+                BillDepositAction currentAction =
+                        new BillDepositAction((DepositUserCodeReference) formData.reference1.lov,
+                        formData.reference2, formData.currency.currency, formData, defaultTimeout);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
                 return;
@@ -82,48 +80,47 @@ public class BillDepositController extends Application {
     }
 
     public static void mainLoop() {
-        BillDepositAction currentAction = getCurrentAction();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = currentAction.getActionState();
-            o[1] = currentAction.getBillData();
-            o[2] = Messages.get(currentAction.getActionMessage());
+            o[0] = ModelFacade.getState();
+            o[1] = ModelFacade.getCurrentCounters();
+            o[2] = Messages.get(ModelFacade.getActionMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
-            renderArgs.put("billData", currentAction.getBillData());
-            renderArgs.put("formData", currentAction.getFormData());
+            renderArgs.put("billData", ModelFacade.getCurrentCounters());
+            renderArgs.put("formData", ModelFacade.getFormData());
             render();
         }
     }
 
     public static void cancel() {
-        BillDepositAction currentAction = getCurrentAction();
-        currentAction.cancelDeposit();
+        ModelFacade.cancel();
         mainLoop();
     }
 
     public static void accept() {
-        BillDepositAction currentAction = getCurrentAction();
-        currentAction.acceptDeposit();
+        ModelFacade.accept();
         mainLoop();
     }
 
     public static void finish() {
-        BillDepositAction currentAction = getCurrentAction();
-        Long total = currentAction.getTotal();
-        FormData formData = (FormData) currentAction.getFormData();
+        Deposit deposit = ModelFacade.getDeposit();
+        FormData formData = (FormData) ModelFacade.getFormData();
         if (formData != null) {
             renderArgs.put("clientCode", getProperty("client_code"));
             renderArgs.put("formData", formData);
-            renderArgs.put("depositTotal", total);
+            if (deposit != null) {
+                renderArgs.put("depositTotal", deposit.getTotal());
+                renderArgs.put("depositId", deposit.depositId);
+            }
             try {
                 // Print the ticket.
                 DeviceFactory.getPrinter().print("billDeposit", renderArgs);
             } catch (Throwable ex) {
                 Logger.debug(ex.getMessage());
             }
-            currentAction.finishAction();
+            ModelFacade.finishAction();
         } else {
             Application.index();
             return;

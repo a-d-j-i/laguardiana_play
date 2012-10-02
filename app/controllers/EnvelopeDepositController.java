@@ -1,13 +1,10 @@
 package controllers;
 
 import devices.DeviceFactory;
-import devices.Printer;
 import java.awt.print.PrinterException;
-import java.io.IOException;
 import java.util.List;
 import models.ModelFacade;
 import models.actions.EnvelopeDepositAction;
-import models.actions.UserAction;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.db.LgEnvelopeContent.EnvelopeContentType;
@@ -19,7 +16,6 @@ import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
-import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Util;
 import play.mvc.With;
@@ -32,14 +28,14 @@ public class EnvelopeDepositController extends Application {
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
-
-        F.Tuple<UserAction, Boolean> userActionTuple = ModelFacade.getCurrentUserAction();
-        if (userActionTuple._1 == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start") || !userActionTuple._2) {
+        String neededAction = ModelFacade.getNeededAction();
+        if (neededAction == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
                 Application.index();
             }
         } else {
-            if (!(userActionTuple._1 instanceof EnvelopeDepositAction)) {
+            if (ModelFacade.getNeededController() == null
+                    || !(request.controller.equalsIgnoreCase(ModelFacade.getNeededController()))) {
                 Application.index();
             }
         }
@@ -130,7 +126,9 @@ public class EnvelopeDepositController extends Application {
                 } catch (PrinterException ex) {
                     Logger.error(ex.getMessage());
                 }
-                EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
+                EnvelopeDepositAction currentAction =
+                        new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov,
+                        formData.reference2, e, formData, defaultTimeout);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
             }
@@ -152,36 +150,32 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void mainLoop() {
-        EnvelopeDepositAction currentAction = getCurrentAction();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = currentAction.getActionState();
+            o[0] = ModelFacade.getState();
             o[1] = null;
-            o[2] = Messages.get(currentAction.getActionMessage());
+            o[2] = Messages.get(ModelFacade.getActionMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
-            renderArgs.put("formData", currentAction.getFormData());
+            renderArgs.put("formData", ModelFacade.getFormData());
             render();
         }
     }
 
     public static void cancel() {
-        EnvelopeDepositAction currentAction = getCurrentAction();
-        currentAction.cancelDeposit();
+        ModelFacade.cancel();
         mainLoop();
     }
 
     public static void accept() {
-        EnvelopeDepositAction currentAction = getCurrentAction();
-        currentAction.acceptDeposit();
+        ModelFacade.accept();
         mainLoop();
     }
 
     public static void finish() {
-        EnvelopeDepositAction currentAction = getCurrentAction();
-        FormData formData = (FormData) currentAction.getFormData();
-        currentAction.finishAction();
+        FormData formData = (FormData) ModelFacade.getFormData();
+        ModelFacade.finishAction();
         if (formData == null) {
             Application.index();
             return;
