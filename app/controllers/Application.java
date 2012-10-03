@@ -12,19 +12,12 @@ import play.mvc.*;
 @With({Secure.class})
 public class Application extends Controller {
 
-    static int defaultTimeout = 60;
-
     @Before
     static void basicPropertiesAndFixWizard() throws Throwable {
         if (request.isAjax()) {
             return;
         }
         renderArgs.put("useHardwareKeyboard", isProperty("useHardwareKeyboard"));
-        try {
-            defaultTimeout = Integer.parseInt(Play.configuration.getProperty("timer.timeout"));
-        } catch (NumberFormatException e) {
-            Logger.debug("Error parsing timer.timeout %s", e.getMessage());
-        }
 
         String neededController = ModelFacade.getNeededController();
         if (neededController == null) {

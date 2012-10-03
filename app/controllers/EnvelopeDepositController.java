@@ -128,7 +128,7 @@ public class EnvelopeDepositController extends Application {
                 }
                 EnvelopeDepositAction currentAction =
                         new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov,
-                        formData.reference2, e, formData, defaultTimeout);
+                        formData.reference2, e, formData);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
             }
@@ -165,12 +165,12 @@ public class EnvelopeDepositController extends Application {
 
     public static void cancel() {
         ModelFacade.cancel();
-        mainLoop();
+        renderJSON("");
     }
 
     public static void accept() {
         ModelFacade.accept();
-        mainLoop();
+        renderJSON("");
     }
 
     public static void finish() {

@@ -51,7 +51,7 @@ public class CountController extends Application {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                CountingAction currentAction = new CountingAction(formData.currency.currency, formData, defaultTimeout);
+                CountingAction currentAction = new CountingAction(formData.currency.currency, formData);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
                 return;
@@ -83,12 +83,12 @@ public class CountController extends Application {
 
     public static void cancel() {
         ModelFacade.cancel();
-        mainLoop();
+        renderJSON("");
     }
 
     public static void accept() {
         ModelFacade.accept();
-        mainLoop();
+        renderJSON("");
     }
 
     public static void finish() {

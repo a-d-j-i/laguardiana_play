@@ -151,7 +151,7 @@ public class Count extends ManagerCommandAbstract {
         if (!waitUntilD1State(GloryStatus.D1Mode.deposit)) {
             return;
         }
-        setStatus(GloryManager.Status.PUT_THE_BILLS_ON_THE_HOPER, false);
+        setStatus(GloryManager.Status.PUT_THE_BILLS_ON_THE_HOPER, true);
         boolean storeTry = false;
         while (!mustCancel()) {
             Logger.debug("Counting");
@@ -196,6 +196,7 @@ public class Count extends ManagerCommandAbstract {
                     }
                     break;
                 case counting:
+                    setStatus(GloryManager.Status.COUNTING, true);
                     // The second time after storing.
                     if (!refreshCurrentQuantity()) {
                         return;

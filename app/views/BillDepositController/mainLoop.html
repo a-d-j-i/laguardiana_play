@@ -87,6 +87,18 @@
             </div>
         </div>
     </div>
+    <div id="alerta_timeout" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.timeout' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'application.timeout_detail' }</span>
+            </div>
+            <div id="timeout_botonera">
+                <a id ="timeout_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+                <a id="timeout_continueButton" class="boton naranja">&{ 'application.continue' }</a>
+            </div>
+        </div>
+    </div>
 </section>
 
 #{set 'moreScripts'}
@@ -103,20 +115,20 @@
         $.getJSON( '@{mainLoop}', function( data ) {
             waiting = false;
             var status = data[ 0 ];
-            var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
                 $( '#info_message' ).html(  data[ 2 ] );
-                if ( status == 'IDLE' || status == 'CANCELING' ) {
+                if ( status == 'IDLE' || status == 'CONTINUE_DEPOSIT' || status == 'CANCELING' ) {
                 } else if ( status == 'ESCROW_FULL_STORING' || status == 'READY_TO_STORE_STORING' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
                     if ( lastStatus != status ) {
-                        waiting = true;
                         $("#alerta_escrow_full").overlay().load();
                         $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                     }
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
+                } else if ( status == 'COUNTING' ) {
+                    //$("#alerta_timeout").overlay().close();
                 } else if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                 } else if ( status == 'ERROR' ) {
@@ -126,6 +138,7 @@
                 }
                 lastStatus = status
             }
+            var billData = data[ 1 ];
             var total = 0;
             var cnt_total = 0;
             for( var i = 0 ; i < billData.length; i ++ ) {
@@ -160,13 +173,11 @@
     
     $( '#alerta_cancelButton' ).click( function(event) {
         $("#alerta_escrow_full").overlay().close();
-        waiting = false;
         $.getJSON( '@{cancel()}', function( data ) {});
     });
     
     $( '#alerta_continueButton' ).click( function(event) {
         $("#alerta_escrow_full").overlay().close();
-        waiting = false;
         if ( lastStatus == 'IDLE' || lastStatus == 'ESCROW_FULL_STORING' ) {
             // waiting the glory.
         } else if ( lastStatus == 'ESCROW_FULL' ) {
@@ -175,6 +186,18 @@
             alert( "Invalid last status : " + lastStatus );
         }
     });
+    
+    $( '#timeout_cancelButton' ).click( function(event) {
+        $("#alerta_timeout").overlay().close();
+        $.getJSON( '@{cancel()}', function( data ) {});
+    });
+    
+    $( '#timeout_continueButton' ).click( function(event) {
+        $("#alerta_timeout").overlay().close();
+        $.getJSON( '@{cancelTimeout()}', function( data ) {});
+    });
+
+
     // Call refresh every 1.5 seconds
     setInterval(refresh, 500);
     refresh();

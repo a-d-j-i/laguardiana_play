@@ -62,7 +62,7 @@ public class BillDepositController extends Application {
             if (formData != null) {
                 BillDepositAction currentAction =
                         new BillDepositAction((DepositUserCodeReference) formData.reference1.lov,
-                        formData.reference2, formData.currency.currency, formData, defaultTimeout);
+                        formData.reference2, formData.currency.currency, formData);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
                 return;
@@ -96,12 +96,17 @@ public class BillDepositController extends Application {
 
     public static void cancel() {
         ModelFacade.cancel();
-        mainLoop();
+        renderJSON("");
     }
 
     public static void accept() {
         ModelFacade.accept();
-        mainLoop();
+        renderJSON("");
+    }
+
+    public static void cancelTimeout() {
+        ModelFacade.cancelTimeout();
+        renderJSON("");
     }
 
     public static void finish() {

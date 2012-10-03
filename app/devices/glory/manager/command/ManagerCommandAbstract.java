@@ -422,7 +422,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case escrow_close:
                     break;
                 case escrow_open:
-                    threadCommandApi.setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
+                    setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_ESCROW, true);
                     break;
                 case counting_start_request:
                 case waiting:
@@ -450,11 +450,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
     private boolean canSendRemoteCancel() {
         // Under this conditions the remoteCancel command fails.
         if (gloryStatus.isRejectBillPresent()) {
-            threadCommandApi.setStatus(GloryManager.Status.REMOVE_REJECTED_BILLS);
+            setStatus(GloryManager.Status.REMOVE_REJECTED_BILLS, true);
             return false;
         }
         if (gloryStatus.isHopperBillPresent()) {
-            threadCommandApi.setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER);
+            setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER, true);
             return false;
         }
         switch (gloryStatus.getSr1Mode()) {

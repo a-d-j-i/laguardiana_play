@@ -32,8 +32,8 @@ public class EnvelopeDepositAction extends UserAction {
     public String userCode;
     public LgEnvelope envelope;
 
-    public EnvelopeDepositAction(DepositUserCodeReference userCodeLov, String userCode, LgEnvelope envelope, Object formData, int timeout) {
-        super(null, formData, messageMap, timeout);
+    public EnvelopeDepositAction(DepositUserCodeReference userCodeLov, String userCode, LgEnvelope envelope, Object formData) {
+        super(null, formData, messageMap);
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;
         this.envelope = envelope;
@@ -55,7 +55,7 @@ public class EnvelopeDepositAction extends UserAction {
 
     @Override
     public void accept() {
-        if (state != ActionState.READY_TO_STORE || currentDepositId == null) {
+        if (state != ActionState.READY_TO_STORE) {
             Logger.error("acceptDeposit Invalid step");
             return;
         }
@@ -69,8 +69,8 @@ public class EnvelopeDepositAction extends UserAction {
 
     @Override
     public void cancel() {
-        if (currentDepositId == null) {
-            Logger.error("cancelDeposit Invalid step %s", state.name());
+        if (state != ActionState.READY_TO_STORE) {
+            Logger.error("cancel Invalid step");
             return;
         }
         state = ActionState.CANCELING;
@@ -99,7 +99,6 @@ public class EnvelopeDepositAction extends UserAction {
                 } else {
                     state = ActionState.FINISH;
                 }
-                currentDepositId = null;
                 break;
             case READY_TO_STORE:
                 if (m != GloryManager.Status.IDLE) {
@@ -109,7 +108,6 @@ public class EnvelopeDepositAction extends UserAction {
                 Deposit d = Deposit.findById(currentDepositId);
                 d.finishDate = new Date();
                 d.save();
-                currentDepositId = null;
                 break;
             default:
                 Logger.error("WhenDone invalid status %s %s", state.name(), m.name());
@@ -123,7 +121,15 @@ public class EnvelopeDepositAction extends UserAction {
     }
 
     @Override
-    public void onTimeoutEvent() {
+    public void onTimeoutEvent(Timeout timeout, ActionState startState) {
         Logger.debug("CountingAction timeoutEvent");
+    }
+
+    @Override
+    public void cancelTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 }

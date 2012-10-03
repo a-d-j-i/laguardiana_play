@@ -29,8 +29,8 @@ public class CountingAction extends UserAction {
         messageMap.put(GloryManager.Status.ERROR, "application.error");
     }
 
-    public CountingAction(Currency currency, Object formData, int timeout) {
-        super(currency, formData, messageMap, timeout);
+    public CountingAction(Currency currency, Object formData) {
+        super(currency, formData, messageMap);
     }
 
     @Override
@@ -106,7 +106,15 @@ public class CountingAction extends UserAction {
     }
 
     @Override
-    public void onTimeoutEvent() {
+    public void onTimeoutEvent(Timeout timeout, ActionState startState) {
         Logger.debug("CountingAction timeoutEvent");
+    }
+
+    @Override
+    public void cancelTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 }

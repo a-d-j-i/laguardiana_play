@@ -32,6 +32,8 @@ application.thanks=MUCHAS GRACIAS POR OPERAR CON PROSEGUR
 application.error=ERROR
 application.close=CERRAR
 application.printers=Impresoras
+application.timeout=Necesita mas tiempo
+application.timeout_detail=Necesita mas tiempo
 
 application.start_counting=INICIAR CONTEO
 application.choose_currency_before=Seleccione divisa antes de iniciar el conteo

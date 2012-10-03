@@ -19,6 +19,7 @@ public class GloryManager {
         READY_TO_STORE,
         ERROR,
         PUT_THE_BILLS_ON_THE_HOPER,
+        COUNTING,
         ESCROW_FULL,
         PUT_THE_ENVELOPE_IN_THE_ESCROW,
         INITIALIZING,

@@ -8,6 +8,7 @@ import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.Timer;
 import models.Bill;
 import models.Deposit;
 import models.db.LgBatch;
@@ -39,8 +40,8 @@ public class BillDepositAction extends UserAction {
     public String userCode;
 
     public BillDepositAction(DepositUserCodeReference userCodeLov,
-            String userCode, Currency currency, Object formData, int timeout) {
-        super(currency, formData, messageMap, timeout);
+            String userCode, Currency currency, Object formData) {
+        super(currency, formData, messageMap);
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;
     }
@@ -56,15 +57,14 @@ public class BillDepositAction extends UserAction {
         deposit.save();
         currentDepositId = deposit.depositId;
         userActionApi.count(currency.numericId);
-        startTimer();
     }
 
     @Override
     public void cancel() {
-        if (currentDepositId == null) {
-            Logger.error("cancelDeposit Invalid step %s", state.name());
-            return;
+        if (state != ActionState.READY_TO_STORE && state != ActionState.ESCROW_FULL) {
+            Logger.error("cancel Invalid step");
         }
+        cancelTimer();
         state = ActionState.CANCELING;
         if (!userActionApi.cancelDeposit()) {
             Logger.error("cancelDeposit can't cancel glory");
@@ -73,11 +73,11 @@ public class BillDepositAction extends UserAction {
 
     @Override
     public void accept() {
-        if ((state != ActionState.READY_TO_STORE && state != ActionState.ESCROW_FULL)
-                || currentDepositId == null) {
+        if (state != ActionState.READY_TO_STORE && state != ActionState.ESCROW_FULL) {
             Logger.error("acceptDeposit Invalid step");
             return;
         }
+        cancelTimer();
         Deposit deposit = Deposit.findById(currentDepositId);
         LgBatch batch = new LgBatch();
         for (Bill bill : Bill.getBillList(currency.numericId)) {
@@ -101,66 +101,99 @@ public class BillDepositAction extends UserAction {
     }
 
     @Override
+    public void cancelTimer() {
+        if (timer != null) {
+            startTimer(timer.startState);
+        } else {
+            Logger.error("Trying to cancel an invalid timer");
+        }
+    }
+
+    @Override
     public void onGloryEvent(GloryManager.Status m) {
-        Logger.debug("BillDepositAction When Done %s %s", m.name(), state.name());
+        Logger.debug("onGloryEvent When Done %s %s", m.name(), state.name());
         switch (state) {
+            case CONTINUE_DEPOSIT:
             case IDLE:
                 switch (m) {
                     case READY_TO_STORE:
                         state = ActionState.READY_TO_STORE;
+                        startTimer(ActionState.READY_TO_STORE);
                         break;
                     case ESCROW_FULL:
                         state = ActionState.ESCROW_FULL;
+                        startTimer(ActionState.ESCROW_FULL);
+                        break;
+                    case COUNTING:
+                        cancelTimer();
+                        break;
+                    case PUT_THE_BILLS_ON_THE_HOPER:
+                        startTimer(ActionState.IDLE);
                         break;
                     case IDLE:
-                        Logger.debug("Seting state to finish...");
                         state = ActionState.FINISH;
+                        break;
+                    default:
+                        Logger.error("onGloryEvent IDLE Invalid manager status %s", m.name());
                         break;
                 }
                 break;
             case CANCELING:
-                if (m != GloryManager.Status.CANCELED) {
-                    Logger.error("CANCELING Invalid manager status %s", m.name());
-                    currentDepositId = null;
-                } else {
-                    state = ActionState.FINISH;
-                    currentDepositId = null;
+                switch (m) {
+                    case IDLE:
+                    case CANCELED:
+                        state = ActionState.FINISH;
+                        break;
+                    case REMOVE_REJECTED_BILLS:
+                        break;
+                    case REMOVE_THE_BILLS_FROM_ESCROW:
+                        break;
+                    case REMOVE_THE_BILLS_FROM_HOPER:
+                        break;
+                    default:
+                        Logger.error("onGloryEvent CANCELING Invalid manager status %s", m.name());
+                        break;
                 }
                 break;
             case ESCROW_FULL_STORING:
                 if (m != GloryManager.Status.IDLE) {
-                    Logger.error("ESCROW_FULL Invalid manager status %s", m.name());
+                    Logger.error("onGloryEvent ESCROW_FULL Invalid manager status %s", m.name());
                 }
-                state = ActionState.IDLE;
+                state = ActionState.CONTINUE_DEPOSIT;
                 break;
             case READY_TO_STORE_STORING:
                 if (m != GloryManager.Status.IDLE) {
-                    Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
+                    Logger.error("onGloryEventREADY_TO_STORE Invalid manager status %s", m.name());
                 }
                 state = ActionState.FINISH;
                 Deposit d = Deposit.findById(currentDepositId);
                 d.finishDate = new Date();
                 d.save();
+                cancelTimer();
                 break;
             case FINISH:
                 if (m != GloryManager.Status.IDLE) {
-                    Logger.error("WhenDone invalid status %s %s", state.name(), m.name());
+                    Logger.error("onGloryEvent invalid status %s %s", state.name(), m.name());
                 }
                 break;
             default:
-                Logger.error("WhenDone invalid status %s %s", state.name(), m.name());
-                currentDepositId = null;
+                Logger.error("onGloryEvent invalid status %s %s", state.name(), m.name());
                 break;
         }
     }
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        Logger.debug("CountingAction ioBoardEvent %s %s", status.status.name(), state.name());
+        Logger.debug("Action ioBoardEvent %s %s", status.status.name(), state.name());
     }
 
     @Override
-    public void onTimeoutEvent() {
-        Logger.debug("CountingAction timeoutEvent");
+    public void onTimeoutEvent(Timeout timeout, ActionState startState) {
+        Logger.debug("Action onTimeoutEvent %s", startState.name());
+//        if (timeout.timeoutState == TimeoutState.WARN) {
+//            timeout.startCancelTimeout();
+//        } else {
+//            cancel();
+//        }
     }
 }

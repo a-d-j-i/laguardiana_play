@@ -13,6 +13,7 @@ import java.util.Observable;
 import java.util.Observer;
 import models.actions.UserAction;
 import play.Logger;
+import play.Play;
 import play.jobs.Job;
 import play.libs.F.Promise;
 
@@ -60,14 +61,16 @@ public class ModelFacade {
             if (status == GloryManager.Status.ERROR) {
                 String msg = String.format("Glory Error : %s", me);
                 Event.save(null, Event.Type.GLORY, msg);
-                setError(msg);
+                if (Play.configuration.getProperty("glory.ignore") == null) {
+                    setError(msg);
+                }
                 return;
             }
 
             if (currentUserAction == null) {
-                String msg = String.format("Glory current user action is numm : %s", status.name());
-                Logger.error("Current user action is null");
-                Event.save(null, Event.Type.GLORY, status.name());
+                String msg = String.format("Glory current user action is null : %s", status.name());
+                Logger.error(msg);
+                Event.save(null, Event.Type.GLORY, msg);
             } else {
                 Event.save(currentUserAction.getDepositId(), Event.Type.GLORY, status.name());
                 currentUserAction.onGloryEvent(status);
@@ -88,7 +91,10 @@ public class ModelFacade {
             if (status.status == IoBoard.Status.ERROR) {
                 String msg = String.format("IOBoard Error : %s", status.error);
                 Event.save(null, Event.Type.IO_BOARD, msg);
-                setError(msg);
+                // A development option
+                if (Play.configuration.getProperty("io_board.ignore") == null) {
+                    setError(msg);
+                }
                 return;
             }
 
@@ -175,10 +181,14 @@ public class ModelFacade {
             return null;
         }
         if (manager.getStatus() == GloryManager.Status.ERROR) {
-            setError(String.format("Glory error : %s", manager.getErrorDetail()));
+            if (Play.configuration.getProperty("glory.ignore") == null) {
+                setError(String.format("Glory error : %s", manager.getErrorDetail()));
+            }
         }
         if (ioBoard.getStatus().status == IoBoard.Status.ERROR) {
-            setError(String.format("IoBoeard error : %s", ioBoard.getStatus().error));
+            if (Play.configuration.getProperty("io_board.ignore") == null) {
+                setError(String.format("IoBoeard error : %s", ioBoard.getStatus().error));
+            }
         }
         if (isError()) {
             return "ERROR";
@@ -304,6 +314,14 @@ public class ModelFacade {
             return;
         }
         currentUserAction.accept();
+    }
+
+    public static void cancelTimeout() {
+        if (currentUserAction == null) {
+            Logger.error("cancelTimeout invalid current User Action");
+            return;
+        }
+        currentUserAction.cancelTimer();
     }
 
     // TODO: Implement this as an action with some screens.
