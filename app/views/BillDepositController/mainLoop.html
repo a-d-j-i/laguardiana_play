@@ -17,6 +17,7 @@
                         <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
                         <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                         <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                        <p>&{ 'counting_page.total_sum' }: <span id="totalSum">${totalSum}</span></p>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
                         <div id="info_message" style="color: green;"> 
@@ -114,6 +115,10 @@
         waiting = true;
         $.getJSON( '@{mainLoop}', function( data ) {
             waiting = false;
+            
+            var totalSum = data[ 3 ];
+            $( '#totalSum' ).html( totalSum );
+            
             var status = data[ 0 ];
             if ( status != null && status.toString() != 'null' ) {
                 $( '#info_message' ).html(  data[ 2 ] );
@@ -138,6 +143,7 @@
                 }
                 lastStatus = status
             }
+            
             var billData = data[ 1 ];
             var total = 0;
             var cnt_total = 0;

@@ -259,7 +259,8 @@ public class GloryController extends Application {
     }
 
     public static void programUpdate() {
-        String gFileName = "UPGRADES.TXT";
+        // For templates C*******.DLF, for firmware A0******.MOT, for font A1******.DLF
+        String gFileName = "CUPGRADE.DLF";
         //String filename = "/home/adji/Desktop/work/laguardiana/permaquim/last_sep_07_2012/DE-50/A0v0196.mot";
         String filename = "/tmp/test.txt";
         File f = new File(filename);

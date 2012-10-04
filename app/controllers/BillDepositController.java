@@ -81,15 +81,17 @@ public class BillDepositController extends Application {
 
     public static void mainLoop() {
         if (request.isAjax()) {
-            Object[] o = new Object[3];
+            Object[] o = new Object[4];
             o[0] = ModelFacade.getState();
             o[1] = ModelFacade.getCurrentCounters();
             o[2] = Messages.get(ModelFacade.getActionMessage());
+            o[3] = ModelFacade.getDepositTotal();
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty("client_code"));
             renderArgs.put("billData", ModelFacade.getCurrentCounters());
             renderArgs.put("formData", ModelFacade.getFormData());
+            renderArgs.put("totalSum", ModelFacade.getDepositTotal());
             render();
         }
     }

@@ -300,6 +300,18 @@ public class ModelFacade {
         return Deposit.findById(currentUserAction.getDepositId());
     }
 
+    public static Long getDepositTotal() {
+        if (currentUserAction == null) {
+            Logger.error("getDeposit invalid current User Action");
+            return null;
+        }
+        if (currentUserAction.getDepositId() == null) {
+            Logger.error("getDeposit invalid depositId %d", currentUserAction.getDepositId());
+            return null;
+        }
+        return Deposit.getTotal(currentUserAction.getDepositId());
+    }
+
     public static void cancel() {
         if (currentUserAction == null) {
             Logger.error("cancel invalid current User Action");

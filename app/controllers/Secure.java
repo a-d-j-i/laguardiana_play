@@ -166,7 +166,10 @@ public class Secure extends Controller {
 
     // Is it ok to be public?? 
     public static User getCurrentUser() {
-        User user = Cache.get(session.getId() + "-user", User.class);
+        User user = null;
+        if (session != null) {
+            user = Cache.get(session.getId() + "-user", User.class);
+        }
         if (user == null) {
             List<User> q = User.find("byUserName", User.GUEST_NAME).fetch();
             if (q.size() > 1) {

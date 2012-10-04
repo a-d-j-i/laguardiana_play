@@ -105,7 +105,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     boolean gotoNeutral(boolean openEscrow, boolean storingError) {
-        for (int i = 0; i < retries; i++) {
+        for (int i = 0; i < retries && !threadCommandApi.mustStop(); i++) {
             Logger.debug("GOTO NEUTRAL");
             if (!sense()) {
                 return false;
@@ -237,17 +237,14 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
                             return false;
                         }
-                    }
-                    if (gloryStatus.getD1Mode() != GloryStatus.D1Mode.neutral) {
-                        setError(GloryManager.Error.APP_ERROR,
-                                String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
+                        if (gloryStatus.getD1Mode() != GloryStatus.D1Mode.neutral) {
+                            setError(GloryManager.Error.APP_ERROR,
+                                    String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
+                        }
                     }
                     break;
                 case neutral:
                     // Wait until bills are from anyware removed.
-                    if (!canSendRemoteCancel()) {
-                        break;
-                    }
                     Logger.debug("GOTO NEUTRAL DONE");
                     return true;
                 default:
@@ -257,8 +254,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             sleep();
         }
-        setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN, "GOTO NEUTRAL TIMEOUT");
-        Logger.debug("GOTO NEUTRAL TIMEOUT!!!");
+        if (!threadCommandApi.mustStop()) {
+            setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN, "GOTO NEUTRAL TIMEOUT");
+            Logger.debug("GOTO NEUTRAL TIMEOUT!!!");
+        }
         return false;
     }
 
