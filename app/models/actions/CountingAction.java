@@ -4,11 +4,10 @@
  */
 package models.actions;
 
-import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.EnumMap;
+import models.actions.states.IdleCounting;
 import models.lov.Currency;
-import play.Logger;
 
 /**
  *
@@ -31,6 +30,7 @@ public class CountingAction extends UserAction {
 
     public CountingAction(Currency currency, Object formData) {
         super(currency, formData, messageMap);
+        state = new IdleCounting(new StateApi());
     }
 
     @Override
@@ -41,80 +41,5 @@ public class CountingAction extends UserAction {
     @Override
     public void start() {
         userActionApi.count(currency.numericId);
-    }
-
-    @Override
-    public void cancel() {
-        state = ActionState.CANCELING;
-        if (!userActionApi.cancelDeposit()) {
-            Logger.error("cancelDeposit can't cancel glory");
-        }
-    }
-
-    @Override
-    public void accept() {
-        if (state != ActionState.READY_TO_STORE) {
-            Logger.error("acceptDeposit Invalid step");
-            return;
-        }
-        if (!userActionApi.cancelDeposit()) {
-            Logger.error("startCounting can't cancel glory");
-        }
-    }
-
-    @Override
-    public void onGloryEvent(GloryManager.Status m) {
-        Logger.debug("CountingAction When Done %s %s", m.name(), state.name());
-        switch (state) {
-            case IDLE:
-                switch (m) {
-                    case READY_TO_STORE:
-                        state = ActionState.READY_TO_STORE;
-                        break;
-                    case ESCROW_FULL:
-                        userActionApi.withdraw();
-                        break;
-                    default:
-                        Logger.debug("getControllerAction Current manager state %s %s", state.name(), m.name());
-                        break;
-                }
-                return;
-            case CANCELING:
-                // IDLE is when we canceled after an full escrow
-                if (m != GloryManager.Status.CANCELED) {
-                    Logger.error("CANCELING Invalid manager status %s", m.name());
-                } else {
-                    state = ActionState.FINISH;
-                }
-                break;
-            case READY_TO_STORE:
-                if (m != GloryManager.Status.CANCELED) {
-                    Logger.error("READY_TO_STORE Invalid manager status %s", m.name());
-                }
-                state = ActionState.FINISH;
-                break;
-            default:
-                Logger.error("WhenDone invalid status %s %s %s", state.name(), m.name());
-                return;
-        }
-        Logger.debug("--------- esNewClasscrow full SAVE");
-    }
-
-    @Override
-    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        Logger.debug("CountingAction ioBoardEvent %s %s", status.status.name(), state.name());
-    }
-
-    @Override
-    public void onTimeoutEvent(Timeout timeout, ActionState startState) {
-        Logger.debug("CountingAction timeoutEvent");
-    }
-
-    @Override
-    public void cancelTimer() {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
     }
 }

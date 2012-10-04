@@ -8,9 +8,15 @@ import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.EnumMap;
+import models.Bill;
+import models.Deposit;
 import models.Event;
 import models.ModelFacade.UserActionApi;
 import models.User;
+import models.actions.states.ActionState;
+import models.actions.states.Finish;
+import models.db.LgBatch;
+import models.db.LgBill;
 import models.lov.Currency;
 import play.Logger;
 import play.Play;
@@ -23,25 +29,63 @@ import play.libs.F.Promise;
  */
 abstract public class UserAction {
 
-    static public enum ActionState {
-
-        IDLE,
-        READY_TO_STORE,
-        ESCROW_FULL,
-        READY_TO_STORE_STORING,
-        ESCROW_FULL_STORING,
-        CONTINUE_DEPOSIT,
-        FINISH,
-        CANCELING,;
-    };
+  
     final protected Object formData;
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
     protected User currentUser = null;
     protected final EnumMap<GloryManager.Status, String> messages;
-    protected ActionState state = ActionState.IDLE;
+    protected ActionState state = null;
     protected Integer currentDepositId = null;
     protected Timeout timer = null;
+
+    public class StateApi {
+
+        public void setState(ActionState state) {
+            UserAction.this.state = state;
+        }
+
+        public boolean cancelDeposit() {
+            return userActionApi.cancelDeposit();
+        }
+
+        public boolean store() {
+            return userActionApi.store(currentDepositId);
+        }
+
+        public void withdraw() {
+            userActionApi.withdraw();
+        }
+
+        public void cancelTimer() {
+            UserAction.this.cancelTimer();
+        }
+
+        public void addBatchToDeposit() {
+            Deposit deposit = Deposit.findById(currentDepositId);
+            LgBatch batch = new LgBatch();
+            for (Bill bill : Bill.getBillList(currency.numericId)) {
+                Logger.debug(" -> quantity %d", bill.q);
+                LgBill b = new LgBill(bill.q, bill.billType);
+                batch.addBill(b);
+            }
+            deposit.addBatch(batch);
+            batch.save();
+            deposit.save();
+        }
+
+        public void openDeposit() {
+            Deposit d = Deposit.findById(currentDepositId);
+            d.startDate = new Date();
+            d.save();
+        }
+
+        public void closeDeposit() {
+            Deposit d = Deposit.findById(currentDepositId);
+            d.finishDate = new Date();
+            d.save();
+        }
+    }
 
     public UserAction(Currency currency, Object formData, EnumMap<GloryManager.Status, String> messages) {
         this.formData = formData;
@@ -63,15 +107,30 @@ abstract public class UserAction {
         return formData;
     }
 
+    public void accept() {
+        state.accept();
+    }
+
+    public void cancel() {
+        state.cancel();
+    }
+
     abstract public void start();
 
-    abstract public void cancel();
+    // TODO: Need events ???
+    public void onGloryEvent(GloryManager.Status m) {
+        state.onGloryEvent(m);
+    }
 
-    abstract public void accept();
+    // TODO: Need events ???
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
+        state.onIoBoardEvent(status);
+    }
 
-    abstract public void onGloryEvent(GloryManager.Status m);
-
-    abstract public void onIoBoardEvent(IoBoard.IoBoardStatus status);
+    // TODO: Need events ???
+    public void onTimeoutEvent(Timeout timeout, ActionState startState) {
+        state.onTimeoutEvent(timeout, startState);
+    }
 
     abstract public String getActionNeededController();
 
@@ -80,11 +139,10 @@ abstract public class UserAction {
     }
 
     public String getNeededActionAction() {
-        switch (state) {
-            case FINISH:
-                return "finish";
-            default:
-                return "mainLoop";
+        if (state instanceof Finish) {
+            return "finish";
+        } else {
+            return "mainLoop";
         }
     }
 
@@ -95,13 +153,7 @@ abstract public class UserAction {
     public Integer getDepositId() {
         return currentDepositId;
     }
-//    protected void error(String message, Object... args) {
-//        Logger.error(message, args);
-//        error = String.format(message, args);
-//        state = ActionState.ERROR;
-//    }
 
-    // TODO: Review what else I must do?.
     public void finishAction() {
         cancelTimer();
     }
@@ -114,11 +166,15 @@ abstract public class UserAction {
         timer.startWarnTimeout();
     }
 
-    abstract public void cancelTimer();
+    public void cancelTimer() {
+        if (timer != null) {
+            timer.cancel();
+        } else {
+            Logger.error("Trying to cancel an invalid timer");
+        }
+    }
 
-    abstract public void onTimeoutEvent(Timeout timeout, ActionState startState);
-
-    protected class Timeout extends Job {
+    public class Timeout extends Job {
 
         private int timeout1 = 10;
         private int timeout2 = 60;
