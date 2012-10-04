@@ -6,7 +6,7 @@ package models.actions.states;
 
 import devices.IoBoard.IoBoardStatus;
 import devices.glory.manager.GloryManager;
-import models.actions.UserAction;
+import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -23,6 +23,10 @@ abstract public class ActionState {
     }
 
     abstract public String name();
+
+    public String getNeededActionAction() {
+        return "mainLoop";
+    }
 
     public void start() {
         Logger.error("start Invalid step %s", name());
@@ -44,7 +48,16 @@ abstract public class ActionState {
         Logger.debug("onIoBoardEvent %s %s", status.status.name(), name());
     }
 
-    public void onTimeoutEvent(UserAction.Timeout timeout, ActionState startState) {
-        Logger.debug("onIoBoardEvent %s %s", timeout.startState.name(), name());
+    public void onTimeoutEvent(TimeoutTimer timer) {
+        Logger.debug("onTimeoutEvent %s", name());
+    }
+
+    // used by timeout state.
+    public void suspendTimeout() {
+        Logger.debug("suspendTimeout %s", name());
+    }
+
+    public boolean canFinishAction() {
+        return false;
     }
 }

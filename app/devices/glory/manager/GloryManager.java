@@ -4,6 +4,8 @@ import devices.glory.Glory;
 import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.command.*;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.atomic.AtomicReference;
 import play.Logger;
 
@@ -11,7 +13,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryManager {
+public class GloryManager extends Observable {
 
     static public enum Status {
 
@@ -20,6 +22,7 @@ public class GloryManager {
         ERROR,
         PUT_THE_BILLS_ON_THE_HOPER,
         COUNTING,
+        COUNT_DONE,
         ESCROW_FULL,
         PUT_THE_ENVELOPE_IN_THE_ESCROW,
         INITIALIZING,
@@ -58,7 +61,6 @@ public class GloryManager {
     // TODO: Better error reporting, as a class with arguments.
     final private AtomicReference<Status> status = new AtomicReference<Status>(Status.IDLE);
     final private AtomicReference<ErrorDetail> error = new AtomicReference<ErrorDetail>();
-    // TODO: Change onCountDont to an observable.
 
     public GloryManager(Glory device) {
         this.device = device;
@@ -103,19 +105,18 @@ public class GloryManager {
 
         public void setStatus(Status s) {
             // TODO: This is not thread safe. Review
-            if (status.get() != Status.ERROR) {
+            Status cs = status.get();
+            if (cs != Status.ERROR) {
                 status.set(s);
-            }
-        }
-
-        public void setStatus(Status c, Status s) {
-            if (status.get() != Status.ERROR) {
-                status.compareAndSet(c, s);
+                setChanged();
+                notifyObservers(cs);
             }
         }
 
         public void clearError() {
             status.compareAndSet(Status.ERROR, Status.IDLE);
+            setChanged();
+            notifyObservers(status);
         }
 
         public void setError(GloryManager.ErrorDetail e) {
@@ -139,7 +140,7 @@ public class GloryManager {
             managerControllerApi = managerThreadState.getControllerApi();
         }
 
-        public boolean count(Runnable onCommandDone, Map<Integer, Integer> desiredQuantity, Integer currency) {
+        public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
                 if (cmd instanceof Count) {
@@ -148,7 +149,7 @@ public class GloryManager {
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new Count(threadCommandApi, onCommandDone, desiredQuantity, currency));
+            return managerControllerApi.sendCommand(new Count(threadCommandApi, desiredQuantity, currency));
         }
 
         public Integer getCurrency() {
@@ -185,11 +186,11 @@ public class GloryManager {
         }
 
         // TODO: Fix this.
-        public boolean cancelDeposit(Runnable onCommandDone) {
+        public boolean cancelDeposit() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
                 Logger.debug("cancelDeposit executing cancelcount");
-                return managerControllerApi.sendCommand(new CancelCount(threadCommandApi, onCommandDone));
+                return managerControllerApi.sendCommand(new CancelCount(threadCommandApi));
             }
             // TODO: One base class
             if (!(cmd instanceof Count) && !(cmd instanceof EnvelopeDeposit)) {
@@ -227,7 +228,7 @@ public class GloryManager {
             return false;
         }
 
-        public boolean envelopeDeposit(Runnable onCommandDone) {
+        public boolean envelopeDeposit() {
             Logger.debug("envelopeDeposit");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
@@ -237,10 +238,10 @@ public class GloryManager {
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi, onCommandDone));
+            return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi));
         }
 
-        public boolean reset(Runnable onCommandDone) {
+        public boolean reset() {
             Logger.debug("reset");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
@@ -254,10 +255,10 @@ public class GloryManager {
                 return false;
             }
             Logger.debug("executing reset");
-            return managerControllerApi.sendCommand(new Reset(threadCommandApi, onCommandDone));
+            return managerControllerApi.sendCommand(new Reset(threadCommandApi));
         }
 
-        public boolean storingErrorReset(Runnable onCommandDone) {
+        public boolean storingErrorReset() {
             Logger.debug("storing error reset");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
@@ -268,7 +269,7 @@ public class GloryManager {
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi, onCommandDone));
+            return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi));
         }
 
         public GloryManager.Status getStatus() {
@@ -277,6 +278,10 @@ public class GloryManager {
 
         public ErrorDetail getErrorDetail() {
             return error.get();
+        }
+
+        public void addObserver(Observer observer) {
+            GloryManager.this.addObserver(observer);
         }
     }
     /*

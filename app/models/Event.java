@@ -1,6 +1,7 @@
 package models;
 
 import javax.persistence.*;
+import models.actions.UserAction;
 import models.db.*;
 
 @Entity
@@ -33,10 +34,10 @@ public class Event extends LgEvent implements java.io.Serializable {
         this.message = message;
     }
 
-    public static void save(Integer depositId, Type type, String message) {
+    public static void save(UserAction userAction, Type type, String message) {
         Deposit deposit = null;
-        if (depositId != null) {
-            deposit = Deposit.findById(depositId);
+        if (userAction != null && userAction.getDepositId() != null) {
+            deposit = Deposit.findById(userAction.getDepositId());
         }
         Event e = new Event(deposit, type, message);
         e.save();

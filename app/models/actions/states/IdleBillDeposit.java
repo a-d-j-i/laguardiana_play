@@ -5,6 +5,7 @@
 package models.actions.states;
 
 import devices.glory.manager.GloryManager;
+import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -42,18 +43,34 @@ public class IdleBillDeposit extends ActionState {
             case ESCROW_FULL:
                 stateApi.setState(new EscrowFullBillDeposit(stateApi));
                 break;
+            case IDLE:
+                break;
             case COUNTING:
-                //cancelTimer();
+                //stateApi.cancelTimer();
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
-                //startTimer(ActionState.IDLE);
+                //stateApi.startTimer();
                 break;
-            case IDLE:
+            case COUNT_DONE:
                 stateApi.setState(new Finish(stateApi));
                 break;
             default:
                 Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
+    }
+
+    @Override
+    public void onTimeoutEvent(TimeoutTimer timer) {
+        switch (timer.state) {
+            case WARN:
+                stateApi.setState(new TimeoutState(stateApi, this));
+                break;
+            case CANCEL:
+            default:
+                stateApi.setError("Timeout error need admin intervention");
+                break;
+        }
+
     }
 }

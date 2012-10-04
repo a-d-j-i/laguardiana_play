@@ -19,8 +19,8 @@ public class Count extends ManagerCommandAbstract {
 
     private final CountData countData;
 
-    public Count(ThreadCommandApi threadCommandApi, Runnable onCommandDone, Map<Integer, Integer> desiredQuantity, Integer currency) {
-        super(threadCommandApi, onCommandDone);
+    public Count(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity, Integer currency) {
+        super(threadCommandApi);
         countData = new CountData(desiredQuantity, currency);
     }
 
@@ -134,7 +134,7 @@ public class Count extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setStatus(GloryManager.Status.IDLE, false);
+        setStatus(GloryManager.Status.IDLE);
 
         boolean batchEnd = false;
         if (!gotoNeutral(false, false)) {
@@ -150,9 +150,6 @@ public class Count extends ManagerCommandAbstract {
         }
         if (!waitUntilD1State(GloryStatus.D1Mode.deposit)) {
             return;
-        }
-        if (!gloryStatus.isHopperBillPresent()) {
-            setStatus(GloryManager.Status.PUT_THE_BILLS_ON_THE_HOPER, true);
         }
         boolean storeTry = false;
         while (!mustCancel()) {
@@ -174,7 +171,7 @@ public class Count extends ManagerCommandAbstract {
                             return;
                         }
                         WaitForEmptyEscrow();
-                        setStatus(GloryManager.Status.IDLE, true);
+                        setStatus(GloryManager.Status.IDLE);
                         break;
                     } else {
                         if (countData.isBatch && batchEnd) {
@@ -182,7 +179,7 @@ public class Count extends ManagerCommandAbstract {
                             break;
                         }
                         if (gloryStatus.isEscrowFull()) {
-                            setStatus(GloryManager.Status.ESCROW_FULL, true);
+                            setStatus(GloryManager.Status.ESCROW_FULL);
                             break;
                         }
                         if (gloryStatus.isHopperBillPresent()) {
@@ -191,14 +188,14 @@ public class Count extends ManagerCommandAbstract {
                             }
                             break;
                         }
-                        setStatus(GloryManager.Status.READY_TO_STORE, true);
+                        setStatus(GloryManager.Status.READY_TO_STORE);
                     }
                     if (!refreshCurrentQuantity()) {
                         return;
                     }
                     break;
                 case counting:
-                    setStatus(GloryManager.Status.COUNTING, true);
+                    setStatus(GloryManager.Status.COUNTING);
                     // The second time after storing.
                     if (!refreshCurrentQuantity()) {
                         return;
@@ -208,11 +205,14 @@ public class Count extends ManagerCommandAbstract {
                     // The second time after storing.
                     if (storeTry) {
                         gotoNeutral(true, false);
-                        setStatus(GloryManager.Status.IDLE, true);
+                        setStatus(GloryManager.Status.COUNT_DONE);
                         return;
                     }
                     if (!refreshCurrentQuantity()) {
                         return;
+                    }
+                    if (!gloryStatus.isHopperBillPresent()) {
+                        setStatus(GloryManager.Status.PUT_THE_BILLS_ON_THE_HOPER);
                     }
                     break;
                 case being_store:
@@ -226,11 +226,11 @@ public class Count extends ManagerCommandAbstract {
                         }
                         WaitForEmptyEscrow();
                         gotoNeutral(true, false);
-                        setStatus(GloryManager.Status.IDLE, false);
+                        setStatus(GloryManager.Status.IDLE);
                         return;
                     }
                     if (storeTry) {
-                        setStatus(GloryManager.Status.IDLE, true);
+                        setStatus(GloryManager.Status.IDLE);
                     }
                     if (batchCountStart()) { // batch end
                         batchEnd = true;
@@ -252,7 +252,7 @@ public class Count extends ManagerCommandAbstract {
             sleep();
         }
         if (mustCancel()) {
-            setStatus(GloryManager.Status.CANCELING, false);
+            setStatus(GloryManager.Status.CANCELING);
         }
         gotoNeutral(true, false);
     }

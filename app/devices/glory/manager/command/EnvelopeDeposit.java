@@ -14,8 +14,8 @@ import devices.glory.manager.GloryManager.ThreadCommandApi;
  */
 public class EnvelopeDeposit extends ManagerCommandAbstract {
 
-    public EnvelopeDeposit(ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
-        super(threadCommandApi, onCommandDone);
+    public EnvelopeDeposit(ThreadCommandApi threadCommandApi) {
+        super(threadCommandApi);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
         if (!waitUntilSR1State(GloryStatus.SR1Mode.escrow_open)) {
             return;
         }
-        setStatus(GloryManager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW, true);
+        setStatus(GloryManager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW);
         boolean storeTry = false;
         while (!mustCancel()) {
             if (!sense()) {
@@ -59,7 +59,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        setStatus(GloryManager.Status.IDLE, false);
+                        setStatus(GloryManager.Status.IDLE);
                         gotoNeutral(true, false);
                         return;
                     }
@@ -92,7 +92,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
             sleep();
         }
         if (mustCancel()) {
-            setStatus(GloryManager.Status.CANCELING, false);
+            setStatus(GloryManager.Status.CANCELING);
         }
         gotoNeutral(true, false);
     }

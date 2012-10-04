@@ -4,9 +4,11 @@ import devices.DeviceFactory;
 import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import models.ModelFacade;
+import models.actions.ErrorResetAction;
+import models.actions.StoringErrorResetAction;
+import models.actions.UserAction;
 import models.db.LgSystemProperty;
 import play.Logger;
-import play.Play;
 import play.mvc.*;
 
 @With({Secure.class})
@@ -71,15 +73,19 @@ public class Application extends Controller {
             istatus = s.status;
             ierror = s.error;
         }
+        UserAction currentAction = null;
         if (cmd != null) {
             switch (cmd) {
                 case 1:
-                    ModelFacade.reset();
+                    currentAction = new ErrorResetAction();
                     break;
                 case 2:
-                    ModelFacade.storingErrorReset();
+                    currentAction = new StoringErrorResetAction();
                     break;
             }
+        }
+        if (currentAction != null) {
+            ModelFacade.startAction(currentAction);
         }
         renderArgs.put("mstatus", ModelFacade.getState());
         renderArgs.put("merror", ModelFacade.getError());

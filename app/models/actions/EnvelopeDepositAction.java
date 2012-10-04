@@ -39,7 +39,7 @@ public class EnvelopeDepositAction extends UserAction {
     }
 
     @Override
-    final public String getActionNeededController() {
+    final public String getNeededController() {
         return "EnvelopeDepositController";
     }
 

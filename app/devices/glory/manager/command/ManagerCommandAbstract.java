@@ -49,11 +49,9 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
     protected final GloryStatus gloryStatus = new GloryStatus();
     private final ThreadCommandApi threadCommandApi;
-    protected final Runnable onCommandDone;
 
-    public ManagerCommandAbstract(ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
+    public ManagerCommandAbstract(ThreadCommandApi threadCommandApi) {
         this.threadCommandApi = threadCommandApi;
-        this.onCommandDone = onCommandDone;
     }
     private AtomicBoolean isDone = new AtomicBoolean(false);
     private AtomicBoolean mustCancel = new AtomicBoolean(false);
@@ -66,26 +64,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
         switch (threadCommandApi.getStatus()) {
             case ERROR:
-                if (onCommandDone != null) {
-                    try {
-                        onCommandDone.run();
-                    } catch (Exception e) {
-                        setError(GloryManager.Error.APP_ERROR, e.getMessage());
-                    }
-                }
                 break;
             default:
                 if (mustCancel()) {
                     threadCommandApi.setStatus(GloryManager.Status.CANCELED);
-                } else {
-                    threadCommandApi.setStatus(GloryManager.Status.IDLE);
-                }
-                if (onCommandDone != null) {
-                    try {
-                        onCommandDone.run();
-                    } catch (Exception e) {
-                        setError(GloryManager.Error.APP_ERROR, e.getMessage());
-                    }
                 }
                 threadCommandApi.setStatus(GloryManager.Status.IDLE);
         }
@@ -421,7 +403,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case escrow_close:
                     break;
                 case escrow_open:
-                    setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_ESCROW, true);
+                    setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
                     break;
                 case counting_start_request:
                 case waiting:
@@ -449,11 +431,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
     private boolean canSendRemoteCancel() {
         // Under this conditions the remoteCancel command fails.
         if (gloryStatus.isRejectBillPresent()) {
-            setStatus(GloryManager.Status.REMOVE_REJECTED_BILLS, true);
+            setStatus(GloryManager.Status.REMOVE_REJECTED_BILLS);
             return false;
         }
         if (gloryStatus.isHopperBillPresent()) {
-            setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER, true);
+            setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER);
             return false;
         }
         switch (gloryStatus.getSr1Mode()) {
@@ -475,34 +457,14 @@ abstract public class ManagerCommandAbstract implements Runnable {
     protected void setError(GloryManager.Error e, String s) {
         Logger.error("MANAGER ERROR : %s %s", e.name(), s);
         threadCommandApi.setError(new GloryManager.ErrorDetail(e, s));
-        setStatus(GloryManager.Status.ERROR, true);
+        setStatus(GloryManager.Status.ERROR);
     }
 
-    protected void setStatus(GloryManager.Status status, boolean publish) {
-        GloryManager.Status oldStatus = threadCommandApi.getStatus();
+    protected void setStatus(GloryManager.Status status) {
         threadCommandApi.setStatus(status);
-
-        if (oldStatus != status && publish) {
-            if (onCommandDone != null) {
-                try {
-                    onCommandDone.run();
-                } catch (Exception e) {
-                    setError(GloryManager.Error.APP_ERROR, e.getMessage());
-                }
-            }
-        }
     }
 
     protected void clearError(boolean publish) {
         threadCommandApi.clearError();
-        if (publish) {
-            if (onCommandDone != null) {
-                try {
-                    onCommandDone.run();
-                } catch (Exception e) {
-                    setError(GloryManager.Error.APP_ERROR, e.getMessage());
-                }
-            }
-        }
     }
 }

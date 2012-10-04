@@ -13,8 +13,8 @@ import play.Logger;
  */
 public class StoringErrorReset extends ManagerCommandAbstract {
 
-    public StoringErrorReset(GloryManager.ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
-        super(threadCommandApi, onCommandDone);
+    public StoringErrorReset(GloryManager.ThreadCommandApi threadCommandApi) {
+        super(threadCommandApi);
     }
 
     @Override

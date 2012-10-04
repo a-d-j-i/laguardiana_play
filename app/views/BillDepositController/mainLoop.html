@@ -121,6 +121,11 @@
             
             var status = data[ 0 ];
             if ( status != null && status.toString() != 'null' ) {
+                if ( status == 'TIMEOUT_WARNING' ) {
+                    $("#alerta_timeout").overlay().load();
+                } else {
+                    $("#alerta_timeout").overlay().close();
+                }
                 $( '#info_message' ).html(  data[ 2 ] );
                 if ( status == 'IDLE' || status == 'CONTINUE_DEPOSIT' || status == 'CANCELING' ) {
                 } else if ( status == 'ESCROW_FULL_STORING' || status == 'READY_TO_STORE_STORING' ) {
@@ -132,8 +137,8 @@
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
+                } else if ( status == 'TIMEOUT_WARNING') {
                 } else if ( status == 'COUNTING' ) {
-                    //$("#alerta_timeout").overlay().close();
                 } else if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                 } else if ( status == 'ERROR' ) {

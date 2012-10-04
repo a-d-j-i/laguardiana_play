@@ -13,8 +13,8 @@ import play.Logger;
  */
 public class Reset extends ManagerCommandAbstract {
 
-    public Reset(GloryManager.ThreadCommandApi threadCommandApi, Runnable onCommandDone) {
-        super(threadCommandApi, onCommandDone);
+    public Reset(GloryManager.ThreadCommandApi threadCommandApi) {
+        super(threadCommandApi);
     }
 
     @Override

@@ -7,11 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import models.Bill;
 import models.db.LgBillType;
 import play.Logger;
-import play.Play;
 import play.mvc.Before;
-import models.Bill;
 
 // TODO: Manage errors.
 public class GloryManagerController extends Application {
@@ -89,7 +88,7 @@ public class GloryManagerController extends Application {
                     }
                 }
             }
-            if (!manager.count(null, desiredQuantity, currency)) {
+            if (!manager.count(desiredQuantity, currency)) {
                 error = "Still executing another command";
             }
         }
@@ -99,7 +98,7 @@ public class GloryManagerController extends Application {
 
     public static void cancelDeposit() throws IOException {
         if (manager != null) {
-            if (!manager.cancelDeposit(null)) {
+            if (!manager.cancelDeposit()) {
                 error = "Not counting cant cancel";
             }
         }
@@ -128,7 +127,7 @@ public class GloryManagerController extends Application {
 
     public static void reset() throws IOException {
         if (manager != null) {
-            if (!manager.reset(null)) {
+            if (!manager.reset()) {
                 error = "Executing another command";
             }
         }
@@ -137,7 +136,7 @@ public class GloryManagerController extends Application {
 
     public static void storingErrorReset() throws IOException {
         if (manager != null) {
-            if (!manager.storingErrorReset(null)) {
+            if (!manager.storingErrorReset()) {
                 error = "Executing another command";
             }
         }
@@ -146,7 +145,7 @@ public class GloryManagerController extends Application {
 
     public static void envelopeDeposit() throws IOException {
         if (manager != null) {
-            if (!manager.envelopeDeposit(null)) {
+            if (!manager.envelopeDeposit()) {
                 error = "Executing another command";
             }
         }

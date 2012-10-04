@@ -107,7 +107,7 @@ public class BillDepositController extends Application {
     }
 
     public static void cancelTimeout() {
-        ModelFacade.cancelTimeout();
+        ModelFacade.suspendTimeout();
         renderJSON("");
     }
 
@@ -117,7 +117,7 @@ public class BillDepositController extends Application {
         if (formData != null) {
             renderArgs.put("clientCode", getProperty("client_code"));
             renderArgs.put("formData", formData);
-            if (deposit != null) {
+            if (deposit != null && deposit.getTotal() > 0) {
                 renderArgs.put("depositTotal", deposit.getTotal());
                 renderArgs.put("depositId", deposit.depositId);
                 try {

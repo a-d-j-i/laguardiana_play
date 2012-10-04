@@ -184,7 +184,9 @@ public class Secure extends Controller {
             user.setGuest();
 
             if (user.isGuest()) {
-                Cache.set(session.getId() + "-user", user);
+                if (session != null) {
+                    Cache.set(session.getId() + "-user", user);
+                }
             } else {
                 login();
                 return null;

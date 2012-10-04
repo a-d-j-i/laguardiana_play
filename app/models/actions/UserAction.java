@@ -14,14 +14,10 @@ import models.Event;
 import models.ModelFacade.UserActionApi;
 import models.User;
 import models.actions.states.ActionState;
-import models.actions.states.Finish;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.lov.Currency;
 import play.Logger;
-import play.Play;
-import play.jobs.Job;
-import play.libs.F.Promise;
 
 /**
  *
@@ -29,7 +25,6 @@ import play.libs.F.Promise;
  */
 abstract public class UserAction {
 
-  
     final protected Object formData;
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
@@ -37,9 +32,10 @@ abstract public class UserAction {
     protected final EnumMap<GloryManager.Status, String> messages;
     protected ActionState state = null;
     protected Integer currentDepositId = null;
-    protected Timeout timer = null;
 
     public class StateApi {
+
+        private TimeoutTimer timer = null;
 
         public void setState(ActionState state) {
             UserAction.this.state = state;
@@ -55,10 +51,6 @@ abstract public class UserAction {
 
         public void withdraw() {
             userActionApi.withdraw();
-        }
-
-        public void cancelTimer() {
-            UserAction.this.cancelTimer();
         }
 
         public void addBatchToDeposit() {
@@ -84,6 +76,30 @@ abstract public class UserAction {
             Deposit d = Deposit.findById(currentDepositId);
             d.finishDate = new Date();
             d.save();
+        }
+
+        synchronized public void startTimer() {
+            if (timer != null) {
+                timer.cancel();
+            }
+            timer = new TimeoutTimer(UserAction.this);
+            timer.start();
+        }
+
+        synchronized public void cancelTimer() {
+            if (timer != null) {
+                timer.cancel();
+            } else {
+                Logger.error("Trying to cancel an invalid timer");
+            }
+        }
+
+        public void setError(String msg) {
+            userActionApi.setError(msg);
+        }
+
+        public void clearError() {
+            userActionApi.clearError();
         }
     }
 
@@ -115,103 +131,46 @@ abstract public class UserAction {
         state.cancel();
     }
 
+    public boolean canFinishAction() {
+        return state.canFinishAction();
+    }
+
+    public void suspendTimeout() {
+        Logger.debug("--------------> SUSPEND");
+        state.suspendTimeout();
+    }
+
     abstract public void start();
 
-    // TODO: Need events ???
     public void onGloryEvent(GloryManager.Status m) {
         state.onGloryEvent(m);
     }
 
-    // TODO: Need events ???
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         state.onIoBoardEvent(status);
     }
 
-    // TODO: Need events ???
-    public void onTimeoutEvent(Timeout timeout, ActionState startState) {
-        state.onTimeoutEvent(timeout, startState);
+    public void onTimeoutEvent(TimeoutTimer timer) {
+        Date currentDate = new Date();
+        Event.save(this, Event.Type.TIMEOUT, currentDate.toString());
+        state.onTimeoutEvent(timer);
     }
-
-    abstract public String getActionNeededController();
 
     public Currency getCurrency() {
         return currency;
     }
 
-    public String getNeededActionAction() {
-        if (state instanceof Finish) {
-            return "finish";
-        } else {
-            return "mainLoop";
-        }
+    abstract public String getNeededController();
+
+    public String getNeededAction() {
+        return state.getNeededActionAction();
     }
 
-    public String getActionMessage() {
+    public String getMessage() {
         return messages.get(userActionApi.getManagerStatus());
     }
 
     public Integer getDepositId() {
         return currentDepositId;
-    }
-
-    public void finishAction() {
-        cancelTimer();
-    }
-
-    synchronized protected void startTimer(ActionState startState) {
-        if (timer != null) {
-            timer.cancel();
-        }
-        timer = new Timeout(startState);
-        timer.startWarnTimeout();
-    }
-
-    public void cancelTimer() {
-        if (timer != null) {
-            timer.cancel();
-        } else {
-            Logger.error("Trying to cancel an invalid timer");
-        }
-    }
-
-    public class Timeout extends Job {
-
-        private int timeout1 = 10;
-        private int timeout2 = 60;
-        final public ActionState startState;
-        public Promise promise;
-
-        public Timeout(ActionState startState) {
-            this.startState = startState;
-            try {
-                timeout1 = Integer.parseInt(Play.configuration.getProperty("timer.timeout1"));
-            } catch (NumberFormatException e) {
-                Logger.debug("Error parsing timer.timeout1 %s", e.getMessage());
-            }
-            try {
-                timeout2 = Integer.parseInt(Play.configuration.getProperty("timer.timeout2"));
-            } catch (NumberFormatException e) {
-                Logger.debug("Error parsing timer.timeout1 %s", e.getMessage());
-            }
-        }
-
-        public void startWarnTimeout() {
-            promise = this.in(timeout1);
-        }
-
-        public void startCancelTimeout() {
-            promise = this.in(timeout2);
-        }
-
-        public void cancel() {
-            promise.cancel(true);
-        }
-
-        @Override
-        public void doJob() {
-            Date currentDate = new Date();
-            Event.save(getDepositId(), Event.Type.TIMEOUT, currentDate.toString());
-            onTimeoutEvent(this, startState);
-        }
     }
 }

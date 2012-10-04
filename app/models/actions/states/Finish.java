@@ -30,4 +30,14 @@ public class Finish extends ActionState {
             Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
         }
     }
+
+    @Override
+    public String getNeededActionAction() {
+        return "finish";
+    }
+
+    @Override
+    public boolean canFinishAction() {
+        return true;
+    }
 }

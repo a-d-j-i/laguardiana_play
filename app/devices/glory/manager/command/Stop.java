@@ -14,7 +14,7 @@ import play.Logger;
 public class Stop extends ManagerCommandAbstract {
 
     public Stop(GloryManager.ThreadCommandApi threadCommandApi) {
-        super(threadCommandApi, null);
+        super(threadCommandApi);
     }
 
     @Override

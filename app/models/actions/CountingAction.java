@@ -34,7 +34,7 @@ public class CountingAction extends UserAction {
     }
 
     @Override
-    final public String getActionNeededController() {
+    final public String getNeededController() {
         return "CountController";
     }
 

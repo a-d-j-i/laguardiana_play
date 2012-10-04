@@ -12,33 +12,27 @@ import play.Logger;
  *
  * @author adji
  */
-public class IdleEnvelopeDeposit extends ActionState {
-
-    public IdleEnvelopeDeposit(StateApi stateApi) {
+public class ResetState extends ActionState {
+    
+    public ResetState(StateApi stateApi) {
         super(stateApi);
     }
-
+    
     @Override
     public String name() {
-        return "IDLE";
+        return "RESET";
     }
-
-    @Override
-    public void cancel() {
-        stateApi.cancelTimer();
-        if (!stateApi.cancelDeposit()) {
-            Logger.error("cancelDeposit can't cancel glory");
-        }
-        stateApi.setState(new Canceling(stateApi));
-    }
-
+    
     @Override
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
         switch (m) {
-            case PUT_THE_ENVELOPE_IN_THE_ESCROW:
-                stateApi.setState(new ReadyToStoreEnvelopeDeposit(stateApi));
+            case IDLE:
+            case INITIALIZING:
+                stateApi.clearError();
+                stateApi.setState(new Finish(stateApi));
                 break;
+            case ERROR:
             default:
                 Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
                 break;

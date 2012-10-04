@@ -20,24 +20,27 @@ import play.libs.F.Promise;
 /**
  * TODO: Review this with another thread/job that has a input queue for events
  * and react according to events from the glory and the electronics in the cage.
+ * TODO: Save the state on the db so we react better on restart !!!!.
  *
  * @author aweil
  */
 public class ModelFacade {
     // FACTORY
 
-    final static private GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
+    final static private GloryManager.ControllerApi manager;
     final static private IoBoard ioBoard;
     private static String error = null;
     private static UserAction currentUserAction = null;
     private static User currentUser = null;
-    final static private Runnable onGloryDone = new Runnable() {
-        public void run() {
-            Promise now = new OnGloryEvent(manager.getStatus(), manager.getErrorDetail()).now();
-        }
-    };
 
     static {
+        manager = DeviceFactory.getGloryManager();
+        manager.addObserver(new Observer() {
+            public void update(Observable o, Object data) {
+                Promise now = new OnGloryEvent((GloryManager.Status) data).now();
+            }
+        });
+
         ioBoard = DeviceFactory.getIoBoard();
         ioBoard.addObserver(new Observer() {
             public void update(Observable o, Object data) {
@@ -51,29 +54,34 @@ public class ModelFacade {
         GloryManager.Status status;
         GloryManager.ErrorDetail me;
 
-        public OnGloryEvent(GloryManager.Status status, GloryManager.ErrorDetail me) {
+        public OnGloryEvent(GloryManager.Status status) {
             this.status = status;
-            this.me = me;
+            this.me = manager.getErrorDetail();
         }
 
         @Override
         public void doJob() throws Exception {
-            if (status == GloryManager.Status.ERROR) {
-                String msg = String.format("Glory Error : %s", me);
-                Event.save(null, Event.Type.GLORY, msg);
-                if (Play.configuration.getProperty("glory.ignore") == null) {
-                    setError(msg);
-                }
-                return;
-            }
-
-            if (currentUserAction == null) {
-                String msg = String.format("Glory current user action is null : %s", status.name());
-                Logger.error(msg);
-                Event.save(null, Event.Type.GLORY, msg);
-            } else {
-                Event.save(currentUserAction.getDepositId(), Event.Type.GLORY, status.name());
-                currentUserAction.onGloryEvent(status);
+            Event.save(currentUserAction, Event.Type.GLORY, status.name());
+            switch (status) {
+                case ERROR:
+                    if (Play.configuration.getProperty("glory.ignore") == null) {
+                        setError(String.format("Glory Error : %s", me));
+                    }
+                    break;
+                //Could happen on startup
+                case INITIALIZING:
+                case IDLE:
+                    if (currentUserAction != null) {
+                        currentUserAction.onGloryEvent(status);
+                    }
+                    break;
+                default:
+                    if (currentUserAction == null) {
+                        Logger.error(String.format("OnGloryEvent current user action is null : %s", status.name()));
+                    } else {
+                        currentUserAction.onGloryEvent(status);
+                    }
+                    break;
             }
         }
     }
@@ -88,21 +96,16 @@ public class ModelFacade {
 
         @Override
         public void doJob() throws Exception {
+            Event.save(currentUserAction, Event.Type.IO_BOARD, status.toString());
             if (status.status == IoBoard.Status.ERROR) {
-                String msg = String.format("IOBoard Error : %s", status.error);
-                Event.save(null, Event.Type.IO_BOARD, msg);
                 // A development option
                 if (Play.configuration.getProperty("io_board.ignore") == null) {
-                    setError(msg);
+                    setError(String.format("IOBoard Error : %s", status.error));
                 }
                 return;
             }
 
-            if (currentUserAction == null) {
-                Event.save(null, Event.Type.IO_BOARD, status.toString());
-            } else {
-                //TODO: Call the cops.
-                Event.save(currentUserAction.getDepositId(), Event.Type.IO_BOARD, status.toString());
+            if (currentUserAction != null) {
                 currentUserAction.onIoBoardEvent(status);
             }
         }
@@ -116,7 +119,7 @@ public class ModelFacade {
                     setError("count currentAction is null");
                     return;
                 }
-                if (!manager.count(onGloryDone, null, numericId)) {
+                if (!manager.count(null, numericId)) {
                     setError(String.format("startBillDeposit can't start glory %s", manager.getErrorDetail()));
                 }
             }
@@ -133,7 +136,15 @@ public class ModelFacade {
         }
 
         public boolean cancelDeposit() {
-            return manager.cancelDeposit(onGloryDone);
+            return manager.cancelDeposit();
+        }
+
+        public boolean resetGlory() {
+            return manager.reset();
+        }
+
+        public boolean storingErrorReset() {
+            return manager.storingErrorReset();
         }
 
         public void envelopeDeposit() {
@@ -142,7 +153,7 @@ public class ModelFacade {
                     setError("envelopeDeposit currentAction is null");
                     return;
                 }
-                if (!manager.envelopeDeposit(onGloryDone)) {
+                if (!manager.envelopeDeposit()) {
                     setError(String.format("envelopeDeposit can't start glory %s", manager.getErrorDetail()));
                 }
             }
@@ -151,29 +162,42 @@ public class ModelFacade {
         public GloryManager.Status getManagerStatus() {
             return manager.getStatus();
         }
+
+        public void setError(String msg) {
+            ModelFacade.setError(msg);
+        }
+
+        public void clearError() {
+            // Todo Put int the ResetAction if needed.
+            ioBoard.clearError();
+            ModelFacade.clearError();
+        }
     }
 
     synchronized static public void startAction(UserAction userAction) {
-        Event.save(userAction.getDepositId(), Event.Type.ACTION_START_TRY, getNeededController());
+        Event.save(userAction, Event.Type.ACTION_START_TRY, getNeededController());
         if (currentUserAction != null || currentUser != null) {
+            if (isError()) {
+                Logger.info("Error so canceling action");
+                finishAction();
+            }
             Logger.error("startAction currentAction is not null");
             return;
         }
         currentUser = Secure.getCurrentUser();
         currentUserAction = userAction;
-        Event.save(currentUserAction.getDepositId(), Event.Type.ACTION_START, getNeededController());
+        Event.save(currentUserAction, Event.Type.ACTION_START, getNeededController());
         currentUserAction.start(currentUser, new UserActionApi());
     }
 
     synchronized public static void finishAction() {
-        if (currentUserAction == null || currentUser == null) {
-            Logger.error("finishDeposit currentAction is null");
-        } else {
-            Event.save(currentUserAction.getDepositId(), Event.Type.ACTION_FINISH, getNeededController());
-            currentUserAction.finishAction();
+        if (currentUserAction != null && currentUser != null) {
+            Event.save(currentUserAction, Event.Type.ACTION_FINISH, getNeededController());
         }
-        currentUserAction = null;
-        currentUser = null;
+        if ( currentUserAction.canFinishAction() ) {
+            currentUserAction = null;
+            currentUser = null;
+        }
     }
 
     synchronized static public String getState() {
@@ -207,7 +231,7 @@ public class ModelFacade {
             return "Application";
         }
         if (currentUserAction != null) {
-            return currentUserAction.getActionNeededController();
+            return currentUserAction.getNeededController();
         }
         return null;
     }
@@ -220,7 +244,7 @@ public class ModelFacade {
             return "counterError";
         }
         if (currentUserAction != null) {
-            return currentUserAction.getNeededActionAction();
+            return currentUserAction.getNeededAction();
         }
         return null;
     }
@@ -285,7 +309,7 @@ public class ModelFacade {
             Logger.error("getActionMessage invalid current User Action");
             return null;
         }
-        return currentUserAction.getActionMessage();
+        return currentUserAction.getMessage();
     }
 
     public static Deposit getDeposit() {
@@ -328,43 +352,11 @@ public class ModelFacade {
         currentUserAction.accept();
     }
 
-    public static void cancelTimeout() {
+    public static void suspendTimeout() {
         if (currentUserAction == null) {
             Logger.error("cancelTimeout invalid current User Action");
             return;
         }
-        currentUserAction.cancelTimer();
-    }
-
-    // TODO: Implement this as an action with some screens.
-    synchronized public static void reset() {
-        if (!isError()) {
-            return;
-        }
-        finishAction();
-        manager.reset(new Runnable() {
-            public void run() {
-                if (manager.getStatus() != GloryManager.Status.ERROR) {
-                    clearError();
-                }
-            }
-        });
-        ioBoard.clearError();
-    }
-
-    // TODO: Implement this as an action with some screens.
-    synchronized public static void storingErrorReset() {
-        if (!isError()) {
-            return;
-        }
-        finishAction();
-        manager.storingErrorReset(new Runnable() {
-            public void run() {
-                if (manager.getStatus() != GloryManager.Status.ERROR) {
-                    clearError();
-                }
-            }
-        });
-        ioBoard.clearError();
+        currentUserAction.suspendTimeout();
     }
 }

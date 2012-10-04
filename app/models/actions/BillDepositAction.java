@@ -43,7 +43,7 @@ public class BillDepositAction extends UserAction {
     }
 
     @Override
-    final public String getActionNeededController() {
+    final public String getNeededController() {
         return "BillDepositController";
     }
 
