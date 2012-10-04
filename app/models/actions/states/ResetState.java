@@ -13,20 +13,20 @@ import play.Logger;
  * @author adji
  */
 public class ResetState extends ActionState {
-    
+
     public ResetState(StateApi stateApi) {
         super(stateApi);
     }
-    
+
     @Override
     public String name() {
         return "RESET";
     }
-    
+
     @Override
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
-        switch (m) {
+        switch (m.getState()) {
             case IDLE:
             case INITIALIZING:
                 stateApi.clearError();

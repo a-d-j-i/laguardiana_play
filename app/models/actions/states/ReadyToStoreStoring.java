@@ -28,7 +28,7 @@ public class ReadyToStoreStoring extends ActionState {
     @Override
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
-        if (m != GloryManager.Status.IDLE) {
+        if (m.getState() != GloryManager.State.IDLE) {
             Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
         }
         stateApi.closeDeposit();

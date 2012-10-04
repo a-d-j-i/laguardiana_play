@@ -62,14 +62,14 @@ abstract public class ManagerCommandAbstract implements Runnable {
         isDone.set(false);
         execute();
 
-        switch (threadCommandApi.getStatus()) {
+        switch (threadCommandApi.getState()) {
             case ERROR:
                 break;
             default:
                 if (mustCancel()) {
-                    threadCommandApi.setStatus(GloryManager.Status.CANCELED);
+                    threadCommandApi.setState(GloryManager.State.CANCELED);
                 }
-                threadCommandApi.setStatus(GloryManager.Status.IDLE);
+                threadCommandApi.setState(GloryManager.State.IDLE);
         }
         isDone.set(true);
     }
@@ -403,7 +403,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case escrow_close:
                     break;
                 case escrow_open:
-                    setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_ESCROW);
+                    setState(GloryManager.State.REMOVE_THE_BILLS_FROM_ESCROW);
                     break;
                 case counting_start_request:
                 case waiting:
@@ -431,11 +431,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
     private boolean canSendRemoteCancel() {
         // Under this conditions the remoteCancel command fails.
         if (gloryStatus.isRejectBillPresent()) {
-            setStatus(GloryManager.Status.REMOVE_REJECTED_BILLS);
+            setState(GloryManager.State.REMOVE_REJECTED_BILLS);
             return false;
         }
         if (gloryStatus.isHopperBillPresent()) {
-            setStatus(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER);
+            setState(GloryManager.State.REMOVE_THE_BILLS_FROM_HOPER);
             return false;
         }
         switch (gloryStatus.getSr1Mode()) {
@@ -456,12 +456,12 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     protected void setError(GloryManager.Error e, String s) {
         Logger.error("MANAGER ERROR : %s %s", e.name(), s);
-        threadCommandApi.setError(new GloryManager.ErrorDetail(e, s));
-        setStatus(GloryManager.Status.ERROR);
+        threadCommandApi.setErrorInfo(e, s);
+        setState(GloryManager.State.ERROR);
     }
 
-    protected void setStatus(GloryManager.Status status) {
-        threadCommandApi.setStatus(status);
+    protected void setState(GloryManager.State state) {
+        threadCommandApi.setState(state);
     }
 
     protected void clearError(boolean publish) {

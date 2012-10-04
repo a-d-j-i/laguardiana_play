@@ -134,7 +134,7 @@ public class Count extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setStatus(GloryManager.Status.IDLE);
+        setState(GloryManager.State.IDLE);
 
         boolean batchEnd = false;
         if (!gotoNeutral(false, false)) {
@@ -171,7 +171,7 @@ public class Count extends ManagerCommandAbstract {
                             return;
                         }
                         WaitForEmptyEscrow();
-                        setStatus(GloryManager.Status.IDLE);
+                        setState(GloryManager.State.IDLE);
                         break;
                     } else {
                         if (countData.isBatch && batchEnd) {
@@ -179,7 +179,7 @@ public class Count extends ManagerCommandAbstract {
                             break;
                         }
                         if (gloryStatus.isEscrowFull()) {
-                            setStatus(GloryManager.Status.ESCROW_FULL);
+                            setState(GloryManager.State.ESCROW_FULL);
                             break;
                         }
                         if (gloryStatus.isHopperBillPresent()) {
@@ -188,14 +188,14 @@ public class Count extends ManagerCommandAbstract {
                             }
                             break;
                         }
-                        setStatus(GloryManager.Status.READY_TO_STORE);
+                        setState(GloryManager.State.READY_TO_STORE);
                     }
                     if (!refreshCurrentQuantity()) {
                         return;
                     }
                     break;
                 case counting:
-                    setStatus(GloryManager.Status.COUNTING);
+                    setState(GloryManager.State.COUNTING);
                     // The second time after storing.
                     if (!refreshCurrentQuantity()) {
                         return;
@@ -205,14 +205,14 @@ public class Count extends ManagerCommandAbstract {
                     // The second time after storing.
                     if (storeTry) {
                         gotoNeutral(true, false);
-                        setStatus(GloryManager.Status.COUNT_DONE);
+                        setState(GloryManager.State.COUNT_DONE);
                         return;
                     }
                     if (!refreshCurrentQuantity()) {
                         return;
                     }
                     if (!gloryStatus.isHopperBillPresent()) {
-                        setStatus(GloryManager.Status.PUT_THE_BILLS_ON_THE_HOPER);
+                        setState(GloryManager.State.PUT_THE_BILLS_ON_THE_HOPER);
                     }
                     break;
                 case being_store:
@@ -226,11 +226,11 @@ public class Count extends ManagerCommandAbstract {
                         }
                         WaitForEmptyEscrow();
                         gotoNeutral(true, false);
-                        setStatus(GloryManager.Status.IDLE);
+                        setState(GloryManager.State.IDLE);
                         return;
                     }
                     if (storeTry) {
-                        setStatus(GloryManager.Status.IDLE);
+                        setState(GloryManager.State.IDLE);
                     }
                     if (batchCountStart()) { // batch end
                         batchEnd = true;
@@ -252,7 +252,7 @@ public class Count extends ManagerCommandAbstract {
             sleep();
         }
         if (mustCancel()) {
-            setStatus(GloryManager.Status.CANCELING);
+            setState(GloryManager.State.CANCELING);
         }
         gotoNeutral(true, false);
     }

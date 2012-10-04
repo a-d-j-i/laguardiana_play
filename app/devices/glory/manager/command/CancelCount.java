@@ -19,7 +19,7 @@ public class CancelCount extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setStatus(GloryManager.Status.CANCELING);
+        setState(GloryManager.State.CANCELING);
         gotoNeutral(false, false);
         cancel();
     }

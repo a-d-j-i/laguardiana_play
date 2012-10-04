@@ -19,8 +19,8 @@ public class Init extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setStatus(GloryManager.Status.INITIALIZING);
+        setState(GloryManager.State.INITIALIZING);
         gotoNeutral(false, false);
-        setStatus(GloryManager.Status.IDLE);
+        setState(GloryManager.State.IDLE);
     }
 }

@@ -4,9 +4,6 @@ import devices.DeviceFactory;
 import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import models.ModelFacade;
-import models.actions.ErrorResetAction;
-import models.actions.StoringErrorResetAction;
-import models.actions.UserAction;
 import models.db.LgSystemProperty;
 import play.Logger;
 import play.mvc.*;
@@ -58,14 +55,14 @@ public class Application extends Controller {
 
     public static void counterError(Integer cmd) {
         GloryManager.Status gstatus = null;
-        GloryManager.ErrorDetail gerror = null;
+        String gerror = null;
         IoBoard.Status istatus = null;
         String ierror = null;
 
         final GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
-            gerror = manager.getErrorDetail();
+            gerror = manager.getStatus().getErrorDetail();
         }
         final IoBoard ioBoard = DeviceFactory.getIoBoard();
         if (ioBoard != null) {
@@ -73,19 +70,15 @@ public class Application extends Controller {
             istatus = s.status;
             ierror = s.error;
         }
-        UserAction currentAction = null;
         if (cmd != null) {
             switch (cmd) {
                 case 1:
-                    currentAction = new ErrorResetAction();
+                    ModelFacade.errorReset();
                     break;
                 case 2:
-                    currentAction = new StoringErrorResetAction();
+                    ModelFacade.storingErrorReset();
                     break;
             }
-        }
-        if (currentAction != null) {
-            ModelFacade.startAction(currentAction);
         }
         renderArgs.put("mstatus", ModelFacade.getState());
         renderArgs.put("merror", ModelFacade.getError());

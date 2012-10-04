@@ -26,7 +26,7 @@ public class Canceling extends ActionState {
     @Override
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
-        switch (m) {
+        switch (m.getState()) {
             case IDLE:
             case CANCELED:
                 stateApi.setState(new Finish(stateApi));

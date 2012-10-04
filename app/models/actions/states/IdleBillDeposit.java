@@ -36,7 +36,7 @@ public class IdleBillDeposit extends ActionState {
     @Override
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
-        switch (m) {
+        switch (m.getState()) {
             case READY_TO_STORE:
                 stateApi.setState(new ReadyToStoreBillDeposit(stateApi));
                 break;
@@ -46,12 +46,13 @@ public class IdleBillDeposit extends ActionState {
             case IDLE:
                 break;
             case COUNTING:
-                //stateApi.cancelTimer();
+                stateApi.cancelTimer();
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
-                //stateApi.startTimer();
+                stateApi.startTimer();
                 break;
             case COUNT_DONE:
+                stateApi.cancelTimer();
                 stateApi.setState(new Finish(stateApi));
                 break;
             default:

@@ -43,31 +43,40 @@ public class TimeoutTimer extends Job {
             Logger.debug("Error parsing timer.cancel_timeout %s", e.getMessage());
         }
         try {
-            cancel_timeout = Integer.parseInt(Play.configuration.getProperty("timer.warn_timeout"));
+            cancel_timeout = Integer.parseInt(Play.configuration.getProperty("timer.cancel_timeout"));
         } catch (NumberFormatException e) {
             Logger.debug("Error parsing timer.cancel_timeout %s", e.getMessage());
         }
     }
 
-    public void start() {
+    synchronized public void start() {
         Logger.debug("TimeoutTimer start %s current %s", state.name(), userAction.state.getClass().getSimpleName());
+        if (timer != null) {
+            Logger.error("Timer allready configured");
+        }
         state = State.WARN;
         timer = new Timer();
         timer.schedule(new JobAdapter(), warn_timeout * 1000);
     }
 
-    public void cancel() {
+    synchronized public void restart() {
+        cancel();
+        start();
+    }
+
+    synchronized public void cancel() {
         Logger.debug("TimeoutTimer cancel %s current %s", state.name(), userAction.state.getClass().getSimpleName());
         if (timer != null) {
             timer.cancel();
+        } else {
+            Logger.debug("Canceling an invalid timer");
         }
         timer = null;
     }
 
     @Override
-    public void doJob() {
+    synchronized public void doJob() {
         Logger.debug("TimeoutTimer doJob %s current %s", state.name(), userAction.state.getClass().getSimpleName());
-        cancel();
         switch (state) {
             case WARN:
                 userAction.onTimeoutEvent(this);

@@ -41,12 +41,12 @@ public class TimeoutState extends ActionState {
 
     @Override
     public void onTimeoutEvent(TimeoutTimer timer) {
-        Logger.error("INVALID TIMEOUT EVENT IN TIMEOUT STATE");
+        returnState.onTimeoutEvent(timer);
     }
 
     @Override
     public void suspendTimeout() {
-        stateApi.cancelTimer();
+        stateApi.restartTimer();
         stateApi.setState(returnState);
     }
 }

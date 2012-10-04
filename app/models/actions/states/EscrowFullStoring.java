@@ -5,7 +5,6 @@
 package models.actions.states;
 
 import devices.glory.manager.GloryManager;
-import devices.glory.manager.GloryManager.Status;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -25,9 +24,9 @@ public class EscrowFullStoring extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(Status m) {
+    public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
-        if (m != GloryManager.Status.IDLE) {
+        if (m.getState() != GloryManager.State.IDLE) {
             Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
         }
         stateApi.setState(new ContinueDeposit(stateApi));

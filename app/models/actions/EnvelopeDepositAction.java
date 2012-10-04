@@ -18,13 +18,13 @@ import models.lov.DepositUserCodeReference;
  */
 public class EnvelopeDepositAction extends UserAction {
 
-    static final EnumMap<GloryManager.Status, String> messageMap = new EnumMap<GloryManager.Status, String>(GloryManager.Status.class);
+    static final EnumMap<GloryManager.State, String> messageMap = new EnumMap<GloryManager.State, String>(GloryManager.State.class);
 
     static {
-        messageMap.put(GloryManager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
-        messageMap.put(GloryManager.Status.CANCELING, "counting_page.canceling");
-        messageMap.put(GloryManager.Status.CANCELED, "counting_page.deposit_canceled");
-        messageMap.put(GloryManager.Status.ERROR, "application.error");
+        messageMap.put(GloryManager.State.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
+        messageMap.put(GloryManager.State.CANCELING, "counting_page.canceling");
+        messageMap.put(GloryManager.State.CANCELED, "counting_page.deposit_canceled");
+        messageMap.put(GloryManager.State.ERROR, "application.error");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;

@@ -189,7 +189,7 @@
     
     $( '#alerta_continueButton' ).click( function(event) {
         $("#alerta_escrow_full").overlay().close();
-        if ( lastStatus == 'IDLE' || lastStatus == 'ESCROW_FULL_STORING' ) {
+        if ( lastStatus == 'IDLE' || lastStatus == 'ESCROW_FULL_STORING' || lastStatus == 'CONTINUE_DEPOSIT'  ) {
             // waiting the glory.
         } else if ( lastStatus == 'ESCROW_FULL' ) {
             $.getJSON( '@{accept()}', function( data ) {});

@@ -18,18 +18,18 @@ import models.lov.DepositUserCodeReference;
  */
 public class BillDepositAction extends UserAction {
 
-    static final EnumMap<GloryManager.Status, String> messageMap = new EnumMap<GloryManager.Status, String>(GloryManager.Status.class);
+    static final EnumMap<GloryManager.State, String> messageMap = new EnumMap<GloryManager.State, String>(GloryManager.State.class);
 
     static {
-        messageMap.put(GloryManager.Status.READY_TO_STORE, "bill_deposit.ready_to_store");
-        messageMap.put(GloryManager.Status.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
-        messageMap.put(GloryManager.Status.ESCROW_FULL, "bill_deposit.escrow_full");
-        messageMap.put(GloryManager.Status.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
-        messageMap.put(GloryManager.Status.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
-        messageMap.put(GloryManager.Status.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
-        messageMap.put(GloryManager.Status.CANCELING, "counting_page.canceling");
-        messageMap.put(GloryManager.Status.CANCELED, "counting_page.deposit_canceled");
-        messageMap.put(GloryManager.Status.ERROR, "application.error");
+        messageMap.put(GloryManager.State.READY_TO_STORE, "bill_deposit.ready_to_store");
+        messageMap.put(GloryManager.State.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
+        messageMap.put(GloryManager.State.ESCROW_FULL, "bill_deposit.escrow_full");
+        messageMap.put(GloryManager.State.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
+        messageMap.put(GloryManager.State.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
+        messageMap.put(GloryManager.State.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
+        messageMap.put(GloryManager.State.CANCELING, "counting_page.canceling");
+        messageMap.put(GloryManager.State.CANCELED, "counting_page.deposit_canceled");
+        messageMap.put(GloryManager.State.ERROR, "application.error");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;

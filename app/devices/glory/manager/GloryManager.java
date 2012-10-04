@@ -6,16 +6,15 @@ import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.atomic.AtomicReference;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class GloryManager extends Observable {
+public class GloryManager {
 
-    static public enum Status {
+    static public enum State {
 
         IDLE,
         READY_TO_STORE,
@@ -40,27 +39,57 @@ public class GloryManager extends Observable {
         BILLS_IN_ESCROW_CALL_ADMIN;
     };
 
-    static public class ErrorDetail {
+    static public class Status extends Observable {
 
-        public Error code;
-        public String data;
-
-        public ErrorDetail(Error code, String data) {
-            this.code = code;
-            this.data = data;
-        }
+        private State state = State.IDLE;
+        private Error error;
+        private String errorMsg;
 
         @Override
-        public String toString() {
-            return "ErrorDetail{" + "code=" + code + ", data=" + data + '}';
+        synchronized public String toString() {
+            return "Error ( " + error + " ) : " + errorMsg;
+        }
+
+        synchronized public State getState() {
+            return state;
+        }
+
+        synchronized private void setState(State state) {
+            if (this.state != State.ERROR) {
+                if (this.state != state) {
+                    setChanged();
+                }
+                this.state = state;
+                notifyObservers(this);
+            }
+
+        }
+
+        synchronized private void clearError() {
+            if (state == State.ERROR) {
+                this.state = State.IDLE;
+                setChanged();
+                notifyObservers(this);
+            }
+        }
+
+        synchronized public String getErrorDetail() {
+            return "ErrorDetail{" + "code=" + error + ", data=" + errorMsg + '}';
+        }
+
+        synchronized private void setError(Error e, String msg) {
+            this.error = e;
+            this.errorMsg = msg;
+        }
+
+        synchronized public String name() {
+            return state.name();
         }
     }
     final private Thread thread;
     final private Glory device;
     final private ManagerThreadState managerThreadState;
-    // TODO: Better error reporting, as a class with arguments.
-    final private AtomicReference<Status> status = new AtomicReference<Status>(Status.IDLE);
-    final private AtomicReference<ErrorDetail> error = new AtomicReference<ErrorDetail>();
+    final private Status status = new Status();
 
     public GloryManager(Glory device) {
         this.device = device;
@@ -99,28 +128,20 @@ public class GloryManager extends Observable {
             return device.sendCommand(cmd, debug);
         }
 
-        public Status getStatus() {
-            return status.get();
+        public State getState() {
+            return status.getState();
         }
 
-        public void setStatus(Status s) {
-            // TODO: This is not thread safe. Review
-            Status cs = status.get();
-            if (cs != Status.ERROR) {
-                status.set(s);
-                setChanged();
-                notifyObservers(cs);
-            }
+        public void setState(State s) {
+            status.setState(s);
         }
 
         public void clearError() {
-            status.compareAndSet(Status.ERROR, Status.IDLE);
-            setChanged();
-            notifyObservers(status);
+            status.clearError();
         }
 
-        public void setError(GloryManager.ErrorDetail e) {
-            error.set(e);
+        public void setErrorInfo(Error e, String msg) {
+            status.setError(e, msg);
         }
     }
 
@@ -272,16 +293,12 @@ public class GloryManager extends Observable {
             return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi));
         }
 
-        public GloryManager.Status getStatus() {
-            return status.get();
-        }
-
-        public ErrorDetail getErrorDetail() {
-            return error.get();
+        public Status getStatus() {
+            return status;
         }
 
         public void addObserver(Observer observer) {
-            GloryManager.this.addObserver(observer);
+            status.addObserver(observer);
         }
     }
     /*

@@ -35,7 +35,7 @@ public class IdleFiltering extends ActionState {
     @Override
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
-        switch (m) {
+        switch (m.getState()) {
             case READY_TO_STORE:
                 stateApi.setState(new ReadyToStoreCounting(stateApi));
                 //startTimer(ActionState.READY_TO_STORE);

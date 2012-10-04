@@ -35,7 +35,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
         if (!waitUntilSR1State(GloryStatus.SR1Mode.escrow_open)) {
             return;
         }
-        setStatus(GloryManager.Status.PUT_THE_ENVELOPE_IN_THE_ESCROW);
+        setState(GloryManager.State.PUT_THE_ENVELOPE_IN_THE_ESCROW);
         boolean storeTry = false;
         while (!mustCancel()) {
             if (!sense()) {
@@ -59,7 +59,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        setStatus(GloryManager.Status.IDLE);
+                        setState(GloryManager.State.IDLE);
                         gotoNeutral(true, false);
                         return;
                     }
@@ -92,7 +92,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
             sleep();
         }
         if (mustCancel()) {
-            setStatus(GloryManager.Status.CANCELING);
+            setState(GloryManager.State.CANCELING);
         }
         gotoNeutral(true, false);
     }

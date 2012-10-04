@@ -7,7 +7,7 @@ package models.actions;
 import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
-import java.util.EnumMap;
+import java.util.Map;
 import models.Bill;
 import models.Deposit;
 import models.Event;
@@ -29,13 +29,17 @@ abstract public class UserAction {
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
     protected User currentUser = null;
-    protected final EnumMap<GloryManager.Status, String> messages;
+    protected final Map<GloryManager.State, String> messages;
     protected ActionState state = null;
     protected Integer currentDepositId = null;
 
     public class StateApi {
 
-        private TimeoutTimer timer = null;
+        final private TimeoutTimer timer;
+
+        public StateApi() {
+            timer = new TimeoutTimer(UserAction.this);
+        }
 
         public void setState(ActionState state) {
             UserAction.this.state = state;
@@ -78,20 +82,16 @@ abstract public class UserAction {
             d.save();
         }
 
-        synchronized public void startTimer() {
-            if (timer != null) {
-                timer.cancel();
-            }
-            timer = new TimeoutTimer(UserAction.this);
+        public void startTimer() {
             timer.start();
         }
 
-        synchronized public void cancelTimer() {
-            if (timer != null) {
-                timer.cancel();
-            } else {
-                Logger.error("Trying to cancel an invalid timer");
-            }
+        public void restartTimer() {
+            timer.restart();
+        }
+
+        public void cancelTimer() {
+            timer.cancel();
         }
 
         public void setError(String msg) {
@@ -103,7 +103,7 @@ abstract public class UserAction {
         }
     }
 
-    public UserAction(Currency currency, Object formData, EnumMap<GloryManager.Status, String> messages) {
+    public UserAction(Currency currency, Object formData, Map<GloryManager.State, String> messages) {
         this.formData = formData;
         this.messages = messages;
         this.currency = currency;
@@ -167,7 +167,7 @@ abstract public class UserAction {
     }
 
     public String getMessage() {
-        return messages.get(userActionApi.getManagerStatus());
+        return messages.get(userActionApi.getManagerState());
     }
 
     public Integer getDepositId() {

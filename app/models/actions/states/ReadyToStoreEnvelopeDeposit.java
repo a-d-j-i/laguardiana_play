@@ -34,7 +34,7 @@ public class ReadyToStoreEnvelopeDeposit extends IdleEnvelopeDeposit {
     @Override
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
-        switch (m) {
+        switch (m.getState()) {
             case IDLE:
                 stateApi.closeDeposit();
                 stateApi.setState(new Finish(stateApi));

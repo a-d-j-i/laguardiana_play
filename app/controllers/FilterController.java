@@ -17,6 +17,9 @@ public class FilterController extends Application {
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
+        if (request.isAjax()) {
+            return;
+        }
         String neededAction = ModelFacade.getNeededAction();
         if (neededAction == null) {
             if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {

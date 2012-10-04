@@ -25,11 +25,26 @@ import play.libs.F.Promise;
  * @author aweil
  */
 public class ModelFacade {
-    // FACTORY
 
+    // FACTORY
+    static public class ModelError {
+
+        public String gloryError = null;
+        public String ioBoardError = null;
+        public String appError = null;
+
+        public boolean isError() {
+            return (gloryError != null || ioBoardError != null || appError != null);
+        }
+
+        @Override
+        public String toString() {
+            return "gloryError=" + gloryError + ", ioBoardError=" + ioBoardError + ", appError=" + appError;
+        }
+    }
     final static private GloryManager.ControllerApi manager;
     final static private IoBoard ioBoard;
-    private static String error = null;
+    private static ModelError modelError = new ModelError();
     private static UserAction currentUserAction = null;
     private static User currentUser = null;
 
@@ -52,20 +67,18 @@ public class ModelFacade {
     static class OnGloryEvent extends Job {
 
         GloryManager.Status status;
-        GloryManager.ErrorDetail me;
 
         public OnGloryEvent(GloryManager.Status status) {
             this.status = status;
-            this.me = manager.getErrorDetail();
         }
 
         @Override
         public void doJob() throws Exception {
             Event.save(currentUserAction, Event.Type.GLORY, status.name());
-            switch (status) {
+            switch (status.getState()) {
                 case ERROR:
                     if (Play.configuration.getProperty("glory.ignore") == null) {
-                        setError(String.format("Glory Error : %s", me));
+                        modelError.gloryError = status.getErrorDetail();
                     }
                     break;
                 //Could happen on startup
@@ -100,7 +113,7 @@ public class ModelFacade {
             if (status.status == IoBoard.Status.ERROR) {
                 // A development option
                 if (Play.configuration.getProperty("io_board.ignore") == null) {
-                    setError(String.format("IOBoard Error : %s", status.error));
+                    modelError.ioBoardError = status.error;
                 }
                 return;
             }
@@ -120,7 +133,7 @@ public class ModelFacade {
                     return;
                 }
                 if (!manager.count(null, numericId)) {
-                    setError(String.format("startBillDeposit can't start glory %s", manager.getErrorDetail()));
+                    setError(String.format("startBillDeposit can't start glory %s", manager.getStatus().getErrorDetail()));
                 }
             }
         }
@@ -139,14 +152,6 @@ public class ModelFacade {
             return manager.cancelDeposit();
         }
 
-        public boolean resetGlory() {
-            return manager.reset();
-        }
-
-        public boolean storingErrorReset() {
-            return manager.storingErrorReset();
-        }
-
         public void envelopeDeposit() {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
@@ -154,13 +159,13 @@ public class ModelFacade {
                     return;
                 }
                 if (!manager.envelopeDeposit()) {
-                    setError(String.format("envelopeDeposit can't start glory %s", manager.getErrorDetail()));
+                    setError(String.format("envelopeDeposit can't start glory %s", manager.getStatus().getErrorDetail()));
                 }
             }
         }
 
-        public GloryManager.Status getManagerStatus() {
-            return manager.getStatus();
+        public GloryManager.State getManagerState() {
+            return manager.getStatus().getState();
         }
 
         public void setError(String msg) {
@@ -174,13 +179,29 @@ public class ModelFacade {
         }
     }
 
+    synchronized public static boolean isError() {
+        return modelError.isError();
+    }
+
+    synchronized public static void errorReset() {
+        manager.reset();
+        ioBoard.clearError();
+        clearError();
+    }
+
+    synchronized public static void storingErrorReset() {
+        manager.storingErrorReset();
+        ioBoard.clearError();
+        clearError();
+    }
+
     synchronized static public void startAction(UserAction userAction) {
         Event.save(userAction, Event.Type.ACTION_START_TRY, getNeededController());
+        if (modelError.isError()) {
+            Logger.info("Can't start an action when on error");
+            return;
+        }
         if (currentUserAction != null || currentUser != null) {
-            if (isError()) {
-                Logger.info("Error so canceling action");
-                finishAction();
-            }
             Logger.error("startAction currentAction is not null");
             return;
         }
@@ -194,7 +215,7 @@ public class ModelFacade {
         if (currentUserAction != null && currentUser != null) {
             Event.save(currentUserAction, Event.Type.ACTION_FINISH, getNeededController());
         }
-        if ( currentUserAction.canFinishAction() ) {
+        if (currentUserAction.canFinishAction() || modelError.isError()) {
             currentUserAction = null;
             currentUser = null;
         }
@@ -204,22 +225,24 @@ public class ModelFacade {
         if (isLocked()) {
             return null;
         }
-        if (manager.getStatus() == GloryManager.Status.ERROR) {
+        if (manager.getStatus().getState() == GloryManager.State.ERROR) {
             if (Play.configuration.getProperty("glory.ignore") == null) {
-                setError(String.format("Glory error : %s", manager.getErrorDetail()));
+                setError(String.format("Glory error : %s", manager.getStatus().getErrorDetail()));
             }
         }
+
         if (ioBoard.getStatus().status == IoBoard.Status.ERROR) {
             if (Play.configuration.getProperty("io_board.ignore") == null) {
                 setError(String.format("IoBoeard error : %s", ioBoard.getStatus().error));
             }
         }
-        if (isError()) {
+        if (modelError.isError()) {
             return "ERROR";
         }
         if (currentUserAction != null) {
             return currentUserAction.getStateName();
         }
+
         return "IDLE";
     }
 
@@ -227,7 +250,7 @@ public class ModelFacade {
         if (isLocked()) {
             return null;
         }
-        if (isError()) {
+        if (modelError.isError()) {
             return "Application";
         }
         if (currentUserAction != null) {
@@ -240,7 +263,7 @@ public class ModelFacade {
         if (isLocked()) {
             return null;
         }
-        if (isError()) {
+        if (modelError.isError()) {
             return "counterError";
         }
         if (currentUserAction != null) {
@@ -258,30 +281,28 @@ public class ModelFacade {
 
     private static void setError(String e) {
         Logger.debug("Error in manager %s", e);
-        error = e;
+        modelError.appError = e;
         finishAction();
     }
 
     private static void clearError() {
-        GloryManager.Status m = manager.getStatus();
-        if (m == GloryManager.Status.ERROR) {
+        GloryManager.State m = manager.getStatus().getState();
+        if (m != GloryManager.State.ERROR) {
+            modelError.gloryError = null;
+        } else {
             Logger.error("Manager still in error %s", m.name());
-            return;
         }
         IoBoard.IoBoardStatus s = ioBoard.getStatus();
-        if (s.status == IoBoard.Status.ERROR) {
+        if (s.status != IoBoard.Status.ERROR) {
+            modelError.ioBoardError = null;
+        } else {
             Logger.error("IoBoard still in error %s", m.name());
-            return;
         }
-        error = null;
-    }
-
-    synchronized public static boolean isError() {
-        return error != null;
+        modelError.appError = null;
     }
 
     synchronized public static String getError() {
-        return error;
+        return modelError.toString();
     }
 
     synchronized public static List<Bill> getCurrentCounters() {
