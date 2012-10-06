@@ -117,9 +117,9 @@ public class Application extends Controller {
             args.put("depositTotal", 505);
             args.put("depositId", 12345);
             // Print the ticket.
-            DeviceFactory.getPrinter().print("envelopeDeposit_start", args);
-//            DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs);
-//            DeviceFactory.getPrinter().print("billDeposit", renderArgs);
+//            DeviceFactory.getPrinter().print("envelopeDeposit_start", args);
+//            DeviceFactory.getPrinter().print("envelopeDeposit_finish", args);
+            DeviceFactory.getPrinter().print("billDeposit", args);
 
             /*renderArgs.put("testarg", "ADJI");
              DeviceFactory.getPrinter().print("test", renderArgs);*/

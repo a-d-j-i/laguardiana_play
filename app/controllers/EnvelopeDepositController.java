@@ -165,6 +165,8 @@ public class EnvelopeDepositController extends Application {
     public static void finish() {
         Deposit deposit = ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
+
+        renderArgs.put("canceled", (deposit != null && deposit.finishDate == null));
         if (formData != null) {
             ModelFacade.finishAction();
         } else {

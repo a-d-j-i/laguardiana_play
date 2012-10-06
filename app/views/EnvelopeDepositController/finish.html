@@ -8,6 +8,9 @@
             <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
             <div class="mensaje"><span>&{ 'envelope_deposit.deposit_done' }</span></div>
             <h2>&{ 'application.thanks' }</h2>
+            #{if canceled}
+            &{ 'counting_page.deposit_canceled' }
+            #{/if}
         </div>
         <hr />
         <div class="botonera">

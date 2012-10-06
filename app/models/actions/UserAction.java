@@ -4,11 +4,9 @@
  */
 package models.actions;
 
-import devices.DeviceFactory;
 import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import models.Bill;
 import models.Deposit;

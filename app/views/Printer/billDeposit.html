@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title></title>
-    </head>
     <body>
-        <h1>&{ 'application.thanks' }</h1>
+        <h1><b>&{ 'application.thanks' }</b></h1>
+        #{if ( formData.showReference1 ) }
         <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+        #{/if}
+        #{if ( formData.showReference2 ) }
         <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+        #{/if}
         <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.textId}</p>
         <p>&{ 'summary.transaction_code' }: ${depositId}</p>
         <br/>

@@ -4,6 +4,7 @@
  */
 package devices;
 
+import devices.printHelper.LargeHTMLEditorKit;
 import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.io.Reader;
@@ -24,6 +25,7 @@ import javax.print.attribute.HashDocAttributeSet;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.PrintServiceAttributeSet;
+import javax.print.attribute.standard.MediaPrintableArea;
 import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.print.event.PrintJobEvent;
@@ -47,21 +49,27 @@ public class Printer {
     class MyPrintListener implements PrintJobListener {
 
         public void printDataTransferCompleted(PrintJobEvent pje) {
+            Logger.debug("printDataTransferCompleted");
         }
 
         public void printJobCompleted(PrintJobEvent pje) {
+            Logger.debug("printJobCompleted");
         }
 
         public void printJobFailed(PrintJobEvent pje) {
+            Logger.debug("printJobFailed");
         }
 
         public void printJobCanceled(PrintJobEvent pje) {
+            Logger.debug("printJobCanceled");
         }
 
         public void printJobNoMoreEvents(PrintJobEvent pje) {
+            Logger.debug("printJobNoMoreEvents");
         }
 
         public void printJobRequiresAttention(PrintJobEvent pje) {
+            Logger.debug("printJobRequiresAttention");
         }
     }
     public Map<String, PrintService> printers = new HashMap<String, PrintService>();
@@ -77,6 +85,14 @@ public class Printer {
     }
 
     public void print(String templateName, Map args) throws PrinterException, PrintException {
+        print(templateName, args, 0);
+
+    }
+
+    public void print(String templateName, Map args, int paperLen) throws PrinterException, PrintException {
+        if (paperLen <= 0) {
+            paperLen = 60;
+        }
         Template template = null;
         try {
             template = TemplateLoader.load("Printer/" + templateName + ".html");
@@ -88,7 +104,9 @@ public class Printer {
         String body = template.render(args);
         Logger.debug("PRINT : %s", body);
 
-        HTMLEditorKit kit = new HTMLEditorKit();
+        //HTMLEditorKit kit = new HTMLEditorKit();
+        HTMLEditorKit kit = new LargeHTMLEditorKit();
+
         HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
         Reader fin = new StringReader(body);
         try {
@@ -102,6 +120,7 @@ public class Printer {
 
         JEditorPane item = new JEditorPane();
         item.setEditorKit(kit);
+        item.getDocument().putProperty("ZOOM_FACTOR", new Double(1.5));
         item.setDocument(doc);
         item.setEditable(false);
 
@@ -125,10 +144,11 @@ public class Printer {
             HashDocAttributeSet attrc = new HashDocAttributeSet();
             //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 30, MediaPrintableArea.MM));
             attrc.add(OrientationRequested.PORTRAIT);
-            attrc.add(MediaSize.findMedia((float) 80, (float) 30, MediaSize.MM));
-            addMediaSizeByName(p, attrc, "80mm * 160mm");
+            attrc.add(MediaSize.findMedia((float) 80, (float) paperLen, MediaSize.MM));
+            //attrc.add(MediaSize.findMedia((float) 80, (float) 160, MediaSize.MM));
+            //addMediaSizeByName(p, attrc, "80mm * 160mm");
             Doc docc = new SimpleDoc(item.getPrintable(null, null), DocFlavor.SERVICE_FORMATTED.PRINTABLE, attrc);
-            //printJob.addPrintJobListener(new MyPrintListener());
+            printJob.addPrintJobListener(new MyPrintListener());
             printJob.print(docc, null);
 
 
@@ -145,22 +165,6 @@ public class Printer {
 
         }
     }
-//    private void printDocTest1(DocFlavor format, String body) throws PrintException, PrinterException {
-//        //format = DocFlavor.INPUT_STREAM.AUTOSENSE;
-//        //ByteArrayInputStream b = new ByteArrayInputStream(body.getBytes());
-//        //StringReader r = new StringReader(body);
-//        Doc myDoc = new SimpleDoc(body, format, null);
-//        PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
-//        aset.add(new Copies(1));
-//        aset.add(Sides.ONE_SIDED);
-//        //aSet.add(new MediaSize(58, 120000, MediaSize.MM));
-//        PrintServiceAttributeSet s = printService.getAttributes();
-//        for (Attribute a : s.toArray()) {
-//            Logger.debug("Default printer service attr: " + a.getName() + " " + a.toString());
-//        }
-//        DocPrintJob job = printService.createPrintJob();
-//        job.print(myDoc, aset);
-//    }
 
     // Hack to add something from sun.print.
     void addMediaSizeByName(PrintService p, PrintRequestAttributeSet attrs, String name) {

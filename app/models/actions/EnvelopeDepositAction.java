@@ -67,7 +67,8 @@ public class EnvelopeDepositAction extends UserAction {
             renderArgs.put("formData", formData);
             renderArgs.put("referenceCodes", referenceCodes);
             renderArgs.put("currencies", currencies);
-            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs);
+            renderArgs.put("depositId", currentDepositId);
+            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs, 110);
         } catch (PrinterException ex) {
             Logger.error(ex.getMessage());
         } catch (PrintException ex) {
@@ -77,15 +78,21 @@ public class EnvelopeDepositAction extends UserAction {
 
     @Override
     public void finish() {
-        Map renderArgs = new HashMap();
-        renderArgs.put("clientCode", LgSystemProperty.getProperty("client_code"));
-        renderArgs.put("formData", formData);
-        renderArgs.put("depositId", currentDepositId);
-        try {
-            // Print the ticket.
-            DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs);
-        } catch (Throwable ex) {
-            Logger.debug(ex.getMessage());
+        if (currentDepositId != null) {
+            Deposit d = Deposit.findById(currentDepositId);
+            if (d != null && d.finishDate != null) {
+                Map renderArgs = new HashMap();
+                renderArgs.put("clientCode", LgSystemProperty.getProperty("client_code"));
+                renderArgs.put("formData", formData);
+                renderArgs.put("depositId", currentDepositId);
+
+                try {
+                    // Print the ticket.
+                    DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs);
+                } catch (Throwable ex) {
+                    Logger.debug(ex.getMessage());
+                }
+            }
         }
     }
 }

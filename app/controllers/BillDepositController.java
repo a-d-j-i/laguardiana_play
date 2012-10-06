@@ -1,6 +1,5 @@
 package controllers;
 
-import devices.DeviceFactory;
 import java.util.List;
 import models.Deposit;
 import models.ModelFacade;
@@ -123,6 +122,7 @@ public class BillDepositController extends Application {
         renderArgs.put("clientCode", getProperty("client_code"));
         renderArgs.put("formData", formData);
         if (deposit != null && deposit.getTotal() > 0) {
+            renderArgs.put("canceled", deposit.finishDate == null);
             renderArgs.put("depositTotal", deposit.getTotal());
             renderArgs.put("depositId", deposit.depositId);
         }
