@@ -214,10 +214,11 @@ public class ModelFacade {
     synchronized public static void finishAction() {
         if (currentUserAction != null && currentUser != null) {
             Event.save(currentUserAction, Event.Type.ACTION_FINISH, getNeededController());
-        }
-        if (currentUserAction.canFinishAction() || modelError.isError()) {
-            currentUserAction = null;
-            currentUser = null;
+
+            if (currentUserAction.canFinishAction() || modelError.isError()) {
+                currentUserAction = null;
+                currentUser = null;
+            }
         }
     }
 

@@ -9,7 +9,7 @@
     name:           PlayInternalApp
     retryInterval:  -1
     executionTime:  0000-00-00
-    presicion:      0000-00-00
+    presicion:      1
     interval:       -1
 
 

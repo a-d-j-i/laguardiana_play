@@ -121,6 +121,7 @@ hr {
     height: 47px;
     line-height: 47px;
     font-size: 15pt;
+    border: none;
     border-right: 1px solid;
     display: inline-block;
     padding: 0 18px 0 70px;

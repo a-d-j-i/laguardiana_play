@@ -13,8 +13,9 @@ $(function() {
     });
 
     $(".keyboard .element.key").bind("click", function() {
-        if (!focused_input)
-            focused_input = $(valid_inputs).first();
+        if (!focused_input || (focused_input && !$(focused_input).is(":visible"))) {
+            $("input:text:visible").focus();
+        }
         if (focused_input) {
             focused_input.keydown();
             var key_value = $(this).attr("data-key");

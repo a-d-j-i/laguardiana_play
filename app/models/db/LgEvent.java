@@ -21,7 +21,7 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
     @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "creation_date", nullable = false, length = 13)
     public Date creationDate = new Date();
-    @Column( name = "message", nullable = false, length = 256)
+    @Column( name = "message", nullable = true, length = 256)
     public String message;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "event")
     public Set<LgExternalAppLog> externalAppLogs = new HashSet<LgExternalAppLog>(0);

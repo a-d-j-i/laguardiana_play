@@ -232,6 +232,7 @@
     );
         
         $("#mainForm").bind("step_shown", function(event, data){
+            Elastic.refresh();
             function checkAndSet( check, set ) {
                 str = $( check ).val();
                 if ( ! ( ! str ) && ! /^\s*$/.test( str ) && str > 0 ) {
