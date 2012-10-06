@@ -17,7 +17,7 @@ public class LgAclRule extends GenericModel implements java.io.Serializable {
     @ManyToOne( fetch = FetchType.LAZY)
     @JoinColumn( name = "resource_id", nullable = false)
     public LgResource resource;
-    @Column( name = "priority", nullable = false)
+    @Column( name = "priority", nullable = true)
     public Integer priority;
     @Column( name = "permission", nullable = false, length = 8)
     public String permission;

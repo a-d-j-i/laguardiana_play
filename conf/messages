@@ -25,7 +25,7 @@ application.back=VOLVER
 application.continue=CONTINUAR
 application.cancel=CANCELAR
 application.finish=TERMINAR
-application.choose_one=Seleccione una opción
+application.choose_one=seleccione una opción
 application.wellcome=Bienvenido %s
 application.choose_currency=Seleccione divisa
 application.thanks=MUCHAS GRACIAS POR OPERAR CON PROSEGUR
@@ -79,6 +79,7 @@ counting_page.totals=TOTALES
 
 summary.ticket=Retire su ticket
 summary.total=Monto
+summary.transaction_code=Transaccion.
 
 envelope_deposit.select_contents=Seleccione los contenidos del sobre
 envelope_deposit.cash=EFECTIVO

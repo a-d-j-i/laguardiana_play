@@ -1,8 +1,7 @@
 package controllers;
 
-import devices.DeviceFactory;
-import java.awt.print.PrinterException;
 import java.util.List;
+import models.Deposit;
 import models.ModelFacade;
 import models.actions.EnvelopeDepositAction;
 import models.db.LgEnvelope;
@@ -17,7 +16,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
-import play.mvc.Util;
 import play.mvc.With;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeReference;
@@ -122,13 +120,6 @@ public class EnvelopeDepositController extends Application {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
                 }
 
-                try {
-                    // Print the ticket.
-                    prepareStartRenderArgs(formData);
-                    DeviceFactory.getPrinter().print("envelopeDeposit", renderArgs);
-                } catch (PrinterException ex) {
-                    Logger.error(ex.getMessage());
-                }
                 EnvelopeDepositAction currentAction =
                         new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov,
                         formData.reference2, e, formData);
@@ -139,17 +130,12 @@ public class EnvelopeDepositController extends Application {
         if (formData == null) {
             formData = new FormData();
         }
-        prepareStartRenderArgs(formData);
-        render();
-    }
-
-    @Util
-    static private void prepareStartRenderArgs(FormData formData) {
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
         renderArgs.put("formData", formData);
         renderArgs.put("referenceCodes", referenceCodes);
         renderArgs.put("currencies", currencies);
+        render();
     }
 
     public static void mainLoop() {
@@ -177,14 +163,14 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void finish() {
+        Deposit deposit = ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
-        ModelFacade.finishAction();
-        if (formData == null) {
+        if (formData != null) {
+            ModelFacade.finishAction();
+        } else {
             Application.index();
             return;
         }
-        renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("formData", formData);
         render();
     }
 }

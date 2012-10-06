@@ -8,9 +8,6 @@ import devices.SerialPortAdapterAbstract.PortConfiguration;
 import devices.glory.Glory;
 import devices.glory.manager.GloryManager;
 import java.util.HashMap;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.standard.*;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -31,17 +28,7 @@ public class DeviceFactory extends PlayPlugin {
 
     public static Printer getPrinter() {
         if (printer == null) {
-            PrintRequestAttributeSet attrs = new HashPrintRequestAttributeSet();
-            // http://docs.oracle.com/javase/1.4.2/docs/api/javax/print/attribute/PrintRequestAttribute.html
-            attrs.add(new Copies(1));
-            attrs.add(Sides.ONE_SIDED);
-            attrs.add(MediaSizeName.ISO_A4);
-            //attrs.add(PrintQuality.DRAFT);
-            //attrs.add(OrientationRequested.LANDSCAPE);
-            //attrs.add(new PrinterResolution(600, 600, PrinterResolution.DPI));
-            //attrs.add(new MediaPrintableArea(0, 0, 10, 10, MediaPrintableArea.MM));
-            // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
-            printer = new Printer(Play.configuration.getProperty("printer.port"), attrs);
+            printer = new Printer(Play.configuration.getProperty("printer.port"));
         }
         return printer;
     }

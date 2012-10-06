@@ -4,9 +4,11 @@
  */
 package models.actions;
 
+import devices.DeviceFactory;
 import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import models.Bill;
 import models.Deposit;
@@ -141,6 +143,8 @@ abstract public class UserAction {
     }
 
     abstract public void start();
+
+    abstract public void finish();
 
     public void onGloryEvent(GloryManager.Status m) {
         state.onGloryEvent(m);

@@ -55,7 +55,7 @@ public class Secure extends Controller {
 
     public static boolean checkPermission(String resource, String operation) {
         if (Play.mode.isDev() && Play.configuration.getProperty("secure.allowAll") != null) {
-            //Logger.info("IN DEV MODE ALL ALLOWED!!!");
+            Logger.info("IN DEV MODE ALL ALLOWED!!!");
             return true;
         }
         User user = Cache.get(session.getId() + "-user", User.class);
@@ -83,8 +83,7 @@ public class Secure extends Controller {
         render();
     }
 
-    public static void authenticate(@Required String username, String password,
-            boolean remember, String cancel) throws Throwable {
+    public static void authenticate(@Required String username, @Required String password, boolean remember) throws Throwable {
         // The keyboard only types uppercase.
         if (password != null) {
             password = password.toLowerCase();
@@ -96,12 +95,11 @@ public class Secure extends Controller {
         if (Validation.hasErrors()) {
             Logger.info("validation hasErrors!!!");
             for (Error error : validation.errors()) {
-                Logger.error("    %s", error.message());
+                Logger.error("%s    %s", error.message(), error.getKey());
             }
             flash.keep("url");
             flash.error("secure.invalid_field");
             params.flash();
-            validation.keep(); // keep the errors for the next request
             if (request.isAjax()) {
                 String[] d = {"error", Messages.get("secure.invalid_field")};
                 renderJSON(d);

@@ -24,10 +24,12 @@ public class User extends LgUser {
 
     public static User authenticate(String username, String password) {
         List<User> users = User.find("select u from User u where u.username = ? and u.password = ? and "
-                + "u.endDate is null or u.endDate > CURRENT_TIMESTAMP", username, password).fetch();
+                + "( u.endDate is null or u.endDate > CURRENT_TIMESTAMP )", username, password).fetch();
         User validated = null;
         for (User user : users) {
+            Logger.debug("Validating user %s", user.username);
             if (user.authenticate(password)) {
+                Logger.debug("Validated user %s", user.username);
                 validated = user;
                 break;
             }

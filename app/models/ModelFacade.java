@@ -216,6 +216,7 @@ public class ModelFacade {
             Event.save(currentUserAction, Event.Type.ACTION_FINISH, getNeededController());
 
             if (currentUserAction.canFinishAction() || modelError.isError()) {
+                currentUserAction.finish();
                 currentUserAction = null;
                 currentUser = null;
             }

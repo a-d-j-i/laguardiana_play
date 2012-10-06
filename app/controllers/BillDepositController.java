@@ -63,8 +63,7 @@ public class BillDepositController extends Application {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                BillDepositAction currentAction =
-                        new BillDepositAction((DepositUserCodeReference) formData.reference1.lov,
+                BillDepositAction currentAction = new BillDepositAction((DepositUserCodeReference) formData.reference1.lov,
                         formData.reference2, formData.currency.currency, formData);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
@@ -117,24 +116,17 @@ public class BillDepositController extends Application {
     public static void finish() {
         Deposit deposit = ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
-        if (formData != null) {
-            renderArgs.put("clientCode", getProperty("client_code"));
-            renderArgs.put("formData", formData);
-            if (deposit != null && deposit.getTotal() > 0) {
-                renderArgs.put("depositTotal", deposit.getTotal());
-                renderArgs.put("depositId", deposit.depositId);
-                try {
-                    // Print the ticket.
-                    DeviceFactory.getPrinter().print("billDeposit", renderArgs);
-                } catch (Throwable ex) {
-                    Logger.debug(ex.getMessage());
-                }
-            }
-            ModelFacade.finishAction();
-        } else {
+        if (formData == null) {
             Application.index();
             return;
         }
+        renderArgs.put("clientCode", getProperty("client_code"));
+        renderArgs.put("formData", formData);
+        if (deposit != null && deposit.getTotal() > 0) {
+            renderArgs.put("depositTotal", deposit.getTotal());
+            renderArgs.put("depositId", deposit.depositId);
+        }
+        ModelFacade.finishAction();
         render();
     }
 }

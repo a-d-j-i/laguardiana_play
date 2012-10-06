@@ -42,4 +42,8 @@ public class FilteringAction extends UserAction {
     public void start() {
         userActionApi.count(currency.numericId);
     }
+
+    @Override
+    public void finish() {
+    }
 }

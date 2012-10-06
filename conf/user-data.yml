@@ -6,6 +6,7 @@
 # External Application Codes
 #
   db.LgExternalApp(PlayInternalApp):
+    id:             1
     name:           PlayInternalApp
     retryInterval:  -1
     executionTime:  0000-00-00
@@ -18,19 +19,8 @@
 #
   db.LgRole(RoleAdmin):
     name:           admin
-
-
-  db.LgRole(RoleUser):
-    name:           user
-
-
-  db.LgRole(Role_CashDeposit_User):
-    name:           user
-
-
   db.LgRole(RoleGuest):
     name:           guest
-
 
 
 #
@@ -39,38 +29,7 @@
   db.LgResource(ResourceAdmin):
     name:           ADMIN
 
-  db.LgResource(ResourceApplicationIndex):
-    name:           Application.index
-    
-  db.LgResource(ResourceApplicationPrint):
-    name:           Application.printTemplate
-    
-  db.LgResource(ResourceApplicationInputReference):
-    name:           Application.inputReference
-  db.LgResource(ResourceDepositGetReferenceCodes):
-    name:           Application.getReferenceCodes
-  db.LgResource(ResourceApplicationAppendBatch):
-    name:           Application.appendBatch
-  db.LgResource(ResourceApplicationCountMoney):
-    name:           Application.countMoney
-  db.LgResource(ResourceApplicationAcceptBatch):
-    name:           Application.acceptBatch
-    
-# -> Cash Deposits
-  db.LgResource(ResBillDepositControllerAcceptBatch):
-    name:           BillDepositController.acceptBatch
-  db.LgResource(ResBillDepositControllerInputReference):
-    name:           BillDepositController.inputReference
-  db.LgResource(ResBillDepositControllerCountingPage):
-    name:           BillDepositController.countingPage
-  db.LgResource(ResBillDepositController_cancelDeposit):
-    name:           BillDepositController.cancelDeposit
-  db.LgResource(ResBillDepositController_info):
-    name:           BillDepositController.info
-
-
-
-
+  
 # ACLs
 #
 # ACLs for Role: Admin
@@ -81,150 +40,7 @@
     operation:      ADMIN
     permission:     ALLOW
 
-# ACLs for Role: Guest
-  db.LgAclRule(RoleGuestApplicationIndex):
-    role:           RoleGuest
-    resource:       ResourceApplicationIndex
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-
-  db.LgAclRule(RoleGuestApplicationPrint):
-    role:           RoleGuest
-    resource:       ResourceApplicationPrint
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-
-# ACLs for Rol: User / Only Cash Deposit
-  db.LgAclRule(RoleUser_ResBillDepositControllerInputReference_Post):
-    role:           Role_CashDeposit_User
-    resource:       ResBillDepositControllerInputReference
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-  db.LgAclRule(RoleUser_ResBillDepositControllerInputReference_Get):
-    role:           Role_CashDeposit_User
-    resource:       ResBillDepositControllerInputReference
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-  db.LgAclRule(RoleUser_ResBillDepositControllerAcceptBatch_Post):
-    role:           Role_CashDeposit_User
-    resource:       ResBillDepositControllerAcceptBatch
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-  db.LgAclRule(RoleUser_ResBillDepositControllerAcceptBatch_Get):
-    role:           Role_CashDeposit_User
-    resource:       ResBillDepositControllerAcceptBatch
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-  db.LgAclRule(RoleUser_ResBillDepositControllerCountingPage_Post):
-    role:           Role_CashDeposit_User
-    resource:       ResBillDepositControllerCountingPage
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-  db.LgAclRule(RoleUser_ResBillDepositControllerCountingPage_Get):
-    role:           Role_CashDeposit_User
-    resource:       ResBillDepositControllerCountingPage
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-  db.LgAclRule(RoleUser_ResBillDepositController_cancelDeposit_Get):
-    role:           Role_CashDeposit_User
-    resource:       ResBillDepositController_cancelDeposit
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-  db.LgAclRule(RoleUser_ResBillDepositController_info_Get):
-    role:           Role_CashDeposit_User
-    resource:       ResBillDepositController_info
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-  
-# old acls..
-  db.LgAclRule(RoleUserResourceDepositGetReferenceCodes):
-    role:           RoleUser
-    resource:       ResourceDepositGetReferenceCodes
-    priority:       1
-    operation:      GET
-    permission:     ALLOW
-
-  db.LgAclRule(RoleUserResourceApplicationCountMoneyPost):
-    role:           RoleUser
-    resource:       ResourceApplicationCountMoney
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-   
-  db.LgAclRule(RoleUserResourceApplication_AcceptBatch):
-    role:           RoleUser
-    resource:       ResourceApplicationAcceptBatch
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-  db.LgAclRule(RoleUserResourceApplication_AcceptBatch_GET):
-    role:           RoleUser
-    resource:       ResourceApplicationAcceptBatch
-    priority:       1
-    operation:      GET 
-    permission:     ALLOW
-  db.LgAclRule(RoleUserResourceApplication_AppendBatch):
-    role:           RoleUser
-    resource:       ResourceApplicationAppendBatch
-    priority:       1
-    operation:      POST
-    permission:     ALLOW
-
-    
-#
-# Users
-#
-  User(dave):
-    externalApp:    PlayInternalApp
-    username:       dave
-    password:       dave
-    externalId:     1515
-    locked:         #x42
-    creationDate:   2012-01-01
-    endDate:        2112-01-01    
-    roles:          [ RoleGuest, Role_CashDeposit_User, RoleUser ]
-#    password:       #x16 #x10 #x83 #x87 #x43 #xcc #x90 #xe3 #xe4 #xfd #xda #x74 #x82 #x82 #xd9 #xb8
-
-  User(dave_Cash_Deposit_Only):
-    externalApp:    PlayInternalApp
-    username:       davecd
-    password:       davecd
-    externalId:     1515
-    locked:         #x42
-    creationDate:   2012-01-01
-    endDate:        2112-01-01    
-    roles:          [ RoleGuest, Role_CashDeposit_User ]
-
-  User(admindave):
-    externalApp:    PlayInternalApp
-    username:       admindave
-    password:       admindave
-    externalId:     1516
-    locked:         #x42
-    creationDate:   2012-01-01
-    endDate:        2112-01-01    
-    roles:          [ RoleGuest, RoleAdmin ]
-
-  User(expireddave):
-    externalApp:    PlayInternalApp
-    username:       expireddave
-    password:       expireddave
-    externalId:     1516
-    locked:         #x42
-    creationDate:   2012-01-01
-    endDate:        2012-01-02    
-    roles:          [ RoleGuest, RoleUser ]
-
+# Basic users
   User(admin):
     externalApp:    PlayInternalApp
     username:       admin
@@ -244,3 +60,14 @@
     creationDate:   2012-01-01
     endDate:        2112-01-01    
     roles:          [ RoleGuest ]
+    
+  User(demo):
+    externalApp:    PlayInternalApp
+    username:       demo
+    password:       demo
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          []
+    

@@ -4,13 +4,18 @@
  */
 package models.actions;
 
+import devices.DeviceFactory;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 import models.Deposit;
 import models.actions.states.IdleBillDeposit;
+import models.db.LgSystemProperty;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
 
 /**
  *
@@ -47,6 +52,7 @@ public class BillDepositAction extends UserAction {
         return "BillDepositController";
     }
 
+    // TODO: Move to states
     @Override
     public void start() {
         Deposit deposit = new Deposit(currentUser, userCode, userCodeLov);
@@ -54,5 +60,24 @@ public class BillDepositAction extends UserAction {
         deposit.save();
         currentDepositId = deposit.depositId;
         userActionApi.count(currency.numericId);
+    }
+
+    // TODO: Move to states
+    @Override
+    public void finish() {
+        Map renderArgs = new HashMap();
+        renderArgs.put("clientCode", LgSystemProperty.getProperty("client_code"));
+        renderArgs.put("formData", formData);
+        Deposit deposit = Deposit.findById(getDepositId());
+        if (deposit != null && deposit.getTotal() > 0) {
+            renderArgs.put("depositTotal", deposit.getTotal());
+            renderArgs.put("depositId", deposit.depositId);
+            try {
+                // Print the ticket.
+                DeviceFactory.getPrinter().print("billDeposit", renderArgs);
+            } catch (Throwable ex) {
+                Logger.debug(ex.getMessage());
+            }
+        }
     }
 }

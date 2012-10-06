@@ -5,12 +5,21 @@
 package models.actions;
 
 import controllers.Secure;
+import devices.DeviceFactory;
 import devices.glory.manager.GloryManager;
+import java.awt.print.PrinterException;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.print.PrintException;
 import models.Deposit;
 import models.actions.states.IdleEnvelopeDeposit;
 import models.db.LgEnvelope;
+import models.db.LgSystemProperty;
+import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
 
 /**
  *
@@ -50,5 +59,33 @@ public class EnvelopeDepositAction extends UserAction {
         deposit.save();
         currentDepositId = deposit.depositId;
         userActionApi.envelopeDeposit();
+        try {
+            Map renderArgs = new HashMap();
+            // Print the ticket.
+            List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
+            List<Currency> currencies = Currency.findAll();
+            renderArgs.put("formData", formData);
+            renderArgs.put("referenceCodes", referenceCodes);
+            renderArgs.put("currencies", currencies);
+            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs);
+        } catch (PrinterException ex) {
+            Logger.error(ex.getMessage());
+        } catch (PrintException ex) {
+            Logger.error(ex.getMessage());
+        }
+    }
+
+    @Override
+    public void finish() {
+        Map renderArgs = new HashMap();
+        renderArgs.put("clientCode", LgSystemProperty.getProperty("client_code"));
+        renderArgs.put("formData", formData);
+        renderArgs.put("depositId", currentDepositId);
+        try {
+            // Print the ticket.
+            DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs);
+        } catch (Throwable ex) {
+            Logger.debug(ex.getMessage());
+        }
     }
 }

@@ -3,6 +3,7 @@ package models;
 import javax.persistence.*;
 import models.actions.UserAction;
 import models.db.*;
+import play.Logger;
 
 @Entity
 public class Event extends LgEvent implements java.io.Serializable {
@@ -39,8 +40,12 @@ public class Event extends LgEvent implements java.io.Serializable {
         if (userAction != null && userAction.getDepositId() != null) {
             deposit = Deposit.findById(userAction.getDepositId());
         }
-        Event e = new Event(deposit, type, message);
-        e.save();
+        try {
+            Event e = new Event(deposit, type, message);
+            e.save();
+        } catch (Exception ex) {
+            Logger.error("Error saving event %s", ex);
+        }
     }
 
     @Override
