@@ -177,6 +177,14 @@ public class ModelFacade {
             ioBoard.clearError();
             ModelFacade.clearError();
         }
+
+        public void openGate() {
+            ioBoard.openGate();
+        }
+
+        public void closeGate() {
+            ioBoard.closeGate();
+        }
     }
 
     synchronized public static boolean isError() {

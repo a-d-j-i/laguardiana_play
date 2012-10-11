@@ -28,9 +28,7 @@ public class IoBoard extends Observable {
         OPENNING,
         OPEN,
         CLOSING,
-        CLOSED,
-        //
-        READY_TO_STORE,;
+        CLOSED,;
     }
 
     public class IoBoardStatus implements Cloneable {

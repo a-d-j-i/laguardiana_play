@@ -2,8 +2,6 @@
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import models.db.LgAclRule;
-import models.db.LgBag;
-import models.db.LgLov;
 import models.db.LgResource;
 import models.db.LgRole;
 import models.db.LgSystemProperty;
@@ -21,49 +19,47 @@ public class Bootstrap extends Job {
     @Override
     public void doJob() {
         // Load roles.
-        Fixtures.deleteDatabase();
-
-        Logger.info("loading user-data.yml as no users were found!");
-        Fixtures.loadModels("user-data.yml");
-        LgRole app = loadRolsResourcesAndAcls(controllers.Application.class);
-        LgRole appMin = loadRolsResourcesAndAclsMin(controllers.Application.class, true);
-        LgRole bill = loadRolsResourcesAndAcls(controllers.BillDepositController.class);
-        LgRole count = loadRolsResourcesAndAcls(controllers.CountController.class);
-        LgRole envelope = loadRolsResourcesAndAcls(controllers.EnvelopeDepositController.class);
-        LgRole filter = loadRolsResourcesAndAcls(controllers.FilterController.class);
-        LgRole glory = loadRolsResourcesAndAcls(controllers.GloryController.class);
-        LgRole manager = loadRolsResourcesAndAcls(controllers.GloryManagerController.class);
-        LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
-
-        // Add application envelope and bill to demo.
-/*        LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
-         guest.roles.add(app);
-         app.users.add(guest);
-         guest.save();*/
-
-        LgUser demo = LgUser.find("select u from LgUser u where username = 'demo'").first();
-        demo.roles.add(appMin);
-        appMin.users.add(demo);
-        demo.roles.add(bill);
-        bill.users.add(demo);
-        demo.roles.add(envelope);
-        envelope.users.add(demo);
-        demo.save();
-
-
-
-        if (LgLov.count() == 0) {
-            Logger.info("loading lov-data.yml as no data were found!");
-            Fixtures.loadModels("lov-data.yml");
-        }
-        if (LgSystemProperty.count() == 0) {
-            Logger.info("loading sys-props-data.yml as no data were found!");
-            Fixtures.loadModels("sys-props-data.yml");
-        }
-        Logger.info(String.format("Glory port : %s", Play.configuration.getProperty("glory.port")));
         if (Play.mode.isDev()) {
-            if (LgBag.count() == 0) {
+            if (LgSystemProperty.find("select l from LgSystemProperty l where name = 'db_initialized'").fetch().isEmpty()) {
+                Fixtures.deleteDatabase();
+                LgSystemProperty l = new LgSystemProperty();
+                l.name = "db_initialized";
+                l.value = "done";
+                l.save();
+
+                Logger.info("loading user-data.yml as no users were found!");
+                Fixtures.loadModels("user-data.yml");
+                LgRole app = loadRolsResourcesAndAcls(controllers.Application.class);
+                LgRole appMin = loadRolsResourcesAndAclsMin(controllers.Application.class, true);
+                LgRole bill = loadRolsResourcesAndAcls(controllers.BillDepositController.class);
+                LgRole count = loadRolsResourcesAndAcls(controllers.CountController.class);
+                LgRole envelope = loadRolsResourcesAndAcls(controllers.EnvelopeDepositController.class);
+                LgRole filter = loadRolsResourcesAndAcls(controllers.FilterController.class);
+                LgRole glory = loadRolsResourcesAndAcls(controllers.GloryController.class);
+                LgRole manager = loadRolsResourcesAndAcls(controllers.GloryManagerController.class);
+                LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
+
+                // Add application envelope and bill to demo.
+/*        LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
+                 guest.roles.add(app);
+                 app.users.add(guest);
+                 guest.save();*/
+
+                LgUser demo = LgUser.find("select u from LgUser u where username = 'demo'").first();
+                demo.roles.add(appMin);
+                appMin.users.add(demo);
+                demo.roles.add(bill);
+                bill.users.add(demo);
+                demo.roles.add(envelope);
+                envelope.users.add(demo);
+                demo.save();
+
+                Logger.info("loading lov-data.yml");
+                Fixtures.loadModels("lov-data.yml");
+                Logger.info("loading sys-props-data.yml");
+                Fixtures.loadModels("sys-props-data.yml");
                 Fixtures.loadModels("dev-data.yml");
+                Logger.info(String.format("Glory port : %s", Play.configuration.getProperty("glory.port")));
             }
         }
         // Start glory Manager

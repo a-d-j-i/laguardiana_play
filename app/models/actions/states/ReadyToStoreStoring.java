@@ -5,8 +5,6 @@
 package models.actions.states;
 
 import devices.glory.manager.GloryManager;
-import java.util.Date;
-import models.Deposit;
 import models.actions.UserAction;
 import play.Logger;
 

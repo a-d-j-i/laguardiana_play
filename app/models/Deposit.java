@@ -41,10 +41,13 @@ public class Deposit extends LgDeposit {
 
     @Override
     public <T extends JPABase> T save() {
-        if (!JPABase.em().contains(this)) {
+        boolean mustSave = (!JPABase.em().contains(this));
+        T ret = super.save();
+        if (mustSave) {
             Event event = new Event(this, Event.Type.DEPOSIT_CHANGE, String.format("Deposit changed by userId : %d", user.userId));
+            event.save();
         }
-        return super.save();
+        return ret;
     }
 
     public LgLov findUserCodeLov() {

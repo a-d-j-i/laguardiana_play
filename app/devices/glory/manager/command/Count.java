@@ -160,7 +160,6 @@ public class Count extends ManagerCommandAbstract {
             switch (gloryStatus.getSr1Mode()) {
                 case storing_start_request:
                     if (countData.needToStoreDeposit()) {
-                        countData.storeDepositDone();
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
@@ -217,23 +216,26 @@ public class Count extends ManagerCommandAbstract {
                     break;
                 case being_store:
                     storeTry = true;
+                    countData.storeDepositDone();
                     break;
                 case counting_start_request:
-                    // If there are bills in the hoper then it comes here after storing a full escrow
-                    if (countData.isBatch && batchEnd) { //BATCH END
-                        if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                    if (!countData.needToStoreDeposit()) {
+                        // If there are bills in the hoper then it comes here after storing a full escrow
+                        if (countData.isBatch && batchEnd) { //BATCH END
+                            if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                                return;
+                            }
+                            WaitForEmptyEscrow();
+                            gotoNeutral(true, false);
+                            setState(GloryManager.State.IDLE);
                             return;
                         }
-                        WaitForEmptyEscrow();
-                        gotoNeutral(true, false);
-                        setState(GloryManager.State.IDLE);
-                        return;
-                    }
-                    if (storeTry) {
-                        setState(GloryManager.State.IDLE);
-                    }
-                    if (batchCountStart()) { // batch end
-                        batchEnd = true;
+                        if (storeTry) {
+                            setState(GloryManager.State.IDLE);
+                        }
+                        if (batchCountStart()) { // batch end
+                            batchEnd = true;
+                        }
                     }
                     break;
                 case abnormal_device:

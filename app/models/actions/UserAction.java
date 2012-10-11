@@ -18,6 +18,7 @@ import models.db.LgBatch;
 import models.db.LgBill;
 import models.lov.Currency;
 import play.Logger;
+import play.db.jpa.JPABase;
 
 /**
  *
@@ -100,6 +101,14 @@ abstract public class UserAction {
 
         public void clearError() {
             userActionApi.clearError();
+        }
+
+        public void openGate() {
+            userActionApi.openGate();
+        }
+
+        public void closeGate() {
+            userActionApi.closeGate();
         }
     }
 
