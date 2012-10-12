@@ -18,7 +18,6 @@ import models.db.LgBatch;
 import models.db.LgBill;
 import models.lov.Currency;
 import play.Logger;
-import play.db.jpa.JPABase;
 
 /**
  *
