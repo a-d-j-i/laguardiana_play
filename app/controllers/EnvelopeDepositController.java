@@ -7,6 +7,7 @@ import models.actions.EnvelopeDepositAction;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.db.LgEnvelopeContent.EnvelopeContentType;
+import models.db.LgSystemProperty;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -75,7 +76,7 @@ public class EnvelopeDepositController extends Application {
         final public Boolean showReference2 = isProperty("envelope_deposit.show_reference2");
         @CheckWith(FormDepositUserCodeReference.Validate.class)
         public FormDepositUserCodeReference reference1 = new FormDepositUserCodeReference();
-        @Required(message = "validation.required.reference2")
+        //@Required(message = "validation.required.reference2")
         public String reference2 = null;
         @Required(message = "validation.required.envelopeCode")
         public String envelopeCode = null;
@@ -95,7 +96,6 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void start(@Valid FormData formData) {
-        Logger.debug("wizard data %s", formData);
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
@@ -129,6 +129,10 @@ public class EnvelopeDepositController extends Application {
         }
         if (formData == null) {
             formData = new FormData();
+            formData.cashData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
+            formData.checkData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
+            formData.ticketData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
+
         }
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
@@ -146,7 +150,7 @@ public class EnvelopeDepositController extends Application {
             o[2] = Messages.get(ModelFacade.getActionMessage());
             renderJSON(o);
         } else {
-            renderArgs.put("clientCode", getProperty("client_code"));
+            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
             renderArgs.put("formData", ModelFacade.getFormData());
             render();
         }

@@ -5,22 +5,25 @@
 package models.actions.states;
 
 import devices.glory.manager.GloryManager;
-import models.actions.UserAction.StateApi;
+import models.actions.UserAction;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class Canceling extends ActionState {
+public class StoringBillDeposit extends ActionState {
 
-    public Canceling(StateApi stateApi) {
+    final protected boolean escrowDeposit;
+
+    public StoringBillDeposit(UserAction.StateApi stateApi, boolean escrowDeposit) {
         super(stateApi);
+        this.escrowDeposit = escrowDeposit;
     }
 
     @Override
     public String name() {
-        return "CANCELING";
+        return "STORING";
     }
 
     @Override
@@ -28,16 +31,16 @@ public class Canceling extends ActionState {
         super.onGloryEvent(m);
         switch (m.getState()) {
             case IDLE:
-            case CANCELED:
+                stateApi.closeDeposit();
                 stateApi.setState(new Finish(stateApi));
                 break;
-            case CANCELING:
+            case READY_TO_STORE:
+            case COUNTING:
+                stateApi.setState(new IdleBillDeposit(stateApi, escrowDeposit));
+                break;
+            case STORING:
                 break;
             case REMOVE_REJECTED_BILLS:
-                break;
-            case REMOVE_THE_BILLS_FROM_ESCROW:
-                break;
-            case REMOVE_THE_BILLS_FROM_HOPER:
                 break;
             default:
                 Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());

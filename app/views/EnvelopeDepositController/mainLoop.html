@@ -3,7 +3,7 @@
 <section id="depositar_sobre_06">
     <header></header>
     <!-- link volver -->
-    <a href="@{ finish() }" class="boton_top">◄ &{ 'application.back' }</a>
+    <!--    <a href="@{ finish() }" class="boton_top">◄ &{ 'application.back' }</a>-->
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
         <div class="contenido">
@@ -13,7 +13,7 @@
                     #{if ( formData.showReference1 ) }
                     <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
                     #{/if}
-                    #{if ( formData.showReference2 ) }
+                    #{if ( formData.showReference2 && formData.reference2 != "" ) }
                     <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                     #{/if}
                     #{if ( formData.cashData.amount > 0 ) }
@@ -34,7 +34,7 @@
                     <p>&{ 'envelope_deposit.envelope_code' }: ${ formData.envelopeCode }</p>
                     <p>&nbsp;</p>
                     <!-- /resumen de datos -->
-                    <div id="info_message" style="color: green;"> 
+                    <div class="info_message" style="color: green;"> 
                 </li>
             </ul>
         </div>
@@ -47,38 +47,66 @@
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a href="#" class="boton gris">&{ 'application.continue' }</a>
+                        <!--                        <a href="#" class="boton gris">&{ 'application.continue' }</a>-->
                     </div>
                 </li>
             </ul>
         </div>
     </article>
+    <div id="alerta_cancel" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.canceling' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <div id="error_text">
+                    <span>&{ 'application.canceling_detail' }</span>
+                    <span class="info_message" style="color: green;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="alerta_storing" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'counting_page.storing_detail' }</span>
+                <span class="info_message" style="color: green;"></span>
+            </div>
+        </div>
+    </div>
 </section>
 
 
 #{set 'moreScripts'}
+<script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
-    var waiting = false;
-    var lastStatus = false;
-    
-    // Reload the whole messages panel
-    function refresh() {
-        if ( waiting ) {
-            return;
-        }
-        waiting = true;
+
+    doRefresh = function() {
         $.getJSON( '@{mainLoop}', function( data ) {
-            waiting = false;
             var status = data[ 0 ];
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
-                $( '#info_message' ).html(  data[ 2 ] );
-                if ( status == 'IDLE' || status == 'CANCELING' ) {
+                $( '.info_message' ).html(  data[ 2 ] );
+                if ( status == 'TIMEOUT_WARNING' ) {
+                    showAlert( "#alerta_timeout" );
+                } else {
+                    closeAlert( "#alerta_timeout" );
+                }
+                if ( status == 'CANCELING' ) {
+                    showAlert( '#alerta_cancel' );                
+                } else {
+                    closeAlert( "#alerta_cancel" );
+                }
+                if ( status == 'STORING' ) {
+                    showAlert( '#alerta_storing' );                
+                } else {
+                    closeAlert( "#alerta_storing" );    
+                }
+                if ( status == 'IDLE' || status == 'CANCELING' || status == 'STORING' ) {
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
                 } else if ( status == 'READY_TO_STORE' ) {
-                    $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
+//                    $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                 } else if ( status == 'ERROR' ) {
                     window.location.href = "@{Application.counterError()}";
                 } else {          
@@ -86,21 +114,10 @@
                 }
                 lastStatus = status
             }
-            var total = 0;
-            var cnt_total = 0;
-            for( var i = 0 ; i < billData.length; i ++ ) {
-                var nid = '#BTRID_' + billData[ i ].billTypeId;
-                $( nid ).children( '#bill_denomination' ).html( billData[ i ].denomination );
-                $( nid ).children( '#bill_quantity' ).html( billData[ i ].quantity );
-                var t = ( billData[ i ].denomination * billData[ i ].quantity );
-                $( nid ).children( '#bill_total' ).html( t );
-                total += t;
-                cnt_total += billData[ i ].quantity;
-            }
-            $( '#cnt_total' ).html( cnt_total );
-            $( '#total' ).html( total );
+            doneRefresh();
         })
-    }
+    };
+    
     
     $( '#continueButton' ).click( function(event) {
         $.getJSON( '@{accept()}', function( data ) {});
@@ -109,9 +126,6 @@
     $( '#cancelButton' ).click( function(event) {
         $.getJSON( '@{cancel()}', function( data ) {});
     });
-    // Call refresh every 1.5 seconds
-    setInterval(refresh, 500);
-    refresh();
 </script>
 #{/set}
 

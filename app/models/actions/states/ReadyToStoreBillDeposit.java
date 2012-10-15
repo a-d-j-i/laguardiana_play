@@ -4,10 +4,8 @@
  */
 package models.actions.states;
 
-import devices.IoBoard;
 import models.actions.UserAction.StateApi;
 import play.Logger;
-import play.Play;
 
 /**
  *
@@ -15,15 +13,20 @@ import play.Play;
  */
 public class ReadyToStoreBillDeposit extends IdleBillDeposit {
 
-    boolean openGate = false;
+    protected final boolean escrowFull;
 
-    public ReadyToStoreBillDeposit(StateApi stateApi) {
-        super(stateApi);
+    public ReadyToStoreBillDeposit(StateApi stateApi, boolean escrowDeposit, boolean escrowFull) {
+        super(stateApi, escrowDeposit);
+        this.escrowFull = escrowFull;
     }
 
     @Override
     public String name() {
-        return "READY_TO_STORE";
+        if (escrowFull) {
+            return "ESCROW_FULL";
+        } else {
+            return "READY_TO_STORE";
+        }
     }
 
     @Override
@@ -35,11 +38,7 @@ public class ReadyToStoreBillDeposit extends IdleBillDeposit {
         if (!stateApi.store()) {
             Logger.error("startBillDeposit can't cancel glory");
         }
-        acceptNextStep();
-    }
-
-    protected void acceptNextStep() {
-        stateApi.setState(new ReadyToStoreStoring(stateApi));
+        stateApi.setState(new StoringBillDeposit(stateApi, escrowDeposit));
     }
 //    @Override
 //    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {

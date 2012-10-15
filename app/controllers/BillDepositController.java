@@ -4,11 +4,11 @@ import java.util.List;
 import models.Deposit;
 import models.ModelFacade;
 import models.actions.BillDepositAction;
+import models.db.LgSystemProperty;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
 import play.data.validation.CheckWith;
-import play.data.validation.Required;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -43,18 +43,19 @@ public class BillDepositController extends Application {
         final public Boolean showReference2 = isProperty("bill_deposit.show_reference2");
         @CheckWith(FormDepositUserCodeReference.Validate.class)
         public FormDepositUserCodeReference reference1 = new FormDepositUserCodeReference();
-        @Required(message = "validation.required.reference2")
+        //@Required(message = "validation.required.reference2")
         public String reference2 = null;
         @CheckWith(FormCurrency.Validate.class)
         public FormCurrency currency = new FormCurrency();
 
         @Override
         public String toString() {
-            return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + '}';
+            return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + ", currency=" + currency + '}';
         }
     }
 
     public static void start(@Valid FormData formData) throws Throwable {
+
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
@@ -71,6 +72,7 @@ public class BillDepositController extends Application {
         }
         if (formData == null) {
             formData = new FormData();
+            formData.currency.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
         }
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
@@ -89,7 +91,7 @@ public class BillDepositController extends Application {
             o[3] = ModelFacade.getDepositTotal();
             renderJSON(o);
         } else {
-            renderArgs.put("clientCode", getProperty("client_code"));
+            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
             renderArgs.put("billData", ModelFacade.getCurrentCounters());
             renderArgs.put("formData", ModelFacade.getFormData());
             renderArgs.put("totalSum", ModelFacade.getDepositTotal());
@@ -119,11 +121,11 @@ public class BillDepositController extends Application {
             Application.index();
             return;
         }
-        renderArgs.put("clientCode", getProperty("client_code"));
+        renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
         renderArgs.put("formData", formData);
         if (deposit != null) {
             Long total = deposit.getTotal();
-            Logger.debug("deposit : %s %s", deposit.finishDate);
+            Logger.error( "------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>> %s %d", deposit.finishDate, total);
             renderArgs.put("canceled", (deposit.finishDate == null || total <= 0));
             renderArgs.put("depositTotal", total);
             renderArgs.put("depositId", deposit.depositId);

@@ -32,7 +32,7 @@ public class BillDepositAction extends UserAction {
         messageMap.put(GloryManager.State.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
         messageMap.put(GloryManager.State.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
         messageMap.put(GloryManager.State.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
-        messageMap.put(GloryManager.State.CANCELING, "counting_page.canceling");
+        messageMap.put(GloryManager.State.CANCELING, "application.canceling");
         messageMap.put(GloryManager.State.CANCELED, "counting_page.deposit_canceled");
         messageMap.put(GloryManager.State.ERROR, "application.error");
     }
@@ -44,7 +44,7 @@ public class BillDepositAction extends UserAction {
         super(currency, formData, messageMap);
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;
-        state = new IdleBillDeposit(new StateApi());
+        state = new IdleBillDeposit(new StateApi(), false);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class BillDepositAction extends UserAction {
     @Override
     public void finish() {
         Map renderArgs = new HashMap();
-        renderArgs.put("clientCode", LgSystemProperty.getProperty("client_code"));
+        renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE));
         renderArgs.put("formData", formData);
         Deposit deposit = Deposit.findById(getDepositId());
         if (deposit != null && deposit.getTotal() > 0) {

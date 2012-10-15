@@ -1,8 +1,9 @@
 #{extends 'main.html' /}
 #{set title:'Depositar Efectivo' /}
-<section id="depositar_efectivo_03">
+<section id="counterError">
     <header></header>
     <article>
+        <h1 class="">&{ 'application.error' }</h1>
         <div class="contenido">
             <p id="mstatus">ModelFacade status ${ mstatus }</p>
             <p id="merror">ModelFacade error ${ merror }</p>
@@ -10,8 +11,12 @@
             <p id="gerror">Glory Error ${ gError }</p>
             <p id="ierror">IOBoard Status ${ istatus }</p>
             <p id="ierror">IOBoard Error ${ ierror }</p>
+            #{checkPermission resource: 'Application.reset', operation: 'GET'}
             <a class="boton naranja full_width" href="@{Application.counterError(1)}">Reset</a>
+            #{/checkPermission}
+            #{checkPermission resource: 'Application.storingReset', operation: 'GET'}
             <a class="boton naranja full_width" href="@{Application.counterError(2)}">StoringErrorReset</a>
+            #{/checkPermission}
             <!-- datos del deposito -->
             <!-- /datos del deposito -->
         </div>
@@ -30,9 +35,12 @@
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
-                        <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde">&{'main_menu.logout'}</a>
+                        <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde full_width">&{'main_menu.logout'}</a>
                         #{/if}
-                    </div>
+                        #{else}
+                        <a href="@{ Secure.login}" class="boton verde full_width">&{'main_menu.login'}</a>
+                        #{/else}
+                   </div>
                 </li>
             </ul>
         </div>

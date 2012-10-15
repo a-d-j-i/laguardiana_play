@@ -18,10 +18,10 @@ public class GloryManager {
 
         IDLE,
         READY_TO_STORE,
+        STORING,
         ERROR,
         PUT_THE_BILLS_ON_THE_HOPER,
         COUNTING,
-        COUNT_DONE,
         ESCROW_FULL,
         PUT_THE_ENVELOPE_IN_THE_ESCROW,
         INITIALIZING,

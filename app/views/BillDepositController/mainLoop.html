@@ -4,7 +4,7 @@
 <section id="depositar_efectivo_02">
     <header></header>
     <!-- link volver -->
-    <a href="@{cancel()}" class="boton_top">◄ &{ 'application.back' }</a>
+    <!--    <a href="@{cancel()}" class="boton_top">◄ &{ 'application.back' }</a>-->
     <article>
         <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
 
@@ -20,7 +20,7 @@
                         <p>&{ 'counting_page.total_sum' }: <span id="totalSum">${totalSum}</span></p>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
-                        <div id="info_message" style="color: green;"> 
+                        <div class="info_message" style="color: green;"> 
 
                         </div>
                     </div>
@@ -70,7 +70,7 @@
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
                         <!-- link continuar -->
-                        <a id ="continueButton" href="#" class="boton gris">&{ 'application.continue' }</a>
+                        <a id ="continueButton" href="#" class="boton naranja" style="display: none;">&{ 'application.continue' }</a>
                     </div>
                 </li>
             </ul>
@@ -100,47 +100,73 @@
             </div>
         </div>
     </div>
+    <div id="alerta_cancel" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.canceling' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <div id="error_text">
+                    <span>&{ 'application.canceling_detail' }</span>
+                    <span class="info_message" style="color: green;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="alerta_storing" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'counting_page.storing_detail' }</span>
+                    <span class="info_message" style="color: green;"></span>
+            </div>
+        </div>
+    </div>
 </section>
 
+
 #{set 'moreScripts'}
+<script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
-    var waiting = false;
-    var lastStatus = "false";
-    
-    // Reload the whole messages panel
-    function refresh() {
-        if ( waiting ) {
-            return;
-        }
-        waiting = true;
+    doRefresh = function() {
         $.getJSON( '@{mainLoop}', function( data ) {
-            waiting = false;
             
+            $( '.info_message' ).html(  data[ 2 ] );
             var totalSum = data[ 3 ];
             $( '#totalSum' ).html( totalSum );
             
             var status = data[ 0 ];
             if ( status != null && status.toString() != 'null' ) {
                 if ( status == 'TIMEOUT_WARNING' ) {
-                    $("#alerta_timeout").overlay().load();
+                    showAlert( "#alerta_timeout" );
                 } else {
-                    $("#alerta_timeout").overlay().close();
+                    closeAlert( "#alerta_timeout" );
                 }
-                $( '#info_message' ).html(  data[ 2 ] );
-                if ( status == 'IDLE' || status == 'CONTINUE_DEPOSIT' || status == 'CANCELING' ) {
-                } else if ( status == 'ESCROW_FULL_STORING' || status == 'READY_TO_STORE_STORING' ) {
+                if ( status == 'CANCELING' ) {
+                    showAlert( '#alerta_cancel' );                
+                } else {
+                    closeAlert( "#alerta_cancel" );
+                }
+                if ( status == 'STORING' ) {
+                    showAlert( '#alerta_storing' );                
+                } else {
+                    closeAlert( "#alerta_storing" );    
+                }
+                if ( status == 'READY_TO_STORE' ) {
+                    $( '#continueButton' ).show();
+                } else {
+                    $( '#continueButton' ).hide();
+                }
+                
+                if ( status == 'IDLE' || status == 'TIMEOUT_WARNING' || status == 'CANCELING' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' ) {
+                } else if ( status == 'STORING' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
                     if ( lastStatus != status ) {
-                        $("#alerta_escrow_full").overlay().load();
-                        $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
+                        showAlert( "#alerta_escrow_full" );
                     }
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
                 } else if ( status == 'TIMEOUT_WARNING') {
                 } else if ( status == 'COUNTING' ) {
-                } else if ( status == 'READY_TO_STORE' ) {
-                    $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                 } else if ( status == 'ERROR' ) {
                     window.location.href = "@{Application.counterError()}";
                 } else {          
@@ -163,6 +189,8 @@
             }
             $( '#cnt_total' ).html( cnt_total );
             $( '#total' ).html( total );
+            
+            doneRefresh();
         })
     }
     
@@ -173,8 +201,8 @@
     $( '#continueButton' ).click( function(event) {
         if ( lastStatus == 'IDLE' ) {
         } else if ( lastStatus == 'ESCROW_FULL' ) {
-            $("#alerta_escrow_full").overlay().load();
-        } else if ( lastStatus == 'READY_TO_STORE' ) {
+            showAlert( "#alerta_escrow_full" );
+        } else if ( lastStatus == 'READY_TO_STORE' || lastStatus == 'CONTINUE_DEPOSIT' ) {
             $.getJSON( '@{accept()}', function( data ) {});
         } else {
             //alert( "Invalid last status : " + lastStatus );
@@ -183,13 +211,13 @@
     
     
     $( '#alerta_cancelButton' ).click( function(event) {
-        $("#alerta_escrow_full").overlay().close();
+        closeAlert( "#alerta_escrow_full" );
         $.getJSON( '@{cancel()}', function( data ) {});
     });
     
     $( '#alerta_continueButton' ).click( function(event) {
-        $("#alerta_escrow_full").overlay().close();
-        if ( lastStatus == 'IDLE' || lastStatus == 'ESCROW_FULL_STORING' || lastStatus == 'CONTINUE_DEPOSIT'  ) {
+        closeAlert( "#alerta_escrow_full" );
+        if ( lastStatus == 'IDLE' || lastStatus == 'STORING' || lastStatus == 'CONTINUE_DEPOSIT'  ) {
             // waiting the glory.
         } else if ( lastStatus == 'ESCROW_FULL' ) {
             $.getJSON( '@{accept()}', function( data ) {});
@@ -199,18 +227,15 @@
     });
     
     $( '#timeout_cancelButton' ).click( function(event) {
-        $("#alerta_timeout").overlay().close();
+        closeAlert( "#alerta_timeout" );
         $.getJSON( '@{cancel()}', function( data ) {});
     });
     
     $( '#timeout_continueButton' ).click( function(event) {
-        $("#alerta_timeout").overlay().close();
+        closeAlert( "#alerta_timeout" );
         $.getJSON( '@{cancelTimeout()}', function( data ) {});
     });
 
 
-    // Call refresh every 1.5 seconds
-    setInterval(refresh, 500);
-    refresh();
 </script>
 #{/set}

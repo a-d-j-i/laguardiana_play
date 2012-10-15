@@ -448,8 +448,12 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     void sleep() {
+        sleep(500);
+    }
+
+    void sleep(int timems) {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(timems);
         } catch (InterruptedException ex) {
         }
     }

@@ -6,6 +6,7 @@ package validation;
 
 import models.db.LgSystemProperty;
 import models.lov.Currency;
+import play.Logger;
 import play.data.validation.Check;
 
 /**
@@ -29,7 +30,7 @@ public class FormCurrency {
             }
             if (data.value == null) {
                 try {
-                    String dc = LgSystemProperty.getProperty("bill_deposit.default_currency");
+                    String dc = LgSystemProperty.getProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
                     data.value = Integer.parseInt(dc);
                 } catch (NumberFormatException e) {
                     data.value = 1; // Fixed.

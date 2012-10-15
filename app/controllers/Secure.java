@@ -138,7 +138,13 @@ public class Secure extends Controller {
             String[] d = {"success", getOriginalUrl()};
             renderJSON(d);
         } else {
-            redirect(getOriginalUrl());
+            String a = flash.get("authenticated");
+            flash.put("authenticated", "authenticated");
+            if (a != null) {
+                redirect("/");
+            } else {
+                redirect(getOriginalUrl());
+            }
         }
     }
 

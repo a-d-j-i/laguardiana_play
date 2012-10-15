@@ -112,7 +112,7 @@ public class Application extends Controller {
             BillDepositController.FormData formData = new BillDepositController.FormData();
             formData.currency.currency = new Currency();
             formData.currency.currency.textId = "Pesos";
-            args.put("clientCode", getProperty("client_code"));
+            args.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
             args.put("formData", formData);
             args.put("depositTotal", 505);
             args.put("depositId", 12345);
@@ -135,8 +135,17 @@ public class Application extends Controller {
     }
 
     @Util
-    static public String getProperty(String name) {
-        return LgSystemProperty.getProperty(name);
+    static public String getProperty(LgSystemProperty.Types type) {
+        return LgSystemProperty.getProperty(type);
+    }
+
+    @Util
+    static public Integer getIntProperty(LgSystemProperty.Types type) {
+        try {
+            return Integer.parseInt(LgSystemProperty.getProperty(type));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Util

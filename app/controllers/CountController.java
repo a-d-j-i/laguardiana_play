@@ -3,6 +3,7 @@ package controllers;
 import java.util.List;
 import models.ModelFacade;
 import models.actions.CountingAction;
+import models.db.LgSystemProperty;
 import models.lov.Currency;
 import play.Logger;
 import play.data.validation.CheckWith;
@@ -77,7 +78,7 @@ public class CountController extends Application {
             o[2] = Messages.get(ModelFacade.getActionMessage());
             renderJSON(o);
         } else {
-            renderArgs.put("clientCode", getProperty("client_code"));
+            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
             renderArgs.put("billData", ModelFacade.getCurrentCounters());
             renderArgs.put("formData", ModelFacade.getFormData());
             render();

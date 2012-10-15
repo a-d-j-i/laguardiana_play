@@ -779,3 +779,11 @@ table tfoot tr td {
 #separar_dinero_03 .columna_2 {
     text-align: right;
 }
+
+
+
+#counterError .contenido {
+    height: 280px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}

@@ -50,6 +50,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                     break;
                 case escrow_close_request:
                     if (gloryStatus.isEscrowBillPresent()) {
+                        sleep(2000);
                         if (!sendGCommand(new devices.glory.command.CloseEscrow())) {
                             // Ignore the error, could happen if some one takes the envelope quickly.
                         }
@@ -71,6 +72,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
+                        setState(GloryManager.State.STORING);
                     }
                     break;
                 case being_store:

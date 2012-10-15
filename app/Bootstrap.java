@@ -94,7 +94,7 @@ public class Bootstrap extends Job {
                 }
                 l.save();
                 if (min && c.equals(controllers.Application.class)) {
-                    if (!m.getName().equals("index")
+                    if (!m.getName().equals("index") && !m.getName().equals("counterError")
                             && !m.getName().equals("mainMenu")) {
                         continue;
                     }

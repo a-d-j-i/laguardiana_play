@@ -24,9 +24,9 @@
                             #{error 'formData.reference1' /}
 
                             #{ if ( formData.showReference2 ) }
-                            <input name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
-                                   value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if} "
-                                   /> 
+                            <input  autocomplete="off"name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
+                                    /> 
+                            <!--                                   value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if} "-->
                             #{ifError 'formData.reference2'}
                             <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required.reference2' }</label>
                             #{/ifError}
@@ -34,14 +34,14 @@
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
-                        #{ keyboard /}
+                        #{ keyboard useHardwareKeyboard: useHardwareKeyboard /}
                     </li>
                 </ul>
             </div>
         </div>
         <div class="step" id="second" style="display: none">
             <div class="contenido">
-                <input name="second_next" id="second_next" type="hidden" class="link" value="envelope_code">
+                <input  autocomplete="off"name="second_next" id="second_next" type="hidden" class="link" value="envelope_code">
                 <div class="mensaje"><span>&{ 'envelope_deposit.select_contents' }</span></div>
                 <div class="botonera">
                     <ul class="on-2 columns">
@@ -53,9 +53,9 @@
                         <li class="column">
                             <div class="columna">
                                 <a name="documents_link" id="documents_link" href="#" class="boton naranja full_width">&{ 'envelope_deposit.documents' }</a>
-                                <input type="hidden" id="hasDocuments" name="formData.hasDocuments"
-                                       value="#{if ( formData.hasDocuments ) }true#{/if}#{else}false#{/else}"
-                                       />
+                                <input  autocomplete="off"type="hidden" id="hasDocuments" name="formData.hasDocuments"
+                                        value="#{if ( formData.hasDocuments ) }true#{/if}#{else}false#{/else}"
+                                        />
                             </div>
                         </li>
                         <li class="column">
@@ -71,9 +71,9 @@
                         <li class="column">
                             <div class="columna">
                                 <a name="others_link" id="others_link" href="#" class="boton naranja full_width">&{ 'envelope_deposit.others' }</a>
-                                <input type="hidden" id="hasOthers" name="formData.hasOthers" 
-                                       value="#{if ( formData.hasOthers ) }true#{/if}#{else}false#{/else}"
-                                       />
+                                <input  autocomplete="off"type="hidden" id="hasOthers" name="formData.hasOthers" 
+                                        value="#{if ( formData.hasOthers ) }true#{/if}#{else}false#{/else}"
+                                        />
                             </div>
                         </li>
                     </ul>
@@ -82,7 +82,7 @@
         </div>
         <div id="cash" class="step amount_input" style="display: none">
             <div class="contenido">
-                <input name="cash_second" id="cash_second" type="hidden" class="link" value="second">
+                <input  autocomplete="off"name="cash_second" id="cash_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
@@ -91,21 +91,21 @@
                             #{select 'formData.cashData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input name="formData.cashData.amount" id="cashData" value="${formData?.cashData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            <input  autocomplete="off"name="formData.cashData.amount" id="cashData" value="${formData?.cashData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
                             #{ifError 'formData.cashData.amount'}
                             <label for="formData.cashData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.cashData_amount' }</label>
                             #{/ifError}
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
-                        #{ keyboard /}
+                        #{ keyboard useHardwareKeyboard: useHardwareKeyboard /}
                     </li>
                 </ul>
             </div>
         </div>
         <div id="checks" class="step amount_input" style="display: none">
             <div class="contenido">
-                <input name="checks_second" id="checks_second" type="hidden" class="link" value="second">
+                <input  autocomplete="off"name="checks_second" id="checks_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
@@ -114,52 +114,52 @@
                             #{select 'formData.checkData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input name="formData.checkData.amount" id="checkData" value="${formData?.checkData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            <input  autocomplete="off"name="formData.checkData.amount" id="checkData" value="${formData?.checkData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
                             #{ifError 'formData.checkData.amount'}
                             <label for="formData.checkData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.checkData_amount' }</label>
                             #{/ifError}
                         </div>                    
                     </li>
                     <li class="fixed column" style="width: 40%">
-                        #{ keyboard /}
+                        #{ keyboard useHardwareKeyboard: useHardwareKeyboard /}
                     </li>
                 </ul>
             </div>
         </div>
         <div id="tickets" class="step amount_input" style="display: none">
             <div class="contenido">
-                <input name="tickets_second" id="tickets_second" type="hidden" class="link" value="second">
+                <input  autocomplete="off"name="tickets_second" id="tickets_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
-                        <input name="tickets_second" id="cash_second" type="hidden" class="link" value="second">
+                        <input  autocomplete="off"name="tickets_second" id="cash_second" type="hidden" class="link" value="second">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
                             %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.value } }%
                             #{select 'formData.ticketData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input name="formData.ticketData.amount" id="ticketData" value="${formData?.ticketData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            <input  autocomplete="off"name="formData.ticketData.amount" id="ticketData" value="${formData?.ticketData?.amount}" type="text" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
                             #{ifError 'formData.ticketData.amount'}
                             <label for="formData.ticketData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.ticketData_amount' }</label>
                             #{/ifError}         
                         </div>
                     </li>
                     <li class="fixed column" style="width: 40%">
-                        #{ keyboard /}
+                        #{ keyboard useHardwareKeyboard: useHardwareKeyboard /}
                     </li>
                 </ul>
             </div>
         </div>
         <div id="envelope_code" class="step submit_step" style="display: none">
             <div class="contenido">
-                <input name="envelope_code_next" id="envelope_code_next" type="hidden" class="link" value="print_ticket">
+                <input  autocomplete="off"name="envelope_code_next" id="envelope_code_next" type="hidden" class="link" value="print_ticket">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
                         <div class="columna_1">
                             <div class="mensaje"><span>&{ 'envelope_deposit.envelope_code_title' }</span></div>
-                            <input name="formData.envelopeCode" type="text" placeholder="&{ 'envelope_deposit.envelope_code_title' }" class="full_width"
-                                   value="#{if play.mode.isDev() }ENVELOPE CODE TESTVAL#{/if} "
-                                   />
+                            <input  autocomplete="off"name="formData.envelopeCode" type="text" placeholder="&{ 'envelope_deposit.envelope_code_title' }" class="full_width"
+                                    />
+                            <!--                                   value="#{if play.mode.isDev() }ENVELOPE CODE TESTVAL#{/if} "-->
                             #{ifError 'formData.envelopeCode'}
                             <label for="formData.envelopeCode" generated="true" class="error" style="display: inline; ">&{ 'validation.required.envelopeCode' }</label>
                             #{/ifError}
@@ -175,16 +175,16 @@
         <div class="botonera_pie">
             <ul class="columns">
                 <li class="column">
-                    <div class="columna" >
+                    <div class="columna" style="width: 340px;">
                         <!-- link cancelar -->
                         <a href="@{ Application.index() }" class="boton rojo">&{ 'application.cancel' }</a>
                         <!-- /link cancelar -->
                     </div>
                 </li>
                 <li class="column">
-                    <div class="columna">
+                    <div class="columna" >
                         <!-- link continuar -->
-                        <input type="submit" id ="continueButton" href="#" class="boton naranja"/>
+                        <input  autocomplete="off"type="submit"  value="&{ 'application.continue' }" id ="continueButton" class="boton naranja"/>
                     </div>
                 </li>
             </ul>
@@ -214,14 +214,14 @@
             outDuration: 0,
             validationOptions : {
                 rules: {
-                    'formData.reference2' : "required",
+                    //'formData.reference2' : "required",
                     'formData.envelopeCode' : "required",
                     'formData.cashData.amount' : "number",
                     'formData.checkData.amount' : "number",
                     'formData.ticketData.amount' : "number",
                 },
                 messages: {
-                    'formData.reference2': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
+                    //'formData.reference2': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
                     'formData.envelopeCode': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
                     'formData.cashData.amount': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
                     'formData.checkData.amount': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
