@@ -15,11 +15,11 @@ import play.Logger;
  *
  * @author adji
  */
-public class Count extends ManagerCommandAbstract {
+public class CountCommand extends ManagerCommandAbstract {
 
     private final CountData countData;
 
-    public Count(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public CountCommand(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity, Integer currency) {
         super(threadCommandApi);
         countData = new CountData(desiredQuantity, currency);
     }

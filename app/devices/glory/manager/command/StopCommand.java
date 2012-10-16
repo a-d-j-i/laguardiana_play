@@ -11,9 +11,9 @@ import play.Logger;
  *
  * @author adji
  */
-public class Stop extends ManagerCommandAbstract {
+public class StopCommand extends ManagerCommandAbstract {
 
-    public Stop(GloryManager.ThreadCommandApi threadCommandApi) {
+    public StopCommand(GloryManager.ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
 

@@ -12,9 +12,9 @@ import devices.glory.manager.GloryManager.ThreadCommandApi;
  *
  * @author adji
  */
-public class EnvelopeDeposit extends ManagerCommandAbstract {
+public class EnvelopeDepositCommand extends ManagerCommandAbstract {
 
-    public EnvelopeDeposit(ThreadCommandApi threadCommandApi) {
+    public EnvelopeDepositCommand(ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
 

@@ -164,13 +164,13 @@ public class GloryManager {
         public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
-                if (cmd instanceof Count) {
+                if (cmd instanceof CountCommand) {
                     return true;
                 }
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new Count(threadCommandApi, desiredQuantity, currency));
+            return managerControllerApi.sendCommand(new CountCommand(threadCommandApi, desiredQuantity, currency));
         }
 
         public Integer getCurrency() {
@@ -178,10 +178,10 @@ public class GloryManager {
             if (cmd == null) {
                 return null;
             }
-            if (!(cmd instanceof Count)) {
+            if (!(cmd instanceof CountCommand)) {
                 return null;
             }
-            return ((Count) cmd).getCurrency();
+            return ((CountCommand) cmd).getCurrency();
         }
 
         public Map<Integer, Integer> getCurrentQuantity() {
@@ -189,10 +189,10 @@ public class GloryManager {
             if (cmd == null) {
                 return null;
             }
-            if (!(cmd instanceof Count)) {
+            if (!(cmd instanceof CountCommand)) {
                 return null;
             }
-            return ((Count) cmd).getCurrentQuantity();
+            return ((CountCommand) cmd).getCurrentQuantity();
         }
 
         public Map<Integer, Integer> getDesiredQuantity() {
@@ -200,10 +200,10 @@ public class GloryManager {
             if (cmd == null) {
                 return null;
             }
-            if (!(cmd instanceof Count)) {
+            if (!(cmd instanceof CountCommand)) {
                 return null;
             }
-            return ((Count) cmd).getDesiredQuantity();
+            return ((CountCommand) cmd).getDesiredQuantity();
         }
 
         // TODO: Fix this.
@@ -211,10 +211,10 @@ public class GloryManager {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
                 Logger.debug("cancelDeposit executing cancelcount");
-                return managerControllerApi.sendCommand(new CancelCount(threadCommandApi));
+                return managerControllerApi.sendCommand(new CancelCountCommand(threadCommandApi));
             }
             // TODO: One base class
-            if (!(cmd instanceof Count) && !(cmd instanceof EnvelopeDeposit)) {
+            if (!(cmd instanceof CountCommand) && !(cmd instanceof EnvelopeDepositCommand)) {
                 return false;
             }
             cmd.cancel();
@@ -228,8 +228,8 @@ public class GloryManager {
                 return true;
             }
             // TODO: One base class
-            if (cmd instanceof Count) {
-                ((Count) cmd).storeDeposit(sequenceNumber);
+            if (cmd instanceof CountCommand) {
+                ((CountCommand) cmd).storeDeposit(sequenceNumber);
                 return true;
             }
             return false;
@@ -242,8 +242,8 @@ public class GloryManager {
                 return true;
             }
             // TODO: One base class
-            if (cmd instanceof Count) {
-                ((Count) cmd).withdrawDeposit();
+            if (cmd instanceof CountCommand) {
+                ((CountCommand) cmd).withdrawDeposit();
                 return true;
             }
             return false;
@@ -253,20 +253,20 @@ public class GloryManager {
             Logger.debug("envelopeDeposit");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
-                if (cmd instanceof EnvelopeDeposit) {
+                if (cmd instanceof EnvelopeDepositCommand) {
                     return true;
                 }
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new EnvelopeDeposit(threadCommandApi));
+            return managerControllerApi.sendCommand(new EnvelopeDepositCommand(threadCommandApi));
         }
 
         public boolean reset() {
             Logger.debug("reset");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
-                if (cmd instanceof Reset) {
+                if (cmd instanceof ResetCommand) {
                     Logger.debug("reset RUNNING");
                     return true;
                 }
@@ -276,21 +276,21 @@ public class GloryManager {
                 return false;
             }
             Logger.debug("executing reset");
-            return managerControllerApi.sendCommand(new Reset(threadCommandApi));
+            return managerControllerApi.sendCommand(new ResetCommand(threadCommandApi));
         }
 
         public boolean storingErrorReset() {
             Logger.debug("storing error reset");
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
-                if (cmd instanceof StoringErrorReset) {
+                if (cmd instanceof StoringErrorResetCommand) {
                     return true;
                 }
                 cmd.cancel();
                 // still executing
                 return false;
             }
-            return managerControllerApi.sendCommand(new StoringErrorReset(threadCommandApi));
+            return managerControllerApi.sendCommand(new StoringErrorResetCommand(threadCommandApi));
         }
 
         public Status getStatus() {
