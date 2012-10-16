@@ -61,7 +61,8 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     public static JPAQuery findUnprocessed(int appId) {
         return LgDeposit.find(
                 "select d from LgDeposit d where "
-                + "not exists ("
+                + " finishDate is not null "
+                + "and not exists ("
                 + " from LgEvent e, LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
                 + " and d = e.deposit"

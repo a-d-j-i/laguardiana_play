@@ -2,9 +2,15 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import models.BillDeposit;
+import models.EnvelopeDeposit;
+import models.db.LgBill;
 import models.db.LgDeposit;
+import models.db.LgEnvelope;
+import models.db.LgEnvelopeContent;
+import play.Logger;
 import play.mvc.Controller;
 
 public class ReportController extends Controller {
@@ -17,25 +23,67 @@ public class ReportController extends Controller {
         render();
     }
 
+    static public class DepositDataContents {
+
+        final public Integer type;
+        final public Integer amount;
+        final public Integer currency;
+
+        private DepositDataContents(LgEnvelopeContent c) {
+            this.type = c.contentTypeLov;
+            this.amount = c.amount;
+            this.currency = c.unitLov;
+        }
+    }
+
     static public class DepositData {
 
         final public Integer id;
         final public String type;
         final public Long total;
+        final public Integer currency;
         final public Date startDate;
         final public Date finishDate;
+        final List<DepositDataContents> contents;
 
         public DepositData(LgDeposit d) {
-            if (d instanceof BillDeposit) {
-                this.total = ((BillDeposit) d).getTotal();
-                this.type = "Bill";
-            } else {
-                this.total = new Long(0);
-                this.type = "Envelope";
-            }
             this.id = d.depositId;
             this.startDate = d.startDate;
             this.finishDate = d.finishDate;
+            if (d instanceof BillDeposit) {
+                this.type = "Bill";
+                this.contents = null;
+                BillDeposit b = (BillDeposit) d;
+                Iterator<LgBill> i = b.bills.iterator();
+                if (i.hasNext()) {
+                    LgBill lb = i.next();
+                    this.total = b.getTotal();
+                    this.currency = lb.billType.currency;
+                } else {
+                    this.total = null;
+                    this.currency = null;
+                }
+            } else if (d instanceof EnvelopeDeposit) {
+                this.type = "Envelope";
+                EnvelopeDeposit e = (EnvelopeDeposit) d;
+                this.total = null;
+                this.currency = null;
+                this.contents = new ArrayList<DepositDataContents>();
+                Iterator<LgEnvelope> i = e.envelopes.iterator();
+                while (i.hasNext()) {
+                    LgEnvelope le = i.next();
+                    for (LgEnvelopeContent c : le.envelopeContents) {
+                        DepositDataContents cc = new DepositDataContents(c);
+                        contents.add(cc);
+                    }
+                }
+            } else {
+                Logger.error("DepositData Invalid deposit type");
+                this.type = "unknow";
+                this.total = null;
+                this.currency = null;
+                this.contents = null;
+            }
         }
     }
 

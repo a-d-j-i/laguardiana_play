@@ -135,7 +135,7 @@ public class ModelFacade {
                     return;
                 }
                 if (!manager.count(null, numericId)) {
-                    setError(String.format("startBillDeposit can't start glory %s", manager.getStatus().getErrorDetail()));
+                    setError(String.format("count can't start glory %s", manager.getStatus().getErrorDetail()));
                 }
             }
         }
@@ -146,7 +146,7 @@ public class ModelFacade {
 
         public void withdraw() {
             if (!manager.withdrawDeposit()) {
-                setError("startCounting can't withdrawDeposit glory");
+                setError("withdraw can't withdrawDeposit glory");
             }
         }
 
@@ -357,23 +357,6 @@ public class ModelFacade {
         return LgDeposit.findById(currentUserAction.getDepositId());
     }
 
-/*    public static Long getDepositTotal() {
-        if (currentUserAction == null) {
-            Logger.error("getDeposit invalid current User Action");
-            return null;
-        }
-        if (currentUserAction.getDepositId() == null) {
-            Logger.error("getDeposit invalid depositId %d", currentUserAction.getDepositId());
-            return null;
-        }
-        LgDeposit d = LgDeposit.findById(currentUserAction.getDepositId());
-        if (d instanceof BillDeposit) {
-            return ((BillDeposit) d).getTotal();
-        } else {
-            return new Long(0);
-        }
-    }
-*/
     public static void cancel() {
         if (currentUserAction == null) {
             Logger.error("cancel invalid current User Action");

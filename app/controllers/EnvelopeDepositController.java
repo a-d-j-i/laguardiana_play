@@ -116,10 +116,10 @@ public class EnvelopeDepositController extends CounterController {
                 if (formData.ticketData.amount > 0) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.TICKETS, formData.ticketData.amount, formData.ticketData.currency.numericId));
                 }
-                if (formData.hasDocuments != null) {
+                if (formData.hasDocuments != null && formData.hasDocuments) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.DOCUMENTS, null, null));
                 }
-                if (formData.hasOthers != null) {
+                if (formData.hasOthers != null && formData.hasOthers) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
                 }
 

@@ -104,11 +104,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case normal_error_recovery_mode:
                         case deposit:
                         case manual:
-                            if (canSendRemoteCancel()) {
-                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                                    return false;
-                                }
-                            }
+                            sendRemoteCancel();
                         // dont break;
                         case neutral:
                             storingErrorRecovery();
@@ -124,11 +120,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     switch (gloryStatus.getD1Mode()) {
                         case deposit:
                         case manual:
-                            if (canSendRemoteCancel()) {
-                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                                    return false;
-                                }
-                            }
+                            sendRemoteCancel();
                         // dont break;
                         case neutral:
                             if (!sendGloryCommand(new devices.glory.command.SetErrorRecoveryMode())) {
@@ -172,11 +164,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case being_restoration:
                         case waiting_for_an_envelope_to_set:
                             WaitForEmptyEscrow();
-                            if (canSendRemoteCancel()) {
-                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                                    return false;
-                                }
-                            }
+                            sendRemoteCancel();
                             break;
                         case being_recover_from_storing_error:
                             if (storingError) {
@@ -184,29 +172,17 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             } else {
                                 WaitForEmptyEscrow();
                                 setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
-                                if (canSendRemoteCancel()) {
-                                    if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                                        return false;
-                                    }
-                                }
+                                sendRemoteCancel();
                             }
                             break;
                         case counting_start_request:
-                            if (canSendRemoteCancel()) {
-                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                                    return false;
-                                }
-                            }
+                            sendRemoteCancel();
                             break;
                         case counting:
                             // Japaneese hack...
                             break;
                         case waiting:
-                            if (canSendRemoteCancel()) {
-                                if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                                    return false;
-                                }
-                            }
+                            sendRemoteCancel();
                             break;
                         default:
                             setError(GloryManager.Error.APP_ERROR,
@@ -215,10 +191,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     }
                     break;
                 case initial:
-                    if (canSendRemoteCancel()) {
-                        if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                            return false;
-                        }
+                    if (sendRemoteCancel()) {
                         if (gloryStatus.getD1Mode() != GloryStatus.D1Mode.neutral) {
                             setError(GloryManager.Error.APP_ERROR,
                                     String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
@@ -428,7 +401,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 "WaitForEmptyEscrow waiting too much");
     }
 
-    private boolean canSendRemoteCancel() {
+    private boolean sendRemoteCancel() {
         // Under this conditions the remoteCancel command fails.
         if (gloryStatus.isRejectBillPresent()) {
             setState(GloryManager.State.REMOVE_REJECTED_BILLS);
@@ -443,7 +416,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
             case storing_start_request:
                 return false;
             default:
-                return true;
+                if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
+                    Logger.error("Error %s sending cmd : RemoteCancel", gloryStatus.getLastError());
+                    return false;
+                }
+                return sense();
         }
     }
 
