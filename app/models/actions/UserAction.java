@@ -9,13 +9,13 @@ import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.Map;
 import models.Bill;
-import models.Deposit;
-import models.Event;
 import models.ModelFacade.UserActionApi;
 import models.User;
 import models.actions.states.ActionState;
 import models.db.LgBatch;
 import models.db.LgBill;
+import models.db.LgDeposit;
+import models.db.LgEvent;
 import models.lov.Currency;
 import play.Logger;
 
@@ -58,7 +58,7 @@ abstract public class UserAction {
         }
 
         public void addBatchToDeposit() {
-            Deposit deposit = Deposit.findById(currentDepositId);
+            LgDeposit deposit = LgDeposit.findById(currentDepositId);
             LgBatch batch = new LgBatch();
             for (Bill bill : Bill.getBillList(currency.numericId)) {
                 Logger.debug(" -> quantity %d", bill.q);
@@ -71,13 +71,13 @@ abstract public class UserAction {
         }
 
         public void openDeposit() {
-            Deposit d = Deposit.findById(currentDepositId);
+            LgDeposit d = LgDeposit.findById(currentDepositId);
             d.startDate = new Date();
             d.save();
         }
 
         public void closeDeposit() {
-            Deposit d = Deposit.findById(currentDepositId);
+            LgDeposit d = LgDeposit.findById(currentDepositId);
             d.finishDate = new Date();
             d.save();
         }
@@ -162,7 +162,7 @@ abstract public class UserAction {
 
     public void onTimeoutEvent(TimeoutTimer timer) {
         Date currentDate = new Date();
-        Event.save(this, Event.Type.TIMEOUT, currentDate.toString());
+        LgEvent.save(this, LgEvent.Type.TIMEOUT, currentDate.toString());
         state.onTimeoutEvent(timer);
     }
 

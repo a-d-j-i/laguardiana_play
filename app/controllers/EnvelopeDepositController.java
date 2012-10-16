@@ -1,7 +1,7 @@
 package controllers;
 
 import java.util.List;
-import models.Deposit;
+import models.EnvelopeDeposit;
 import models.ModelFacade;
 import models.actions.EnvelopeDepositAction;
 import models.db.LgEnvelope;
@@ -17,12 +17,13 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
+import play.mvc.Router;
 import play.mvc.With;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeReference;
 
 @With(Secure.class)
-public class EnvelopeDepositController extends Application {
+public class EnvelopeDepositController extends CounterController {
 
     @Before
     // currentAction allways valid
@@ -31,14 +32,16 @@ public class EnvelopeDepositController extends Application {
             return;
         }
         String neededAction = ModelFacade.getNeededAction();
-        if (neededAction == null) {
+        String neededController = ModelFacade.getNeededController();
+        if (neededAction == null || neededController == null) {
             if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
+                Logger.debug("wizardFixPage Redirect Application.index");
                 Application.index();
             }
         } else {
-            if (ModelFacade.getNeededController() == null
-                    || !(request.controller.equalsIgnoreCase(ModelFacade.getNeededController()))) {
-                Application.index();
+            if (!(request.controller.equalsIgnoreCase(neededController))) {
+                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
+                redirect(Router.getFullUrl(neededController + "." + neededAction));
             }
         }
     }
@@ -167,7 +170,7 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void finish() {
-        Deposit deposit = ModelFacade.getDeposit();
+        EnvelopeDeposit deposit = (EnvelopeDeposit) ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
 
         renderArgs.put("canceled", (deposit != null && deposit.finishDate == null));

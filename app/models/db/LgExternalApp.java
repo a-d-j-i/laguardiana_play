@@ -12,7 +12,6 @@ public class LgExternalApp extends GenericModel implements java.io.Serializable 
 
     @Id
     @Column( name = "external_app_id", unique = true, nullable = false)
-    @GeneratedValue
     public Integer externalAppId;
     @Column( name = "name", nullable = false, length = 128)
     public String name;

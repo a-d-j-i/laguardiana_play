@@ -5,10 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
-import play.db.jpa.JPABase;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)

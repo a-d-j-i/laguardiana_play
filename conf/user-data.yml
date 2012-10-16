@@ -6,8 +6,16 @@
 # External Application Codes
 #
   db.LgExternalApp(PlayInternalApp):
-    id:             1
+    externalAppId:  1
     name:           PlayInternalApp
+    retryInterval:  -1
+    executionTime:  0000-00-00
+    presicion:      1
+    interval:       -1
+
+  db.LgExternalApp(PlayInternalApp):
+    externalAppId:  2
+    name:           PRDM
     retryInterval:  -1
     executionTime:  0000-00-00
     presicion:      1

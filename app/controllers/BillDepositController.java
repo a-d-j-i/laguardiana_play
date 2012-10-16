@@ -1,7 +1,7 @@
 package controllers;
 
 import java.util.List;
-import models.Deposit;
+import models.BillDeposit;
 import models.ModelFacade;
 import models.actions.BillDepositAction;
 import models.db.LgSystemProperty;
@@ -13,10 +13,11 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
+import play.mvc.Router;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeReference;
 
-public class BillDepositController extends Application {
+public class BillDepositController extends CounterController {
 
     @Before
     // currentAction allways valid
@@ -25,14 +26,16 @@ public class BillDepositController extends Application {
             return;
         }
         String neededAction = ModelFacade.getNeededAction();
-        if (neededAction == null) {
+        String neededController = ModelFacade.getNeededController();
+        if (neededAction == null || neededController == null) {
             if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
+                Logger.debug("wizardFixPage Redirect Application.index");
                 Application.index();
             }
         } else {
-            if (ModelFacade.getNeededController() == null
-                    || !(request.controller.equalsIgnoreCase(ModelFacade.getNeededController()))) {
-                Application.index();
+            if (!(request.controller.equalsIgnoreCase(neededController))) {
+                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
+                redirect(Router.getFullUrl(neededController + "." + neededAction));
             }
         }
     }
@@ -83,18 +86,23 @@ public class BillDepositController extends Application {
     }
 
     public static void mainLoop() {
+        BillDeposit d = (BillDeposit) ModelFacade.getDeposit();
+        Long totalSum = new Long(0);
+        if (d != null) {
+            totalSum = d.getTotal();
+        }
         if (request.isAjax()) {
             Object[] o = new Object[4];
             o[0] = ModelFacade.getState();
             o[1] = ModelFacade.getCurrentCounters();
             o[2] = Messages.get(ModelFacade.getActionMessage());
-            o[3] = ModelFacade.getDepositTotal();
+            o[3] = totalSum;
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
             renderArgs.put("billData", ModelFacade.getCurrentCounters());
             renderArgs.put("formData", ModelFacade.getFormData());
-            renderArgs.put("totalSum", ModelFacade.getDepositTotal());
+            renderArgs.put("totalSum", totalSum);
             render();
         }
     }
@@ -115,7 +123,7 @@ public class BillDepositController extends Application {
     }
 
     public static void finish() {
-        Deposit deposit = ModelFacade.getDeposit();
+        BillDeposit deposit = (BillDeposit) ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
         if (formData == null) {
             Application.index();
@@ -125,7 +133,6 @@ public class BillDepositController extends Application {
         renderArgs.put("formData", formData);
         if (deposit != null) {
             Long total = deposit.getTotal();
-            Logger.error( "------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>> %s %d", deposit.finishDate, total);
             renderArgs.put("canceled", (deposit.finishDate == null || total <= 0));
             renderArgs.put("depositTotal", total);
             renderArgs.put("depositId", deposit.depositId);

@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.print.PrintException;
-import models.Deposit;
+import models.EnvelopeDeposit;
 import models.actions.states.IdleEnvelopeDeposit;
 import models.db.LgEnvelope;
 import models.db.LgSystemProperty;
@@ -54,7 +54,7 @@ public class EnvelopeDepositAction extends UserAction {
 
     @Override
     public void start() {
-        Deposit deposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov);
+        EnvelopeDeposit deposit = new EnvelopeDeposit(Secure.getCurrentUser(), userCode, userCodeLov);
         deposit.addEnvelope(envelope);
         deposit.save();
         currentDepositId = deposit.depositId;
@@ -79,7 +79,7 @@ public class EnvelopeDepositAction extends UserAction {
     @Override
     public void finish() {
         if (currentDepositId != null) {
-            Deposit d = Deposit.findById(currentDepositId);
+            EnvelopeDeposit d = EnvelopeDeposit.findById(currentDepositId);
             if (d != null && d.finishDate != null) {
                 Map renderArgs = new HashMap();
                 renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE));

@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import models.Deposit;
+import models.BillDeposit;
 import models.actions.states.IdleBillDeposit;
 import models.db.LgSystemProperty;
 import models.lov.Currency;
@@ -55,7 +55,7 @@ public class BillDepositAction extends UserAction {
     // TODO: Move to states
     @Override
     public void start() {
-        Deposit deposit = new Deposit(currentUser, userCode, userCodeLov);
+        BillDeposit deposit = new BillDeposit(currentUser, userCode, userCodeLov);
         deposit.startDate = new Date();
         deposit.save();
         currentDepositId = deposit.depositId;
@@ -68,7 +68,7 @@ public class BillDepositAction extends UserAction {
         Map renderArgs = new HashMap();
         renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE));
         renderArgs.put("formData", formData);
-        Deposit deposit = Deposit.findById(getDepositId());
+        BillDeposit deposit = BillDeposit.findById(getDepositId());
         if (deposit != null && deposit.getTotal() > 0) {
             renderArgs.put("depositTotal", deposit.getTotal());
             renderArgs.put("depositId", deposit.depositId);

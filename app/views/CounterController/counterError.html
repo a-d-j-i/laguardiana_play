@@ -12,10 +12,10 @@
             <p id="ierror">IOBoard Status ${ istatus }</p>
             <p id="ierror">IOBoard Error ${ ierror }</p>
             #{checkPermission resource: 'Application.reset', operation: 'GET'}
-            <a class="boton naranja full_width" href="@{Application.counterError(1)}">Reset</a>
+            <a class="boton naranja full_width" href="@{counterError(1)}">Reset</a>
             #{/checkPermission}
             #{checkPermission resource: 'Application.storingReset', operation: 'GET'}
-            <a class="boton naranja full_width" href="@{Application.counterError(2)}">StoringErrorReset</a>
+            <a class="boton naranja full_width" href="@{counterError(2)}">StoringErrorReset</a>
             #{/checkPermission}
             <!-- datos del deposito -->
             <!-- /datos del deposito -->
@@ -25,12 +25,12 @@
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
                     <!-- link cancelar -->
-                    #{if isError }
-                    <a href="@{Application.counterError()}" class="boton gris">Refresh</a>
-                    #{/if}
-                    #{else}
+                    <!--                    #{if isError }
+                                        <a href="@{counterError()}" class="boton gris">Refresh</a>
+                                        #{/if}
+                                        #{else}
+                                        #{/else}-->
                     <a href="@{Application.index()}" class="boton gris">&{ 'main_menu.title' }</a>
-                    #{/else}
                 </li>
                 <li class="fixed column" style="width: 50%">
                     <div class="columna_2">
@@ -40,7 +40,7 @@
                         #{else}
                         <a href="@{ Secure.login}" class="boton verde full_width">&{'main_menu.login'}</a>
                         #{/else}
-                   </div>
+                    </div>
                 </li>
             </ul>
         </div>

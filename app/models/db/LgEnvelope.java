@@ -43,7 +43,6 @@ public class LgEnvelope extends GenericModel implements java.io.Serializable {
                 et = evt.description;
             }
         }
-        return "LgEnvelope{" + "envelopeId=" + envelopeId + ", deposit=" + deposit + ", envelopeTypeLov=" + et + ", envelopeNumber=" + envelopeNumber + ", envelopeContents=" + envelopeContents
-                + '}';
+        return "LgEnvelope{" + "envelopeId=" + envelopeId + ", envelopeTypeLov=" + et + ", envelopeNumber=" + envelopeNumber + '}';
     }
 }

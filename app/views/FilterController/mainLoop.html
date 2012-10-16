@@ -102,7 +102,7 @@
                 } else if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
                 } else if ( status == 'ERROR' ) {
-                    window.location.href = "@{Application.counterError()}";
+                    window.location.href = "@{counterError()}";
                 } else {          
                     alert( "Invalid status : " + status + " last status : " + lastStatus );
                 }

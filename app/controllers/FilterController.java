@@ -11,9 +11,10 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
+import play.mvc.Router;
 import validation.FormCurrency;
 
-public class FilterController extends Application {
+public class FilterController extends CounterController {
 
     @Before
     // currentAction allways valid
@@ -22,14 +23,16 @@ public class FilterController extends Application {
             return;
         }
         String neededAction = ModelFacade.getNeededAction();
-        if (neededAction == null) {
+        String neededController = ModelFacade.getNeededController();
+        if (neededAction == null || neededController == null) {
             if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
+                Logger.debug("wizardFixPage Redirect Application.index");
                 Application.index();
             }
         } else {
-            if (ModelFacade.getNeededController() == null
-                    || !(request.controller.equalsIgnoreCase(ModelFacade.getNeededController()))) {
-                Application.index();
+            if (!(request.controller.equalsIgnoreCase(neededController))) {
+                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
+                redirect(Router.getFullUrl(neededController + "." + neededAction));
             }
         }
     }

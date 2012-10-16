@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
-import models.Event;
 import play.Logger;
 import play.db.jpa.GenericModel;
 
@@ -41,7 +40,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         List<LgBag> bags = LgBag.find("select bg from LgBag bg where bg.withdrawDate is null order by bg.creationDate desc").fetch();
         if (bags == null || bags.isEmpty()) {
             Logger.error("There's no bag where to deposit, creating one!!");
-            Event.save(null, Event.Type.INVALID_BAG, "There is no bag to deposit creating one");
+            LgEvent.save(null, LgEvent.Type.INVALID_BAG, "There is no bag to deposit creating one");
             currentBag = new LgBag("AUTOMATIC_BY_APP");
             currentBag.save();
         } else {
@@ -53,7 +52,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
                     toClose.withdrawDate = new Date();
                     toClose.save();
                     Logger.error("There are more than one open bag, closing the bag %d", toClose.bagId);
-                    Event.save(null, Event.Type.INVALID_BAG, String.format("There are more than one open bag, closing the bag %d", toClose.bagId));
+                    LgEvent.save(null, LgEvent.Type.INVALID_BAG, String.format("There are more than one open bag, closing the bag %d", toClose.bagId));
                 }
             } else {
                 currentBag = bags.get(0);

@@ -168,7 +168,7 @@
                 } else if ( status == 'TIMEOUT_WARNING') {
                 } else if ( status == 'COUNTING' ) {
                 } else if ( status == 'ERROR' ) {
-                    window.location.href = "@{Application.counterError()}";
+                    window.location.href = "@{counterError()}";
                 } else {          
                     alert( "Invalid status : " + status + " last status : " + lastStatus );
                 }
