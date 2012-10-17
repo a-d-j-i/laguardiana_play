@@ -70,17 +70,21 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 + ")", appId);
     }
 
-    public static void process(int appId, int depositId, String resultCode) {
+    public static boolean process(int appId, int depositId, String resultCode) {
         LgDeposit d = LgDeposit.findById(depositId);
+        LgExternalApp ea = LgExternalApp.findById(appId);
+        if (d == null || ea == null) {
+            return false;
+        }
         LgEvent e = new LgEvent(LgEvent.Type.DEPOSIT_EXPORT, String.format("Exporting to app %d", appId));
         e.setDeposit(d);
         e.save();
-        LgExternalApp ea = LgExternalApp.findById(appId);
         LgExternalAppLog el = new LgExternalAppLog(e, resultCode);
         el.successDate = new Date();
         el.setEvent(e);
         el.setExternalApp(ea);
         el.save();
+        return true;
     }
 
     public void addBatch(LgBatch batch) {

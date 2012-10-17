@@ -88,11 +88,11 @@ public class ReportController extends Controller {
     }
 
     public static void processDeposit(Integer depositId) {
-        LgDeposit.process(2, depositId, "DONE");
+        boolean stat = LgDeposit.process(2, depositId, "DONE");
         if (request.format.equalsIgnoreCase("html")) {
             unprocessedDeposits(1);
         } else {
-            renderHtml("DONE");
+            renderHtml(stat ? "DONE" : "ERROR");
         }
     }
 

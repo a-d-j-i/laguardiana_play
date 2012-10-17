@@ -8,6 +8,7 @@ import controllers.Secure;
 import devices.DeviceFactory;
 import devices.glory.manager.GloryManager;
 import java.awt.print.PrinterException;
+import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,7 @@ public class EnvelopeDepositAction extends UserAction {
     @Override
     public void start() {
         EnvelopeDeposit deposit = new EnvelopeDeposit(Secure.getCurrentUser(), userCode, userCodeLov);
+        deposit.startDate = new Date();
         deposit.addEnvelope(envelope);
         deposit.save();
         currentDepositId = deposit.depositId;
