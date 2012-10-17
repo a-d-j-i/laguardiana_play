@@ -66,7 +66,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 + " from LgEvent e, LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
                 + " and d = e.deposit"
-                + " and al.event = e and ea.externalAppId = ?"
+                + " and al.event = e and ea.appId = ?"
                 + ")", appId);
     }
 
