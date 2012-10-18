@@ -20,10 +20,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        if (!gotoNeutral(false, false)) {
-            return;
-        }
-        if (!sendGloryCommand(new devices.glory.command.SetManualMode())) {
+        if (!gotoNeutral(false, false, true)) {
             return;
         }
         if (!waitUntilD1State(GloryStatus.D1Mode.manual)) {
@@ -60,8 +57,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        setState(GloryManager.State.IDLE);
-                        gotoNeutral(true, false);
+                        gotoNeutral(true, false, true);
                         return;
                     }
                     if (!gloryStatus.isEscrowBillPresent()) {
@@ -96,6 +92,6 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
         if (mustCancel()) {
             setState(GloryManager.State.CANCELING);
         }
-        gotoNeutral(true, false);
+        gotoNeutral(true, false, false);
     }
 }

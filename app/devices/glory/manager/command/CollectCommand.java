@@ -11,16 +11,17 @@ import devices.glory.manager.GloryManager.ThreadCommandApi;
  *
  * @author adji
  */
-public class CancelCountCommand extends ManagerCommandAbstract {
+public class CollectCommand extends ManagerCommandAbstract {
 
-    public CancelCountCommand(ThreadCommandApi threadCommandApi) {
+    public CollectCommand(ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
 
     @Override
     public void execute() {
-        setState(GloryManager.State.CANCELING);
-        gotoNeutral(false, false, false);
-        cancel();
+        setState(GloryManager.State.COLLECTING);
+        if (sendGloryCommand(new devices.glory.command.SetCollectMode())) {
+            gotoNeutral(false, false, false);
+        }
     }
 }

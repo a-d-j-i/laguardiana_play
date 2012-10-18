@@ -115,6 +115,6 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     @Override
     public String toString() {
-        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", bag=" + bag + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + '}';
+        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag + '}';
     }
 }

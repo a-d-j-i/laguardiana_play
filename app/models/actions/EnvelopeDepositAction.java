@@ -32,9 +32,6 @@ public class EnvelopeDepositAction extends UserAction {
 
     static {
         messageMap.put(GloryManager.State.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
-        messageMap.put(GloryManager.State.CANCELING, "application.canceling");
-        messageMap.put(GloryManager.State.CANCELED, "counting_page.deposit_canceled");
-        messageMap.put(GloryManager.State.ERROR, "application.error");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;

@@ -7,6 +7,8 @@ package models.actions;
 import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import models.Bill;
 import models.ModelFacade.UserActionApi;
@@ -29,9 +31,24 @@ abstract public class UserAction {
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
     protected User currentUser = null;
-    protected final Map<GloryManager.State, String> messages;
+    protected final Map<GloryManager.State, String> messages = new EnumMap<GloryManager.State, String>(GloryManager.State.class);
     protected ActionState state = null;
     protected Integer currentDepositId = null;
+
+    public UserAction(Currency currency, Object formData, Map<GloryManager.State, String> msgs) {
+        this.formData = formData;
+        this.currency = currency;
+        messages.put(GloryManager.State.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
+        messages.put(GloryManager.State.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
+        messages.put(GloryManager.State.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
+        messages.put(GloryManager.State.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
+        messages.put(GloryManager.State.CANCELING, "application.canceling");
+        messages.put(GloryManager.State.CANCELED, "counting_page.deposit_canceled");
+        messages.put(GloryManager.State.ERROR, "application.error");
+        for (Map.Entry<GloryManager.State, String> m : messages.entrySet()) {
+            messages.put(m.getKey(), m.getValue());
+        }
+    }
 
     public class StateApi {
 
@@ -51,6 +68,10 @@ abstract public class UserAction {
 
         public boolean store() {
             return userActionApi.store(currentDepositId);
+        }
+
+        public void envelopeDeposit() {
+            userActionApi.envelopeDeposit();
         }
 
         public void withdraw() {
@@ -109,12 +130,6 @@ abstract public class UserAction {
         public void closeGate() {
             userActionApi.closeGate();
         }
-    }
-
-    public UserAction(Currency currency, Object formData, Map<GloryManager.State, String> messages) {
-        this.formData = formData;
-        this.messages = messages;
-        this.currency = currency;
     }
 
     public String getStateName() {

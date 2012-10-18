@@ -28,8 +28,9 @@ public class BillDeposit extends LgDeposit {
     public String toString() {
         LgLov uc = this.findUserCodeLov();
         Integer billcount = this.bills.size();
-        return "Deposit by: " + user.toString() + " in: " + bag.toString()
+        return "Bill Deposit by: " + user.toString() 
+                + " CREATION DATE : " + creationDate
                 + " codes:[" + billcount.toString() + ":" + userCode + "/" + uc.toString() + "]"
-                + " TOTAL : " + getTotal() + " FINISH DATE : " + finishDate;
+                + " TOTAL : " + getTotal() + " FINISH DATE : " + finishDate + " in bag: " + bag.toString();
     }
 }

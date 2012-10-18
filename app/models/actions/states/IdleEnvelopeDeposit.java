@@ -36,6 +36,9 @@ public class IdleEnvelopeDeposit extends ActionState {
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
         switch (m.getState()) {
+            case IDLE:
+                stateApi.envelopeDeposit();
+                break;
             case PUT_THE_ENVELOPE_IN_THE_ESCROW:
                 stateApi.setState(new ReadyToStoreEnvelopeDeposit(stateApi));
                 break;

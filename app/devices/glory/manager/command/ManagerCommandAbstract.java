@@ -86,7 +86,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         return (mustCancel.get() || threadCommandApi.mustStop());
     }
 
-    boolean gotoNeutral(boolean openEscrow, boolean storingError) {
+    boolean gotoNeutral(boolean openEscrow, boolean storingError, boolean forceEmptyHoper) {
         for (int i = 0; i < retries && !threadCommandApi.mustStop(); i++) {
             Logger.debug("GOTO NEUTRAL");
             if (!sense()) {
@@ -145,6 +145,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case normal_error_recovery_mode:
                 case storing_error_recovery_mode:
                 case deposit:
+                case collect_mode:
                 case manual:
                     switch (gloryStatus.getSr1Mode()) {
                         case escrow_close: // The escrow is closing... wait.
@@ -176,13 +177,12 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             }
                             break;
                         case counting_start_request:
+                        case being_exchange_the_cassette:
+                        case waiting:
                             sendRemoteCancel();
                             break;
                         case counting:
                             // Japaneese hack...
-                            break;
-                        case waiting:
-                            sendRemoteCancel();
                             break;
                         default:
                             setError(GloryManager.Error.APP_ERROR,
@@ -199,9 +199,20 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     }
                     break;
                 case neutral:
-                    // Wait until bills are from anyware removed.
-                    Logger.debug("GOTO NEUTRAL DONE");
-                    return true;
+                    if (!forceEmptyHoper) {
+                        Logger.debug("GOTO NEUTRAL DONE");
+                        return true;
+                    } else {
+                        if (gloryStatus.isRejectBillPresent()) {
+                            setState(GloryManager.State.REMOVE_REJECTED_BILLS);
+                        } else if (gloryStatus.isHopperBillPresent()) {
+                            setState(GloryManager.State.REMOVE_THE_BILLS_FROM_HOPER);
+                        } else {
+                            Logger.debug("GOTO NEUTRAL DONE");
+                            return true;
+                        }
+                    }
+                    break;
                 default:
                     setError(GloryManager.Error.APP_ERROR,
                             String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name()));
@@ -269,9 +280,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     void storingErrorRecovery() {
-        if (!sendGloryCommand(new devices.glory.command.SetStroringErrorRecoveryMode())) {
-            return;
-        }
         waitUntilD1State(D1Mode.storing_error_recovery_mode);
         if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
             return;
@@ -288,7 +296,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             return;
         }
         waitUntilSR1State(SR1Mode.waiting);
-        gotoNeutral(true, false);
+        gotoNeutral(true, false, true);
     }
 
     boolean waitUntilSR1State(SR1Mode state) {
@@ -346,6 +354,28 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     return false;
                 default:
                     break;
+            }
+            // retry command
+            GloryCommandAbstract cmd = null;
+            switch (state) {
+                case deposit:
+                    cmd = new devices.glory.command.SetDepositMode();
+                    break;
+                case manual:
+                    cmd = new devices.glory.command.SetManualMode();
+                    break;
+                case storing_error_recovery_mode:
+                    cmd = new devices.glory.command.SetStroringErrorRecoveryMode();
+                    break;
+                default:
+                    Logger.error("waitUntilD1State invalid state %s", state.name());
+                    break;
+            }
+
+            if (cmd != null) {
+                if (!sendGCommand(cmd)) {
+                    Logger.error("waitUntilD1State Error %s sending cmd : %s", gloryStatus.getLastError(), cmd.getDescription());
+                }
             }
             sleep();
         }

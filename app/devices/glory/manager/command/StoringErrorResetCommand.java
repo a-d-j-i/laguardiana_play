@@ -20,7 +20,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
     @Override
     public void execute() {
         Logger.debug("StoringErrorReset command");
-        if (gotoNeutral(true, true)) {
+        if (gotoNeutral(true, true, true)) {
             Logger.debug("StoringErrorReset command done");
             clearError(false);
         } else {

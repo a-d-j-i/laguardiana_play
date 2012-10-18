@@ -105,6 +105,15 @@ public class GloryManagerController extends Application {
         index();
     }
 
+    public static void collectBag() throws IOException {
+        if (manager != null) {
+            if (!manager.collect()) {
+                error = "Cant collect";
+            }
+        }
+        index();
+    }
+
     public static void storeDeposit() throws IOException {
         if (manager != null) {
             int sequenceNumber = 1;

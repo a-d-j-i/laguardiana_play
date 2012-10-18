@@ -20,7 +20,7 @@ public class InitCommand extends ManagerCommandAbstract {
     @Override
     public void execute() {
         setState(GloryManager.State.INITIALIZING);
-        gotoNeutral(false, false);
+        gotoNeutral(false, false, false);
         setState(GloryManager.State.IDLE);
     }
 }

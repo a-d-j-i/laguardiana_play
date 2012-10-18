@@ -17,9 +17,10 @@ public class EnvelopeDeposit extends LgDeposit {
     public String toString() {
         LgLov uc = this.findUserCodeLov();
         Integer billcount = this.bills.size();
-        return "Envelope Deposit by: " + user.toString() + " in: " + bag.toString()
+        return "Envelope Deposit by: " + user.toString()
+                + " CREATION DATE : " + creationDate
                 + " codes:[" + billcount.toString() + ":" + userCode + "/" + uc.toString() + "]"
                 + " FINISH DATE : " + finishDate 
-                + " envelopes : " + envelopes;
+                + " envelopes : " + envelopes  + " in bag: " + bag.toString();
     }
 }

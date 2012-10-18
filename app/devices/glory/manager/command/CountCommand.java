@@ -137,15 +137,12 @@ public class CountCommand extends ManagerCommandAbstract {
         setState(GloryManager.State.IDLE);
 
         boolean batchEnd = false;
-        if (!gotoNeutral(false, false)) {
+        if (!gotoNeutral(false, false, false)) {
             // ERROR.
             return;
         }
         Logger.error("CURRENCY %d", countData.currency.byteValue());
         if (!sendGloryCommand(new devices.glory.command.SwitchCurrency(countData.currency.byteValue()))) {
-            return;
-        }
-        if (!sendGloryCommand(new devices.glory.command.SetDepositMode())) {
             return;
         }
         if (!waitUntilD1State(GloryStatus.D1Mode.deposit)) {
@@ -212,7 +209,7 @@ public class CountCommand extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        gotoNeutral(true, false);
+                        gotoNeutral(true, false, true);
                         return;
                     }
                     if (!refreshQuantity()) {
@@ -237,7 +234,7 @@ public class CountCommand extends ManagerCommandAbstract {
                                 return;
                             }
                             WaitForEmptyEscrow();
-                            gotoNeutral(true, false);
+                            gotoNeutral(true, false, true);
                             return;
                         }
                         if (gloryStatus.isRejectFull()) {
@@ -266,8 +263,10 @@ public class CountCommand extends ManagerCommandAbstract {
         }
         if (mustCancel()) {
             setState(GloryManager.State.CANCELING);
+            gotoNeutral(true, false, true);
+        } else {
+            gotoNeutral(true, false, false);
         }
-        gotoNeutral(true, false);
     }
 
     public void storeDeposit(int sequenceNumber) {

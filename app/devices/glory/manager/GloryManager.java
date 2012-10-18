@@ -28,7 +28,7 @@ public class GloryManager {
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
-        CANCELING, CANCELED,;
+        CANCELING, CANCELED, COLLECTING;
     };
 
     static public enum Error {
@@ -260,6 +260,24 @@ public class GloryManager {
                 return false;
             }
             return managerControllerApi.sendCommand(new EnvelopeDepositCommand(threadCommandApi));
+        }
+
+        public boolean collect() {
+            Logger.debug("collect");
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                if (cmd instanceof CollectCommand) {
+                    Logger.debug("collect RUNNING");
+                    return true;
+                }
+                cmd.cancel();
+                // still executing
+                Logger.debug("cmd still executing");
+                return false;
+            }
+            Logger.debug("executing collect");
+            return managerControllerApi.sendCommand(new CollectCommand(threadCommandApi));
+
         }
 
         public boolean reset() {
