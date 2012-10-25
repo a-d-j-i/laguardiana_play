@@ -6,7 +6,6 @@ import java.util.Set;
 import javax.persistence.*;
 import models.db.LgLov.LovCol;
 import models.lov.DepositUserCodeReference;
-import play.Logger;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPABase;
 
