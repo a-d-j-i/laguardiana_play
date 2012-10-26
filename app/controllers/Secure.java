@@ -2,7 +2,9 @@ package controllers;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import models.User;
+import models.db.LgSystemProperty;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -75,6 +77,9 @@ public class Secure extends Controller {
             url = Play.ctxPath + "/";
         }
         renderArgs.put("lastUrl", url);
+        // TODO: Put in some other place.
+        renderArgs.put("useHardwareKeyboard", LgSystemProperty.isProperty("useHardwareKeyboard"));
+
         Logger.error("URL %s", url);
 
 
@@ -143,7 +148,12 @@ public class Secure extends Controller {
             if (a != null) {
                 redirect("/");
             } else {
-                redirect(getOriginalUrl());
+                Map<String, String> m = Router.route("GET", getOriginalUrl());
+                if (checkPermission(m.get("action"), "GET")) {
+                    redirect(getOriginalUrl());
+                } else {
+                    redirect("/");
+                }
             }
         }
     }

@@ -21,3 +21,7 @@
   db.LgSystemProperty(clientCode):
     name:  "client_code"
     value:  "LA Guardiana S.A."
+    
+  db.LgSystemProperty(useHardwareKeyboard):
+    name:  "useHardwareKeyboard"
+    value:  "true"
