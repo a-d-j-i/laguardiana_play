@@ -87,7 +87,7 @@ public class EnvelopeDepositAction extends UserAction {
 
                 try {
                     // Print the ticket.
-                    DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs);
+                    DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs, 60);
                 } catch (Throwable ex) {
                     Logger.debug(ex.getMessage());
                 }

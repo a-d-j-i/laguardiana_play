@@ -1,17 +1,88 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                border: black;
+        	text-align:center;
+            }          
+            #container {
+                margin: 0;
+                padding: 0;
+                width: 70mm;
+                height: 150mm;
+        	margin:0px auto;
+        	text-align:left;
+        	padding:0px;
+        	border:1px dashed #333;
+            }
+
+            th {
+                margin:0;
+                padding:2px;
+            }
+            td,p {
+                margin:0;
+                padding:0;
+            }
+            table {
+                border-collapse:collapse;
+                border-spacing:0;
+            }
+            img {
+                border:0;
+            }
+        </style>
+    </head>
     <body>
-        <h1><b>&{ 'application.thanks' }</b></h1>
-        #{if ( formData.showReference1 ) }
-        <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
-        #{/if}
-        #{if ( formData.showReference2 && formData.reference2 != "" ) }
-        <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
-        #{/if}
-        <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.textId}</p>
-        <p>&{ 'summary.transaction_code' }: ${depositId}</p>
-        <br/>
-        S.E.U.O.
-        <br/>
+        <div id="container">
+            <img src="public/images/logo.gif">
+            <p><b>&{ 'application.thanks' }</b></p>
+            #{if ( formData.showReference1 && formData.reference1 != "" ) }
+            <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+            #{/if}
+            #{if ( formData.showReference2 && formData.reference2 != "" ) }
+            <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+            #{/if}
+            <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.textId}</p>
+            <p>&{ 'summary.transaction_code' }: ${depositId}</p>
+            <br/>
+            <table style="font-size: smaller">
+                <thead>
+                    <tr>
+                        <th>&{ 'counting_page.denomination' }</th>
+                        <th>&{ 'counting_page.quantity' }</th>
+                        <th>&{ 'counting_page.total' }</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- detalle de billetes -->
+                    %{ total = 0; cnt_total = 0;}%
+                    #{list items:billData, as:'b'}
+                    <tr id="BTRID_${b.tid}">
+                        <td id="bill_denomination">${b.d}</td>
+                        <td id="bill_quantity">${b.q}</td>
+                        <td id="bill_total">${b.d  * b.q}</td>
+                        %{ total += b.d  * b.q; cnt_total += b.q }%
+                    </tr>
+                    #{/list}
+                    <!-- /detalle de billetes -->
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td><b>&{ 'counting_page.totals' }</b></td>
+                        <!-- totales -->
+                        <td id ="cnt_total"><b>${ cnt_total }</b></td>
+                        <td id ="total"><b>${ total }</b></td>
+                        <!-- /totales -->
+                    </tr>
+                </tfoot>
+            </table>
+            S.E.U.O.
+            <br/>
+        </div>
     </body>
 </html>

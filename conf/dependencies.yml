@@ -2,3 +2,4 @@
 
 require:
     - play -> crud
+#    - org.xhtmlrenderer -> core-renderer R8

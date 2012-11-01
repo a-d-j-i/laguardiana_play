@@ -1,6 +1,8 @@
 package models;
 
+import java.util.List;
 import javax.persistence.Entity;
+import models.db.LgBill;
 import models.db.LgDeposit;
 import models.db.LgLov;
 import models.db.LgUser;
@@ -24,11 +26,15 @@ public class BillDeposit extends LgDeposit {
         return r;
     }
 
+    public List<Bill> getBillList() {
+        return Bill.getDepositBillList(this);
+    }
+
     @Override
     public String toString() {
         LgLov uc = this.findUserCodeLov();
         Integer billcount = this.bills.size();
-        return "Bill Deposit by: " + user.toString() 
+        return "Bill Deposit by: " + user.toString()
                 + " CREATION DATE : " + creationDate
                 + " codes:[" + billcount.toString() + ":" + userCode + "/" + uc.toString() + "]"
                 + " TOTAL : " + getTotal() + " FINISH DATE : " + finishDate + " in bag: " + bag.toString();

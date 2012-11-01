@@ -83,7 +83,7 @@ counting_page.totals=TOTALES
 
 summary.ticket=Retire su ticket
 summary.total=Monto
-summary.transaction_code=Transaccion.
+summary.transaction_code=Transaccion
 
 envelope_deposit.select_contents=Seleccione los contenidos del sobre
 envelope_deposit.cash=EFECTIVO

@@ -237,13 +237,17 @@ public class CountCommand extends ManagerCommandAbstract {
                             gotoNeutral(true, false, true);
                             return;
                         }
-                        if (gloryStatus.isRejectFull()) {
+                        if (gloryStatus.isRejectBillPresent()) {
                             setState(GloryManager.State.REMOVE_REJECTED_BILLS);
                             break;
                         }
                         if (batchCountStart()) { // batch end
                             batchEnd = true;
                         }
+                    }
+                    if (gloryStatus.isRejectFull()) {
+                        setState(GloryManager.State.REMOVE_REJECTED_BILLS);
+                        break;
                     }
                     break;
                 case abnormal_device:

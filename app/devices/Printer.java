@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Array;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.print.Doc;
@@ -22,19 +23,19 @@ import javax.print.SimpleDoc;
 import javax.print.attribute.Attribute;
 import javax.print.attribute.DocAttributeSet;
 import javax.print.attribute.HashDocAttributeSet;
-import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.PrintServiceAttributeSet;
-import javax.print.attribute.standard.MediaPrintableArea;
 import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.print.event.PrintJobEvent;
 import javax.print.event.PrintJobListener;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import play.Logger;
+import play.Play;
 import play.exceptions.TemplateNotFoundException;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -45,7 +46,11 @@ import play.templates.TemplateLoader;
  */
 public class Printer {
 
+    final boolean TO_PRINTER = true;
+    final int PAGE_WIDTH = 80;
+    final int DEFAULT_PAGE_LEN = 150;
     // TODO: Manage errors.
+
     class MyPrintListener implements PrintJobListener {
 
         public void printDataTransferCompleted(PrintJobEvent pje) {
@@ -84,14 +89,9 @@ public class Printer {
         }
     }
 
-    public void print(String templateName, Map args) throws PrinterException, PrintException {
-        print(templateName, args, 0);
-
-    }
-
     public void print(String templateName, Map args, int paperLen) throws PrinterException, PrintException {
         if (paperLen <= 0) {
-            paperLen = 60;
+            paperLen = DEFAULT_PAGE_LEN;
         }
         Template template = null;
         try {
@@ -102,12 +102,17 @@ public class Printer {
             template = TemplateLoader.load("Printer/" + templateName + ".txt");
         }
         String body = template.render(args);
-        Logger.debug("PRINT : %s", body);
+        //Logger.debug("PRINT : %s", body);
 
         //HTMLEditorKit kit = new HTMLEditorKit();
         HTMLEditorKit kit = new LargeHTMLEditorKit();
 
         HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
+        try {
+            doc.setBase(Play.applicationPath.toURI().toURL());
+        } catch (MalformedURLException ex) {
+            throw new PrinterException(ex.getMessage());
+        }
         Reader fin = new StringReader(body);
         try {
             kit.read(fin, doc, 0);
@@ -120,12 +125,12 @@ public class Printer {
 
         JEditorPane item = new JEditorPane();
         item.setEditorKit(kit);
-        item.getDocument().putProperty("ZOOM_FACTOR", new Double(1.5));
+//        item.getDocument().putProperty("ZOOM_FACTOR", new Double(1.5));
         item.setDocument(doc);
         item.setEditable(false);
 
 
-        PrintRequestAttributeSet attrs = new HashPrintRequestAttributeSet();
+        //PrintRequestAttributeSet attrs = new HashPrintRequestAttributeSet();
         // http://docs.oracle.com/javase/1.4.2/docs/api/javax/print/attribute/PrintRequestAttribute.html
         //attrs.add(new Copies(1));
         //attrs.add(Sides.ONE_SIDED);
@@ -144,12 +149,20 @@ public class Printer {
             HashDocAttributeSet attrc = new HashDocAttributeSet();
             //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 30, MediaPrintableArea.MM));
             attrc.add(OrientationRequested.PORTRAIT);
-            attrc.add(MediaSize.findMedia((float) 80, (float) paperLen, MediaSize.MM));
+            attrc.add(MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM));
             //attrc.add(MediaSize.findMedia((float) 80, (float) 160, MediaSize.MM));
             //addMediaSizeByName(p, attrc, "80mm * 160mm");
             Doc docc = new SimpleDoc(item.getPrintable(null, null), DocFlavor.SERVICE_FORMATTED.PRINTABLE, attrc);
             printJob.addPrintJobListener(new MyPrintListener());
-            printJob.print(docc, null);
+            if (TO_PRINTER) {
+                printJob.print(docc, null);
+            } else {
+                JFrame frame = new JFrame("Main print frame");
+                frame.getContentPane().add(item);
+                frame.setSize((int) (4.1 * PAGE_WIDTH), (int) (4.1 * paperLen));
+                frame.pack();
+                frame.setVisible(true);
+            }
 
 
             /*            attrs.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 160, MediaPrintableArea.MM));
@@ -161,8 +174,6 @@ public class Printer {
             //item.print(null, null, false, p, attrs, false);
         } else {
             throw new PrinterException(String.format("Printer %s not found", port));
-
-
         }
     }
 

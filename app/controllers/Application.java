@@ -1,11 +1,9 @@
 package controllers;
 
 import devices.DeviceFactory;
-import devices.IoBoard;
-import devices.glory.manager.GloryManager;
-import java.util.HashMap;
-import java.util.Map;
-import models.ModelFacade;
+import java.util.List;
+import models.Bill;
+import models.BillDeposit;
 import models.db.LgSystemProperty;
 import models.lov.Currency;
 import play.Logger;
@@ -29,6 +27,7 @@ public class Application extends Controller {
     public static void hardwareMenu() {
         render();
     }
+
     public static void printersMenu() {
         render();
     }
@@ -36,25 +35,30 @@ public class Application extends Controller {
     public static void printTemplate() {
         try {
             DeviceFactory.getPrinter().printAttributes();
-            Map args = new HashMap();
+   
             BillDepositController.FormData formData = new BillDepositController.FormData();
             formData.currency.currency = new Currency();
             formData.currency.currency.textId = "Pesos";
-            args.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE));
-            args.put("formData", formData);
-            args.put("depositTotal", 505);
-            args.put("depositId", 12345);
-            // Print the ticket.
-//            DeviceFactory.getPrinter().print("envelopeDeposit_start", args);
-//            DeviceFactory.getPrinter().print("envelopeDeposit_finish", args);
-            DeviceFactory.getPrinter().print("billDeposit", args);
+            renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE));
+            renderArgs.put("formData", formData);
 
-            /*renderArgs.put("testarg", "ADJI");
-             DeviceFactory.getPrinter().print("test", renderArgs);*/
+            int depositId = 1013;
+            BillDeposit deposit = BillDeposit.findById(depositId);
+            List<Bill> bl = deposit.getBillList();
+            renderArgs.put("billData", bl);
+            renderArgs.put("depositTotal", deposit.getTotal());
+            renderArgs.put("depositId", deposit.depositId);
+            // Print the ticket.
+//            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs);
+//            DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs);
+            DeviceFactory.getPrinter().print("billDeposit", renderArgs.data, 150);
+
+
         } catch (Throwable ex) {
             Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }
-        redirect("Application.otherMenu");
+        //render( "Printer/billDeposit.html");
+        redirect("Application.printersMenu");
     }
 
     public static void listPrinters() {

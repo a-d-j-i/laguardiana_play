@@ -63,11 +63,12 @@ public class BillDepositAction extends UserAction {
         renderArgs.put("formData", formData);
         BillDeposit deposit = BillDeposit.findById(getDepositId());
         if (deposit != null && deposit.getTotal() > 0) {
+            renderArgs.put("billData", deposit.getBillList());
             renderArgs.put("depositTotal", deposit.getTotal());
             renderArgs.put("depositId", deposit.depositId);
             try {
                 // Print the ticket.
-                DeviceFactory.getPrinter().print("billDeposit", renderArgs);
+                DeviceFactory.getPrinter().print("billDeposit", renderArgs, 150);
             } catch (Throwable ex) {
                 Logger.debug(ex.getMessage());
             }
