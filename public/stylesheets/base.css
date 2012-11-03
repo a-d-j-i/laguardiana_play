@@ -34,9 +34,10 @@ a {
 /* layout */
 
 section {
-    width: 800px;
+    width: 100%; /*800px;*/
     height: 600px;
     background: url('../gfx/fondo.png');
+    background-size: 100% 600px;
     margin: 0 auto;
     position: relative;
 }
@@ -782,8 +783,33 @@ table tfoot tr td {
 
 
 
-#counterError .contenido {
-    height: 280px;
+/* General adji */
+
+
+.botonera {
+    height: 150px;
     overflow: hidden;
-    margin-bottom: 20px;
 }
+
+.botonera .columna {
+    padding: 0 10px;
+}
+
+.botonera .columna a {
+    margin-bottom: 30px;
+}
+
+hr {
+    margin: 35px 0;
+}
+
+.botonera_pie .columna {
+    padding: 0 10px;
+}
+
+.botonera_pie .columna a {
+    margin-right: 20px;
+}
+
+
+
