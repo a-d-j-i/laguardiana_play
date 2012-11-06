@@ -33,6 +33,10 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         this.creationDate = new Date();
     }
 
+    public static JPAQuery findUnprocessed() {
+        return LgDeposit.find("select b from LgBag b");
+    }
+
     // TODO: Search for the bag that has withdraw data null.
     // Or add a new bug logging the error.
     public static LgBag getCurrentBag() {

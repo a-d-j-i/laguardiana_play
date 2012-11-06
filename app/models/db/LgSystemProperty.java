@@ -10,7 +10,9 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
     public enum Types {
 
         DEFAULT_CURRENCY,
-        CLIENT_CODE,;
+        CLIENT_CODE,
+        MACHINE_CODE,
+        MACHINE_DESCRIPTION;
 
         public String getTypeName() {
             return name().toLowerCase();
