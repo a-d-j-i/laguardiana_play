@@ -19,7 +19,7 @@ public class GloryStatus implements Serializable {
 
     public enum D1Mode {
 
-        unknown( 0xff ), neutral( 0 ), initial( 1 ), deposit( 2 ), manual( 3 ), normal_error_recovery_mode( 4 ), storing_error_recovery_mode( 5 ), correct_mode( 6 );
+        unknown( 0xff ), neutral( 0 ), initial( 1 ), deposit( 2 ), manual( 3 ), normal_error_recovery_mode( 4 ), storing_error_recovery_mode( 5 ), collect_mode( 6 );
         private final byte m;
 
         D1Mode( int m ) {

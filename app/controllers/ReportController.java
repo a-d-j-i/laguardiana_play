@@ -1,0 +1,231 @@
+package controllers;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import models.Bill;
+import models.BillDeposit;
+import models.EnvelopeDeposit;
+import models.db.LgBag;
+import models.db.LgBillType;
+import models.db.LgDeposit;
+import models.db.LgEnvelope;
+import models.db.LgEnvelopeContent;
+import models.db.LgSystemProperty;
+import models.lov.Currency;
+import play.Logger;
+import play.mvc.Controller;
+
+public class ReportController extends Controller {
+
+    public static void index() {
+        mainMenu();
+    }
+
+    public static void mainMenu() {
+        render();
+    }
+
+    static public class ContentData {
+    }
+
+    static public class BillContentData extends ContentData {
+
+        final public String billType;
+        final public Integer denomination;
+        final public Integer quantity;
+
+        public BillContentData(String billType, Integer denomination, Integer quantity) {
+            this.billType = billType;
+            this.denomination = denomination;
+            this.quantity = quantity;
+        }
+    }
+
+    static public class EnvelopeContentData extends ContentData {
+
+        final public String type;
+        final public Integer amount;
+        final public String currency;
+
+        private EnvelopeContentData(LgEnvelopeContent c) {
+            this.type = LgEnvelopeContent.EnvelopeContentType.find(c.contentTypeLov).name();
+            this.amount = c.amount;
+            if (c.unitLov == null) {
+                this.currency = "-";
+            } else {
+                this.currency = Currency.findByNumericId(c.unitLov).textId;
+            }
+        }
+    }
+
+    static public class DepositData {
+
+        final public Integer id;
+        final public Integer type;
+        final public Integer bag_id;
+        final public String user_id;
+        final public Date startDate;
+        final public Date finishDate;
+
+        public DepositData(LgDeposit d, Integer type) {
+            this.type = type;
+            this.id = d.depositId;
+            this.bag_id = d.bag.bagId;
+            this.user_id = d.user.externalId;
+            this.startDate = d.startDate;
+            this.finishDate = d.finishDate;
+        }
+    }
+
+    static public class BillDepositData extends DepositData {
+
+        public List<BillContentData> contents = new ArrayList<BillContentData>();
+
+        public BillDepositData(BillDeposit d) {
+            super(d, 0);
+            List qret = Bill.getDepositContent(d);
+
+            for (Object b : qret) {
+                Object[] a = (Object[]) b;
+                Long quantity = (Long) a[ 1];
+
+                LgBillType bt = (LgBillType) a[0];
+                BillContentData bdc = new BillContentData(Currency.findByNumericId(bt.unitLov).textId,
+                        bt.denomination.intValue(), quantity.intValue());
+                contents.add(bdc);
+            }
+        }
+    }
+
+    static public class EnvelopeDepositData extends DepositData {
+
+        final public Integer envelopeCode;
+        public List<EnvelopeContentData> contents = new ArrayList<EnvelopeContentData>();
+
+        public EnvelopeDepositData(EnvelopeDeposit d) {
+            super(d, 1);
+            this.envelopeCode = d.userCodeLov;
+            for (LgEnvelope le : d.envelopes) {
+                for (LgEnvelopeContent c : le.envelopeContents) {
+                    EnvelopeContentData cc = new EnvelopeContentData(c);
+                    contents.add(cc);
+                }
+            }
+        }
+    }
+
+    public static void processDeposit(Integer depositId) {
+        boolean stat = LgDeposit.process(2, depositId, "DONE");
+        if (request.format.equalsIgnoreCase("html")) {
+            unprocessedDeposits(1);
+        } else {
+            renderHtml(stat ? "DONE" : "ERROR");
+        }
+    }
+
+    static public class UnprocessedDeposits {
+
+        final public String clientCode = LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE);
+        final public String branchCode = LgSystemProperty.getProperty(LgSystemProperty.Types.BRANCH_CODE);
+        final public String machineCode = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_CODE);
+        final public String machineDescription = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
+        public List<DepositData> depositData;
+    }
+
+    public static void unprocessedDeposits(Integer page) {
+        if (request.format.equalsIgnoreCase("html")) {
+            if (page == null || page < 1) {
+                page = 1;
+            }
+            int length = 4;
+            List<LgDeposit> depositList = LgDeposit.findUnprocessed(2).fetch(page, length);
+            if (page > 1) {
+                renderArgs.put("prevPage", page - 1);
+            } else {
+                renderArgs.put("prevPage", 1);
+            }
+            if (depositList.size() == length) {
+                renderArgs.put("nextPage", page + 1);
+            } else {
+                renderArgs.put("nextPage", page);
+            }
+            renderArgs.put("data", depositList);
+            render();
+            return;
+        }
+        List<LgDeposit> depositList = LgDeposit.findUnprocessed(2).fetch();
+        UnprocessedDeposits ret = new UnprocessedDeposits();
+        ret.depositData = new ArrayList<DepositData>(depositList.size());
+        for (LgDeposit d : depositList) {
+            if (d instanceof BillDeposit) {
+                ret.depositData.add(new BillDepositData((BillDeposit) d));
+            } else if (d instanceof EnvelopeDeposit) {
+                ret.depositData.add(new EnvelopeDepositData((EnvelopeDeposit) d));
+            } else {
+                Logger.error("Invalid deposit type");
+            }
+        }
+        if (request.format.equalsIgnoreCase("xml")) {
+            renderXml(ret);
+        } else {
+            renderJSON(ret);
+        }
+    }
+
+    static public class BagData {
+
+        public Integer bagId;
+        public Date creationDate;
+        public Date withdrawDate;
+
+        private BagData(LgBag b) {
+            this.bagId = b.bagId;
+            this.creationDate = b.creationDate;
+            this.withdrawDate = b.withdrawDate;
+        }
+    }
+
+    static public class BagList {
+
+        final public String clientCode = LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE);
+        final public String branchCode = LgSystemProperty.getProperty(LgSystemProperty.Types.BRANCH_CODE);
+        final public String machineCode = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_CODE);
+        final public String machineDescription = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
+        public List<BagData> bagData;
+    }
+
+    public static void bagList(Integer page) {
+        if (request.format.equalsIgnoreCase("html")) {
+            if (page == null || page < 1) {
+                page = 1;
+            }
+            int length = 4;
+            List<LgBag> bagList = LgBag.findUnprocessed().fetch(page, length);
+            if (page > 1) {
+                renderArgs.put("prevPage", page - 1);
+            } else {
+                renderArgs.put("prevPage", 1);
+            }
+            if (bagList.size() == length) {
+                renderArgs.put("nextPage", page + 1);
+            } else {
+                renderArgs.put("nextPage", page);
+            }
+            renderArgs.put("data", bagList);
+            render();
+            return;
+        }
+        List<LgBag> bagList = LgBag.findUnprocessed().fetch();
+        BagList ret = new BagList();
+        ret.bagData = new ArrayList<BagData>(bagList.size());
+        for (LgBag b : bagList) {
+            ret.bagData.add(new BagData(b));
+        }
+        if (request.format.equalsIgnoreCase("xml")) {
+            renderXml(ret);
+        } else {
+            renderJSON(ret);
+        }
+    }
+}

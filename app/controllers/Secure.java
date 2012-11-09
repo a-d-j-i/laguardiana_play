@@ -2,7 +2,9 @@ package controllers;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import models.User;
+import models.db.LgSystemProperty;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -55,7 +57,7 @@ public class Secure extends Controller {
 
     public static boolean checkPermission(String resource, String operation) {
         if (Play.mode.isDev() && Play.configuration.getProperty("secure.allowAll") != null) {
-            //Logger.info("IN DEV MODE ALL ALLOWED!!!");
+            Logger.info("IN DEV MODE ALL ALLOWED!!!");
             return true;
         }
         User user = Cache.get(session.getId() + "-user", User.class);
@@ -75,6 +77,9 @@ public class Secure extends Controller {
             url = Play.ctxPath + "/";
         }
         renderArgs.put("lastUrl", url);
+        // TODO: Put in some other place.
+        renderArgs.put("useHardwareKeyboard", LgSystemProperty.isProperty("useHardwareKeyboard"));
+
         Logger.error("URL %s", url);
 
 
@@ -83,8 +88,7 @@ public class Secure extends Controller {
         render();
     }
 
-    public static void authenticate(@Required String username, String password,
-            boolean remember, String cancel) throws Throwable {
+    public static void authenticate(@Required String username, @Required String password, boolean remember) throws Throwable {
         // The keyboard only types uppercase.
         if (password != null) {
             password = password.toLowerCase();
@@ -96,12 +100,11 @@ public class Secure extends Controller {
         if (Validation.hasErrors()) {
             Logger.info("validation hasErrors!!!");
             for (Error error : validation.errors()) {
-                Logger.error("    %s", error.message());
+                Logger.error("%s    %s", error.message(), error.getKey());
             }
             flash.keep("url");
             flash.error("secure.invalid_field");
             params.flash();
-            validation.keep(); // keep the errors for the next request
             if (request.isAjax()) {
                 String[] d = {"error", Messages.get("secure.invalid_field")};
                 renderJSON(d);
@@ -140,7 +143,18 @@ public class Secure extends Controller {
             String[] d = {"success", getOriginalUrl()};
             renderJSON(d);
         } else {
-            redirect(getOriginalUrl());
+            String a = flash.get("authenticated");
+            flash.put("authenticated", "authenticated");
+            if (a != null) {
+                redirect("/");
+            } else {
+                Map<String, String> m = Router.route("GET", getOriginalUrl());
+                if (checkPermission(m.get("action"), "GET")) {
+                    redirect(getOriginalUrl());
+                } else {
+                    redirect("/");
+                }
+            }
         }
     }
 

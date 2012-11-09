@@ -15,11 +15,11 @@ import play.Logger;
  *
  * @author adji
  */
-public class Count extends ManagerCommandAbstract {
+public class CountCommand extends ManagerCommandAbstract {
 
     private final CountData countData;
 
-    public Count(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public CountCommand(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity, Integer currency) {
         super(threadCommandApi);
         countData = new CountData(desiredQuantity, currency);
     }
@@ -137,15 +137,12 @@ public class Count extends ManagerCommandAbstract {
         setState(GloryManager.State.IDLE);
 
         boolean batchEnd = false;
-        if (!gotoNeutral(false, false)) {
+        if (!gotoNeutral(false, false, false)) {
             // ERROR.
             return;
         }
         Logger.error("CURRENCY %d", countData.currency.byteValue());
         if (!sendGloryCommand(new devices.glory.command.SwitchCurrency(countData.currency.byteValue()))) {
-            return;
-        }
-        if (!sendGloryCommand(new devices.glory.command.SetDepositMode())) {
             return;
         }
         if (!waitUntilD1State(GloryStatus.D1Mode.deposit)) {
@@ -160,10 +157,16 @@ public class Count extends ManagerCommandAbstract {
             switch (gloryStatus.getSr1Mode()) {
                 case storing_start_request:
                     if (countData.needToStoreDeposit()) {
-                        countData.storeDepositDone();
+                        if (!refreshQuantity()) {
+                            String error = gloryStatus.getLastError();
+                            Logger.error("Error %s sending cmd : CountingDataRequest", error);
+                            setError(GloryManager.Error.APP_ERROR, error);
+                            return;
+                        }
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
+                        setState(GloryManager.State.STORING);
                         break;
                     } else if (countData.needToWithdrawDeposit()) {
                         countData.withdrawDepositDone();
@@ -190,25 +193,29 @@ public class Count extends ManagerCommandAbstract {
                         }
                         setState(GloryManager.State.READY_TO_STORE);
                     }
-                    if (!refreshCurrentQuantity()) {
+                    if (!refreshQuantity()) {
+                        String error = gloryStatus.getLastError();
+                        Logger.error("Error %s sending cmd : CountingDataRequest", error);
+                        setError(GloryManager.Error.APP_ERROR, error);
                         return;
                     }
                     break;
                 case counting:
                     setState(GloryManager.State.COUNTING);
                     // The second time after storing.
-                    if (!refreshCurrentQuantity()) {
-                        return;
-                    }
+                    // Ignore error.
+                    refreshQuantity();
                     break;
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        gotoNeutral(true, false);
-                        setState(GloryManager.State.COUNT_DONE);
+                        gotoNeutral(true, false, true);
                         return;
                     }
-                    if (!refreshCurrentQuantity()) {
+                    if (!refreshQuantity()) {
+                        String error = gloryStatus.getLastError();
+                        Logger.error("Error %s sending cmd : CountingDataRequest", error);
+                        setError(GloryManager.Error.APP_ERROR, error);
                         return;
                     }
                     if (!gloryStatus.isHopperBillPresent()) {
@@ -217,23 +224,30 @@ public class Count extends ManagerCommandAbstract {
                     break;
                 case being_store:
                     storeTry = true;
+                    countData.storeDepositDone();
                     break;
                 case counting_start_request:
-                    // If there are bills in the hoper then it comes here after storing a full escrow
-                    if (countData.isBatch && batchEnd) { //BATCH END
-                        if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                    if (!countData.needToStoreDeposit()) {
+                        // If there are bills in the hoper then it comes here after storing a full escrow
+                        if (countData.isBatch && batchEnd) { //BATCH END
+                            if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                                return;
+                            }
+                            WaitForEmptyEscrow();
+                            gotoNeutral(true, false, true);
                             return;
                         }
-                        WaitForEmptyEscrow();
-                        gotoNeutral(true, false);
-                        setState(GloryManager.State.IDLE);
-                        return;
+                        if (gloryStatus.isRejectBillPresent()) {
+                            setState(GloryManager.State.REMOVE_REJECTED_BILLS);
+                            break;
+                        }
+                        if (batchCountStart()) { // batch end
+                            batchEnd = true;
+                        }
                     }
-                    if (storeTry) {
-                        setState(GloryManager.State.IDLE);
-                    }
-                    if (batchCountStart()) { // batch end
-                        batchEnd = true;
+                    if (gloryStatus.isRejectFull()) {
+                        setState(GloryManager.State.REMOVE_REJECTED_BILLS);
+                        break;
                     }
                     break;
                 case abnormal_device:
@@ -253,8 +267,10 @@ public class Count extends ManagerCommandAbstract {
         }
         if (mustCancel()) {
             setState(GloryManager.State.CANCELING);
+            gotoNeutral(true, false, true);
+        } else {
+            gotoNeutral(true, false, false);
         }
-        gotoNeutral(true, false);
     }
 
     public void storeDeposit(int sequenceNumber) {
@@ -329,11 +345,8 @@ public class Count extends ManagerCommandAbstract {
         return true;
     }
 
-    private boolean refreshCurrentQuantity() {
+    private boolean refreshQuantity() {
         if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
-            String error = gloryStatus.getLastError();
-            Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            setError(GloryManager.Error.APP_ERROR, error);
             return false;
         }
         Map<Integer, Integer> bills = gloryStatus.getBills();

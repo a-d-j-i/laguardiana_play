@@ -6,7 +6,7 @@
     <article>
         <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
         <ul class="columns">
-            #{form @start(formData), 'id' : 'startForm' }
+            #{form @start(), 'id' : 'startForm' }
             #{ifErrors}
             <p class="error">
                 All fields are required!
@@ -27,9 +27,9 @@
                     #{error 'formData.reference1' /}
 
                     #{ if ( formData.showReference2 ) }
-                    <input id="reference2_input" name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
-                           value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if}"
+                     <input  autocomplete="off"id="reference2_input" name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
                            /> 
+<!--                           value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if}"-->
                     #{ifError 'formData.reference2'}
                     <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required.reference2' }</label>
                     #{/ifError}
@@ -39,11 +39,9 @@
                 </div>
             </li>
             <li class="fixed column" style="width: 40%">
-                #{ keyboard /}
+                #{ keyboard useHardwareKeyboard: useHardwareKeyboard /}
                 <!-- link accion -->
-                <a id ="startCountingButton" href="#" 
-                   class="boton #{if play.mode.isDev() }naranja#{/if}#{else}gris#{/else}"
-                   >&{ 'application.start_counting' }</a>
+                <a id ="startCountingButton" href="#" class="boton naranja">&{ 'application.start_counting' }</a>
             </li>
             #{/form}
         </ul>
@@ -56,13 +54,13 @@
 #{script 'jquery/jquery.validate.js' /}
 <script type="text/javascript" charset="${_response_encoding}">
     
-    $( '#reference2_input' ).keyup( function(event) {
+/*    $( '#reference2_input' ).keyup( function(event) {
         if ( $( this ).val() ) {
             $( '#startCountingButton' ).removeClass( 'gris' ).addClass( 'naranja' );
         } else {
             $( '#startCountingButton' ).removeClass( 'naranja' ).addClass( 'gris' );
         }
-    } );
+    } );*/
     $( '#startCountingButton' ).click( function(event) {
         //        $("#startForm").validate( {
         //            errorPlacement: function(error, element) {
@@ -80,9 +78,9 @@
         //                'formData.reference2': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
         //            }
         //        });
-        if ( $( '#reference2_input' ).val() ) {
+        //if ( $( '#reference2_input' ).val() ) {
             $( '#startForm').submit();
-        }
+        //}
     });
 </script>
 #{/set}

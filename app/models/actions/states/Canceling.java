@@ -31,6 +31,8 @@ public class Canceling extends ActionState {
             case CANCELED:
                 stateApi.setState(new Finish(stateApi));
                 break;
+            case CANCELING:
+                break;
             case REMOVE_REJECTED_BILLS:
                 break;
             case REMOVE_THE_BILLS_FROM_ESCROW:

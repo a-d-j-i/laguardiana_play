@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import models.actions.UserAction;
+import models.db.LgDeposit;
+import models.db.LgEvent;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
@@ -74,7 +76,7 @@ public class ModelFacade {
 
         @Override
         public void doJob() throws Exception {
-            Event.save(currentUserAction, Event.Type.GLORY, status.name());
+            LgEvent.save(currentUserAction, LgEvent.Type.GLORY, status.name());
             switch (status.getState()) {
                 case ERROR:
                     if (Play.configuration.getProperty("glory.ignore") == null) {
@@ -109,7 +111,7 @@ public class ModelFacade {
 
         @Override
         public void doJob() throws Exception {
-            Event.save(currentUserAction, Event.Type.IO_BOARD, status.toString());
+            LgEvent.save(currentUserAction, LgEvent.Type.IO_BOARD, status.toString());
             if (status.status == IoBoard.Status.ERROR) {
                 // A development option
                 if (Play.configuration.getProperty("io_board.ignore") == null) {
@@ -133,7 +135,7 @@ public class ModelFacade {
                     return;
                 }
                 if (!manager.count(null, numericId)) {
-                    setError(String.format("startBillDeposit can't start glory %s", manager.getStatus().getErrorDetail()));
+                    setError(String.format("count can't start glory %s", manager.getStatus().getErrorDetail()));
                 }
             }
         }
@@ -144,7 +146,7 @@ public class ModelFacade {
 
         public void withdraw() {
             if (!manager.withdrawDeposit()) {
-                setError("startCounting can't withdrawDeposit glory");
+                setError("withdraw can't withdrawDeposit glory");
             }
         }
 
@@ -177,6 +179,14 @@ public class ModelFacade {
             ioBoard.clearError();
             ModelFacade.clearError();
         }
+
+        public void openGate() {
+            ioBoard.openGate();
+        }
+
+        public void closeGate() {
+            ioBoard.closeGate();
+        }
     }
 
     synchronized public static boolean isError() {
@@ -196,7 +206,7 @@ public class ModelFacade {
     }
 
     synchronized static public void startAction(UserAction userAction) {
-        Event.save(userAction, Event.Type.ACTION_START_TRY, getNeededController());
+        LgEvent.save(userAction, LgEvent.Type.ACTION_START_TRY, getNeededController());
         if (modelError.isError()) {
             Logger.info("Can't start an action when on error");
             return;
@@ -207,17 +217,19 @@ public class ModelFacade {
         }
         currentUser = Secure.getCurrentUser();
         currentUserAction = userAction;
-        Event.save(currentUserAction, Event.Type.ACTION_START, getNeededController());
+        LgEvent.save(currentUserAction, LgEvent.Type.ACTION_START, getNeededController());
         currentUserAction.start(currentUser, new UserActionApi());
     }
 
     synchronized public static void finishAction() {
         if (currentUserAction != null && currentUser != null) {
-            Event.save(currentUserAction, Event.Type.ACTION_FINISH, getNeededController());
-        }
-        if (currentUserAction.canFinishAction() || modelError.isError()) {
-            currentUserAction = null;
-            currentUser = null;
+            LgEvent.save(currentUserAction, LgEvent.Type.ACTION_FINISH, getNeededController());
+
+            if (currentUserAction.canFinishAction() || modelError.isError()) {
+                currentUserAction.finish();
+                currentUserAction = null;
+                currentUser = null;
+            }
         }
     }
 
@@ -251,7 +263,7 @@ public class ModelFacade {
             return null;
         }
         if (modelError.isError()) {
-            return "Application";
+            return "CounterController";
         }
         if (currentUserAction != null) {
             return currentUserAction.getNeededController();
@@ -333,7 +345,7 @@ public class ModelFacade {
         return currentUserAction.getMessage();
     }
 
-    public static Deposit getDeposit() {
+    public static LgDeposit getDeposit() {
         if (currentUserAction == null) {
             Logger.error("getDeposit invalid current User Action");
             return null;
@@ -342,19 +354,7 @@ public class ModelFacade {
             Logger.error("getDeposit invalid depositId %d", currentUserAction.getDepositId());
             return null;
         }
-        return Deposit.findById(currentUserAction.getDepositId());
-    }
-
-    public static Long getDepositTotal() {
-        if (currentUserAction == null) {
-            Logger.error("getDeposit invalid current User Action");
-            return null;
-        }
-        if (currentUserAction.getDepositId() == null) {
-            Logger.error("getDeposit invalid depositId %d", currentUserAction.getDepositId());
-            return null;
-        }
-        return Deposit.getTotal(currentUserAction.getDepositId());
+        return LgDeposit.findById(currentUserAction.getDepositId());
     }
 
     public static void cancel() {

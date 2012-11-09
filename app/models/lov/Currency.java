@@ -9,7 +9,7 @@ import models.db.LgLov;
  */
 @Entity
 public class Currency extends LgLov {
-
+    
     public static Currency findByTextId( String textId ) {
         return ( Currency ) LgLov.findByTextId( Currency.class.getSimpleName(), textId );
     }
@@ -17,4 +17,5 @@ public class Currency extends LgLov {
     public static Currency findByNumericId( Integer numericId ) {
         return ( Currency ) LgLov.findByNumericId( Currency.class.getSimpleName(), numericId );
     }
+
 }

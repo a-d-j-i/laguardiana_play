@@ -6,7 +6,6 @@ package models.actions;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import models.actions.UserAction;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;

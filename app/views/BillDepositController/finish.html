@@ -5,15 +5,21 @@
     <article>
         <div class="contenido">
             <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
+            <!-- datos del deposito -->
+            #{if !canceled }
             <div class="mensaje"><span>&{ 'summary.ticket' }</span></div>
             <h2>&{ 'application.thanks' }</h2>
-            <!-- datos del deposito -->
-            #{if depositTotal > 0 }
+            #{if ( formData.showReference1 ) }
             <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+            #{/if}
+            #{if ( formData.showReference2 && formData.reference2 != "" ) }
             <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+            #{/if}
             <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.textId}</p>
             #{/if}
             #{else}
+                <div class="mensaje"><span>&{ 'counting_page.deposit_canceled' }</span></div>
+                <h2>&{ 'application.thanks' }</h2>
                 &{ 'counting_page.deposit_canceled' }
             #{/else}
             <!-- /datos del deposito -->

@@ -13,26 +13,48 @@ import play.Logger;
  */
 public class ReadyToStoreBillDeposit extends IdleBillDeposit {
 
-    public ReadyToStoreBillDeposit(StateApi stateApi) {
-        super(stateApi);
+    protected final boolean escrowFull;
+
+    public ReadyToStoreBillDeposit(StateApi stateApi, boolean escrowDeposit, boolean escrowFull) {
+        super(stateApi, escrowDeposit);
+        this.escrowFull = escrowFull;
     }
 
     @Override
     public String name() {
-        return "READY_TO_STORE";
+        if (escrowFull) {
+            return "ESCROW_FULL";
+        } else {
+            return "READY_TO_STORE";
+        }
     }
 
     @Override
     public void accept() {
+        // TODO: Do it right.
+        //stateApi.openGate();
         stateApi.cancelTimer();
         stateApi.addBatchToDeposit();
         if (!stateApi.store()) {
             Logger.error("startBillDeposit can't cancel glory");
         }
-        acceptNextStep();
+        stateApi.setState(new StoringBillDeposit(stateApi, escrowDeposit));
     }
-
-    protected void acceptNextStep() {
-        stateApi.setState(new ReadyToStoreStoring(stateApi));
-    }
+//    @Override
+//    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
+//        switch (status.status) {
+//            case OPEN:
+//                stateApi.addBatchToDeposit();
+//                if (!stateApi.store()) {
+//                    Logger.error("startBillDeposit can't cancel glory");
+//                }
+//                acceptNextStep();
+//                break;
+//            case OPENNING:
+//                break;
+//            default:
+//                Logger.debug("onIoBoardEvent invalid state %s %s", status.status.name(), name());
+//                break;
+//        }
+//    }
 }

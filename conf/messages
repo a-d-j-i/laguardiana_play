@@ -24,8 +24,10 @@ keyboard.space=ESPACIO
 application.back=VOLVER
 application.continue=CONTINUAR
 application.cancel=CANCELAR
+application.canceling=Cancelando.
+application.canceling_detail=Cancelando, espere...
 application.finish=TERMINAR
-application.choose_one=Seleccione una opción
+application.choose_one=seleccione una opción
 application.wellcome=Bienvenido %s
 application.choose_currency=Seleccione divisa
 application.thanks=MUCHAS GRACIAS POR OPERAR CON PROSEGUR
@@ -34,6 +36,8 @@ application.close=CERRAR
 application.printers=Impresoras
 application.timeout=Necesita mas tiempo
 application.timeout_detail=Necesita mas tiempo
+
+application.remove_ticket=Por favor retire su ticket
 
 application.start_counting=INICIAR CONTEO
 application.choose_currency_before=Seleccione divisa antes de iniciar el conteo
@@ -63,7 +67,7 @@ counting_page.remove_the_bills_from_escrow=Retire los billetes de la maquina.
 counting_page.remove_the_bills_from_hoper=Retire los billetes de la parte superior de la maquina.
 counting_page.remove_rejected_bills=Retire los billetes rechazados.
 counting_page.storing=Depositando.
-counting_page.canceling=Cancelando.
+counting_page.storing_detail=Depositando espere...
 counting_page.deposit_canceled=Desposito Cancelado.
 counting_page.total_sum=Total acumulado
 
@@ -79,6 +83,7 @@ counting_page.totals=TOTALES
 
 summary.ticket=Retire su ticket
 summary.total=Monto
+summary.transaction_code=Transaccion
 
 envelope_deposit.select_contents=Seleccione los contenidos del sobre
 envelope_deposit.cash=EFECTIVO
@@ -92,7 +97,7 @@ envelope_deposit.type_amount_to_confirm=Ingrese el monto a confirmar
 envelope_deposit.envelope_code_title=Ingrese número de sobre
 envelope_deposit.envelope_code=Nro. de sobre
 envelope_deposit.put_ticket_in_envelope=Coloque el ticket y el dinero en el sobre e ingréselo en la máquina
-envelope_deposit.deposit_done=Su sobre ya fue depositado
+envelope_deposit.deposit_done=Por favor retire su ticket
 envelope_deposit.has_documents=Contiene documentos
 envelope_deposit.has_others=Contiene otros
 envelope_deposit.amount_cash=Monto en efectivo

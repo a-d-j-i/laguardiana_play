@@ -5,9 +5,9 @@
 package devices.glory.manager;
 
 import devices.glory.manager.GloryManager.ThreadCommandApi;
-import devices.glory.manager.command.Init;
+import devices.glory.manager.command.InitCommand;
 import devices.glory.manager.command.ManagerCommandAbstract;
-import devices.glory.manager.command.Stop;
+import devices.glory.manager.command.StopCommand;
 import play.Logger;
 
 /**
@@ -25,7 +25,7 @@ public class ManagerThread extends Thread {
     @Override
     public void run() {
         ManagerCommandAbstract currentCommand;
-        currentCommand = new Init( threadCommandApi );
+        currentCommand = new InitCommand( threadCommandApi );
         currentCommand.run();
         while ( !threadCommandApi.mustStop() ) {
             currentCommand = threadCommandApi.getCurrentCommand();
@@ -37,7 +37,7 @@ public class ManagerThread extends Thread {
             currentCommand.run();
         }
         Logger.debug( "Executing stop command" );
-        currentCommand = new Stop( threadCommandApi );
+        currentCommand = new StopCommand( threadCommandApi );
         currentCommand.run();
         Logger.debug( "Executin stop command done" );
         threadCommandApi.stopped();

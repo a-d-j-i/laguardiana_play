@@ -7,6 +7,20 @@ import play.db.jpa.GenericModel;
 @Table(name = "lg_system_property", schema = "public")
 public class LgSystemProperty extends GenericModel implements java.io.Serializable {
 
+    public enum Types {
+
+        DEFAULT_CURRENCY,
+        MACHINE_CODE,
+        MACHINE_DESCRIPTION,
+        CLIENT_CODE,
+        CLIENT_DESCRIPTION,
+        BRANCH_CODE;
+
+        
+        public String getTypeName() {
+            return name().toLowerCase();
+        }
+    }
     @Id
     @Column(name = "property_id", unique = true, nullable = false)
     @GeneratedValue
@@ -16,7 +30,11 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
     @Column(name = "value", nullable = true, length = 128)
     public String value;
 
-    static public String getProperty(String name) {
+    static public String getProperty(Types type) {
+        return getProperty(type.getTypeName());
+    }
+
+    static private String getProperty(String name) {
         LgSystemProperty l = LgSystemProperty.find("select p from LgSystemProperty p where p.name = ?", name).first();
         if (l == null) {
             return null;

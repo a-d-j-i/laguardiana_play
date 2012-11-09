@@ -9,11 +9,13 @@ import play.db.jpa.GenericModel;
 @Entity
 @Table( name = "lg_external_app", schema = "public")
 public class LgExternalApp extends GenericModel implements java.io.Serializable {
-
+    // Needed for play generic model.
     @Id
     @Column( name = "external_app_id", unique = true, nullable = false)
     @GeneratedValue
     public Integer externalAppId;
+    @Column( name = "app_id", unique = true, nullable = false)
+    public Integer appId;
     @Column( name = "name", nullable = false, length = 128)
     public String name;
     @Column( name = "retry_interval", nullable = false)
@@ -32,6 +34,6 @@ public class LgExternalApp extends GenericModel implements java.io.Serializable 
 
     @Override
     public String toString() {
-        return "LgExternalApp{" + "externalAppId=" + externalAppId + ", name=" + name + ", retryInterval=" + retryInterval + ", executionTime=" + executionTime + ", presicion=" + presicion + ", interval=" + interval + '}';
+        return "LgExternalApp{" + "appId=" + appId + ", name=" + name + ", retryInterval=" + retryInterval + ", executionTime=" + executionTime + ", presicion=" + presicion + ", interval=" + interval + '}';
     }
 }

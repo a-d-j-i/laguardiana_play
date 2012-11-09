@@ -11,16 +11,16 @@ import devices.glory.manager.GloryManager.ThreadCommandApi;
  *
  * @author adji
  */
-public class CancelCount extends ManagerCommandAbstract {
+public class InitCommand extends ManagerCommandAbstract {
 
-    public CancelCount(ThreadCommandApi threadCommandApi) {
+    public InitCommand(ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
 
     @Override
     public void execute() {
-        setState(GloryManager.State.CANCELING);
-        gotoNeutral(false, false);
-        cancel();
+        setState(GloryManager.State.INITIALIZING);
+        gotoNeutral(false, false, false);
+        setState(GloryManager.State.IDLE);
     }
 }

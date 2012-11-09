@@ -39,7 +39,7 @@ public class DenominationDataRequest extends CommandWithDataResponse {
                 d.currencyCode = new String(b);
                 d.newVal = (data[ i + 3] != 0x30);
                 // TODO: Check for 0x4X
-                d.denominationCode = new Integer(data[ i + 4] & 0x0F);
+                d.denominationCode = 32 - new Integer(data[ i + 4] & 0x0F);
 
                 Double dd = (Math.pow(10, getDecDigit(data[i + 6])) * (getDecDigit(data[i + 7]) * 100 + getDecDigit(data[i + 8]) * 10 + getDecDigit(data[i + 9]) * 1));
                 d.value = dd.intValue();

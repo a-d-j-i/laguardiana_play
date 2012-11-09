@@ -31,7 +31,7 @@ public abstract class LgUser extends GenericModel implements java.io.Serializabl
     @Column( name = "external_id", nullable = false, length = 32)
     public String externalId;
     @Column( name = "locked", nullable = false, length = 1)
-    public char locked;
+    public byte locked;
     @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "creation_date", nullable = false, length = 13)
     public Date creationDate;

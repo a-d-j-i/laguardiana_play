@@ -5,12 +5,22 @@
 package models.actions;
 
 import controllers.Secure;
+import devices.DeviceFactory;
 import devices.glory.manager.GloryManager;
+import java.awt.print.PrinterException;
+import java.util.Date;
 import java.util.EnumMap;
-import models.Deposit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.print.PrintException;
+import models.EnvelopeDeposit;
 import models.actions.states.IdleEnvelopeDeposit;
 import models.db.LgEnvelope;
+import models.db.LgSystemProperty;
+import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
 
 /**
  *
@@ -22,9 +32,6 @@ public class EnvelopeDepositAction extends UserAction {
 
     static {
         messageMap.put(GloryManager.State.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
-        messageMap.put(GloryManager.State.CANCELING, "counting_page.canceling");
-        messageMap.put(GloryManager.State.CANCELED, "counting_page.deposit_canceled");
-        messageMap.put(GloryManager.State.ERROR, "application.error");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;
@@ -45,10 +52,46 @@ public class EnvelopeDepositAction extends UserAction {
 
     @Override
     public void start() {
-        Deposit deposit = new Deposit(Secure.getCurrentUser(), userCode, userCodeLov);
+        EnvelopeDeposit deposit = new EnvelopeDeposit(Secure.getCurrentUser(), userCode, userCodeLov);
+        deposit.startDate = new Date();
         deposit.addEnvelope(envelope);
         deposit.save();
         currentDepositId = deposit.depositId;
         userActionApi.envelopeDeposit();
+        try {
+            Map renderArgs = new HashMap();
+            // Print the ticket.
+            List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
+            List<Currency> currencies = Currency.findAll();
+            renderArgs.put("formData", formData);
+            renderArgs.put("referenceCodes", referenceCodes);
+            renderArgs.put("currencies", currencies);
+            renderArgs.put("depositId", currentDepositId);
+            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs, 110);
+        } catch (PrinterException ex) {
+            Logger.error(ex.getMessage());
+        } catch (PrintException ex) {
+            Logger.error(ex.getMessage());
+        }
+    }
+
+    @Override
+    public void finish() {
+        if (currentDepositId != null) {
+            EnvelopeDeposit d = EnvelopeDeposit.findById(currentDepositId);
+            if (d != null && d.finishDate != null) {
+                Map renderArgs = new HashMap();
+                renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
+                renderArgs.put("formData", formData);
+                renderArgs.put("depositId", currentDepositId);
+
+                try {
+                    // Print the ticket.
+                    DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs, 60);
+                } catch (Throwable ex) {
+                    Logger.debug(ex.getMessage());
+                }
+            }
+        }
     }
 }

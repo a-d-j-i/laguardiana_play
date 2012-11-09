@@ -41,7 +41,7 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     }
 
     public static List< LgBillType> find(int currency) {
-        return LgBillType.find("select l from LgBillType l where currency = ?", currency).fetch();
+        return LgBillType.find("select l from LgBillType l where currency = ? order by denomination desc", currency).fetch();
     }
 
     @PrePersist

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1><b>&{ 'envelope_deposit.put_ticket_in_envelope' }</b></h1>
+
+        #{if ( formData.showReference1 ) }
+        <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+        #{/if}
+        #{if ( formData.showReference2 && formData.reference2 != "" ) }
+        <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+        #{/if}
+        #{if ( formData.cashData.amount > 0 ) }
+        <p>&{ 'envelope_deposit.amount_cash' }: ${ formData.cashData.amount } ${ formData.cashData.currency.textId } </p>
+        #{/if}
+        #{if ( formData.checkData.amount > 0 ) }
+        <p>&{ 'envelope_deposit.amount_checks' }: ${ formData.checkData.amount } ${ formData.checkData.currency.textId } </p>
+        #{/if}
+        #{if ( formData.ticketData.amount > 0  ) }
+        <p>&{ 'envelope_deposit.amount_tickets' }: ${ formData.ticketData.amount } ${ formData.ticketData.currency.textId } </p>
+        #{/if}
+        #{if formData.hasDocuments }
+        <p>&{ 'envelope_deposit.has_documents' }</p>
+        #{/if}
+        #{if formData.hasOthers }
+        <p>&{ 'envelope_deposit.has_others' }</p>
+        #{/if}
+        <p>&{ 'envelope_deposit.envelope_code' }: ${ formData.envelopeCode }</p>
+        <br/>
+        <p>&{ 'summary.transaction_code' }: ${depositId}</p>
+        <br/>
+        S.E.U.O.
+    </body>
+</html>

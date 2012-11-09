@@ -34,9 +34,10 @@ a {
 /* layout */
 
 section {
-    width: 800px;
+    width: 100%; /*800px;*/
     height: 600px;
     background: url('../gfx/fondo.png');
+    background-size: 100% 600px;
     margin: 0 auto;
     position: relative;
 }
@@ -121,6 +122,7 @@ hr {
     height: 47px;
     line-height: 47px;
     font-size: 15pt;
+    border: none;
     border-right: 1px solid;
     display: inline-block;
     padding: 0 18px 0 70px;
@@ -778,3 +780,36 @@ table tfoot tr td {
 #separar_dinero_03 .columna_2 {
     text-align: right;
 }
+
+
+
+/* General adji */
+
+
+.botonera {
+    height: 150px;
+    overflow: hidden;
+}
+
+.botonera .columna {
+    padding: 0 10px;
+}
+
+.botonera .columna a {
+    margin-bottom: 30px;
+}
+
+hr {
+    margin: 35px 0;
+}
+
+.botonera_pie .columna {
+    padding: 0 10px;
+}
+
+.botonera_pie .columna a {
+    margin-right: 20px;
+}
+
+
+

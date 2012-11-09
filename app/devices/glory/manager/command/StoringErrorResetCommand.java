@@ -11,20 +11,20 @@ import play.Logger;
  *
  * @author adji
  */
-public class Reset extends ManagerCommandAbstract {
+public class StoringErrorResetCommand extends ManagerCommandAbstract {
 
-    public Reset(GloryManager.ThreadCommandApi threadCommandApi) {
+    public StoringErrorResetCommand(GloryManager.ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
 
     @Override
     public void execute() {
-        Logger.debug("Reset command");
-        if (gotoNeutral(true, false)) {
-            Logger.debug("Reset command done");
+        Logger.debug("StoringErrorReset command");
+        if (gotoNeutral(true, true, true)) {
+            Logger.debug("StoringErrorReset command done");
             clearError(false);
         } else {
-            Logger.debug("Reset command failed");
+            Logger.debug("StoringErrorReset command faileds");
         }
     }
 }

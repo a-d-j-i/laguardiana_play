@@ -15,13 +15,28 @@ import play.Logger;
  */
 public class IdleBillDeposit extends ActionState {
 
-    public IdleBillDeposit(StateApi stateApi) {
+    final protected boolean escrowDeposit;
+
+    public IdleBillDeposit(StateApi stateApi, boolean escrowDeposit) {
         super(stateApi);
+        this.escrowDeposit = escrowDeposit;
     }
 
     @Override
     public String name() {
-        return "IDLE";
+        if (escrowDeposit) {
+            return "CONTINUE_DEPOSIT";
+        } else {
+            return "IDLE";
+        }
+    }
+
+    @Override
+    public void accept() {
+        if (!escrowDeposit) {
+            return;
+        }
+        stateApi.setState(new StoringBillDeposit(stateApi, escrowDeposit));
     }
 
     @Override
@@ -29,6 +44,9 @@ public class IdleBillDeposit extends ActionState {
         stateApi.cancelTimer();
         if (!stateApi.cancelDeposit()) {
             Logger.error("cancelDeposit can't cancel glory");
+        }
+        if (escrowDeposit) {
+            stateApi.closeDeposit();
         }
         stateApi.setState(new Canceling(stateApi));
     }
@@ -38,22 +56,20 @@ public class IdleBillDeposit extends ActionState {
         super.onGloryEvent(m);
         switch (m.getState()) {
             case READY_TO_STORE:
-                stateApi.setState(new ReadyToStoreBillDeposit(stateApi));
+                stateApi.setState(new ReadyToStoreBillDeposit(stateApi, escrowDeposit, false));
                 break;
             case ESCROW_FULL:
-                stateApi.setState(new EscrowFullBillDeposit(stateApi));
+                stateApi.setState(new ReadyToStoreBillDeposit(stateApi, true, true));
                 break;
             case IDLE:
+                stateApi.closeDeposit();
+                stateApi.setState(new Finish(stateApi));
                 break;
             case COUNTING:
                 stateApi.cancelTimer();
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
                 stateApi.startTimer();
-                break;
-            case COUNT_DONE:
-                stateApi.cancelTimer();
-                stateApi.setState(new Finish(stateApi));
                 break;
             default:
                 Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());

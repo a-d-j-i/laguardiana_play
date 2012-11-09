@@ -11,16 +11,16 @@ import play.Logger;
  *
  * @author adji
  */
-public class Stop extends ManagerCommandAbstract {
+public class StopCommand extends ManagerCommandAbstract {
 
-    public Stop(GloryManager.ThreadCommandApi threadCommandApi) {
+    public StopCommand(GloryManager.ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
 
     @Override
     public void execute() {
         Logger.debug("EXECUTING STOP");
-        gotoNeutral(false, false);
+        gotoNeutral(false, false, false);
         Logger.debug("EXECUTING STOP DONE");
     }
 }

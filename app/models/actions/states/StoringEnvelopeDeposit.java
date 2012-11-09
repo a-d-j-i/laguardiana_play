@@ -12,23 +12,28 @@ import play.Logger;
  *
  * @author adji
  */
-public class EscrowFullStoring extends ActionState {
+class StoringEnvelopeDeposit extends ActionState {
 
-    public EscrowFullStoring(StateApi stateApi) {
+    public StoringEnvelopeDeposit(StateApi stateApi) {
         super(stateApi);
     }
 
     @Override
     public String name() {
-        return "ESCROW_FULL_STORING";
+        return "STORING";
     }
 
     @Override
     public void onGloryEvent(GloryManager.Status m) {
         super.onGloryEvent(m);
-        if (m.getState() != GloryManager.State.IDLE) {
-            Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+        switch (m.getState()) {
+            case IDLE:
+                stateApi.closeDeposit();
+                stateApi.setState(new Finish(stateApi));
+                break;
+            default:
+                Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+                break;
         }
-        stateApi.setState(new ContinueDeposit(stateApi));
     }
 }

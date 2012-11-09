@@ -12,18 +12,15 @@ import devices.glory.manager.GloryManager.ThreadCommandApi;
  *
  * @author adji
  */
-public class EnvelopeDeposit extends ManagerCommandAbstract {
+public class EnvelopeDepositCommand extends ManagerCommandAbstract {
 
-    public EnvelopeDeposit(ThreadCommandApi threadCommandApi) {
+    public EnvelopeDepositCommand(ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
 
     @Override
     public void execute() {
-        if (!gotoNeutral(false, false)) {
-            return;
-        }
-        if (!sendGloryCommand(new devices.glory.command.SetManualMode())) {
+        if (!gotoNeutral(false, false, true)) {
             return;
         }
         if (!waitUntilD1State(GloryStatus.D1Mode.manual)) {
@@ -50,6 +47,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                     break;
                 case escrow_close_request:
                     if (gloryStatus.isEscrowBillPresent()) {
+                        sleep(2000);
                         if (!sendGCommand(new devices.glory.command.CloseEscrow())) {
                             // Ignore the error, could happen if some one takes the envelope quickly.
                         }
@@ -59,8 +57,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        setState(GloryManager.State.IDLE);
-                        gotoNeutral(true, false);
+                        gotoNeutral(true, false, true);
                         return;
                     }
                     if (!gloryStatus.isEscrowBillPresent()) {
@@ -71,6 +68,7 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
+                        setState(GloryManager.State.STORING);
                     }
                     break;
                 case being_store:
@@ -94,6 +92,6 @@ public class EnvelopeDeposit extends ManagerCommandAbstract {
         if (mustCancel()) {
             setState(GloryManager.State.CANCELING);
         }
-        gotoNeutral(true, false);
+        gotoNeutral(true, false, false);
     }
 }

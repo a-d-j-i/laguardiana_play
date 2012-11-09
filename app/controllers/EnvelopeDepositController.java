@@ -1,13 +1,13 @@
 package controllers;
 
-import devices.DeviceFactory;
-import java.awt.print.PrinterException;
 import java.util.List;
+import models.EnvelopeDeposit;
 import models.ModelFacade;
 import models.actions.EnvelopeDepositAction;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.db.LgEnvelopeContent.EnvelopeContentType;
+import models.db.LgSystemProperty;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -17,13 +17,13 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
-import play.mvc.Util;
+import play.mvc.Router;
 import play.mvc.With;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeReference;
 
 @With(Secure.class)
-public class EnvelopeDepositController extends Application {
+public class EnvelopeDepositController extends CounterController {
 
     @Before
     // currentAction allways valid
@@ -32,14 +32,16 @@ public class EnvelopeDepositController extends Application {
             return;
         }
         String neededAction = ModelFacade.getNeededAction();
-        if (neededAction == null) {
+        String neededController = ModelFacade.getNeededController();
+        if (neededAction == null || neededController == null) {
             if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
+                Logger.debug("wizardFixPage Redirect Application.index");
                 Application.index();
             }
         } else {
-            if (ModelFacade.getNeededController() == null
-                    || !(request.controller.equalsIgnoreCase(ModelFacade.getNeededController()))) {
-                Application.index();
+            if (!(request.controller.equalsIgnoreCase(neededController))) {
+                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
+                redirect(Router.getFullUrl(neededController + "." + neededAction));
             }
         }
     }
@@ -77,7 +79,7 @@ public class EnvelopeDepositController extends Application {
         final public Boolean showReference2 = isProperty("envelope_deposit.show_reference2");
         @CheckWith(FormDepositUserCodeReference.Validate.class)
         public FormDepositUserCodeReference reference1 = new FormDepositUserCodeReference();
-        @Required(message = "validation.required.reference2")
+        //@Required(message = "validation.required.reference2")
         public String reference2 = null;
         @Required(message = "validation.required.envelopeCode")
         public String envelopeCode = null;
@@ -97,7 +99,6 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void start(@Valid FormData formData) {
-        Logger.debug("wizard data %s", formData);
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
@@ -115,20 +116,13 @@ public class EnvelopeDepositController extends Application {
                 if (formData.ticketData.amount > 0) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.TICKETS, formData.ticketData.amount, formData.ticketData.currency.numericId));
                 }
-                if (formData.hasDocuments != null) {
+                if (formData.hasDocuments != null && formData.hasDocuments) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.DOCUMENTS, null, null));
                 }
-                if (formData.hasOthers != null) {
+                if (formData.hasOthers != null && formData.hasOthers) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
                 }
 
-                try {
-                    // Print the ticket.
-                    prepareStartRenderArgs(formData);
-                    DeviceFactory.getPrinter().print("envelopeDeposit", renderArgs);
-                } catch (PrinterException ex) {
-                    Logger.error(ex.getMessage());
-                }
                 EnvelopeDepositAction currentAction =
                         new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov,
                         formData.reference2, e, formData);
@@ -138,18 +132,17 @@ public class EnvelopeDepositController extends Application {
         }
         if (formData == null) {
             formData = new FormData();
-        }
-        prepareStartRenderArgs(formData);
-        render();
-    }
+            formData.cashData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
+            formData.checkData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
+            formData.ticketData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
 
-    @Util
-    static private void prepareStartRenderArgs(FormData formData) {
+        }
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
         renderArgs.put("formData", formData);
         renderArgs.put("referenceCodes", referenceCodes);
         renderArgs.put("currencies", currencies);
+        render();
     }
 
     public static void mainLoop() {
@@ -160,7 +153,7 @@ public class EnvelopeDepositController extends Application {
             o[2] = Messages.get(ModelFacade.getActionMessage());
             renderJSON(o);
         } else {
-            renderArgs.put("clientCode", getProperty("client_code"));
+            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
             renderArgs.put("formData", ModelFacade.getFormData());
             render();
         }
@@ -177,14 +170,16 @@ public class EnvelopeDepositController extends Application {
     }
 
     public static void finish() {
+        EnvelopeDeposit deposit = (EnvelopeDeposit) ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
-        ModelFacade.finishAction();
-        if (formData == null) {
+
+        renderArgs.put("canceled", (deposit != null && deposit.finishDate == null));
+        if (formData != null) {
+            ModelFacade.finishAction();
+        } else {
             Application.index();
             return;
         }
-        renderArgs.put("clientCode", getProperty("client_code"));
-        renderArgs.put("formData", formData);
         render();
     }
 }
