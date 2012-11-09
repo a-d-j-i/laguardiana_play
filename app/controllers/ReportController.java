@@ -2,15 +2,12 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import models.Bill;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
 import models.db.LgBag;
-import models.db.LgBill;
+import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
@@ -29,13 +26,29 @@ public class ReportController extends Controller {
         render();
     }
 
-    static public class DepositDataContents {
+    static public class ContentData {
+    }
+
+    static public class BillContentData extends ContentData {
+
+        final public String billType;
+        final public Integer denomination;
+        final public Integer quantity;
+
+        public BillContentData(String billType, Integer denomination, Integer quantity) {
+            this.billType = billType;
+            this.denomination = denomination;
+            this.quantity = quantity;
+        }
+    }
+
+    static public class EnvelopeContentData extends ContentData {
 
         final public String type;
         final public Integer amount;
         final public String currency;
 
-        private DepositDataContents(LgEnvelopeContent c) {
+        private EnvelopeContentData(LgEnvelopeContent c) {
             this.type = LgEnvelopeContent.EnvelopeContentType.find(c.contentTypeLov).name();
             this.amount = c.amount;
             if (c.unitLov == null) {
@@ -49,58 +62,55 @@ public class ReportController extends Controller {
     static public class DepositData {
 
         final public Integer id;
-        final public String type;
-        final public Long total;
-        final public String currency;
+        final public Integer type;
         final public Integer bag_id;
         final public String user_id;
         final public Date startDate;
         final public Date finishDate;
-        final List<DepositDataContents> contents;
 
-        public DepositData(LgDeposit d) {
+        public DepositData(LgDeposit d, Integer type) {
+            this.type = type;
             this.id = d.depositId;
             this.bag_id = d.bag.bagId;
             this.user_id = d.user.externalId;
             this.startDate = d.startDate;
             this.finishDate = d.finishDate;
-            if (d instanceof BillDeposit) {
-                this.type = "Bill";
-                this.contents = null;
-                BillDeposit b = (BillDeposit) d;
-                Iterator<LgBill> i = b.bills.iterator();
-                if (i.hasNext()) {
-                    LgBill lb = i.next();
-                    this.total = b.getTotal();
-                    if (lb.billType.currency == null) {
-                        this.currency = "-";
-                    } else {
-                        this.currency = Currency.findByNumericId(lb.billType.currency).textId;
-                    }
-                } else {
-                    this.total = null;
-                    this.currency = null;
+        }
+    }
+
+    static public class BillDepositData extends DepositData {
+
+        public List<BillContentData> contents = new ArrayList<BillContentData>();
+
+        public BillDepositData(BillDeposit d) {
+            super(d, 0);
+            List qret = Bill.getDepositContent(d);
+
+            for (Object b : qret) {
+                Object[] a = (Object[]) b;
+                Long quantity = (Long) a[ 1];
+
+                LgBillType bt = (LgBillType) a[0];
+                BillContentData bdc = new BillContentData(Currency.findByNumericId(bt.unitLov).textId,
+                        bt.denomination.intValue(), quantity.intValue());
+                contents.add(bdc);
+            }
+        }
+    }
+
+    static public class EnvelopeDepositData extends DepositData {
+
+        final public Integer envelopeCode;
+        public List<EnvelopeContentData> contents = new ArrayList<EnvelopeContentData>();
+
+        public EnvelopeDepositData(EnvelopeDeposit d) {
+            super(d, 1);
+            this.envelopeCode = d.userCodeLov;
+            for (LgEnvelope le : d.envelopes) {
+                for (LgEnvelopeContent c : le.envelopeContents) {
+                    EnvelopeContentData cc = new EnvelopeContentData(c);
+                    contents.add(cc);
                 }
-            } else if (d instanceof EnvelopeDeposit) {
-                this.type = "Envelope";
-                EnvelopeDeposit e = (EnvelopeDeposit) d;
-                this.total = null;
-                this.currency = null;
-                this.contents = new ArrayList<DepositDataContents>();
-                Iterator<LgEnvelope> i = e.envelopes.iterator();
-                while (i.hasNext()) {
-                    LgEnvelope le = i.next();
-                    for (LgEnvelopeContent c : le.envelopeContents) {
-                        DepositDataContents cc = new DepositDataContents(c);
-                        contents.add(cc);
-                    }
-                }
-            } else {
-                Logger.error("DepositData Invalid deposit type");
-                this.type = "unknow";
-                this.total = null;
-                this.currency = null;
-                this.contents = null;
             }
         }
     }
@@ -117,6 +127,7 @@ public class ReportController extends Controller {
     static public class UnprocessedDeposits {
 
         final public String clientCode = LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE);
+        final public String branchCode = LgSystemProperty.getProperty(LgSystemProperty.Types.BRANCH_CODE);
         final public String machineCode = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_CODE);
         final public String machineDescription = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
         public List<DepositData> depositData;
@@ -147,7 +158,13 @@ public class ReportController extends Controller {
         UnprocessedDeposits ret = new UnprocessedDeposits();
         ret.depositData = new ArrayList<DepositData>(depositList.size());
         for (LgDeposit d : depositList) {
-            ret.depositData.add(new DepositData(d));
+            if (d instanceof BillDeposit) {
+                ret.depositData.add(new BillDepositData((BillDeposit) d));
+            } else if (d instanceof EnvelopeDeposit) {
+                ret.depositData.add(new EnvelopeDepositData((EnvelopeDeposit) d));
+            } else {
+                Logger.error("Invalid deposit type");
+            }
         }
         if (request.format.equalsIgnoreCase("xml")) {
             renderXml(ret);
@@ -172,6 +189,7 @@ public class ReportController extends Controller {
     static public class BagList {
 
         final public String clientCode = LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE);
+        final public String branchCode = LgSystemProperty.getProperty(LgSystemProperty.Types.BRANCH_CODE);
         final public String machineCode = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_CODE);
         final public String machineDescription = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
         public List<BagData> bagData;

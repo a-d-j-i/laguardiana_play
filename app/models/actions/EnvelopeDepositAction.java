@@ -81,7 +81,7 @@ public class EnvelopeDepositAction extends UserAction {
             EnvelopeDeposit d = EnvelopeDeposit.findById(currentDepositId);
             if (d != null && d.finishDate != null) {
                 Map renderArgs = new HashMap();
-                renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE));
+                renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
                 renderArgs.put("formData", formData);
                 renderArgs.put("depositId", currentDepositId);
 

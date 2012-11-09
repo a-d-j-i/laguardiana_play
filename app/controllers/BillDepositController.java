@@ -99,7 +99,7 @@ public class BillDepositController extends CounterController {
             o[3] = totalSum;
             renderJSON(o);
         } else {
-            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
+            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
             renderArgs.put("billData", ModelFacade.getCurrentCounters());
             renderArgs.put("formData", ModelFacade.getFormData());
             renderArgs.put("totalSum", totalSum);
@@ -129,7 +129,7 @@ public class BillDepositController extends CounterController {
             Application.index();
             return;
         }
-        renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
+        renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
         renderArgs.put("formData", formData);
         if (deposit != null) {
             Long total = deposit.getTotal();

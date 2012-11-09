@@ -1,6 +1,10 @@
 #
 # Predefined User Reference Code for deposits
 #
+  db.LgSystemProperty(useHardwareKeyboard):
+    name:  "useHardwareKeyboard"
+    value:  "true"
+    
   db.LgSystemProperty(billDepositShowReference1):
     name:  "bill_deposit.show_reference1"
     value:  "true"
@@ -16,15 +20,8 @@
   db.LgSystemProperty(envelopeDepositShowReference2):
     name:  "envelope_deposit.show_reference2"
     value:  "true"
-        
-  db.LgSystemProperty(machineCode):
-    name:  "machine_code"
-    value:  "DE500-01"
-     
-  db.LgSystemProperty(machineDescription):
-    name:  "machine_description"
-    value:  "De 500 prima"
     
+        
   db.LgSystemProperty(clientCode):
     name:  "client_code"
     value:  "LA Guardiana S.A."

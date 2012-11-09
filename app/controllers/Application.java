@@ -39,7 +39,7 @@ public class Application extends Controller {
             BillDepositController.FormData formData = new BillDepositController.FormData();
             formData.currency.currency = new Currency();
             formData.currency.currency.textId = "Pesos";
-            renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE));
+            renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
             renderArgs.put("formData", formData);
 
             int depositId = 1013;

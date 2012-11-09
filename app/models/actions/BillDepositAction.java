@@ -59,7 +59,7 @@ public class BillDepositAction extends UserAction {
     @Override
     public void finish() {
         Map renderArgs = new HashMap();
-        renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE));
+        renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
         renderArgs.put("formData", formData);
         BillDeposit deposit = BillDeposit.findById(getDepositId());
         if (deposit != null && deposit.getTotal() > 0) {

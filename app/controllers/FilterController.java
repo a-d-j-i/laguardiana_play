@@ -81,7 +81,7 @@ public class FilterController extends CounterController {
             o[2] = Messages.get(ModelFacade.getActionMessage());
             renderJSON(o);
         } else {
-            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_CODE));
+            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
             renderArgs.put("billData", ModelFacade.getCurrentCounters());
             renderArgs.put("formData", ModelFacade.getFormData());
             render();

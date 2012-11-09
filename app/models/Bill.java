@@ -60,8 +60,7 @@ public class Bill {
         return ret;
     }
 
-    static public List<Bill> getDepositBillList(BillDeposit deposit) {
-        List<Bill> ret = new ArrayList<Bill>();
+    static public List getDepositContent(BillDeposit deposit) {
         List qret = BillDeposit.find(" "
                 + "select bt, sum( b.quantity )"
                 + " from BillDeposit d, LgBill b, LgBillType bt"
@@ -71,6 +70,12 @@ public class Bill {
                 + " group by bt.billTypeId, bt.denomination, bt.unitLov, bt.slot, bt.currency, bt.creationDate, bt.endDate"
                 + " order by bt.denomination desc"
                 + "", deposit.depositId).fetch();
+        return qret;
+    }
+
+    static public List<Bill> getDepositBillList(BillDeposit deposit) {
+        List<Bill> ret = new ArrayList<Bill>();
+        List qret = getDepositContent(deposit);
 
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
