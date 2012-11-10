@@ -203,6 +203,13 @@ select option {
     width: 100%;
 }
 
+.medium_width {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    width: 50%;
+}
+
 /* tablas */
 
 table {
@@ -391,400 +398,17 @@ table tfoot tr td {
     margin-top: 10px;
 }
 
-/* section: menu principal */
-
-#menu_principal .mensaje {
-    margin-bottom: 20px;
-}
-
-#menu_principal .botonera {
-    height: 150px;
-    overflow: hidden;
-}
-
-#menu_principal .botonera .columna {
-    padding: 0 10px;
-}
-
-#menu_principal .botonera .columna a {
-    margin-bottom: 30px;
-}
-
-#menu_principal hr {
-    margin: 35px 0;
-}
-
-#menu_principal .botonera_pie .columna {
-    padding: 0 10px;
-}
-
-#menu_principal .botonera_pie .columna a {
-    margin-right: 20px;
-}
-
-/* section: depositar efectivo 01 */
-
-#depositar_efectivo_01 select {
+select {
     margin-bottom: 15px;
 }
 
-#depositar_efectivo_01 input[type='text'] {
+input[type='text'] {
     margin-bottom: 15px;
 }
 
-#depositar_efectivo_01 .columna_1 {
-    padding-right: 30px;
-}
-
-#depositar_efectivo_01 .keyboard {
+.keyboard {
     margin-bottom: 41px;
 }
-
-/* section: depositar efectivo 02 */
-
-#depositar_efectivo_02 .columna_1 {
-    padding-right: 30px;
-}
-
-#depositar_efectivo_02 .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_efectivo_02 .botonera {
-
-}
-
-#depositar_efectivo_02 .columna_2 {
-    text-align: right;
-}
-
-/* section: depositar efectivo 03 */
-
-#depositar_efectivo_03 .columna_1 {
-    padding-right: 30px;
-}
-
-#depositar_efectivo_03 .contenido {
-    height: 320px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_efectivo_03 hr {
-    margin: 20px 0;
-}
-
-#depositar_efectivo_03 .botonera {
-
-}
-
-#depositar_efectivo_03 .columna_2 {
-    text-align: right;
-}
-
-/* section: depositar sobre 01 */
-
-#depositar_sobre #first .columna_1 {
-    padding-right: 30px;
-}
-
-#depositar_sobre #first select {
-    margin-bottom: 15px;
-}
-
-#depositar_sobre #first .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_sobre #first .botonera {
-
-}
-
-#depositar_sobre #first .columna_2 {
-    text-align: right;
-}
-
-/* section: menu principal */
-
-#depositar_sobre #second .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_sobre #second .mensaje {
-    margin-bottom: 20px;
-}
-
-#depositar_sobre #second .botonera {
-    height: 170px;
-    overflow: hidden;
-}
-
-#depositar_sobre #second .botonera .columna {
-    padding: 0 10px;
-}
-
-#depositar_sobre #second .botonera .columna a {
-    margin-bottom: 10px;
-}
-
-#depositar_sobre #second hr {
-    margin: 25px 0;
-}
-
-#depositar_sobre #second .botonera_pie .columna {
-    padding: 0 10px;
-}
-
-#depositar_sobre #second .botonera_pie .columna a {
-    margin-right: 20px;
-}
-
-/* section: depositar sobre 03 */
-
-#depositar_sobre .amount_input {
-
-}
-
-#depositar_sobre .amount_input .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_sobre .amount_input .columna_1 {
-    padding-right: 60px;
-}
-
-#depositar_sobre .amount_input select {
-    margin-bottom: 20px;
-}
-
-#depositar_sobre .amount_input .botonera {
-
-}
-
-#depositar_sobre .amount_input .columna_2 {
-    text-align: right;
-}
-
-/* section: depositar sobre 04 */
-
-#depositar_sobre_04 {
-
-}
-
-#depositar_sobre_04 .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_sobre_04 .columna_1 {
-    padding-right: 60px;
-}
-
-#depositar_sobre_04 select {
-    margin-bottom: 20px;
-}
-
-#depositar_sobre_04 .botonera {
-
-}
-
-#depositar_sobre_04 .columna_2 {
-    text-align: right;
-}
-
-/* section: depositar sobre 05 */
-
-#depositar_sobre #envelope_code {
-
-}
-
-#depositar_sobre #envelope_code .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_sobre #envelope_code .columna_1 {
-    padding-right: 60px;
-}
-
-#depositar_sobre #envelope_code select {
-    margin-bottom: 20px;
-}
-
-#depositar_sobre #envelope_code .botonera {
-
-}
-
-#depositar_sobre #envelope_code .columna_2 {
-    text-align: right;
-}
-
-/* section: depositar sobre 06 */
-
-#depositar_sobre_06 .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_sobre_06 .botonera {
-
-}
-
-#depositar_sobre_06 .columna_2 {
-    text-align: right;
-}
-
-/* section: depositar sobre 07 */
-
-#depositar_sobre_07 .columna_1 {
-    padding-right: 30px;
-}
-
-#depositar_sobre_07 .contenido {
-    height: 320px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#depositar_sobre_07 hr {
-    margin: 20px 0;
-}
-
-#depositar_sobre_07 .botonera {
-
-}
-
-#depositar_sobre_07 .columna_2 {
-    text-align: right;
-}
-
-/* section: contar dinero 01 */
-
-#contar_dinero_01 .contenido {
-    height: 340px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#contar_dinero_01 select {
-    width: 300px;
-}
-
-#contar_dinero_01 .botonera {
-
-}
-
-#contar_dinero_01 .columna_2 {
-    text-align: right;
-}
-
-/* section: contar dinero 02 */
-
-#contar_dinero_02 .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#contar_dinero_02 .columna_1 {
-    padding-right: 50px;
-}
-
-#contar_dinero_02 .botonera {
-
-}
-
-#contar_dinero_02 .columna_2 {
-    text-align: right;
-}
-
-/* section: separar dinero 01 */
-
-#separar_dinero_01 .contenido {
-    height: 340px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#separar_dinero_01 select {
-    width: 300px;
-}
-
-#separar_dinero_01 .botonera {
-
-}
-
-#separar_dinero_01 .columna_2 {
-    text-align: right;
-}
-
-/* section: separar dinero 02 */
-
-#separar_dinero_02 .columna_1 {
-    padding-right: 30px;
-}
-
-#separar_dinero_02 select {
-    margin-bottom: 10px;
-}
-
-#separar_dinero_02 input {
-    margin-bottom: 10px;
-}
-
-#separar_dinero_02 .contenido {
-    height: 280px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#separar_dinero_02 .botonera {
-
-}
-
-#separar_dinero_02 .columna_2 {
-    text-align: right;
-}
-
-/* section: separar dinero 03 */
-
-#separar_dinero_03 .columna_1 {
-    padding-right: 30px;
-}
-
-#separar_dinero_03 .contenido {
-    height: 320px;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-#separar_dinero_03 hr {
-    margin: 20px 0;
-}
-
-#separar_dinero_03 .botonera {
-
-}
-
-#separar_dinero_03 .columna_2 {
-    text-align: right;
-}
-
-
-
-/* General adji */
-
 
 .botonera {
     height: 150px;
@@ -799,10 +423,6 @@ table tfoot tr td {
     margin-bottom: 30px;
 }
 
-hr {
-    margin: 35px 0;
-}
-
 .botonera_pie .columna {
     padding: 0 10px;
 }
@@ -811,5 +431,32 @@ hr {
     margin-right: 20px;
 }
 
+.columna_1 {
+    padding-right: 30px;
+}
 
+.columna_2 {
+    text-align: right;
+}
+
+.contenido {
+    height: 270px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+hr {
+    margin: 15px 0;
+}
+
+
+.contenido_grande {
+    height: 350px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.mensaje {
+    margin-bottom: 20px;
+}
 

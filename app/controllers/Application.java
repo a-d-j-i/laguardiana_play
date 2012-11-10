@@ -34,7 +34,7 @@ public class Application extends Controller {
 
     public static void printTemplate() {
         try {
-            DeviceFactory.getPrinter().printAttributes();
+            //DeviceFactory.getPrinter().printAttributes();
    
             BillDepositController.FormData formData = new BillDepositController.FormData();
             formData.currency.currency = new Currency();
@@ -42,8 +42,8 @@ public class Application extends Controller {
             renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
             renderArgs.put("formData", formData);
 
-            int depositId = 1013;
-            BillDeposit deposit = BillDeposit.findById(depositId);
+            List<BillDeposit> depositList = BillDeposit.findAll();
+            BillDeposit deposit = depositList.get(0);
             List<Bill> bl = deposit.getBillList();
             renderArgs.put("billData", bl);
             renderArgs.put("depositTotal", deposit.getTotal());

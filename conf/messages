@@ -110,6 +110,7 @@ envelope_deposit.required.envelopeCode=Falta el codigo del sobre
 validation.required=%s es un campo obligatorio
 validation.required=campo obligatorio
 validation.must_be_a_number=el campo debe ser numerico
+validation.must_be_a_5_number=el campo debe ser numerico de 5 digitos maximo
 validation.required.reference2=campo obligatorio
 validation.required.envelopeCode=campo obligatorio
 validation.required.cashData_amount=campo obligatorio

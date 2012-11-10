@@ -28,7 +28,7 @@
     
   db.LgSystemProperty( DEFAULT_CURRENCY ):
     name:           default_currency
-    value:          3
+    value:          1
     
   lov.Currency(Reference_ARS_BILL):
     numericId:      1

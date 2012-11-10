@@ -69,8 +69,8 @@ public class BillDepositAction extends UserAction {
             try {
                 // Print the ticket.
                 DeviceFactory.getPrinter().print("billDeposit", renderArgs, 150);
-            } catch (Throwable ex) {
-                Logger.debug(ex.getMessage());
+            } catch (Exception ex) {
+                Logger.debug("Error printing : " + ex.getMessage());
             }
         }
     }

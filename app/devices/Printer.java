@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Array;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.print.Doc;
@@ -101,6 +100,9 @@ public class Printer {
         if (template == null) {
             template = TemplateLoader.load("Printer/" + templateName + ".txt");
         }
+        if (template == null) {
+            throw new PrinterException(String.format("Template %s not found", templateName));
+        }
         String body = template.render(args);
         //Logger.debug("PRINT : %s", body);
 
@@ -109,18 +111,15 @@ public class Printer {
 
         HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
         try {
+            Logger.debug(Play.applicationPath.toURI().toURL().toString());
             doc.setBase(Play.applicationPath.toURI().toURL());
-        } catch (MalformedURLException ex) {
-            throw new PrinterException(ex.getMessage());
-        }
-        Reader fin = new StringReader(body);
-        try {
+            Reader fin = new StringReader(body);
             kit.read(fin, doc, 0);
             fin.close();
         } catch (IOException ex) {
-            Logger.error(ex.toString());
+            throw new PrinterException("IOException : " + ex.toString());
         } catch (BadLocationException ex) {
-            Logger.error(ex.toString());
+            throw new PrinterException("BadLocationException : " + ex.toString());
         }
 
         JEditorPane item = new JEditorPane();
@@ -141,43 +140,41 @@ public class Printer {
         //attrs.add(new PrinterResolution(600, 600, PrinterResolution.DPI));
         //attrs.add(new MediaPrintableArea(0, 0, 10, 10, MediaPrintableArea.MM));
 
+        HashDocAttributeSet attrc = new HashDocAttributeSet();
+        //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 30, MediaPrintableArea.MM));
+        attrc.add(OrientationRequested.PORTRAIT);
+        attrc.add(MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM));
 
         // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
-        if (printers.containsKey(port)) {
-            PrintService p = printers.get(port);
-            DocPrintJob printJob = p.createPrintJob();
-            HashDocAttributeSet attrc = new HashDocAttributeSet();
-            //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 30, MediaPrintableArea.MM));
-            attrc.add(OrientationRequested.PORTRAIT);
-            attrc.add(MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM));
-            //attrc.add(MediaSize.findMedia((float) 80, (float) 160, MediaSize.MM));
-            //addMediaSizeByName(p, attrc, "80mm * 160mm");
-            Doc docc = new SimpleDoc(item.getPrintable(null, null), DocFlavor.SERVICE_FORMATTED.PRINTABLE, attrc);
-            printJob.addPrintJobListener(new MyPrintListener());
-            if (TO_PRINTER) {
-                printJob.print(docc, null);
-            } else {
-                JFrame frame = new JFrame("Main print frame");
-                frame.getContentPane().add(item);
-                frame.setSize((int) (4.1 * PAGE_WIDTH), (int) (4.1 * paperLen));
-                frame.pack();
-                frame.setVisible(true);
-            }
-
-
-            /*            attrs.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 160, MediaPrintableArea.MM));
-             attrs.add(OrientationRequested.PORTRAIT);
-             addMediaSizeByName(p, attrs, "80mm * 160mm");
-             */
-
-            //Logger.debug("Printer : " + p.getName() + " " + p.toString());
-            //item.print(null, null, false, p, attrs, false);
-        } else {
-            throw new PrinterException(String.format("Printer %s not found", port));
+        if (port == null || !printers.containsKey(port)) {
+            throw new PrinterException(String.format("Printer %s not found", port == null ? "NULL" : port));
         }
-    }
 
-    // Hack to add something from sun.print.
+        PrintService p = printers.get(port);
+        DocPrintJob printJob = p.createPrintJob();
+        //attrc.add(MediaSize.findMedia((float) 80, (float) 160, MediaSize.MM));
+        //addMediaSizeByName(p, attrc, "80mm * 160mm");
+        Doc docc = new SimpleDoc(item.getPrintable(null, null), DocFlavor.SERVICE_FORMATTED.PRINTABLE, attrc);
+        printJob.addPrintJobListener(new MyPrintListener());
+        if (TO_PRINTER) {
+            printJob.print(docc, null);
+        } else {
+            JFrame frame = new JFrame("Main print frame");
+            frame.getContentPane().add(item);
+            frame.setSize((int) (4.1 * PAGE_WIDTH), (int) (4.1 * paperLen));
+            frame.pack();
+            frame.setVisible(true);
+        }
+
+        /*            attrs.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 160, MediaPrintableArea.MM));
+         attrs.add(OrientationRequested.PORTRAIT);
+         addMediaSizeByName(p, attrs, "80mm * 160mm");
+         */
+        //Logger.debug("Printer : " + p.getName() + " " + p.toString());
+        //item.print(null, null, false, p, attrs, false);
+    }
+// Hack to add something from sun.print.
+
     void addMediaSizeByName(PrintService p, PrintRequestAttributeSet attrs, String name) {
         Object o = p.getSupportedAttributeValues(javax.print.attribute.standard.Media.class, null, null);
         if (o
