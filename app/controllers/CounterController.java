@@ -53,7 +53,6 @@ public class CounterController extends Controller {
     public static void counterError(Integer cmd) {
         GloryManager.Status gstatus = null;
         String gerror = null;
-        IoBoard.Status istatus = null;
         String ierror = null;
 
         final GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
@@ -63,9 +62,7 @@ public class CounterController extends Controller {
         }
         final IoBoard ioBoard = DeviceFactory.getIoBoard();
         if (ioBoard != null) {
-            IoBoard.IoBoardStatus s = ioBoard.getStatus();
-            istatus = s.status;
-            ierror = s.error;
+            ierror = ioBoard.getError();
         }
         if (cmd != null) {
             switch (cmd) {
@@ -81,7 +78,6 @@ public class CounterController extends Controller {
         renderArgs.put("merror", ModelFacade.getError());
         renderArgs.put("gstatus", gstatus);
         renderArgs.put("gerror", gerror);
-        renderArgs.put("istatus", istatus);
         renderArgs.put("ierror", ierror);
 
         if (request.isAjax()) {

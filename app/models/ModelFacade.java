@@ -13,7 +13,6 @@ import java.util.Observable;
 import java.util.Observer;
 import models.actions.UserAction;
 import models.db.LgDeposit;
-import models.db.LgEvent;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
@@ -76,7 +75,7 @@ public class ModelFacade {
 
         @Override
         public void doJob() throws Exception {
-            LgEvent.save(currentUserAction, LgEvent.Type.GLORY, status.name());
+            GloryEvent.save(currentUserAction, status.name());
             switch (status.getState()) {
                 case ERROR:
                     if (Play.configuration.getProperty("glory.ignore") == null) {
@@ -111,8 +110,12 @@ public class ModelFacade {
 
         @Override
         public void doJob() throws Exception {
-            LgEvent.save(currentUserAction, LgEvent.Type.IO_BOARD, status.toString());
-            if (status.status == IoBoard.Status.ERROR) {
+            if (status == null) {
+                Logger.debug("doJob status is null");
+                return;
+            }
+            IoBoardEvent.save(currentUserAction, status.toString());
+            if (status.isError()) {
                 // A development option
                 if (Play.configuration.getProperty("io_board.ignore") == null) {
                     modelError.ioBoardError = status.error;
@@ -206,7 +209,7 @@ public class ModelFacade {
     }
 
     synchronized static public void startAction(UserAction userAction) {
-        LgEvent.save(userAction, LgEvent.Type.ACTION_START_TRY, getNeededController());
+        ActionEvent.save(userAction, "Start try", getNeededController());
         if (modelError.isError()) {
             Logger.info("Can't start an action when on error");
             return;
@@ -217,13 +220,13 @@ public class ModelFacade {
         }
         currentUser = Secure.getCurrentUser();
         currentUserAction = userAction;
-        LgEvent.save(currentUserAction, LgEvent.Type.ACTION_START, getNeededController());
+        ActionEvent.save(currentUserAction, "Start", getNeededController());
         currentUserAction.start(currentUser, new UserActionApi());
     }
 
     synchronized public static void finishAction() {
         if (currentUserAction != null && currentUser != null) {
-            LgEvent.save(currentUserAction, LgEvent.Type.ACTION_FINISH, getNeededController());
+            ActionEvent.save(currentUserAction, "Finish", getNeededController());
 
             if (currentUserAction.canFinishAction() || modelError.isError()) {
                 currentUserAction.finish();
@@ -243,9 +246,9 @@ public class ModelFacade {
             }
         }
 
-        if (ioBoard.getStatus().status == IoBoard.Status.ERROR) {
+        if (ioBoard.isError()) {
             if (Play.configuration.getProperty("io_board.ignore") == null) {
-                setError(String.format("IoBoeard error : %s", ioBoard.getStatus().error));
+                setError(String.format("IoBoeard error : %s", ioBoard.getError()));
             }
         }
         if (modelError.isError()) {
@@ -304,11 +307,10 @@ public class ModelFacade {
         } else {
             Logger.error("Manager still in error %s", m.name());
         }
-        IoBoard.IoBoardStatus s = ioBoard.getStatus();
-        if (s.status != IoBoard.Status.ERROR) {
+        if (ioBoard.isError()) {
             modelError.ioBoardError = null;
         } else {
-            Logger.error("IoBoard still in error %s", m.name());
+            Logger.error("IoBoard still in error %s", ioBoard.getError());
         }
         modelError.appError = null;
     }

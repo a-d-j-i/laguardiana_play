@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
+import models.DepositEvent;
+import models.DepositProcessedEvent;
 import models.db.LgLov.LovCol;
 import models.lov.DepositUserCodeReference;
 import play.db.jpa.GenericModel;
@@ -40,8 +42,6 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     @LovCol(DepositUserCodeReference.class)
     public Integer userCodeLov;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit")
-    public Set<LgEvent> events = new HashSet<LgEvent>(0);
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit")
     public Set<LgEnvelope> envelopes = new HashSet<LgEnvelope>(0);
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit")
     public Set<LgBill> bills = new HashSet<LgBill>(0);
@@ -62,9 +62,9 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 "select d from LgDeposit d where "
                 + " finishDate is not null "
                 + "and not exists ("
-                + " from LgEvent e, LgExternalAppLog al, LgExternalApp ea"
+                + " from DepositProcessedEvent e, LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
-                + " and d = e.deposit"
+                + " and d.depositId = e.eventSourceId"
                 + " and al.event = e and ea.appId = ?"
                 + ")", appId);
     }
@@ -75,9 +75,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         if (d == null || ea == null) {
             return false;
         }
-        LgEvent e = new LgEvent(LgEvent.Type.DEPOSIT_EXPORT, String.format("Exporting to app %d", appId));
-        e.setDeposit(d);
-        e.save();
+        DepositProcessedEvent e = DepositProcessedEvent.save(d, String.format("Exporting to app %d", appId));
         LgExternalAppLog el = new LgExternalAppLog(e, resultCode);
         el.successDate = new Date();
         el.setEvent(e);
@@ -103,7 +101,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         boolean mustSave = (!JPABase.em().contains(this));
         T ret = super.save();
         if (mustSave) {
-            LgEvent.save(null, LgEvent.Type.DEPOSIT_CHANGE, String.format("Deposit changed by userId : %d", user.userId));
+            DepositEvent.save(user, this, String.format("Deposit changed by userId : %d", user.userId));
         }
         return ret;
     }

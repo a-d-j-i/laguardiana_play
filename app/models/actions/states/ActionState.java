@@ -45,7 +45,7 @@ abstract public class ActionState {
     }
 
     public void onIoBoardEvent(IoBoardStatus status) {
-        Logger.debug("onIoBoardEvent %s %s", status.status.name(), name());
+        Logger.debug("onIoBoardEvent %s", status.toString());
     }
 
     public void onTimeoutEvent(TimeoutTimer timer) {

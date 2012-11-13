@@ -3,7 +3,6 @@ package controllers;
 import devices.DeviceFactory;
 import devices.IoBoard.IoBoardStatus;
 import java.io.IOException;
-import play.Logger;
 import play.Play;
 import play.mvc.Before;
 import play.mvc.Router;
@@ -28,7 +27,7 @@ public class IoBoardController extends Application {
             render();
         }
         IoBoardStatus s = null;
-        s = ioBoard.getStatus();
+        s = ioBoard.getStatusCopy();
         if (s != null) {
             renderArgs.put("status", s);
             renderArgs.put("A", Integer.toHexString(s.A));

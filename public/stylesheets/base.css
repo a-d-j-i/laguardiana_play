@@ -166,16 +166,12 @@ hr {
 
 /* forms */
 
-input[type='text'], input[type='password'], textarea {
+input[type='text'], input[type='password'], input[type='number'], textarea {
     background: white;
     border: 1px solid #BCBCBC;
     padding: 10px;
     font-size: 15pt;
     color: #999999;
-}
-
-input[type='text'], input[type='password'] {
-
 }
 
 select {
@@ -201,13 +197,6 @@ select option {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     width: 100%;
-}
-
-.medium_width {
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    width: 50%;
 }
 
 /* tablas */
@@ -411,7 +400,6 @@ input[type='text'] {
 }
 
 .botonera {
-    height: 150px;
     overflow: hidden;
 }
 
@@ -423,20 +411,8 @@ input[type='text'] {
     margin-bottom: 30px;
 }
 
-.botonera_pie .columna {
-    padding: 0 10px;
-}
-
-.botonera_pie .columna a {
-    margin-right: 20px;
-}
-
-.columna_1 {
-    padding-right: 30px;
-}
-
-.columna_2 {
-    text-align: right;
+.botonera .columna a {
+    margin-bottom: 20px;
 }
 
 .contenido {

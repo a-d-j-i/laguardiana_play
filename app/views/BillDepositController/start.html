@@ -5,15 +5,15 @@
     <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
+        #{form @start(), 'id' : 'startForm', 'onSubmit' : 'return testSubmit();' }
         <div class="contenido_grande">
             <ul class="columns">
-                #{form @start(), 'id' : 'startForm' }
-                #{ifErrors}
-                <p class="error">
-                    All fields are required!
-                </p>
-                #{/ifErrors}
-                <li class="fixed column" style="width: 60%">
+                <li class="fixed column" style="width: 60%;">
+                    #{ifErrors}
+                    <p class="error">
+                        All fields are required!
+                    </p>
+                    #{/ifErrors}
                     <div class="columna_1">
                         #{ if ( formData.showReference1 || formData.showReference2 ) }
                         <div class="mensaje"><span>&{ 'application.input_reference' }</span></div>
@@ -28,8 +28,8 @@
                         #{error 'formData.reference1' /}
 
                         #{ if ( formData.showReference2 ) }
-                        <input  autocomplete="off"id="reference2_input" name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
-                                /> 
+                        <input type="text" autocomplete="off" id="reference2_input" name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
+                               /> 
                         <!--                           value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if}"-->
                         #{ifError 'formData.reference2'}
                         <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required.reference2' }</label>
@@ -44,12 +44,16 @@
                         &nbsp;
                         #{ keyboard useHardwareKeyboard: useHardwareKeyboard /}
                     </div>
-                    <!-- link accion -->
-                    <a id ="startCountingButton" href="#" class="boton medium_width naranja">&{ 'application.start_counting' }</a>
+                    <div class="botonera">
+                        <div class="columna">
+                            <!-- link accion -->
+                            <a id ="startCountingButton" href="#" class="boton full_width naranja">&{ 'application.start_counting' }</a>
+                        </div>
+                    </div>  
                 </li>
-                #{/form}
             </ul>
         </div>
+        #{/form}
     </article>
 </section>
 
@@ -58,7 +62,10 @@
 #{script 'jquery/jquery.form.js' /}
 #{script 'jquery/jquery.validate.js' /}
 <script type="text/javascript" charset="${_response_encoding}">
-    
+    var s = false;
+    function testSubmit() {
+        return s;
+    }
     /*    $( '#reference2_input' ).keyup( function(event) {
         if ( $( this ).val() ) {
             $( '#startCountingButton' ).removeClass( 'gris' ).addClass( 'naranja' );
@@ -67,6 +74,7 @@
         }
     } );*/
     $( '#startCountingButton' ).click( function(event) {
+        s = true;
         //        $("#startForm").validate( {
         //            errorPlacement: function(error, element) {
         //            },

@@ -8,16 +8,15 @@ import devices.IoBoard;
 import devices.glory.manager.GloryManager;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import models.Bill;
 import models.ModelFacade.UserActionApi;
+import models.TimeoutEvent;
 import models.User;
 import models.actions.states.ActionState;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgDeposit;
-import models.db.LgEvent;
 import models.lov.Currency;
 import play.Logger;
 
@@ -142,6 +141,10 @@ abstract public class UserAction {
         start();
     }
 
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
     public Object getFormData() {
         return formData;
     }
@@ -177,7 +180,7 @@ abstract public class UserAction {
 
     public void onTimeoutEvent(TimeoutTimer timer) {
         Date currentDate = new Date();
-        LgEvent.save(this, LgEvent.Type.TIMEOUT, currentDate.toString());
+        TimeoutEvent.save(this, currentDate.toString());
         state.onTimeoutEvent(timer);
     }
 

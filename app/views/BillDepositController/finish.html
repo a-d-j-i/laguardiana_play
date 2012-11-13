@@ -28,14 +28,17 @@
         <div class="botonera">
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
-                    <!-- link cancelar -->
-                    <a href="@{Application.index()}" class="boton medium_width gris">&{ 'main_menu.title' }</a>
+                    <div class="columna">
+                        <a href="@{Application.index()}" class="boton full_width gris">&{ 'main_menu.title' }</a>
+                    </div>
                 </li>
                 <li class="fixed column" style="width: 50%">
-                    <div class="columna_2">
-                        #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
-                        <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde">&{'main_menu.logout'}</a>
-                        #{/if}
+                    <div class="columna">
+                        <div class="columna">
+                            #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
+                            <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde">&{'main_menu.logout'}</a>
+                            #{/if}
+                        </div>
                     </div>
                 </li>
             </ul>

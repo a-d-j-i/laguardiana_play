@@ -4,6 +4,7 @@ import devices.IoBoard.IoBoardStatus;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,31 +16,86 @@ import play.Logger;
  * TODO: getCh, fifo, etc in other class.
  */
 public class IoBoard extends Observable {
-    // read timeout in ms
 
+    // read timeout in ms
+    public enum SHUTTER_STATE {
+
+        SHUTTER_START(0),
+        SHUTTER_START_OPEN(1),
+        SHUTTER_START_CLOSE(2),
+        SHUTTER_RUN_OPEN(3),
+        SHUTTER_RUN_CLOSE(4),
+        SHUTTER_RUN_OPEN_PORT(5),
+        SHUTTER_RUN_CLOSE_PORT(6),
+        SHUTTER_STOP_OPEN(7),
+        SHUTTER_STOP_CLOSE(8),
+        SHUTTER_OPEN(9),
+        SHUTTER_CLOSED(10);
+        static final HashMap< Byte, SHUTTER_STATE> reverse = new HashMap< Byte, SHUTTER_STATE>();
+
+        static {
+            for (SHUTTER_STATE s : SHUTTER_STATE.values()) {
+                reverse.put(s.stId, s);
+            }
+        }
+        private Byte stId;
+
+        private SHUTTER_STATE(int stId) {
+            this.stId = (byte) stId;
+        }
+
+        public static SHUTTER_STATE factory(int stId) {
+            return reverse.get((byte) stId);
+        }
+
+        public boolean isOpen() {
+            return this == SHUTTER_OPEN;
+        }
+    };
+
+    public enum BAG_STATE {
+
+        BAG_STATE_ERROR(0),
+        BAG_STATE_REMOVED(1),
+        BAG_STATE_TAKING_S(2),
+        BAG_STATE_TAKING_SM(3),
+        BAG_STATE_PLACING_S(4),
+        BAG_STATE_PLACING_SM(5),
+        BAG_STATE_INPLACE(6);
+        static final HashMap< Byte, BAG_STATE> reverse = new HashMap< Byte, BAG_STATE>();
+
+        static {
+            for (BAG_STATE s : BAG_STATE.values()) {
+                reverse.put(s.stId, s);
+            }
+        }
+        private Byte stId;
+
+        private BAG_STATE(int stId) {
+            this.stId = (byte) stId;
+        }
+
+        public static BAG_STATE factory(int stId) {
+            return reverse.get((byte) stId);
+        }
+    }
     public static final int IOBOARD_READ_TIMEOUT = 10000;
     public static final int IOBOARD_STATUS_CHECK_FREQ = 2000;
     public static final int IOBOARD_MAX_RETRIES = 5;
 
-    public enum Status {
-
-        IDLE,
-        ERROR,
-        OPENNING,
-        OPEN,
-        CLOSING,
-        CLOSED,;
-    }
-
     public class IoBoardStatus implements Cloneable {
 
+        final private Lock mutex = new ReentrantLock();
         public Integer A = 0;
         public Integer B = 0;
         public Integer C = 0;
         public Integer D = 0;
-        public Status status = Status.IDLE;
+        public Integer bagStatus = 0;
         public boolean isRunning;
         public String error = null;
+        public BAG_STATE bagState = null;
+        public SHUTTER_STATE shutterState = null;
+        public Integer lockState = null;
 
         private IoBoardStatus copy() {
             try {
@@ -50,25 +106,113 @@ public class IoBoard extends Observable {
             }
         }
 
-        @Override
-        public String toString() {
-            return "IoBoardStatus{" + "A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ", status=" + status + ", isRunning=" + isRunning + ", error=" + error + '}';
+        private void setBagState(BAG_STATE bagState) {
+            if (this.bagState != bagState) {
+                this.bagState = bagState;
+                setChanged();
+            }
         }
-    }
 
-    private class StatusThread extends Thread {
+        private void setShutterState(SHUTTER_STATE shutterState) {
+            if (this.shutterState != shutterState) {
+                this.shutterState = shutterState;
+                setChanged();
+            }
+        }
 
-        private IoBoardStatus currentStatus = new IoBoardStatus();
-        final private Lock mutex = new ReentrantLock();
+        private void setLockState(Integer lockState) {
+            if (this.lockState != lockState) {
+                this.lockState = lockState;
+                setChanged();
+            }
+        }
 
-        public IoBoardStatus getStatus() {
+        public IoBoardStatus getStatusCopy() {
             mutex.lock();
             try {
-                return currentStatus.copy();
+                return copy();
             } finally {
                 mutex.unlock();
             }
         }
+
+        private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt) {
+            IoBoardStatus status = null;
+            mutex.lock();
+            try {
+                setBagState(BAG_STATE.factory(bagSt));
+                setShutterState(SHUTTER_STATE.factory(shutterSt));
+                setLockState(lockSt);
+                this.lockState = lockSt;
+                if (hasChanged()) {
+                    status = copy();
+                }
+            } finally {
+                mutex.unlock();
+            }
+            notifyObservers(status);
+        }
+
+        private void setStatus(Integer A, Integer B, Integer C, Integer D, Integer BAG) {
+            mutex.lock();
+            try {
+                this.A = A;
+                this.B = B;
+                this.C = C;
+                this.D = D;
+                this.bagStatus = BAG;
+            } finally {
+                mutex.unlock();
+            }
+        }
+
+        private void setError(String error) {
+            IoBoardStatus status = null;
+            Logger.error("------- > IoBoard error : %s", error);
+            mutex.lock();
+            try {
+                this.error = error;
+                setChanged();
+                status = copy();
+            } finally {
+                mutex.unlock();
+            }
+            notifyObservers(status);
+        }
+
+        private void clearError() {
+            mutex.lock();
+            try {
+                // Don't overwrite the first error!!!.
+                this.error = null;
+            } finally {
+                mutex.unlock();
+            }
+        }
+
+        private String getError() {
+            String ret;
+            mutex.lock();
+            try {
+                // Don't overwrite the first error!!!.
+                ret = this.error;
+            } finally {
+                mutex.unlock();
+            }
+            return ret;
+        }
+
+        public boolean isError() {
+            return getError() != null;
+        }
+
+        @Override
+        public String toString() {
+            return "IoBoardStatus{" + "A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ", bagStatus=" + bagStatus + ", isRunning=" + isRunning + ", error=" + error + ", bagState=" + bagState + ", shutterState=" + shutterState + ", lockState=" + lockState + '}';
+        }
+    }
+
+    private class StatusThread extends Thread {
 
         @Override
         public void run() {
@@ -88,45 +232,46 @@ public class IoBoard extends Observable {
                             Integer B = Integer.parseInt(l.substring(17, 19), 16);
                             Integer C = Integer.parseInt(l.substring(23, 25), 16);
                             Integer D = Integer.parseInt(l.substring(29, 31), 16);
-                            setABCD(A, B, C, D);
+                            Integer BAG = Integer.parseInt(l.substring(68, 70), 16);
+                            currentStatus.setStatus(A, B, C, D, BAG);
                         } catch (NumberFormatException e) {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
-                    } else {
-                        if (l.equalsIgnoreCase("START OPEN")) {
-                            setStatus(Status.OPENNING);
-                        } else if (l.equalsIgnoreCase("START CLOSE")) {
-                            setStatus(Status.CLOSING);
-                        } else if (l.equalsIgnoreCase("OPEN")) {
-                            setStatus(Status.OPEN);
-                        } else if (l.equalsIgnoreCase("CLOSE")) {
-                            setStatus(Status.CLOSED);
-                        } else if (l.equalsIgnoreCase("ERROR OPEN TIMEOUT")) {
-                            setError("Open timeout");
-                        } else {
-                            Logger.warn("StatusThread Ignoring line : %s", l);
+                    } else if (l.startsWith("STATE :") && l.length() == 31) {
+                        try {
+                            Integer bagSt = Integer.parseInt(l.substring(12, 14), 10);
+                            Integer shutterSt = Integer.parseInt(l.substring(23, 25), 10);
+                            Integer lockSt = Integer.parseInt(l.substring(31, 32), 10);
+                            // TODO: Lockin
+                            currentStatus.setSTATE(bagSt, shutterSt, lockSt);
+                        } catch (NumberFormatException e) {
+                            Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
+                    } else if (l.startsWith("ERROR")) {
+                        currentStatus.setError(l);
+                    } else {
+                        Logger.warn("IOBOARD Ignoring line : %s", l);
                     }
                 } catch (Exception ex) {
                     if (!(ex.getCause() instanceof TimeoutException)) {
-                        setError(String.format("StatusThread exception %s", ex.getMessage()));
+                        currentStatus.setError(String.format("StatusThread exception %s", ex.getMessage()));
                     } else { // timeout
                         // Try again
-                        if (getStatus().status != Status.ERROR) {
+                        if (getError() == null) {
                             sendCmd('S');
                             retries++;
 
                             if (retries == IOBOARD_MAX_RETRIES) {
-                                setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
+                                currentStatus.setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
                                 retries = 0;
                             }
                             Date currTime = new Date();
                             if (lastCmdSentTime != null && (currTime.getTime() - lastCmdSentTime.getTime()) > IOBOARD_READ_TIMEOUT) {
-                                setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
+                                currentStatus.setError(String.format("StatusThread timeout reading from port, exception %s", ex.getMessage()));
                                 try {
                                     serialPort.reconect();
                                 } catch (IOException ex1) {
-                                    setError(String.format("Error in reconection %s", ex1.getMessage()));
+                                    currentStatus.setError(String.format("Error in reconection %s", ex1.getMessage()));
                                 }
                             }
                         }
@@ -134,54 +279,6 @@ public class IoBoard extends Observable {
                 }
             }
             Logger.debug("IOBOARD status thread done");
-        }
-
-        private void setABCD(Integer A, Integer B, Integer C, Integer D) {
-            mutex.lock();
-            try {
-                currentStatus.A = A;
-                currentStatus.B = B;
-                currentStatus.C = C;
-                currentStatus.D = D;
-            } finally {
-                mutex.unlock();
-            }
-        }
-
-        private void setStatus(Status s) {
-            IoBoardStatus status;
-            mutex.lock();
-            try {
-                currentStatus.status = s;
-                status = currentStatus.copy();
-            } finally {
-                mutex.unlock();
-            }
-            setChanged();
-            notifyObservers(status);
-        }
-
-        private void setError(String error) {
-            Logger.error("------- > IoBoard error : %s", error);
-            mutex.lock();
-            try {
-                currentStatus.status = Status.ERROR;
-                currentStatus.error = error;
-            } finally {
-                mutex.unlock();
-            }
-        }
-
-        private void clearError() {
-            mutex.lock();
-            try {
-                // Don't overwrite the first error!!!.
-                if (currentStatus.status == Status.ERROR) {
-                    currentStatus.status = Status.IDLE;
-                }
-            } finally {
-                mutex.unlock();
-            }
         }
 
         private void sendCmd(char cmd) {
@@ -200,13 +297,14 @@ public class IoBoard extends Observable {
                 try {
                     serialPort.reconect();
                 } catch (IOException ex1) {
-                    if (getStatus().status != Status.ERROR) {
-                        setError(String.format("Error in reconection %s", ex1.getMessage()));
+                    if (getError() == null) {
+                        currentStatus.setError(String.format("Error in reconection %s", ex1.getMessage()));
                     }
                 }
             }
         }
     }
+    private IoBoardStatus currentStatus = new IoBoardStatus();
     private Date lastCmdSentTime = null;
     private AtomicBoolean mustStop = new AtomicBoolean(false);
     private final StatusThread statusThread;
@@ -253,12 +351,21 @@ public class IoBoard extends Observable {
         statusThread.sendCmd('C');
     }
 
-    public IoBoardStatus getStatus() {
-        return statusThread.getStatus();
+    public void clearError() {
+        statusThread.sendCmd('E');
+        currentStatus.clearError();
     }
 
-    public void clearError() {
-        statusThread.clearError();
+    public boolean isError() {
+        return currentStatus.isError();
+    }
+
+    public String getError() {
+        return currentStatus.getError();
+    }
+
+    public IoBoardStatus getStatusCopy() {
+        return currentStatus.getStatusCopy();
     }
 
     @Override

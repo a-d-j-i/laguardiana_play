@@ -39,6 +39,8 @@ public abstract class LgUser extends GenericModel implements java.io.Serializabl
     @Column( name = "end_date", nullable = true, length = 13)
     public Date endDate;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    public Set<LgEvent> events = new HashSet<LgEvent>(0);
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
     public Set<LgDeposit> deposits = new HashSet<LgDeposit>(0);
     @ManyToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable( name = "lg_user_role", schema = "public", joinColumns = {
