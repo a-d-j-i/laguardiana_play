@@ -25,6 +25,7 @@ import javax.print.attribute.HashDocAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.PrintServiceAttributeSet;
 import javax.print.attribute.standard.MediaSize;
+import javax.print.attribute.standard.MediaSizeName;
 import javax.print.attribute.standard.OrientationRequested;
 import javax.print.event.PrintJobEvent;
 import javax.print.event.PrintJobListener;
@@ -143,7 +144,14 @@ public class Printer {
         HashDocAttributeSet attrc = new HashDocAttributeSet();
         //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 30, MediaPrintableArea.MM));
         attrc.add(OrientationRequested.PORTRAIT);
-        attrc.add(MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM));
+        MediaSizeName m = MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM);
+        if (m != null) {
+            Logger.debug("MEDIA SIZE NAME %s", m);
+            attrc.add(m);
+        } else {
+            Logger.error("MEDIA SIZE NAME IS NULL");
+            return;
+        }
 
         // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
         if (port == null || !printers.containsKey(port)) {

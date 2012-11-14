@@ -68,7 +68,7 @@ public class BillDepositAction extends UserAction {
             renderArgs.put("depositId", deposit.depositId);
             try {
                 // Print the ticket.
-                DeviceFactory.getPrinter().print("billDeposit", renderArgs, 150);
+                DeviceFactory.getPrinter().print("billDeposit", renderArgs, 120);
             } catch (Exception ex) {
                 Logger.debug("Error printing : " + ex.getMessage());
             }

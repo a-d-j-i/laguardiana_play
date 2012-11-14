@@ -51,7 +51,7 @@ public class Application extends Controller {
             // Print the ticket.
 //            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs);
 //            DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs);
-            DeviceFactory.getPrinter().print("billDeposit", renderArgs.data, 150);
+            DeviceFactory.getPrinter().print("billDeposit", renderArgs.data, 120);
 
 
         } catch (Throwable ex) {
