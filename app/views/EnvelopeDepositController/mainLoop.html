@@ -17,13 +17,13 @@
                     <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                     #{/if}
                     #{if ( formData.cashData.amount > 0 ) }
-                    <p>&{ 'envelope_deposit.amount_cash' }: ${ formData.cashData.amount } ${ formData.cashData.currency.textId } </p>
+                    <p>&{ 'envelope_deposit.amount_cash' }: ${ formData.cashData.amount } ${ formData.cashData.currency.description } </p>
                     #{/if}
                     #{if ( formData.checkData.amount > 0 ) }
-                    <p>&{ 'envelope_deposit.amount_checks' }: ${ formData.checkData.amount } ${ formData.checkData.currency.textId } </p>
+                    <p>&{ 'envelope_deposit.amount_checks' }: ${ formData.checkData.amount } ${ formData.checkData.currency.description } </p>
                     #{/if}
                     #{if ( formData.ticketData.amount > 0  ) }
-                    <p>&{ 'envelope_deposit.amount_tickets' }: ${ formData.ticketData.amount } ${ formData.ticketData.currency.textId } </p>
+                    <p>&{ 'envelope_deposit.amount_tickets' }: ${ formData.ticketData.amount } ${ formData.ticketData.currency.description } </p>
                     #{/if}
                     #{if formData.hasDocuments }
                     <p>&{ 'envelope_deposit.has_documents' }</p>

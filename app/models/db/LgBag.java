@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
-import models.InvalidBagEvent;
+import models.BagProcessedEvent;
+import models.BagEvent;
 import play.Logger;
 import play.db.jpa.GenericModel;
 
@@ -38,6 +39,32 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         return LgDeposit.find("select b from LgBag b");
     }
 
+    public static JPAQuery findUnprocessed(int appId) {
+        return LgDeposit.find(
+                "select b from LgBag b where "
+                + "not exists ("
+                + " from BagProcessedEvent e, LgExternalAppLog al, LgExternalApp ea"
+                + " where al.externalApp = ea "
+                + " and b.bagId = e.eventSourceId"
+                + " and al.event = e and ea.appId = ?"
+                + ")", appId);
+    }
+
+    public static boolean process(int appId, int depositId, String resultCode) {
+        LgBag b = LgBag.findById(depositId);
+        LgExternalApp ea = LgExternalApp.findById(appId);
+        if (b == null || ea == null || b.withdrawDate == null) {
+            return false;
+        }
+        BagProcessedEvent e = BagProcessedEvent.save(b, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(e, resultCode);
+        el.successDate = new Date();
+        el.setEvent(e);
+        el.setExternalApp(ea);
+        el.save();
+        return true;
+    }
+
     // TODO: Search for the bag that has withdraw data null.
     // Or add a new bug logging the error.
     public static LgBag getCurrentBag() {
@@ -45,7 +72,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         List<LgBag> bags = LgBag.find("select bg from LgBag bg where bg.withdrawDate is null order by bg.creationDate desc").fetch();
         if (bags == null || bags.isEmpty()) {
             Logger.error("There's no bag where to deposit, creating one!!");
-            InvalidBagEvent.save(null, "There is no bag to deposit creating one");
+            BagEvent.save(null, "There is no bag to deposit creating one");
             currentBag = new LgBag("AUTOMATIC_BY_APP");
             currentBag.save();
         } else {
@@ -57,7 +84,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
                     toClose.withdrawDate = new Date();
                     toClose.save();
                     Logger.error("There are more than one open bag, closing the bag %d", toClose.bagId);
-                    InvalidBagEvent.save(toClose, String.format("There are more than one open bag, closing the bag %d", toClose.bagId));
+                    BagEvent.save(toClose, String.format("There are more than one open bag, closing the bag %d", toClose.bagId));
                 }
             } else {
                 currentBag = bags.get(0);
@@ -67,6 +94,17 @@ public class LgBag extends GenericModel implements java.io.Serializable {
             Logger.error("APP ERROR bag = null");
         }
         return currentBag;
+    }
+
+    public static void rotateBag() {
+
+        LgBag current = getCurrentBag();
+        current.withdrawDate = new Date();
+        BagEvent.save(current, "Closing bag");
+        current.save();
+        LgBag newBag = new LgBag("AUTOMATIC_ROTATED_BY_APP");
+        newBag.save();
+        BagEvent.save(newBag, "Opening new bag");
     }
 
     @Override

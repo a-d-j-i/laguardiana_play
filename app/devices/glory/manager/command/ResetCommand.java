@@ -20,7 +20,7 @@ public class ResetCommand extends ManagerCommandAbstract {
     @Override
     public void execute() {
         Logger.debug("Reset command");
-        if (gotoNeutral(true, false, true)) {
+        if (gotoNeutral(false, false, true)) {
             Logger.debug("Reset command done");
             clearError(false);
         } else {

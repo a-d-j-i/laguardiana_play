@@ -14,10 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.print.PrintException;
+import models.Configuration;
 import models.EnvelopeDeposit;
 import models.actions.states.IdleEnvelopeDeposit;
 import models.db.LgEnvelope;
-import models.db.LgSystemProperty;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -67,7 +67,7 @@ public class EnvelopeDepositAction extends UserAction {
             renderArgs.put("referenceCodes", referenceCodes);
             renderArgs.put("currencies", currencies);
             renderArgs.put("depositId", currentDepositId);
-            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs, 110);
+            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs, 120);
         } catch (PrinterException ex) {
             Logger.error(ex.getMessage());
         } catch (PrintException ex) {
@@ -81,13 +81,14 @@ public class EnvelopeDepositAction extends UserAction {
             EnvelopeDeposit d = EnvelopeDeposit.findById(currentDepositId);
             if (d != null && d.finishDate != null) {
                 Map renderArgs = new HashMap();
-                renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
+                renderArgs.put("clientCode", Configuration.getClientDescription());
                 renderArgs.put("formData", formData);
                 renderArgs.put("depositId", currentDepositId);
+                renderArgs.put("envelopes", d.envelopes);
 
                 try {
                     // Print the ticket.
-                    DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs, 60);
+                    DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs, 120);
                 } catch (Throwable ex) {
                     Logger.debug(ex.getMessage());
                 }

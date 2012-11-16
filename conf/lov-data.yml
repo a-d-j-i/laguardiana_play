@@ -32,20 +32,20 @@
     
   lov.Currency(Reference_ARS_BILL):
     numericId:      1
-    textId:         Pesos Argentinos
-    description:    $
+    textId:         ARS
+    description:    Pesos Argentinos
     endDate:        2999-12-31
 
   lov.Currency(Reference_USD_BILL):
     numericId:      2
-    textId:         Dolares
-    description:    U$S
+    textId:         USD
+    description:    Dolares
     endDate:        2999-12-31
 
   lov.Currency(Reference_EUR_BILL):
     numericId:      3
-    textId:         Euros
-    description:    EU$
+    textId:         EUR
+    description:    Euros
     endDate:        2999-12-31
 
   db.LgBillType(2pesos):

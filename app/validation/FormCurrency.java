@@ -4,9 +4,8 @@
  */
 package validation;
 
-import models.db.LgSystemProperty;
+import models.Configuration;
 import models.lov.Currency;
-import play.Logger;
 import play.data.validation.Check;
 
 /**
@@ -29,12 +28,7 @@ public class FormCurrency {
                 return true;
             }
             if (data.value == null) {
-                try {
-                    String dc = LgSystemProperty.getProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
-                    data.value = Integer.parseInt(dc);
-                } catch (NumberFormatException e) {
-                    data.value = 1; // Fixed.
-                }
+                data.value = Configuration.getDefaultCurrency();
             }
             data.currency = Currency.findByNumericId(data.value);
             if (data.currency == null) {

@@ -1,6 +1,8 @@
 package controllers;
 
 import java.util.List;
+import java.util.Set;
+import models.Configuration;
 import models.EnvelopeDeposit;
 import models.ModelFacade;
 import models.actions.EnvelopeDepositAction;
@@ -25,7 +27,7 @@ import validation.FormDepositUserCodeReference;
 
 @With(Secure.class)
 public class EnvelopeDepositController extends CounterController {
-    
+
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
@@ -46,16 +48,16 @@ public class EnvelopeDepositController extends CounterController {
             }
         }
     }
-    
+
     static public class FormDataContent extends FormCurrency {
-        
+
         static public class Validate extends FormCurrency.Validate {
-            
+
             @Override
             public boolean isSatisfied(Object validatedObject, Object data) {
                 return this.isSatisfied(validatedObject, (FormDataContent) data);
             }
-            
+
             public boolean isSatisfied(Object validatedObject, FormDataContent data) {
                 if (!super.isSatisfied(validatedObject, (FormCurrency) data)) {
                     return false;
@@ -67,17 +69,17 @@ public class EnvelopeDepositController extends CounterController {
             }
         }
         public Integer amount = null;
-        
+
         @Override
         public String toString() {
             return "FormDataContent{" + "amount=" + amount + '}' + super.toString();
         }
     }
-    
+
     static public class FormData {
-        
-        final public Boolean showReference1 = isProperty("envelope_deposit.show_reference1");
-        final public Boolean showReference2 = isProperty("envelope_deposit.show_reference2");
+
+        final public Boolean showReference1 = Configuration.mustShowReference1();
+        final public Boolean showReference2 = Configuration.mustShowReference2();
         @CheckWith(FormDepositUserCodeReference.Validate.class)
         public FormDepositUserCodeReference reference1 = new FormDepositUserCodeReference();
         //@Required(message = "validation.required.reference2")
@@ -93,13 +95,13 @@ public class EnvelopeDepositController extends CounterController {
         public FormDataContent checkData = new FormDataContent();
         @CheckWith(FormDataContent.Validate.class)
         public FormDataContent ticketData = new FormDataContent();
-        
+
         @Override
         public String toString() {
             return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + ", envelopeCode=" + envelopeCode + ", hasDocuments=" + hasDocuments + ", hasOther=" + hasOthers + ", cashData=" + cashData + ", checkData=" + checkData + ", ticketData=" + ticketData + '}';
         }
     }
-    
+
     public static void start(@Valid FormData formData) {
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
@@ -124,20 +126,18 @@ public class EnvelopeDepositController extends CounterController {
                 if (formData.hasOthers != null && formData.hasOthers) {
                     e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
                 }
-                
-                EnvelopeDepositAction currentAction =
-                        new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov,
-                        formData.reference2, e, formData);
+
+                EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
                 ModelFacade.startAction(currentAction);
                 mainLoop();
             }
         }
         if (formData == null) {
             formData = new FormData();
-            formData.cashData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
-            formData.checkData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
-            formData.ticketData.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
-            
+            formData.cashData.value = Configuration.getDefaultCurrency();
+            formData.checkData.value = Configuration.getDefaultCurrency();
+            formData.ticketData.value = Configuration.getDefaultCurrency();
+
         }
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
@@ -146,7 +146,7 @@ public class EnvelopeDepositController extends CounterController {
         renderArgs.put("currencies", currencies);
         render();
     }
-    
+
     public static void mainLoop() {
         if (request.isAjax()) {
             Object[] o = new Object[3];
@@ -155,26 +155,27 @@ public class EnvelopeDepositController extends CounterController {
             o[2] = Messages.get(ModelFacade.getActionMessage());
             renderJSON(o);
         } else {
-            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
+            renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("formData", ModelFacade.getFormData());
             render();
         }
     }
-    
+
     public static void cancel() {
         ModelFacade.cancel();
         renderJSON("");
     }
-    
+
     public static void accept() {
         ModelFacade.accept();
         renderJSON("");
     }
-    
+
     public static void finish() {
         EnvelopeDeposit deposit = (EnvelopeDeposit) ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
-        
+        Set<LgEnvelope> envelopes = deposit.envelopes;
+        renderArgs.put("envelopes", envelopes);
         renderArgs.put("canceled", (deposit != null && deposit.finishDate == null));
         if (formData != null) {
             ModelFacade.finishAction();

@@ -3,6 +3,7 @@ package controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import models.Configuration;
 import models.User;
 import models.db.LgSystemProperty;
 import play.Logger;
@@ -78,7 +79,7 @@ public class Secure extends Controller {
         }
         renderArgs.put("lastUrl", url);
         // TODO: Put in some other place.
-        renderArgs.put("useHardwareKeyboard", LgSystemProperty.isProperty("useHardwareKeyboard"));
+        renderArgs.put("useHardwareKeyboard", Configuration.useHardwareKeyboard());
 
         Logger.error("URL %s", url);
 

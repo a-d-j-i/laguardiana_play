@@ -11,8 +11,8 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import models.BillDeposit;
+import models.Configuration;
 import models.actions.states.IdleBillDeposit;
-import models.db.LgSystemProperty;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -59,7 +59,7 @@ public class BillDepositAction extends UserAction {
     @Override
     public void finish() {
         Map renderArgs = new HashMap();
-        renderArgs.put("clientCode", LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
+        renderArgs.put("clientCode", Configuration.getClientDescription());
         renderArgs.put("formData", formData);
         BillDeposit deposit = BillDeposit.findById(getDepositId());
         if (deposit != null && deposit.getTotal() > 0) {

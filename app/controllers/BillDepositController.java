@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.List;
 import models.BillDeposit;
+import models.Configuration;
 import models.ModelFacade;
 import models.actions.BillDepositAction;
 import models.db.LgSystemProperty;
@@ -42,8 +43,8 @@ public class BillDepositController extends CounterController {
 
     static public class FormData {
 
-        final public Boolean showReference1 = isProperty("bill_deposit.show_reference1");
-        final public Boolean showReference2 = isProperty("bill_deposit.show_reference2");
+        final public Boolean showReference1 = Configuration.mustShowReference1();
+        final public Boolean showReference2 = Configuration.mustShowReference2();
         @CheckWith(FormDepositUserCodeReference.Validate.class)
         public FormDepositUserCodeReference reference1 = new FormDepositUserCodeReference();
         //@Required(message = "validation.required.reference2")
@@ -75,7 +76,7 @@ public class BillDepositController extends CounterController {
         }
         if (formData == null) {
             formData = new FormData();
-            formData.currency.value = getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
+            formData.currency.value = Configuration.getDefaultCurrency();
         }
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
@@ -99,7 +100,7 @@ public class BillDepositController extends CounterController {
             o[3] = totalSum;
             renderJSON(o);
         } else {
-            renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
+            renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("billData", ModelFacade.getCurrentCounters());
             renderArgs.put("formData", ModelFacade.getFormData());
             renderArgs.put("totalSum", totalSum);
@@ -129,7 +130,7 @@ public class BillDepositController extends CounterController {
             Application.index();
             return;
         }
-        renderArgs.put("clientCode", getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION));
+        renderArgs.put("clientCode", Configuration.getClientDescription());
         renderArgs.put("formData", formData);
         if (deposit != null) {
             Long total = deposit.getTotal();

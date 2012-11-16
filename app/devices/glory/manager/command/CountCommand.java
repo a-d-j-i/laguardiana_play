@@ -28,7 +28,6 @@ public class CountCommand extends ManagerCommandAbstract {
 
         private Map< Integer, Integer> currentQuantity = new HashMap<Integer, Integer>();
         private final Integer currency;
-        private boolean storeDeposit = false;
         private boolean withdrawDeposit = false;
         private final Map<Integer, Integer> desiredQuantity = new HashMap<Integer, Integer>();
         private int currentSlot = 0;
@@ -72,33 +71,6 @@ public class CountCommand extends ManagerCommandAbstract {
             wlock();
             try {
                 this.currentQuantity = billData;
-            } finally {
-                wunlock();
-            }
-        }
-
-        private boolean needToStoreDeposit() {
-            rlock();
-            try {
-                return storeDeposit;
-            } finally {
-                runlock();
-            }
-        }
-
-        private void storeDeposit() {
-            wlock();
-            try {
-                this.storeDeposit = true;
-            } finally {
-                wunlock();
-            }
-        }
-
-        private void storeDepositDone() {
-            wlock();
-            try {
-                this.storeDeposit = false;
             } finally {
                 wunlock();
             }
@@ -273,7 +245,7 @@ public class CountCommand extends ManagerCommandAbstract {
         }
     }
 
-    public void storeDeposit(int sequenceNumber) {
+    public void storeDeposit(Integer sequenceNumber) {
         countData.storeDeposit();
     }
 

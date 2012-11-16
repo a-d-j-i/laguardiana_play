@@ -7,13 +7,12 @@ package controllers;
 import devices.DeviceFactory;
 import devices.IoBoard;
 import devices.glory.manager.GloryManager;
+import models.Configuration;
 import models.ModelFacade;
-import models.db.LgSystemProperty;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
-import play.mvc.Util;
 import play.mvc.With;
 
 /**
@@ -29,7 +28,7 @@ public class CounterController extends Controller {
         if (request.isAjax()) {
             return;
         }
-        renderArgs.put("useHardwareKeyboard", isProperty("useHardwareKeyboard"));
+        renderArgs.put("useHardwareKeyboard", Configuration.useHardwareKeyboard());
 
         String neededController = ModelFacade.getNeededController();
         if (neededController == null) {
@@ -93,24 +92,5 @@ public class CounterController extends Controller {
             renderArgs.put("isError", ModelFacade.isError());
             render();
         }
-    }
-
-    @Util
-    static public String getProperty(LgSystemProperty.Types type) {
-        return LgSystemProperty.getProperty(type);
-    }
-
-    @Util
-    static public Integer getIntProperty(LgSystemProperty.Types type) {
-        try {
-            return Integer.parseInt(LgSystemProperty.getProperty(type));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    @Util
-    static public Boolean isProperty(String name) {
-        return LgSystemProperty.isProperty(name);
     }
 }

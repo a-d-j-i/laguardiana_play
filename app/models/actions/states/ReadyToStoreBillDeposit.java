@@ -4,6 +4,7 @@
  */
 package models.actions.states;
 
+import models.Configuration;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -31,30 +32,16 @@ public class ReadyToStoreBillDeposit extends IdleBillDeposit {
 
     @Override
     public void accept() {
-        // TODO: Do it right.
-        //stateApi.openGate();
         stateApi.cancelTimer();
         stateApi.addBatchToDeposit();
-        if (!stateApi.store()) {
-            Logger.error("startBillDeposit can't cancel glory");
+        if (Configuration.ioBoardIgnore()) {
+            if (!stateApi.store()) {
+                Logger.error("startBillDeposit can't cancel glory");
+            }
+            stateApi.setState(new StoringBillDeposit(stateApi, escrowDeposit));
+        } else {
+            stateApi.openGate();
+            stateApi.setState(new WaitForOpenGate(stateApi, new StoringBillDeposit(stateApi, escrowDeposit)));
         }
-        stateApi.setState(new StoringBillDeposit(stateApi, escrowDeposit));
     }
-//    @Override
-//    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-//        switch (status.status) {
-//            case OPEN:
-//                stateApi.addBatchToDeposit();
-//                if (!stateApi.store()) {
-//                    Logger.error("startBillDeposit can't cancel glory");
-//                }
-//                acceptNextStep();
-//                break;
-//            case OPENNING:
-//                break;
-//            default:
-//                Logger.debug("onIoBoardEvent invalid state %s %s", status.status.name(), name());
-//                break;
-//        }
-//    }
 }

@@ -30,10 +30,6 @@ public class IoBoardController extends Application {
         s = ioBoard.getStatusCopy();
         if (s != null) {
             renderArgs.put("status", s);
-            renderArgs.put("A", Integer.toHexString(s.A));
-            renderArgs.put("B", Integer.toHexString(s.B));
-            renderArgs.put("C", Integer.toHexString(s.C));
-            renderArgs.put("D", Integer.toHexString(s.D));
         }
         render();
     }
@@ -45,6 +41,21 @@ public class IoBoardController extends Application {
 
     public static void closeGate() {
         ioBoard.closeGate();
+        index();
+    }
+
+    public static void aproveBag() throws IOException {
+        ioBoard.aproveBag();
+        index();
+    }
+
+    public static void aproveBagConfirm() {
+        ioBoard.aproveBagConfirm();
+        index();
+    }
+
+    public static void clearError() {
+        ioBoard.clearError();
         index();
     }
 }

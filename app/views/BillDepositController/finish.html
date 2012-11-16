@@ -15,7 +15,7 @@
             #{if ( formData.showReference2 && formData.reference2 != "" ) }
             <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
             #{/if}
-            <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.textId}</p>
+            <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.description}</p>
             #{/if}
             #{else}
             <div class="mensaje"><span>&{ 'counting_page.deposit_canceled' }</span></div>

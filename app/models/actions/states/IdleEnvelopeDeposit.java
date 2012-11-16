@@ -43,7 +43,7 @@ public class IdleEnvelopeDeposit extends ActionState {
                 stateApi.setState(new ReadyToStoreEnvelopeDeposit(stateApi));
                 break;
             default:
-                Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("IdleEnvelopeDeposit onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
     }

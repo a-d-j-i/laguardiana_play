@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import models.Bill;
 import models.BillDeposit;
+import models.Configuration;
 import models.EnvelopeDeposit;
 import models.db.LgBag;
 import models.db.LgBillType;
@@ -124,12 +125,21 @@ public class ReportController extends Controller {
         }
     }
 
+    public static void processBag(Integer bagId) {
+        boolean stat = LgBag.process(2, bagId, "DONE");
+        if (request.format.equalsIgnoreCase("html")) {
+            unprocessedBags(1);
+        } else {
+            renderHtml(stat ? "DONE" : "ERROR");
+        }
+    }
+
     static public class UnprocessedDeposits {
 
-        final public String clientCode = LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE);
-        final public String branchCode = LgSystemProperty.getProperty(LgSystemProperty.Types.BRANCH_CODE);
-        final public String machineCode = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_CODE);
-        final public String machineDescription = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
+        final public String clientCode = Configuration.getClientCode();
+        final public String branchCode = Configuration.getBranchCode();
+        final public String machineCode = Configuration.getMachineCode();
+        final public String machineDescription = Configuration.getMachineDescription();
         public List<DepositData> depositData;
     }
 
@@ -188,20 +198,24 @@ public class ReportController extends Controller {
 
     static public class BagList {
 
-        final public String clientCode = LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE);
-        final public String branchCode = LgSystemProperty.getProperty(LgSystemProperty.Types.BRANCH_CODE);
-        final public String machineCode = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_CODE);
-        final public String machineDescription = LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
+        final public String clientCode = Configuration.getClientCode();
+        final public String branchCode = Configuration.getBranchCode();
+        final public String machineCode = Configuration.getMachineCode();
+        final public String machineDescription = Configuration.getMachineDescription();
         public List<BagData> bagData;
     }
 
     public static void bagList(Integer page) {
+        unprocessedBags(page);
+    }
+
+    public static void unprocessedBags(Integer page) {
         if (request.format.equalsIgnoreCase("html")) {
             if (page == null || page < 1) {
                 page = 1;
             }
             int length = 4;
-            List<LgBag> bagList = LgBag.findUnprocessed().fetch(page, length);
+            List<LgBag> bagList = LgBag.findUnprocessed(2).fetch(page, length);
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {

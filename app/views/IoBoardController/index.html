@@ -15,15 +15,28 @@
                 <a class="boton naranja full_width" href="@{index()}">status</a>
                 <a class="boton naranja full_width" href="@{openGate()}">openGate</a>
                 <a class="boton naranja full_width" href="@{closeGate()}">closeGate</a>
+                <a class="boton naranja full_width" href="@{aproveBag()}">aproveBag</a>
+                <a class="boton naranja full_width" href="@{aproveBagConfirm()}">aproveBagConfirm</a>
+                <a class="boton naranja full_width" href="@{clearError()}">clearError</a>
             </li>
             <li class="column">
                 <div class="columna">
                     <p>${error}</p>
-                    <p>STATUS : ${status?.status?.name()}</p>
-                    <p>A : ${A}</p>
-                    <p>B : ${B}</p>
-                    <p>C : ${C}</p>
-                    <p>D : ${D}</p>
+                    <p>error : ${status?.getError()}</p>
+                    <p>A : ${status?.reprA()}</p>
+                    <p>B : ${status?.reprB()}</p>
+                    <p>C : ${status?.reprC()}</p>
+                    <p>D : ${status?.reprD()}</p>
+                    <p>BAG STATUS : ${status?.bagStatus}</p>
+                    <p>BAG_STATE : ${status?.bagState?.name()}</p>
+                    <p>SHUTTER_STATE : ${status?.shutterState?.name()}</p>
+                    #{if (status?.lockState ) }
+                    <p>lockState : Locked</p>
+                    #{/if}
+                    #{else}
+                    <p>lockState : UnLocked</p>
+                    #{/else}
+                    <p>BAG_APROVE_STATE : ${status?.bagAproveState}</p>
                 </div>
             </li>
         </ul>

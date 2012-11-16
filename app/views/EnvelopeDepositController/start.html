@@ -73,7 +73,7 @@
                         <div class="columna">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
                             %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.value } }%
-                            #{select 'formData.cashData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
+                            #{select 'formData.cashData.value', items: currencies, valueProperty:'numericId', labelProperty:'description', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
                             <input type="number" autocomplete="off" name="formData.cashData.amount" id="cashData" value="${formData?.cashData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
@@ -96,7 +96,7 @@
                         <div class="columna">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
                             %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.value } }%
-                            #{select 'formData.checkData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
+                            #{select 'formData.checkData.value', items: currencies, valueProperty:'numericId', labelProperty:'description', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
                             <input type="number" autocomplete="off" name="formData.checkData.amount" id="checkData" value="${formData?.checkData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
@@ -120,7 +120,7 @@
                         <div class="columna">
                             <div class="mensaje"><span>&{ 'application.choose_currency' }</span></div>
                             %{ val = null; if ( formData.cashData != null ) { val = formData.cashData.value } }%
-                            #{select 'formData.ticketData.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:val, class : 'full_width' /}
+                            #{select 'formData.ticketData.value', items: currencies, valueProperty:'numericId', labelProperty:'description', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
                             <input type="number" autocomplete="off" name="formData.ticketData.amount" id="ticketData" value="${formData?.ticketData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
@@ -214,9 +214,9 @@
                 rules: {
                     //'formData.reference2' : "required",
                     'formData.envelopeCode' : { required: true, range : [ 0,99999 ] },
-                    'formData.cashData.amount' : "number",
-                    'formData.checkData.amount' : "number",
-                    'formData.ticketData.amount' : "number"
+                    'formData.cashData.amount' : { number: true },
+                    'formData.checkData.amount' : { number: true },
+                    'formData.ticketData.amount' : { number: true }
                 },
                 onkeyup: false,
                 onclick: false,

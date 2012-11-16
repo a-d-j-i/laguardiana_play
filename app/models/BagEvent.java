@@ -9,9 +9,9 @@ import models.db.LgUser;
 import play.Logger;
 
 @Entity
-public class InvalidBagEvent extends LgEvent {
+public class BagEvent extends LgEvent {
 
-    public InvalidBagEvent(LgUser user, Integer eventSourceId, String message) {
+    public BagEvent(LgUser user, Integer eventSourceId, String message) {
         super(user, eventSourceId, message);
     }
 
@@ -21,7 +21,7 @@ public class InvalidBagEvent extends LgEvent {
             bagId = bag.bagId;
         }
         try {
-            InvalidBagEvent e = new InvalidBagEvent(Secure.getCurrentUser(), bagId, name);
+            BagEvent e = new BagEvent(Secure.getCurrentUser(), bagId, name);
             e.save();
         } catch (Exception ex) {
             Logger.error("Error saving event %s", ex);

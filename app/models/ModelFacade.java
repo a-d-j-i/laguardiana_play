@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import models.actions.UserAction;
+import models.db.LgBag;
 import models.db.LgDeposit;
 import play.Logger;
 import play.Play;
@@ -117,12 +118,27 @@ public class ModelFacade {
             IoBoardEvent.save(currentUserAction, status.toString());
             if (status.isError()) {
                 // A development option
-                if (Play.configuration.getProperty("io_board.ignore") == null) {
-                    modelError.ioBoardError = status.error;
+                if (!Configuration.ioBoardIgnore()) {
+                    modelError.ioBoardError = status.getError();
                 }
                 return;
             }
 
+            // Bag change.
+            if (status.bagState == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
+                switch (status.bagAproveState) {
+                    case BAG_NOT_APROVED:
+                        ioBoard.aproveBag();
+                        break;
+                    case BAG_APROVE_WAIT:
+                    case BAG_APROVED:
+                        break;
+                    case BAG_APROVE_CONFIRM:
+                        LgBag.rotateBag();
+                        ioBoard.aproveBagConfirm();
+                        break;
+                }
+            }
             if (currentUserAction != null) {
                 currentUserAction.onIoBoardEvent(status);
             }
@@ -218,6 +234,13 @@ public class ModelFacade {
             Logger.error("startAction currentAction is not null");
             return;
         }
+        if (!Configuration.ioBoardIgnore()) {
+            if (ioBoard.getStatusCopy().bagState != IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
+                setError("bag not in place");
+                return;
+            }
+        }
+
         currentUser = Secure.getCurrentUser();
         currentUserAction = userAction;
         ActionEvent.save(currentUserAction, "Start", getNeededController());
@@ -247,7 +270,7 @@ public class ModelFacade {
         }
 
         if (ioBoard.isError()) {
-            if (Play.configuration.getProperty("io_board.ignore") == null) {
+            if (!Configuration.ioBoardIgnore()) {
                 setError(String.format("IoBoeard error : %s", ioBoard.getError()));
             }
         }

@@ -14,8 +14,15 @@ import devices.glory.manager.GloryManager.ThreadCommandApi;
  */
 public class EnvelopeDepositCommand extends ManagerCommandAbstract {
 
+    private final CommandData commandData;
+
     public EnvelopeDepositCommand(ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
+        commandData = new CommandData();
+    }
+
+    public void storeDeposit(Integer sequenceNumber) {
+        commandData.storeDeposit();
     }
 
     @Override
@@ -54,6 +61,17 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                     }
                     break;
                 case storing_start_request:
+                    if (commandData.needToStoreDeposit()) {
+                        if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
+                            return;
+                        }
+                        setState(GloryManager.State.STORING);
+                        break;
+                    } else {
+                        setState(GloryManager.State.READY_TO_STORE);
+                    }
+                    break;
+
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
@@ -65,10 +83,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                             return;
                         }
                     } else {
-                        if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
-                            return;
-                        }
-                        setState(GloryManager.State.STORING);
+                        setState(GloryManager.State.READY_TO_STORE);
                     }
                     break;
                 case being_store:

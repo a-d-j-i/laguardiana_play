@@ -5,6 +5,7 @@
 package models.actions.states;
 
 import devices.glory.manager.GloryManager;
+import models.Configuration;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -33,13 +34,23 @@ public class ReadyToStoreEnvelopeDeposit extends IdleEnvelopeDeposit {
 
     @Override
     public void onGloryEvent(GloryManager.Status m) {
-        super.onGloryEvent(m);
         switch (m.getState()) {
-            case STORING:
-                stateApi.setState(new StoringEnvelopeDeposit(stateApi));
+            case READY_TO_STORE:
+                if (Configuration.ioBoardIgnore()) {
+                    if (!stateApi.store()) {
+                        Logger.error("startBillDeposit can't cancel glory");
+                    }
+                    stateApi.setState(new StoringEnvelopeDeposit(stateApi));
+                } else {
+                    stateApi.openGate();
+                    stateApi.setState(new WaitForOpenGate(stateApi, new StoringEnvelopeDeposit(stateApi)));
+                }
                 break;
+            /*            case STORING:
+             stateApi.setState(new StoringEnvelopeDeposit(stateApi));
+             break;*/
             default:
-                Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("ReadyToStoreEnvelopeDeposit onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
     }

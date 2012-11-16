@@ -5,6 +5,7 @@
 package models.actions.states;
 
 import devices.glory.manager.GloryManager;
+import models.Configuration;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -29,7 +30,14 @@ class StoringEnvelopeDeposit extends ActionState {
         switch (m.getState()) {
             case IDLE:
                 stateApi.closeDeposit();
-                stateApi.setState(new Finish(stateApi));
+                if (Configuration.ioBoardIgnore()) {
+                    stateApi.setState(new Finish(stateApi));
+                } else {
+                    stateApi.closeGate();
+                    stateApi.setState(new WaitForClosedGate(stateApi, new Finish(stateApi)));
+                }
+                break;
+            case STORING:
                 break;
             default:
                 Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());

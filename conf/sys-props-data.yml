@@ -22,6 +22,18 @@
     value:  "true"
     
         
+  db.LgSystemProperty(machineCode):
+    name:  "machine_code"
+    value:  "el codigo de la maquina"
+    
+  db.LgSystemProperty(machineDescription):
+    name:  "machine_description"
+    value:  "P500"
+        
+  db.LgSystemProperty(branchCode):
+    name:  "branch_code"
+    value:  "el codigo de sucursal."
+        
   db.LgSystemProperty(clientCode):
     name:  "client_code"
     value:  "LA Guardiana S.A."

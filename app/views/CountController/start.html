@@ -15,7 +15,7 @@
             </p>
             #{/ifErrors}
             <div class="mensaje"><span class="full_width">&{ 'application.choose_currency_before' }</span></div>
-            #{select 'formData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'textId', value:formData.currency, class: 'full_width' /}
+            #{select 'formData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'description', value:formData.currency, class: 'full_width' /}
             #{/form}
         </div>
         <div class="botonera">

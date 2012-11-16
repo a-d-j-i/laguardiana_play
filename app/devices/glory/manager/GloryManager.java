@@ -231,6 +231,9 @@ public class GloryManager {
             if (cmd instanceof CountCommand) {
                 ((CountCommand) cmd).storeDeposit(sequenceNumber);
                 return true;
+            } else if (cmd instanceof EnvelopeDepositCommand) {
+                ((EnvelopeDepositCommand) cmd).storeDeposit(sequenceNumber);
+                return true;
             }
             return false;
         }
