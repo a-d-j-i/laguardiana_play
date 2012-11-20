@@ -47,7 +47,7 @@
                     <div class="botonera">
                         <div class="columna">
                             <!-- link accion -->
-                            <a id ="startCountingButton" href="#" class="boton full_width naranja">&{ 'application.start_counting' }</a>
+                            <a id ="startCountingButton" href="#" class="boton full_width ${play.configuration['style.button_color']}">&{ 'application.start_counting' }</a>
                         </div>
                     </div>  
                 </li>
@@ -68,9 +68,9 @@
     }
     /*    $( '#reference2_input' ).keyup( function(event) {
         if ( $( this ).val() ) {
-            $( '#startCountingButton' ).removeClass( 'gris' ).addClass( 'naranja' );
+            $( '#startCountingButton' ).removeClass( 'gris' ).addClass( '${play.configuration['style.button_color']}' );
         } else {
-            $( '#startCountingButton' ).removeClass( 'naranja' ).addClass( 'gris' );
+            $( '#startCountingButton' ).removeClass( '${play.configuration['style.button_color']}' ).addClass( 'gris' );
         }
     } );*/
     $( '#startCountingButton' ).click( function(event) {

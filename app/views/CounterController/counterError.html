@@ -12,10 +12,10 @@
             <p id="ierror">IOBoard Status ${ istatus }</p>
             <p id="ierror">IOBoard Error ${ ierror }</p>
             #{checkPermission resource: 'Application.reset', operation: 'GET'}
-            <a class="boton naranja full_width" href="@{counterError(1)}">Reset</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(1)}">Reset</a>
             #{/checkPermission}
             #{checkPermission resource: 'Application.storingReset', operation: 'GET'}
-            <a class="boton naranja full_width" href="@{counterError(2)}">StoringErrorReset</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(2)}">StoringErrorReset</a>
             #{/checkPermission}
             <!-- datos del deposito -->
             <!-- /datos del deposito -->

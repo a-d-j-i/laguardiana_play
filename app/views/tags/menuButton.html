@@ -1,4 +1,4 @@
 %{ def url = actionBridge."$_resource".call() }%
 #{if ( controllers.Secure.checkPermission( _resource, _operation ) ) }
-<a href="${url}" class="boton naranja full_width separar">${_title}</a>
+<a href="${url}" class="boton ${play.configuration['style.button_color']} full_width separar">${_title}</a>
 #{/if}

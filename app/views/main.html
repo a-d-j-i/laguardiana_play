@@ -1,18 +1,29 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html>
     <head>
         <title>#{get 'title' /}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=${_response_encoding}">
 
-        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/'}/${play.configuration['style.favicon']}">
         <!-- yui reset -->
         <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/yui/reset.css'}">
         <!-- local css -->
         <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/base.css'}">
         <!-- elasticss -->
         <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/elastic.css'}">
+        <style>
+            header {
+                background: url('../public/images/${play.configuration['style.logo']}') 94% 50% no-repeat;
+            }
+            section {
+                background: url('../public/images/${play.configuration['style.background']}');
+            }
+            .boton_top {
+                background: url('../public/images/${play.configuration['style.button_top']}') top left repeat-y;
+            }
+        </style>
         <!-- mottie -->
-<!--        <link rel="stylesheet"  media="screen" type="text/css" href="@{'/public/stylesheets/keyboard/keyboard.css'}" />-->
+        <!--        <link rel="stylesheet"  media="screen" type="text/css" href="@{'/public/stylesheets/keyboard/keyboard.css'}" />-->
         #{get 'moreStyles' /}
     </head>
 
@@ -27,7 +38,7 @@
     <!-- jquery-tools -->
     <script src="@{'/public/javascripts/jquery/jquery.tools.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <!-- mottie -->
-<!--    <script src="@{'/public/javascripts/jquery/jquery.keyboard.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>-->
+    <!--    <script src="@{'/public/javascripts/jquery/jquery.keyboard.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>-->
     <!-- default value -->
     <script src="@{'/public/javascripts/jquery/jquery.defaultvalue.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <!-- elasticss -->

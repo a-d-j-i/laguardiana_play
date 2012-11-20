@@ -106,7 +106,7 @@
                     window.location.href = "@{finish}";
                     return;
                 } else if ( status == 'READY_TO_STORE' ) {
-//                    $( '#continueButton' ).attr( { 'class' : 'boton naranja'});
+//                    $( '#continueButton' ).attr( { 'class' : 'boton ${play.configuration['style.button_color']}'});
                 } else if ( status == 'ERROR' ) {
                     window.location.href = "@{counterError()}";
                 } else {          

@@ -36,7 +36,7 @@ a {
 section {
     width: 100%; /*800px;*/
     height: 600px;
-    background: url('../gfx/fondo.png');
+    background: url('../images/fondo.png');
     background-size: 100% 600px;
     margin: 0 auto;
     position: relative;
@@ -44,7 +44,7 @@ section {
 
 header {
     height: 118px;
-    background: url('../gfx/logo.png') 94% 50% no-repeat;
+    background: url('../images/logo.png') 94% 50% no-repeat;
 }
 
 article {
@@ -62,27 +62,27 @@ h1 {
 }
 
 h1.candado {
-    background-image: url('../gfx/icono_candado.png');
+    background-image: url('../images/icono_candado.png');
     padding-left: 51px;
 }
 
 h1.casa {
-    background-image: url('../gfx/icono_casa.png');
+    background-image: url('../images/icono_casa.png');
     padding-left: 66px;
 }
 
 h1.contar_dinero {
-    background-image: url('../gfx/icono_contar_dinero.png');
+    background-image: url('../images/icono_contar_dinero.png');
     padding-left: 62px;
 }
 
 h1.depositar_efectivo {
-    background-image: url('../gfx/icono_depositar_efectivo.png');
+    background-image: url('../images/icono_depositar_efectivo.png');
     padding-left: 62px;
 }
 
 h1.depositar_sobre {
-    background-image: url('../gfx/icono_depositar_sobre.png');
+    background-image: url('../images/icono_depositar_sobre.png');
     padding-left: 63px;
 }
 
@@ -96,7 +96,7 @@ h2 {
 hr {
     border: none;
     height: 1px;
-    background: url('../gfx/separador.png') top right no-repeat;
+    background: url('../images/separador.png') top right no-repeat;
     padding: 0;
     margin: 10px 0;
 }
@@ -104,13 +104,13 @@ hr {
 /* mensaje */
 
 .mensaje {
-    background: url('../gfx/caption_flecha.png') left bottom no-repeat;
+    background: url('../images/caption_flecha.png') left bottom no-repeat;
     padding-bottom: 12px;
     margin-bottom: 10px;
 }
 
 .mensaje span {
-    background: url('../gfx/caption_fondo.png');
+    background: url('../images/caption_fondo.png');
     display: inline-block;
     font-size: 15pt;
     padding: 10px 22px 10px 20px;
@@ -131,30 +131,36 @@ hr {
 
 .boton.verde {
     color: white;
-    background: url('../gfx/boton_verde.png') top left no-repeat;
+    background: url('../images/boton_verde.png') top left no-repeat;
     border-right-color: #547a1f;
 }
 
 .boton.gris {
     color: black;
-    background: url('../gfx/boton_gris.png') top left no-repeat;
+    background: url('../images/boton_gris.png') top left no-repeat;
     border-right-color: #b3b3b3;
 }
 
 .boton.naranja {
     color: black;
-    background: url('../gfx/boton_naranja.png') top left no-repeat;
+    background: url('../images/boton_naranja.png') top left no-repeat;
     border-right-color: #fcba09;
+}
+
+.boton.azul {
+    color: black;
+    background: url('../images/boton_azul.png') top left no-repeat;
+    border-right-color: #00AEEF;
 }
 
 .boton.rojo {
     color: white;
-    background: url('../gfx/boton_rojo.png') top left no-repeat;
+    background: url('../images/boton_rojo.png') top left no-repeat;
     border-right-color: #b91b0b;
 }
 
 .boton_top {
-    background: url('../gfx/boton_top_fondo.png') top left repeat-y;
+    background: url('../images/boton_top_fondo.png') top left repeat-y;
     color: black;
     padding: 12px 15px 12px 63px;
     min-width: 252px;
@@ -202,7 +208,7 @@ select option {
 /* tablas */
 
 table {
-    background: url('../gfx/tabla_fondo.png') top left repeat-x #B8B8B8;
+    background: url('../images/tabla_fondo.png') top left repeat-x #B8B8B8;
     border: 1px solid #BCBCBC;
 }
 
@@ -329,19 +335,19 @@ table tfoot tr td {
 }
 
 .alerta.info #alerta_titulo {
-    background-image: url('../gfx/alertas_icono_info.png');
+    background-image: url('../images/alertas_icono_info.png');
 }
 
 .alerta.error #alerta_titulo {
-    background-image: url('../gfx/alertas_icono_error.png');
+    background-image: url('../images/alertas_icono_error.png');
 }
 
 .alerta.success #alerta_titulo {
-    background-image: url('../gfx/alertas_icono_success.png');
+    background-image: url('../images/alertas_icono_success.png');
 }
 
 .alerta.continue #alerta_titulo {
-    background-image: url('../gfx/alertas_icono_continue.png');
+    background-image: url('../images/alertas_icono_continue.png');
 }
 
 .alerta #alerta_cuerpo {
@@ -349,7 +355,7 @@ table tfoot tr td {
 }
 
 .alerta #alerta_cuerpo #alerta_texto {
-    background: url('../gfx/alertas_flecha.png') top left no-repeat;
+    background: url('../images/alertas_flecha.png') top left no-repeat;
     padding-top: 13px;
     margin-bottom: 30px;
 }

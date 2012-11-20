@@ -66,7 +66,7 @@
                     #{/else}
                     #{/list}
                 </select>
-                <button type="submit" class="boton naranja full_width">Count</button>
+                <button type="submit" class="boton ${play.configuration['style.button_color']} full_width">Count</button>
             </div>
             Status: <div id="statusMsg" class="mensaje">${ status }</div>
             Error: <div id="errorMsg" class="mensaje">${ error }</div>
@@ -75,13 +75,13 @@
             &nbsp;
         </li>
         <li class="fixed column" style="width: 15%">
-            <a class="boton naranja full_width" href="@{cancelDeposit()}">CancelDeposit</a>
-            <a class="boton naranja full_width" href="@{storeDeposit()}">StoreDeposit</a>
-            <a class="boton naranja full_width" href="@{withdrawDeposit()}">WithdrawDeposit</a>
-            <a class="boton naranja full_width" href="@{reset()}">Reset</a>
-            <a class="boton naranja full_width" href="@{storingErrorReset()}">StoringErrorReset</a>
-            <a class="boton naranja full_width" href="@{collectBag()}">Collect</a>
-            <a class="boton naranja full_width" href="@{envelopeDeposit()}">EnvelopeDeposit</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{cancelDeposit()}">CancelDeposit</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storeDeposit()}">StoreDeposit</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{withdrawDeposit()}">WithdrawDeposit</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{reset()}">Reset</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storingErrorReset()}">StoringErrorReset</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{collectBag()}">Collect</a>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{envelopeDeposit()}">EnvelopeDeposit</a>
         </li>
     </ul>
 </div>

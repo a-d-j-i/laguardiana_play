@@ -19,7 +19,7 @@
                     <li class="column">
                         <div class="columna">
                             <!-- depositar_efectivo_01.html -->
-                            <a href="@{BillDepositController.start()}" class="boton naranja full_width separar">&{'main_menu.cash_deposit'}</a>
+                            <a href="@{BillDepositController.start()}" class="boton ${play.configuration['style.button_color']} full_width separar">&{'main_menu.cash_deposit'}</a>
                         </div>
                     </li>
                     #{/ifAuthorized}
@@ -27,7 +27,7 @@
                     <!-- boton contar billetes -->
                     <li class="column">
                         <div class="columna">
-                            <a href="@{CountController.start()}" class="boton naranja full_width separar">&{'main_menu.count'}</a>
+                            <a href="@{CountController.start()}" class="boton ${play.configuration['style.button_color']} full_width separar">&{'main_menu.count'}</a>
                         </div>
                     </li>
                     #{/ifAuthorized}
@@ -35,7 +35,7 @@
                     #{ifAuthorized resource: 'EnvelopeDepositController.start', operation: 'GET'}
                     <li class="column">
                         <div class="columna">
-                            <a href="@{EnvelopeDepositController.start()}" class="boton naranja full_width">&{'main_menu.envelope_deposit'}</a>
+                            <a href="@{EnvelopeDepositController.start()}" class="boton ${play.configuration['style.button_color']} full_width">&{'main_menu.envelope_deposit'}</a>
                         </div>
                     </li>
                     #{/ifAuthorized}
@@ -43,7 +43,7 @@
                     #{ifAuthorized resource: 'FilterController.start', operation: 'GET'}
                     <li class="column">
                         <div class="columna">
-                            <a href="@{FilterController.start()}" class="boton naranja full_width">&{'main_menu.filter'}</a>
+                            <a href="@{FilterController.start()}" class="boton ${play.configuration['style.button_color']} full_width">&{'main_menu.filter'}</a>
                         </div>
                     </li>
                     #{/ifAuthorized}
