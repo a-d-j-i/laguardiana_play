@@ -271,7 +271,7 @@ public class ModelFacade {
 
         if (ioBoard.isError()) {
             if (!Configuration.ioBoardIgnore()) {
-                setError(String.format("IoBoeard error : %s", ioBoard.getError()));
+                setError(String.format("IoBoard error : %s", ioBoard.getError()));
             }
         }
         if (modelError.isError()) {

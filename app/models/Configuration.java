@@ -15,7 +15,8 @@ import play.Play;
 public class Configuration {
 
     public static boolean ioBoardIgnore() {
-        return Play.configuration.getProperty("io_board.ignore") == null;
+        String d = Play.configuration.getProperty("io_board.ignore");
+        return d.equalsIgnoreCase("true");
     }
 
     public static Object getClientDescription() {
@@ -42,10 +43,6 @@ public class Configuration {
 
     public static Boolean mustShowReference2() {
         return LgSystemProperty.isProperty("bill_deposit.show_reference2");
-    }
-
-    public static Object useHardwareKeyboard() {
-        return LgSystemProperty.isProperty("useHardwareKeyboard");
     }
 
     public static String getClientCode() {

@@ -79,8 +79,6 @@ public class Secure extends Controller {
         }
         renderArgs.put("lastUrl", url);
         // TODO: Put in some other place.
-        renderArgs.put("useHardwareKeyboard", Configuration.useHardwareKeyboard());
-
         Logger.error("URL %s", url);
 
 

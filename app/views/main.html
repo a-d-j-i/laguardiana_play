@@ -23,7 +23,9 @@
             }
         </style>
         <!-- mottie -->
-        <!--        <link rel="stylesheet"  media="screen" type="text/css" href="@{'/public/stylesheets/keyboard/keyboard.css'}" />-->
+        #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
+        <link rel="stylesheet"  media="screen" type="text/css" href="@{'/public/stylesheets/mottie.css'}" />
+        #{/if}
         #{get 'moreStyles' /}
     </head>
 
@@ -38,7 +40,16 @@
     <!-- jquery-tools -->
     <script src="@{'/public/javascripts/jquery/jquery.tools.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <!-- mottie -->
-    <!--    <script src="@{'/public/javascripts/jquery/jquery.keyboard.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>-->
+    #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
+    <script src="@{'/public/javascripts/jquery/jquery.keyboard.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <script>
+        $(function(){
+            $(":text, [type='password'], textarea").keyboard();
+            $("[type='number']").keyboard( { layout : 'num' } );
+        });
+    </script>
+
+    #{/if}
     <!-- default value -->
     <script src="@{'/public/javascripts/jquery/jquery.defaultvalue.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <!-- elasticss -->

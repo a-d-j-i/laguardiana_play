@@ -28,8 +28,6 @@ public class CounterController extends Controller {
         if (request.isAjax()) {
             return;
         }
-        renderArgs.put("useHardwareKeyboard", Configuration.useHardwareKeyboard());
-
         String neededController = ModelFacade.getNeededController();
         if (neededController == null) {
             return;

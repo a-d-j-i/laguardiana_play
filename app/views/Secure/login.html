@@ -20,7 +20,7 @@
         <input type="password" placeholder="&{'secure.password'}" name="password"/>
         <a href="#">&{'secure.pass_forget'}</a>
         #{/form}
-        #{if ( useHardwareKeyboard ) }
+        #{if ( ! play.configuration[ 'style.useHardwareKeyboard' ] ) }
         <div class="contenido" style="height: 185px;">
         </div>
 
