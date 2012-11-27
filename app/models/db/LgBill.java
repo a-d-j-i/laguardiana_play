@@ -10,7 +10,8 @@ public class LgBill extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column(name = "bill_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgBillGenerator")
+    @SequenceGenerator(name = "LgBillGenerator", sequenceName = "lg_bill_sequence")
     public Integer billId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deposit_id", nullable = false)

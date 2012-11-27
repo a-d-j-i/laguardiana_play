@@ -30,6 +30,9 @@ public class WaitForOpenGate extends ActionState {
                 }
                 stateApi.setState(nextAction);
                 break;
+            case SHUTTER_CLOSED:
+                stateApi.setError("WaitForGate shutter closed");
+                break;
             default:
                 Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.shutterState.name(), name());
                 break;

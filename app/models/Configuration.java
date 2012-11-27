@@ -15,8 +15,11 @@ import play.Play;
 public class Configuration {
 
     public static boolean ioBoardIgnore() {
-        String d = Play.configuration.getProperty("io_board.ignore");
-        return d.equalsIgnoreCase("true");
+        return isProperty("io_board.ignore") && Play.mode.isDev();
+    }
+
+    public static boolean isGloryIgnore() {
+        return isProperty("glory.ignore") && Play.mode.isDev();
     }
 
     public static Object getClientDescription() {
@@ -59,5 +62,20 @@ public class Configuration {
 
     public static String getMachineDescription() {
         return LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
+    }
+
+    public static boolean isAllAlowed() {
+        return isProperty("secure.allowAll");
+    }
+
+    private static boolean isProperty(String property) {
+        String prop = Play.configuration.getProperty(property);
+        if (prop == null) {
+            return false;
+        }
+        if (prop.equalsIgnoreCase("true") || prop.equalsIgnoreCase("on")) {
+            return true;
+        }
+        return false;
     }
 }

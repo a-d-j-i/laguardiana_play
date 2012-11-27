@@ -4,7 +4,7 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -52,8 +52,7 @@ public class IdleBillDeposit extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(GloryManager.Status m) {
-        super.onGloryEvent(m);
+    public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
             case READY_TO_STORE:
                 stateApi.setState(new ReadyToStoreBillDeposit(stateApi, escrowDeposit, false));
@@ -71,8 +70,10 @@ public class IdleBillDeposit extends ActionState {
             case PUT_THE_BILLS_ON_THE_HOPER:
                 stateApi.startTimer();
                 break;
+            case REMOVE_REJECTED_BILLS:
+                break;
             default:
-                Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("IdleBillDeposit onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
     }

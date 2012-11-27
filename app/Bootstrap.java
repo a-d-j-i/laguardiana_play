@@ -38,16 +38,21 @@ public class Bootstrap extends Job {
                 LgRole glory = loadRolsResourcesAndAcls(controllers.GloryController.class);
                 LgRole manager = loadRolsResourcesAndAcls(controllers.GloryManagerController.class);
                 LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
+                LgRole counter = loadRolsResourcesAndAcls(controllers.CounterController.class);
 
                 // Add application envelope and bill to demo.
-/*        LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
-                 guest.roles.add(app);
-                 app.users.add(guest);
-                 guest.save();*/
+                LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
+                /*guest.roles.add(appMin);
+                appMin.users.add(guest);*/
+                guest.roles.add(counter);
+                counter.users.add(guest);
+                guest.save();
 
                 LgUser demo = LgUser.find("select u from LgUser u where username = 'demo'").first();
                 demo.roles.add(appMin);
                 appMin.users.add(demo);
+                demo.roles.add(counter);
+                counter.users.add(demo);
                 demo.roles.add(bill);
                 bill.users.add(demo);
                 demo.roles.add(envelope);
@@ -94,8 +99,7 @@ public class Bootstrap extends Job {
                 }
                 l.save();
                 if (min && c.equals(controllers.Application.class)) {
-                    if (!m.getName().equals("index") && !m.getName().equals("counterError")
-                            && !m.getName().equals("mainMenu")) {
+                    if (!m.getName().equals("index") && !m.getName().equals("mainMenu")) {
                         continue;
                     }
                 }

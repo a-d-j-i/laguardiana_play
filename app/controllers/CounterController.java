@@ -7,7 +7,7 @@ package controllers;
 import devices.DeviceFactory;
 import devices.IoBoard;
 import devices.glory.manager.GloryManager;
-import models.Configuration;
+import devices.glory.manager.ManagerInterface;
 import models.ModelFacade;
 import play.Logger;
 import play.mvc.Before;
@@ -48,11 +48,11 @@ public class CounterController extends Controller {
     }
 
     public static void counterError(Integer cmd) {
-        GloryManager.Status gstatus = null;
+        ManagerInterface.Status gstatus = null;
         String gerror = null;
         String ierror = null;
 
-        final GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
+        final ManagerInterface manager = DeviceFactory.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
             gerror = manager.getStatus().getErrorDetail();

@@ -22,7 +22,8 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
     }
     @Id
     @Column(name = "property_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgSystemPropertyGenerator")
+    @SequenceGenerator(name = "LgSystemPropertyGenerator", sequenceName = "lg_system_property_sequence")
     public Integer propertyId;
     @Column(name = "name", nullable = false, length = 64)
     public String name;

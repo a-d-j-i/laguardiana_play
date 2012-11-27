@@ -5,7 +5,7 @@
 package models;
 
 import devices.DeviceFactory;
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class Bill {
 
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
-        GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
+        ManagerInterface manager = DeviceFactory.getGloryManager();
         if (manager != null) {
             currentQuantity = manager.getCurrentQuantity();
             desiredQuantity = manager.getDesiredQuantity();
@@ -79,7 +79,7 @@ public class Bill {
 
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
-        GloryManager.ControllerApi manager = DeviceFactory.getGloryManager();
+        ManagerInterface manager = DeviceFactory.getGloryManager();
         if (manager != null) {
             currentQuantity = manager.getCurrentQuantity();
             desiredQuantity = manager.getDesiredQuantity();

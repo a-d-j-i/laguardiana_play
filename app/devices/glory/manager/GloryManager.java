@@ -2,9 +2,9 @@ package devices.glory.manager;
 
 import devices.glory.Glory;
 import devices.glory.command.GloryCommandAbstract;
+import devices.glory.manager.ManagerInterface.State;
 import devices.glory.manager.command.*;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Observer;
 import play.Logger;
 
@@ -14,82 +14,10 @@ import play.Logger;
  */
 public class GloryManager {
 
-    static public enum State {
-
-        IDLE,
-        READY_TO_STORE,
-        STORING,
-        ERROR,
-        PUT_THE_BILLS_ON_THE_HOPER,
-        COUNTING,
-        ESCROW_FULL,
-        PUT_THE_ENVELOPE_IN_THE_ESCROW,
-        INITIALIZING,
-        REMOVE_THE_BILLS_FROM_ESCROW,
-        REMOVE_REJECTED_BILLS,
-        REMOVE_THE_BILLS_FROM_HOPER,
-        CANCELING, CANCELED, COLLECTING;
-    };
-
-    static public enum Error {
-
-        APP_ERROR,
-        JAM,
-        STORING_ERROR_CALL_ADMIN,
-        BILLS_IN_ESCROW_CALL_ADMIN;
-    };
-
-    static public class Status extends Observable {
-
-        private State state = State.IDLE;
-        private Error error;
-        private String errorMsg;
-
-        @Override
-        synchronized public String toString() {
-            return "Error ( " + error + " ) : " + errorMsg;
-        }
-
-        synchronized public State getState() {
-            return state;
-        }
-
-        synchronized private void setState(State state) {
-            if (this.state != State.ERROR) {
-                if (this.state != state) {
-                    setChanged();
-                }
-                this.state = state;
-                notifyObservers(this);
-            }
-
-        }
-
-        synchronized private void clearError() {
-            if (state == State.ERROR) {
-                this.state = State.IDLE;
-                setChanged();
-                notifyObservers(this);
-            }
-        }
-
-        synchronized public String getErrorDetail() {
-            return "ErrorDetail{" + "code=" + error + ", data=" + errorMsg + '}';
-        }
-
-        synchronized private void setError(Error e, String msg) {
-            this.error = e;
-            this.errorMsg = msg;
-        }
-
-        synchronized public String name() {
-            return state.name();
-        }
-    }
     final private Thread thread;
     final private Glory device;
     final private ManagerThreadState managerThreadState;
-    final private Status status = new Status();
+    final private ManagerInterface.Status status = new ManagerInterface.Status();
 
     public GloryManager(Glory device) {
         this.device = device;
@@ -140,7 +68,7 @@ public class GloryManager {
             status.clearError();
         }
 
-        public void setErrorInfo(Error e, String msg) {
+        public void setErrorInfo(ManagerInterface.Error e, String msg) {
             status.setError(e, msg);
         }
     }
@@ -152,12 +80,12 @@ public class GloryManager {
      *
      *
      */
-    public class ControllerApi {
+    public class ManagerControllerApi implements ManagerInterface {
 
         private final ManagerThreadState.ControllerApi managerControllerApi;
         private final ThreadCommandApi threadCommandApi = new ThreadCommandApi();
 
-        public ControllerApi() {
+        public ManagerControllerApi() {
             managerControllerApi = managerThreadState.getControllerApi();
         }
 
@@ -352,8 +280,8 @@ public class GloryManager {
             Logger.debug("Closing Manager done");
         }
 
-        public ControllerApi getControllerApi() {
-            return new ControllerApi();
+        public ManagerControllerApi getControllerApi() {
+            return new ManagerControllerApi();
         }
     }
 

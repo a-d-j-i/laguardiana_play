@@ -5,7 +5,7 @@
 package models.actions.states;
 
 import devices.IoBoard;
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -40,7 +40,7 @@ abstract public class ActionState {
         Logger.error("ActionState accept Invalid step %s", name());
     }
 
-    public void onGloryEvent(GloryManager.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         Logger.debug("ActionState onGloryEvent %s %s", m.name(), name());
     }
 

@@ -2,8 +2,6 @@
 #{set title:'Login' /}
 <section id ="login">
     <header></header>
-
-
     <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="candado">&{'secure.title'}</h1>
@@ -21,18 +19,18 @@
         <a href="#">&{'secure.pass_forget'}</a>
         #{/form}
         #{if ( ! play.configuration[ 'style.useHardwareKeyboard' ] ) }
-        <div class="contenido" style="height: 185px;">
+        <div class="contenido" style="height: 140px;">
         </div>
-
+        <hr>
         <div class="botonera">
-            <ul class="columns">
+            <ul class="on-2 columns">
                 <li class="fixed column" style="width: 50%">
                     &nbsp;
                 </li>
                 <li class="fixed column" style="width: 50%">
-                    <div class="columna_2">
+                    <div class="columna">
                         <!-- link continuar -->
-                        <a id="continueButton" href="#" class="boton ${play.configuration['style.button_color']}">&{'application.continue'}</a>
+                        <a id="continueButton" href="#" class="full_width boton ${play.configuration['style.button_color']}">&{'application.continue'}</a>
                     </div>
                 </li>
             </ul>

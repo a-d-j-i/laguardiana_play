@@ -7,7 +7,7 @@ package models;
 import controllers.Secure;
 import devices.DeviceFactory;
 import devices.IoBoard;
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -44,7 +44,7 @@ public class ModelFacade {
             return "gloryError=" + gloryError + ", ioBoardError=" + ioBoardError + ", appError=" + appError;
         }
     }
-    final static private GloryManager.ControllerApi manager;
+    final static private ManagerInterface manager;
     final static private IoBoard ioBoard;
     private static ModelError modelError = new ModelError();
     private static UserAction currentUserAction = null;
@@ -54,7 +54,7 @@ public class ModelFacade {
         manager = DeviceFactory.getGloryManager();
         manager.addObserver(new Observer() {
             public void update(Observable o, Object data) {
-                Promise now = new OnGloryEvent((GloryManager.Status) data).now();
+                Promise now = new OnGloryEvent((ManagerInterface.Status) data).now();
             }
         });
 
@@ -68,9 +68,9 @@ public class ModelFacade {
 
     static class OnGloryEvent extends Job {
 
-        GloryManager.Status status;
+        ManagerInterface.Status status;
 
-        public OnGloryEvent(GloryManager.Status status) {
+        public OnGloryEvent(ManagerInterface.Status status) {
             this.status = status;
         }
 
@@ -78,17 +78,15 @@ public class ModelFacade {
         public void doJob() throws Exception {
             GloryEvent.save(currentUserAction, status.name());
             switch (status.getState()) {
-                case ERROR:
-                    if (Play.configuration.getProperty("glory.ignore") == null) {
-                        modelError.gloryError = status.getErrorDetail();
-                    }
-                    break;
                 //Could happen on startup
                 case INITIALIZING:
                 case IDLE:
                     if (currentUserAction != null) {
                         currentUserAction.onGloryEvent(status);
                     }
+                    break;
+                case ERROR:
+                    modelError.gloryError = status.getErrorDetail();
                     break;
                 default:
                     if (currentUserAction == null) {
@@ -185,7 +183,7 @@ public class ModelFacade {
             }
         }
 
-        public GloryManager.State getManagerState() {
+        public ManagerInterface.State getManagerState() {
             return manager.getStatus().getState();
         }
 
@@ -263,7 +261,7 @@ public class ModelFacade {
         if (isLocked()) {
             return null;
         }
-        if (manager.getStatus().getState() == GloryManager.State.ERROR) {
+        if (manager.getStatus().getState() == ManagerInterface.State.ERROR) {
             if (Play.configuration.getProperty("glory.ignore") == null) {
                 setError(String.format("Glory error : %s", manager.getStatus().getErrorDetail()));
             }
@@ -324,8 +322,8 @@ public class ModelFacade {
     }
 
     private static void clearError() {
-        GloryManager.State m = manager.getStatus().getState();
-        if (m != GloryManager.State.ERROR) {
+        ManagerInterface.State m = manager.getStatus().getState();
+        if (m != ManagerInterface.State.ERROR) {
             modelError.gloryError = null;
         } else {
             Logger.error("Manager still in error %s", m.name());

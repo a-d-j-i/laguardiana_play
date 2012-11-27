@@ -4,7 +4,7 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -24,9 +24,9 @@ public class Finish extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(GloryManager.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         super.onGloryEvent(m);
-        if (m.getState() != GloryManager.State.IDLE) {
+        if (m.getState() != ManagerInterface.State.IDLE) {
             Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
         }
     }

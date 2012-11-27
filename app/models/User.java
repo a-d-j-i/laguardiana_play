@@ -133,6 +133,7 @@ public class User extends LgUser {
         } else if (rule.permission.equalsIgnoreCase("DENY")) {
             return false;
         }
+        Logger.error("Unauthorized %s %s", resource, operation);
         return false;
     }
 

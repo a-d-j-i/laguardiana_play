@@ -5,7 +5,7 @@
 package models.actions;
 
 import devices.DeviceFactory;
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -23,11 +23,11 @@ import play.Logger;
  */
 public class BillDepositAction extends UserAction {
 
-    static final EnumMap<GloryManager.State, String> messageMap = new EnumMap<GloryManager.State, String>(GloryManager.State.class);
+    static final EnumMap<ManagerInterface.State, String> messageMap = new EnumMap<ManagerInterface.State, String>(ManagerInterface.State.class);
 
     static {
-        messageMap.put(GloryManager.State.READY_TO_STORE, "bill_deposit.ready_to_store");
-        messageMap.put(GloryManager.State.ESCROW_FULL, "bill_deposit.escrow_full");
+        messageMap.put(ManagerInterface.State.READY_TO_STORE, "bill_deposit.ready_to_store");
+        messageMap.put(ManagerInterface.State.ESCROW_FULL, "bill_deposit.escrow_full");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;

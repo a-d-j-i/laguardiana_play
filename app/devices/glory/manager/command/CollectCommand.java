@@ -4,8 +4,8 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
+import devices.glory.manager.ManagerInterface;
 
 /**
  *
@@ -19,7 +19,7 @@ public class CollectCommand extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setState(GloryManager.State.COLLECTING);
+        setState(ManagerInterface.State.COLLECTING);
         if (sendGloryCommand(new devices.glory.command.SetCollectMode())) {
             gotoNeutral(false, false, false);
         }

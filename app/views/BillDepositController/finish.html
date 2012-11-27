@@ -36,7 +36,7 @@
                     <div class="columna">
                         <div class="columna">
                             #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
-                            <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde">&{'main_menu.logout'}</a>
+                            <a href="@{ Secure.logout( "Application.index" ) }" class="boton full_width verde">&{'main_menu.logout'}</a>
                             #{/if}
                         </div>
                     </div>
@@ -45,3 +45,15 @@
         </div>
     </article>
 </section>
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    function done() {
+        window.location.href = "@{Application.index()}";
+    };
+    // Call refresh every 1.5 seconds
+    done(refresh,  ${play.configuration['finish_screen.timeout']});
+    refresh();
+
+</script>
+#{/set}

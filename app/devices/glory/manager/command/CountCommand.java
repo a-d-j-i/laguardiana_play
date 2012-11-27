@@ -7,6 +7,7 @@ package devices.glory.manager.command;
 import devices.glory.GloryStatus;
 import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
+import devices.glory.manager.ManagerInterface;
 import java.util.HashMap;
 import java.util.Map;
 import play.Logger;
@@ -106,7 +107,7 @@ public class CountCommand extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setState(GloryManager.State.IDLE);
+        setState(ManagerInterface.State.IDLE);
 
         boolean batchEnd = false;
         if (!gotoNeutral(false, false, false)) {
@@ -132,13 +133,13 @@ public class CountCommand extends ManagerCommandAbstract {
                         if (!refreshQuantity()) {
                             String error = gloryStatus.getLastError();
                             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-                            setError(GloryManager.Error.APP_ERROR, error);
+                            setError(ManagerInterface.Error.APP_ERROR, error);
                             return;
                         }
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
-                        setState(GloryManager.State.STORING);
+                        setState(ManagerInterface.State.STORING);
                         break;
                     } else if (countData.needToWithdrawDeposit()) {
                         countData.withdrawDepositDone();
@@ -146,7 +147,7 @@ public class CountCommand extends ManagerCommandAbstract {
                             return;
                         }
                         WaitForEmptyEscrow();
-                        setState(GloryManager.State.IDLE);
+                        setState(ManagerInterface.State.IDLE);
                         break;
                     } else {
                         if (countData.isBatch && batchEnd) {
@@ -154,7 +155,7 @@ public class CountCommand extends ManagerCommandAbstract {
                             break;
                         }
                         if (gloryStatus.isEscrowFull()) {
-                            setState(GloryManager.State.ESCROW_FULL);
+                            setState(ManagerInterface.State.ESCROW_FULL);
                             break;
                         }
                         if (gloryStatus.isHopperBillPresent()) {
@@ -163,17 +164,17 @@ public class CountCommand extends ManagerCommandAbstract {
                             }
                             break;
                         }
-                        setState(GloryManager.State.READY_TO_STORE);
+                        setState(ManagerInterface.State.READY_TO_STORE);
                     }
                     if (!refreshQuantity()) {
                         String error = gloryStatus.getLastError();
                         Logger.error("Error %s sending cmd : CountingDataRequest", error);
-                        setError(GloryManager.Error.APP_ERROR, error);
+                        setError(ManagerInterface.Error.APP_ERROR, error);
                         return;
                     }
                     break;
                 case counting:
-                    setState(GloryManager.State.COUNTING);
+                    setState(ManagerInterface.State.COUNTING);
                     // The second time after storing.
                     // Ignore error.
                     refreshQuantity();
@@ -187,11 +188,11 @@ public class CountCommand extends ManagerCommandAbstract {
                     if (!refreshQuantity()) {
                         String error = gloryStatus.getLastError();
                         Logger.error("Error %s sending cmd : CountingDataRequest", error);
-                        setError(GloryManager.Error.APP_ERROR, error);
+                        setError(ManagerInterface.Error.APP_ERROR, error);
                         return;
                     }
                     if (!gloryStatus.isHopperBillPresent()) {
-                        setState(GloryManager.State.PUT_THE_BILLS_ON_THE_HOPER);
+                        setState(ManagerInterface.State.PUT_THE_BILLS_ON_THE_HOPER);
                     }
                     break;
                 case being_store:
@@ -210,7 +211,7 @@ public class CountCommand extends ManagerCommandAbstract {
                             return;
                         }
                         if (gloryStatus.isRejectBillPresent()) {
-                            setState(GloryManager.State.REMOVE_REJECTED_BILLS);
+                            setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
                             break;
                         }
                         if (batchCountStart()) { // batch end
@@ -218,27 +219,27 @@ public class CountCommand extends ManagerCommandAbstract {
                         }
                     }
                     if (gloryStatus.isRejectFull()) {
-                        setState(GloryManager.State.REMOVE_REJECTED_BILLS);
+                        setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
                         break;
                     }
                     break;
                 case abnormal_device:
-                    setError(GloryManager.Error.JAM,
+                    setError(ManagerInterface.Error.JAM,
                             String.format("Count Abnormal device, todo: get the flags"));
                     return;
                 case storing_error:
-                    setError(GloryManager.Error.STORING_ERROR_CALL_ADMIN,
+                    setError(ManagerInterface.Error.STORING_ERROR_CALL_ADMIN,
                             String.format("Count Storing error, todo: get the flags"));
                     return;
                 default:
-                    setError(GloryManager.Error.APP_ERROR,
+                    setError(ManagerInterface.Error.APP_ERROR,
                             String.format("Count invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
                     return;
             }
             sleep();
         }
         if (mustCancel()) {
-            setState(GloryManager.State.CANCELING);
+            setState(ManagerInterface.State.CANCELING);
             gotoNeutral(true, false, true);
         } else {
             gotoNeutral(true, false, false);
@@ -277,12 +278,12 @@ public class CountCommand extends ManagerCommandAbstract {
         if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
             String error = gloryStatus.getLastError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            setError(GloryManager.Error.APP_ERROR, error);
+            setError(ManagerInterface.Error.APP_ERROR, error);
             return false;
         }
         Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
         if (currentQuantity == null) {
-            setError(GloryManager.Error.APP_ERROR,
+            setError(ManagerInterface.Error.APP_ERROR,
                     String.format("Error getting current count"));
             return false;
         }
@@ -294,7 +295,7 @@ public class CountCommand extends ManagerCommandAbstract {
             }
             int current = currentQuantity.get(countData.currentSlot);
             if (current > desired) {
-                setError(GloryManager.Error.APP_ERROR,
+                setError(ManagerInterface.Error.APP_ERROR,
                         String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired));
                 return true;
             }
@@ -310,7 +311,7 @@ public class CountCommand extends ManagerCommandAbstract {
             if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
                 String error = gloryStatus.getLastError();
                 Logger.error("Error %s sending cmd : BatchDataTransmition", error);
-                setError(GloryManager.Error.APP_ERROR, error);
+                setError(ManagerInterface.Error.APP_ERROR, error);
             }
             return false;
         }

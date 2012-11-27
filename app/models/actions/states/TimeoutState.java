@@ -5,10 +5,9 @@
 package models.actions.states;
 
 import devices.IoBoard;
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
-import play.Logger;
 
 /**
  *
@@ -29,7 +28,7 @@ public class TimeoutState extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(GloryManager.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         suspendTimeout();
         returnState.onGloryEvent(m);
     }

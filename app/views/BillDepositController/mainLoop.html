@@ -17,7 +17,7 @@
                         <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
                         <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                         <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
-                        <p>&{ 'counting_page.total_sum' }: <span id="totalSum">${totalSum}</span></p>
+                        <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
                         <div class="info_message" style="color: green;"> 
@@ -38,10 +38,10 @@
                             <!-- detalle de billetes -->
                             %{ total = 0; cnt_total = 0;}%
                             #{list items:billData, as:'b'}
-                            <tr id="BTRID_${b.tid}">
-                                <td id="bill_denomination">${b.d}</td>
-                                <td id="bill_quantity">${b.q}</td>
-                                <td id="bill_total">${b.d  * b.q}</td>
+                            <tr class="BTRID_${b.tid}">
+                                <td class="bill_denomination">${b.d}</td>
+                                <td class="bill_quantity">${b.q}</td>
+                                <td class="bill_total">${b.d  * b.q}</td>
                                 %{ total += b.d  * b.q; cnt_total += b.q }%
                             </tr>
                             #{/list}
@@ -52,8 +52,8 @@
                             <tr>
                                 <td>&{ 'counting_page.totals' }</td>
                                 <!-- totales -->
-                                <td id ="cnt_total">${ cnt_total }</td>
-                                <td id ="total">${ total }</td>
+                                <td class ="cnt_total">${ cnt_total }</td>
+                                <td class ="total">${ total }</td>
                                 <!-- /totales -->
                             </tr>
                         </tfoot>
@@ -82,7 +82,10 @@
         <div id="alerta_titulo">&{ 'bill_deposit.escrow_full' }</div>
         <div id="alerta_cuerpo">
             <div id="alerta_texto">
-                <span id="error_text">&{ 'bill_deposit.escrow_full_text' }</span>
+                <div id="error_text">
+                    &{ 'bill_deposit.escrow_full_text_t1' }&nbsp; 
+                    <span class="total">class ="total">${ total }</span>&nbsp;${formData.currency.currency.description}
+                </div>
             </div>
             <div id="alerta_botonera">
                 <a id ="alerta_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
@@ -122,6 +125,15 @@
             </div>
         </div>
     </div>
+    <div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+                <span class="info_message" style="color: green;"></span>
+            </div>
+        </div>
+    </div>
 </section>
 
 
@@ -133,7 +145,7 @@
             
             $( '.info_message' ).html(  data[ 2 ] );
             var totalSum = data[ 3 ];
-            $( '#totalSum' ).html( totalSum );
+            $( '.totalSum' ).html( totalSum );
             
             var status = data[ 0 ];
             if ( status != null && status.toString() != 'null' ) {
@@ -164,6 +176,10 @@
                     if ( lastStatus != status ) {
                         showAlert( "#alerta_escrow_full" );
                     }
+                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
+                    if ( lastStatus != status ) {
+                        showAlert( "#alerta_remove_rejected_bills" );
+                    }
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
@@ -181,16 +197,16 @@
             var total = 0;
             var cnt_total = 0;
             for( var i = 0 ; i < billData.length; i ++ ) {
-                var nid = '#BTRID_' + billData[ i ].tid;
-                $( nid ).children( '#bill_denomination' ).html( billData[ i ].d );
-                $( nid ).children( '#bill_quantity' ).html( billData[ i ].q );
+                var nid = '.BTRID_' + billData[ i ].tid;
+                $( nid ).children( '.bill_denomination' ).html( billData[ i ].d );
+                $( nid ).children( '.bill_quantity' ).html( billData[ i ].q );
                 var t = ( billData[ i ].d * billData[ i ].q );
-                $( nid ).children( '#bill_total' ).html( t );
+                $( nid ).children( '.bill_total' ).html( t );
                 total += t;
                 cnt_total += billData[ i ].q;
             }
-            $( '#cnt_total' ).html( cnt_total );
-            $( '#total' ).html( total );
+            $( '.cnt_total' ).html( cnt_total );
+            $( '.total' ).html( total );
             
             doneRefresh();
         })

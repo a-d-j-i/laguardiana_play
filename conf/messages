@@ -36,7 +36,7 @@ application.close=CERRAR
 application.printers=Impresoras
 application.timeout=Necesita mas tiempo
 application.timeout_detail=Necesita mas tiempo
-
+application.hardware_error=Error de hardware llame al administrador
 application.remove_ticket=Por favor retire su ticket
 
 application.start_counting=INICIAR CONTEO
@@ -53,8 +53,9 @@ main_menu.login=INGRESAR AL SISTEMA
 main_menu.logout=SALIR DEL SISTEMA
 other_menu.title=OTRAS OPERACIONES
 
-bill_deposit.escrow_full=Se lleno el escrow, esta listo para depositar ?
-bill_deposit.escrow_full_text=Se lleno el escrow. <br/>Esta listo para depositar ?<br/>Tenga en cuenta que esta operacion no se puede deshacer!!!
+bill_deposit.escrow_full=Capacidad llena, ¿Está listo para depositar?
+bill_deposit.escrow_full_text_t1=Dinero recontado: 
+bill_deposit.escrow_full_text_t2=. Si confirma el depósito no podrá volver atrás.
 bill_deposit.ready_to_store=Presione continuar para depositar
 
 envelope_deposit.put_the_envelope_in_the_escrow=Coloque el sobre en la maquina.

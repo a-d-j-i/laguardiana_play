@@ -4,7 +4,7 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import models.Configuration;
 import models.actions.UserAction;
 import play.Logger;
@@ -28,7 +28,7 @@ public class StoringBillDeposit extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(GloryManager.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         super.onGloryEvent(m);
         switch (m.getState()) {
             case IDLE:

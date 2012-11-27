@@ -9,7 +9,8 @@ public class LgUserProperty extends GenericModel implements java.io.Serializable
 
     @Id
     @Column( name = "user_property_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgUserPropertyGenerator")
+    @SequenceGenerator(name = "LgUserPropertyGenerator", sequenceName = "lg_user_property_sequence")
     public Integer userPropertyId;
     @Column( name = "property", nullable = false, length = 64)
     public String property;

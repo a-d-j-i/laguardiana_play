@@ -6,7 +6,7 @@ package models.actions;
 
 import controllers.Secure;
 import devices.DeviceFactory;
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import java.awt.print.PrinterException;
 import java.util.Date;
 import java.util.EnumMap;
@@ -28,10 +28,10 @@ import play.Logger;
  */
 public class EnvelopeDepositAction extends UserAction {
 
-    static final EnumMap<GloryManager.State, String> messageMap = new EnumMap<GloryManager.State, String>(GloryManager.State.class);
+    static final EnumMap<ManagerInterface.State, String> messageMap = new EnumMap<ManagerInterface.State, String>(ManagerInterface.State.class);
 
     static {
-        messageMap.put(GloryManager.State.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
+        messageMap.put(ManagerInterface.State.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;

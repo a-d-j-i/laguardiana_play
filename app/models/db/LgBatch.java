@@ -12,7 +12,8 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column(name = "batch_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgBatchGenerator")
+    @SequenceGenerator(name = "LgBatchGenerator", sequenceName = "lg_batch_sequence")
     public Integer batchId;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)

@@ -6,8 +6,11 @@ import devices.SerialPortAdapterAbstract.PORTSPEED;
 import devices.SerialPortAdapterAbstract.PORTSTOPBITS;
 import devices.SerialPortAdapterAbstract.PortConfiguration;
 import devices.glory.Glory;
+import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.FakeGloryManager;
 import devices.glory.manager.GloryManager;
 import java.util.HashMap;
+import models.Configuration;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -33,7 +36,11 @@ public class DeviceFactory extends PlayPlugin {
         return printer;
     }
 
-    public static GloryManager.ControllerApi getGloryManager() {
+    public static ManagerInterface getGloryManager() {
+        
+        if ( Configuration.isGloryIgnore() ) {
+            return new FakeGloryManager();
+        }
         Glory glory = getCounter(Play.configuration.getProperty("glory.port"));
 
         if (glory == null) {

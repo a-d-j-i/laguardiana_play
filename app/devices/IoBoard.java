@@ -197,7 +197,7 @@ public class IoBoard extends Observable {
 
         private void setError(String error) {
             IoBoardStatus status = null;
-            Logger.error("------- > IoBoard error : %s", error);
+            Logger.error("IoBoard error : %s", error);
             mutex.lock();
             try {
                 this.errorMsg = error;
@@ -303,6 +303,7 @@ public class IoBoard extends Observable {
                         } catch (NumberFormatException e) {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
+                    } else if (l.startsWith("STATE :") && l.length() > 47) {
                     } else if (l.startsWith("STATE :") && l.length() > 47) {
                         try {
                             Integer bagSt = Integer.parseInt(l.substring(12, 14), 10);

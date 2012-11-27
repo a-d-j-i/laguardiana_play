@@ -11,7 +11,8 @@ public class LgExternalAppLog extends GenericModel implements java.io.Serializab
 
     @Id
     @Column( name = "log_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgExternalAppLogGenerator")
+    @SequenceGenerator(name = "LgExternalAppLogGenerator", sequenceName = "lg_external_app_log_sequence")
     public Integer logId;
     @ManyToOne( fetch = FetchType.LAZY)
     @JoinColumn( name = "external_app_id", nullable = false)

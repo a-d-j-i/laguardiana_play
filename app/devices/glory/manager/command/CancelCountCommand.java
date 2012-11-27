@@ -4,8 +4,8 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
+import devices.glory.manager.ManagerInterface;
 
 /**
  *
@@ -19,7 +19,7 @@ public class CancelCountCommand extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setState(GloryManager.State.CANCELING);
+        setState(ManagerInterface.State.CANCELING);
         gotoNeutral(false, false, false);
         cancel();
     }

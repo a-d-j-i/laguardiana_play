@@ -12,7 +12,8 @@ public class LgEnvelope extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column(name = "envelope_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgEnvelopeGenerator")
+    @SequenceGenerator(name = "LgEnvelopeGenerator", sequenceName = "lg_envelope_sequence")
     public Integer envelopeId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deposit_id", nullable = false)

@@ -19,7 +19,8 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     @Id
     @Column(name = "deposit_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgDepositGenerator")
+    @SequenceGenerator(name = "LgDepositGenerator", sequenceName = "lg_deposit_sequence")
     public Integer depositId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

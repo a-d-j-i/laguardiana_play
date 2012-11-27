@@ -22,7 +22,8 @@ abstract public class LgLov extends GenericModel implements java.io.Serializable
     }
     @Id
     @Column(name = "lov_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgLovGenerator")
+    @SequenceGenerator(name = "LgLovGenerator", sequenceName = "lg_lov_sequence")
     public Integer lovId;
     @Column(name = "type", nullable = false, updatable = false, insertable = false)
     public String type;

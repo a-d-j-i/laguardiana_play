@@ -5,20 +5,21 @@
     <article>
         <h1 class="">&{ 'application.error' }</h1>
         <div class="contenido">
+            #{if controllers.Secure.checkPermission( 'Application.reset', 'GET' ) || controllers.Secure.checkPermission( 'Application.storingReset', 'GET' )  }
             <p id="mstatus">ModelFacade status ${ mstatus }</p>
             <p id="merror">ModelFacade error ${ merror }</p>
             <p id="gstatus">Glory Status ${ gstatus }</p>
             <p id="gerror">Glory Error ${ gError }</p>
             <p id="ierror">IOBoard Status ${ istatus }</p>
             <p id="ierror">IOBoard Error ${ ierror }</p>
-            #{checkPermission resource: 'Application.reset', operation: 'GET'}
             <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(1)}">Reset</a>
-            #{/checkPermission}
-            #{checkPermission resource: 'Application.storingReset', operation: 'GET'}
             <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(2)}">StoringErrorReset</a>
-            #{/checkPermission}
             <!-- datos del deposito -->
             <!-- /datos del deposito -->
+            #{/if}
+            #{else}
+            <h2>&{ 'application.hardware_error' }</h2>
+            #{/else}
         </div>
         <hr />
         <div class="botonera">

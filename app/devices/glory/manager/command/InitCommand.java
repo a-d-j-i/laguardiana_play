@@ -4,8 +4,8 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
+import devices.glory.manager.ManagerInterface;
 
 /**
  *
@@ -19,8 +19,8 @@ public class InitCommand extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setState(GloryManager.State.INITIALIZING);
+        setState(ManagerInterface.State.INITIALIZING);
         gotoNeutral(false, false, false);
-        setState(GloryManager.State.IDLE);
+        setState(ManagerInterface.State.IDLE);
     }
 }

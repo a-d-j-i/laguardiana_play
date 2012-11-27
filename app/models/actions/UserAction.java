@@ -5,7 +5,7 @@
 package models.actions;
 
 import devices.IoBoard;
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
@@ -30,21 +30,21 @@ abstract public class UserAction {
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
     protected User currentUser = null;
-    protected final Map<GloryManager.State, String> messages = new EnumMap<GloryManager.State, String>(GloryManager.State.class);
+    protected final Map<ManagerInterface.State, String> messages = new EnumMap<ManagerInterface.State, String>(ManagerInterface.State.class);
     protected ActionState state = null;
     protected Integer currentDepositId = null;
 
-    public UserAction(Currency currency, Object formData, Map<GloryManager.State, String> msgs) {
+    public UserAction(Currency currency, Object formData, Map<ManagerInterface.State, String> msgs) {
         this.formData = formData;
         this.currency = currency;
-        messages.put(GloryManager.State.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
-        messages.put(GloryManager.State.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
-        messages.put(GloryManager.State.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
-        messages.put(GloryManager.State.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
-        messages.put(GloryManager.State.CANCELING, "application.canceling");
-        messages.put(GloryManager.State.CANCELED, "counting_page.deposit_canceled");
-        messages.put(GloryManager.State.ERROR, "application.error");
-        for (Map.Entry<GloryManager.State, String> m : messages.entrySet()) {
+        messages.put(ManagerInterface.State.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
+        messages.put(ManagerInterface.State.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
+        messages.put(ManagerInterface.State.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
+        messages.put(ManagerInterface.State.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
+        messages.put(ManagerInterface.State.CANCELING, "application.canceling");
+        messages.put(ManagerInterface.State.CANCELED, "counting_page.deposit_canceled");
+        messages.put(ManagerInterface.State.ERROR, "application.error");
+        for (Map.Entry<ManagerInterface.State, String> m : messages.entrySet()) {
             messages.put(m.getKey(), m.getValue());
         }
     }
@@ -170,7 +170,7 @@ abstract public class UserAction {
 
     abstract public void finish();
 
-    public void onGloryEvent(GloryManager.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         state.onGloryEvent(m);
     }
 

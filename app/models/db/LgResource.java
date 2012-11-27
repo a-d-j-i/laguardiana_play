@@ -11,7 +11,8 @@ public class LgResource extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "resource_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgResourceGenerator")
+    @SequenceGenerator(name = "LgResourceGenerator", sequenceName = "lg_resource_sequence")
     public Integer resourceId;
     @Column( name = "name", nullable = false, length = 64)
     public String name;

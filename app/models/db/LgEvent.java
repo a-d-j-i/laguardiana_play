@@ -12,31 +12,10 @@ import play.db.jpa.GenericModel;
 @DiscriminatorColumn(name = "event_type", length = 32)
 abstract public class LgEvent extends GenericModel implements java.io.Serializable {
 
-    /*
-     public static enum Type {
-
-     GLORY(1),
-     ACTION_START_TRY(2),
-     ACTION_START(4),
-     ACTION_FINISH(5),
-     DEPOSIT_CHANGE(6),
-     IO_BOARD(7),
-     INVALID_BAG(8),
-     TIMEOUT(9),
-     DEPOSIT_EXPORT(10),;
-     private Integer eventTypeLov;
-
-     private Type(Integer eventTypeLov) {
-     this.eventTypeLov = eventTypeLov;
-     }
-
-     private Integer getEventTypeLov() {
-     return eventTypeLov;
-     }
-     }*/
     @Id
     @Column( name = "event_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgEventGenerator")
+    @SequenceGenerator(name = "LgEventGenerator", sequenceName = "lg_event_sequence")
     public Integer eventId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = true)

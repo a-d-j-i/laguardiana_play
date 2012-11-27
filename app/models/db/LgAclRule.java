@@ -9,7 +9,8 @@ public class LgAclRule extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "acl_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgAclRuleGenerator")
+    @SequenceGenerator(name = "LgAclRuleGenerator", sequenceName = "lg_acl_rule_sequence")
     public Integer aclId;
     @ManyToOne( fetch = FetchType.LAZY)
     @JoinColumn( name = "role_id", nullable = false)

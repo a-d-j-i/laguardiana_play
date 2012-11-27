@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
-import models.BagProcessedEvent;
 import models.BagEvent;
+import models.BagProcessedEvent;
 import play.Logger;
 import play.db.jpa.GenericModel;
 
@@ -17,7 +17,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "bag_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgBagGenerator")
+    @SequenceGenerator(name = "LgBagGenerator", sequenceName = "lg_bag_sequence")
     public Integer bagId;
     @Column( name = "bag_code", nullable = false, length = 128)
     public String bagCode;

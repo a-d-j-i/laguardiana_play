@@ -4,7 +4,7 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -33,7 +33,7 @@ public class IdleCounting extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(GloryManager.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         super.onGloryEvent(m);
         switch (m.getState()) {
             case READY_TO_STORE:

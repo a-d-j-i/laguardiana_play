@@ -12,7 +12,8 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column(name = "bill_type_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgBillTypeGenerator")
+    @SequenceGenerator(name = "LgBillTypeGenerator", sequenceName = "lg_bill_type_sequence")
     public Integer billTypeId;
     @Column(name = "denomination", nullable = false)
     public Integer denomination;

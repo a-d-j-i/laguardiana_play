@@ -13,7 +13,8 @@ public class LgRole extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column( name = "role_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgRoleGenerator")
+    @SequenceGenerator(name = "LgRoleGenerator", sequenceName = "lg_role_sequence")
     public Integer roleId;
     @Column( name = "name", nullable = false, length = 64)
     public String name;

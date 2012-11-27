@@ -12,7 +12,8 @@ public class LgExternalApp extends GenericModel implements java.io.Serializable 
     // Needed for play generic model.
     @Id
     @Column( name = "external_app_id", unique = true, nullable = false)
-    @GeneratedValue
+    @GeneratedValue(generator = "LgExternalAppGenerator")
+    @SequenceGenerator(name = "LgExternalAppGenerator", sequenceName = "lg_external_app_sequence")
     public Integer externalAppId;
     @Column( name = "app_id", unique = true, nullable = false)
     public Integer appId;

@@ -12,7 +12,6 @@ import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
-import models.db.LgSystemProperty;
 import models.lov.Currency;
 import play.Logger;
 import play.mvc.Controller;
