@@ -38,9 +38,7 @@
     function done() {
         window.location.href = "@{Application.index()}";
     };
-    // Call refresh every 1.5 seconds
-    done(refresh,  ${play.configuration['finish_screen.timeout']});
-    refresh();
+    setTimeout(done,  ${play.configuration['finish_screen.timeout']});
 
 </script>
 #{/set}

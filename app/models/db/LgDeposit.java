@@ -28,6 +28,9 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bag_id", nullable = false)
     public LgBag bag;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "z_id", nullable = false)
+    public LgZ z;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
@@ -49,6 +52,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     public LgDeposit(LgUser user, String userCode, DepositUserCodeReference userCodeData) {
         this.bag = LgBag.getCurrentBag();
+        this.z = LgZ.getCurrentZ();
         this.user = user;
         this.userCode = userCode;
 
@@ -113,6 +117,6 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     @Override
     public String toString() {
-        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag + '}';
+        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag +", z=" + z + '}';
     }
 }

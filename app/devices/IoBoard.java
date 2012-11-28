@@ -11,6 +11,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import models.Configuration;
 import play.Logger;
 
 /*
@@ -316,7 +317,10 @@ public class IoBoard extends Observable {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
                     } else if (l.contains("ERROR")) {
-                        currentStatus.setError(l);
+                        if (l.contains("SHUTTER") && Configuration.isIgnoreShutter()) {
+                        } else {
+                            currentStatus.setError(l);
+                        }
                     } else {
                         Logger.warn("IOBOARD Ignoring line : %s", l);
                     }

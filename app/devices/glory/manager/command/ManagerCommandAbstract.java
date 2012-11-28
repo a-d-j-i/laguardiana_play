@@ -412,6 +412,27 @@ abstract public class ManagerCommandAbstract implements Runnable {
         return false;
     }
 
+    void WaitForEmptyRejectedBills() {
+        if (!gloryStatus.isRejectBillPresent()) {
+            return;
+        }
+        setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
+        for (int i = 0; i < retries; i++) {
+            Logger.debug("WaitForEmptyRejectedBills");
+            if (!sense()) {
+                return;
+            }
+            if (!gloryStatus.isRejectBillPresent()) {
+                setState(ManagerInterface.State.IDLE);
+                return;
+            }
+            sleep();
+        }
+        setError(ManagerInterface.Error.APP_ERROR,
+                "WaitForEmptyRejectedBills waiting too much");
+
+    }
+
     void WaitForEmptyEscrow() {
         for (int i = 0; i < retries; i++) {
             Logger.debug("WaitForEmptyEscrow");

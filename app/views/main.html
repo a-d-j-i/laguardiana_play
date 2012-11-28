@@ -22,6 +22,10 @@
                 background: url('../public/images/${play.configuration['style.button_top']}') top left repeat-y;
             }
         </style>
+        #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
+        <!-- jquery ui -->
+        <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/jquery-ui.css'}">
+        #{/if}
         <!-- mottie -->
         #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
         <link rel="stylesheet"  media="screen" type="text/css" href="@{'/public/stylesheets/mottie.css'}" />
@@ -44,8 +48,40 @@
     <script src="@{'/public/javascripts/jquery/jquery.keyboard.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <script>
         $(function(){
-            $(":text, [type='password'], textarea").keyboard();
-            $("[type='number']").keyboard( { layout : 'num' } );
+            $(":text, [type='password'], textarea").keyboard({
+                layout: 'custom',
+                autoAccept   : true,
+                openOn       : 'click',
+                customLayout: {
+                    'default': [
+                        '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
+                        '{tab} q w e r t y u i o p [ ] \\',
+                        'a s d f g h j k l ; \' {accept}',
+                        '{shift} z x c v b n m , . / {shift}',
+                        '{space} {cancel}'
+                    ],
+                    'shift': [
+                        '~ ! @ # $ % ^ & * ( ) _ + {bksp}',
+                        '{tab} Q W E R T Y U I O P { } |',
+                        'A S D F G H J K L : " {accept}',
+                        '{shift} Z X C V B N M < > ? {shift}',
+                        '{space} {cancel}'
+                    ]
+                }
+            });
+            $("[type='number']").keyboard({
+                layout: 'custom',
+                autoAccept   : true,
+                openOn       : 'click',
+                customLayout: {
+                    'default' : [
+                        '7 8 9 {c}',
+                        '4 5 6 {b}',
+                        '1 2 3 {clear}',
+                        '0 . {accept}'
+                    ]
+                }
+            });
         });
     </script>
 

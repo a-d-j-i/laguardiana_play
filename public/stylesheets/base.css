@@ -2,7 +2,6 @@
     font-family: 'DIN';
     src: url('../fonts/DINPro-Medium.eot');
     src: local('☺'),
-        url('../fonts/DINPro-Medium.woff') format('woff'),
         url('../fonts/DINPro-Medium.ttf') format('truetype'),
         url('../fonts/DINPro-Medium.svg') format('svg');
     font-weight: normal;
@@ -360,7 +359,7 @@ table tfoot tr td {
     margin-bottom: 30px;
 }
 
-.alerta #alerta_cuerpo #alerta_texto span {
+.alerta #alerta_cuerpo #alerta_texto {
     background: #FFF7C2;
     padding: 15px;
     color: black;
@@ -375,12 +374,12 @@ table tfoot tr td {
 /* section: login */
 
 #login input[type='text'] {
-    width: 200px;
+    width: 30%;
     margin-right: 15px;
 }
 
 #login input[type='password'] {
-    width: 200px;
+    width: 30%;
     margin-right: 15px;
 }
 
@@ -391,6 +390,7 @@ table tfoot tr td {
 
 .keyboard {
     margin-top: 10px;
+    margin-bottom: 41px;
 }
 
 select {
@@ -401,20 +401,18 @@ input[type='text'] {
     margin-bottom: 15px;
 }
 
-.keyboard {
-    margin-bottom: 41px;
-}
 
 .botonera {
     overflow: hidden;
 }
 
-.botonera .columna {
-    padding: 0 10px;
+.botonera .column {
+    width: 48%;
+    float: left;
 }
 
-.botonera .columna a {
-    margin-bottom: 30px;
+.botonera .columna {
+    padding: 0 10px;
 }
 
 .botonera .columna a {

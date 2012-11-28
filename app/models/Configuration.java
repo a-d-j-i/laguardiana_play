@@ -18,6 +18,10 @@ public class Configuration {
         return isProperty("io_board.ignore") && Play.mode.isDev();
     }
 
+    public static boolean isIgnoreShutter() {
+        return isProperty("io_board.ignore_shutter");
+    }
+
     public static boolean isGloryIgnore() {
         return isProperty("glory.ignore") && Play.mode.isDev();
     }

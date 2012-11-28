@@ -65,12 +65,13 @@ public class IdleBillDeposit extends ActionState {
                 stateApi.setState(new Finish(stateApi));
                 break;
             case COUNTING:
-                stateApi.cancelTimer();
+                //stateApi.cancelTimer();
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
-                stateApi.startTimer();
+                //stateApi.startTimer();
                 break;
             case REMOVE_REJECTED_BILLS:
+                stateApi.setState(new RemoveRejectedBillsBillDeposit(stateApi, this));
                 break;
             default:
                 Logger.debug("IdleBillDeposit onGloryEvent invalid state %s %s", m.name(), name());
@@ -80,15 +81,15 @@ public class IdleBillDeposit extends ActionState {
 
     @Override
     public void onTimeoutEvent(TimeoutTimer timer) {
-        switch (timer.state) {
-            case WARN:
-                stateApi.setState(new TimeoutState(stateApi, this));
-                break;
-            case CANCEL:
-            default:
-                stateApi.setError("Timeout error need admin intervention");
-                break;
-        }
-
+        /*        switch (timer.state) {
+         case WARN:
+         stateApi.setState(new TimeoutState(stateApi, this));
+         break;
+         case CANCEL:
+         default:
+         stateApi.setError("Timeout error need admin intervention");
+         break;
+         }
+         */
     }
 }

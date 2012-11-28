@@ -18,6 +18,7 @@
                         <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                         <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
                         <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
+                        <p>&{ 'counting_page.current_total_sum' }: <span class="currentTotalSum">${currentTotalSum}</span></p>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
                         <div class="info_message" style="color: green;"> 
@@ -83,57 +84,58 @@
         <div id="alerta_cuerpo">
             <div id="alerta_texto">
                 <div id="error_text">
-                    &{ 'bill_deposit.escrow_full_text_t1' }&nbsp; 
-                    <span class="total">class ="total">${ total }</span>&nbsp;${formData.currency.currency.description}
-                </div>
-            </div>
-            <div id="alerta_botonera">
-                <a id ="alerta_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
-                <a id="alerta_continueButton" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
-            </div>
-        </div>
-    </div>
-    <div id="alerta_timeout" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'application.timeout' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'application.timeout_detail' }</span>
-            </div>
-            <div id="timeout_botonera">
-                <a id ="timeout_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
-                <a id="timeout_continueButton" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
-            </div>
-        </div>
-    </div>
-    <div id="alerta_cancel" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'application.canceling' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <div id="error_text">
-                    <span>&{ 'application.canceling_detail' }</span>
-                    <span class="info_message" style="color: green;"></span>
+                    &{ 'bill_deposit.escrow_full_text_t1' }
+                    <span class="total">${ total }</span>&nbsp;${formData.currency.currency.description}<br>
+                    &{ 'bill_deposit.escrow_full_text_t2' }
                 </div>
             </div>
         </div>
+        <div id="alerta_botonera">
+            <a id ="alerta_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+            <a id="alerta_continueButton" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+        </div>
     </div>
-    <div id="alerta_storing" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'counting_page.storing_detail' }</span>
+</div>
+<div id="alerta_timeout" class="alerta info" style="display: none;">
+    <div id="alerta_titulo">&{ 'application.timeout' }</div>
+    <div id="alerta_cuerpo">
+        <div id="alerta_texto">
+            <span id="error_text">&{ 'application.timeout_detail' }</span>
+        </div>
+        <div id="timeout_botonera">
+            <a id ="timeout_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+            <a id="timeout_continueButton" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+        </div>
+    </div>
+</div>
+<div id="alerta_cancel" class="alerta info" style="display: none;">
+    <div id="alerta_titulo">&{ 'application.canceling' }</div>
+    <div id="alerta_cuerpo">
+        <div id="alerta_texto">
+            <div id="error_text">
+                <span>&{ 'application.canceling_detail' }</span>
                 <span class="info_message" style="color: green;"></span>
             </div>
         </div>
     </div>
-    <div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
-                <span class="info_message" style="color: green;"></span>
-            </div>
+</div>
+<div id="alerta_storing" class="alerta info" style="display: none;">
+    <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
+    <div id="alerta_cuerpo">
+        <div id="alerta_texto">
+            <span id="error_text">&{ 'counting_page.storing_detail' }</span>
+            <span class="info_message" style="color: green;"></span>
         </div>
     </div>
+</div>
+<div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
+    <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
+    <div id="alerta_cuerpo">
+        <div id="alerta_texto">
+            <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+        </div>
+    </div>
+</div>
 </section>
 
 
@@ -164,6 +166,11 @@
                 } else {
                     closeAlert( "#alerta_storing" );    
                 }
+                if ( status == 'REMOVE_REJECTED_BILLS' ) {
+                    showAlert( '#alerta_remove_rejected_bills' );                
+                } else {
+                    closeAlert( "#alerta_remove_rejected_bills" );    
+                }
                 if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).show();
                 } else {
@@ -172,13 +179,10 @@
                 
                 if ( status == 'IDLE' || status == 'TIMEOUT_WARNING' || status == 'CANCELING' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' ) {
                 } else if ( status == 'STORING' ) {
+                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
                     if ( lastStatus != status ) {
                         showAlert( "#alerta_escrow_full" );
-                    }
-                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
-                    if ( lastStatus != status ) {
-                        showAlert( "#alerta_remove_rejected_bills" );
                     }
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
@@ -207,6 +211,7 @@
             }
             $( '.cnt_total' ).html( cnt_total );
             $( '.total' ).html( total );
+            $( '.currentTotalSum' ).html( parseInt( totalSum ) + parseInt( total ) );
             
             doneRefresh();
         })

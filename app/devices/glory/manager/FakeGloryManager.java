@@ -56,8 +56,13 @@ public class FakeGloryManager implements ManagerInterface {
     }
 
     public boolean storeDeposit(Integer sequenceNumber) {
-        status.setState(State.STORING);
-        status.setState(State.IDLE);
+        if (status.getState() == State.ESCROW_FULL) {
+            status.setState(State.STORING);
+            status.setState(State.COUNTING);
+        } else {
+            status.setState(State.STORING);
+            status.setState(State.IDLE);
+        }
         return true;
     }
 
@@ -80,16 +85,20 @@ public class FakeGloryManager implements ManagerInterface {
         status.setState(State.IDLE);
         return true;
     }
+    static boolean escrowDone = false;
 
     public ManagerInterface.Status getStatus() {
         counter++;
         if (counter % 10 == 0) {
             if (billDeposit) {
-                //status.setState(State.ESCROW_FULL);
+                if (!escrowDone) {
+                    status.setState(State.ESCROW_FULL);
+                    escrowDone = true;
+                }
             } else {
                 status.setState(State.PUT_THE_ENVELOPE_IN_THE_ESCROW);
             }
-        } 
+        }
         if (counter % 20 == 0) {
             status.setState(State.READY_TO_STORE);
         }

@@ -8,8 +8,11 @@ import java.util.Set;
 import javax.persistence.*;
 import models.BagEvent;
 import models.BagProcessedEvent;
+import models.BillDeposit;
+import models.EnvelopeDeposit;
 import play.Logger;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 
 @Entity
 @Table( name = "lg_bag", schema = "public")
@@ -34,10 +37,6 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public LgBag(String bagCode) {
         this.bagCode = bagCode;
         this.creationDate = new Date();
-    }
-
-    public static JPAQuery findUnprocessed() {
-        return LgDeposit.find("select b from LgBag b");
     }
 
     public static JPAQuery findUnprocessed(int appId) {
@@ -95,6 +94,25 @@ public class LgBag extends GenericModel implements java.io.Serializable {
             Logger.error("APP ERROR bag = null");
         }
         return currentBag;
+    }
+
+    public static F.T3<Long, Long, Long> getCurrentBagTotals() {
+        LgBag currentBag = getCurrentBag();
+        long sum = 0;
+        long envelopes = 0;
+        long deposits = 0;
+        for (LgDeposit d : currentBag.deposits) {
+            deposits++;
+            if (d instanceof BillDeposit) {
+                BillDeposit bd = (BillDeposit) d;
+                sum += bd.getTotal();
+            } else if (d instanceof EnvelopeDeposit) {
+                envelopes++;
+            } else {
+                Logger.error("Invalid deposit type");
+            }
+        }
+        return new F.T3<Long, Long, Long>(sum, envelopes, deposits);
     }
 
     public static void rotateBag() {

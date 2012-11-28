@@ -7,9 +7,10 @@
         <div class="botonera" style="height: 550px;">
             <ul class="on-2 columns">
                 #{otherMenuButton resource: 'ReportController.unprocessedDeposits', operation: 'GET', title: 'unprocessedDeposits' /}
-            </ul>           
-            <ul class="on-2 columns">
                 #{otherMenuButton resource: 'ReportController.unprocessedBags', operation: 'GET', title: 'unprocessedBags' /}
+                #{otherMenuButton resource: 'ReportController.currentBagTotals', operation: 'GET', title: 'currentBagTotals' /}
+                #{otherMenuButton resource: 'ReportController.currentZTotals', operation: 'GET', title: 'currentZTotals' /}
+                #{otherMenuButton resource: 'ReportController.rotateZ', operation: 'GET', title: 'rotateZ' /}
             </ul>
         </div>
     </article>

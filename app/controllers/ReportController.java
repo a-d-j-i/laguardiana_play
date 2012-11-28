@@ -12,8 +12,10 @@ import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
+import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
+import play.libs.F;
 import play.mvc.Controller;
 
 public class ReportController extends Controller {
@@ -229,7 +231,7 @@ public class ReportController extends Controller {
             render();
             return;
         }
-        List<LgBag> bagList = LgBag.findUnprocessed().fetch();
+        List<LgBag> bagList = LgBag.findUnprocessed(2).fetch();
         BagList ret = new BagList();
         ret.bagData = new ArrayList<BagData>(bagList.size());
         for (LgBag b : bagList) {
@@ -240,5 +242,20 @@ public class ReportController extends Controller {
         } else {
             renderJSON(ret);
         }
+    }
+
+    public static void currentBagTotals() {
+        renderArgs.put("totals", LgBag.getCurrentBagTotals());
+        render();
+    }
+
+    public static void currentZTotals() {
+        renderArgs.put("totals", LgZ.getCurrentZTotals());
+        render();
+    }
+
+    public static void rotateZ() {
+        LgZ.rotateZ();
+        index();
     }
 }

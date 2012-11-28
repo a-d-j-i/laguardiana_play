@@ -129,6 +129,10 @@ public class CountCommand extends ManagerCommandAbstract {
             }
             switch (gloryStatus.getSr1Mode()) {
                 case storing_start_request:
+                    if (gloryStatus.isRejectBillPresent()) {
+                        WaitForEmptyRejectedBills();
+                        break;
+                    }
                     if (countData.needToStoreDeposit()) {
                         if (!refreshQuantity()) {
                             String error = gloryStatus.getLastError();
@@ -210,8 +214,8 @@ public class CountCommand extends ManagerCommandAbstract {
                             gotoNeutral(true, false, true);
                             return;
                         }
-                        if (gloryStatus.isRejectBillPresent()) {
-                            setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
+                        if (gloryStatus.isRejectFull()) {
+                            WaitForEmptyRejectedBills();
                             break;
                         }
                         if (batchCountStart()) { // batch end
@@ -219,7 +223,7 @@ public class CountCommand extends ManagerCommandAbstract {
                         }
                     }
                     if (gloryStatus.isRejectFull()) {
-                        setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
+                        WaitForEmptyRejectedBills();
                         break;
                     }
                     break;
@@ -271,6 +275,7 @@ public class CountCommand extends ManagerCommandAbstract {
 
         if (!countData.isBatch) {
             sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills));
+            setState(ManagerInterface.State.COUNTING);
             return true;
         }
 
@@ -313,6 +318,7 @@ public class CountCommand extends ManagerCommandAbstract {
                 Logger.error("Error %s sending cmd : BatchDataTransmition", error);
                 setError(ManagerInterface.Error.APP_ERROR, error);
             }
+            setState(ManagerInterface.State.COUNTING);
             return false;
         }
         return true;

@@ -19,15 +19,17 @@
         <a href="#">&{'secure.pass_forget'}</a>
         #{/form}
         #{if ( ! play.configuration[ 'style.useHardwareKeyboard' ] ) }
-        <div class="contenido" style="height: 140px;">
+        <div class="contenido" style="height: 130px;">
         </div>
         <hr>
         <div class="botonera">
             <ul class="on-2 columns">
-                <li class="fixed column" style="width: 50%">
-                    &nbsp;
+                <li class="column">
+                    <div class="columna">
+                        &nbsp;
+                    </div>
                 </li>
-                <li class="fixed column" style="width: 50%">
+                <li class="column">
                     <div class="columna">
                         <!-- link continuar -->
                         <a id="continueButton" href="#" class="full_width boton ${play.configuration['style.button_color']}">&{'application.continue'}</a>

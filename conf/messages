@@ -55,7 +55,7 @@ other_menu.title=OTRAS OPERACIONES
 
 bill_deposit.escrow_full=Capacidad llena, ¿Está listo para depositar?
 bill_deposit.escrow_full_text_t1=Dinero recontado: 
-bill_deposit.escrow_full_text_t2=. Si confirma el depósito no podrá volver atrás.
+bill_deposit.escrow_full_text_t2=Si confirma el depósito no podrá volver atrás.
 bill_deposit.ready_to_store=Presione continuar para depositar
 
 envelope_deposit.put_the_envelope_in_the_escrow=Coloque el sobre en la maquina.
@@ -70,7 +70,8 @@ counting_page.remove_rejected_bills=Retire los billetes rechazados.
 counting_page.storing=Depositando.
 counting_page.storing_detail=Depositando espere...
 counting_page.deposit_canceled=Desposito Cancelado.
-counting_page.total_sum=Total acumulado
+counting_page.total_sum=Subtotal ya depositado
+counting_page.current_total_sum=Subtotal del deposito
 
 counting_page.escrow_full_text=Se lleno el escrow. <br/>Retire los billetes del escrow.
 counting_page.currency_title=Divisa
@@ -102,7 +103,7 @@ envelope_deposit.deposit_done=Por favor retire su ticket
 envelope_deposit.has_documents=Contiene documentos
 envelope_deposit.has_others=Contiene otros
 envelope_deposit.amount_cash=Monto en efectivo
-envelope_deposit.amount_checks=Monto en pesos
+envelope_deposit.amount_checks=Monto en cheques
 envelope_deposit.amount_tickets=Monto en tickets
 envelope_deposit.required.reference1=Debe ingresar la referencia
 envelope_deposit.required.reference2=Debe ingresar la referencia

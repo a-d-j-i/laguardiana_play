@@ -1,11 +1,11 @@
 package controllers;
 
 import java.util.List;
+import models.Bill;
 import models.BillDeposit;
 import models.Configuration;
 import models.ModelFacade;
 import models.actions.BillDepositAction;
-import models.db.LgSystemProperty;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -88,7 +88,7 @@ public class BillDepositController extends CounterController {
 
     public static void mainLoop() {
         BillDeposit d = (BillDeposit) ModelFacade.getDeposit();
-        Long totalSum = new Long(0);
+        long totalSum = 0;
         if (d != null) {
             totalSum = d.getTotal();
         }
@@ -100,10 +100,17 @@ public class BillDepositController extends CounterController {
             o[3] = totalSum;
             renderJSON(o);
         } else {
+            List<Bill> bls = ModelFacade.getCurrentCounters();
+            long currentTotalSum = 0;
+            currentTotalSum = totalSum;
+            for (Bill b : bls) {
+                currentTotalSum += (b.d * b.q);
+            }
             renderArgs.put("clientCode", Configuration.getClientDescription());
-            renderArgs.put("billData", ModelFacade.getCurrentCounters());
+            renderArgs.put("billData", bls);
             renderArgs.put("formData", ModelFacade.getFormData());
             renderArgs.put("totalSum", totalSum);
+            renderArgs.put("currentTotalSum", currentTotalSum);
             render();
         }
     }
