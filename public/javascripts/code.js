@@ -21,6 +21,8 @@ $(function() {
             focused_input.keydown();
             var key_value = $(this).attr("data-key");
             switch (key_value) {
+                case "{none}":
+                    break;
                 case "{backspace}":
                     focused_input.val(focused_input.val().substr(0, focused_input.val().length - 1));
                     break;

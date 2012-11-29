@@ -140,7 +140,33 @@
                             #{/ifError}
                         </div>
                     </li>
-                    #{ centered_keyboard /}
+                    <li class="fixed column" style="width: 5%;">&nbsp;</li>
+                    <li class="fixed column" style="width: 30%; ">
+                        #{if ( play.configuration[ 'style.useHardwareKeyboard' ] ) }
+                        <div style="height: 265px;">
+                        </div>
+                        #{/if}
+                        #{else}
+                        <div class="keyboard" style="height: 265px;">
+                            <ul class="on-3 same-height columns">
+                                <li class="column"><span><a class="element key" data-key="7">7</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="8">8</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="9">9</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="4">4</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="5">5</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="6">6</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="1">1</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="2">2</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="3">3</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="0">0</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="{none}">&nbsp;</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="{backspace}">←</a></span></li>
+                            </ul>
+                        </div>
+                        #{/else}
+                    </li>
+                    <li class="fixed column" style="width: 5%;">&nbsp;</li>
+
                 </ul>
             </div>
         </div>
@@ -211,6 +237,7 @@
                 },
                 onkeyup: false,
                 onclick: false,
+                onfocusout: false,
                 messages: {
                     //'formData.reference2': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
                     'formData.envelopeCode': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'}",  range: "&{ 'validation.must_be_a_5_number'}" },
@@ -235,7 +262,8 @@
           
         $( '#alerta_continueButton' ).click( function(event) {
             $( "#alerta_validacion" ).overlay().close();
-            onError = false;
+            $("#mainForm").valid();
+//            onError = false;
         });
         
       
