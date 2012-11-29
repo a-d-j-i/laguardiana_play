@@ -2,6 +2,7 @@
     font-family: 'DIN';
     src: url('../fonts/DINPro-Medium.eot');
     src: local('☺'),
+        url('../fonts/DINPro-Medium.woff') format('woff'),
         url('../fonts/DINPro-Medium.ttf') format('truetype'),
         url('../fonts/DINPro-Medium.svg') format('svg');
     font-weight: normal;
@@ -179,6 +180,10 @@ input[type='text'], input[type='password'], input[type='number'], textarea {
     color: #999999;
 }
 
+input[type='text'] {
+    margin-bottom: 15px;
+}
+
 select {
     background: white;
     border: 1px solid #BCBCBC;
@@ -186,7 +191,11 @@ select {
     font-size: 15pt;
     color: #999999;
     height: 50px;
+    margin-bottom: 15px;
 }
+
+
+
 
 select option {
     background: white;
@@ -312,6 +321,41 @@ table tfoot tr td {
     display: block;
 }
 
+.popup_keyboard_qwerty {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    background: url('../images/overlay.png');
+    padding-top: 140px;
+}
+
+.popup_keyboard_qwerty .keyboard {
+    width: 770px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+#popup_keyboard_qwerty_input {
+    margin-bottom: 20px;
+}
+
+.keyboard {
+    margin-top: 10px;
+}
+
+/*.keyboard {
+    margin-top: 10px;
+    margin-bottom: 41px;
+}*/
+
+
+
 /* alertas */
 
 .alerta {
@@ -387,20 +431,6 @@ table tfoot tr td {
     overflow: auto;
     margin-top: 15px;
 }
-
-.keyboard {
-    margin-top: 10px;
-    margin-bottom: 41px;
-}
-
-select {
-    margin-bottom: 15px;
-}
-
-input[type='text'] {
-    margin-bottom: 15px;
-}
-
 
 .botonera {
     overflow: hidden;

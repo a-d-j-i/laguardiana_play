@@ -24,7 +24,7 @@
                             #{error 'formData.reference1' /}
 
                             #{ if ( formData.showReference2 ) }
-                            <input  autocomplete="off" name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
+                            <input  autocomplete="off" name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width popup_keyboard" id="input_1" data-type="qwerty"  
                                     /> 
                             <!--                                   value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if} "-->
                             #{ifError 'formData.reference2'}
@@ -32,9 +32,6 @@
                             #{/ifError}
                             #{/if}
                         </div>
-                    </li>
-                    <li class="fixed column" style="width: 40%">
-                        #{ keyboard /}
                     </li>
                 </ul>
             </div>
@@ -82,9 +79,7 @@
                             #{/ifError}
                         </div>
                     </li>
-                    <li class="fixed column" style="width: 40%">
-                        #{ keyboard /}
-                    </li>
+                    #{ centered_keyboard /}
                 </ul>
             </div>
         </div>
@@ -105,9 +100,7 @@
                             #{/ifError}
                         </div>                    
                     </li>
-                    <li class="fixed column" style="width: 40%">
-                        #{ keyboard useHardwareKeyboard: useHardwareKeyboard /}
-                    </li>
+                    #{ centered_keyboard /}
                 </ul>
             </div>
         </div>
@@ -129,9 +122,7 @@
                             #{/ifError}         
                         </div>
                     </li>
-                    <li class="fixed column" style="width: 40%">
-                        #{ keyboard useHardwareKeyboard: useHardwareKeyboard /}
-                    </li>
+                    #{ centered_keyboard /}
                 </ul>
             </div>
         </div>
@@ -149,9 +140,7 @@
                             #{/ifError}
                         </div>
                     </li>
-                    <li class="fixed column" style="width: 40%">
-                        <div id="keyboard_placeholder"></div>
-                    </li>
+                    #{ centered_keyboard /}
                 </ul>
             </div>
         </div>
@@ -187,6 +176,7 @@
                 </div>
             </div>
         </div>
+        #{ popup_keyboard /}
     </article>
 </section>
 #{/form}
