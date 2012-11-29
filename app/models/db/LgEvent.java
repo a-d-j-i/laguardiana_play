@@ -35,4 +35,11 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
         this.message = message;
         this.eventSourceId = eventSourceId;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{" + "eventId=" + eventId + ", user=" + user + ", eventSourceId=" + eventSourceId + ", creationDate=" + creationDate + ", message=" + message + ", externalAppLogs=" + externalAppLogs + '}';
+    }
+    
+    
 }

@@ -25,7 +25,6 @@ public class Canceling extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
-        super.onGloryEvent(m);
         switch (m.getState()) {
             case IDLE:
             case CANCELED:
@@ -40,7 +39,7 @@ public class Canceling extends ActionState {
             case REMOVE_THE_BILLS_FROM_HOPER:
                 break;
             default:
-                Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("Canceling invalid state %s %s", m.name(), name());
                 break;
         }
     }

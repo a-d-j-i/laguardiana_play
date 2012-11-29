@@ -24,8 +24,8 @@
                             #{error 'formData.reference1' /}
 
                             #{ if ( formData.showReference2 ) }
-                            <input  autocomplete="off" name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width popup_keyboard" id="input_1" data-type="qwerty"  
-                                    /> 
+                            <input  autocomplete="off" name="formData.reference2" type="text"
+                                    placeholder="&{ 'counting_page.reference2_title' }:" class="full_width popup_keyboard" data-type="qwerty" id="input_1"/> 
                             <!--                                   value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if} "-->
                             #{ifError 'formData.reference2'}
                             <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required.reference2' }</label>
@@ -262,7 +262,7 @@
           
         $( '#alerta_continueButton' ).click( function(event) {
             $( "#alerta_validacion" ).overlay().close();
-            $("#mainForm").valid();
+            $("#mainForm").validate();
 //            onError = false;
         });
         

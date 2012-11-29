@@ -10,6 +10,7 @@ import play.db.jpa.GenericModel;
 @Table( name = "lg_external_app", schema = "public")
 public class LgExternalApp extends GenericModel implements java.io.Serializable {
     // Needed for play generic model.
+
     @Id
     @Column( name = "external_app_id", unique = true, nullable = false)
     @GeneratedValue(generator = "LgExternalAppGenerator")
@@ -32,6 +33,10 @@ public class LgExternalApp extends GenericModel implements java.io.Serializable 
     public Set<LgUser> users = new HashSet<LgUser>(0);
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "externalApp")
     public Set<LgExternalAppLog> externalAppLogs = new HashSet<LgExternalAppLog>(0);
+
+    static LgExternalApp findByAppId(Integer appId) {
+        return LgExternalApp.find("select a from LgExternalApp a where appId = ?", appId).first();
+    }
 
     @Override
     public String toString() {

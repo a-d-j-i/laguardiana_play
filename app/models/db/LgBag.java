@@ -1,5 +1,6 @@
 package models.db;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,8 +9,7 @@ import java.util.Set;
 import javax.persistence.*;
 import models.BagEvent;
 import models.BagProcessedEvent;
-import models.BillDeposit;
-import models.EnvelopeDeposit;
+import models.Bill;
 import play.Logger;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -52,7 +52,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
     public static boolean process(int appId, int depositId, String resultCode) {
         LgBag b = LgBag.findById(depositId);
-        LgExternalApp ea = LgExternalApp.findById(appId);
+        LgExternalApp ea = LgExternalApp.findByAppId(appId);
         if (b == null || ea == null || b.withdrawDate == null) {
             return false;
         }
@@ -95,35 +95,26 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         }
         return currentBag;
     }
-
-    public static F.T3<Long, Long, Long> getCurrentBagTotals() {
-        LgBag currentBag = getCurrentBag();
-        long sum = 0;
-        long envelopes = 0;
-        long deposits = 0;
-        for (LgDeposit d : currentBag.deposits) {
-            deposits++;
-            if (d instanceof BillDeposit) {
-                BillDeposit bd = (BillDeposit) d;
-                sum += bd.getTotal();
-            } else if (d instanceof EnvelopeDeposit) {
-                envelopes++;
-            } else {
-                Logger.error("Invalid deposit type");
-            }
-        }
-        return new F.T3<Long, Long, Long>(sum, envelopes, deposits);
+    
+    public F.T4<Long, Long, Long, Collection<Bill>> getTotals() {
+        return LgDeposit.getDepositsTotals(deposits);
     }
 
-    public static void rotateBag() {
+    public static void rotateBag(boolean force) {
 
         LgBag current = getCurrentBag();
-        current.withdrawDate = new Date();
-        BagEvent.save(current, "Closing bag");
-        current.save();
-        LgBag newBag = new LgBag("AUTOMATIC_ROTATED_BY_APP");
-        newBag.save();
-        BagEvent.save(newBag, "Opening new bag");
+
+        if (current.deposits.size() > 0 || force) {
+            current.withdrawDate = new Date();
+            BagEvent.save(current, "Closing bag");
+            current.save();
+            LgBag newBag = new LgBag("AUTOMATIC_ROTATED_BY_APP");
+            newBag.save();
+            BagEvent.save(newBag, "Opening new bag");
+        } else {
+            Logger.debug("this bag is empty so I'm going to reuse it");
+        }
+
     }
 
     @Override

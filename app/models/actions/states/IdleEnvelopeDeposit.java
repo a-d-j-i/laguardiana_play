@@ -34,7 +34,6 @@ public class IdleEnvelopeDeposit extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
-        super.onGloryEvent(m);
         switch (m.getState()) {
             case IDLE:
                 stateApi.envelopeDeposit();

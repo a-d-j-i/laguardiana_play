@@ -132,7 +132,7 @@ public class ModelFacade {
                     case BAG_APROVED:
                         break;
                     case BAG_APROVE_CONFIRM:
-                        LgBag.rotateBag();
+                        LgBag.rotateBag(true);
                         ioBoard.aproveBagConfirm();
                         break;
                 }

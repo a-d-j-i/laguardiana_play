@@ -25,7 +25,6 @@ public class ResetState extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
-        super.onGloryEvent(m);
         switch (m.getState()) {
             case IDLE:
             case INITIALIZING:
@@ -34,7 +33,7 @@ public class ResetState extends ActionState {
                 break;
             case ERROR:
             default:
-                Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("ResetState invalid state %s %s", m.name(), name());
                 break;
         }
     }

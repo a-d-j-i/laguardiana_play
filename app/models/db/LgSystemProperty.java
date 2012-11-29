@@ -1,6 +1,7 @@
 package models.db;
 
 import javax.persistence.*;
+import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity

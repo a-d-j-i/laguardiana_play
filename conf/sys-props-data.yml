@@ -35,3 +35,7 @@
     name:  "client_code"
     value:  "LA Guardiana S.A."
     
+  db.LgSystemProperty(clientCode):
+    name:  "client_description"
+    value:  "LA Guardiana S.A."
+    

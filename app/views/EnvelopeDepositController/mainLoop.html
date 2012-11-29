@@ -10,6 +10,7 @@
             <div class="mensaje"><span>&{ 'envelope_deposit.put_ticket_in_envelope' }</span></div>
             <ul class="columns">
                 <li class="column">
+                    <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
                     #{if ( formData.showReference1 ) }
                     <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
                     #{/if}
@@ -106,7 +107,7 @@
                     window.location.href = "@{finish}";
                     return;
                 } else if ( status == 'READY_TO_STORE' ) {
-//                    $( '#continueButton' ).attr( { 'class' : 'boton ${play.configuration['style.button_color']}'});
+                    //                    $( '#continueButton' ).attr( { 'class' : 'boton ${play.configuration['style.button_color']}'});
                 } else if ( status == 'ERROR' ) {
                     window.location.href = "@{counterError()}";
                 } else {          

@@ -15,6 +15,7 @@ public class FakeGloryManager implements ManagerInterface {
     static Integer currency;
     static int counter = 0;
     static boolean billDeposit = true;
+    static boolean escrowDone = false;
 
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
         status.setState(State.IDLE);
@@ -22,6 +23,7 @@ public class FakeGloryManager implements ManagerInterface {
         FakeGloryManager.desiredQuantity = desiredQuantity;
         FakeGloryManager.currency = currency;
         counter = 0;
+        escrowDone = false;
         return true;
     }
 
@@ -85,7 +87,6 @@ public class FakeGloryManager implements ManagerInterface {
         status.setState(State.IDLE);
         return true;
     }
-    static boolean escrowDone = false;
 
     public ManagerInterface.Status getStatus() {
         counter++;

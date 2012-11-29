@@ -1,15 +1,23 @@
 package models.db;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
+import models.Bill;
+import models.BillDeposit;
 import models.DepositEvent;
 import models.DepositProcessedEvent;
+import models.EnvelopeDeposit;
 import models.db.LgLov.LovCol;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPABase;
+import play.libs.F;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -76,7 +84,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     public static boolean process(int appId, int depositId, String resultCode) {
         LgDeposit d = LgDeposit.findById(depositId);
-        LgExternalApp ea = LgExternalApp.findById(appId);
+        LgExternalApp ea = LgExternalApp.findByAppId(appId);
         if (d == null || ea == null) {
             return false;
         }
@@ -115,8 +123,37 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         return DepositUserCodeReference.findByNumericId(userCodeLov);
     }
 
+    static public F.T4<Long, Long, Long, Collection<Bill>> getDepositsTotals(Set<LgDeposit> deps) {
+        long sum = 0;
+        long envelopes = 0;
+        long deposits = 0;
+        Map<LgBillType, Bill> totalBills = new HashMap<LgBillType, Bill>();
+        for (LgDeposit d : deps) {
+            deposits++;
+            if (d instanceof BillDeposit) {
+                BillDeposit bd = (BillDeposit) d;
+                for (LgBill b : bd.bills) {
+                    Bill bill;
+                    if (totalBills.containsKey(b.billType)) {
+                        bill = totalBills.get(b.billType);
+                    } else {
+                        bill = new Bill(b.billType);
+                    }
+                    bill.q += b.quantity;
+                    totalBills.put(b.billType, bill);
+                }
+                sum += bd.getTotal();
+            } else if (d instanceof EnvelopeDeposit) {
+                envelopes++;
+            } else {
+                Logger.error("Invalid deposit type");
+            }
+        }
+        return new F.T4<Long, Long, Long, Collection<Bill>>(sum, envelopes, deposits, totalBills.values());
+    }
+
     @Override
     public String toString() {
-        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag +", z=" + z + '}';
+        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag + ", z=" + z + '}';
     }
 }

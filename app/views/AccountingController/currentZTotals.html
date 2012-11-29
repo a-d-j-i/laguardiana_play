@@ -1,10 +1,14 @@
 #{extends 'main.html' /}
-#{set title: 'Unprocessed Bags' /}
-<section id ="menu_principal">
+#{set title: 'current Z totals' /}
+<section>
     <header></header>
     <a href="@{mainMenu}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
-        Contenido actual de la maquina<br>
+        Contenido del cierre contable iniciado el ${ z.creationDate } y 
+        #{ if z.closeDate == null }aun no cerrado#{/if}
+        #{ else }cerrado el ${ z.closeDate }#{/else}
+        <br>
+        #{ bills_table bill_data: totals._4 /}
         Total de efectivo ${ totals._1 }<br>
         Total de sobres ${ totals._2 }<br>
         Total de depositos ${ totals._3 }<br>

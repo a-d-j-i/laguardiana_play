@@ -29,7 +29,6 @@ public class StoringBillDeposit extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
-        super.onGloryEvent(m);
         switch (m.getState()) {
             case IDLE:
                 stateApi.closeDeposit();
@@ -54,7 +53,7 @@ public class StoringBillDeposit extends ActionState {
             case REMOVE_REJECTED_BILLS:
                 break;
             default:
-                Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("StoringBillDeposit invalid state %s %s", m.name(), name());
                 break;
         }
     }

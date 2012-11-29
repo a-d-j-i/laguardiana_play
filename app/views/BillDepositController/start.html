@@ -28,8 +28,8 @@
                         #{error 'formData.reference1' /}
 
                         #{ if ( formData.showReference2 ) }
-                        <input type="text" autocomplete="off" id="reference2_input" name="formData.reference2" type="text" placeholder="&{ 'counting_page.reference2_title' }:" class="full_width" 
-                               /> 
+                        <input type="text" autocomplete="off" id="reference2_input" name="formData.reference2" type="text"
+                               placeholder="&{ 'counting_page.reference2_title' }:" class="full_width popup_keyboard" data-type="qwerty"/> 
                         <!--                           value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if}"-->
                         #{ifError 'formData.reference2'}
                         <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required.reference2' }</label>
@@ -40,9 +40,9 @@
                     </div>
                 </li>
                 <li class="fixed column" style="width: 40%;" >
-                    <div style="height: 285;">
-                        &nbsp;
-                        #{ keyboard /}
+                    <div>
+                        <div style="height: 285px;">
+                        </div>
                     </div>
                     <div class="botonera">
                         <div class="columna">
@@ -54,6 +54,7 @@
             </ul>
         </div>
         #{/form}
+        #{ popup_keyboard /}
     </article>
 </section>
 

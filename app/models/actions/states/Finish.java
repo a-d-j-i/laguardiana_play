@@ -25,9 +25,8 @@ public class Finish extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
-        super.onGloryEvent(m);
         if (m.getState() != ManagerInterface.State.IDLE) {
-            Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+            Logger.debug("Finish invalid state %s %s", m.name(), name());
         }
     }
 

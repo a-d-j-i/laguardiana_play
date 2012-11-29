@@ -64,6 +64,11 @@ public class IdleBillDeposit extends ActionState {
                 stateApi.closeDeposit();
                 stateApi.setState(new Finish(stateApi));
                 break;
+            case CANCELED:
+                stateApi.setState(new Finish(stateApi));
+                break;
+            case CANCELING:
+                break;
             case COUNTING:
                 //stateApi.cancelTimer();
                 break;

@@ -1,10 +1,11 @@
 #{extends 'main.html' /}
-#{set title: 'Unprocessed Bags' /}
-<section id ="menu_principal">
+#{set title: 'current Bag Totals' /}
+<section>
     <header></header>
     <a href="@{mainMenu}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
-        Contenido actual de la maquina<br>
+        Contenido actual de la maquina en la bolsa ${ bag.bagId }, colocada el ${ bag.creationDate }<br>
+        #{ bills_table bill_data: totals._4 /}
         Total de efectivo ${ totals._1 }<br>
         Total de sobres ${ totals._2 }<br>
         Total de depositos ${ totals._3 }<br>

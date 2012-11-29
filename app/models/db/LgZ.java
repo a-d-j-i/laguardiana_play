@@ -1,13 +1,14 @@
 package models.db;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
-import models.BillDeposit;
-import models.EnvelopeDeposit;
+import models.Bill;
+import models.ZProcessedEvent;
 import play.Logger;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -63,26 +64,11 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         return currentZ;
     }
 
-    public static F.T3<Long, Long, Long> getCurrentZTotals() {
-        LgZ currentZ = getCurrentZ();
-        long sum = 0;
-        long envelopes = 0;
-        long deposits = 0;
-        for (LgDeposit d : currentZ.deposits) {
-            deposits++;
-            if (d instanceof BillDeposit) {
-                BillDeposit bd = (BillDeposit) d;
-                sum += bd.getTotal();
-            } else if (d instanceof EnvelopeDeposit) {
-                envelopes++;
-            } else {
-                Logger.error("Invalid deposit type");
-            }
-        }
-        return new F.T3<Long, Long, Long>(sum, envelopes, deposits);
+    public F.T4<Long, Long, Long, Collection<Bill>> getTotals() {
+        return LgDeposit.getDepositsTotals(deposits);
     }
 
-    public static void rotateZ() {
+    public static LgZ rotateZ() {
         LgZ current = getCurrentZ();
         if (current.deposits.size() > 0) {
             Logger.debug("Rotating Z");
@@ -93,6 +79,33 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         } else {
             Logger.debug("this Z is empty so don't rotate");
         }
+        return current;
+    }
+
+    public static JPAQuery findUnprocessed(int appId) {
+        return LgDeposit.find(
+                "select z from LgZ z where "
+                + "not exists ("
+                + " from ZProcessedEvent e, LgExternalAppLog al, LgExternalApp ea"
+                + " where al.externalApp = ea "
+                + " and z.zId = e.eventSourceId"
+                + " and al.event = e and ea.appId = ?"
+                + ")", appId);
+    }
+
+    public static boolean process(int appId, int depositId, String resultCode) {
+        LgZ z = LgZ.findById(depositId);
+        LgExternalApp ea = LgExternalApp.findByAppId(appId);
+        if (z == null || ea == null || z.closeDate == null) {
+            return false;
+        }
+        ZProcessedEvent e = ZProcessedEvent.save(z, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(e, resultCode);
+        el.successDate = new Date();
+        el.setEvent(e);
+        el.setExternalApp(ea);
+        el.save();
+        return true;
     }
 
     @Override

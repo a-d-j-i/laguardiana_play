@@ -15,10 +15,18 @@ import models.db.LgEnvelopeContent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
-import play.libs.F;
+import play.mvc.Before;
 import play.mvc.Controller;
 
 public class ReportController extends Controller {
+    final static int EXTERNAL_APP_ID = 2;
+    
+    @Before
+    public static void setFormat(String format) {
+        if (format != null) {
+            request.format = format;
+        }
+    }
 
     public static void index() {
         mainMenu();
@@ -117,24 +125,6 @@ public class ReportController extends Controller {
         }
     }
 
-    public static void processDeposit(Integer depositId) {
-        boolean stat = LgDeposit.process(2, depositId, "DONE");
-        if (request.format.equalsIgnoreCase("html")) {
-            unprocessedDeposits(1);
-        } else {
-            renderHtml(stat ? "DONE" : "ERROR");
-        }
-    }
-
-    public static void processBag(Integer bagId) {
-        boolean stat = LgBag.process(2, bagId, "DONE");
-        if (request.format.equalsIgnoreCase("html")) {
-            unprocessedBags(1);
-        } else {
-            renderHtml(stat ? "DONE" : "ERROR");
-        }
-    }
-
     static public class UnprocessedDeposits {
 
         final public String clientCode = Configuration.getClientCode();
@@ -150,7 +140,7 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgDeposit> depositList = LgDeposit.findUnprocessed(2).fetch(page, length);
+            List<LgDeposit> depositList = LgDeposit.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
@@ -216,7 +206,7 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgBag> bagList = LgBag.findUnprocessed(2).fetch(page, length);
+            List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
@@ -231,7 +221,7 @@ public class ReportController extends Controller {
             render();
             return;
         }
-        List<LgBag> bagList = LgBag.findUnprocessed(2).fetch();
+        List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch();
         BagList ret = new BagList();
         ret.bagData = new ArrayList<BagData>(bagList.size());
         for (LgBag b : bagList) {
@@ -244,18 +234,99 @@ public class ReportController extends Controller {
         }
     }
 
-    public static void currentBagTotals() {
-        renderArgs.put("totals", LgBag.getCurrentBagTotals());
-        render();
+    static public class ZData {
+
+        public Integer ZId;
+        public Date creationDate;
+        public Date closeDate;
+
+        private ZData(LgZ z) {
+            this.ZId = z.zId;
+            this.creationDate = z.creationDate;
+            this.closeDate = z.closeDate;
+        }
     }
 
-    public static void currentZTotals() {
-        renderArgs.put("totals", LgZ.getCurrentZTotals());
-        render();
+    static public class ZList {
+
+        final public String clientCode = Configuration.getClientCode();
+        final public String branchCode = Configuration.getBranchCode();
+        final public String machineCode = Configuration.getMachineCode();
+        final public String machineDescription = Configuration.getMachineDescription();
+        public List<ZData> zData;
     }
 
-    public static void rotateZ() {
-        LgZ.rotateZ();
-        index();
+    public static void zList(Integer page) {
+        unprocessedZs(page);
+    }
+
+    public static void unprocessedZs(Integer page) {
+        if (request.format.equalsIgnoreCase("html")) {
+            if (page == null || page < 1) {
+                page = 1;
+            }
+            int length = 4;
+            List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            if (page > 1) {
+                renderArgs.put("prevPage", page - 1);
+            } else {
+                renderArgs.put("prevPage", 1);
+            }
+            if (zList.size() == length) {
+                renderArgs.put("nextPage", page + 1);
+            } else {
+                renderArgs.put("nextPage", page);
+            }
+            renderArgs.put("data", zList);
+            render();
+            return;
+        }
+        List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch();
+        ZList ret = new ZList();
+        ret.zData = new ArrayList<ZData>(zList.size());
+        for (LgZ z : zList) {
+            ret.zData.add(new ZData(z));
+        }
+        if (request.format.equalsIgnoreCase("xml")) {
+            renderXml(ret);
+        } else {
+            renderJSON(ret);
+        }
+    }
+
+    public static void processDeposit(Integer depositId) {
+        if (depositId == null) {
+            unprocessedDeposits(1);
+        }
+        boolean stat = LgDeposit.process(EXTERNAL_APP_ID, depositId, "DONE");
+        if (request.format.equalsIgnoreCase("html")) {
+            unprocessedDeposits(1);
+        } else {
+            renderHtml(stat ? "DONE" : "ERROR");
+        }
+    }
+
+    public static void processBag(Integer bagId) {
+        if (bagId == null) {
+            unprocessedBags(1);
+        }
+        boolean stat = LgBag.process(EXTERNAL_APP_ID, bagId, "DONE");
+        if (request.format.equalsIgnoreCase("html")) {
+            unprocessedBags(1);
+        } else {
+            renderHtml(stat ? "DONE" : "ERROR");
+        }
+    }
+
+    public static void processZ(Integer zId) {
+        if (zId == null) {
+            unprocessedZs(1);
+        }
+        boolean stat = LgZ.process(EXTERNAL_APP_ID, zId, "DONE");
+        if (request.format.equalsIgnoreCase("html")) {
+            unprocessedZs(1);
+        } else {
+            renderHtml(stat ? "DONE" : "ERROR");
+        }
     }
 }

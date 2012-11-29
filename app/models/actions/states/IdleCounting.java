@@ -34,7 +34,6 @@ public class IdleCounting extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
-        super.onGloryEvent(m);
         switch (m.getState()) {
             case READY_TO_STORE:
                 stateApi.setState(new ReadyToStoreCounting(stateApi));
@@ -53,7 +52,7 @@ public class IdleCounting extends ActionState {
                 stateApi.setState(new Finish(stateApi));
                 break;
             default:
-                Logger.debug("onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("IdleCounting invalid state %s %s", m.name(), name());
                 break;
         }
     }
