@@ -1,6 +1,0 @@
-<xml>
-#{list items:referenceCodes, as:'reference'}
-  <reference value="${reference.numericId}">${reference.toString()}</reference>
-#{/list}
-</xml>
-

@@ -1,38 +1,12 @@
-#{extends 'main.html' /}
+#{extends 'ReportController/unprocessed.html' /}
 #{set title: 'Unprocessed Bags' /}
-<section id ="menu_principal">
-    <header></header>
-    <a href="@{mainMenu}" class="boton_top">◄ &{ 'application.back' }</a>
-    <article>
-        <div class="botonera" style="height: 550px;">
-            <ul class="on-3 columns">
-                <li class="column">
-                    <div class="columna">
-                        <a href="@{unprocessedBags()}/xml" class="boton ${play.configuration['style.button_color']} full_width separar">xml</a>
-                    </div>
-                </li>
-                <li class="column">
-                    <div class="columna">
-                        <a href="@{unprocessedBags(prevPage)}" class="boton ${play.configuration['style.button_color']} full_width separar">prev page</a>
-                    </div>
-                </li>
-                <li class="column">
-                    <div class="columna">
-                        <a href="@{unprocessedBags(nextPage)}" class="boton ${play.configuration['style.button_color']} full_width separar">next page</a>
-                    </div>
-                </li>
-            </ul>
-            <ul>
-                #{list items:data, as:'bag' }
-                <li>${bag.bagId} : ${bag.toString()}
-                    <a href="@{processBag(bag.bagId)}" style="color: green">process</a>
-                </li>
-                #{/list}
-            </ul>
-
-        </div>
-    </article>
-</section>
+<ul>
+    #{list items:data, as:'bag' }
+    <li>${bag.bagId} : ${bag.toString()}
+        <a href="@{processBag(bag.bagId)}" style="color: green">process</a>
+    </li>
+    #{/list}
+</ul>
 
 
 

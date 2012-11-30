@@ -39,11 +39,13 @@ public class Bootstrap extends Job {
                 LgRole manager = loadRolsResourcesAndAcls(controllers.GloryManagerController.class);
                 LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
                 LgRole counter = loadRolsResourcesAndAcls(controllers.CounterController.class);
+                LgRole report = loadRolsResourcesAndAcls(controllers.ReportController.class);
+                LgRole accounting = loadRolsResourcesAndAcls(controllers.AccountingController.class);
 
                 // Add application envelope and bill to demo.
                 LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
                 /*guest.roles.add(appMin);
-                appMin.users.add(guest);*/
+                 appMin.users.add(guest);*/
                 guest.roles.add(counter);
                 counter.users.add(guest);
                 guest.save();
@@ -57,6 +59,8 @@ public class Bootstrap extends Job {
                 bill.users.add(demo);
                 demo.roles.add(envelope);
                 envelope.users.add(demo);
+                demo.roles.add(accounting);
+                accounting.users.add(demo);
                 demo.save();
 
                 Logger.info("loading lov-data.yml");

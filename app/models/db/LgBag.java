@@ -39,6 +39,17 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         this.creationDate = new Date();
     }
 
+    public static JPAQuery find(Date start, Date end) {
+        if (end == null) {
+            end = new Date();
+        }
+        if (start == null) {
+            return LgDeposit.find("select b from LgBag b where creationDate < ?", end);
+        } else {
+            return LgDeposit.find("select b from LgBag b where creationDate > ? and creationDate < ?", start, end);
+        }
+    }
+
     public static JPAQuery findUnprocessed(int appId) {
         return LgDeposit.find(
                 "select b from LgBag b where "
@@ -95,7 +106,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         }
         return currentBag;
     }
-    
+
     public F.T4<Long, Long, Long, Collection<Bill>> getTotals() {
         return LgDeposit.getDepositsTotals(deposits);
     }

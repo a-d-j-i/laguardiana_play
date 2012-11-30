@@ -70,6 +70,17 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         this.creationDate = new Date();
     }
 
+    public static JPAQuery find(Date start, Date end) {
+        if (end == null) {
+            end = new Date();
+        }
+        if (start == null) {
+            return LgDeposit.find("select d from LgDeposit d where creationDate < ?", end);
+        } else {
+            return LgDeposit.find("select d from LgDeposit d where creationDate > ? and creationDate < ?", start, end);
+        }
+    }
+
     public static JPAQuery findUnprocessed(int appId) {
         return LgDeposit.find(
                 "select d from LgDeposit d where "

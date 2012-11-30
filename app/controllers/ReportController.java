@@ -19,8 +19,9 @@ import play.mvc.Before;
 import play.mvc.Controller;
 
 public class ReportController extends Controller {
+
     final static int EXTERNAL_APP_ID = 2;
-    
+
     @Before
     public static void setFormat(String format) {
         if (format != null) {
@@ -328,5 +329,65 @@ public class ReportController extends Controller {
         } else {
             renderHtml(stat ? "DONE" : "ERROR");
         }
+    }
+
+    public static void listZs(Integer page, Date startDate, Date endDate) {
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        int length = 8;
+        List<LgZ> zList = LgZ.find(startDate, endDate).fetch(page, length);
+        if (page > 1) {
+            renderArgs.put("prevPage", page - 1);
+        } else {
+            renderArgs.put("prevPage", 1);
+        }
+        if (zList.size() == length) {
+            renderArgs.put("nextPage", page + 1);
+        } else {
+            renderArgs.put("nextPage", page);
+        }
+        renderArgs.put("data", zList);
+        render();
+    }
+
+    public static void listBags(Integer page, Date startDate, Date endDate) {
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        int length = 8;
+        List<LgBag> bList = LgBag.find(startDate, endDate).fetch(page, length);
+        if (page > 1) {
+            renderArgs.put("prevPage", page - 1);
+        } else {
+            renderArgs.put("prevPage", 1);
+        }
+        if (bList.size() == length) {
+            renderArgs.put("nextPage", page + 1);
+        } else {
+            renderArgs.put("nextPage", page);
+        }
+        renderArgs.put("data", bList);
+        render();
+    }
+
+    public static void listDeposits(Integer page, Date startDate, Date endDate) {
+        if (page == null || page < 1) {
+            page = 1;
+        }
+        int length = 4;
+        List<LgDeposit> dList = LgDeposit.find(startDate, endDate).fetch(page, length);
+        if (page > 1) {
+            renderArgs.put("prevPage", page - 1);
+        } else {
+            renderArgs.put("prevPage", 1);
+        }
+        if (dList.size() == length) {
+            renderArgs.put("nextPage", page + 1);
+        } else {
+            renderArgs.put("nextPage", page);
+        }
+        renderArgs.put("data", dList);
+        render();
     }
 }

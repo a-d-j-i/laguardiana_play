@@ -2,7 +2,7 @@
 #{if ( controllers.Secure.checkPermission( _resource, _operation ) ) }
 <li class="column">
     <div class="columna">
-        <a href="${url}" class="boton ${play.configuration['style.button_color']} full_width separar">${_title}</a>
+        <a href="${url}" class="boton ${play.configuration['style.button_color']} full_width separar">&{ 'other_menu.' + _title }</a>
     </div>
 </li>
 #{/if}

@@ -82,6 +82,17 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         return current;
     }
 
+    public static JPAQuery find(Date start, Date end) {
+        if (end == null) {
+            end = new Date();
+        }
+        if (start == null) {
+            return LgDeposit.find("select z from LgZ z where creationDate < ?", end);
+        } else {
+            return LgDeposit.find("select z from LgZ z where creationDate > ? and creationDate < ?", start, end);
+        }
+    }
+
     public static JPAQuery findUnprocessed(int appId) {
         return LgDeposit.find(
                 "select z from LgZ z where "

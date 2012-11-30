@@ -43,6 +43,33 @@ application.start_counting=INICIAR CONTEO
 application.choose_currency_before=Seleccione divisa antes de iniciar el conteo
 application.input_reference=Ingrese Referencia
 
+
+
+other_menu.accounting=Contabilidad
+other_menu.reports=Reportes
+other_menu.hardware_admin=Hardware Admin
+
+other_menu.db_admin=Administrar DB
+other_menu.glory_cmd=Glory Comandos
+other_menu.glory_manager=Glory Manager
+other_menu.ioboard_cmd=IoBoard
+other_menu.status=Status
+other_menu.printer_test=Printer Test
+other_menu.printer_list=Printer List
+
+other_menu.current_z_totals=Ultimo cierre
+other_menu.rotate_z=Cierre contable
+other_menu.current_bag_totals=Dinero en Bolsa
+other_menu.rotate_bag=Cambiar Bolsa
+
+other_menu.unprocessed_zs=Zs a procesar
+other_menu.unprocessed_bags=Bolsas a procesar
+other_menu.unprocessed_deposits=Despositos a procesar
+other_menu.list_zs=Listar Zs
+other_menu.list_bags=Listar bolsas
+other_menu.list_deposits=Listar depositos
+
+
 main_menu.title=MENÚ PRINCIPAL
 main_menu.cash_deposit=DEPOSITAR EFECTIVO
 main_menu.envelope_deposit=DEPOSITAR SOBRE

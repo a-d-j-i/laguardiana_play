@@ -1,0 +1,9 @@
+#{extends 'ReportController/lists.html' /}
+#{set title: 'List Zs' /}
+<ul>
+    #{list items:data, as:'z' }
+    <li>
+        ${z.zId} : ${z.toString()}
+    </li>
+    #{/list}
+</ul>
