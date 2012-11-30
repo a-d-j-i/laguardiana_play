@@ -66,7 +66,7 @@ public class EnvelopeDepositAction extends UserAction {
             renderArgs.put("formData", formData);
             renderArgs.put("referenceCodes", referenceCodes);
             renderArgs.put("currencies", currencies);
-            renderArgs.put("depositId", currentDepositId);
+            renderArgs.put("deposit", deposit);
             DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs, 120);
         } catch (PrinterException ex) {
             Logger.error(ex.getMessage());
@@ -83,7 +83,7 @@ public class EnvelopeDepositAction extends UserAction {
                 Map renderArgs = new HashMap();
                 renderArgs.put("clientCode", Configuration.getClientDescription());
                 renderArgs.put("formData", formData);
-                renderArgs.put("depositId", currentDepositId);
+                renderArgs.put("deposit", d);
                 renderArgs.put("envelopes", d.envelopes);
 
                 try {

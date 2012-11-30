@@ -2,9 +2,7 @@ package models;
 
 import java.util.List;
 import javax.persistence.Entity;
-import models.db.LgBill;
 import models.db.LgDeposit;
-import models.db.LgLov;
 import models.db.LgUser;
 import models.lov.DepositUserCodeReference;
 

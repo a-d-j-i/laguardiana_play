@@ -1,7 +1,9 @@
 package controllers;
 
+import devices.DeviceFactory;
 import models.db.LgBag;
 import models.db.LgZ;
+import play.Logger;
 import play.mvc.Controller;
 
 public class AccountingController extends Controller {
@@ -25,6 +27,11 @@ public class AccountingController extends Controller {
         if (currentBag != null) {
             renderArgs.put("totals", currentBag.getTotals());
         }
+        try {
+            DeviceFactory.getPrinter().print("currentBagTotals", renderArgs.data, 120);
+        } catch (Throwable ex) {
+            Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
+        }
         render();
     }
 
@@ -33,6 +40,11 @@ public class AccountingController extends Controller {
         renderArgs.put("z", currentZ);
         if (currentZ != null) {
             renderArgs.put("totals", currentZ.getTotals());
+        }
+        try {
+            DeviceFactory.getPrinter().print("currentZTotals", renderArgs.data, 120);
+        } catch (Throwable ex) {
+            Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }
         render();
     }

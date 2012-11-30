@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Array;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.print.Doc;
@@ -46,7 +47,7 @@ import play.templates.TemplateLoader;
  */
 public class Printer {
 
-    final boolean TO_PRINTER = true;
+    final boolean TO_PRINTER = false;
     final int PAGE_WIDTH = 80;
     final int DEFAULT_PAGE_LEN = 150;
     // TODO: Manage errors.
@@ -89,7 +90,7 @@ public class Printer {
         }
     }
 
-    public void print(String templateName, Map args, int paperLen) throws PrinterException, PrintException {
+    public void print(String templateName, Map<String, Object> args, int paperLen) throws PrinterException, PrintException {
         if (paperLen <= 0) {
             paperLen = DEFAULT_PAGE_LEN;
         }
@@ -104,6 +105,7 @@ public class Printer {
         if (template == null) {
             throw new PrinterException(String.format("Template %s not found", templateName));
         }
+        args.put("currentDate", new Date());
         String body = template.render(args);
         //Logger.debug("PRINT : %s", body);
 

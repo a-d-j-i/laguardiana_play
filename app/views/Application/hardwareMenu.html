@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 #{set title:'Otras operaciones' /}
-<section id ="menu_principal">
+<section>
     <header></header>
     <a href="@{Application.otherMenu}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
@@ -13,7 +13,8 @@
                     #{otherMenuButton resource: 'GloryManagerController.index', operation: 'GET', title: 'Glory (Manager)' /}
                     #{otherMenuButton resource: 'IoBoardController.index', operation: 'GET', title: 'Io Board( Comandos )' /}
                     #{otherMenuButton resource: 'CounterController.counterError', operation: 'GET', title: 'Status' /}
-                    #{otherMenuButton resource: 'Application.printersMenu', operation: 'GET', title: 'Printers' /}
+                    #{otherMenuButton resource: 'Application.printTemplate', operation: 'GET', title: 'Printer Test' /}
+                    #{otherMenuButton resource: 'Application.listPrinters', operation: 'GET', title: 'List Printers' /}
                 </ul>
             </div>
         </div>

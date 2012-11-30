@@ -4,9 +4,9 @@
     <header></header>
     <a href="@{mainMenu}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
-        Contenido del cierre contable iniciado el ${ z.creationDate } y 
+        Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy hh:mm:ss') } y 
         #{ if z.closeDate == null }aun no cerrado#{/if}
-        #{ else }cerrado el ${ z.closeDate }#{/else}
+        #{ else }cerrado el ${ z.closeDate.format('dd/MM/yyyy hh:mm:ss') }#{/else}
         <br>
         #{ bills_table bill_data: totals._4 /}
         Total de efectivo ${ totals._1 }<br>
