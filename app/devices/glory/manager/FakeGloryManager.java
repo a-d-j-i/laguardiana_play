@@ -15,7 +15,7 @@ public class FakeGloryManager implements ManagerInterface {
     static Integer currency;
     static int counter = 0;
     static boolean billDeposit = true;
-    static boolean escrowDone = false;
+    static boolean stepOneDone = false;
 
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
         status.setState(State.IDLE);
@@ -23,7 +23,7 @@ public class FakeGloryManager implements ManagerInterface {
         FakeGloryManager.desiredQuantity = desiredQuantity;
         FakeGloryManager.currency = currency;
         counter = 0;
-        escrowDone = false;
+        stepOneDone = false;
         return true;
     }
 
@@ -94,9 +94,9 @@ public class FakeGloryManager implements ManagerInterface {
         counter++;
         if (counter % 10 == 0) {
             if (billDeposit) {
-                if (!escrowDone) {
+                if (!stepOneDone) {
                     status.setState(State.ESCROW_FULL);
-                    escrowDone = true;
+                    stepOneDone = true;
                 }
             } else {
                 status.setState(State.PUT_THE_ENVELOPE_IN_THE_ESCROW);
@@ -104,6 +104,11 @@ public class FakeGloryManager implements ManagerInterface {
         }
         if (counter % 20 == 0) {
             status.setState(State.READY_TO_STORE);
+        }
+
+        if (counter == 40) {
+            status.setState(State.IDLE);
+            counter = 0;
         }
 
         return status;
