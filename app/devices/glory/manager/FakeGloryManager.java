@@ -58,12 +58,14 @@ public class FakeGloryManager implements ManagerInterface {
     }
 
     public boolean storeDeposit(Integer sequenceNumber) {
-        if (status.getState() == State.ESCROW_FULL) {
-            status.setState(State.STORING);
-            status.setState(State.COUNTING);
-        } else {
-            status.setState(State.STORING);
-            status.setState(State.IDLE);
+        if (status.getState() != State.CANCELED && status.getState() != State.CANCELED) {
+            if (status.getState() == State.ESCROW_FULL) {
+                status.setState(State.STORING);
+                status.setState(State.COUNTING);
+            } else {
+                status.setState(State.STORING);
+                status.setState(State.IDLE);
+            }
         }
         return true;
     }

@@ -1,13 +1,12 @@
 #{extends 'Printer/ticket_160mm.html' /}
-<img src="public/images/logo.gif">
+<img src="public/images/logo.png">
+<br>
 Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy hh:mm:ss') } y 
 #{ if z.closeDate == null }aun no cerrado#{/if}
 #{ else }cerrado el ${ z.closeDate.format('dd/MM/yyyy hh:mm:ss') }#{/else}
 <br>
-#{ bills_table bill_data: totals._4 /}
+#{ bills_table_printer bill_data: totals._4 /}
 Total de efectivo ${ totals._1 }<br>
 Total de sobres ${ totals._2 }<br>
 Total de depositos ${ totals._3 }<br>
-
-
-
+${ currentDate.format('dd/MM/yyyy hh:mm:ss') }&nbsp;S.E.U.O.

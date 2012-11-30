@@ -1,7 +1,11 @@
 package controllers;
 
 import devices.DeviceFactory;
+import java.util.List;
+import models.Bill;
+import models.BillDeposit;
 import models.Configuration;
+import models.lov.Currency;
 import play.Logger;
 import play.mvc.*;
 
@@ -28,26 +32,27 @@ public class Application extends Controller {
         try {
             //DeviceFactory.getPrinter().printAttributes();
 
-            /*BillDepositController.FormData formData = new BillDepositController.FormData();
-             formData.currency.currency = new Currency();
-             formData.currency.currency.textId = "Pesos";
-             renderArgs.put("formData", formData);*/
+            BillDepositController.FormData formData = new BillDepositController.FormData();
+            formData.currency.currency = new Currency();
+            formData.currency.currency.textId = "Pesos";
+            renderArgs.put("formData", formData);
             /*EnvelopeDepositController.FormData formData = new EnvelopeDepositController.FormData();
              renderArgs.put("formData", formData);*/
 
             renderArgs.put("clientCode", Configuration.getClientDescription());
 
-            /*            List<BillDeposit> depositList = BillDeposit.findAll();
-             BillDeposit deposit = depositList.get(0);
-             List<Bill> bl = deposit.getBillList();
-             renderArgs.put("billData", bl);
-             renderArgs.put("depositTotal", deposit.getTotal());
-             renderArgs.put("deposit", deposit);
-             renderArgs.put("envelopes", deposit.envelopes);*/
+            /*List<BillDeposit> depositList = BillDeposit.findAll();
+            BillDeposit deposit = depositList.get(0);*/
+            BillDeposit deposit = BillDeposit.findById(33);
+            List<Bill> bl = deposit.getBillList();
+            renderArgs.put("billData", bl);
+            renderArgs.put("depositTotal", deposit.getTotal());
+            renderArgs.put("deposit", deposit);
+            renderArgs.put("envelopes", deposit.envelopes);
             // Print the ticket.
 //            DeviceFactory.getPrinter().print("envelopeDeposit_start", renderArgs.data, 120);
 //            DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs.data, 120);
-//            DeviceFactory.getPrinter().print("billDeposit", renderArgs.data, 120);
+            DeviceFactory.getPrinter().print("billDeposit", renderArgs.data, 120);
 
         } catch (Throwable ex) {
             Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());

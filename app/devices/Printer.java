@@ -47,7 +47,7 @@ import play.templates.TemplateLoader;
  */
 public class Printer {
 
-    final boolean TO_PRINTER = false;
+    final boolean TO_PRINTER = true;
     final int PAGE_WIDTH = 80;
     final int DEFAULT_PAGE_LEN = 150;
     // TODO: Manage errors.

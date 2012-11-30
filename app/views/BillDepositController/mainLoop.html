@@ -240,7 +240,7 @@
     
     $( '#alerta_continueButton' ).click( function(event) {
         closeAlert( "#alerta_escrow_full" );
-        if ( lastStatus == 'IDLE' || lastStatus == 'STORING' || lastStatus == 'CONTINUE_DEPOSIT'  ) {
+        if ( lastStatus == 'IDLE' || lastStatus == 'READY_TO_STORE' || lastStatus == 'STORING' || lastStatus == 'CONTINUE_DEPOSIT'  ) {
             // waiting the glory.
         } else if ( lastStatus == 'ESCROW_FULL' ) {
             $.getJSON( '@{accept()}', function( data ) {});
