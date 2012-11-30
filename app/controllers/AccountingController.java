@@ -55,6 +55,11 @@ public class AccountingController extends Controller {
         if (currentZ != null) {
             renderArgs.put("totals", currentZ.getTotals());
         }
+        try {
+            DeviceFactory.getPrinter().print("currentZTotals", renderArgs.data, 120);
+        } catch (Throwable ex) {
+            Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
+        }
         renderTemplate("AccountingController/currentZTotals.html", renderArgs);
     }
 }
