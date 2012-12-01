@@ -25,6 +25,7 @@ import javax.print.attribute.DocAttributeSet;
 import javax.print.attribute.HashDocAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.PrintServiceAttributeSet;
+import javax.print.attribute.standard.MediaPrintableArea;
 import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.MediaSizeName;
 import javax.print.attribute.standard.OrientationRequested;
@@ -144,7 +145,7 @@ public class Printer {
         //attrs.add(new MediaPrintableArea(0, 0, 10, 10, MediaPrintableArea.MM));
 
         HashDocAttributeSet attrc = new HashDocAttributeSet();
-        //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 30, MediaPrintableArea.MM));
+        //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) PAGE_WIDTH, (float) paperLen, MediaPrintableArea.MM));
         attrc.add(OrientationRequested.PORTRAIT);
         MediaSizeName m = MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM);
         if (m != null) {

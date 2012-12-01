@@ -81,8 +81,7 @@ public class LargeHTMLEditorKit extends HTMLEditorKit {
         protected void layout(int width, int height) {
             if (width < Integer.MAX_VALUE) {
                 super.layout(new Double(width / getZoomFactor()).intValue(),
-                        new Double(height
-                        * getZoomFactor()).intValue());
+                        new Double(height * getZoomFactor()).intValue());
             }
         }
 

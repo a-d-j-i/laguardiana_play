@@ -1,32 +1,34 @@
-<table border="0" cellpadding="0" cellspacing="0" style="font-size: smaller">
-    <thead>
-        <tr>
-            <th>&{ 'counting_page.denomination' }</th>
-            <th>&{ 'counting_page.quantity' }</th>
-            <th>&{ 'counting_page.total' }</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- detalle de billetes -->
-        %{ total = 0; cnt_total = 0;}%
-        #{list items:_bill_data, as:'b'}
-        <tr id="BTRID_${b.tid}">
-            <td id="bill_denomination">${b.d}</td>
-            <td id="bill_quantity">${b.q}</td>
-            <td id="bill_total">${b.d  * b.q}</td>
-            %{ total += b.d  * b.q; cnt_total += b.q }%
-        </tr>
-        #{/list}
-        <!-- /detalle de billetes -->
-    </tbody>
+<center>
+    <table border="0" cellpadding="0" cellspacing="0" style="font-size: smaller">
+        <thead>
+            <tr>
+                <th>&{ 'counting_page.denomination' }</th>
+                <th>&{ 'counting_page.quantity' }</th>
+                <th>&{ 'counting_page.total' }</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- detalle de billetes -->
+            %{ total = 0; cnt_total = 0;}%
+            #{list items:_bill_data, as:'b'}
+            <tr id="BTRID_${b.tid}">
+                <td id="bill_denomination">${b.d}</td>
+                <td id="bill_quantity">${b.q}</td>
+                <td id="bill_total">${b.d  * b.q}</td>
+                %{ total += b.d  * b.q; cnt_total += b.q }%
+            </tr>
+            #{/list}
+            <!-- /detalle de billetes -->
+        </tbody>
 
-    <tfoot>
-        <tr>
-            <td><b>&{ 'counting_page.totals' }</b></td>
-            <!-- totales -->
-            <td id ="cnt_total"><b>${ cnt_total }</b></td>
-            <td id ="total"><b>${ total }</b></td>
-            <!-- /totales -->
-        </tr>
-    </tfoot>
-</table>
+        <tfoot>
+            <tr>
+                <td><b>&{ 'counting_page.totals' }</b></td>
+                <!-- totales -->
+                <td id ="cnt_total"><b>${ cnt_total }</b></td>
+                <td id ="total"><b>${ total }</b></td>
+                <!-- /totales -->
+            </tr>
+        </tfoot>
+    </table>
+</center>

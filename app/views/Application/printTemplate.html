@@ -2,19 +2,19 @@
 #{set title:'Otras operaciones' /}
 <section>
     <header></header>
-    <a href="@{Application.otherMenu}" class="boton_top">◄ &{ 'application.back' }</a>
+    <a href="@{Application.hardwareMenu}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="casa">&{'other_menu.title'}</h1>
         <div class="contenido">
             <div class="mensaje"><span>&{'application.choose_one'}</span></div>
             <div class="botonera">
                 <ul class="on-2 columns">
-                    #{otherMenuButton resource: 'GloryController.index', operation: 'GET', title: 'glory_cmd' /}
-                    #{otherMenuButton resource: 'GloryManagerController.index', operation: 'GET', title: 'glory_manager' /}
-                    #{otherMenuButton resource: 'IoBoardController.index', operation: 'GET', title: 'ioboard_cmd' /}
-                    #{otherMenuButton resource: 'CounterController.counterError', operation: 'GET', title: 'status' /}
-                    #{otherMenuButton resource: 'Application.listPrinters', operation: 'GET', title: 'printer_list' /}
-                    #{otherMenuButton resource: 'Application.printTemplate', operation: 'GET', title: 'printer_test' /}
+                    #{otherMenuButton resource: 'Printer.billDeposit', operation: 'GET', title: 'billDeposit' /}
+                    #{otherMenuButton resource: 'Printer.currentBagTotals', operation: 'GET', title: 'currentBagTotals' /}
+                    #{otherMenuButton resource: 'Printer.envelopeDeposit_finish', operation: 'GET', title: 'envelopeDeposit_finish' /}
+                    #{otherMenuButton resource: 'Printer.envelopeDeposit_start', operation: 'GET', title: 'envelopeDeposit_start' /}
+                    #{otherMenuButton resource: 'Printer.currentZTotals', operation: 'GET', title: 'currentZTotals' /}
+                    #{otherMenuButton resource: 'Printer.test', operation: 'GET', title: 'test' /}
                 </ul>
             </div>
         </div>
