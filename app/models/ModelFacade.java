@@ -114,9 +114,10 @@ public class ModelFacade {
                 return;
             }
             IoBoardEvent.save(currentUserAction, status.toString());
-            if (status.isError()) {
+            if (status.getError() != null) {
                 // A development option
                 if (!Configuration.ioBoardIgnore()) {
+                    Logger.error("Setting ioboard error : %s", status.getError());
                     modelError.ioBoardError = status.getError();
                 }
                 return;
@@ -267,10 +268,8 @@ public class ModelFacade {
             }
         }
 
-        if (ioBoard.isError()) {
-            if (!Configuration.ioBoardIgnore()) {
-                setError(String.format("IoBoard error : %s", ioBoard.getError()));
-            }
+        if (ioBoard.getError() != null && !Configuration.ioBoardIgnore()) {
+            setError(String.format("IoBoard error : %s", ioBoard.getError()));
         }
         if (modelError.isError()) {
             return "ERROR";
@@ -322,13 +321,14 @@ public class ModelFacade {
     }
 
     private static void clearError() {
+        Logger.debug("clearing error");
         ManagerInterface.State m = manager.getStatus().getState();
         if (m != ManagerInterface.State.ERROR) {
             modelError.gloryError = null;
         } else {
             Logger.error("Manager still in error %s", m.name());
         }
-        if (ioBoard.isError()) {
+        if (ioBoard.getError() == null) {
             modelError.ioBoardError = null;
         } else {
             Logger.error("IoBoard still in error %s", ioBoard.getError());

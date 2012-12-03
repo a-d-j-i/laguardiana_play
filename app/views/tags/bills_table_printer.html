@@ -12,7 +12,7 @@
             %{ total = 0; cnt_total = 0;}%
             #{list items:_bill_data, as:'b'}
             <tr id="BTRID_${b.tid}">
-                <td id="bill_denomination">${b.d}</td>
+                <td id="bill_denomination">${b.d} &{b.c}</td>
                 <td id="bill_quantity">${b.q}</td>
                 <td id="bill_total">${b.d  * b.q}</td>
                 %{ total += b.d  * b.q; cnt_total += b.q }%

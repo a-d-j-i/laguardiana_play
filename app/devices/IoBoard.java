@@ -241,10 +241,6 @@ public class IoBoard extends Observable {
             return ret;
         }
 
-        public boolean isError() {
-            return getError() != null;
-        }
-
         public String repr(Byte d) {
             BitSet b = new BitSet();
             byte c = 1;
@@ -437,10 +433,6 @@ public class IoBoard extends Observable {
 
     public void aproveBagConfirm() {
         currentStatus.setAproveBagState(BAG_APROVE_STATE.BAG_APROVED);
-    }
-
-    public boolean isError() {
-        return currentStatus.isError();
     }
 
     public String getError() {

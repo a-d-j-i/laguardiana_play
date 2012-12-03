@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import models.db.LgBillType;
+import models.lov.Currency;
 
 /**
  * @author adji
@@ -27,12 +28,20 @@ public class Bill {
     public Integer dq = 0;
     // Quantity
     public Integer q = 0;
-
+    // Currency
+    public String c = "";
+    
     public Bill(LgBillType bb) {
         this.billType = bb;
         this.tid = bb.billTypeId;
         this.btd = bb.toString();
         this.d = bb.denomination;
+        Currency c = bb.getCurrency();
+        if ( c == null ) {
+            this.c = "-";
+        } else {
+            this.c = c.textId;
+        }
     }
 
     static public List<Bill> getBillList(Integer currency) {

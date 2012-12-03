@@ -108,7 +108,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     }
 
     public F.T4<Long, Long, Long, Collection<Bill>> getTotals() {
-        return LgDeposit.getDepositsTotals(deposits);
+        return LgDeposit.getTotals(deposits);
     }
 
     public static void rotateBag(boolean force) {

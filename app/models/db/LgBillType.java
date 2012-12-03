@@ -55,4 +55,8 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
         Integer d = denomination;
         return (d.toString() + " " + Currency.findByNumericId(unitLov));
     }
+
+    public Currency getCurrency() {
+        return Currency.findByNumericId(unitLov);
+    }
 }

@@ -134,7 +134,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         return DepositUserCodeReference.findByNumericId(userCodeLov);
     }
 
-    static public F.T4<Long, Long, Long, Collection<Bill>> getDepositsTotals(Set<LgDeposit> deps) {
+    static public F.T4<Long, Long, Long, Collection<Bill>> getTotals(Set<LgDeposit> deps) {
         long sum = 0;
         long envelopes = 0;
         long deposits = 0;
