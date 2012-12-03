@@ -128,6 +128,7 @@ public class IoBoard extends Observable {
         }
 
         private void setBagState(BAG_STATE bagState) {
+            Logger.debug("IOBOARD setBagState : %s", bagState.name());
             if (this.bagState != bagState) {
                 this.bagState = bagState;
                 setChanged();
@@ -135,6 +136,7 @@ public class IoBoard extends Observable {
         }
 
         private void setShutterState(SHUTTER_STATE shutterState) {
+            Logger.debug("IOBOARD setShutterState : %s", shutterState.name());
             if (this.shutterState != shutterState) {
                 this.shutterState = shutterState;
                 setChanged();
@@ -142,6 +144,7 @@ public class IoBoard extends Observable {
         }
 
         private void setLockState(Integer lockState) {
+            Logger.debug("IOBOARD setLockState : %d", lockState);
             if (this.lockState != lockState) {
                 this.lockState = lockState;
                 setChanged();
@@ -155,17 +158,18 @@ public class IoBoard extends Observable {
                 setBagState(BAG_STATE.factory(bagSt));
                 setShutterState(SHUTTER_STATE.factory(shutterSt));
                 setLockState(lockSt);
-                this.lockState = lockSt;
                 // The bag changed the state.
                 switch (bagAproveState) {
                     case BAG_APROVED:
                         if (!bagAproved) {
+                            Logger.debug("IOBOARD BAG NOT APROVED");
                             bagAproveState = BAG_APROVE_STATE.BAG_NOT_APROVED;
                             setChanged();
                         }
                         break;
                     case BAG_APROVE_WAIT:
                         if (bagAproved) {
+                            Logger.debug("IOBOARD BAG APROVE CONFIRM");
                             bagAproveState = BAG_APROVE_STATE.BAG_APROVE_CONFIRM;
                             setChanged();
                         }
@@ -184,6 +188,8 @@ public class IoBoard extends Observable {
         }
 
         private void setStatus(Byte A, Byte B, Byte C, Byte D, Byte BAG) {
+            Logger.debug("IOBOARD setStatus : A 0x%x B 0x%x C 0x%x D 0x%x BAG STATUS 0x%x",
+                    A, B, C, D, BAG);
             mutex.lock();
             try {
                 this.A = A;
@@ -287,7 +293,7 @@ public class IoBoard extends Observable {
                         throw new IOException("IoBoard StatusThread IoBoard Serial port closed");
                     }
                     String l = serialPort.readLine(IOBOARD_STATUS_CHECK_FREQ);
-                    //Logger.debug("IOBOARD reader %s", l);
+                    Logger.debug("IOBOARD reader %s", l);
                     retries = 0;
                     if (l.startsWith("STATUS :") && l.length() > 70) {
                         try {
@@ -301,7 +307,6 @@ public class IoBoard extends Observable {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
                     } else if (l.startsWith("STATE :") && l.length() > 47) {
-                    } else if (l.startsWith("STATE :") && l.length() > 47) {
                         try {
                             Integer bagSt = Integer.parseInt(l.substring(12, 14), 10);
                             Boolean bagAproved = (Integer.parseInt(l.substring(27, 28), 10) == 1);
@@ -314,6 +319,7 @@ public class IoBoard extends Observable {
                         }
                     } else if (l.contains("ERROR")) {
                         if (l.contains("SHUTTER") && Configuration.isIgnoreShutter()) {
+                            // Ignore.
                         } else {
                             currentStatus.setError(l);
                         }
