@@ -76,7 +76,7 @@ public class IdleBillDeposit extends ActionState {
                 //stateApi.startTimer();
                 break;
             case REMOVE_REJECTED_BILLS:
-                stateApi.setState(new RemoveRejectedBillsBillDeposit(stateApi, this));
+                stateApi.setState(new RemoveRejectedBills(stateApi, this));
                 break;
             default:
                 Logger.debug("IdleBillDeposit onGloryEvent invalid state %s %s", m.name(), name());

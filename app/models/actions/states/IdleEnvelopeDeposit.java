@@ -41,6 +41,9 @@ public class IdleEnvelopeDeposit extends ActionState {
             case PUT_THE_ENVELOPE_IN_THE_ESCROW:
                 stateApi.setState(new ReadyToStoreEnvelopeDeposit(stateApi));
                 break;
+            case REMOVE_REJECTED_BILLS:
+                stateApi.setState(new RemoveRejectedBills(stateApi, this));
+                break;
             default:
                 Logger.debug("IdleEnvelopeDeposit onGloryEvent invalid state %s %s", m.name(), name());
                 break;

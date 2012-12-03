@@ -13,11 +13,11 @@ import play.Logger;
  *
  * @author adji
  */
-public class RemoveRejectedBillsBillDeposit extends ActionState {
+public class RemoveRejectedBills extends ActionState {
 
     final protected ActionState prevState;
 
-    public RemoveRejectedBillsBillDeposit(StateApi stateApi, ActionState prevState) {
+    public RemoveRejectedBills(StateApi stateApi, ActionState prevState) {
         super(stateApi);
         this.prevState = prevState;
     }
@@ -30,11 +30,13 @@ public class RemoveRejectedBillsBillDeposit extends ActionState {
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
+            // Envelope deposit.
+            case PUT_THE_ENVELOPE_IN_THE_ESCROW:
             case IDLE:
                 stateApi.setState(prevState);
                 break;
             default:
-                Logger.debug("RemoveRejectedBillsBillDeposit onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("RemoveRejectedBills onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
     }

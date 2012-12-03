@@ -77,6 +77,14 @@
             </div>
         </div>
     </div>
+    <div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+            </div>
+        </div>
+    </div>
 </section>
 
 
@@ -105,7 +113,13 @@
                 } else {
                     closeAlert( "#alerta_storing" );    
                 }
-                if ( status == 'IDLE' || status == 'CANCELING' || status == 'STORING' ) {
+                if ( status == 'REMOVE_REJECTED_BILLS' ) {
+                    showAlert( '#alerta_remove_rejected_bills' );                
+                } else {
+                    closeAlert( "#alerta_remove_rejected_bills" );    
+                }
+
+                if ( status == 'IDLE' || status == 'CANCELING' || status == 'STORING' || status == 'REMOVE_REJECTED_BILLS' ) {
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
