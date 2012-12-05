@@ -268,67 +268,69 @@
         
       
         $("#mainForm").bind("step_shown", function(event, data) {
-            Elastic.refresh();
-            function checkAndSet( check, set ) {
-                str = $( check ).val();
-                if ( ! ( ! str ) && ! /^\s*$/.test( str ) && str > 0 ) {
-                    $( set ).addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-                } else {
-                    $( set ).addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
-                }
-            };
-            
-            if (data.currentStep == 'second') {
-                checkAndSet( '#cashData' , '#cash_link' );
-                checkAndSet( '#checkData' , '#checks_link' );
-                checkAndSet( '#ticketData' , '#tickets_link' );
-                if ( $( '#hasDocuments' ).val() == 'true' ) {
-                    $( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-                }
-                if ( $( '#hasOthers' ).val() == 'true' ) {
-                    $( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-                }
-            } else if ( data.currentStep == 'envelope_code') {
-                // last step activate all input, (hack).
-                $(":input").not(".wizard-ignore").removeAttr("disabled")
-            }
-            
-        });
-        $( '#cash_link' ).click( function(event) {
-            $("#mainForm").formwizard("show","cash");
-        });
-        $( '#checks_link' ).click( function(event) {
-            $("#mainForm").formwizard("show","checks");
-        });
-        $( '#tickets_link' ).click( function(event) {
-            $("#mainForm").formwizard("show","tickets");
-        });
-        $( '#documents_link' ).click( function(event) {
-            if ( $("#hasDocuments").val() == 'true' ) {
-                $("#hasDocuments").val("false");
-                $( '#documents_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
-            } else {
-                $("#hasDocuments").val("true");
-                $( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+    Elastic.refresh();
+    function checkAndSet( check, set ) {
+	str = $( check ).val();
+	if ( ! ( ! str ) && ! /^\s*$/.test( str ) && str > 0 ) {
+	    $( set ).addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+	} else {
+	    $( set ).addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
+	}
+    };
+    
+    if (data.currentStep == 'second') {
+	checkAndSet( '#cashData' , '#cash_link' );
+	checkAndSet( '#checkData' , '#checks_link' );
+	checkAndSet( '#ticketData' , '#tickets_link' );
+	if ( $( '#hasDocuments' ).val() == 'true' ) {
+	    $( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+	}
+	if ( $( '#hasOthers' ).val() == 'true' ) {
+	    $( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+	}
+    } else if ( data.currentStep == 'envelope_code') {
+	// last step activate all input, (hack).
+	$(":input").not(".wizard-ignore").removeAttr("disabled")
+    }
+    
+});
+$( '#cash_link' ).click( function(event) {
+    $("#mainForm").formwizard("show","cash");
+});
+$( '#checks_link' ).click( function(event) {
+    $("#mainForm").formwizard("show","checks");
+});
+$( '#tickets_link' ).click( function(event) {
+    $("#mainForm").formwizard("show","tickets");
+});
+$( '#documents_link' ).click( function(event) {
+    if ( $("#hasDocuments").val() == 'true' ) {
+	$("#hasDocuments").val("false");
+	$( '#documents_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
+    } else {
+	$("#hasDocuments").val("true");
+	$( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
 
-            }
-        });
-        $( '#others_link' ).click( function(event) {
-            if ( $("#hasOthers").val() == 'true' ) {
-                $("#hasOthers").val("false");
-                $( '#others_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
-            } else {
-                $("#hasOthers").val("true");
-                $( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-            }
-        });
-        $( '#backButton' ).click( function(event) {
-            state = $("#mainForm").formwizard("state");
-            if ( state.isFirstStep ) {
-                window.location.href = "@{ Application.index() }";
-            };
-            $("#mainForm").formwizard("back");
-        });
+    }
+});
+$( '#others_link' ).click( function(event) {
+    if ( $("#hasOthers").val() == 'true' ) {
+	$("#hasOthers").val("false");
+	$( '#others_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
+    } else {
+	$("#hasOthers").val("true");
+	$( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+    }
+});
+$( '#backButton' ).click( function(event) {
+    state = $("#mainForm").formwizard("state");
+    if ( state.isFirstStep ) {
+	window.location.href = "@{ Application.index() }";
+    };
+    $("#mainForm").formwizard("back");
+});
+
+    Elastic.refresh();
     });
     
 </script>

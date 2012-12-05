@@ -18,7 +18,7 @@
         <input type="password" placeholder="&{'secure.password'}" name="password"/>
         <a href="#">&{'secure.pass_forget'}</a>
         #{/form}
-        #{if ( ! play.configuration[ 'style.useHardwareKeyboard' ] ) }
+        #{if ( play.configuration[ 'style.useHardwareKeyboard' ] ) }
         <div class="contenido" style="height: 130px;">
         </div>
         <hr>
@@ -133,7 +133,8 @@
     
     $( '#continueButton' ).click( function(event) {
         $( '#mainForm' ).submit();
-    });
+});
+   Elastic.refresh();
 </script>
 #{/set}
 

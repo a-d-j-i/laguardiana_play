@@ -106,7 +106,6 @@ hr {
 .mensaje {
     background: url('../images/caption_flecha.png') left bottom no-repeat;
     padding-bottom: 12px;
-    margin-bottom: 10px;
 }
 
 .mensaje span {
@@ -465,9 +464,6 @@ hr {
     margin: 15px 0;
 }
 
-.mensaje {
-    margin-bottom: 20px;
-}
 
 
 /*Jquery tools calendar */
