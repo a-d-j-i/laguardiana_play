@@ -18,7 +18,7 @@ secure.invalid_user_password=Error usuario o clave invalida.
 secure.continue_message=Para continuar, ingrese su usuario y contraseña
 secure.pass_forget=¿No recuerda sus datos?
 
-keyboard.continue=SIGUIENTE
+keyboard.continue=CONTINUAR
 keyboard.space=ESPACIO
 
 application.back=VOLVER

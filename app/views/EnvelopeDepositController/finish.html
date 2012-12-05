@@ -6,12 +6,14 @@
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
         <div class="contenido">
-            <div class="mensaje"><span>&{ 'envelope_deposit.deposit_done' }</span></div>
-            <h2>&{ 'application.thanks' }</h2>
             #{if canceled}
+            <div class="mensaje"><span>&{ 'counting_page.deposit_canceled' }</span></div>
+            <h2>&{ 'application.thanks' }</h2>
             &{ 'counting_page.deposit_canceled' }
             #{/if}
             #{else}
+            <div class="mensaje"><span>&{ 'envelope_deposit.deposit_done' }</span></div>
+            <h2>&{ 'application.thanks' }</h2>
             &{ 'application.remove_ticket' }
             #{/else}
         </div>
@@ -38,7 +40,7 @@
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     function done() {
-        window.location.href = "@{Application.index()}";
+        window.location.href = "@{Secure.logout()}";
     };
     setTimeout(done,  ${play.configuration['finish_screen.timeout']});
 

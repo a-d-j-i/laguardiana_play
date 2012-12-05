@@ -56,7 +56,7 @@
                 <li class="column">
                     <div class="columna">
                         <!-- boton otras operaciones -->
-                        #{ifAuthorized resource: 'Application.otherMenu', operation: 'GET'}
+                        #{ifAuthorized resource: 'Application.otherMenu', operation: 'GET', fill: 1}
                         <a href="@{Application.otherMenu}" class="boton gris full_width">&{'main_menu.other_operations'}</a>
                         #{/ifAuthorized}
                     </div>

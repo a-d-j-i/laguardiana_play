@@ -2,3 +2,8 @@
 #{if ( controllers.Secure.checkPermission( _resource, _operation ) ) }
 #{doBody /}
 #{/if}
+#{else}
+#{if _fill }
+&nbsp;
+#{/if}
+#{/else}

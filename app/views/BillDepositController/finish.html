@@ -49,7 +49,7 @@
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     function done() {
-        window.location.href = "@{Application.index()}";
+        window.location.href = "@{Secure.logout()}";
     };
     setTimeout(done,  ${play.configuration['finish_screen.timeout']});
 
