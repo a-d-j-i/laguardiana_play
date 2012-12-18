@@ -1,0 +1,10 @@
+#{list items:_buttons, as:'b'}
+%{ def url = actionBridge."$b".call() }%
+#{if _perms[ b ] }
+<li class="column">
+    <div class="columna">
+        <a href="${url}" class="boton ${play.configuration['style.button_color']} full_width separar">&{ _titles[ b ] }</a>
+    </div>
+</li>
+#{/if}
+#{/list}

@@ -2,7 +2,7 @@
 #{set title: 'current Bag Totals' /}
 <section>
     <header></header>
-    <a href="@{mainMenu}" class="boton_top">◄ &{ 'application.back' }</a>
+    <a href="@{MenuController.AccountingMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         Contenido actual de la maquina en la bolsa ${ bag.bagId }, colocada el ${ bag.creationDate.format('dd/MM/yyyy hh:mm:ss') }<br>
         #{ bills_table bill_data: totals._4 /}

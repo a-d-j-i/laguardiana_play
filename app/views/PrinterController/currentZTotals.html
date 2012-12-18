@@ -1,4 +1,4 @@
-#{extends 'Printer/ticket_160mm.html' /}
+#{extends 'PrinterController/ticket_160mm.html' /}
 <center><img src="public/images/logo.png"></center>
 Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy hh:mm:ss') } y 
 #{ if z.closeDate == null }aun no cerrado#{/if}

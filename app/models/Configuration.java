@@ -14,6 +14,10 @@ import play.Play;
  */
 public class Configuration {
 
+    public static boolean dontAskForPassword() {
+        return isProperty("secure.dontAskForPassword");
+    }
+
     public static boolean ioBoardIgnore() {
         return isProperty("io_board.ignore") && Play.mode.isDev();
     }

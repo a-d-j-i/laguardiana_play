@@ -2,10 +2,15 @@
 #{set title:'Login' /}
 <section id ="login">
     <header></header>
-<!--    <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>-->
+    <!--    <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>-->
     <article>
-        <h1 class="candado">&{'secure.title'}</h1>
-        <div class="mensaje"><span>&{'secure.continue_message' }</span></div>
+        <h1 class="candado" id="candado">&{'secure.title'}</h1>
+        #{if ( play.configuration[ 'secure.dontAskForPassword' ] ) }
+        <div class="mensaje"><span>&{'secure.continue_message_user' }</span></div>
+        #{/if}
+        #{else}
+        <div class="mensaje"><span>&{'secure.continue_message_password' }</span></div>
+        #{/else}
         #{form @authenticate(), id : 'mainForm' }       
         <!--        <input type="text" placeholder="&{'secure.username'}"  class="keyboard_alpha keyboard_default" name="username"/>
                 <input type="password" placeholder="&{'secure.password'}" class="keyboard_alpha" name="password"/>
@@ -15,8 +20,12 @@
                 <a href="${lastUrl}"><input type="button" name="cancel" value="Cancel" class="btn" /></a>
         -->
         <input type="text" placeholder="&{'secure.username'}"  class="focus_me" name="username"/>
-        <input type="password" placeholder="&{'secure.password'}" name="password"/>
-        <a href="#">&{'secure.pass_forget'}</a>
+        #{if ( play.configuration[ 'secure.dontAskForPassword' ] ) }
+        <input id="password" type="password" placeholder="&{'secure.password'}" name="password" style="display: none;"/>
+        #{/if}
+        #{else}
+        <input id="password" type="password" placeholder="&{'secure.password'}" name="password"/>
+        #{/else}
         #{/form}
         #{if ( play.configuration[ 'style.useHardwareKeyboard' ] ) }
         <div class="contenido" style="height: 130px;">
@@ -107,6 +116,17 @@
 
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
+    var candado_count = 0;
+    $("#candado").click( function( event ) {
+        candado_count++;
+        if ( candado_count >= 3 ) {
+            $( "#password" ).show();
+        }
+    } );
+    function refresh() {
+        candado_count=0;
+    };
+    setInterval(refresh, 3000);
     
     /* attach a submit handler to the form */
     $("#mainForm").submit( function(event) {
@@ -120,12 +140,12 @@
             var extra = data[ 1 ];
             if ( status == 'error' ) {
                 $( '#error_text' ).html( extra );
-                $("#alerta").overlay().load();
+                $( "#alerta" ).overlay().load();
             } else if ( status == 'success' ) {    
                 window.location.href = extra;
             } else {
                 $( '#error_text' ).html( 'Estado invalido : ' + data );
-                $("#alerta").overlay().load();
+                $( "#alerta" ).overlay().load();
             }
         }
     );
@@ -133,8 +153,8 @@
     
     $( '#continueButton' ).click( function(event) {
         $( '#mainForm' ).submit();
-});
-   Elastic.refresh();
+    });
+    Elastic.refresh();
 </script>
 #{/set}
 

@@ -174,9 +174,11 @@ public class EnvelopeDepositController extends CounterController {
     public static void finish() {
         EnvelopeDeposit deposit = (EnvelopeDeposit) ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
-        Set<LgEnvelope> envelopes = deposit.envelopes;
-        renderArgs.put("envelopes", envelopes);
-        renderArgs.put("canceled", (deposit != null && deposit.finishDate == null));
+        if (deposit != null) {
+            Set<LgEnvelope> envelopes = deposit.envelopes;
+            renderArgs.put("envelopes", envelopes);
+            renderArgs.put("canceled", (deposit != null && deposit.finishDate == null));
+        }
         if (formData != null) {
             ModelFacade.finishAction();
         } else {

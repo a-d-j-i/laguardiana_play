@@ -78,4 +78,24 @@
     creationDate:   2012-01-01
     endDate:        2112-01-01    
     roles:          []
+
+  User(user):
+    externalApp:    PlayInternalApp
+    username:       user
+    password:       ""
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          []
+
+  User(supervisor):
+    externalApp:    PlayInternalApp
+    username:       supervisor
+    password:       supervisor
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          []
     

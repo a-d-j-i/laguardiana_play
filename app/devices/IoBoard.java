@@ -67,10 +67,16 @@ public class IoBoard extends Observable {
         BAG_STATE_ERROR(0),
         BAG_STATE_REMOVED(1),
         BAG_STATE_INPLACE(2),
-        BAG_STATE_EXCHANGE_00(3),
-        BAG_STATE_EXCHANGE_01(4),
-        BAG_STATE_EXCHANGE_10(5),
-        BAG_STATE_EXCHANGE_11(6);
+        BAG_STATE_TAKING_START(3),
+        BAG_STATE_TAKING_STEP1(4),
+        BAG_STATE_TAKING_STEP2(5),
+        BAG_STATE_PUTTING_START(6),
+        BAG_STATE_PUTTING_1(7),
+        BAG_STATE_PUTTING_2(8),
+        BAG_STATE_PUTTING_3(9),
+        BAG_STATE_PUTTING_4(10),
+        BAG_STATE_PUTTING_5(11),
+        BAG_STATE_PUTTING_6(12),;
         static final HashMap< Byte, BAG_STATE> reverse = new HashMap< Byte, BAG_STATE>();
 
         static {

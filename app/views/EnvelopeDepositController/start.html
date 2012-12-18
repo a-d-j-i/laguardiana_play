@@ -325,7 +325,7 @@ $( '#others_link' ).click( function(event) {
 $( '#backButton' ).click( function(event) {
     state = $("#mainForm").formwizard("state");
     if ( state.isFirstStep ) {
-	window.location.href = "@{ Application.index() }";
+	window.location.href = "@{ MenuController.mainMenu(1) }";
     };
     $("#mainForm").formwizard("back");
 });

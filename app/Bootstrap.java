@@ -29,8 +29,15 @@ public class Bootstrap extends Job {
 
                 Logger.info("loading user-data.yml as no users were found!");
                 Fixtures.loadModels("user-data.yml");
-                LgRole app = loadRolsResourcesAndAcls(controllers.Application.class);
-                LgRole appMin = loadRolsResourcesAndAclsMin(controllers.Application.class, true);
+                // Menus
+                LgRole mainMenu = loadRolsResourcesAndAclsMenu("mainMenu");
+                LgRole otherMenu = loadRolsResourcesAndAclsMenu("otherMenu");
+                LgRole hardwareMenu = loadRolsResourcesAndAclsMenu("hardwareMenu");
+                LgRole printTemplateMenu = loadRolsResourcesAndAclsMenu("printTemplateMenu");
+                LgRole accountingMenu = loadRolsResourcesAndAclsMenu("accountingMenu");
+                LgRole reportMenu = loadRolsResourcesAndAclsMenu("reportMenu");
+
+                // Controllers
                 LgRole bill = loadRolsResourcesAndAcls(controllers.BillDepositController.class);
                 LgRole count = loadRolsResourcesAndAcls(controllers.CountController.class);
                 LgRole envelope = loadRolsResourcesAndAcls(controllers.EnvelopeDepositController.class);
@@ -51,17 +58,49 @@ public class Bootstrap extends Job {
                 guest.save();
 
                 LgUser demo = LgUser.find("select u from LgUser u where username = 'demo'").first();
-                demo.roles.add(appMin);
-                appMin.users.add(demo);
+                demo.roles.add(mainMenu);
+                mainMenu.users.add(demo);
+
                 demo.roles.add(counter);
                 counter.users.add(demo);
                 demo.roles.add(bill);
                 bill.users.add(demo);
                 demo.roles.add(envelope);
                 envelope.users.add(demo);
-                demo.roles.add(accounting);
-                accounting.users.add(demo);
                 demo.save();
+
+
+
+                LgUser user = LgUser.find("select u from LgUser u where username = 'user'").first();
+                user.roles.add(mainMenu);
+                mainMenu.users.add(user);
+
+                user.roles.add(counter);
+                counter.users.add(user);
+                user.roles.add(bill);
+                bill.users.add(user);
+                user.save();
+
+
+
+                LgUser supervisor = LgUser.find("select u from LgUser u where username = 'supervisor'").first();
+                supervisor.roles.add(mainMenu);
+                mainMenu.users.add(supervisor);
+                supervisor.roles.add(otherMenu);
+                otherMenu.users.add(supervisor);
+                supervisor.roles.add(accountingMenu);
+                accountingMenu.users.add(supervisor);
+
+                supervisor.roles.add(counter);
+                counter.users.add(supervisor);
+                supervisor.roles.add(bill);
+                bill.users.add(supervisor);
+                supervisor.roles.add(envelope);
+                envelope.users.add(supervisor);
+                supervisor.roles.add(accounting);
+                accounting.users.add(supervisor);
+                supervisor.save();
+
 
                 Logger.info("loading lov-data.yml");
                 Fixtures.loadModels("lov-data.yml");
@@ -77,16 +116,7 @@ public class Bootstrap extends Job {
 
     @Util
     static LgRole loadRolsResourcesAndAcls(Class c) {
-        return loadRolsResourcesAndAclsMin(c, false);
-    }
-
-    // Min is a hack for application controller.
-    @Util
-    static LgRole loadRolsResourcesAndAclsMin(Class c, boolean min) {
         String roleName = c.getSimpleName();
-        if (min) {
-            roleName += "MIN";
-        }
         LgRole lr = LgRole.find("select l from LgRole l where name = ?", roleName).first();
         if (lr == null) {
             lr = new LgRole();
@@ -95,44 +125,58 @@ public class Bootstrap extends Job {
         }
         for (Method m : c.getDeclaredMethods()) {
             if (Modifier.isPublic(m.getModifiers()) && !m.isAnnotationPresent(Util.class)) {
-                String name = c.getSimpleName() + m.getName().substring(0, 1).toUpperCase() + m.getName().substring(1);
-                LgResource l = LgResource.find("select l from LgResource l where name = ?", name).first();
-                if (l == null) {
-                    l = new LgResource();
-                    l.name = c.getSimpleName() + "." + m.getName();
-                }
-                l.save();
-                if (min && c.equals(controllers.Application.class)) {
-                    if (!m.getName().equals("index") && !m.getName().equals("mainMenu")) {
-                        continue;
-                    }
-                }
-                // Get
-                LgAclRule lacl = LgAclRule.find("select l from LgAclRule l "
-                        + "where operation = 'GET' and permission = 'ALLOW' "
-                        + " and resource = ? and role = ? ", l, lr).first();
-                if (lacl == null) {
-                    lacl = new LgAclRule();
-                    lacl.operation = "GET";
-                    lacl.permission = "ALLOW";
-                    lacl.resource = l;
-                    lacl.role = lr;
-                }
-                lacl.save();
-                // Post
-                lacl = LgAclRule.find("select l from LgAclRule l "
-                        + "where operation = 'POST' and permission = 'ALLOW' "
-                        + " and resource = ? and role = ? ", l, lr).first();
-                if (lacl == null) {
-                    lacl = new LgAclRule();
-                    lacl.operation = "POST";
-                    lacl.permission = "ALLOW";
-                    lacl.resource = l;
-                    lacl.role = lr;
-                }
-                lacl.save();
+                String name = c.getSimpleName() + "." + m.getName();
+                createAcl(lr, name);
             }
         }
         return lr;
+    }
+
+    @Util
+    static LgRole loadRolsResourcesAndAclsMenu(String menuName) {
+        String roleName = "Menu_" + menuName;
+        LgRole lr = LgRole.find("select l from LgRole l where name = ?", roleName).first();
+        if (lr == null) {
+            lr = new LgRole();
+            lr.name = roleName;
+            lr.save();
+        }
+        String name = controllers.MenuController.class.getSimpleName() + "." + menuName;
+        createAcl(lr, name);
+        return lr;
+    }
+
+    @Util
+    static void createAcl(LgRole lr, String name) {
+        LgResource l = LgResource.find("select l from LgResource l where name = ?", name).first();
+        if (l == null) {
+            l = new LgResource();
+            l.name = name;
+        }
+        l.save();
+        // Get
+        LgAclRule lacl = LgAclRule.find("select l from LgAclRule l "
+                + "where operation = 'GET' and permission = 'ALLOW' "
+                + " and resource = ? and role = ? ", l, lr).first();
+        if (lacl == null) {
+            lacl = new LgAclRule();
+            lacl.operation = "GET";
+            lacl.permission = "ALLOW";
+            lacl.resource = l;
+            lacl.role = lr;
+        }
+        lacl.save();
+        // Post
+        lacl = LgAclRule.find("select l from LgAclRule l "
+                + "where operation = 'POST' and permission = 'ALLOW' "
+                + " and resource = ? and role = ? ", l, lr).first();
+        if (lacl == null) {
+            lacl = new LgAclRule();
+            lacl.operation = "POST";
+            lacl.permission = "ALLOW";
+            lacl.resource = l;
+            lacl.role = lr;
+        }
+        lacl.save();
     }
 }

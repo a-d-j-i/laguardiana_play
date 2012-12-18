@@ -2,7 +2,7 @@
 #{set title:'Depositar Efectivo' /}
 <section>
     <header></header>
-    <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>
+    <a href="@{MenuController.mainMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
         #{form @start(), 'id' : 'startForm', 'onSubmit' : 'return testSubmit();' }

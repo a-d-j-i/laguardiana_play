@@ -2,7 +2,7 @@
 #{set title:'Otras operaciones' /}
 <section>
     <header></header>
-    <a href="@{Application.hardwareMenu}" class="boton_top">◄ &{ 'application.back' }</a>
+    <a href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <div class="contenido">
             <h1 class="casa">&{'application.printers'}</h1>
@@ -23,20 +23,6 @@
             </table>
         </div>
         <hr />
-        <div class="botonera">
-            <ul class="on-2 columns">
-                <li class="column">
-                    <div class="columna">
-                        &nbsp;
-                    </div>
-                </li>
-                <li class="column">
-                    <div class="columna">
-                        <!-- boton ingresar -->
-                        <a href="@{Secure.login}" class="boton verde full_width">&{'main_menu.login'}</a>
-                    </div>
-                </li>
-            </ul>
-        </div>
+        #{menuBottomButtons}&nbsp;#{/menuBottomButtons}
     </article>
 </section>

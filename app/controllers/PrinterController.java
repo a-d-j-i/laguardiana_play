@@ -10,9 +10,14 @@ import play.Logger;
 import play.mvc.*;
 
 @With({Secure.class})
-public class Printer extends Controller {
+public class PrinterController extends Controller {
 
     static final boolean TO_PRINTER = true;
+
+    public static void listPrinters() {
+        renderArgs.put("printers", DeviceFactory.getPrinter().printers.values());
+        render();
+    }
 
     public static void billDeposit() {
         BillDepositController.FormData formData = new BillDepositController.FormData();

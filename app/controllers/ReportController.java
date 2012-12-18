@@ -29,14 +29,6 @@ public class ReportController extends Controller {
         }
     }
 
-    public static void index() {
-        mainMenu();
-    }
-
-    public static void mainMenu() {
-        render();
-    }
-
     static public class ContentData {
     }
 

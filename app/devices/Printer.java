@@ -97,11 +97,11 @@ public class Printer {
         }
         Template template = null;
         try {
-            template = TemplateLoader.load("Printer/" + templateName + ".html");
+            template = TemplateLoader.load("PrinterController/" + templateName + ".html");
         } catch (TemplateNotFoundException e) {
         }
         if (template == null) {
-            template = TemplateLoader.load("Printer/" + templateName + ".txt");
+            template = TemplateLoader.load("PrinterController/" + templateName + ".txt");
         }
         if (template == null) {
             throw new PrinterException(String.format("Template %s not found", templateName));

@@ -6,7 +6,7 @@
 
 <section id="menu_principal">
     <header></header>
-    <a href="@{Application.otherMenu}" class="boton_top">◄ &{ 'application.back' }</a>
+    <a href="@{MenuController.otherMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
 
     #{if request.actionMethod != 'index'}
     <div id="crudBreadcrumb">

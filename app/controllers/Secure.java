@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import models.Configuration;
 import models.User;
-import models.db.LgSystemProperty;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -87,7 +86,7 @@ public class Secure extends Controller {
         render();
     }
 
-    public static void authenticate(@Required String username, @Required String password, boolean remember) throws Throwable {
+    public static void authenticate(@Required String username, String password, boolean remember) throws Throwable {
         // The keyboard only types uppercase.
         if (password != null) {
             password = password.toLowerCase();
@@ -95,7 +94,9 @@ public class Secure extends Controller {
         if (username != null) {
             username = username.toLowerCase();
         }
-
+        if (!Configuration.dontAskForPassword()) {
+            validation.required(password);
+        }
         if (Validation.hasErrors()) {
             Logger.info("validation hasErrors!!!");
             for (Error error : validation.errors()) {
@@ -120,11 +121,20 @@ public class Secure extends Controller {
         if (user == null) {
             Logger.error("no such user!");
             flash.keep("url");
-            flash.error("secure.invalid_user_password");
+            if (Configuration.dontAskForPassword()) {
+                flash.error("secure.invalid_user");
+            } else {
+                flash.error("secure.invalid_user_password");
+            }
             params.flash();
             if (request.isAjax()) {
-                String[] d = {"error", Messages.get("secure.invalid_user_password")};
-                renderJSON(d);
+                if (Configuration.dontAskForPassword()) {
+                    String[] d = {"error", Messages.get("secure.invalid_user")};
+                    renderJSON(d);
+                } else {
+                    String[] d = {"error", Messages.get("secure.invalid_user_password")};
+                    renderJSON(d);
+                }
                 return;
             } else {
                 login();
@@ -157,7 +167,7 @@ public class Secure extends Controller {
         }
     }
 
-    public static void logout(String toUrl) throws Throwable {
+    public static void logout(String toUrl) {
         Cache.delete(session.getId() + "-user");
         session.clear();
         //flash.success( "secure.logout" );
@@ -169,7 +179,7 @@ public class Secure extends Controller {
         }
     }
 
-    static String getOriginalUrl() throws Throwable {
+    static String getOriginalUrl() {
         String url = flash.get("url");
         if (url == null) {
             url = Play.ctxPath + "/";

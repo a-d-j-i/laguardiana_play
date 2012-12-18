@@ -15,7 +15,9 @@ secure.logout=Logout success.
 secure.not_allowed=Not allowed must login.
 secure.invalid_field=Error debe completar todos los campos.
 secure.invalid_user_password=Error usuario o clave invalida.
-secure.continue_message=Para continuar, ingrese su usuario y contraseña
+secure.invalid_user=Error usuario invalido.
+secure.continue_message_user=Para continuar, ingrese su usuario
+secure.continue_message_password=Para continuar, ingrese su usuario y contraseña
 secure.pass_forget=¿No recuerda sus datos?
 
 keyboard.continue=CONTINUAR

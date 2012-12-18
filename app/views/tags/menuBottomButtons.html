@@ -1,0 +1,20 @@
+<div class="botonera">
+    <ul class="on-2 columns">
+        <li class="column">
+            <div class="columna">
+                #{doBody /}
+            </div>
+        </li>
+        <li class="column">
+            <div class="columna">
+                <!-- boton ingresar -->
+                #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
+                <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde full_width">&{'main_menu.logout'}</a>
+                #{/if}
+                #{else}
+                <a href="@{ Secure.login}" class="boton verde full_width">&{'main_menu.login'}</a>
+                #{/else}
+            </div>
+        </li>
+    </ul>
+</div>

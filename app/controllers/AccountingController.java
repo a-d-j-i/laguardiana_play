@@ -8,17 +8,9 @@ import play.mvc.Controller;
 
 public class AccountingController extends Controller {
 
-    public static void index() {
-        mainMenu();
-    }
-
-    public static void mainMenu() {
-        render();
-    }
-
     public static void rotateBag() {
         LgBag.rotateBag(false);
-        index();
+        MenuController.accountingMenu(null);
     }
 
     public static void currentBagTotals() {
