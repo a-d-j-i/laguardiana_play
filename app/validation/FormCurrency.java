@@ -38,6 +38,14 @@ public class FormCurrency {
             return true;
         }
     }
+
+    public FormCurrency(Currency currency) {
+        this.currency = currency;
+        this.value = currency.numericId;
+    }
+
+    public FormCurrency() {
+    }
     transient public Currency currency = null;
     public Integer value = null;
 

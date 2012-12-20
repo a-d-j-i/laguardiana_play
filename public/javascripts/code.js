@@ -82,8 +82,9 @@ $(function() {
         speed: "fast"
     });
     
-    $(".alerta_cerrar").bind("click", function() {
-        cerrar_alerta();
+    $(".alerta_cerrar").bind("click", function(event) {
+       var a = $(event.target).parents( ".alerta" );
+       a.overlay().close();
     });
 
 });
@@ -98,9 +99,6 @@ function abrir_alerta(tipo) {
     $("#alerta").overlay().load();
 }
 
-function cerrar_alerta() {
-    $("#alerta").overlay().close();
-}
 
 
 // cursor

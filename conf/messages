@@ -31,6 +31,7 @@ application.canceling_detail=Cancelando, espere...
 application.finish=TERMINAR
 application.choose_one=seleccione una opción
 application.wellcome=Bienvenido %s
+application.wellcome_x=Bienvenido
 application.choose_currency=Seleccione divisa
 application.thanks=MUCHAS GRACIAS POR OPERAR CON PROSEGUR
 application.error=ERROR

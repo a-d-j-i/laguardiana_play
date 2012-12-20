@@ -4,6 +4,7 @@
  */
 package validation;
 
+import models.Configuration;
 import models.db.LgLov;
 import models.lov.DepositUserCodeReference;
 import play.data.validation.Check;
@@ -23,6 +24,9 @@ public class FormDepositUserCodeReference {
 
         public boolean isSatisfied(Object validatedObject, FormDepositUserCodeReference data) {
             try {
+                if (!Configuration.mustShowReference1()) {
+                    return true;
+                }
                 if (data == null || data.value == null || data.value.isEmpty()) {
                     setMessage("validation.required.reference1");
                     return false;

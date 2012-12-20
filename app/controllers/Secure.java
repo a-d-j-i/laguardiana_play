@@ -149,7 +149,7 @@ public class Secure extends Controller {
         }
         Cache.set(session.getId() + "-user", user, expire);
         if (request.isAjax()) {
-            String[] d = {"success", getOriginalUrl()};
+            String[] d = {"success", getOriginalUrl(), username, user.gecos};
             renderJSON(d);
         } else {
             String a = flash.get("authenticated");

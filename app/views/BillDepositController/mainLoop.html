@@ -13,9 +13,15 @@
                 <li class="fixed column" style="width: 45%">
                     <div class="columna_1">
                         <!-- resumen de datos -->
+                        <p style="font-size: larger;">&{ 'application.wellcome_x' }&nbsp;${user?.username}</p>
+                        <p style="font-size: larger;">${user?.gecos}</p>
                         <p>&{ 'counting_page.currency_title' }: ${formData.currency.currency.description}</p>
+                        #{if ( formData.showReference1 ) }
                         <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+                        #{/if}
+                        #{if ( formData.showReference2 && formData.reference2 != "" ) }
                         <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+                        #{/if}
                         <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
                         <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
                         <p>&{ 'counting_page.current_total_sum' }: <span class="currentTotalSum">${currentTotalSum}</span></p>

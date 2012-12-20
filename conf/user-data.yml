@@ -53,6 +53,7 @@
     externalApp:    PlayInternalApp
     username:       admin
     password:       admin
+    gecos:          "Usario administrador"
     creationDate:   2012-01-01
     endDate:        2112-01-02    
     externalId:     0
@@ -63,6 +64,7 @@
     externalApp:    PlayInternalApp
     username:       guest
     password:       guest
+    gecos:          "Usario guest"
     externalId:     0
     locked:         #x42
     creationDate:   2012-01-01
@@ -73,6 +75,7 @@
     externalApp:    PlayInternalApp
     username:       demo
     password:       demo
+    gecos:          "Usario demo"
     externalId:     0
     locked:         #x42
     creationDate:   2012-01-01
@@ -83,6 +86,7 @@
     externalApp:    PlayInternalApp
     username:       user
     password:       ""
+    gecos:          "Usario user"
     externalId:     0
     locked:         #x42
     creationDate:   2012-01-01
@@ -93,6 +97,7 @@
     externalApp:    PlayInternalApp
     username:       supervisor
     password:       supervisor
+    gecos:          "Usario supervisor"
     externalId:     0
     locked:         #x42
     creationDate:   2012-01-01

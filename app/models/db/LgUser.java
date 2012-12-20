@@ -29,6 +29,8 @@ public abstract class LgUser extends GenericModel implements java.io.Serializabl
     public String username;
     @Column( name = "password", nullable = false, length = 128)
     protected String password;
+    @Column( name = "gecos", nullable = true, length = 128)
+    public String gecos;
     @Column( name = "external_id", nullable = false, length = 32)
     public String externalId;
     @Column( name = "locked", nullable = false, length = 1)

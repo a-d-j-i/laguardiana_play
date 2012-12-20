@@ -5,6 +5,7 @@ import models.Bill;
 import models.BillDeposit;
 import models.Configuration;
 import models.ModelFacade;
+import models.User;
 import models.actions.BillDepositAction;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
@@ -59,7 +60,20 @@ public class BillDepositController extends CounterController {
     }
 
     public static void start(@Valid FormData formData) throws Throwable {
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
+        List<Currency> currencies = Currency.findAll();
 
+        if (currencies.size() == 1
+                && (referenceCodes.size() <= 1 || !Configuration.mustShowReference1())
+                && !Configuration.mustShowReference2()) {
+            // Nothing to complete, navigte to next step
+            formData = new FormData();
+            formData.currency = new FormCurrency(currencies.get(0));
+            BillDepositAction currentAction = new BillDepositAction(referenceCodes.get(0), "", currencies.get(0), formData);
+            ModelFacade.startAction(currentAction);
+            mainLoop();
+            return;
+        }
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
@@ -78,8 +92,6 @@ public class BillDepositController extends CounterController {
             formData = new FormData();
             formData.currency.value = Configuration.getDefaultCurrency();
         }
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
         renderArgs.put("formData", formData);
         renderArgs.put("referenceCodes", referenceCodes);
         renderArgs.put("currencies", currencies);
@@ -107,6 +119,8 @@ public class BillDepositController extends CounterController {
                 currentTotalSum += (b.d * b.q);
             }
             renderArgs.put("clientCode", Configuration.getClientDescription());
+            User u = Secure.getCurrentUser();
+            renderArgs.put("user", u);
             renderArgs.put("billData", bls);
             renderArgs.put("formData", ModelFacade.getFormData());
             renderArgs.put("totalSum", totalSum);

@@ -112,6 +112,17 @@
             </div>
         </div>
     </div>
+    <div id="alerta_success" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.wellcome_x' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="info_text"></span>
+            </div>
+            <div id="alerta_botonera">
+                <a class="alerta_cerrar boton ${play.configuration['style.button_color']}">&{ 'application.close' }</a>
+            </div>
+        </div>
+    </div>
 </section>
 
 #{set 'moreScripts'}
@@ -120,7 +131,13 @@
     $("#candado").click( function( event ) {
         candado_count++;
         if ( candado_count >= 3 ) {
-            $( "#password" ).show();
+            if ( $( "#password" ).is(":visible") ) {
+                $( "#password" ).val( "" );
+                $( "#password" ).hide();
+            } else {
+                $( "#password" ).show();
+            }
+            candado_count=0;
         }
     } );
     function refresh() {
@@ -141,8 +158,16 @@
             if ( status == 'error' ) {
                 $( '#error_text' ).html( extra );
                 $( "#alerta" ).overlay().load();
-            } else if ( status == 'success' ) {    
+            } else if ( status == 'success' ) { 
+                #{if ( play.configuration[ 'secure.wellcomePopup' ] ) }
+                $( '#info_text' ).html( data[ 2 ] + "<br> " + data [ 3 ] );
+                $( "#alerta_success" ).overlay().onClose( function( event ) {
+                    window.location.href = extra;
+                }).load();
+                #{/if}
+                #{else}
                 window.location.href = extra;
+                #{/else}
             } else {
                 $( '#error_text' ).html( 'Estado invalido : ' + data );
                 $( "#alerta" ).overlay().load();
