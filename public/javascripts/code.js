@@ -1,7 +1,6 @@
 $(function() {
-
     // default value
-
+    var decimalChar = (0.1).toLocaleString().charAt(1);
     $("[placeholder]").defaultValue();
 
     // teclados
@@ -21,6 +20,9 @@ $(function() {
             focused_input.keydown();
             var key_value = $(this).attr("data-key");
             switch (key_value) {
+                case ".":
+                    focused_input.val(focused_input.val() + decimalChar);
+                    break;
                 case "{none}":
                     break;
                 case "{backspace}":
@@ -39,6 +41,7 @@ $(function() {
                     break;
                 default:
                     focused_input.val(focused_input.val() + key_value);
+                    break;
             }
             focused_input.focus();
             focused_input[0].selectionStart = focused_input[0].selectionEnd = focused_input.val().length;
@@ -83,11 +86,22 @@ $(function() {
     });
     
     $(".alerta_cerrar").bind("click", function(event) {
-       var a = $(event.target).parents( ".alerta" );
-       a.overlay().close();
+        var a = $(event.target).parents( ".alerta" );
+        a.overlay().close();
     });
 
 });
+
+function blink() {
+    var hobjs = $(".blink").filter(":visible");
+    var vobjs = $(".blink").filter(":hidden");
+    hobjs.hide();
+    vobjs.show();
+}
+if ( $(".blink") ) {
+    setInterval( blink, 500);
+}
+
 
 // alertas
 

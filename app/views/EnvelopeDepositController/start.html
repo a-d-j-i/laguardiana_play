@@ -6,6 +6,7 @@
     <a id="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
+        #{ if ( formData.showReference1 || formData.showReference2 ) }
         <div class="step" id="first" >
             <div class="contenido">
                 <ul class="columns">
@@ -36,6 +37,7 @@
                 </ul>
             </div>
         </div>
+        #{/if}
         <div class="step" id="second" style="display: none">
             <div class="contenido">
                 <input  autocomplete="off" name="second_next" id="second_next" type="hidden" class="link" value="envelope_code">
@@ -176,7 +178,8 @@
                 <li class="column">
                     <div class="columna">
                         <!-- link cancelar -->
-                        <a href="@{ Application.index() }" class="boton full_width rojo">&{ 'application.cancel' }</a>
+                        <a id="cancelButton" href="@{ Application.index() }" class="boton full_width rojo">&{ 'application.cancel' }</a>
+                        &nbsp;
                         <!-- /link cancelar -->
                     </div>
                 </li>
@@ -215,123 +218,134 @@
 #{script 'jquery/jquery.form.wizard.js' /}
 <script type="text/javascript" charset="${_response_encoding}">
     $(function(){
-        $("#mainForm").formwizard({ 
-            formPluginEnabled: false,
-            validationEnabled: true,
-            focusFirstInput : true,
-            textSubmit: "&{ 'application.continue' }",
-            textNext: "&{ 'application.continue' }",
-            textBack: "&{ 'application.back' }",
-            inAnimation : {height: 'none'},
-            outAnimation: {height: 'none'},
-            inDuration : 0,
-            outDuration: 0,
-            disableUIStyles: true,
-            validationOptions : {
-                rules: {
-                    //'formData.reference2' : "required",
-                    'formData.envelopeCode' : { required: true, range : [ 0,99999 ] },
-                    'formData.cashData.amount' : { number: true },
-                    'formData.checkData.amount' : { number: true },
-                    'formData.ticketData.amount' : { number: true }
-                },
-                onkeyup: false,
-                onclick: false,
-                onfocusout: false,
-                messages: {
-                    //'formData.reference2': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
-                    'formData.envelopeCode': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'}",  range: "&{ 'validation.must_be_a_5_number'}" },
-                    'formData.cashData.amount': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
-                    'formData.checkData.amount': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
-                    'formData.ticketData.amount': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "}
-                },
-                showErrors: function(errorMap, errorList) {
-                    $( "#validation_error" ).html( "" );
-                    $.each( errorMap, function( name, value ) {
-                        $( 'input[ name="' + name + '"]' ).val( "" );
-                        $( "#validation_error" ).html( $( "#validation_error" ).html() +  "<br/>" + value );
-                    } );
-                    if ( this.numberOfInvalids() > 0 ) {
-                        $("#alerta_validacion").overlay().load();
-                    }
-                    this.defaultShowErrors();
+        jQuery.validator.addMethod("decimal", function(value, element, params) {
+            return this.optional(element) || /^\d+(\.\d{0,2})?$/.test(value); 
+        }, jQuery.validator.format("Please enter an xxxx.xx number."));
+            
+
+    $("#mainForm").formwizard({ 
+        formPluginEnabled: false,
+        validationEnabled: true,
+        focusFirstInput : true,
+        textSubmit: "&{ 'application.continue' }",
+        textNext: "&{ 'application.continue' }",
+        textBack: "&{ 'application.back' }",
+        inAnimation : {height: 'none'},
+        outAnimation: {height: 'none'},
+        inDuration : 0,
+        outDuration: 0,
+        disableUIStyles: true,
+        validationOptions : {
+            rules: {
+                //'formData.reference2' : "required",
+                'formData.envelopeCode' : { required: true, range : [ 0,99999 ] },
+                'formData.cashData.amount' : { decimal: true },
+                'formData.checkData.amount' : { decimal: true },
+                'formData.ticketData.amount' : { decimal: true }
+            },
+            onkeyup: false,
+            onclick: false,
+            onfocusout: false,
+            messages: {
+                //'formData.reference2': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
+                'formData.envelopeCode': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'}",  range: "&{ 'validation.must_be_a_5_number'}" },
+                'formData.cashData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
+                'formData.checkData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
+                'formData.ticketData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "}
+            },
+            showErrors: function(errorMap, errorList) {
+                $( "#validation_error" ).html( "" );
+                $.each( errorMap, function( name, value ) {
+                    $( 'input[ name="' + name + '"]' ).val( "" );
+                    $( "#validation_error" ).html( $( "#validation_error" ).html() +  "<br/>" + value );
+                } );
+                if ( this.numberOfInvalids() > 0 ) {
+                    $("#alerta_validacion").overlay().load();
                 }
+                this.defaultShowErrors();
             }
         }
-    );
+    }
+);
           
-        $( '#alerta_continueButton' ).click( function(event) {
-            $( "#alerta_validacion" ).overlay().close();
-            $("#mainForm").validate();
-//            onError = false;
-        });
+    $( '#alerta_continueButton' ).click( function(event) {
+        $( "#alerta_validacion" ).overlay().close();
+        $("#mainForm").validate();
+        //            onError = false;
+    });
         
       
-        $("#mainForm").bind("step_shown", function(event, data) {
-    Elastic.refresh();
-    function checkAndSet( check, set ) {
-	str = $( check ).val();
-	if ( ! ( ! str ) && ! /^\s*$/.test( str ) && str > 0 ) {
-	    $( set ).addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-	} else {
-	    $( set ).addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
-	}
-    };
+    $("#mainForm").bind("step_shown", function(event, data) {
+        Elastic.refresh();
+        function checkAndSet( check, set ) {
+            str = $( check ).val();
+            if ( ! ( ! str ) && ! /^\s*$/.test( str ) && str > 0 ) {
+                $( set ).addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+            } else {
+                $( set ).addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
+            }
+        };
     
-    if (data.currentStep == 'second') {
-	checkAndSet( '#cashData' , '#cash_link' );
-	checkAndSet( '#checkData' , '#checks_link' );
-	checkAndSet( '#ticketData' , '#tickets_link' );
-	if ( $( '#hasDocuments' ).val() == 'true' ) {
-	    $( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-	}
-	if ( $( '#hasOthers' ).val() == 'true' ) {
-	    $( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-	}
-    } else if ( data.currentStep == 'envelope_code') {
-	// last step activate all input, (hack).
-	$(":input").not(".wizard-ignore").removeAttr("disabled")
-    }
+        if (data.currentStep == 'second') {
+            checkAndSet( '#cashData' , '#cash_link' );
+            checkAndSet( '#checkData' , '#checks_link' );
+            checkAndSet( '#ticketData' , '#tickets_link' );
+            if ( $( '#hasDocuments' ).val() == 'true' ) {
+                $( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+            }
+            if ( $( '#hasOthers' ).val() == 'true' ) {
+                $( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+            }
+        } else if ( data.currentStep == 'envelope_code') {
+            // last step activate all input, (hack).
+            $(":input").not(".wizard-ignore").removeAttr("disabled")
+        } 
+        if ( data.currentStep != 'cash' && data.currentStep != 'checks' && data.currentStep != 'tickets' ) {
+            $("#cancelButton").show();
+        }
     
-});
-$( '#cash_link' ).click( function(event) {
-    $("#mainForm").formwizard("show","cash");
-});
-$( '#checks_link' ).click( function(event) {
-    $("#mainForm").formwizard("show","checks");
-});
-$( '#tickets_link' ).click( function(event) {
-    $("#mainForm").formwizard("show","tickets");
-});
-$( '#documents_link' ).click( function(event) {
-    if ( $("#hasDocuments").val() == 'true' ) {
-	$("#hasDocuments").val("false");
-	$( '#documents_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
-    } else {
-	$("#hasDocuments").val("true");
-	$( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-
-    }
-});
-$( '#others_link' ).click( function(event) {
-    if ( $("#hasOthers").val() == 'true' ) {
-	$("#hasOthers").val("false");
-	$( '#others_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
-    } else {
-	$("#hasOthers").val("true");
-	$( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-    }
-});
-$( '#backButton' ).click( function(event) {
-    state = $("#mainForm").formwizard("state");
-    if ( state.isFirstStep ) {
-	window.location.href = "@{ MenuController.mainMenu(1) }";
-    };
-    $("#mainForm").formwizard("back");
-});
-
-    Elastic.refresh();
     });
+    $( '#cash_link' ).click( function(event) {
+        $("#cancelButton").hide();
+        $("#mainForm").formwizard("show","cash");
+    });
+    $( '#checks_link' ).click( function(event) {
+        $("#cancelButton").hide();
+        $("#mainForm").formwizard("show","checks");
+    });
+    $( '#tickets_link' ).click( function(event) {
+        $("#cancelButton").hide();
+        $("#mainForm").formwizard("show","tickets");
+    });
+    $( '#documents_link' ).click( function(event) {
+        if ( $("#hasDocuments").val() == 'true' ) {
+            $("#hasDocuments").val("false");
+            $( '#documents_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
+        } else {
+            $("#hasDocuments").val("true");
+            $( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+
+        }
+    });
+    $( '#others_link' ).click( function(event) {
+        if ( $("#hasOthers").val() == 'true' ) {
+            $("#hasOthers").val("false");
+            $( '#others_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
+        } else {
+            $("#hasOthers").val("true");
+            $( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+        }
+    });
+    $( '#backButton' ).click( function(event) {
+        state = $("#mainForm").formwizard("state");
+        if ( state.isFirstStep ) {
+            window.location.href = "@{ MenuController.mainMenu(1) }";
+        };
+        $("#mainForm").formwizard("back");
+    });
+
+    Elastic.refresh();
+});
     
 </script>
 #{/set}

@@ -60,6 +60,9 @@ public class BillDepositAction extends UserAction {
     public void finish() {
         Map renderArgs = new HashMap();
         renderArgs.put("clientCode", Configuration.getClientDescription());
+        renderArgs.put("providerCode", Configuration.getProviderDescription());
+        renderArgs.put("branchCode", Configuration.getBranchCode());
+        renderArgs.put("machineCode", Configuration.getMachineCode());
         renderArgs.put("formData", formData);
         BillDeposit deposit = BillDeposit.findById(getDepositId());
         if (deposit != null && deposit.getTotal() > 0) {

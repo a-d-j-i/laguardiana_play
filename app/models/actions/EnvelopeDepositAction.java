@@ -63,6 +63,10 @@ public class EnvelopeDepositAction extends UserAction {
             // Print the ticket.
             List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
             List<Currency> currencies = Currency.findAll();
+            renderArgs.put("clientCode", Configuration.getClientDescription());
+            renderArgs.put("providerCode", Configuration.getProviderDescription());
+            renderArgs.put("branchCode", Configuration.getBranchCode());
+            renderArgs.put("machineCode", Configuration.getMachineCode());
             renderArgs.put("formData", formData);
             renderArgs.put("referenceCodes", referenceCodes);
             renderArgs.put("currencies", currencies);
@@ -82,10 +86,10 @@ public class EnvelopeDepositAction extends UserAction {
             if (d != null && d.finishDate != null) {
                 Map renderArgs = new HashMap();
                 renderArgs.put("clientCode", Configuration.getClientDescription());
+                renderArgs.put("providerCode", Configuration.getProviderDescription());
                 renderArgs.put("formData", formData);
                 renderArgs.put("deposit", d);
                 renderArgs.put("envelopes", d.envelopes);
-
                 try {
                     // Print the ticket.
                     DeviceFactory.getPrinter().print("envelopeDeposit_finish", renderArgs, 120);

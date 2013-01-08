@@ -48,7 +48,7 @@ public class ReportController extends Controller {
     static public class EnvelopeContentData extends ContentData {
 
         final public String type;
-        final public Integer amount;
+        final public Double amount;
         final public String currency;
 
         private EnvelopeContentData(LgEnvelopeContent c) {
@@ -367,7 +367,7 @@ public class ReportController extends Controller {
         if (page == null || page < 1) {
             page = 1;
         }
-        int length = 4;
+        int length = 10;
         List<LgDeposit> dList = LgDeposit.find(startDate, endDate).fetch(page, length);
         if (page > 1) {
             renderArgs.put("prevPage", page - 1);
@@ -379,6 +379,7 @@ public class ReportController extends Controller {
         } else {
             renderArgs.put("nextPage", page);
         }
+        renderArgs.put("page", page);
         renderArgs.put("data", dList);
         render();
     }

@@ -119,6 +119,7 @@ public class BillDepositController extends CounterController {
                 currentTotalSum += (b.d * b.q);
             }
             renderArgs.put("clientCode", Configuration.getClientDescription());
+            renderArgs.put("providerCode", Configuration.getProviderDescription());
             User u = Secure.getCurrentUser();
             renderArgs.put("user", u);
             renderArgs.put("billData", bls);
@@ -152,6 +153,7 @@ public class BillDepositController extends CounterController {
             return;
         }
         renderArgs.put("clientCode", Configuration.getClientDescription());
+        renderArgs.put("providerCode", Configuration.getProviderDescription());
         renderArgs.put("formData", formData);
         if (deposit != null) {
             Long total = deposit.getTotal();

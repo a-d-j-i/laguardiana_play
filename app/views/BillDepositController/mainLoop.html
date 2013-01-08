@@ -23,12 +23,13 @@
                         <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                         #{/if}
                         <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
-                        <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
+                        <div id="total_sum_field" style="display: none;">
+                            <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
+                        </div>
                         <p>&{ 'counting_page.current_total_sum' }: <span class="currentTotalSum">${currentTotalSum}</span></p>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
-                        <div class="info_message" style="color: green;"> 
-
+                        <div class="info_message blink" style="color: green; font-size: x-large;"> 
                         </div>
                     </div>
                 </li>
@@ -101,47 +102,46 @@
             <a id="alerta_continueButton" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
         </div>
     </div>
-</div>
-<div id="alerta_timeout" class="alerta info" style="display: none;">
-    <div id="alerta_titulo">&{ 'application.timeout' }</div>
-    <div id="alerta_cuerpo">
-        <div id="alerta_texto">
-            <span id="error_text">&{ 'application.timeout_detail' }</span>
-        </div>
-        <div id="timeout_botonera">
-            <a id ="timeout_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
-            <a id="timeout_continueButton" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+    <div id="alerta_timeout" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.timeout' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'application.timeout_detail' }</span>
+            </div>
+            <div id="timeout_botonera">
+                <a id ="timeout_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+                <a id="timeout_continueButton" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+            </div>
         </div>
     </div>
-</div>
-<div id="alerta_cancel" class="alerta info" style="display: none;">
-    <div id="alerta_titulo">&{ 'application.canceling' }</div>
-    <div id="alerta_cuerpo">
-        <div id="alerta_texto">
-            <div id="error_text">
-                <span>&{ 'application.canceling_detail' }</span>
+    <div id="alerta_cancel" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.canceling' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <div id="error_text">
+                    <span>&{ 'application.canceling_detail' }</span>
+                    <span class="info_message" style="color: green;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="alerta_storing" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'counting_page.storing_detail' }</span>
                 <span class="info_message" style="color: green;"></span>
             </div>
         </div>
     </div>
-</div>
-<div id="alerta_storing" class="alerta info" style="display: none;">
-    <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
-    <div id="alerta_cuerpo">
-        <div id="alerta_texto">
-            <span id="error_text">&{ 'counting_page.storing_detail' }</span>
-            <span class="info_message" style="color: green;"></span>
+    <div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+            </div>
         </div>
     </div>
-</div>
-<div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
-    <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
-    <div id="alerta_cuerpo">
-        <div id="alerta_texto">
-            <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
-        </div>
-    </div>
-</div>
 </section>
 
 
@@ -151,11 +151,17 @@
     doRefresh = function() {
         $.getJSON( '@{mainLoop}', function( data ) {
             
+            var status = data[ 0 ];
+            
             $( '.info_message' ).html(  data[ 2 ] );
             var totalSum = data[ 3 ];
-            $( '.totalSum' ).html( totalSum );
+            if ( totalSum > 0 ) {
+                $( '.totalSum' ).html( totalSum ).show();
+                $( '#total_sum_field' ).show();
+            } else {
+                $( '#total_sum_field' ).hide();
+            }
             
-            var status = data[ 0 ];
             if ( status != null && status.toString() != 'null' ) {
                 if ( status == 'TIMEOUT_WARNING' ) {
                     showAlert( "#alerta_timeout" );
@@ -217,8 +223,9 @@
             }
             $( '.cnt_total' ).html( cnt_total );
             $( '.total' ).html( total );
-            $( '.currentTotalSum' ).html( parseInt( totalSum ) + parseInt( total ) );
-            
+            if ( status != 'STORING' ) { // when storing the deposit total have the current quantity and the machine still report the same quantity.
+                $( '.currentTotalSum' ).html( parseInt( totalSum ) + parseInt( total ) );
+            }
             doneRefresh();
         })
     }

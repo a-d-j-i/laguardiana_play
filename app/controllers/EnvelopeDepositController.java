@@ -9,7 +9,6 @@ import models.actions.EnvelopeDepositAction;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.db.LgEnvelopeContent.EnvelopeContentType;
-import models.db.LgSystemProperty;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -63,12 +62,12 @@ public class EnvelopeDepositController extends CounterController {
                     return false;
                 }
                 if (data.amount == null) {
-                    data.amount = 0;
+                    data.amount = 0.0;
                 }
                 return true;
             }
         }
-        public Integer amount = null;
+        public Double amount = null;
 
         @Override
         public String toString() {
@@ -156,6 +155,7 @@ public class EnvelopeDepositController extends CounterController {
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
+            renderArgs.put("providerCode", Configuration.getProviderDescription());
             renderArgs.put("formData", ModelFacade.getFormData());
             render();
         }
@@ -185,6 +185,8 @@ public class EnvelopeDepositController extends CounterController {
             Application.index();
             return;
         }
+        renderArgs.put("clientCode", Configuration.getClientDescription());
+        renderArgs.put("providerCode", Configuration.getProviderDescription());
         render();
     }
 }

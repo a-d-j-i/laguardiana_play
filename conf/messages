@@ -33,7 +33,7 @@ application.choose_one=seleccione una opción
 application.wellcome=Bienvenido %s
 application.wellcome_x=Bienvenido
 application.choose_currency=Seleccione divisa
-application.thanks=MUCHAS GRACIAS POR OPERAR CON PROSEGUR
+application.thanks=MUCHAS GRACIAS POR OPERAR CON %s
 application.error=ERROR
 application.close=CERRAR
 application.printers=Impresoras
@@ -114,8 +114,12 @@ counting_page.total=TOTAL
 counting_page.totals=TOTALES
 
 summary.ticket=Retire su ticket
-summary.total=Monto
+summary.total=Importe depositado
 summary.transaction_code=Transaccion
+summary.user_gecos=Usuario
+summary.client_code=Empresa
+summary.branch_code=Sucursal
+summary.machine_code=Terminal
 
 envelope_deposit.select_contents=Seleccione los contenidos del sobre
 envelope_deposit.cash=EFECTIVO
@@ -141,7 +145,7 @@ envelope_deposit.required.envelopeCode=Falta el codigo del sobre
 
 validation.required=%s es un campo obligatorio
 validation.required=campo obligatorio
-validation.must_be_a_number=el campo debe ser numerico
+validation.must_be_a_number=el campo debe ser numerico con dos digitos decimales
 validation.must_be_a_5_number=el campo debe ser numerico de 5 digitos maximo
 validation.required.reference2=campo obligatorio
 validation.required.envelopeCode=campo obligatorio

@@ -36,6 +36,7 @@ import javax.swing.JFrame;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import models.Configuration;
 import play.Logger;
 import play.Play;
 import play.exceptions.TemplateNotFoundException;
@@ -48,7 +49,6 @@ import play.templates.TemplateLoader;
  */
 public class Printer {
 
-    final boolean TO_PRINTER = true;
     final int PAGE_WIDTH = 80;
     final int DEFAULT_PAGE_LEN = 150;
     // TODO: Manage errors.
@@ -167,7 +167,7 @@ public class Printer {
         //addMediaSizeByName(p, attrc, "80mm * 160mm");
         Doc docc = new SimpleDoc(item.getPrintable(null, null), DocFlavor.SERVICE_FORMATTED.PRINTABLE, attrc);
         printJob.addPrintJobListener(new MyPrintListener());
-        if (TO_PRINTER) {
+        if (!Configuration.isPrinterTest()) {
             printJob.print(docc, null);
         } else {
             JFrame frame = new JFrame("Main print frame");

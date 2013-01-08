@@ -1,6 +1,6 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<center><img src="public/images/logo.png"></center>
-<p><b>&{ 'application.thanks' }</b></p>
+<center><img src="public/images/${play.configuration['style.logo']}"></center>
+<p><b>&{ 'application.thanks', providerCode }</b></p>
 #{if ( formData.showReference1 && formData.reference1 != "" ) }
 <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
 #{/if}
@@ -9,7 +9,12 @@
 #{/if}
 <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.description}</p>
 <p>&{ 'summary.transaction_code' }: ${deposit.depositId}</p>
+<p>&{ 'summary.user_gecos' }: ${deposit.user.username}</p>
+<p>&{ 'summary.user_gecos' }: ${deposit.user.gecos}</p>
+<p>&{ 'summary.client_code' }: ${clientCode}</p>
+<p>&{ 'summary.branch_code' }: ${branchCode}</p>
+<p>&{ 'summary.machine_code' }: ${machineCode}</p>
 <br/>
 #{ bills_table_printer bill_data: billData /}
 <br/>
-${ deposit.finishDate.format('dd/MM/yyyy hh:mm:ss') }&nbsp;S.E.U.O.
+${ deposit.finishDate?.format('dd/MM/yyyy hh:mm:ss') }&nbsp;S.E.U.O.

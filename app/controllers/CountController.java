@@ -82,6 +82,7 @@ public class CountController extends CounterController {
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
+            renderArgs.put("providerCode", Configuration.getProviderDescription());
             renderArgs.put("billData", ModelFacade.getCurrentCounters());
             renderArgs.put("formData", ModelFacade.getFormData());
             render();

@@ -14,6 +14,10 @@ import play.Play;
  */
 public class Configuration {
 
+    public static boolean isPrinterTest() {
+        return isProperty("printer.test");
+    }
+
     public static boolean dontAskForPassword() {
         return isProperty("secure.dontAskForPassword");
     }
@@ -30,7 +34,15 @@ public class Configuration {
         return isProperty("glory.ignore") && Play.mode.isDev();
     }
 
-    public static Object getClientDescription() {
+    public static String getProviderDescription() {
+        String pc = LgSystemProperty.getProperty(LgSystemProperty.Types.PROVIDER_DESCRIPTION);
+        if (pc == null || pc.isEmpty()) {
+            pc = getClientDescription();
+        }
+        return pc;
+    }
+
+    public static String getClientDescription() {
         return LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION);
     }
 

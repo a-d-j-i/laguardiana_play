@@ -12,8 +12,6 @@ import play.mvc.*;
 @With({Secure.class})
 public class PrinterController extends Controller {
 
-    static final boolean TO_PRINTER = true;
-
     public static void listPrinters() {
         renderArgs.put("printers", DeviceFactory.getPrinter().printers.values());
         render();
@@ -25,9 +23,12 @@ public class PrinterController extends Controller {
         formData.currency.currency.textId = "Pesos";
         renderArgs.put("formData", formData);
         renderArgs.put("clientCode", Configuration.getClientDescription());
-        /*List<BillDeposit> depositList = BillDeposit.findAll();
-         BillDeposit deposit = depositList.get(0);*/
-        BillDeposit deposit = BillDeposit.findById(33);
+        renderArgs.put("providerCode", Configuration.getProviderDescription());
+        renderArgs.put("branchCode", Configuration.getBranchCode());
+        renderArgs.put("machineCode", Configuration.getMachineCode());
+        List<BillDeposit> depositList = BillDeposit.findAll();
+        BillDeposit deposit = depositList.get(0);
+        //BillDeposit deposit = BillDeposit.findById(33);
         List<Bill> bl = deposit.getBillList();
         renderArgs.put("billData", bl);
         renderArgs.put("depositTotal", deposit.getTotal());
@@ -39,7 +40,7 @@ public class PrinterController extends Controller {
 
     public static void currentBagTotals() {
         renderArgs.put("clientCode", Configuration.getClientDescription());
-
+        renderArgs.put("providerCode", Configuration.getProviderDescription());
         /*List<BillDeposit> depositList = BillDeposit.findAll();
          BillDeposit deposit = depositList.get(0);*/
         BillDeposit deposit = BillDeposit.findById(33);
@@ -55,12 +56,11 @@ public class PrinterController extends Controller {
     public static void envelopeDeposit_finish() {
         EnvelopeDepositController.FormData formData = new EnvelopeDepositController.FormData();
         renderArgs.put("formData", formData);
-
         renderArgs.put("clientCode", Configuration.getClientDescription());
-
-        /*List<BillDeposit> depositList = BillDeposit.findAll();
-         BillDeposit deposit = depositList.get(0);*/
-        BillDeposit deposit = BillDeposit.findById(33);
+        renderArgs.put("providerCode", Configuration.getProviderDescription());
+        List<BillDeposit> depositList = BillDeposit.findAll();
+        BillDeposit deposit = depositList.get(0);
+        //BillDeposit deposit = BillDeposit.findById(33);
         List<Bill> bl = deposit.getBillList();
         renderArgs.put("billData", bl);
         renderArgs.put("depositTotal", deposit.getTotal());
@@ -75,7 +75,7 @@ public class PrinterController extends Controller {
         renderArgs.put("formData", formData);
 
         renderArgs.put("clientCode", Configuration.getClientDescription());
-
+        renderArgs.put("providerCode", Configuration.getProviderDescription());
         /*List<BillDeposit> depositList = BillDeposit.findAll();
          BillDeposit deposit = depositList.get(0);*/
         BillDeposit deposit = BillDeposit.findById(33);
@@ -94,6 +94,7 @@ public class PrinterController extends Controller {
         formData.currency.currency.textId = "Pesos";
         renderArgs.put("formData", formData);
         renderArgs.put("clientCode", Configuration.getClientDescription());
+        renderArgs.put("providerCode", Configuration.getProviderDescription());
         /*List<BillDeposit> depositList = BillDeposit.findAll();
          BillDeposit deposit = depositList.get(0);*/
         BillDeposit deposit = BillDeposit.findById(33);
@@ -113,13 +114,11 @@ public class PrinterController extends Controller {
 
     @Util
     static void print() {
-        if (TO_PRINTER) {
-            try {
-                //DeviceFactory.getPrinter().printAttributes();
-                DeviceFactory.getPrinter().print("billDeposit", renderArgs.data, 120);
-            } catch (Throwable ex) {
-                Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
-            }
+        try {
+            //DeviceFactory.getPrinter().printAttributes();
+            DeviceFactory.getPrinter().print(request.actionMethod, renderArgs.data, 120);
+        } catch (Throwable ex) {
+            Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }
     }
 }
