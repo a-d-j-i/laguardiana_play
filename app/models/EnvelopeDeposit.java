@@ -36,7 +36,7 @@ public class EnvelopeDeposit extends LgDeposit {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
-        DeviceFactory.getPrinter().print("PrinterController/envelopeDeposit_finish.html", args, 300);
+        DeviceFactory.getPrinter().print("PrinterController/envelopeDeposit_finish.html", args, 200);
     }
 
     // Merge somehow with print...
@@ -46,6 +46,6 @@ public class EnvelopeDeposit extends LgDeposit {
         //List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         //List<Currency> currencies = Currency.findAll();
         setRenderArgs(args);
-        DeviceFactory.getPrinter().print("PrinterController/envelopeDeposit_start.html", args, 300);
+        DeviceFactory.getPrinter().print("PrinterController/envelopeDeposit_start.html", args, 200);
     }
 }

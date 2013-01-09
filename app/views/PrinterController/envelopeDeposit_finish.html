@@ -15,11 +15,11 @@
 <div>
     &{ 'envelope_deposit.contents' }<br>
     #{list items:e.envelopeContents, as:'ec'}
-    <p style="font-size: smaller">&{ 'envelope_deposit.' + ec.getType().name().toLowerCase() } 
+    <div style="font-size: smaller">&{ 'envelope_deposit.' + ec.getType().name().toLowerCase() } 
         #{if ( ec.amount > 0 ) }
         ${ ec.amount } ${ ec.getCurrency()?.description }
         #{/if}
-    <br>
+    </div>
     #{/list}
 </div>
 <br/>

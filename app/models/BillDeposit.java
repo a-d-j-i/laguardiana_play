@@ -67,6 +67,6 @@ public class BillDeposit extends LgDeposit {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
-        DeviceFactory.getPrinter().print("PrinterController/billDeposit.html", args, 300);
+        DeviceFactory.getPrinter().print("PrinterController/billDeposit.html", args, 200);
     }
 }
