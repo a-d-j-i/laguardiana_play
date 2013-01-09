@@ -1,5 +1,6 @@
 package models.db;
 
+import controllers.BillDepositController.FormData;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import play.Logger;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPABase;
 import play.libs.F;
+import play.mvc.Scope;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -70,14 +72,29 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         this.creationDate = new Date();
     }
 
+    public static long count(Date start, Date end) {
+        if (end == null) {
+            end = new Date();
+        }
+        if (start == null) {
+            return LgDeposit.count("select count(d) from LgDeposit d where creationDate <= ?", end);
+        } else {
+            return LgDeposit.count("select count(d) from LgDeposit d where "
+                    + "cast(creationDate as date)  >= cast(? as date) and cast(creationDate as date) <= cast(? as date)",
+                    start, end);
+        }
+    }
+
     public static JPAQuery find(Date start, Date end) {
         if (end == null) {
             end = new Date();
         }
         if (start == null) {
-            return LgDeposit.find("select d from LgDeposit d where creationDate < ?", end);
+            return LgDeposit.find("select d from LgDeposit d where creationDate <= ? order by depositId", end);
         } else {
-            return LgDeposit.find("select d from LgDeposit d where creationDate > ? and creationDate < ?", start, end);
+            return LgDeposit.find("select d from LgDeposit d where "
+                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by depositId",
+                    start, end);
         }
     }
 
@@ -131,6 +148,9 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     }
 
     public LgLov findUserCodeLov() {
+        if (userCodeLov == null) {
+            return null;
+        }
         return DepositUserCodeReference.findByNumericId(userCodeLov);
     }
 
@@ -167,4 +187,10 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     public String toString() {
         return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag + ", z=" + z + '}';
     }
+
+    abstract public void setRenderArgs(Map args);
+
+    abstract public void print();
+
+    abstract public String getDetailView();
 }

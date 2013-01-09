@@ -1,8 +1,10 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<center><img src="public/images/logo.png"></center>
+<img src="../public/images/${play.configuration['style.logo']}">
+<div style="width: 70mm;">
 Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy hh:mm:ss') } y 
 #{ if z.closeDate == null }aun no cerrado#{/if}
 #{ else }cerrado el ${ z.closeDate.format('dd/MM/yyyy hh:mm:ss') }#{/else}
+</div>
 <br>
 #{ bills_table_printer bill_data: totals._4 /}
 Total de efectivo ${ totals._1 }<br>

@@ -2,6 +2,8 @@ package models.db;
 
 import java.util.HashMap;
 import javax.persistence.*;
+import models.Configuration;
+import models.lov.Currency;
 import play.db.jpa.GenericModel;
 
 @Entity
@@ -58,6 +60,14 @@ public class LgEnvelopeContent extends GenericModel implements java.io.Serializa
         this.contentTypeLov = contentTypeLov.getLov();
         this.amount = amount;
         this.unitLov = unitLov;
+    }
+
+    public EnvelopeContentType getType() {
+        return EnvelopeContentType.find(contentTypeLov);
+    }
+
+    public Currency getCurrency() {
+        return Currency.findByNumericId(Configuration.getDefaultCurrency());
     }
 
     @Override

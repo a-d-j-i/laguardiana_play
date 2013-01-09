@@ -1,19 +1,25 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<center><img src="public/images/${play.configuration['style.logo']}"></center>
-<p><b>&{ 'application.thanks', providerCode }</b></p>
-#{if ( formData.showReference1 && formData.reference1 != "" ) }
-<p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+<img src="../public/images/${play.configuration['style.logo']}">
+#{if reprint } 
+&{ 'summary.reprint' }
 #{/if}
-#{if ( formData.showReference2 && formData.reference2 != "" ) }
-<p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+<b>
+    &{ 'application.thanks', providerCode }
+</b>
+<br>
+#{if ( deposit.findUserCodeLov() ) }
+&{ 'counting_page.reference1_title' }: ${deposit.findUserCodeLov()}<br>
 #{/if}
-<p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.description}</p>
-<p>&{ 'summary.transaction_code' }: ${deposit.depositId}</p>
-<p>&{ 'summary.user_gecos' }: ${deposit.user.username}</p>
-<p>&{ 'summary.user_gecos' }: ${deposit.user.gecos}</p>
-<p>&{ 'summary.client_code' }: ${clientCode}</p>
-<p>&{ 'summary.branch_code' }: ${branchCode}</p>
-<p>&{ 'summary.machine_code' }: ${machineCode}</p>
+#{if ( deposit.userCode ) }
+&{ 'counting_page.reference2_title' }: ${deposit.userCode}<br>
+#{/if}
+&{ 'summary.total' }: ${depositTotal} ${deposit.getCurrency().description}<br>
+&{ 'summary.transaction_code' }: ${deposit.depositId}<br>
+&{ 'summary.user_gecos' }: ${deposit.user.username}<br>
+&{ 'summary.user_gecos' }: ${deposit.user.gecos}<br>
+&{ 'summary.client_code' }: ${clientCode}<br>
+&{ 'summary.branch_code' }: ${branchCode}<br>
+&{ 'summary.machine_code' }: ${machineCode}<br>
 <br/>
 #{ bills_table_printer bill_data: billData /}
 <br/>

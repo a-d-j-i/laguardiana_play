@@ -58,23 +58,9 @@ public class BillDepositAction extends UserAction {
     // TODO: Move to states
     @Override
     public void finish() {
-        Map renderArgs = new HashMap();
-        renderArgs.put("clientCode", Configuration.getClientDescription());
-        renderArgs.put("providerCode", Configuration.getProviderDescription());
-        renderArgs.put("branchCode", Configuration.getBranchCode());
-        renderArgs.put("machineCode", Configuration.getMachineCode());
-        renderArgs.put("formData", formData);
         BillDeposit deposit = BillDeposit.findById(getDepositId());
         if (deposit != null && deposit.getTotal() > 0) {
-            renderArgs.put("billData", deposit.getBillList());
-            renderArgs.put("depositTotal", deposit.getTotal());
-            renderArgs.put("deposit", deposit);
-            try {
-                // Print the ticket.
-                DeviceFactory.getPrinter().print("billDeposit", renderArgs, 120);
-            } catch (Exception ex) {
-                Logger.debug("Error printing : " + ex.getMessage());
-            }
+            deposit.print();
         }
     }
 }

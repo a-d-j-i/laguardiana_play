@@ -1,5 +1,5 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<center><img src="public/images/logo.png"></center>
+<img src="../public/images/${play.configuration['style.logo']}">
 Contenido actual de la maquina en la bolsa ${ bag.bagId }, colocada el ${ bag.creationDate.format('dd/MM/yyyy hh:mm:ss') }<br>
 #{ bills_table_printer bill_data: totals._4 /}
 Total de efectivo ${ totals._1 }<br>

@@ -1,34 +1,35 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<center><img src="public/images/${play.configuration['style.logo']}"></center>
-<p><b>&{ 'application.thanks', providerCode }</b></p>
-#{if ( formData.showReference1 ) }
-<p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+<center><img src="../public/images/${play.configuration['style.logo']}"></center>
+<b>&{ 'application.thanks', providerCode }</b><br>
+#{if reprint } 
+&{ 'summary.reprint' }
 #{/if}
-#{if ( formData.showReference2 && formData.reference2 != "" ) }
-<p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+#{if ( deposit.findUserCodeLov() ) }
+&{ 'counting_page.reference1_title' }: ${deposit.findUserCodeLov()}<br>
 #{/if}
-#{if ( formData.cashData.amount > 0 ) }
-<p>&{ 'envelope_deposit.amount_cash' }: ${ formData.cashData.amount } ${ formData.cashData.currency.description } </p>
+#{if ( deposit.userCode ) }
+&{ 'counting_page.reference2_title' }: ${deposit.userCode}<br>
 #{/if}
-#{if ( formData.checkData.amount > 0 ) }
-<p>&{ 'envelope_deposit.amount_checks' }: ${ formData.checkData.amount } ${ formData.checkData.currency.description } </p>
-#{/if}
-#{if ( formData.ticketData.amount > 0  ) }
-<p>&{ 'envelope_deposit.amount_tickets' }: ${ formData.ticketData.amount } ${ formData.ticketData.currency.description } </p>
-#{/if}
-#{if formData.hasDocuments }
-<p>&{ 'envelope_deposit.has_documents' }</p>
-#{/if}
-#{if formData.hasOthers }
-<p>&{ 'envelope_deposit.has_others' }</p>
-#{/if}
+
+#{list items:deposit.envelopes, as:'e'}
+<div>
+    &{ 'envelope_deposit.contents' }<br>
+    #{list items:e.envelopeContents, as:'ec'}
+    <p style="font-size: smaller">&{ 'envelope_deposit.' + ec.getType().name().toLowerCase() } 
+        #{if ( ec.amount > 0 ) }
+        ${ ec.amount } ${ ec.getCurrency()?.description }
+        #{/if}
+    <br>
+    #{/list}
+</div>
 <br/>
-<p>&{ 'envelope_deposit.envelope_code' }: ${ formData.envelopeCode }</p>
-<p>&{ 'summary.transaction_code' }: ${deposit.depositId}</p>
-<p>&{ 'summary.user_gecos' }: ${deposit.user.username}</p>
-<p>&{ 'summary.user_gecos' }: ${deposit.user.gecos}</p>
-<p>&{ 'summary.client_code' }: ${clientCode}</p>
-<p>&{ 'summary.branch_code' }: ${branchCode}</p>
-<p>&{ 'summary.machine_code' }: ${machineCode}</p>
+&{ 'envelope_deposit.envelope_code' }: ${ e.envelopeNumber }
+#{/list}
+&{ 'summary.transaction_code' }: ${deposit.depositId}<br>
+&{ 'summary.user_gecos' }: ${deposit.user.username}<br>
+&{ 'summary.user_gecos' }: ${deposit.user.gecos}<br>
+&{ 'summary.client_code' }: ${clientCode}<br>
+&{ 'summary.branch_code' }: ${branchCode}<br>
+&{ 'summary.machine_code' }: ${machineCode}<br>
 <br/>
 ${ deposit.finishDate?.format('dd/MM/yyyy hh:mm:ss') }&nbsp;S.E.U.O.

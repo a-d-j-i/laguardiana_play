@@ -1,5 +1,6 @@
 package controllers;
 
+import devices.DeviceFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,8 +16,10 @@ import models.db.LgEnvelopeContent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
+import play.data.binding.As;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 
 public class ReportController extends Controller {
 
@@ -363,24 +366,39 @@ public class ReportController extends Controller {
         render();
     }
 
-    public static void listDeposits(Integer page, Date startDate, Date endDate) {
+    public static void listDeposits(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate) {
+        if (endDate == null) {
+            endDate = new Date();
+        }
         if (page == null || page < 1) {
             page = 1;
         }
-        int length = 10;
+        int length = 5;
+        Integer totalPage = (int) (LgDeposit.count(startDate, endDate) / length) + 1;
+        if (page > totalPage) {
+            page = totalPage;
+        }
+        renderArgs.put("prevPage", page - 1);
+        renderArgs.put("nextPage", page + 1);
+
         List<LgDeposit> dList = LgDeposit.find(startDate, endDate).fetch(page, length);
-        if (page > 1) {
-            renderArgs.put("prevPage", page - 1);
-        } else {
-            renderArgs.put("prevPage", 1);
-        }
-        if (dList.size() == length) {
-            renderArgs.put("nextPage", page + 1);
-        } else {
-            renderArgs.put("nextPage", page);
-        }
+        renderArgs.put("startDate", startDate);
+        renderArgs.put("endDate", endDate);
         renderArgs.put("page", page);
+        renderArgs.put("totalPage", totalPage);
         renderArgs.put("data", dList);
         render();
+    }
+
+    public static void depositDetail(Integer depositId) {
+        LgDeposit d = LgDeposit.findById(depositId);
+        d.setRenderArgs(renderArgs.data);
+        render(d.getDetailView());
+    }
+
+    public static void depositReprint(Integer depositId) {
+        LgDeposit d = LgDeposit.findById(depositId);
+        renderArgs.put("reprint", "true");
+        d.print();
     }
 }

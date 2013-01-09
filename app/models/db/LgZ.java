@@ -1,10 +1,13 @@
 package models.db;
 
+import devices.DeviceFactory;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
@@ -122,5 +125,17 @@ public class LgZ extends GenericModel implements java.io.Serializable {
     @Override
     public String toString() {
         return "LgZ{" + "zId=" + zId + ", creationDate=" + creationDate + ", closeDate=" + closeDate + '}';
+    }
+
+    public void print() {
+        Map<String, Object> args = new HashMap<String, Object>();
+        setRenderArgs(args);
+        DeviceFactory.getPrinter().print("PrinterController/currentZTotals.html", args, 200);
+    }
+
+    public void setRenderArgs(Map<String, Object> args) {
+        args.put("z", this);
+        args.put("totals", this.getTotals());
+        args.put("currentDate", new Date());
     }
 }

@@ -22,10 +22,8 @@
                 background: url('../public/images/${play.configuration['style.button_top']}') top left repeat-y;
             }
         </style>
-        #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
         <!-- jquery ui -->
         <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/jquery-ui.css'}">
-        #{/if}
         <!-- mottie -->
         #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
         <link rel="stylesheet"  media="screen" type="text/css" href="@{'/public/stylesheets/mottie.css'}" />
@@ -40,7 +38,7 @@
     <!-- jquery -->
     <script src="@{'/public/javascripts/jquery/jquery-1.8.0.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <!-- jquery ui -->
-    <script src="@{'/public/javascripts/jquery/jquery-ui-1.8.23.custom.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <script src="@{'/public/javascripts/jquery/jquery-ui.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <!-- jquery-tools -->
     <script src="@{'/public/javascripts/jquery/jquery.tools.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <!-- mottie -->

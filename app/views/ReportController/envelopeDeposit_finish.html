@@ -1,0 +1,38 @@
+#{extends 'main.html' /}
+<section>
+    <header></header>
+    <a href="@{listDeposits()}" class="boton_top">◄ &{ 'application.back' }</a>
+    <article>
+        <div class="contenido_grande">
+            <ul class="columns">
+                <li class="column">
+                    <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                    #{if ( deposit.findUserCodeLov() ) }
+                    <p>&{ 'counting_page.reference1_title' }: ${deposit.findUserCodeLov()}</p>
+                    #{/if}
+                    #{if ( deposit.userCode ) }
+                    <p>&{ 'counting_page.reference2_title' }: ${deposit.userCode}</p>
+                    #{/if}
+                    #{list items:deposit.envelopes, as:'e'}
+                    <div>
+                        <p>&{ 'envelope_deposit.contents' }<br>
+                        #{list items:e.envelopeContents, as:'ec'}
+                        &{ 'envelope_deposit.' + ec.getType().name().toLowerCase() } 
+                            #{if ( ec.amount > 0 ) }
+                            ${ ec.amount } ${ ec.getCurrency()?.description }
+                            #{/if}
+                        <br>
+                        #{/list}
+                        </p>
+                    </div>
+                    <br/>
+                    &{ 'envelope_deposit.envelope_code' }: ${ e.envelopeNumber }
+                    #{/list}
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>
+
+
+

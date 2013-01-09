@@ -1,10 +1,13 @@
 package models.db;
 
+import devices.DeviceFactory;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import models.BagEvent;
@@ -131,5 +134,17 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     @Override
     public String toString() {
         return "LgBag{" + "bagId=" + bagId + ", bagCode=" + bagCode + ", creationDate=" + creationDate + ", withdrawDate=" + withdrawDate + '}';
+    }
+
+    public void print() {
+        Map args = new HashMap();
+        setRenderArgs(args);
+        DeviceFactory.getPrinter().print("PrinterController/currentBagTotals.html", args, 200);
+    }
+
+    public void setRenderArgs(Map<String, Object> args) {
+        args.put("bag", this);
+        args.put("currentDate", new Date());
+        args.put("totals", getTotals());
     }
 }

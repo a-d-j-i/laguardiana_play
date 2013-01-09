@@ -4,31 +4,29 @@
  */
 package devices;
 
+import devices.printHelper.EditorPanePrinter;
 import devices.printHelper.LargeHTMLEditorKit;
+import java.awt.Color;
+import java.awt.Insets;
+import java.awt.print.Paper;
 import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Array;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import javax.print.Doc;
-import javax.print.DocFlavor;
-import javax.print.DocPrintJob;
+import java.util.logging.Level;
 import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
-import javax.print.SimpleDoc;
 import javax.print.attribute.Attribute;
 import javax.print.attribute.DocAttributeSet;
-import javax.print.attribute.HashDocAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.PrintServiceAttributeSet;
-import javax.print.attribute.standard.MediaPrintableArea;
-import javax.print.attribute.standard.MediaSize;
-import javax.print.attribute.standard.MediaSizeName;
-import javax.print.attribute.standard.OrientationRequested;
 import javax.print.event.PrintJobEvent;
 import javax.print.event.PrintJobListener;
 import javax.swing.JEditorPane;
@@ -39,7 +37,6 @@ import javax.swing.text.html.HTMLEditorKit;
 import models.Configuration;
 import play.Logger;
 import play.Play;
-import play.exceptions.TemplateNotFoundException;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 
@@ -49,8 +46,10 @@ import play.templates.TemplateLoader;
  */
 public class Printer {
 
+    final double INCH = 72;
+    final double MM = INCH / 25.5;
     final int PAGE_WIDTH = 80;
-    final int DEFAULT_PAGE_LEN = 150;
+    final int DEFAULT_PAGE_LEN = 200;
     // TODO: Manage errors.
 
     class MyPrintListener implements PrintJobListener {
@@ -91,17 +90,24 @@ public class Printer {
         }
     }
 
-    public void print(String templateName, Map<String, Object> args, int paperLen) throws PrinterException, PrintException {
+    public void print(String templateName, Map<String, Object> args, int paperLen) {
+        try {
+            printInt(templateName, args, paperLen);
+        } catch (Exception ex) {
+            Logger.debug("Error printing : " + ex.getMessage());
+        }
+    }
+
+    public void printInt(String templateName, Map<String, Object> args, int paperLen) throws PrinterException, PrintException {
         if (paperLen <= 0) {
             paperLen = DEFAULT_PAGE_LEN;
         }
-        Template template = null;
-        try {
-            template = TemplateLoader.load("PrinterController/" + templateName + ".html");
-        } catch (TemplateNotFoundException e) {
+        Template template = TemplateLoader.load(templateName);
+        if (template == null) {
+            template = TemplateLoader.load(templateName + ".html");
         }
         if (template == null) {
-            template = TemplateLoader.load("PrinterController/" + templateName + ".txt");
+            template = TemplateLoader.load(templateName + ".txt");
         }
         if (template == null) {
             throw new PrinterException(String.format("Template %s not found", templateName));
@@ -110,13 +116,19 @@ public class Printer {
         String body = template.render(args);
         //Logger.debug("PRINT : %s", body);
 
-        //HTMLEditorKit kit = new HTMLEditorKit();
-        HTMLEditorKit kit = new LargeHTMLEditorKit();
+        HTMLEditorKit kit = new HTMLEditorKit();
+        //HTMLEditorKit kit = new LargeHTMLEditorKit();
 
         HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
         try {
-            Logger.debug(Play.applicationPath.toURI().toURL().toString());
-            doc.setBase(Play.applicationPath.toURI().toURL());
+            URI u;
+            try {
+                u = new URI(Play.applicationPath.toURI() + "/PrinterController");
+            } catch (URISyntaxException ex) {
+                u = Play.applicationPath.toURI();
+            }
+            Logger.debug(u.toString());
+            doc.setBase(u.toURL());
             Reader fin = new StringReader(body);
             kit.read(fin, doc, 0);
             fin.close();
@@ -144,39 +156,56 @@ public class Printer {
         //attrs.add(new PrinterResolution(600, 600, PrinterResolution.DPI));
         //attrs.add(new MediaPrintableArea(0, 0, 10, 10, MediaPrintableArea.MM));
 
-        HashDocAttributeSet attrc = new HashDocAttributeSet();
-        //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) PAGE_WIDTH, (float) paperLen, MediaPrintableArea.MM));
-        attrc.add(OrientationRequested.PORTRAIT);
-        MediaSizeName m = MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM);
-        if (m != null) {
-            Logger.debug("MEDIA SIZE NAME %s", m);
-            attrc.add(m);
-        } else {
-            Logger.error("MEDIA SIZE NAME IS NULL");
-            return;
-        }
-
+        /*        HashDocAttributeSet attrc = new HashDocAttributeSet();
+         //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) PAGE_WIDTH, (float) paperLen, MediaPrintableArea.MM));
+         attrc.add(OrientationRequested.PORTRAIT);
+         MediaSizeName m = MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM);
+         if (m != null) {
+         Logger.debug("MEDIA SIZE NAME %s", m);
+         attrc.add(m);
+         } else {
+         Logger.error("MEDIA SIZE NAME IS NULL");
+         return;
+         }
+         */
         // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
         if (port == null || !printers.containsKey(port)) {
             throw new PrinterException(String.format("Printer %s not found", port == null ? "NULL" : port));
         }
-
         PrintService p = printers.get(port);
-        DocPrintJob printJob = p.createPrintJob();
-        //attrc.add(MediaSize.findMedia((float) 80, (float) 160, MediaSize.MM));
-        //addMediaSizeByName(p, attrc, "80mm * 160mm");
-        Doc docc = new SimpleDoc(item.getPrintable(null, null), DocFlavor.SERVICE_FORMATTED.PRINTABLE, attrc);
-        printJob.addPrintJobListener(new MyPrintListener());
+
+        Paper pp = new Paper();
+        pp.setImageableArea(0, 0, PAGE_WIDTH * MM, paperLen * MM);
+        pp.setSize(PAGE_WIDTH * MM, paperLen * MM);
+        EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
+
         if (!Configuration.isPrinterTest()) {
-            printJob.print(docc, null);
+            pnl.print(p);
         } else {
             JFrame frame = new JFrame("Main print frame");
-            frame.getContentPane().add(item);
-            frame.setSize((int) (4.1 * PAGE_WIDTH), (int) (4.1 * paperLen));
+            pnl.setBackground(Color.black);
+            frame.add(pnl);
             frame.pack();
             frame.setVisible(true);
         }
 
+
+        /*
+         DocPrintJob printJob = p.createPrintJob();
+         //attrc.add(MediaSize.findMedia((float) 80, (float) 160, MediaSize.MM));
+         //addMediaSizeByName(p, attrc, "80mm * 160mm");
+         Doc docc = new SimpleDoc(item.getPrintable(null, null), DocFlavor.SERVICE_FORMATTED.PRINTABLE, attrc);
+         printJob.addPrintJobListener(new MyPrintListener());
+         if (!Configuration.isPrinterTest()) {
+         printJob.print(docc, null);
+         } else {
+         JFrame frame = new JFrame("Main print frame");
+         frame.getContentPane().add(item);
+         frame.setSize((int) (4.1 * PAGE_WIDTH), (int) (4.1 * paperLen));
+         frame.pack();
+         frame.setVisible(true);
+         }
+         */
         /*            attrs.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 160, MediaPrintableArea.MM));
          attrs.add(OrientationRequested.PORTRAIT);
          addMediaSizeByName(p, attrs, "80mm * 160mm");

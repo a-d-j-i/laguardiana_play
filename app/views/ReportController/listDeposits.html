@@ -1,12 +1,20 @@
 #{extends 'ReportController/lists.html' /}
 #{set title: 'List Deposits' /}
-<div style="fo">
+<div style="text-align: center;">
+    #{form @listDeposits(), 'id': 'mainForm', 'method' : 'POST' }
+    <ul>
+        <li  style="display: inline;">Fecha desde: <input class="datepicker" type="datetime" name="startDate" value="${startDate?.format('dd/MM/yyyy')}" /></li>
+        <li  style="display: inline;">Fecha hasta: <input class="datepicker" type="datetime" name="endDate" value="${endDate?.format('dd/MM/yyyy')}" /></li>
+    </ul>
+    <input type="hidden" name="page" value="${page}">
+    #{/form}
     <table style="margin-left: auto; margin-right: auto; border: 1px solid;">
         <thead>
         <th>Transaccion</th>
         <th>Usuario</th>
         <th>Fecha del deposito</th>
         <th>Cierre contable</th>
+        <th>Fecha retiro de bolsa</th>
         <th>Total</th>
         <th colspan="2">Acciones</th>
         </thead>
@@ -26,6 +34,9 @@
                     <br>
                     ${deposit.z.closeDate?.format('dd/MM/yyyy hh:mm:ss')}
                 </td>
+                <td style="width:180px;">
+                    ${deposit.bag.withdrawDate?.format('dd/MM/yyyy hh:mm:ss')}
+                </td>
                 <td style="width:150px;">
                     #{if ( deposit.class.getSimpleName() == "BillDeposit" )}
                     ${deposit.getTotal()}
@@ -35,16 +46,34 @@
                     #{/if}
                 </td>
                 <td style="background-color: lightblue; border: 1px solid;">
-                    <a href="@">Detalle</a>
+                    <a href="@{depositDetail(deposit.depositId)}">Detalle</a>
                 </td>
                 <td style="background-color: lightblue; border: 1px solid;">
-                    <a href="@">Reimprimir Ticket</a>
+                    <a href="@{depositReprint(deposit.depositId)}">Reimprimir Ticket</a>
                 </td>
             </tr>
             #{/list}
         </tbody>
         <tfoot> 
-            <tr><td colspan="5">Pagina ${page}</td></tr>
+            <tr><td colspan="7" style="text-align: right;">Pagina ${page} de ${totalPage}</td></tr>
         </tfoot>
     </table>
 </div>
+
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    $(function() {
+        $( ".datepicker" ).datepicker({
+            dateFormat : "dd/mm/yy",
+            onSelect: function(date) {
+                $( "#mainForm" ).submit();
+            }
+        });
+        $( ".boton" ).click(function( event ) {
+            $( "#mainForm" ).attr("action", $(this).attr("href") ).submit();
+            event.preventDefault();
+        });
+    });
+</script>
+#{/set}

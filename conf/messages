@@ -120,8 +120,10 @@ summary.user_gecos=Usuario
 summary.client_code=Empresa
 summary.branch_code=Sucursal
 summary.machine_code=Terminal
+summary.reprint=Reimpresion
 
 envelope_deposit.select_contents=Seleccione los contenidos del sobre
+envelope_deposit.contents=Contenidos del sobre
 envelope_deposit.cash=EFECTIVO
 envelope_deposit.documents=DOCUMENTOS
 envelope_deposit.checks=CHEQUES
@@ -156,3 +158,9 @@ validation.required.ticketData_amount=campo obligatorio
 filter.choose_denomination=Elija la denominacion
 
 
+other_menu.print_billDeposit=Deposito Billetes
+other_menu.print_currentBagTotals=Total Bolsa
+other_menu.print_envelopeDeposit_finish=Deposito Sobre fin
+other_menu.print_envelopeDeposit_start=Deposito Sobre principio
+other_menu.print_currentZTotals=Cierre contable
+print_other_menu.test=Test generico
