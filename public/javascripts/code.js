@@ -72,7 +72,7 @@ $(function() {
 
     // alertas
 
-    $(".alerta").overlay({
+    $(".alerta_automatica").overlay({
         top: 100,
         left: "center",
         mask: {
@@ -86,7 +86,7 @@ $(function() {
     });
     
     $(".alerta_cerrar").bind("click", function(event) {
-        var a = $(event.target).parents( ".alerta" );
+        var a = $(event.target).parents( ".alerta_automatica" );
         a.overlay().close();
     });
 
@@ -108,10 +108,10 @@ if ( $(".blink") ) {
 /**
  * tipos de alerta: info, success, error, continue
  */
-function abrir_alerta(tipo) {
+/*function abrir_alerta(tipo) {
     $("#alerta").removeClass().addClass(tipo);
     $("#alerta").overlay().load();
-}
+}*/
 
 
 

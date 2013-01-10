@@ -1,5 +1,7 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<h3 style="width: 60mm;">&{ 'envelope_deposit.put_ticket_in_envelope' }</h3>
+<h3 style="width: 90%; font-weight: bold;">
+    &{ 'envelope_deposit.put_ticket_in_envelope' }
+</h3>
 
 #{if reprint } 
 &{ 'summary.reprint' }

@@ -1,6 +1,8 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
 <center><img src="../public/images/${play.configuration['style.logo']}"></center>
-<b>&{ 'application.thanks', providerCode }</b><br>
+<h3 style="width: 90%; font-weight: bold;">
+    &{ 'application.thanks', providerCode }
+</h3>
 #{if reprint } 
 &{ 'summary.reprint' }
 #{/if}

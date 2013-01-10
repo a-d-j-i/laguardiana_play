@@ -1,9 +1,6 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<img src="../public/images/${play.configuration['style.logo']}">
-#{if reprint } 
-&{ 'summary.reprint' }
-#{/if}
-<h3 style="width: 70mm;">
+<img  src="../public/images/${play.configuration['style.logo']}">
+<h3 style="width: 90%; font-weight: bold;">
     &{ 'application.thanks', providerCode }
 </h3>
 <br>
@@ -20,5 +17,8 @@
 &{ 'summary.client_code' }: ${clientCode}<br>
 &{ 'summary.branch_code' }: ${branchCode}<br>
 &{ 'summary.machine_code' }: ${machineCode}<br>
+#{if reprint } 
+&{ 'summary.reprint' }<br>
+#{/if}
 #{ bills_table_printer bill_data: billData /}
 ${ deposit.finishDate?.format('dd/MM/yyyy hh:mm:ss') }&nbsp;S.E.U.O.

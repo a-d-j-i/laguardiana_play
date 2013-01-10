@@ -5,12 +5,16 @@
 package devices;
 
 import devices.printHelper.EditorPanePrinter;
-import devices.printHelper.LargeHTMLEditorKit;
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.print.Paper;
 import java.awt.print.PrinterException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Array;
@@ -19,7 +23,6 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
@@ -34,6 +37,7 @@ import javax.swing.JFrame;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import models.Configuration;
 import play.Logger;
 import play.Play;
@@ -118,7 +122,20 @@ public class Printer {
 
         HTMLEditorKit kit = new HTMLEditorKit();
         //HTMLEditorKit kit = new LargeHTMLEditorKit();
-
+/*
+        try {
+            StyleSheet styles = new StyleSheet();
+            FileInputStream is = new FileInputStream(new File(Play.applicationPath, "public/stylesheets/printer.css"));
+            Reader r = new BufferedReader(new InputStreamReader(is, "ISO-8859-1"));
+            styles.loadRules(r, null);
+            r.close();
+            kit.setStyleSheet(styles);
+        } catch (Throwable e) {
+            Logger.error("error loading stylesheet %s", e.toString());
+        }
+*/
+        //Logger.debug("Stylesheet %s", kit.getStyleSheet());
+        
         HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
         try {
             URI u;
@@ -127,7 +144,7 @@ public class Printer {
             } catch (URISyntaxException ex) {
                 u = Play.applicationPath.toURI();
             }
-            Logger.debug(u.toString());
+            //Logger.debug(u.toString());
             doc.setBase(u.toURL());
             Reader fin = new StringReader(body);
             kit.read(fin, doc, 0);
@@ -137,6 +154,7 @@ public class Printer {
         } catch (BadLocationException ex) {
             throw new PrinterException("BadLocationException : " + ex.toString());
         }
+
 
         JEditorPane item = new JEditorPane();
         item.setEditorKit(kit);

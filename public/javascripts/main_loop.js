@@ -1,78 +1,77 @@
 var waiting = false;
 var lastStatus = "false";
-var alertStack = new Array();
-var working = false;
-var currentAlert = undefined;
+
 function doneRefresh() {
     waiting = false;
 };
 var doRefresh = function() {
     doneRefresh();
 };
-function showAlert( a ) {
-    var oldAlert = alertStack.pop();
-    if ( oldAlert && oldAlert != a ) {
-        alertStack.push( oldAlert );
+
+$( "#main_overlay" ).overlay({
+    top: 100,
+    left: "center",
+    mask: {
+        color: "#000",
+        loadSpeed: 100,
+        opacity: 0.9
+    },
+    closeOnClick: false,
+    closeOnEsc: false,
+    speed: "fast",
+    oneInstance: false,
+    onLoad : function(event) {
+        working = false;
+        if ( ! current_alert ) {
+            working = true;
+            this.close();
+        }
+    }, 
+    onClose: function(event) {
+        var o = this;
+        setTimeout(function(){
+            working = false;
+            if ( current_alert ) {
+                working = true;
+                o.load();
+            }
+        },500);
     }
-    alertStack.push( a );
-    if ( working ) {
+});
+
+var current_alert = undefined;
+var working = false;
+function showAlert( a ) {
+   
+    if ( current_alert == a ) {
         return;
     }
-    working = true;
-    if ( currentAlert ) {
-        if ( currentAlert == a ) {
-            working = false;
-            return;
+    $( "#overlay_contents").html( $( a ).html() );
+    $( a ).find( "a" ).each( function() {
+        var id = $( this ).attr( "id" );
+        if ( id ) {
+            $( "#overlay_contents").find( "#" + id ).click( function () {
+                $( a ).find( "#" + id ).click()
+            });
         }
-        $( currentAlert ).overlay().onClose( function() {
-            currentAlert = undefined;
-            working = false;
-            var b = alertStack.pop();
-            if ( b ) {
-                alertStack.push( b );
-                showAlert( b );
-            }
-        }).close();  
-    } else {
-        $( a ).overlay().onLoad(function(){
-            currentAlert = a;
-            working = false;
-            var b = alertStack.pop();
-            if ( b ) {
-                alertStack.push( b );
-                showAlert( b );
-            }
-        }).load();
+    });
+    current_alert = a;
+    if ( ! working ) {
+        working = true;
+        $( "#main_overlay" ).overlay().load();
     }
 };
 
 function closeAlert( a ) {
-
-    // remove from stack
-    var n = new Array();
-    var i;
-    do {
-        i = alertStack.shift();
-        if ( i && i != a ) {
-            n.unshift( i )
-        }
-    } while( i );
-    alertStack = n;
-
-    if ( working || ! currentAlert || currentAlert != a ) {
+    if ( current_alert != a ) {
         return;
     }
-    working = true;
+    current_alert = undefined;
 
-    $( currentAlert ).overlay().onClose( function() {
-        currentAlert = undefined;
-        working = false;
-        var b = alertStack.pop();
-        if ( b ) {
-            alertStack.push( b );
-            showAlert( b );
-        }
-    } ).close();
+    if ( ! working ) {
+        working = true;
+        $( "#main_overlay" ).overlay().close();
+    }
 }
 
 
@@ -86,6 +85,6 @@ function refresh() {
     doRefresh();
 };
 // Call refresh every 1.5 seconds
-setInterval(refresh, 500);
+setInterval(refresh, 2000);
 refresh();
 

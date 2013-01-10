@@ -142,6 +142,10 @@
             </div>
         </div>
     </div>
+    <div id="main_overlay" class="alerta info" style="display: none;">
+        <div id="overlay_contents"></div>
+    </div>
+</div>
 </section>
 
 
@@ -161,6 +165,7 @@
             } else {
                 $( '#total_sum_field' ).hide();
             }
+
             
             if ( status != null && status.toString() != 'null' ) {
                 if ( status == 'TIMEOUT_WARNING' ) {
@@ -208,7 +213,7 @@
                 }
                 lastStatus = status
             }
-            
+           
             var billData = data[ 1 ];
             var total = 0;
             var cnt_total = 0;
