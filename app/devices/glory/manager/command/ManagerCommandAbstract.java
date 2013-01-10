@@ -121,6 +121,16 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 return false;
             }
             switch (gloryStatus.getSr1Mode()) {
+                case escrow_open_request:
+                    if (!openEscrow) {
+                        setError(ManagerInterface.Error.BILLS_IN_ESCROW_CALL_ADMIN,
+                                "There are bills in the escrow call an admin");
+                        return false;
+                    }
+                    if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                        break;
+                    }
+                    break;
                 case storing_error:
                     if (!storingError) {
                         setError(ManagerInterface.Error.STORING_ERROR_CALL_ADMIN,
