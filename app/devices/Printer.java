@@ -121,6 +121,7 @@ public class Printer {
         //Logger.debug("PRINT : %s", body);
 
         HTMLEditorKit kit = new HTMLEditorKit();
+        
         //HTMLEditorKit kit = new LargeHTMLEditorKit();
 /*
         try {

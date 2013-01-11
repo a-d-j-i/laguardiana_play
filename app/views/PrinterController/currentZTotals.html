@@ -1,5 +1,5 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<img src="../public/images/${play.configuration['style.logo']}">
+<img src="../public/images/${play.configuration['style.plogo']}">
 <div style="width: 70mm;">
 Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy hh:mm:ss') } y 
 #{ if z.closeDate == null }aun no cerrado#{/if}

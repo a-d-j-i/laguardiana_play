@@ -38,4 +38,8 @@
   db.LgSystemProperty(clientCode):
     name:  "client_description"
     value:  "LA Guardiana S.A."
+     
+  db.LgSystemProperty(providerCode):
+    name:  "provider_description"
+    value:  "Banco Hipotecario"
     
