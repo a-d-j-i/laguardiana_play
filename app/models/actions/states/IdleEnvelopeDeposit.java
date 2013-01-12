@@ -14,12 +14,17 @@ import play.Logger;
  */
 public class IdleEnvelopeDeposit extends ActionState {
 
+    protected boolean removeRejectedBills = false;
+
     public IdleEnvelopeDeposit(StateApi stateApi) {
         super(stateApi);
     }
 
     @Override
     public String name() {
+        if (removeRejectedBills) {
+            return "REMOVE_REJECTED_BILLS";
+        }
         return "IDLE";
     }
 
@@ -34,6 +39,7 @@ public class IdleEnvelopeDeposit extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
+        boolean r = false;
         switch (m.getState()) {
             case IDLE:
                 stateApi.envelopeDeposit();
@@ -42,11 +48,12 @@ public class IdleEnvelopeDeposit extends ActionState {
                 stateApi.setState(new ReadyToStoreEnvelopeDeposit(stateApi));
                 break;
             case REMOVE_REJECTED_BILLS:
-                stateApi.setState(new RemoveRejectedBills(stateApi, this));
+                r = true;
                 break;
             default:
                 Logger.debug("IdleEnvelopeDeposit onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
+        removeRejectedBills = r;
     }
 }

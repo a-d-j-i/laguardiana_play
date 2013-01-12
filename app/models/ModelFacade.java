@@ -86,6 +86,9 @@ public class ModelFacade {
                     }
                     break;
                 case ERROR:
+                    if (currentUserAction != null) {
+                        currentUserAction.cancel();
+                    }
                     modelError.gloryError = status.getErrorDetail();
                     break;
                 default:

@@ -20,7 +20,7 @@ public class InitCommand extends ManagerCommandAbstract {
     @Override
     public void execute() {
         setState(ManagerInterface.State.INITIALIZING);
-        gotoNeutral(false, false, false);
+        gotoNeutral(false, false);
         setState(ManagerInterface.State.IDLE);
     }
 }

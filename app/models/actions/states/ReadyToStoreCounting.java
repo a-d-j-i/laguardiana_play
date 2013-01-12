@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import models.actions.UserAction;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 

@@ -26,6 +26,7 @@ keyboard.space=ESPACIO
 application.back=VOLVER
 application.continue=CONTINUAR
 application.cancel=CANCELAR
+application.jam=Billete atascado revise la maquina y retire todos los billetes.
 application.canceling=Cancelando.
 application.canceling_detail=Cancelando, espere...
 application.finish=TERMINAR

@@ -44,6 +44,7 @@ abstract public class UserAction {
         messages.put(ManagerInterface.State.CANCELING, "application.canceling");
         messages.put(ManagerInterface.State.CANCELED, "counting_page.deposit_canceled");
         messages.put(ManagerInterface.State.ERROR, "application.error");
+        messages.put(ManagerInterface.State.JAM, "application.jam");
         for (Map.Entry<ManagerInterface.State, String> m : messages.entrySet()) {
             messages.put(m.getKey(), m.getValue());
         }

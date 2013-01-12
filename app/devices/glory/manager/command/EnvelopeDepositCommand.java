@@ -5,8 +5,10 @@
 package devices.glory.manager.command;
 
 import devices.glory.GloryStatus;
+import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.ManagerInterface;
+import play.Logger;
 
 /**
  *
@@ -27,19 +29,14 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        if (!gotoNeutral(false, false, true)) {
+        if (!gotoNeutral(false, true)) {
             return;
         }
-        if (!waitUntilD1State(GloryStatus.D1Mode.manual)) {
+        if (!sendGCommand(new devices.glory.command.SetManualMode())) {
+            setError(ManagerInterface.Error.APP_ERROR,
+                    String.format("EnvelopeDepositCommand gotoManualDeposit Error %s", gloryStatus.getLastError()));
             return;
         }
-        if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
-            return;
-        }
-        if (!waitUntilSR1State(GloryStatus.SR1Mode.escrow_open)) {
-            return;
-        }
-        setState(ManagerInterface.State.PUT_THE_ENVELOPE_IN_THE_ESCROW);
         boolean storeTry = false;
         while (!mustCancel()) {
             if (!sense()) {
@@ -47,6 +44,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
             }
             switch (gloryStatus.getSr1Mode()) {
                 case escrow_open:
+                    setState(ManagerInterface.State.PUT_THE_ENVELOPE_IN_THE_ESCROW);
                     break;
                 case waiting_for_an_envelope_to_set:
                     break;
@@ -75,7 +73,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        gotoNeutral(true, false, true);
+                        gotoNeutral(true, true);
                         return;
                     }
                     if (!gloryStatus.isEscrowBillPresent()) {
@@ -90,9 +88,8 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                     storeTry = true;
                     break;
                 case abnormal_device:
-                    setError(ManagerInterface.Error.JAM,
-                            String.format("EnvelopeDeposit Abnormal device, todo: get the flags"));
-                    return;
+                    setState(ManagerInterface.State.JAM);
+                    break;
                 case storing_error:
                     setError(ManagerInterface.Error.STORING_ERROR_CALL_ADMIN,
                             String.format("EnvelopeDeposit Storing error, todo: get the flags"));
@@ -107,6 +104,6 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
         if (mustCancel()) {
             setState(ManagerInterface.State.CANCELING);
         }
-        gotoNeutral(true, false, false);
+        gotoNeutral(true, false);
     }
 }

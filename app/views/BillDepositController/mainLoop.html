@@ -142,6 +142,14 @@
             </div>
         </div>
     </div>
+    <div id="alerta_jam" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.jam' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'application.jam' }</span>
+            </div>
+        </div>
+    </div>
     <div id="main_overlay" class="alerta info" style="display: none;">
         <div id="overlay_contents"></div>
     </div>
@@ -188,6 +196,11 @@
                 } else {
                     closeAlert( "#alerta_remove_rejected_bills" );    
                 }
+                if ( status == 'JAM' ) {
+                    showAlert( '#alerta_jam' );
+                } else {
+                    closeAlert( "#alerta_jam" );    
+                }
                 if ( status == 'READY_TO_STORE' ) {
                     $( '#continueButton' ).show();
                 } else {
@@ -197,6 +210,7 @@
                 if ( status == 'IDLE' || status == 'TIMEOUT_WARNING' || status == 'CANCELING' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' ) {
                 } else if ( status == 'STORING' ) {
                 } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
+                } else if ( status == 'JAM' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
                     if ( lastStatus != status ) {
                         showAlert( "#alerta_escrow_full" );

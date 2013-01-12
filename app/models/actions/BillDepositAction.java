@@ -4,18 +4,13 @@
  */
 package models.actions;
 
-import devices.DeviceFactory;
 import devices.glory.manager.ManagerInterface;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 import models.BillDeposit;
-import models.Configuration;
 import models.actions.states.IdleBillDeposit;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import play.Logger;
 
 /**
  *

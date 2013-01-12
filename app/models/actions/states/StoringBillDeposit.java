@@ -28,6 +28,18 @@ public class StoringBillDeposit extends ActionState {
     }
 
     @Override
+    public void cancel() {
+        stateApi.cancelTimer();
+        if (!stateApi.cancelDeposit()) {
+            Logger.error("cancelDeposit can't cancel glory");
+        }
+        if (escrowDeposit) {
+            stateApi.closeDeposit();
+        }
+        stateApi.setState(new Canceling(stateApi));
+    }
+
+    @Override
     public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
             case IDLE:

@@ -20,7 +20,7 @@ public class CancelCountCommand extends ManagerCommandAbstract {
     @Override
     public void execute() {
         setState(ManagerInterface.State.CANCELING);
-        gotoNeutral(false, false, false);
+        gotoNeutral(false, false);
         cancel();
     }
 }

@@ -21,7 +21,7 @@ public class CollectCommand extends ManagerCommandAbstract {
     public void execute() {
         setState(ManagerInterface.State.COLLECTING);
         if (sendGloryCommand(new devices.glory.command.SetCollectMode())) {
-            gotoNeutral(false, false, false);
+            gotoNeutral(false, false);
         }
     }
 }

@@ -85,6 +85,6 @@ function refresh() {
     doRefresh();
 };
 // Call refresh every 1.5 seconds
-setInterval(refresh, 2000);
+setInterval(refresh, 500);
 refresh();
 

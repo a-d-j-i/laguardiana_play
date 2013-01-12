@@ -19,7 +19,6 @@ public interface ManagerInterface {
         IDLE,
         READY_TO_STORE,
         STORING,
-        ERROR,
         PUT_THE_BILLS_ON_THE_HOPER,
         COUNTING,
         ESCROW_FULL,
@@ -28,13 +27,14 @@ public interface ManagerInterface {
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
-        CANCELING, CANCELED, COLLECTING;
+        CANCELING, CANCELED, COLLECTING,
+        JAM,
+        ERROR;
     };
 
     static public enum Error {
 
         APP_ERROR,
-        JAM,
         STORING_ERROR_CALL_ADMIN,
         BILLS_IN_ESCROW_CALL_ADMIN;
     };

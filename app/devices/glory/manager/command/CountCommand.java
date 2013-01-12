@@ -4,8 +4,6 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.GloryStatus;
-import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.ManagerInterface;
 import java.util.HashMap;
@@ -107,20 +105,19 @@ public class CountCommand extends ManagerCommandAbstract {
 
     @Override
     public void execute() {
-        setState(ManagerInterface.State.IDLE);
-
-        boolean batchEnd = false;
-        if (!gotoNeutral(false, false, false)) {
-            // ERROR.
+        if (!gotoNeutral(false, false)) {
             return;
         }
         Logger.error("CURRENCY %d", countData.currency.byteValue());
         if (!sendGloryCommand(new devices.glory.command.SwitchCurrency(countData.currency.byteValue()))) {
             return;
         }
-        if (!waitUntilD1State(GloryStatus.D1Mode.deposit)) {
+        if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
+            setError(ManagerInterface.Error.APP_ERROR,
+                    String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError()));
             return;
         }
+        boolean batchEnd = false;
         boolean storeTry = false;
         while (!mustCancel()) {
             Logger.debug("Counting");
@@ -186,12 +183,12 @@ public class CountCommand extends ManagerCommandAbstract {
                 case waiting:
                     // The second time after storing.
                     if (storeTry) {
-                        gotoNeutral(true, false, true);
+                        gotoNeutral(true, true);
                         return;
                     }
                     if (!refreshQuantity()) {
                         String error = gloryStatus.getLastError();
-                        Logger.error("Error %s sending cmd : CountingDataRequest", error);
+                        Logger.error("Error %s sending cmd : CouProcessJamntingDataRequest", error);
                         setError(ManagerInterface.Error.APP_ERROR, error);
                         return;
                     }
@@ -211,10 +208,10 @@ public class CountCommand extends ManagerCommandAbstract {
                                 return;
                             }
                             WaitForEmptyEscrow();
-                            gotoNeutral(true, false, true);
+                            gotoNeutral(true, true);
                             return;
                         }
-                        if (gloryStatus.isRejectFull()) {
+                        if (gloryStatus.isRejectBillPresent()) {
                             WaitForEmptyRejectedBills();
                             break;
                         }
@@ -222,15 +219,23 @@ public class CountCommand extends ManagerCommandAbstract {
                             batchEnd = true;
                         }
                     }
-                    if (gloryStatus.isRejectFull()) {
+                    if (gloryStatus.isRejectBillPresent()) {
                         WaitForEmptyRejectedBills();
                         break;
                     }
                     break;
                 case abnormal_device:
-                    setError(ManagerInterface.Error.JAM,
-                            String.format("Count Abnormal device, todo: get the flags"));
-                    return;
+                    setState(ManagerInterface.State.JAM);
+                    if (!gotoNeutral(true, true)) {
+                        return;
+                    }
+                    setState(ManagerInterface.State.IDLE);
+                    if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
+                        setError(ManagerInterface.Error.APP_ERROR,
+                                String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError()));
+                        return;
+                    }
+                    break;
                 case storing_error:
                     setError(ManagerInterface.Error.STORING_ERROR_CALL_ADMIN,
                             String.format("Count Storing error, todo: get the flags"));
@@ -244,10 +249,31 @@ public class CountCommand extends ManagerCommandAbstract {
         }
         if (mustCancel()) {
             setState(ManagerInterface.State.CANCELING);
-            gotoNeutral(true, false, true);
+            gotoNeutral(true, true);
         } else {
-            gotoNeutral(true, false, false);
+            gotoNeutral(true, false);
         }
+    }
+
+    void WaitForEmptyRejectedBills() {
+        if (!gloryStatus.isRejectBillPresent()) {
+            return;
+        }
+        setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
+        for (int i = 0; i < retries && !mustCancel(); i++) {
+            Logger.debug("WaitForEmptyRejectedBills");
+            if (!sense()) {
+                return;
+            }
+            if (!gloryStatus.isRejectBillPresent()) {
+                setState(ManagerInterface.State.IDLE);
+                return;
+            }
+            sleep();
+        }
+        setError(ManagerInterface.Error.APP_ERROR,
+                "WaitForEmptyRejectedBills waiting too much");
+
     }
 
     public void storeDeposit(Integer sequenceNumber) {
@@ -274,7 +300,9 @@ public class CountCommand extends ManagerCommandAbstract {
         int[] bills = new int[32];
 
         if (!countData.isBatch) {
-            sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills));
+            if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
+                return false;
+            };
             setState(ManagerInterface.State.COUNTING);
             return true;
         }
@@ -302,7 +330,7 @@ public class CountCommand extends ManagerCommandAbstract {
             if (current > desired) {
                 setError(ManagerInterface.Error.APP_ERROR,
                         String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired));
-                return true;
+                return false;
             }
             bills[ countData.currentSlot] = desired - current;
             Logger.debug("---------- slot %d batch billls : %d desired %d value %d", countData.currentSlot, bills[ countData.currentSlot], desired, current);
@@ -314,9 +342,7 @@ public class CountCommand extends ManagerCommandAbstract {
         }
         if (countData.currentSlot < 32) {
             if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
-                String error = gloryStatus.getLastError();
-                Logger.error("Error %s sending cmd : BatchDataTransmition", error);
-                setError(ManagerInterface.Error.APP_ERROR, error);
+                return false;
             }
             setState(ManagerInterface.State.COUNTING);
             return false;
