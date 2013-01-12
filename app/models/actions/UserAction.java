@@ -33,6 +33,7 @@ abstract public class UserAction {
     protected final Map<ManagerInterface.State, String> messages = new EnumMap<ManagerInterface.State, String>(ManagerInterface.State.class);
     protected ActionState state = null;
     protected Integer currentDepositId = null;
+    protected Integer currentBatchId = null;
 
     public UserAction(Currency currency, Object formData, Map<ManagerInterface.State, String> msgs) {
         this.formData = formData;
@@ -89,12 +90,19 @@ abstract public class UserAction {
             deposit.addBatch(batch);
             batch.save();
             deposit.save();
+            currentBatchId = batch.batchId;
         }
 
         public void openDeposit() {
             LgDeposit d = LgDeposit.findById(currentDepositId);
             d.startDate = new Date();
             d.save();
+        }
+
+        public void closeBatch() {
+            LgBatch b = LgBatch.findById(currentBatchId);
+            b.finishDate = new Date();
+            b.save();
         }
 
         public void closeDeposit() {
