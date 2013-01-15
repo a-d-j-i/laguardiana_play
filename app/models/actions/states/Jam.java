@@ -29,7 +29,7 @@ public class Jam extends ActionState {
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
-            case IDLE:
+            case NEUTRAL:
                 stateApi.setState(prevState);
                 break;
             default:

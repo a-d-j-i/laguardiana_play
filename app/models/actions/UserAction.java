@@ -43,7 +43,7 @@ abstract public class UserAction {
         messages.put(ManagerInterface.State.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
         messages.put(ManagerInterface.State.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
         messages.put(ManagerInterface.State.CANCELING, "application.canceling");
-        messages.put(ManagerInterface.State.CANCELED, "counting_page.deposit_canceled");
+        //messages.put(ManagerInterface.State.CANCELED, "counting_page.deposit_canceled");
         messages.put(ManagerInterface.State.ERROR, "application.error");
         messages.put(ManagerInterface.State.JAM, "application.jam");
         for (Map.Entry<ManagerInterface.State, String> m : messages.entrySet()) {
@@ -63,16 +63,16 @@ abstract public class UserAction {
             UserAction.this.state = state;
         }
 
-        public boolean cancelDeposit() {
-            return userActionApi.cancelDeposit();
+        public void count() {
+            userActionApi.count(currency.numericId);
+        }
+
+        public void cancelDeposit() {
+            userActionApi.cancelDeposit();
         }
 
         public boolean store() {
             return userActionApi.store(currentDepositId);
-        }
-
-        public void envelopeDeposit() {
-            userActionApi.envelopeDeposit();
         }
 
         public void withdraw() {
@@ -93,19 +93,24 @@ abstract public class UserAction {
             currentBatchId = batch.batchId;
         }
 
-        public void openDeposit() {
+        public void openEnvelopeDeposit() {
             LgDeposit d = LgDeposit.findById(currentDepositId);
             d.startDate = new Date();
             d.save();
         }
 
         public void closeBatch() {
-            LgBatch b = LgBatch.findById(currentBatchId);
-            b.finishDate = new Date();
-            b.save();
+            if (currentBatchId != null) {
+                LgBatch b = LgBatch.findById(currentBatchId);
+                if (b.finishDate == null) {
+                    b.finishDate = new Date();
+                    b.save();
+                }
+            }
         }
 
         public void closeDeposit() {
+            closeBatch();
             LgDeposit d = LgDeposit.findById(currentDepositId);
             d.finishDate = new Date();
             d.save();

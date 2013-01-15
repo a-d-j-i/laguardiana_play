@@ -8,7 +8,7 @@ import devices.glory.manager.ManagerInterface;
 import java.util.Date;
 import java.util.EnumMap;
 import models.BillDeposit;
-import models.actions.states.IdleBillDeposit;
+import models.actions.states.BillDepositStart;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 
@@ -32,7 +32,7 @@ public class BillDepositAction extends UserAction {
         super(currency, formData, messageMap);
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;
-        state = new IdleBillDeposit(new StateApi(), false);
+        state = new BillDepositStart(new StateApi());
     }
 
     @Override

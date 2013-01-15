@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.manager.command;
 
 import devices.glory.manager.GloryManager.ThreadCommandApi;
@@ -104,7 +100,7 @@ public class CountCommand extends ManagerCommandAbstract {
     }
 
     @Override
-    public void execute() {
+    public void run() {
         if (!gotoNeutral(false, false)) {
             return;
         }
@@ -118,16 +114,15 @@ public class CountCommand extends ManagerCommandAbstract {
             return;
         }
         boolean batchEnd = false;
-        boolean storeTry = false;
         while (!mustCancel()) {
-            Logger.debug("Counting");
+            Logger.debug("Count Command Counting");
             if (!sense()) {
                 return;
             }
             switch (gloryStatus.getSr1Mode()) {
                 case storing_start_request:
                     if (gloryStatus.isRejectBillPresent()) {
-                        WaitForEmptyRejectedBills();
+                        setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
                         break;
                     }
                     if (countData.needToStoreDeposit()) {
@@ -143,12 +138,10 @@ public class CountCommand extends ManagerCommandAbstract {
                         setState(ManagerInterface.State.STORING);
                         break;
                     } else if (countData.needToWithdrawDeposit()) {
-                        countData.withdrawDepositDone();
-                        if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                        if (!sendGCommand(new devices.glory.command.OpenEscrow())) {
                             return;
                         }
-                        WaitForEmptyEscrow();
-                        setState(ManagerInterface.State.IDLE);
+//                        countData.withdrawDepositDone();
                         break;
                     } else {
                         if (countData.isBatch && batchEnd) {
@@ -174,6 +167,24 @@ public class CountCommand extends ManagerCommandAbstract {
                         return;
                     }
                     break;
+                case escrow_open:
+                    setState(ManagerInterface.State.REMOVE_THE_BILLS_FROM_ESCROW);
+                    break;
+                case escrow_close: // The escrow is closing... wait.
+                case being_restoration:
+                    break;
+                case escrow_close_request:
+                    if (gloryStatus.isEscrowBillPresent()) {
+                        break;
+                    }
+                // don't break
+                case being_recover_from_storing_error:
+                case waiting_for_an_envelope_to_set:
+                    if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
+                        return;
+                    }
+                    break;
+
                 case counting:
                     setState(ManagerInterface.State.COUNTING);
                     // The second time after storing.
@@ -181,11 +192,6 @@ public class CountCommand extends ManagerCommandAbstract {
                     refreshQuantity();
                     break;
                 case waiting:
-                    // The second time after storing.
-                    if (storeTry) {
-                        gotoNeutral(true, true);
-                        return;
-                    }
                     if (!refreshQuantity()) {
                         String error = gloryStatus.getLastError();
                         Logger.error("Error %s sending cmd : CouProcessJamntingDataRequest", error);
@@ -197,22 +203,21 @@ public class CountCommand extends ManagerCommandAbstract {
                     }
                     break;
                 case being_store:
-                    storeTry = true;
                     countData.storeDepositDone();
                     break;
                 case counting_start_request:
+                    countData.withdrawDepositDone();
                     if (!countData.needToStoreDeposit()) {
                         // If there are bills in the hoper then it comes here after storing a full escrow
                         if (countData.isBatch && batchEnd) { //BATCH END
                             if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
                                 return;
                             }
-                            WaitForEmptyEscrow();
                             gotoNeutral(true, true);
                             return;
                         }
                         if (gloryStatus.isRejectBillPresent()) {
-                            WaitForEmptyRejectedBills();
+                            setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
                             break;
                         }
                         if (batchCountStart()) { // batch end
@@ -220,7 +225,7 @@ public class CountCommand extends ManagerCommandAbstract {
                         }
                     }
                     if (gloryStatus.isRejectBillPresent()) {
-                        WaitForEmptyRejectedBills();
+                        setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
                         break;
                     }
                     break;
@@ -229,7 +234,6 @@ public class CountCommand extends ManagerCommandAbstract {
                     if (!gotoNeutral(true, true)) {
                         return;
                     }
-                    setState(ManagerInterface.State.IDLE);
                     if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
                         setError(ManagerInterface.Error.APP_ERROR,
                                 String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError()));
@@ -248,32 +252,12 @@ public class CountCommand extends ManagerCommandAbstract {
             sleep();
         }
         if (mustCancel()) {
+            if (!sendGloryCommand(new devices.glory.command.StopCounting())) {
+                return;
+            }
             setState(ManagerInterface.State.CANCELING);
-            gotoNeutral(true, true);
-        } else {
-            gotoNeutral(true, false);
         }
-    }
-
-    void WaitForEmptyRejectedBills() {
-        if (!gloryStatus.isRejectBillPresent()) {
-            return;
-        }
-        setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
-        for (int i = 0; i < retries && !mustCancel(); i++) {
-            Logger.debug("WaitForEmptyRejectedBills");
-            if (!sense()) {
-                return;
-            }
-            if (!gloryStatus.isRejectBillPresent()) {
-                setState(ManagerInterface.State.IDLE);
-                return;
-            }
-            sleep();
-        }
-        setError(ManagerInterface.Error.APP_ERROR,
-                "WaitForEmptyRejectedBills waiting too much");
-
+        gotoNeutral(true, false);
     }
 
     public void storeDeposit(Integer sequenceNumber) {

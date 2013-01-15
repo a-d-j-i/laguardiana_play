@@ -4,7 +4,6 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.GloryStatus;
 import devices.glory.manager.GloryManager;
 import devices.glory.manager.ManagerInterface;
 import play.Logger;
@@ -20,9 +19,8 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
     }
 
     @Override
-    public void execute() {
-        for (int i = 0; i < retries; i++) {
-            boolean avoidCancel = false;
+    public void run() {
+        for (int i = 0; i < retries && !mustCancel(); i++) {
             Logger.debug("StoringErrorReset command");
             if (!sense()) {
                 return;
@@ -34,12 +32,10 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
                                 return;
                             }
-                            avoidCancel = true;
                             break;
                         case escrow_open:
                             break;
                         case being_recover_from_storing_error:
-                            avoidCancel = true;
                             if (!sendGloryCommand(new devices.glory.command.ResetDevice())) {
                                 return;
                             }
@@ -47,23 +43,22 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                         case being_reset:
                             break;
                         case escrow_close_request:
-                            avoidCancel = true;
                             if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
                                 return;
                             }
                         case escrow_close:
                             break;
                         case storing_start_request:
-                            avoidCancel = true;
                             if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                                 return;
                             }
                         case being_store:
                             break;
                         case waiting:
-                            sendRemoteCancel();
+                            if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                return;
+                            }
                             break;
-
                         default:
                             setError(ManagerInterface.Error.APP_ERROR,
                                     String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
@@ -91,20 +86,12 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                 case collect_mode:
                 case manual:
                 case initial:
-                    if (sendRemoteCancel()) {
-                        if (gloryStatus.getSr1Mode() != GloryStatus.SR1Mode.storing_error) {
-                            clearError();
-                            return;
-                        }
-                    }
+                    gotoNeutral(true, true);
                     break;
                 default:
                     setError(ManagerInterface.Error.APP_ERROR,
                             String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name()));
                     break;
-            }
-            if (mustCancel() && !avoidCancel) {
-                break;
             }
             sleep();
         }

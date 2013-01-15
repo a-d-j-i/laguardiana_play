@@ -77,10 +77,11 @@ public class ModelFacade {
         @Override
         public void doJob() throws Exception {
             GloryEvent.save(currentUserAction, status.name());
+            Logger.debug("OnGloryEvent event %s", status.name());
             switch (status.getState()) {
                 //Could happen on startup
                 case INITIALIZING:
-                case IDLE:
+                case NEUTRAL:
                     if (currentUserAction != null) {
                         currentUserAction.onGloryEvent(status);
                     }
@@ -171,8 +172,8 @@ public class ModelFacade {
             }
         }
 
-        public boolean cancelDeposit() {
-            return manager.cancelDeposit();
+        public void cancelDeposit() {
+            manager.cancelCommand();
         }
 
         public void envelopeDeposit() {

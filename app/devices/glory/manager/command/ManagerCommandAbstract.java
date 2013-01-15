@@ -79,30 +79,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     public ManagerCommandAbstract(ThreadCommandApi threadCommandApi) {
         this.threadCommandApi = threadCommandApi;
     }
-    private AtomicBoolean isDone = new AtomicBoolean(false);
     private AtomicBoolean mustCancel = new AtomicBoolean(false);
-
-    abstract public void execute();
-
-    public void run() {
-        isDone.set(false);
-        execute();
-
-        switch (threadCommandApi.getState()) {
-            case ERROR:
-                break;
-            default:
-                if (mustCancel()) {
-                    threadCommandApi.setState(ManagerInterface.State.CANCELED);
-                }
-                threadCommandApi.setState(ManagerInterface.State.IDLE);
-        }
-        isDone.set(true);
-    }
-
-    public boolean isDone() {
-        return isDone.get();
-    }
 
     public void cancel() {
         mustCancel.set(true);
@@ -113,11 +90,17 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     boolean gotoNeutral(boolean openEscrow, boolean forceEmptyHoper) {
+        boolean bagRotated = false;
         for (int i = 0; i < retries; i++) {
-            boolean avoidCancel = false;
             Logger.debug("GOTO NEUTRAL %s %s",
                     (openEscrow ? "OPEN ESCROW" : ""),
                     (forceEmptyHoper ? "FORCE EMPTY HOPER" : ""));
+
+            // If I can open the escrow then I must wait untill it is empty
+            if (mustCancel() && !openEscrow) {
+                Logger.debug("GOTO NEUTRAL CANCELED...");
+                break;
+            }
             if (!sense()) {
                 return false;
             }
@@ -143,7 +126,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
                                 break;
                             }
-                            avoidCancel = true;
                             break;
                         case abnormal_device:
                             setState(ManagerInterface.State.JAM);
@@ -156,36 +138,51 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 }
                             }
                             break;
-                        case escrow_close: // The escrow is closing... wait.
-                            avoidCancel = true;
+                        case escrow_close_request:
+                            if (gloryStatus.isEscrowBillPresent()) {
+                                break;
+                            }
+                        // don't break
+                        case being_recover_from_storing_error:
+                        case waiting_for_an_envelope_to_set:
+                            if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
+                                return false;
+                            }
                             break;
+                        case being_reset:
+                        case escrow_close: // The escrow is closing... wait.
+                        case counting: // Japaneese hack...
+                            break;
+                        case being_restoration:
+                        case escrow_open:
+                            setState(ManagerInterface.State.REMOVE_THE_BILLS_FROM_ESCROW);
+                            break;
+                        case storing_error:
+                            setError(ManagerInterface.Error.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags");
+                            return false;
                         case storing_start_request:
                             if (!openEscrow) {
-                                setError(ManagerInterface.Error.BILLS_IN_ESCROW_CALL_ADMIN,
-                                        "There are bills in the escrow call an admin");
+                                setError(ManagerInterface.Error.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin");
                                 return false;
                             }
                             if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
                                 break;
                             }
-                            avoidCancel = true;
-                        // dont break
-                        case escrow_open:
-                        case escrow_close_request:
-                        case being_restoration:
-                        case being_recover_from_storing_error:
-                        case waiting_for_an_envelope_to_set:
-                            avoidCancel = true;
-                            WaitForEmptyEscrow();
-                            sendRemoteCancel();
                             break;
                         case counting_start_request:
                         case being_exchange_the_cassette:
                         case waiting:
-                            sendRemoteCancel();
-                            break;
-                        case counting:
-                            // Japaneese hack...
+                            if (gloryStatus.isRejectBillPresent()) {
+                                setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
+                                break;
+                            }
+                            if (gloryStatus.isHopperBillPresent()) {
+                                setState(ManagerInterface.State.REMOVE_THE_BILLS_FROM_HOPER);
+                                break;
+                            }
+                            if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                return false;
+                            }
                             break;
                         default:
                             setError(ManagerInterface.Error.APP_ERROR,
@@ -194,11 +191,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     }
                     break;
                 case initial:
-                    if (sendRemoteCancel()) {
-                        if (gloryStatus.getD1Mode() != GloryStatus.D1Mode.neutral) {
-                            setError(ManagerInterface.Error.APP_ERROR,
-                                    String.format("cant set neutral mode d1 (%s) mode not neutral", gloryStatus.getD1Mode().name()));
-                        }
+                    if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                        return false;
                     }
                     break;
                 case neutral:
@@ -212,20 +206,35 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             }
                             break;
                         case waiting:
-                            if (!forceEmptyHoper) {
-                                Logger.debug("GOTO NEUTRAL DONE");
-                                return true;
-                            } else {
+                            if (forceEmptyHoper) {
                                 if (gloryStatus.isRejectBillPresent()) {
                                     setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
+                                    break;
                                 } else if (gloryStatus.isHopperBillPresent()) {
                                     setState(ManagerInterface.State.REMOVE_THE_BILLS_FROM_HOPER);
-                                } else {
-                                    Logger.debug("GOTO NEUTRAL DONE");
-                                    return true;
+                                    break;
                                 }
                             }
-                            break;
+                            if (gloryStatus.isEscrowBillPresent()) {
+                                if (!openEscrow) {
+                                    setError(ManagerInterface.Error.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin");
+                                    return false;
+                                }
+                                if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                                    break;
+                                }
+                            }
+                            if (!bagRotated) {
+                                // Rotate the bag once to fix the glory proble.
+                                bagRotated = true;
+                                if (!sendGloryCommand(new devices.glory.command.SetCollectMode())) {
+                                    break;
+                                }
+                                break;
+                            }
+                            setState(ManagerInterface.State.NEUTRAL);
+                            Logger.debug("GOTO NEUTRAL DONE");
+                            return true;
                         default:
                             setError(ManagerInterface.Error.APP_ERROR,
                                     String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
@@ -236,9 +245,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     setError(ManagerInterface.Error.APP_ERROR,
                             String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name()));
                     break;
-            }
-            if (mustCancel() && !avoidCancel) {
-                break;
             }
             sleep();
         }
@@ -303,75 +309,28 @@ abstract public class ManagerCommandAbstract implements Runnable {
         }
     }
 
-    void WaitForEmptyEscrow() {
-        for (int i = 0; i < retries; i++) {
-            Logger.debug("WaitForEmptyEscrow");
-            if (!sense()) {
-                return;
-            }
-            switch (gloryStatus.getSr1Mode()) {
-                case escrow_close_request:
-                    if (gloryStatus.isEscrowBillPresent()) {
-                        break;
-                    }
-                case being_recover_from_storing_error:
-                case waiting_for_an_envelope_to_set:
-                    if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
-                        return;
-                    }
-                    break;
-                case being_restoration:
-                case counting:
-                case escrow_close:
-                    break;
-                case escrow_open:
-                    setState(ManagerInterface.State.REMOVE_THE_BILLS_FROM_ESCROW);
-                    break;
-                case counting_start_request:
-                case waiting:
-                    return;
-                case abnormal_device:
-                    setState(ManagerInterface.State.JAM);
-                    return;
-                case storing_start_request:
-                case storing_error:
-                    setError(ManagerInterface.Error.STORING_ERROR_CALL_ADMIN,
-                            "Storing error, todo: get the flags");
-                    return;
-                default:
-                    setError(ManagerInterface.Error.APP_ERROR,
-                            String.format("WaitForEmptyEscrow invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
-                    break;
-            }
-            sleep();
-        }
-        setError(ManagerInterface.Error.APP_ERROR,
-                "WaitForEmptyEscrow waiting too much");
-    }
-
-    protected boolean sendRemoteCancel() {
-        // Under this conditions the remoteCancel command fails.
-        if (gloryStatus.isRejectBillPresent()) {
-            setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
-            return false;
-        }
-        if (gloryStatus.isHopperBillPresent()) {
-            setState(ManagerInterface.State.REMOVE_THE_BILLS_FROM_HOPER);
-            return false;
-        }
-        switch (gloryStatus.getSr1Mode()) {
-            case counting:
-            case storing_start_request:
-                return false;
-            default:
-                if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
-                    Logger.error("Error %s sending cmd : RemoteCancel", gloryStatus.getLastError());
-                    return false;
-                }
-                return sense();
-        }
-    }
-
+    /*protected boolean sendRemoteCancel() {
+     // Under this conditions the remoteCancel command fails.
+     if (gloryStatus.isRejectBillPresent()) {
+     setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
+     return false;
+     }
+     if (gloryStatus.isHopperBillPresent()) {
+     setState(ManagerInterface.State.REMOVE_THE_BILLS_FROM_HOPER);
+     return false;
+     }
+     switch (gloryStatus.getSr1Mode()) {
+     case counting:
+     case storing_start_request:
+     return false;
+     default:
+     if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
+     Logger.error("Error %s sending cmd : RemoteCancel", gloryStatus.getLastError());
+     return false;
+     }
+     return sense();
+     }
+     }*/
     void sleep() {
         sleep(500);
     }

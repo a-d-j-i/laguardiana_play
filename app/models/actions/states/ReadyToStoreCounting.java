@@ -5,7 +5,6 @@
 package models.actions.states;
 
 import models.actions.UserAction.StateApi;
-import play.Logger;
 
 /**
  *
@@ -24,8 +23,6 @@ public class ReadyToStoreCounting extends IdleCounting {
 
     @Override
     public void accept() {
-        if (!stateApi.cancelDeposit()) {
-            Logger.error("startCounting can't cancel glory");
-        }
+        stateApi.cancelDeposit();
     }
 }

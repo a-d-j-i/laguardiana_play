@@ -26,7 +26,7 @@ public class ResetState extends ActionState {
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
-            case IDLE:
+            case NEUTRAL:
             case INITIALIZING:
                 stateApi.clearError();
                 stateApi.setState(new Finish(stateApi));

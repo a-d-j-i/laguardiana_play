@@ -12,15 +12,15 @@ import play.Logger;
  *
  * @author adji
  */
-public class Canceling extends ActionState {
+public class BillDepositWithdraw extends ActionState {
 
-    public Canceling(StateApi stateApi) {
+    public BillDepositWithdraw(StateApi stateApi) {
         super(stateApi);
     }
 
     @Override
     public String name() {
-        return "CANCELING";
+        return "IDLE";
     }
 
     @Override
@@ -29,18 +29,10 @@ public class Canceling extends ActionState {
             case NEUTRAL:
                 stateApi.setState(new Finish(stateApi));
                 break;
-            case INITIALIZING:
-                break;
-            case CANCELING:
-                break;
-            case REMOVE_REJECTED_BILLS:
-                break;
-            case REMOVE_THE_BILLS_FROM_ESCROW:
-                break;
-            case REMOVE_THE_BILLS_FROM_HOPER:
-                break;
+            case COUNTING:
+                stateApi.setState(new BillDepositStart(stateApi));
             default:
-                Logger.debug("Canceling invalid state %s %s", m.name(), name());
+                Logger.debug("Withdraw invalid state %s %s", m.name(), name());
                 break;
         }
     }

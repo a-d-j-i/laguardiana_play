@@ -41,15 +41,15 @@ abstract public class ActionState {
     }
 
     public void onGloryEvent(ManagerInterface.Status m) {
-        Logger.debug("ActionState onGloryEvent %s %s", m.name(), name());
+        Logger.error("ActionState invalid onGloryEvent %s %s", m.name(), name());
     }
 
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        Logger.debug("ActionState onIoBoardEvent %s", status.toString());
+        Logger.error("ActionState invalid onIoBoardEvent %s", status.toString());
     }
 
     public void onTimeoutEvent(TimeoutTimer timer) {
-        Logger.debug("ActionState onTimeoutEvent %s", name());
+        Logger.error("ActionState invalid onTimeoutEvent %s", name());
     }
 
     // used by timeout state.

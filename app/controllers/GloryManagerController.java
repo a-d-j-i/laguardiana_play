@@ -89,6 +89,8 @@ public class GloryManagerController extends Application {
                     }
                 }
             }
+            
+        
             if (!manager.count(desiredQuantity, currency)) {
                 error = "Still executing another command";
             }
@@ -99,9 +101,7 @@ public class GloryManagerController extends Application {
 
     public static void cancelDeposit() throws IOException {
         if (manager != null) {
-            if (!manager.cancelDeposit()) {
-                error = "Not counting cant cancel";
-            }
+            manager.cancelCommand();
         }
         index();
     }

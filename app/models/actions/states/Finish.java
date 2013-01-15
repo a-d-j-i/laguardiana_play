@@ -24,13 +24,6 @@ public class Finish extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.Status m) {
-        if (m.getState() != ManagerInterface.State.IDLE) {
-            Logger.debug("Finish invalid state %s %s", m.name(), name());
-        }
-    }
-
-    @Override
     public String getNeededActionAction() {
         return "finish";
     }
@@ -38,5 +31,17 @@ public class Finish extends ActionState {
     @Override
     public boolean canFinishAction() {
         return true;
+    }
+
+    @Override
+    public void onGloryEvent(ManagerInterface.Status m) {
+        switch (m.getState()) {
+            // Was canceled is ok
+            case CANCELING:
+                break;
+            default:
+                Logger.debug("Finish invalid state %s %s", m.name(), name());
+                break;
+        }
     }
 }

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.manager;
 
 import java.util.Map;
@@ -16,9 +12,10 @@ public interface ManagerInterface {
 
     static public enum State {
 
-        IDLE,
+        NEUTRAL,
         READY_TO_STORE,
         STORING,
+        STORED,
         PUT_THE_BILLS_ON_THE_HOPER,
         COUNTING,
         ESCROW_FULL,
@@ -27,7 +24,7 @@ public interface ManagerInterface {
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
-        CANCELING, CANCELED, COLLECTING,
+        CANCELING, COLLECTING,
         JAM,
         ERROR;
     };
@@ -41,7 +38,7 @@ public interface ManagerInterface {
 
     static public class Status extends Observable {
 
-        private State state = State.IDLE;
+        private State state = State.INITIALIZING;
         private Error error;
         private String errorMsg;
 
@@ -56,10 +53,8 @@ public interface ManagerInterface {
 
         synchronized protected void setState(State state) {
             if (this.state != State.ERROR) {
-                if (this.state != state) {
-                    setChanged();
-                }
                 this.state = state;
+                setChanged();
                 notifyObservers(this);
             }
 
@@ -67,7 +62,7 @@ public interface ManagerInterface {
 
         synchronized protected void clearError() {
             if (state == State.ERROR) {
-                this.state = State.IDLE;
+                this.state = State.INITIALIZING;
                 setChanged();
                 notifyObservers(this);
             }
@@ -87,20 +82,19 @@ public interface ManagerInterface {
         }
     }
 
-    public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency);
-
     public Integer getCurrency();
 
     public Map<Integer, Integer> getCurrentQuantity();
 
     public Map<Integer, Integer> getDesiredQuantity();
 
-    // TODO: Fix this.
-    public boolean cancelDeposit();
+    public void cancelCommand();
 
     public boolean storeDeposit(Integer sequenceNumber);
 
     public boolean withdrawDeposit();
+
+    public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency);
 
     public boolean envelopeDeposit();
 

@@ -12,48 +12,36 @@ import play.Logger;
  *
  * @author adji
  */
-public class IdleEnvelopeDeposit extends ActionState {
+public class EnvelopeDepositStart extends ActionState {
 
-    protected boolean removeRejectedBills = false;
-
-    public IdleEnvelopeDeposit(StateApi stateApi) {
+    public EnvelopeDepositStart(StateApi stateApi) {
         super(stateApi);
     }
 
     @Override
     public String name() {
-        if (removeRejectedBills) {
-            return "REMOVE_REJECTED_BILLS";
-        }
         return "IDLE";
     }
 
     @Override
     public void cancel() {
         stateApi.cancelTimer();
-        if (!stateApi.cancelDeposit()) {
-            Logger.error("cancelDeposit can't cancel glory");
-        }
+        stateApi.cancelDeposit();
         stateApi.setState(new Canceling(stateApi));
     }
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
-        boolean r = false;
         switch (m.getState()) {
-            case IDLE:
-                stateApi.envelopeDeposit();
-                break;
             case PUT_THE_ENVELOPE_IN_THE_ESCROW:
-                stateApi.setState(new ReadyToStoreEnvelopeDeposit(stateApi));
+                stateApi.setState(new EnvelopeDepositReadyToStore(stateApi));
                 break;
             case REMOVE_REJECTED_BILLS:
-                r = true;
+                stateApi.setState(new RemoveRejectedBills(stateApi, this));
                 break;
             default:
                 Logger.debug("IdleEnvelopeDeposit onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
-        removeRejectedBills = r;
     }
 }

@@ -80,13 +80,22 @@ class ManagerThreadState {
 
     public class ThreadApi {
 
+        void currentCommandDone() {
+            mutex.lock();
+            try {
+                if ( currentCommand != null ) {
+                    Logger.debug("currentCommandDone ret %s", currentCommand.getClass().getSimpleName());
+                }
+                currentCommand = null;
+            } finally {
+                mutex.unlock();
+            }
+        }
+
         ManagerCommandAbstract getCurrentCommand() {
             ManagerCommandAbstract ret = null;
             mutex.lock();
             try {
-                if (currentCommand != null && currentCommand.isDone()) {
-                    currentCommand = null;
-                }
                 if (currentCommand == null) {
                     waitingWait.signalAll();
                     try {

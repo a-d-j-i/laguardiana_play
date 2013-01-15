@@ -1,14 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.manager.command;
 
-import devices.glory.GloryStatus;
-import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.ManagerInterface;
-import play.Logger;
 
 /**
  *
@@ -28,7 +21,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
     }
 
     @Override
-    public void execute() {
+    public void run() {
         if (!gotoNeutral(false, true)) {
             return;
         }

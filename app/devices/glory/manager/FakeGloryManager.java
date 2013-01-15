@@ -18,7 +18,7 @@ public class FakeGloryManager implements ManagerInterface {
     static boolean stepOneDone = false;
 
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
-        status.setState(State.IDLE);
+        status.setState(State.NEUTRAL);
         billDeposit = true;
         FakeGloryManager.desiredQuantity = desiredQuantity;
         FakeGloryManager.currency = currency;
@@ -29,7 +29,7 @@ public class FakeGloryManager implements ManagerInterface {
 
     public boolean envelopeDeposit() {
         billDeposit = false;
-        status.setState(State.IDLE);
+        status.setState(State.NEUTRAL);
         counter = 0;
         return true;
     }
@@ -51,42 +51,41 @@ public class FakeGloryManager implements ManagerInterface {
         return desiredQuantity;
     }
 
-    public boolean cancelDeposit() {
+    public void cancelCommand() {
         status.setState(State.CANCELING);
-        status.setState(State.CANCELED);
-        return true;
+        status.setState(State.NEUTRAL);
     }
 
     public boolean storeDeposit(Integer sequenceNumber) {
-        if (status.getState() != State.CANCELED && status.getState() != State.CANCELED) {
+        if (status.getState() != State.CANCELING && status.getState() != State.NEUTRAL) {
             if (status.getState() == State.ESCROW_FULL) {
                 status.setState(State.STORING);
                 status.setState(State.COUNTING);
             } else {
                 status.setState(State.STORING);
-                status.setState(State.IDLE);
+                status.setState(State.PUT_THE_BILLS_ON_THE_HOPER);
             }
         }
         return true;
     }
 
     public boolean withdrawDeposit() {
-        status.setState(State.IDLE);
+        status.setState(State.NEUTRAL);
         return true;
     }
 
     public boolean collect() {
-        status.setState(State.IDLE);
+        status.setState(State.NEUTRAL);
         return true;
     }
 
     public boolean reset() {
-        status.setState(State.IDLE);
+        status.setState(State.NEUTRAL);
         return true;
     }
 
     public boolean storingErrorReset() {
-        status.setState(State.IDLE);
+        status.setState(State.NEUTRAL);
         return true;
     }
 
@@ -107,7 +106,7 @@ public class FakeGloryManager implements ManagerInterface {
         }
 
         if (counter == 40) {
-            status.setState(State.IDLE);
+            status.setState(State.PUT_THE_BILLS_ON_THE_HOPER);
             counter = 0;
         }
 

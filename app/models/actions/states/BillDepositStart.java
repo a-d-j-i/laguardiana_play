@@ -13,61 +13,37 @@ import play.Logger;
  *
  * @author adji
  */
-public class IdleBillDeposit extends ActionState {
+public class BillDepositStart extends ActionState {
 
-    final protected boolean escrowDeposit;
-
-    public IdleBillDeposit(StateApi stateApi, boolean escrowDeposit) {
+    public BillDepositStart(StateApi stateApi) {
         super(stateApi);
-        this.escrowDeposit = escrowDeposit;
     }
 
     @Override
     public String name() {
-        if (escrowDeposit) {
-            return "CONTINUE_DEPOSIT";
-        } else {
-            return "IDLE";
-        }
-    }
-
-    @Override
-    public void accept() {
-        if (!escrowDeposit) {
-            return;
-        }
-        stateApi.setState(new StoringBillDeposit(stateApi, escrowDeposit));
+//        if (escrowDeposit) {
+//            return "CONTINUE_DEPOSIT";
+//        } else {
+        return "IDLE";
     }
 
     @Override
     public void cancel() {
         stateApi.cancelTimer();
-        if (!stateApi.cancelDeposit()) {
-            Logger.error("cancelDeposit can't cancel glory");
-        }
-        if (escrowDeposit) {
-            stateApi.closeDeposit();
-        }
-        stateApi.setState(new Canceling(stateApi));
+        stateApi.cancelDeposit();
     }
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
+            case CANCELING:
+                stateApi.setState(new Canceling(stateApi));
+                break;
             case READY_TO_STORE:
-                stateApi.setState(new ReadyToStoreBillDeposit(stateApi, escrowDeposit, false));
+                stateApi.setState(new BillDepositReadyToStore(stateApi));
                 break;
             case ESCROW_FULL:
-                stateApi.setState(new ReadyToStoreBillDeposit(stateApi, true, true));
-                break;
-            case IDLE:
-                stateApi.closeDeposit();
-                stateApi.setState(new Finish(stateApi));
-                break;
-            case CANCELED:
-                stateApi.setState(new Finish(stateApi));
-                break;
-            case CANCELING:
+                stateApi.setState(new BillDepositReadyEscrowFull(stateApi));
                 break;
             case COUNTING:
                 //stateApi.cancelTimer();
@@ -81,8 +57,14 @@ public class IdleBillDeposit extends ActionState {
             case JAM:
                 stateApi.setState(new Jam(stateApi, this));
                 break;
+            case REMOVE_THE_BILLS_FROM_HOPER:
+                break;
+            case REMOVE_THE_BILLS_FROM_ESCROW:
+                break;
+            case INITIALIZING:
+                break;
             default:
-                Logger.debug("IdleBillDeposit onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("BillDepositStart onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
     }

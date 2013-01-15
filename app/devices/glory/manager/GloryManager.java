@@ -40,6 +40,10 @@ public class GloryManager {
             managerThreadApi = managerThreadState.getThreadApi();
         }
 
+        void currentCommandDone() {
+            managerThreadApi.currentCommandDone();
+        }
+
         public ManagerCommandAbstract getCurrentCommand() {
             return managerThreadApi.getCurrentCommand();
         }
@@ -90,15 +94,24 @@ public class GloryManager {
         }
 
         public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
-            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
-            if (cmd != null) {
-                if (cmd instanceof CountCommand) {
-                    return true;
-                }
-                // still executing
-                return false;
-            }
             return managerControllerApi.sendCommand(new CountCommand(threadCommandApi, desiredQuantity, currency));
+        }
+
+        public boolean envelopeDeposit() {
+            return managerControllerApi.sendCommand(new EnvelopeDepositCommand(threadCommandApi));
+        }
+
+        public boolean collect() {
+            return managerControllerApi.sendCommand(new CollectCommand(threadCommandApi));
+
+        }
+
+        public boolean reset() {
+            return managerControllerApi.sendCommand(new ResetCommand(threadCommandApi));
+        }
+
+        public boolean storingErrorReset() {
+            return managerControllerApi.sendCommand(new StoringErrorResetCommand(threadCommandApi));
         }
 
         public Integer getCurrency() {
@@ -134,19 +147,12 @@ public class GloryManager {
             return ((CountCommand) cmd).getDesiredQuantity();
         }
 
-        // TODO: Fix this.
-        public boolean cancelDeposit() {
+        public void cancelCommand() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
-                Logger.debug("cancelDeposit executing cancelcount");
-                return managerControllerApi.sendCommand(new CancelCountCommand(threadCommandApi));
-            }
-            // TODO: One base class
-            if (!(cmd instanceof CountCommand) && !(cmd instanceof EnvelopeDepositCommand)) {
-                return false;
+                return;
             }
             cmd.cancel();
-            return true;
         }
 
         public boolean storeDeposit(Integer sequenceNumber) {
@@ -178,68 +184,6 @@ public class GloryManager {
                 return true;
             }
             return false;
-        }
-
-        public boolean envelopeDeposit() {
-            Logger.debug("envelopeDeposit");
-            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
-            if (cmd != null) {
-                if (cmd instanceof EnvelopeDepositCommand) {
-                    return true;
-                }
-                // still executing
-                return false;
-            }
-            return managerControllerApi.sendCommand(new EnvelopeDepositCommand(threadCommandApi));
-        }
-
-        public boolean collect() {
-            Logger.debug("collect");
-            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
-            if (cmd != null) {
-                if (cmd instanceof CollectCommand) {
-                    Logger.debug("collect RUNNING");
-                    return true;
-                }
-                cmd.cancel();
-                // still executing
-                Logger.debug("cmd still executing");
-                return false;
-            }
-            Logger.debug("executing collect");
-            return managerControllerApi.sendCommand(new CollectCommand(threadCommandApi));
-
-        }
-
-        public boolean reset() {
-            Logger.debug("reset");
-            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
-            if (cmd != null) {
-                if (cmd instanceof ResetCommand) {
-                    Logger.debug("reset RUNNING");
-                    return true;
-                }
-                cmd.cancel();
-                // still executing
-                Logger.debug("cmd still executing");
-                return false;
-            }
-            Logger.debug("executing reset");
-            return managerControllerApi.sendCommand(new ResetCommand(threadCommandApi));
-        }
-
-        public boolean storingErrorReset() {
-            Logger.debug("storing error reset");
-            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
-            if (cmd != null) {
-                if (cmd instanceof StoringErrorResetCommand) {
-                    return true;
-                }
-                cmd.cancel();
-                // still executing
-                return false;
-            }
-            return managerControllerApi.sendCommand(new StoringErrorResetCommand(threadCommandApi));
         }
 
         public Status getStatus() {

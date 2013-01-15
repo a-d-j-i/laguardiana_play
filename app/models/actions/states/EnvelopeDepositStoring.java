@@ -13,9 +13,9 @@ import play.Logger;
  *
  * @author adji
  */
-class StoringEnvelopeDeposit extends ActionState {
+class EnvelopeDepositStoring extends ActionState {
 
-    public StoringEnvelopeDeposit(StateApi stateApi) {
+    public EnvelopeDepositStoring(StateApi stateApi) {
         super(stateApi);
     }
 
@@ -27,7 +27,7 @@ class StoringEnvelopeDeposit extends ActionState {
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
-            case IDLE:
+            case NEUTRAL:
                 stateApi.closeDeposit();
                 if (Configuration.ioBoardIgnore()) {
                     stateApi.setState(new Finish(stateApi));
@@ -36,6 +36,7 @@ class StoringEnvelopeDeposit extends ActionState {
                     stateApi.setState(new WaitForClosedGate(stateApi, new Finish(stateApi)));
                 }
                 break;
+            case INITIALIZING:
             case STORING:
                 break;
             default:

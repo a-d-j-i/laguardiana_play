@@ -16,7 +16,7 @@ import java.util.Map;
 import javax.print.PrintException;
 import models.Configuration;
 import models.EnvelopeDeposit;
-import models.actions.states.IdleEnvelopeDeposit;
+import models.actions.states.EnvelopeDepositStart;
 import models.db.LgEnvelope;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
@@ -42,7 +42,7 @@ public class EnvelopeDepositAction extends UserAction {
         this.userCodeLov = userCodeLov;
         this.userCode = userCode;
         this.envelope = envelope;
-        state = new IdleEnvelopeDeposit(new StateApi());
+        state = new EnvelopeDepositStart(new StateApi());
     }
 
     @Override

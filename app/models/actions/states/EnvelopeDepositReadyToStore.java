@@ -13,9 +13,9 @@ import play.Logger;
  *
  * @author adji
  */
-public class ReadyToStoreEnvelopeDeposit extends IdleEnvelopeDeposit {
+public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
 
-    public ReadyToStoreEnvelopeDeposit(StateApi stateApi) {
+    public EnvelopeDepositReadyToStore(StateApi stateApi) {
         super(stateApi);
     }
 
@@ -26,7 +26,7 @@ public class ReadyToStoreEnvelopeDeposit extends IdleEnvelopeDeposit {
 
     @Override
     public void accept() {
-        stateApi.openDeposit();
+        stateApi.openEnvelopeDeposit();
         if (!stateApi.store()) {
             Logger.error("startEnvelopeDeposit can't cancel glory");
         }
@@ -40,10 +40,10 @@ public class ReadyToStoreEnvelopeDeposit extends IdleEnvelopeDeposit {
                     if (!stateApi.store()) {
                         Logger.error("startBillDeposit can't cancel glory");
                     }
-                    stateApi.setState(new StoringEnvelopeDeposit(stateApi));
+                    stateApi.setState(new EnvelopeDepositStoring(stateApi));
                 } else {
                     stateApi.openGate();
-                    stateApi.setState(new WaitForOpenGate(stateApi, new StoringEnvelopeDeposit(stateApi)));
+                    stateApi.setState(new WaitForOpenGate(stateApi, new EnvelopeDepositStoring(stateApi)));
                 }
                 break;
             /*            case STORING:

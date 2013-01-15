@@ -11,16 +11,15 @@ import devices.glory.manager.ManagerInterface;
  *
  * @author adji
  */
-public class CancelCountCommand extends ManagerCommandAbstract {
+public class GotoNeutral extends ManagerCommandAbstract {
 
-    public CancelCountCommand(ThreadCommandApi threadCommandApi) {
+    public GotoNeutral(ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
 
     @Override
-    public void execute() {
-        setState(ManagerInterface.State.CANCELING);
+    public void run() {
+        setState(ManagerInterface.State.INITIALIZING);
         gotoNeutral(false, false);
-        cancel();
     }
 }

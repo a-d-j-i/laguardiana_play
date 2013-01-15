@@ -13,13 +13,10 @@ import play.Logger;
  *
  * @author adji
  */
-public class StoringBillDeposit extends ActionState {
+public class BillDepositStoring extends ActionState {
 
-    final protected boolean escrowDeposit;
-
-    public StoringBillDeposit(UserAction.StateApi stateApi, boolean escrowDeposit) {
+    public BillDepositStoring(UserAction.StateApi stateApi) {
         super(stateApi);
-        this.escrowDeposit = escrowDeposit;
     }
 
     @Override
@@ -28,38 +25,25 @@ public class StoringBillDeposit extends ActionState {
     }
 
     @Override
-    public void cancel() {
-        stateApi.cancelTimer();
-        if (!stateApi.cancelDeposit()) {
-            Logger.error("cancelDeposit can't cancel glory");
-        }
-        if (escrowDeposit) {
-            stateApi.closeDeposit();
-        }
-        stateApi.setState(new Canceling(stateApi));
-    }
-
-    @Override
     public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
-            case IDLE:
+            case PUT_THE_BILLS_ON_THE_HOPER:
                 stateApi.closeDeposit();
-                stateApi.closeBatch();
                 if (Configuration.ioBoardIgnore()) {
                     stateApi.setState(new Finish(stateApi));
                 } else {
                     stateApi.closeGate();
                     stateApi.setState(new WaitForClosedGate(stateApi, new Finish(stateApi)));
                 }
+                stateApi.cancelDeposit();
                 break;
-            case READY_TO_STORE:
             case COUNTING:
                 stateApi.closeBatch();
                 if (Configuration.ioBoardIgnore()) {
-                    stateApi.setState(new IdleBillDeposit(stateApi, escrowDeposit));
+                    stateApi.setState(new BillDepositStart(stateApi));
                 } else {
                     stateApi.closeGate();
-                    stateApi.setState(new WaitForClosedGate(stateApi, new IdleBillDeposit(stateApi, escrowDeposit)));
+                    stateApi.setState(new WaitForClosedGate(stateApi, new BillDepositStart(stateApi)));
                 }
                 break;
             case STORING:

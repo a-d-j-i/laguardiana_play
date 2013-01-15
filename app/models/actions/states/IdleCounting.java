@@ -26,9 +26,7 @@ public class IdleCounting extends ActionState {
     @Override
     public void cancel() {
         stateApi.cancelTimer();
-        if (!stateApi.cancelDeposit()) {
-            Logger.error("cancelDeposit can't cancel glory");
-        }
+        stateApi.cancelDeposit();
         stateApi.setState(new Canceling(stateApi));
     }
 
@@ -48,7 +46,7 @@ public class IdleCounting extends ActionState {
             case PUT_THE_BILLS_ON_THE_HOPER:
                 //startTimer(ActionState.IDLE);
                 break;
-            case IDLE:
+            case NEUTRAL:
                 stateApi.setState(new Finish(stateApi));
                 break;
             default:

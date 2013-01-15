@@ -5,7 +5,6 @@
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface;
-import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -32,8 +31,13 @@ public class RemoveRejectedBills extends ActionState {
         switch (m.getState()) {
             // Envelope deposit.
             case PUT_THE_ENVELOPE_IN_THE_ESCROW:
-            case IDLE:
+            case REMOVE_THE_BILLS_FROM_HOPER:
+            case ESCROW_FULL:
+            case NEUTRAL:
+            case COUNTING:
                 stateApi.setState(prevState);
+                break;
+            case REMOVE_REJECTED_BILLS:
                 break;
             default:
                 Logger.debug("RemoveRejectedBills onGloryEvent invalid state %s %s", m.name(), name());

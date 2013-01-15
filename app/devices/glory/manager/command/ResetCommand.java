@@ -18,7 +18,7 @@ public class ResetCommand extends ManagerCommandAbstract {
     }
 
     @Override
-    public void execute() {
+    public void run() {
         Logger.debug("Reset command");
         clearError();
         if (gotoNeutral(false, true)) {
