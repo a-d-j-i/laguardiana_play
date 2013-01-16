@@ -17,7 +17,7 @@ import play.mvc.Before;
 public class GloryManagerController extends Application {
 
     static ManagerInterface manager;
-    static ManagerInterface.State status = ManagerInterface.State.ERROR;
+    static ManagerInterface.ManagerState status = ManagerInterface.ManagerState.ERROR;
     static String error = null;
     static String success = null;
 
@@ -28,7 +28,7 @@ public class GloryManagerController extends Application {
             error = "Manager error opening port";
         } else {
             success = manager.getStatus().name();
-            if (manager.getStatus().getState() == ManagerInterface.State.ERROR) {
+            if (manager.getStatus().getState() == ManagerInterface.ManagerState.ERROR) {
                 error = manager.getStatus().getErrorDetail();
             } else {
                 error = null;

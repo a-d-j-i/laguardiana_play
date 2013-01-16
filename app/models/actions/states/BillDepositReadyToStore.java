@@ -47,6 +47,7 @@ public class BillDepositReadyToStore extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.Status m) {
+        Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case READY_TO_STORE:
                 break;
@@ -54,7 +55,10 @@ public class BillDepositReadyToStore extends ActionState {
                 stateApi.setState(new Canceling(stateApi));
                 break;
             case COUNTING:
-                //stateApi.cancelTimer();
+                stateApi.setState(new BillDepositStart(stateApi));
+                break;
+            case ESCROW_FULL:
+                stateApi.setState(new BillDepositReadyEscrowFull(stateApi));
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
                 //stateApi.startTimer();

@@ -30,23 +30,23 @@ abstract public class UserAction {
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
     protected User currentUser = null;
-    protected final Map<ManagerInterface.State, String> messages = new EnumMap<ManagerInterface.State, String>(ManagerInterface.State.class);
+    protected final Map<ManagerInterface.ManagerState, String> messages = new EnumMap<ManagerInterface.ManagerState, String>(ManagerInterface.ManagerState.class);
     protected ActionState state = null;
     protected Integer currentDepositId = null;
     protected Integer currentBatchId = null;
 
-    public UserAction(Currency currency, Object formData, Map<ManagerInterface.State, String> msgs) {
+    public UserAction(Currency currency, Object formData, Map<ManagerInterface.ManagerState, String> msgs) {
         this.formData = formData;
         this.currency = currency;
-        messages.put(ManagerInterface.State.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
-        messages.put(ManagerInterface.State.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
-        messages.put(ManagerInterface.State.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
-        messages.put(ManagerInterface.State.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
-        messages.put(ManagerInterface.State.CANCELING, "application.canceling");
+        messages.put(ManagerInterface.ManagerState.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
+        messages.put(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
+        messages.put(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
+        messages.put(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
+        messages.put(ManagerInterface.ManagerState.CANCELING, "application.canceling");
         //messages.put(ManagerInterface.State.CANCELED, "counting_page.deposit_canceled");
-        messages.put(ManagerInterface.State.ERROR, "application.error");
-        messages.put(ManagerInterface.State.JAM, "application.jam");
-        for (Map.Entry<ManagerInterface.State, String> m : messages.entrySet()) {
+        messages.put(ManagerInterface.ManagerState.ERROR, "application.error");
+        messages.put(ManagerInterface.ManagerState.JAM, "application.jam");
+        for (Map.Entry<ManagerInterface.ManagerState, String> m : messages.entrySet()) {
             messages.put(m.getKey(), m.getValue());
         }
     }

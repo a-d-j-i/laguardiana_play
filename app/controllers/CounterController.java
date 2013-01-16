@@ -6,7 +6,6 @@ package controllers;
 
 import devices.DeviceFactory;
 import devices.IoBoard;
-import devices.glory.manager.GloryManager;
 import devices.glory.manager.ManagerInterface;
 import models.ModelFacade;
 import play.Logger;
@@ -55,7 +54,7 @@ public class CounterController extends Controller {
         final ManagerInterface manager = DeviceFactory.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
-            gerror = manager.getStatus().getErrorDetail();
+            gerror = manager.getStatus().toString();
         }
         final IoBoard ioBoard = DeviceFactory.getIoBoard();
         if (ioBoard != null) {

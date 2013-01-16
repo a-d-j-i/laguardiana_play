@@ -18,7 +18,7 @@ public class FakeGloryManager implements ManagerInterface {
     static boolean stepOneDone = false;
 
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
-        status.setState(State.NEUTRAL);
+        status.setState(ManagerState.NEUTRAL);
         billDeposit = true;
         FakeGloryManager.desiredQuantity = desiredQuantity;
         FakeGloryManager.currency = currency;
@@ -29,7 +29,7 @@ public class FakeGloryManager implements ManagerInterface {
 
     public boolean envelopeDeposit() {
         billDeposit = false;
-        status.setState(State.NEUTRAL);
+        status.setState(ManagerState.NEUTRAL);
         counter = 0;
         return true;
     }
@@ -52,40 +52,40 @@ public class FakeGloryManager implements ManagerInterface {
     }
 
     public void cancelCommand() {
-        status.setState(State.CANCELING);
-        status.setState(State.NEUTRAL);
+        status.setState(ManagerState.CANCELING);
+        status.setState(ManagerState.NEUTRAL);
     }
 
     public boolean storeDeposit(Integer sequenceNumber) {
-        if (status.getState() != State.CANCELING && status.getState() != State.NEUTRAL) {
-            if (status.getState() == State.ESCROW_FULL) {
-                status.setState(State.STORING);
-                status.setState(State.COUNTING);
+        if (status.getState() != ManagerState.CANCELING && status.getState() != ManagerState.NEUTRAL) {
+            if (status.getState() == ManagerState.ESCROW_FULL) {
+                status.setState(ManagerState.STORING);
+                status.setState(ManagerState.COUNTING);
             } else {
-                status.setState(State.STORING);
-                status.setState(State.PUT_THE_BILLS_ON_THE_HOPER);
+                status.setState(ManagerState.STORING);
+                status.setState(ManagerState.PUT_THE_BILLS_ON_THE_HOPER);
             }
         }
         return true;
     }
 
     public boolean withdrawDeposit() {
-        status.setState(State.NEUTRAL);
+        status.setState(ManagerState.NEUTRAL);
         return true;
     }
 
     public boolean collect() {
-        status.setState(State.NEUTRAL);
+        status.setState(ManagerState.NEUTRAL);
         return true;
     }
 
     public boolean reset() {
-        status.setState(State.NEUTRAL);
+        status.setState(ManagerState.NEUTRAL);
         return true;
     }
 
     public boolean storingErrorReset() {
-        status.setState(State.NEUTRAL);
+        status.setState(ManagerState.NEUTRAL);
         return true;
     }
 
@@ -94,19 +94,19 @@ public class FakeGloryManager implements ManagerInterface {
         if (counter % 10 == 0) {
             if (billDeposit) {
                 if (!stepOneDone) {
-                    status.setState(State.ESCROW_FULL);
+                    status.setState(ManagerState.ESCROW_FULL);
                     stepOneDone = true;
                 }
             } else {
-                status.setState(State.PUT_THE_ENVELOPE_IN_THE_ESCROW);
+                status.setState(ManagerState.PUT_THE_ENVELOPE_IN_THE_ESCROW);
             }
         }
         if (counter % 20 == 0) {
-            status.setState(State.READY_TO_STORE);
+            status.setState(ManagerState.READY_TO_STORE);
         }
 
         if (counter == 40) {
-            status.setState(State.PUT_THE_BILLS_ON_THE_HOPER);
+            status.setState(ManagerState.PUT_THE_BILLS_ON_THE_HOPER);
             counter = 0;
         }
 

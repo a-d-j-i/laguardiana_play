@@ -34,7 +34,8 @@ public class BillDepositStart extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.Status m) {
+        public void onGloryEvent(ManagerInterface.Status m) {
+        Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case CANCELING:
                 stateApi.setState(new Canceling(stateApi));

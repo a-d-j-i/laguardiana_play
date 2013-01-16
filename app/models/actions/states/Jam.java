@@ -1,4 +1,4 @@
-/*
+ /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -27,7 +27,7 @@ public class Jam extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.Status m) {
+        public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
             case NEUTRAL:
                 stateApi.setState(prevState);

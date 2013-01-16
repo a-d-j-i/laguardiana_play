@@ -1,13 +1,3 @@
-var waiting = false;
-var lastStatus = "false";
-
-function doneRefresh() {
-    waiting = false;
-};
-var doRefresh = function() {
-    doneRefresh();
-};
-
 $( "#main_overlay" ).overlay({
     top: 100,
     left: "center",
@@ -74,8 +64,16 @@ function closeAlert( a ) {
     }
 }
 
+var waiting = false;
+var lastStatus = "false";
 
+function doneRefresh() {
+    waiting = false;
+};
 
+var doRefresh = function() {
+    doneRefresh();
+};
 
 function refresh() {
     if ( waiting ) {

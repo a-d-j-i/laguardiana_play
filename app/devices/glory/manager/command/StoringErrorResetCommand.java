@@ -60,7 +60,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             }
                             break;
                         default:
-                            setError(ManagerInterface.Error.APP_ERROR,
+                            setError(ManagerInterface.ManagerError.APP_ERROR,
                                     String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
                             break;
                     }
@@ -76,7 +76,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             clearError();
                             return;
                         default:
-                            setError(ManagerInterface.Error.APP_ERROR,
+                            setError(ManagerInterface.ManagerError.APP_ERROR,
                                     String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
                             break;
                     }
@@ -89,14 +89,14 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                     gotoNeutral(true, true);
                     break;
                 default:
-                    setError(ManagerInterface.Error.APP_ERROR,
+                    setError(ManagerInterface.ManagerError.APP_ERROR,
                             String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name()));
                     break;
             }
             sleep();
         }
         if (!mustCancel()) {
-            setError(ManagerInterface.Error.APP_ERROR, "GOTO NEUTRAL TIMEOUT");
+            setError(ManagerInterface.ManagerError.APP_ERROR, "GOTO NEUTRAL TIMEOUT");
             Logger.debug("GOTO NEUTRAL TIMEOUT!!!");
         }
 

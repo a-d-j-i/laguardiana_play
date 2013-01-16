@@ -2,7 +2,7 @@ package devices.glory.manager;
 
 import devices.glory.Glory;
 import devices.glory.command.GloryCommandAbstract;
-import devices.glory.manager.ManagerInterface.State;
+import devices.glory.manager.ManagerInterface.ManagerState;
 import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.Observer;
@@ -60,11 +60,11 @@ public class GloryManager {
             return device.sendCommand(cmd, debug);
         }
 
-        public State getState() {
+        public ManagerState getState() {
             return status.getState();
         }
 
-        public void setState(State s) {
+        public void setState(ManagerState s) {
             status.setState(s);
         }
 
@@ -72,7 +72,7 @@ public class GloryManager {
             status.clearError();
         }
 
-        public void setErrorInfo(ManagerInterface.Error e, String msg) {
+        public void setErrorInfo(ManagerInterface.ManagerError e, String msg) {
             status.setError(e, msg);
         }
     }

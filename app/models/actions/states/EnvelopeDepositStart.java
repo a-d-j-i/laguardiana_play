@@ -31,7 +31,8 @@ public class EnvelopeDepositStart extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.Status m) {
+        public void onGloryEvent(ManagerInterface.Status m) {
+        Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case PUT_THE_ENVELOPE_IN_THE_ESCROW:
                 stateApi.setState(new EnvelopeDepositReadyToStore(stateApi));

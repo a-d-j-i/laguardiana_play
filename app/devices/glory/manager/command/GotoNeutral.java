@@ -19,7 +19,7 @@ public class GotoNeutral extends ManagerCommandAbstract {
 
     @Override
     public void run() {
-        setState(ManagerInterface.State.INITIALIZING);
+        setState(ManagerInterface.ManagerState.INITIALIZING);
         gotoNeutral(false, false);
     }
 }

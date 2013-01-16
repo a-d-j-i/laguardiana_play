@@ -188,7 +188,7 @@ public class ModelFacade {
             }
         }
 
-        public ManagerInterface.State getManagerState() {
+        public ManagerInterface.ManagerState getManagerState() {
             return manager.getStatus().getState();
         }
 
@@ -266,7 +266,7 @@ public class ModelFacade {
         if (isLocked()) {
             return null;
         }
-        if (manager.getStatus().getState() == ManagerInterface.State.ERROR) {
+        if (manager.getStatus().getState() == ManagerInterface.ManagerState.ERROR) {
             if (Play.configuration.getProperty("glory.ignore") == null) {
                 setError(String.format("Glory error : %s", manager.getStatus().getErrorDetail()));
             }
@@ -326,8 +326,8 @@ public class ModelFacade {
 
     private static void clearError() {
         Logger.debug("clearing error");
-        ManagerInterface.State m = manager.getStatus().getState();
-        if (m != ManagerInterface.State.ERROR) {
+        ManagerInterface.ManagerState m = manager.getStatus().getState();
+        if (m != ManagerInterface.ManagerState.ERROR) {
             modelError.gloryError = null;
         } else {
             Logger.error("Manager still in error %s", m.name());

@@ -24,7 +24,7 @@ public class ResetState extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.Status m) {
+        public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
             case NEUTRAL:
             case INITIALIZING:

@@ -15,11 +15,11 @@ import models.lov.Currency;
  */
 public class CountingAction extends UserAction {
 
-    static final EnumMap<ManagerInterface.State, String> messageMap = new EnumMap<ManagerInterface.State, String>(ManagerInterface.State.class);
+    static final EnumMap<ManagerInterface.ManagerState, String> messageMap = new EnumMap<ManagerInterface.ManagerState, String>(ManagerInterface.ManagerState.class);
 
     static {
-        messageMap.put(ManagerInterface.State.READY_TO_STORE, "counting.ready_to_store");
-        messageMap.put(ManagerInterface.State.ESCROW_FULL, "counting.escrow_full");
+        messageMap.put(ManagerInterface.ManagerState.READY_TO_STORE, "counting.ready_to_store");
+        messageMap.put(ManagerInterface.ManagerState.ESCROW_FULL, "counting.escrow_full");
     }
 
     public CountingAction(Currency currency, Object formData) {

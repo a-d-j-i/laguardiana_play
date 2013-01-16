@@ -10,7 +10,7 @@ import java.util.Observer;
  */
 public interface ManagerInterface {
 
-    static public enum State {
+    static public enum ManagerState {
 
         NEUTRAL,
         READY_TO_STORE,
@@ -29,7 +29,7 @@ public interface ManagerInterface {
         ERROR;
     };
 
-    static public enum Error {
+    static public enum ManagerError {
 
         APP_ERROR,
         STORING_ERROR_CALL_ADMIN,
@@ -38,8 +38,8 @@ public interface ManagerInterface {
 
     static public class Status extends Observable {
 
-        private State state = State.INITIALIZING;
-        private Error error;
+        private ManagerState state = ManagerState.INITIALIZING;
+        private ManagerError error;
         private String errorMsg;
 
         @Override
@@ -47,12 +47,12 @@ public interface ManagerInterface {
             return "Error ( " + error + " ) : " + errorMsg;
         }
 
-        synchronized public State getState() {
+        synchronized public ManagerState getState() {
             return state;
         }
 
-        synchronized protected void setState(State state) {
-            if (this.state != State.ERROR) {
+        synchronized protected void setState(ManagerState state) {
+            if (this.state != ManagerState.ERROR) {
                 this.state = state;
                 setChanged();
                 notifyObservers(this);
@@ -61,8 +61,8 @@ public interface ManagerInterface {
         }
 
         synchronized protected void clearError() {
-            if (state == State.ERROR) {
-                this.state = State.INITIALIZING;
+            if (state == ManagerState.ERROR) {
+                this.state = ManagerState.INITIALIZING;
                 setChanged();
                 notifyObservers(this);
             }
@@ -72,7 +72,7 @@ public interface ManagerInterface {
             return "ErrorDetail{" + "code=" + error + ", data=" + errorMsg + '}';
         }
 
-        synchronized protected void setError(Error e, String msg) {
+        synchronized protected void setError(ManagerError e, String msg) {
             this.error = e;
             this.errorMsg = msg;
         }

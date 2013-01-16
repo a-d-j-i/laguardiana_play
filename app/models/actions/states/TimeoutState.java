@@ -28,7 +28,7 @@ public class TimeoutState extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.Status m) {
+        public void onGloryEvent(ManagerInterface.Status m) {
         suspendTimeout();
         returnState.onGloryEvent(m);
     }

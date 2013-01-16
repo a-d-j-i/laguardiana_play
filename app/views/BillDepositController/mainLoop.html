@@ -164,18 +164,29 @@
         $.getJSON( '@{mainLoop}', function( data ) {
             
             var status = data[ 0 ];
-            
-            $( '.info_message' ).html(  data[ 2 ] );
-            var totalSum = data[ 3 ];
-            if ( totalSum > 0 ) {
-                $( '.totalSum' ).html( totalSum ).show();
-                $( '#total_sum_field' ).show();
-            } else {
-                $( '#total_sum_field' ).hide();
-            }
-
-            
+           
             if ( status != null && status.toString() != 'null' ) {
+                if ( status == 'IDLE' || status == 'TIMEOUT_WARNING' || status == 'CANCELING' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' ) {
+                } else if ( status == 'STORING' ) {
+                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
+                } else if ( status == 'JAM' ) {
+                } else if ( status == 'ESCROW_FULL' ) {
+                    if ( lastStatus != status ) {
+                        showAlert( "#alerta_escrow_full" );
+                    }
+                } else if ( status == 'FINISH' ) {
+                    window.location.href = "@{finish}";
+                    return;
+                } else if ( status == 'TIMEOUT_WARNING') {
+                } else if ( status == 'COUNTING' ) {
+                } else if ( status == 'ERROR' ) {
+                    window.location.href = "@{counterError()}";
+                    return;
+                } else {          
+                    alert( "Invalid status : " + status + " last status : " + lastStatus );
+                }
+                
+                
                 if ( status == 'TIMEOUT_WARNING' ) {
                     showAlert( "#alerta_timeout" );
                 } else {
@@ -207,27 +218,18 @@
                     $( '#continueButton' ).hide();
                 }
                 
-                if ( status == 'IDLE' || status == 'TIMEOUT_WARNING' || status == 'CANCELING' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' ) {
-                } else if ( status == 'STORING' ) {
-                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
-                } else if ( status == 'JAM' ) {
-                } else if ( status == 'ESCROW_FULL' ) {
-                    if ( lastStatus != status ) {
-                        showAlert( "#alerta_escrow_full" );
-                    }
-                } else if ( status == 'FINISH' ) {
-                    window.location.href = "@{finish}";
-                    return;
-                } else if ( status == 'TIMEOUT_WARNING') {
-                } else if ( status == 'COUNTING' ) {
-                } else if ( status == 'ERROR' ) {
-                    window.location.href = "@{counterError()}";
-                } else {          
-                    alert( "Invalid status : " + status + " last status : " + lastStatus );
-                }
                 lastStatus = status
             }
-           
+                       
+            $( '.info_message' ).html(  data[ 2 ] );
+            var totalSum = data[ 3 ];
+            if ( totalSum > 0 ) {
+                $( '.totalSum' ).html( totalSum ).show();
+                $( '#total_sum_field' ).show();
+            } else {
+                $( '#total_sum_field' ).hide();
+            }
+
             var billData = data[ 1 ];
             var total = 0;
             var cnt_total = 0;
