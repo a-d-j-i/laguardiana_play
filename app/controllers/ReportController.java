@@ -106,13 +106,13 @@ public class ReportController extends Controller {
 
     static public class EnvelopeDepositData extends DepositData {
 
-        final public Integer envelopeCode;
+        public String envelopeCode;
         public List<EnvelopeContentData> contents = new ArrayList<EnvelopeContentData>();
 
         public EnvelopeDepositData(EnvelopeDeposit d) {
             super(d, 1);
-            this.envelopeCode = d.userCodeLov;
             for (LgEnvelope le : d.envelopes) {
+                this.envelopeCode = le.envelopeNumber;
                 for (LgEnvelopeContent c : le.envelopeContents) {
                     EnvelopeContentData cc = new EnvelopeContentData(c);
                     contents.add(cc);

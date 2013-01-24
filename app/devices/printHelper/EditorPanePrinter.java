@@ -207,6 +207,7 @@ public final class EditorPanePrinter extends JPanel implements Pageable, Printab
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
 
+                setBackground(Color.white);
                 AffineTransform old = ((Graphics2D) g).getTransform();
 
                 Shape oldClip = g.getClip();
@@ -246,6 +247,7 @@ public final class EditorPanePrinter extends JPanel implements Pageable, Printab
             setSize(pageWidth, pageHeight);
             setBackground(Color.white);
             setLayout(null);
+            add(sourcePane);
             add(innerPage);
             innerPage.setBounds(margins.left, margins.top, pageWidth - margins.left - margins.right, pageHeight - margins.top - margins.bottom);
         }
@@ -254,8 +256,8 @@ public final class EditorPanePrinter extends JPanel implements Pageable, Printab
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            g.setColor(Color.black);
-            g.drawRect(0, 0, getWidth() - 2, getHeight() - 2);
+            //g.setColor(Color.black);
+            //g.drawRect(0, 0, getWidth() - 2, getHeight() - 2);
         }
     }
 
