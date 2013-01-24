@@ -5,22 +5,13 @@
 package models.actions;
 
 import controllers.Secure;
-import devices.DeviceFactory;
 import devices.glory.manager.ManagerInterface;
-import java.awt.print.PrinterException;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.print.PrintException;
-import models.Configuration;
 import models.EnvelopeDeposit;
 import models.actions.states.EnvelopeDepositStart;
 import models.db.LgEnvelope;
-import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import play.Logger;
 
 /**
  *
@@ -66,7 +57,7 @@ public class EnvelopeDepositAction extends UserAction {
         if (currentDepositId != null) {
             EnvelopeDeposit d = EnvelopeDeposit.findById(currentDepositId);
             if (d != null && d.finishDate != null) {
-                d.print();
+                d.print(false);
             }
         }
     }

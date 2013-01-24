@@ -32,10 +32,13 @@ public class EnvelopeDeposit extends LgDeposit {
     }
 
     @Override
-    public void print() {
+    public void print(boolean reprint) {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
+        if (reprint) {
+            args.put("reprint", "true");
+        }
         DeviceFactory.getPrinter().print("PrinterController/envelopeDeposit_finish.html", args, 200);
     }
 

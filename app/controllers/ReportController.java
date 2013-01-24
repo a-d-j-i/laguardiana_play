@@ -398,7 +398,7 @@ public class ReportController extends Controller {
 
     public static void depositReprint(Integer depositId) {
         LgDeposit d = LgDeposit.findById(depositId);
-        renderArgs.put("reprint", "true");
-        d.print();
+        d.print(true);
+        listDeposits(depositId, null, null);
     }
 }
