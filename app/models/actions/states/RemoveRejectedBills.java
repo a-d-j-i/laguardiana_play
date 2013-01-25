@@ -27,20 +27,16 @@ public class RemoveRejectedBills extends ActionState {
     }
 
     @Override
-        public void onGloryEvent(ManagerInterface.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
             // Envelope deposit.
-            case PUT_THE_ENVELOPE_IN_THE_ESCROW:
-            case REMOVE_THE_BILLS_FROM_HOPER:
-            case ESCROW_FULL:
-            case NEUTRAL:
-            case COUNTING:
-                stateApi.setState(prevState);
-                break;
             case REMOVE_REJECTED_BILLS:
                 break;
+            case JAM:
+                stateApi.setState(new Jam(stateApi, this));
+                break;
             default:
-                Logger.debug("RemoveRejectedBills onGloryEvent invalid state %s %s", m.name(), name());
+                stateApi.setState(prevState);
                 break;
         }
     }

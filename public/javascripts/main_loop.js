@@ -11,11 +11,14 @@ $( "#main_overlay" ).overlay({
     speed: "fast",
     oneInstance: false,
     onLoad : function(event) {
-        working = false;
-        if ( ! current_alert ) {
-            working = true;
-            this.close();
-        }
+        var o = this;
+        setTimeout(function(){
+            working = false;
+            if ( ! current_alert ) {
+                working = true;
+                this.close();
+            }
+        },500);
     }, 
     onClose: function(event) {
         var o = this;

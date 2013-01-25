@@ -11,37 +11,37 @@ import play.mvc.*;
 
 @With({Secure.class})
 public class PrinterController extends Controller {
-    
+
     public static void listPrinters() {
         renderArgs.put("printers", DeviceFactory.getPrinter().printers.values());
         render();
     }
-    
+
     public static void billDeposit() {
         List<BillDeposit> depositList = BillDeposit.findAll();
         BillDeposit d = depositList.get(0);
         //BillDeposit d = BillDeposit.findById(33);
-        d.print();
+        d.print(true);
         d.setRenderArgs(renderArgs.data);
         render();
     }
-    
+
     public static void currentBagTotals() {
         LgBag b = LgBag.getCurrentBag();
         b.print();
         b.setRenderArgs(renderArgs.data);
         render();
     }
-    
+
     public static void envelopeDeposit_finish() {
         List<EnvelopeDeposit> depositList = EnvelopeDeposit.findAll();
         EnvelopeDeposit d = depositList.get(0);
         //BillDeposit d = BillDeposit.findById(33);
-        d.print();
+        d.print(true);
         d.setRenderArgs(renderArgs.data);
         render();
     }
-    
+
     public static void envelopeDeposit_start() {
         List<EnvelopeDeposit> depositList = EnvelopeDeposit.findAll();
         EnvelopeDeposit d = depositList.get(0);
@@ -50,14 +50,14 @@ public class PrinterController extends Controller {
         d.setRenderArgs(renderArgs.data);
         render();
     }
-    
+
     public static void currentZTotals() {
         LgZ z = LgZ.getCurrentZ();
         z.print();
         z.setRenderArgs(renderArgs.data);
         render();
     }
-    
+
     public static void test() {
         try {
             //DeviceFactory.getPrinter().printAttributes();

@@ -20,16 +20,21 @@ public class BillDepositWithdraw extends ActionState {
 
     @Override
     public String name() {
-        return "IDLE";
+        return "REMOVE_THE_BILLS_FROM_ESCROW";
     }
 
     @Override
-        public void onGloryEvent(ManagerInterface.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
-            case NEUTRAL:
-                stateApi.setState(new Finish(stateApi));
+            case REMOVE_REJECTED_BILLS:
                 break;
+            case JAM:
+                break;
+            case REMOVE_THE_BILLS_FROM_ESCROW:
+                break;
+            case NEUTRAL:
+            case INITIALIZING:
             case COUNTING:
                 stateApi.setState(new BillDepositStart(stateApi));
             default:

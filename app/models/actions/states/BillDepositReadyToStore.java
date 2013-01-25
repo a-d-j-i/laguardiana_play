@@ -49,6 +49,12 @@ public class BillDepositReadyToStore extends ActionState {
     public void onGloryEvent(ManagerInterface.Status m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
+            case REMOVE_REJECTED_BILLS:
+                stateApi.setState(new RemoveRejectedBills(stateApi, this));
+                break;
+            case JAM:
+                stateApi.setState(new Jam(stateApi, this));
+                break;
             case READY_TO_STORE:
                 break;
             case CANCELING:
@@ -58,16 +64,10 @@ public class BillDepositReadyToStore extends ActionState {
                 stateApi.setState(new BillDepositStart(stateApi));
                 break;
             case ESCROW_FULL:
-                stateApi.setState(new BillDepositReadyEscrowFull(stateApi));
+                stateApi.setState(new BillDepositReadyToStoreEscrowFull(stateApi));
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
                 //stateApi.startTimer();
-                break;
-            case REMOVE_REJECTED_BILLS:
-                stateApi.setState(new RemoveRejectedBills(stateApi, this));
-                break;
-            case JAM:
-                stateApi.setState(new Jam(stateApi, this));
                 break;
             default:
                 Logger.debug("BillDepositReadyToStore onGloryEvent invalid state %s %s", m.name(), name());

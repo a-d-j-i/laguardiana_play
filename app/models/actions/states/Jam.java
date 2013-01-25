@@ -27,13 +27,18 @@ public class Jam extends ActionState {
     }
 
     @Override
-        public void onGloryEvent(ManagerInterface.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         switch (m.getState()) {
+            case REMOVE_REJECTED_BILLS:
+                stateApi.setState(new RemoveRejectedBills(stateApi, this));
+                break;
+            case JAM:
+                break;
             case NEUTRAL:
                 stateApi.setState(prevState);
                 break;
             default:
-                Logger.debug("RemoveRejectedBills onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("JAM onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
     }

@@ -107,10 +107,20 @@ public class GloryManager {
         }
 
         public boolean reset() {
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                cmd.cancel();
+                return false;
+            }
             return managerControllerApi.sendCommand(new ResetCommand(threadCommandApi));
         }
 
         public boolean storingErrorReset() {
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                cmd.cancel();
+                return false;
+            }
             return managerControllerApi.sendCommand(new StoringErrorResetCommand(threadCommandApi));
         }
 
@@ -150,6 +160,7 @@ public class GloryManager {
         public void cancelCommand() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
+                managerControllerApi.sendCommand(new GotoNeutral(threadCommandApi));
                 return;
             }
             cmd.cancel();

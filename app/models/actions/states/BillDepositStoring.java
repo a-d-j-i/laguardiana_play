@@ -25,9 +25,15 @@ public class BillDepositStoring extends ActionState {
     }
 
     @Override
-        public void onGloryEvent(ManagerInterface.Status m) {
-        Logger.debug( "%s glory event : %s", this.getClass().getSimpleName(), m.getState());
+    public void onGloryEvent(ManagerInterface.Status m) {
+        Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
+            case REMOVE_REJECTED_BILLS:
+                stateApi.setState(new RemoveRejectedBills(stateApi, this));
+                break;
+            case JAM:
+                stateApi.setState(new Jam(stateApi, this));
+                break;
             case PUT_THE_BILLS_ON_THE_HOPER:
                 stateApi.closeDeposit();
                 if (Configuration.ioBoardIgnore()) {
@@ -48,8 +54,6 @@ public class BillDepositStoring extends ActionState {
                 }
                 break;
             case STORING:
-                break;
-            case REMOVE_REJECTED_BILLS:
                 break;
             default:
                 Logger.debug("StoringBillDeposit invalid state %s %s", m.name(), name());

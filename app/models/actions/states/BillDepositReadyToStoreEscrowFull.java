@@ -13,9 +13,9 @@ import play.Logger;
  *
  * @author adji
  */
-public class BillDepositReadyEscrowFull extends ActionState {
+public class BillDepositReadyToStoreEscrowFull extends ActionState {
 
-    public BillDepositReadyEscrowFull(StateApi stateApi) {
+    public BillDepositReadyToStoreEscrowFull(StateApi stateApi) {
         super(stateApi);
     }
 
@@ -47,9 +47,13 @@ public class BillDepositReadyEscrowFull extends ActionState {
     }
 
     @Override
-        public void onGloryEvent(ManagerInterface.Status m) {
+    public void onGloryEvent(ManagerInterface.Status m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
+            case REMOVE_REJECTED_BILLS:
+                break;
+            case JAM:
+                break;
             case ESCROW_FULL:
                 break;
             case CANCELING:
