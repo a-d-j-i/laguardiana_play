@@ -86,7 +86,9 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                 case collect_mode:
                 case manual:
                 case initial:
-                    gotoNeutral(true, true);
+                    if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                        return;
+                    }
                     break;
                 default:
                     setError(ManagerInterface.ManagerError.APP_ERROR,
