@@ -14,6 +14,8 @@ import play.Play;
  */
 public class Configuration {
 
+    final public static int EXTERNAL_APP_ID = 2;
+
     public static boolean isPrinterTest() {
         return isProperty("printer.test");
     }

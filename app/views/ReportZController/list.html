@@ -1,0 +1,45 @@
+#{extends 'reportList.html' /}
+#{set title: 'List Zs' /}
+<div style="text-align: center;">
+    #{form @list(), 'id': 'mainForm', 'method' : 'GET' }
+    <ul>
+        <li  style="display: inline;">Fecha desde: <input class="datepicker" type="datetime" name="startDate" value="${startDate?.format('dd/MM/yyyy')}" /></li>
+        <li  style="display: inline;">Fecha hasta: <input class="datepicker" type="datetime" name="endDate" value="${endDate?.format('dd/MM/yyyy')}" /></li>
+    </ul>
+    <input type="hidden" name="page" value="${page}">
+    #{/form}
+    <table style="margin-left: auto; margin-right: auto; border: 1px solid;">
+        <thead>
+        <th>Transaccion</th>
+        <th>Fecha de creacion</th>
+        <th>Cierre contable</th>
+        <th>Total</th>
+        <th colspan="2">Acciones</th>
+        </thead>
+        <tbody>
+            #{list items:data, as:'z' }
+            #{if ( ! z.closeDate ) } 
+            <tr style="background-color: lightpink;">
+                #{/if}
+                #{else}
+            <tr style="background-color: lightgreen;">
+                #{/else}
+                <td>${z.zId} </td>
+                <td>${z.creationDate?.format('dd/MM/yyyy hh:mm:ss')}</td>
+                <td style="width:180px;">
+                    ${z.closeDate?.format('dd/MM/yyyy hh:mm:ss')}
+                </td>
+                <td style="background-color: lightblue; border: 1px solid;">
+                    <a href="@{detail(z.zId)}">Detalle</a>
+                </td>
+                <td style="background-color: lightblue; border: 1px solid;">
+                    <a href="@{reprint(z.zId)}">Reimprimir Ticket</a>
+                </td>
+            </tr>
+            #{/list}
+        </tbody>
+        <tfoot> 
+            <tr><td colspan="7" style="text-align: right;">Pagina ${page} de ${totalPage}</td></tr>
+        </tfoot>
+    </table>
+</div>

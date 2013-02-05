@@ -1,9 +1,9 @@
-#{extends 'ReportController/unprocessed.html' /}
+#{extends 'unprocessedMain.html' /}
 #{set title: 'Unprocessed Bags' /}
 <ul>
     #{list items:data, as:'bag' }
     <li>${bag.bagId} : ${bag.toString()}
-        <a href="@{processBag(bag.bagId)}" style="color: green">process</a>
+        <a href="@{process(bag.bagId)}" style="color: green">process</a>
     </li>
     #{/list}
 </ul>

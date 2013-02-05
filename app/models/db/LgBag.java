@@ -42,14 +42,29 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         this.creationDate = new Date();
     }
 
+    public static long count(Date start, Date end) {
+        if (end == null) {
+            end = new Date();
+        }
+        if (start == null) {
+            return LgDeposit.count("select count(b) from LgBag b where cast(creationDate as date) <= cast(? as date)", end);
+        } else {
+            return LgDeposit.count("select count(b) from LgBag b where "
+                    + "cast(creationDate as date)  >= cast(? as date) and cast(creationDate as date) <= cast(? as date)",
+                    start, end);
+        }
+    }
+
     public static JPAQuery find(Date start, Date end) {
         if (end == null) {
             end = new Date();
         }
         if (start == null) {
-            return LgDeposit.find("select b from LgBag b where creationDate < ?", end);
+            return LgBag.find("select b from LgBag b where cast(creationDate as date) <= cast(? as date) order by bagId", end);
         } else {
-            return LgDeposit.find("select b from LgBag b where creationDate > ? and creationDate < ?", start, end);
+            return LgBag.find("select b from LgBag b where "
+                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by bagId",
+                    start, end);
         }
     }
 
@@ -136,10 +151,13 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         return "LgBag{" + "bagId=" + bagId + ", bagCode=" + bagCode + ", creationDate=" + creationDate + ", withdrawDate=" + withdrawDate + '}';
     }
 
-    public void print() {
+    public void print(boolean reprint) {
         Map args = new HashMap();
         setRenderArgs(args);
-        DeviceFactory.getPrinter().print("PrinterController/currentBagTotals.html", args, 200);
+        if (reprint) {
+            args.put("reprint", "true");
+        }
+        DeviceFactory.getPrinter().print("ReportBagController/print.html", args, 200);
     }
 
     public void setRenderArgs(Map<String, Object> args) {

@@ -61,7 +61,7 @@ other_menu.status=Status
 other_menu.printer_test=Printer Test
 other_menu.printer_list=Printer List
 
-other_menu.current_z_totals=Ultimo cierre
+other_menu.current_z_totals=Recaudacion actual
 other_menu.rotate_z=Cierre contable
 other_menu.current_bag_totals=Dinero en Bolsa
 other_menu.rotate_bag=Cambiar Bolsa
@@ -69,7 +69,7 @@ other_menu.rotate_bag=Cambiar Bolsa
 other_menu.unprocessed_zs=Zs a procesar
 other_menu.unprocessed_bags=Bolsas a procesar
 other_menu.unprocessed_deposits=Despositos a procesar
-other_menu.list_zs=Listar Zs
+other_menu.list_zs=Listar cierres contables
 other_menu.list_bags=Listar bolsas
 other_menu.list_deposits=Listar depositos
 

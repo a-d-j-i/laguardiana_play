@@ -5,6 +5,9 @@ Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy h
 #{ if z.closeDate == null }aun no cerrado#{/if}
 #{ else }cerrado el ${ z.closeDate.format('dd/MM/yyyy hh:mm:ss') }#{/else}
 </div>
+#{if reprint } 
+&{ 'summary.reprint' }<br>
+#{/if}
 <br>
 #{ bills_table_printer bill_data: totals._4 /}
 Total de efectivo ${ totals._1 }<br>

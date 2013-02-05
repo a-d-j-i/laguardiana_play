@@ -2,7 +2,7 @@
 #{set title: 'current Z totals' /}
 <section>
     <header></header>
-    <a href="@{MenuController.AccountingMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    <a href="${ backUrl }" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy hh:mm:ss') } y 
         #{ if z.closeDate == null }aun no cerrado#{/if}

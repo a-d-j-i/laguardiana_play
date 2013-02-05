@@ -1,9 +1,0 @@
-#{extends 'ReportController/lists.html' /}
-#{set title: 'List Bags' /}
-<ul>
-    #{list items:data, as:'bag' }
-    <li>
-        ${bag.bagId} : ${bag.toString()}
-    </li>
-    #{/list}
-</ul>

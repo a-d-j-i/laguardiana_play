@@ -18,7 +18,7 @@ public class EnvelopeDeposit extends LgDeposit {
 
     @Override
     public String getDetailView() {
-        return "ReportController/envelopeDeposit_finish.html";
+        return "ReportDepositController/envelopeDepositDetail.html";
     }
 
     @Override

@@ -26,13 +26,6 @@ public class PrinterController extends Controller {
         render();
     }
 
-    public static void currentBagTotals() {
-        LgBag b = LgBag.getCurrentBag();
-        b.print();
-        b.setRenderArgs(renderArgs.data);
-        render();
-    }
-
     public static void envelopeDeposit_finish() {
         List<EnvelopeDeposit> depositList = EnvelopeDeposit.findAll();
         EnvelopeDeposit d = depositList.get(0);
@@ -48,13 +41,6 @@ public class PrinterController extends Controller {
         //BillDeposit d = BillDeposit.findById(33);
         d.printStart();
         d.setRenderArgs(renderArgs.data);
-        render();
-    }
-
-    public static void currentZTotals() {
-        LgZ z = LgZ.getCurrentZ();
-        z.print();
-        z.setRenderArgs(renderArgs.data);
         render();
     }
 

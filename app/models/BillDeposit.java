@@ -59,7 +59,7 @@ public class BillDeposit extends LgDeposit {
 
     @Override
     public String getDetailView() {
-        return "ReportController/billDeposit.html";
+        return "ReportDepositController/billDepositDetail.html";
     }
 
     @Override

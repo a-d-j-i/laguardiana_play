@@ -32,17 +32,16 @@ public class MenuController extends Controller {
 
     public static void printTemplateMenu(String back) {
         String backAction = "MenuController.hardwareMenu";
-        String[] buttons = {"PrinterController.billDeposit", "PrinterController.currentBagTotals", "PrinterController.envelopeDeposit_finish",
-            "PrinterController.envelopeDeposit_start", "PrinterController.currentZTotals", "PrinterController.test"};
-        String[] titles = {"other_menu.print_billDeposit", "other_menu.print_currentBagTotals", "other_menu.print_envelopeDeposit_finish",
-            "other_menu.print_envelopeDeposit_start", "other_menu.print_currentZTotals", "print_other_menu.test"};
+        String[] buttons = {"PrinterController.billDeposit", "PrinterController.envelopeDeposit_finish",
+            "PrinterController.envelopeDeposit_start", "PrinterController.test"};
+        String[] titles = {"other_menu.print_billDeposit", "other_menu.print_envelopeDeposit_finish",
+            "other_menu.print_envelopeDeposit_start", "print_other_menu.test"};
         checkMenu(back, backAction, buttons, titles, 3);
     }
 
     public static void accountingMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"AccountingController.currentZTotals", "AccountingController.rotateZ", "AccountingController.currentBagTotals",
-            "AccountingController.rotateBag"};
+        String[] buttons = {"ReportZController.print", "ReportZController.rotateZ", "ReportBagController.print", "ReportBagController.rotateBag"};
         String[] titles = {"other_menu.current_z_totals", "other_menu.rotate_z", "other_menu.current_bag_totals",
             "other_menu.rotate_bag"};
         checkMenu(back, backAction, buttons, titles, 2);
@@ -50,8 +49,8 @@ public class MenuController extends Controller {
 
     public static void reportMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"ReportController.unprocessedDeposits", "ReportController.unprocessedBags", "ReportController.unprocessedZs",
-            "ReportController.listDeposits", "ReportController.listBags", "ReportController.listZs"};
+        String[] buttons = {"ReportDepositController.unprocessed", "ReportBagController.unprocessed", "ReportZController.unprocessed",
+            "ReportDepositController.list", "ReportBagController.list", "ReportZController.list"};
         String[] titles = {"other_menu.unprocessed_deposits", "other_menu.unprocessed_bags", "other_menu.unprocessed_zs",
             "other_menu.list_deposits", "other_menu.list_bags", "other_menu.list_zs"};
         checkMenu(back, backAction, buttons, titles, 2);

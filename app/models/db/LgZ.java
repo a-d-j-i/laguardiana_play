@@ -85,14 +85,29 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         return current;
     }
 
+    public static long count(Date start, Date end) {
+        if (end == null) {
+            end = new Date();
+        }
+        if (start == null) {
+            return LgDeposit.count("select count(z) from LgZ z where cast(creationDate as date) <= cast(? as date)", end);
+        } else {
+            return LgDeposit.count("select count(z) from LgZ z where "
+                    + "cast(creationDate as date)  >= cast(? as date) and cast(creationDate as date) <= cast(? as date)",
+                    start, end);
+        }
+    }
+
     public static JPAQuery find(Date start, Date end) {
         if (end == null) {
             end = new Date();
         }
         if (start == null) {
-            return LgDeposit.find("select z from LgZ z where creationDate < ?", end);
+            return LgZ.find("select z from LgZ z where cast(creationDate as date) <= cast(? as date) order by zId", end);
         } else {
-            return LgDeposit.find("select z from LgZ z where creationDate > ? and creationDate < ?", start, end);
+            return LgZ.find("select z from LgZ z where "
+                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by zId",
+                    start, end);
         }
     }
 
@@ -127,10 +142,13 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         return "LgZ{" + "zId=" + zId + ", creationDate=" + creationDate + ", closeDate=" + closeDate + '}';
     }
 
-    public void print() {
+    public void print(boolean reprint) {
         Map<String, Object> args = new HashMap<String, Object>();
         setRenderArgs(args);
-        DeviceFactory.getPrinter().print("PrinterController/currentZTotals.html", args, 200);
+        if (reprint) {
+            args.put("reprint", "true");
+        }
+        DeviceFactory.getPrinter().print("ReportZController/print.html", args, 200);
     }
 
     public void setRenderArgs(Map<String, Object> args) {

@@ -1,7 +1,7 @@
-#{extends 'ReportController/lists.html' /}
+#{extends 'reportList.html' /}
 #{set title: 'List Deposits' /}
 <div style="text-align: center;">
-    #{form @listDeposits(), 'id': 'mainForm', 'method' : 'POST' }
+    #{form @list(), 'id': 'mainForm', 'method' : 'GET' }
     <ul>
         <li  style="display: inline;">Fecha desde: <input class="datepicker" type="datetime" name="startDate" value="${startDate?.format('dd/MM/yyyy')}" /></li>
         <li  style="display: inline;">Fecha hasta: <input class="datepicker" type="datetime" name="endDate" value="${endDate?.format('dd/MM/yyyy')}" /></li>
@@ -46,10 +46,10 @@
                     #{/if}
                 </td>
                 <td style="background-color: lightblue; border: 1px solid;">
-                    <a href="@{depositDetail(deposit.depositId)}">Detalle</a>
+                    <a href="@{detail(deposit.depositId)}">Detalle</a>
                 </td>
                 <td style="background-color: lightblue; border: 1px solid;">
-                    <a href="@{depositReprint(deposit.depositId)}">Reimprimir Ticket</a>
+                    <a href="@{reprint(deposit.depositId)}">Reimprimir Ticket</a>
                 </td>
             </tr>
             #{/list}
@@ -59,21 +59,3 @@
         </tfoot>
     </table>
 </div>
-
-
-#{set 'moreScripts'}
-<script type="text/javascript" charset="${_response_encoding}">
-    $(function() {
-        $( ".datepicker" ).datepicker({
-            dateFormat : "dd/mm/yy",
-            onSelect: function(date) {
-                $( "#mainForm" ).submit();
-            }
-        });
-        $( ".boton" ).click(function( event ) {
-            $( "#mainForm" ).attr("action", $(this).attr("href") ).submit();
-            event.preventDefault();
-        });
-    });
-</script>
-#{/set}
