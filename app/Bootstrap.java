@@ -46,6 +46,7 @@ public class Bootstrap extends Job {
                 LgRole manager = loadRolsResourcesAndAcls(controllers.GloryManagerController.class);
                 LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
                 LgRole counter = loadRolsResourcesAndAcls(controllers.CounterController.class);
+                LgRole report = loadRolsResourcesAndAcls(controllers.ReportController.class);
                 LgRole reportDesposit = loadRolsResourcesAndAcls(controllers.ReportDepositController.class);
                 LgRole reportZ = loadRolsResourcesAndAcls(controllers.ReportZController.class);
                 LgRole reportBag = loadRolsResourcesAndAcls(controllers.ReportBagController.class);
@@ -98,6 +99,8 @@ public class Bootstrap extends Job {
                 bill.users.add(supervisor);
                 supervisor.roles.add(envelope);
                 envelope.users.add(supervisor);
+                supervisor.roles.add(report);
+                report.users.add(supervisor);
                 supervisor.roles.add(reportBag);
                 reportBag.users.add(supervisor);
                 supervisor.roles.add(reportZ);
