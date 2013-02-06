@@ -15,7 +15,6 @@ import models.db.LgEnvelopeContent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
-import play.data.binding.As;
 import play.mvc.Before;
 import play.mvc.Controller;
 

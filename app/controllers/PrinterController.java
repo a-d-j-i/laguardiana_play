@@ -4,8 +4,6 @@ import devices.DeviceFactory;
 import java.util.List;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
-import models.db.LgBag;
-import models.db.LgZ;
 import play.Logger;
 import play.mvc.*;
 

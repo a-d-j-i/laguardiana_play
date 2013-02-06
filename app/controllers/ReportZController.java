@@ -1,89 +1,21 @@
 package controllers;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import models.Configuration;
 import models.db.LgZ;
 import play.data.binding.As;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
+import play.mvc.With;
 
+@With({Secure.class})
 public class ReportZController extends Controller {
 
     @Before
     public static void setFormat(String format) {
         if (format != null) {
             request.format = format;
-        }
-    }
-
-    static public class ZData {
-
-        public Integer ZId;
-        public Date creationDate;
-        public Date closeDate;
-
-        private ZData(LgZ z) {
-            this.ZId = z.zId;
-            this.creationDate = z.creationDate;
-            this.closeDate = z.closeDate;
-        }
-    }
-
-    static public class ZList {
-
-        final public String clientCode = Configuration.getClientCode();
-        final public String branchCode = Configuration.getBranchCode();
-        final public String machineCode = Configuration.getMachineCode();
-        final public String machineDescription = Configuration.getMachineDescription();
-        public List<ZData> zData;
-    }
-
-    public static void unprocessed(Integer page) {
-        if (request.format.equalsIgnoreCase("html")) {
-            if (page == null || page < 1) {
-                page = 1;
-            }
-            int length = 4;
-            List<LgZ> zList = LgZ.findUnprocessed(Configuration.EXTERNAL_APP_ID).fetch(page, length);
-            if (page > 1) {
-                renderArgs.put("prevPage", page - 1);
-            } else {
-                renderArgs.put("prevPage", 1);
-            }
-            if (zList.size() == length) {
-                renderArgs.put("nextPage", page + 1);
-            } else {
-                renderArgs.put("nextPage", page);
-            }
-            renderArgs.put("data", zList);
-            render();
-            return;
-        }
-        List<LgZ> zList = LgZ.findUnprocessed(Configuration.EXTERNAL_APP_ID).fetch();
-        ZList ret = new ZList();
-        ret.zData = new ArrayList<ZData>(zList.size());
-        for (LgZ z : zList) {
-            ret.zData.add(new ZData(z));
-        }
-        if (request.format.equalsIgnoreCase("xml")) {
-            renderXml(ret);
-        } else {
-            renderJSON(ret);
-        }
-    }
-
-    public static void process(Integer zId) {
-        if (zId == null) {
-            unprocessed(1);
-        }
-        boolean stat = LgZ.process(Configuration.EXTERNAL_APP_ID, zId, "DONE");
-        if (request.format.equalsIgnoreCase("html")) {
-            unprocessed(1);
-        } else {
-            renderHtml(stat ? "DONE" : "ERROR");
         }
     }
 

@@ -1,83 +1,15 @@
 package controllers;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import models.Configuration;
 import models.db.LgBag;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.Router;
+import play.mvc.With;
 
+@With({Secure.class})
 public class ReportBagController extends Controller {
-
-    static public class BagData {
-
-        public Integer bagId;
-        public Date creationDate;
-        public Date withdrawDate;
-
-        private BagData(LgBag b) {
-            this.bagId = b.bagId;
-            this.creationDate = b.creationDate;
-            this.withdrawDate = b.withdrawDate;
-        }
-    }
-
-    static public class BagList {
-
-        final public String clientCode = Configuration.getClientCode();
-        final public String branchCode = Configuration.getBranchCode();
-        final public String machineCode = Configuration.getMachineCode();
-        final public String machineDescription = Configuration.getMachineDescription();
-        public List<BagData> bagData;
-    }
-
-    public static void unprocessed(Integer page) {
-        if (request.format.equalsIgnoreCase("html")) {
-            if (page == null || page < 1) {
-                page = 1;
-            }
-            int length = 4;
-            List<LgBag> bagList = LgBag.findUnprocessed(Configuration.EXTERNAL_APP_ID).fetch(page, length);
-            if (page > 1) {
-                renderArgs.put("prevPage", page - 1);
-            } else {
-                renderArgs.put("prevPage", 1);
-            }
-            if (bagList.size() == length) {
-                renderArgs.put("nextPage", page + 1);
-            } else {
-                renderArgs.put("nextPage", page);
-            }
-            renderArgs.put("data", bagList);
-            render();
-            return;
-        }
-        List<LgBag> bagList = LgBag.findUnprocessed(Configuration.EXTERNAL_APP_ID).fetch();
-        BagList ret = new BagList();
-        ret.bagData = new ArrayList<BagData>(bagList.size());
-        for (LgBag b : bagList) {
-            ret.bagData.add(new BagData(b));
-        }
-        if (request.format.equalsIgnoreCase("xml")) {
-            renderXml(ret);
-        } else {
-            renderJSON(ret);
-        }
-    }
-
-    public static void process(Integer bagId) {
-        if (bagId == null) {
-            unprocessed(1);
-        }
-        boolean stat = LgBag.process(Configuration.EXTERNAL_APP_ID, bagId, "DONE");
-        if (request.format.equalsIgnoreCase("html")) {
-            unprocessed(1);
-        } else {
-            renderHtml(stat ? "DONE" : "ERROR");
-        }
-    }
 
     public static void list(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate) {
         if (endDate == null) {
