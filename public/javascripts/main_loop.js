@@ -9,50 +9,24 @@ $( "#main_overlay" ).overlay({
     closeOnClick: false,
     closeOnEsc: false,
     speed: "fast",
-    oneInstance: false,
-    onLoad : function(event) {
-        var o = this;
-        setTimeout(function(){
-            working = false;
-            if ( ! current_alert ) {
-                working = true;
-                this.close();
-            }
-        },500);
-    }, 
-    onClose: function(event) {
-        var o = this;
-        setTimeout(function(){
-            working = false;
-            if ( current_alert ) {
-                working = true;
-                o.load();
-            }
-        },500);
-    }
+    oneInstance: true
 });
 
 var current_alert = undefined;
-var working = false;
 function showAlert( a ) {
-   
     if ( current_alert == a ) {
         return;
     }
-    $( "#overlay_contents").html( $( a ).html() );
+    current_alert = a;
+    $( "#overlay_contents" ).html( $( a ).html() );
     $( a ).find( "a" ).each( function() {
         var id = $( this ).attr( "id" );
         if ( id ) {
-            $( "#overlay_contents").find( "#" + id ).click( function () {
+            $( "#overlay_contents" ).find( "#" + id ).click( function () {
                 $( a ).find( "#" + id ).click()
             });
         }
     });
-    current_alert = a;
-    if ( ! working ) {
-        working = true;
-        $( "#main_overlay" ).overlay().load();
-    }
 };
 
 function closeAlert( a ) {
@@ -60,12 +34,28 @@ function closeAlert( a ) {
         return;
     }
     current_alert = undefined;
+}
 
-    if ( ! working ) {
-        working = true;
-        $( "#main_overlay" ).overlay().close();
+function testAlert() {
+    var ov = $( "#main_overlay" ).overlay();
+    
+    if ( current_alert ) {
+        if ( ov.isOpened() ) {
+            return;
+        } else {
+            ov.load();
+        }
+    } else {
+        if ( ov.isOpened() ) {
+            ov.close();
+        } else {
+            return;
+        }
     }
 }
+// Call refresh every 1.5 seconds
+setInterval( testAlert, 100);
+
 
 var waiting = false;
 var lastStatus = "false";

@@ -148,7 +148,6 @@
     
     /* attach a submit handler to the form */
     $("#mainForm").submit( function(event) {
-
         /* stop form from submitting normally */
         event.preventDefault(); 
         /* Send the data using post and put the results in a div */
@@ -187,7 +186,12 @@
     $( '#alerta_success_cancel' ).click( function(event) {
         window.location.href = "@{Secure.logout()}";
     });
-    
+    $(':input').keypress(function (e) {
+        if (e.which == 13) {
+            $('#mainForm').submit();
+            return false;
+        }
+    });
     Elastic.refresh();
 </script>
 #{/set}

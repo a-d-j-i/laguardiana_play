@@ -25,7 +25,7 @@ public abstract class GloryCommandAbstract {
         }
 
         public boolean isGratherThan(DebugLevel level) {
-            return this.getLevel() > level.getLevel();
+            return this.getLevel() >= level.getLevel();
         }
     }
     DebugLevel debug = DebugLevel.NONE;
