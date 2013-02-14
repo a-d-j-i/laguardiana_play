@@ -22,7 +22,12 @@ def next_url = actionBridge."$action".call(nextPage);
         </div>
         <hr>
         <div class="botonera" style="height: 550px;">
-            <ul class="on-2 columns">
+            <ul class="on-4 columns">
+                <li class="column">
+                    <div class="columna">
+                        <a href="#" id="first" class="boton ${play.configuration['style.button_color']} full_width separar">first</a>
+                    </div>
+                </li>
                 <li class="column">
                     <div class="columna">
                         <a href="#" id="prev" class="boton ${play.configuration['style.button_color']} full_width separar">prev page</a>
@@ -31,6 +36,11 @@ def next_url = actionBridge."$action".call(nextPage);
                 <li class="column">
                     <div class="columna">
                         <a href="#" id="next" class="boton ${play.configuration['style.button_color']} full_width separar">next page</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="#" id="last" class="boton ${play.configuration['style.button_color']} full_width separar">end</a>
                     </div>
                 </li>
             </ul>
@@ -46,13 +56,23 @@ def next_url = actionBridge."$action".call(nextPage);
                 $( "#mainForm" ).submit();
             }
         });
-        $( "#next" ).click(function( event ) {
-            $( "[name = page]" ).val( parseInt( $( "[name = page]" ).val() ) + 1 );
+        $( "#first" ).click(function( event ) {
+            $( "[name = page]" ).val( 1 );
             $( "#mainForm" ).submit();
             event.preventDefault();
         });
         $( "#prev" ).click(function( event ) {
             $( "[name = page]" ).val( parseInt( $( "[name = page]" ).val() ) - 1 );
+            $( "#mainForm" ).submit();
+            event.preventDefault();
+        });
+        $( "#next" ).click(function( event ) {
+            $( "[name = page]" ).val( parseInt( $( "[name = page]" ).val() ) + 1 );
+            $( "#mainForm" ).submit();
+            event.preventDefault();
+        });
+        $( "#last" ).click(function( event ) {
+            $( "[name = page]" ).val( ${totalPage} );
             $( "#mainForm" ).submit();
             event.preventDefault();
         });

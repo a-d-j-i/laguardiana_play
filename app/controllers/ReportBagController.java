@@ -21,7 +21,9 @@ public class ReportBagController extends Controller {
             page = 1;
         }
         int length = 3;
-        Integer totalPage = (int) (LgBag.count(startDate, endDate) / length) + 1;
+        long cnt = LgBag.count(startDate, endDate);
+        renderArgs.put("cnt", cnt);
+        Integer totalPage = (int) ((cnt + 1) / length);
         if (page > totalPage) {
             page = totalPage;
         }
