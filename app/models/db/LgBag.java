@@ -1,22 +1,15 @@
 package models.db;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import models.BagEvent;
 import models.BagProcessedEvent;
-import models.Bill;
-import models.BillDeposit;
-import models.EnvelopeDeposit;
-import models.lov.Currency;
 import play.Logger;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 
 @Entity
 @Table( name = "lg_bag", schema = "public")

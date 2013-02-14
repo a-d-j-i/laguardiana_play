@@ -38,29 +38,29 @@ public class ReportBagController extends Controller {
         render();
     }
 
-    public static void detail(Integer bId) {
+    public static void detail(Integer id) {
         LgBag b;
-        if (bId == null) {
+        if (id == null) {
             b = LgBag.getCurrentBag();
         } else {
-            b = LgBag.findById(bId);
+            b = LgBag.findById(id);
         }
         renderArgs.put("backUrl", flash.get("backUrl"));
         setRenderArgs(b);
         render();
     }
 
-    public static void reprint(Integer bId) {
+    public static void reprint(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate, Integer id) {
         LgBag b;
-        if (bId == null) {
+        if (id == null) {
             b = LgBag.getCurrentBag();
         } else {
-            b = LgBag.findById(bId);
+            b = LgBag.findById(id);
         }
         setRenderArgs(b);
         renderArgs.put("reprint", "true");
         DeviceFactory.getPrinter().print("ReportBagController/print.html", renderArgs.data, 200);
-        list(bId, null, null);
+        list(page, startDate, endDate);
     }
 
     public static void rotateBag() {

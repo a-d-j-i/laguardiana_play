@@ -44,17 +44,17 @@ public class ReportDepositController extends Controller {
         render();
     }
 
-    public static void detail(Integer depositId) {
-        LgDeposit d = LgDeposit.findById(depositId);
+    public static void detail(Integer id) {
+        LgDeposit d = LgDeposit.findById(id);
         d.setRenderArgs(renderArgs.data);
         Logger.debug("-------- BACK URL -> %s", flash.get("backUrl"));
         renderArgs.put("backUrl", flash.get("backUrl"));
         render(d.getDetailView());
     }
 
-    public static void reprint(Integer depositId) {
-        LgDeposit d = LgDeposit.findById(depositId);
+    public static void reprint(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate, Integer id) {
+        LgDeposit d = LgDeposit.findById(id);
         d.print(true);
-        list(depositId, null, null);
+        list(page, startDate, endDate);
     }
 }

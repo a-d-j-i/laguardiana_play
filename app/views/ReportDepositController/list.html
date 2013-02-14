@@ -1,61 +1,52 @@
 #{extends 'reportList.html' /}
 #{set title: 'List Deposits' /}
-<div style="text-align: center;">
-    #{form @list(), 'id': 'mainForm', 'method' : 'GET' }
-    <ul>
-        <li  style="display: inline;">Fecha desde: <input class="datepicker" type="datetime" name="startDate" value="${startDate?.format('dd/MM/yyyy')}" /></li>
-        <li  style="display: inline;">Fecha hasta: <input class="datepicker" type="datetime" name="endDate" value="${endDate?.format('dd/MM/yyyy')}" /></li>
-    </ul>
-    <input type="hidden" name="page" value="${page}">
-    #{/form}
-    <table style="margin-left: auto; margin-right: auto; border: 1px solid;">
-        <thead>
-        <th>Transaccion</th>
-        <th>Usuario</th>
-        <th>Fecha del deposito</th>
-        <th>Cierre contable</th>
-        <th>Fecha retiro de bolsa</th>
-        <th>Total</th>
-        <th colspan="2">Acciones</th>
-        </thead>
-        <tbody>
-            #{list items:data, as:'deposit' }
-            #{if ( ! deposit.finishDate ) } 
-            <tr style="background-color: lightpink;">
-                #{/if}
-                #{else}
-            <tr style="background-color: lightgreen;">
-                #{/else}
-                <td>${deposit.depositId} </td>
-                <td>${deposit.user.username} &nbsp; ${deposit.user.gecos}</td>
-                <td>${deposit.creationDate?.format('dd/MM/yyyy hh:mm:ss')}</td>
-                <td style="width:180px;">
-                    ${deposit.z.creationDate?.format('dd/MM/yyyy hh:mm:ss')}
-                    <br>
-                    ${deposit.z.closeDate?.format('dd/MM/yyyy hh:mm:ss')}
-                </td>
-                <td style="width:180px;">
-                    ${deposit.bag.withdrawDate?.format('dd/MM/yyyy hh:mm:ss')}
-                </td>
-                <td style="width:150px;">
-                    #{if ( deposit.class.getSimpleName() == "BillDeposit" )}
-                    ${deposit.getTotal()}
-                    #{/if}
-                    #{if ( deposit.class.getSimpleName() == "EnvelopeDeposit" )}
-                    Deposito por sobre
-                    #{/if}
-                </td>
-                <td style="background-color: lightblue; border: 1px solid;">
-                    <a href="@{detail(deposit.depositId)}">Detalle</a>
-                </td>
-                <td style="background-color: lightblue; border: 1px solid;">
-                    <a href="@{reprint(deposit.depositId)}">Reimprimir Ticket</a>
-                </td>
-            </tr>
-            #{/list}
-        </tbody>
-        <tfoot> 
-            <tr><td colspan="7" style="text-align: right;">Pagina ${page} de ${totalPage}</td></tr>
-        </tfoot>
-    </table>
-</div>
+<table style="margin-left: auto; margin-right: auto; border: 1px solid;">
+    <thead>
+    <th>Transaccion</th>
+    <th>Usuario</th>
+    <th>Fecha del deposito</th>
+    <th>Cierre contable</th>
+    <th>Fecha retiro de bolsa</th>
+    <th>Total</th>
+    <th colspan="2">Acciones</th>
+</thead>
+<tbody>
+    #{list items:data, as:'deposit' }
+    #{if ( ! deposit.finishDate ) } 
+    <tr style="background-color: lightpink;">
+        #{/if}
+        #{else}
+    <tr style="background-color: lightgreen;">
+        #{/else}
+        <td>${deposit.depositId} </td>
+        <td>${deposit.user.username} &nbsp; ${deposit.user.gecos}</td>
+        <td>${deposit.creationDate?.format('dd/MM/yyyy hh:mm:ss')}</td>
+        <td style="width:180px;">
+            ${deposit.z.creationDate?.format('dd/MM/yyyy hh:mm:ss')}
+            <br>
+            ${deposit.z.closeDate?.format('dd/MM/yyyy hh:mm:ss')}
+        </td>
+        <td style="width:180px;">
+            ${deposit.bag.withdrawDate?.format('dd/MM/yyyy hh:mm:ss')}
+        </td>
+        <td style="width:150px;">
+            #{if ( deposit.class.getSimpleName() == "BillDeposit" )}
+            ${deposit.getTotal()}
+            #{/if}
+            #{if ( deposit.class.getSimpleName() == "EnvelopeDeposit" )}
+            Deposito por sobre
+            #{/if}
+        </td>
+        <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ deposit.depositId }" href="@{detail}" class="submitForm">Detalle</a>
+        </td>
+        <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ deposit.depositId }" href="@{reprint}" class="submitForm">Reimprimir Ticket</a>
+        </td>
+    </tr>
+    #{/list}
+</tbody>
+<tfoot> 
+    <tr><td colspan="7" style="text-align: right;">Pagina ${page} de ${totalPage}</td></tr>
+</tfoot>
+</table>

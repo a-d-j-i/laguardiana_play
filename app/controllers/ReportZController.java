@@ -45,29 +45,29 @@ public class ReportZController extends Controller {
         render();
     }
 
-    public static void detail(Integer zId) {
+    public static void detail(Integer id) {
         LgZ z;
-        if (zId == null) {
+        if (id == null) {
             z = LgZ.getCurrentZ();
         } else {
-            z = LgZ.findById(zId);
+            z = LgZ.findById(id);
         }
         renderArgs.put("backUrl", flash.get("backUrl"));
         setRenderArgs(z);
         render();
     }
 
-    public static void reprint(Integer zId) {
+    public static void reprint(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate, Integer id) {
         LgZ z;
-        if (zId == null) {
+        if (id == null) {
             z = LgZ.getCurrentZ();
         } else {
-            z = LgZ.findById(zId);
+            z = LgZ.findById(id);
         }
         setRenderArgs(z);
         renderArgs.put("reprint", "true");
         DeviceFactory.getPrinter().print("ReportZController/print.html", renderArgs.data, 200);
-        list(zId, null, null);
+        list(page, startDate, endDate);
     }
 
     public static void rotateZ() {

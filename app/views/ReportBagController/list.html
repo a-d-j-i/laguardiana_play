@@ -1,58 +1,49 @@
 #{extends 'reportList.html' /}
 #{set title: 'List Bags' /}
-<div style="text-align: center;">
-    #{form @list(), 'id': 'mainForm', 'method' : 'GET' }
-    <ul>
-        <li  style="display: inline;">Fecha desde: <input class="datepicker" type="datetime" name="startDate" value="${startDate?.format('dd/MM/yyyy')}" /></li>
-        <li  style="display: inline;">Fecha hasta: <input class="datepicker" type="datetime" name="endDate" value="${endDate?.format('dd/MM/yyyy')}" /></li>
-    </ul>
-    <input type="hidden" name="page" value="${page}">
-    #{/form}
-    <table style="margin-left: auto; margin-right: auto; border: 1px solid;">
-        <thead>
-        <th>Transaccion</th>
-        <th>Fecha de la bolsa</th>
-        <th>Fecha retiro de bolsa</th>
-        <th>Total de sobres</th>
-        <th>Total de depositos</th>
-        <th>Total de efectivo &nbsp; / &nbsp; billetes</th>
-        <th colspan="2">Acciones</th>
-        </thead>
-        <tbody>
-            #{list items:data, as:'bag' }
-            #{if ( ! bag.withdrawDate ) } 
-            <tr style="background-color: lightpink;">
-                #{/if}
-                #{else}
-            <tr style="background-color: lightgreen;">
-                #{/else}
-                <td>${bag.bagId} </td>
-                <td>${bag.creationDate?.format('dd/MM/yyyy hh:mm:ss')}</td>
-                <td style="width:180px;">
-                    ${bag.withdrawDate?.format('dd/MM/yyyy hh:mm:ss')}
-                </td>
-                <td style="width:100px;">
-                    ${bag.getTotals()._1}
-                </td>
-                <td style="width:100px;">
-                    ${bag.getTotals()._2}
-                </td>
-                <td style="width:350px;">
-                #{list items:bag.getTotals()._3.keySet(), as:'currency'}
-                    ${ bag.getTotals()._3.get( currency ).a } &nbsp; / &nbsp; ${ bag.getTotals()._3.get( currency ).q } &nbsp; ${ currency }<br>
-                #{/list}
-                </td>
-                <td style="background-color: lightblue; border: 1px solid;">
-                    <a href="@{detail(bag.bagId)}">Detalle</a>
-                </td>
-                <td style="background-color: lightblue; border: 1px solid;">
-                    <a href="@{reprint(bag.bagId)}">Reimprimir Ticket</a>
-                </td>
-            </tr>
+<table style="margin-left: auto; margin-right: auto; border: 1px solid;">
+    <thead>
+    <th>Transaccion</th>
+    <th>Fecha de la bolsa</th>
+    <th>Fecha retiro de bolsa</th>
+    <th>Total de sobres</th>
+    <th>Total de depositos</th>
+    <th>Total de efectivo &nbsp; / &nbsp; billetes</th>
+    <th colspan="2">Acciones</th>
+</thead>
+<tbody>
+    #{list items:data, as:'bag' }
+    #{if ( ! bag.withdrawDate ) } 
+    <tr style="background-color: lightpink;">
+        #{/if}
+        #{else}
+    <tr style="background-color: lightgreen;">
+        #{/else}
+        <td>${bag.bagId} </td>
+        <td>${bag.creationDate?.format('dd/MM/yyyy hh:mm:ss')}</td>
+        <td style="width:180px;">
+            ${bag.withdrawDate?.format('dd/MM/yyyy hh:mm:ss')}
+        </td>
+        <td style="width:100px;">
+            ${bag.getTotals()._1}
+        </td>
+        <td style="width:100px;">
+            ${bag.getTotals()._2}
+        </td>
+        <td style="width:350px;">
+            #{list items:bag.getTotals()._3.keySet(), as:'currency'}
+            ${ bag.getTotals()._3.get( currency ).a } &nbsp; / &nbsp; ${ bag.getTotals()._3.get( currency ).q } &nbsp; ${ currency }<br>
             #{/list}
-        </tbody>
-        <tfoot> 
-            <tr><td colspan="7" style="text-align: right;">Pagina ${page} de ${totalPage}</td></tr>
-        </tfoot>
-    </table>
-</div>
+        </td>
+        <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ bag.bagId }" href="@{detail}" class="submitForm">Detalle</a>
+        </td>
+        <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ bag.bagId }" href="@{reprint}" class="submitForm">Reimprimir Ticket</a>
+        </td>
+    </tr>
+    #{/list}
+</tbody>
+<tfoot> 
+    <tr><td colspan="7" style="text-align: right;">Pagina ${page} de ${totalPage}</td></tr>
+</tfoot>
+</table>

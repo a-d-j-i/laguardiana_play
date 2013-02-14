@@ -1,13 +1,23 @@
 #{extends 'main.html' /}
 %{  def action = "$request.action";
-    def prev_url = actionBridge."$action".call(prevPage);
-    def next_url = actionBridge."$action".call(nextPage);
+def prev_url = actionBridge."$action".call(prevPage);
+def next_url = actionBridge."$action".call(nextPage);
 }%
 <section>
     <header></header>
     <a href="@{MenuController.reportMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <div class="contenido_grande">
+            <div style="text-align: center;">
+                #{form @list(), 'id': 'mainForm', 'method' : 'GET' }
+                <ul>
+                    <li  style="display: inline;">Fecha desde: <input class="datepicker" type="datetime" name="startDate" value="${startDate?.format('dd/MM/yyyy')}" /></li>
+                    <li  style="display: inline;">Fecha hasta: <input class="datepicker" type="datetime" name="endDate" value="${endDate?.format('dd/MM/yyyy')}" /></li>
+                </ul>
+                <input type="hidden" name="page" value="${page}">
+                <input type="hidden" name="id">
+                #{/form}
+            </div>
             #{doLayout /}
         </div>
         <hr>
@@ -44,6 +54,11 @@
         $( "#prev" ).click(function( event ) {
             $( "[name = page]" ).val( parseInt( $( "[name = page]" ).val() ) - 1 );
             $( "#mainForm" ).submit();
+            event.preventDefault();
+        });
+        $( ".submitForm" ).click(function( event ) {
+            $( "[name = id]" ).val( $(this).attr( "id" ) );
+            $( "#mainForm" ).attr("action", $(this).attr("href") ).submit();
             event.preventDefault();
         });
     });
