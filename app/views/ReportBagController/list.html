@@ -13,9 +13,9 @@
         <th>Transaccion</th>
         <th>Fecha de la bolsa</th>
         <th>Fecha retiro de bolsa</th>
-        <th>Total de efectivo</th>
         <th>Total de sobres</th>
         <th>Total de depositos</th>
+        <th>Total de efectivo &nbsp; / &nbsp; billetes</th>
         <th colspan="2">Acciones</th>
         </thead>
         <tbody>
@@ -31,14 +31,16 @@
                 <td style="width:180px;">
                     ${bag.withdrawDate?.format('dd/MM/yyyy hh:mm:ss')}
                 </td>
-                <td style="width:150px;">
+                <td style="width:100px;">
                     ${bag.getTotals()._1}
                 </td>
-                <td style="width:150px;">
+                <td style="width:100px;">
                     ${bag.getTotals()._2}
                 </td>
-                <td style="width:150px;">
-                    ${bag.getTotals()._3}
+                <td style="width:350px;">
+                #{list items:bag.getTotals()._3.keySet(), as:'currency'}
+                    ${ bag.getTotals()._3.get( currency ).a } &nbsp; / &nbsp; ${ bag.getTotals()._3.get( currency ).q } &nbsp; ${ currency }<br>
+                #{/list}
                 </td>
                 <td style="background-color: lightblue; border: 1px solid;">
                     <a href="@{detail(bag.bagId)}">Detalle</a>

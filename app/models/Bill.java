@@ -14,6 +14,7 @@ import models.lov.Currency;
 
 /**
  * @author adji
+ * This class must be splitted between controller and model in a happier way.
  */
 public class Bill {
 

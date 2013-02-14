@@ -1,7 +1,7 @@
 Total de sobres ${ _bill_data._1 }<br>
 Total de depositos ${ _bill_data._2 }<br>
 <ul style="display: inline-block; height: 100px; white-space: nowrap; padding: 4px 0;">
-    #{list items:_bill_data._3.keySet(), as:'currency'}
+    #{list items:_bill_data._4.keySet(), as:'currency'}
     <li style="display: inline-block; margin: 0 4px;">
         <div>
             <table class="">
@@ -15,7 +15,7 @@ Total de depositos ${ _bill_data._2 }<br>
                 <tbody>
                     <!-- detalle de billetes -->
                     %{ total = 0; cnt_total = 0;}%
-                    #{list items:_bill_data._3.get( currency ).values(), as:'b'}
+                    #{list items:_bill_data._4.get( currency ).values(), as:'b'}
                     <tr class="BTRID_${b.tid}">
                         <td id="bill_denomination">${b.d} &{b.c}</td>
                         <td class="bill_quantity">${b.q}</td>

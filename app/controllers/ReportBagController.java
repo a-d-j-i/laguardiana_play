@@ -3,12 +3,8 @@ package controllers;
 import devices.DeviceFactory;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import models.Bill;
 import models.db.LgBag;
-import models.db.LgBillType;
 import play.data.binding.As;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Router;
 import play.mvc.Util;
@@ -84,6 +80,6 @@ public class ReportBagController extends Controller {
     static public void setRenderArgs(LgBag b) {
         renderArgs.put("bag", b);
         renderArgs.put("currentDate", new Date());
-        renderArgs.put("totals", ReportController.getTotals(b.deposits));
+        renderArgs.put("totals", b.getTotals());
     }
 }

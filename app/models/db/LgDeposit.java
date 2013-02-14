@@ -162,4 +162,50 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     abstract public void print(boolean reprint);
 
     abstract public String getDetailView();
+
+    public static class Total {
+
+        public long a = 0;
+        public long q = 0;
+    }
+
+    public static F.T4<Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals(Set<LgDeposit> deps) {
+        long envelopes = 0;
+        long deposits = 0;
+        Map<Currency, Map<LgBillType, Bill>> totals = new HashMap();
+        Map<Currency, Total> qaTotals = new HashMap();
+        for (LgDeposit d : deps) {
+            deposits++;
+            if (d instanceof BillDeposit) {
+                BillDeposit bd = (BillDeposit) d;
+                for (LgBill b : bd.bills) {
+                    Currency c = b.billType.getCurrency();
+                    Total at = qaTotals.get(c);
+                    if (at == null) {
+                        at = new Total();
+                    }
+                    at.a += b.getTotal();
+                    at.q += b.quantity;
+                    qaTotals.put(c, at);
+
+                    Map<LgBillType, Bill> ct = totals.get(c);
+                    if (ct == null) {
+                        ct = new HashMap();
+                    }
+                    Bill bill = ct.get(b.billType);
+                    if (bill == null) {
+                        bill = new Bill(b.billType);
+                    }
+                    bill.q += b.quantity;
+                    totals.put(c, ct);
+                    ct.put(b.billType, bill);
+                }
+            } else if (d instanceof EnvelopeDeposit) {
+                envelopes++;
+            } else {
+                Logger.error("Invalid deposit type");
+            }
+        }
+        return new F.T4<Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>>(envelopes, deposits, qaTotals, totals);
+    }
 }

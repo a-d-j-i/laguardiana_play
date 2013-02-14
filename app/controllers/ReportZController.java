@@ -3,12 +3,8 @@ package controllers;
 import devices.DeviceFactory;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import models.Bill;
-import models.db.LgBillType;
 import models.db.LgZ;
 import play.data.binding.As;
-import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
@@ -94,6 +90,6 @@ public class ReportZController extends Controller {
     static public void setRenderArgs(LgZ z) {
         renderArgs.put("z", z);
         renderArgs.put("currentDate", new Date());
-        renderArgs.put("totals", ReportController.getTotals(z.deposits));
+        renderArgs.put("totals", z.getTotals());
     }
 }

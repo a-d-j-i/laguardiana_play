@@ -34,37 +34,6 @@ public class ReportController extends Controller {
         }
     }
 
-    public static F.T3<Long, Long, Map<Currency, Map<LgBillType, Bill>>> getTotals(Set<LgDeposit> deps) {
-        long envelopes = 0;
-        long deposits = 0;
-        Map<Currency, Map<LgBillType, Bill>> totals = new HashMap();
-        for (LgDeposit d : deps) {
-            deposits++;
-            if (d instanceof BillDeposit) {
-                BillDeposit bd = (BillDeposit) d;
-                for (LgBill b : bd.bills) {
-                    Currency c = b.billType.getCurrency();
-                    Map<LgBillType, Bill> ct = totals.get(c);
-                    if (ct == null) {
-                        ct = new HashMap();
-                    }
-                    Bill bill = ct.get(b.billType);
-                    if (bill == null) {
-                        bill = new Bill(b.billType);
-                    }
-                    bill.q += b.quantity;
-                    ct.put(b.billType, bill);
-                    totals.put(c, ct);
-                }
-            } else if (d instanceof EnvelopeDeposit) {
-                envelopes++;
-            } else {
-                Logger.error("Invalid deposit type");
-            }
-        }
-        return new F.T3<Long, Long, Map<Currency, Map<LgBillType, Bill>>>(envelopes, deposits, totals);
-    }
-
     static public class ContentData {
     }
 
