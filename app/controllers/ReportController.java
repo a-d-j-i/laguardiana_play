@@ -2,12 +2,16 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import models.Bill;
 import models.BillDeposit;
 import models.Configuration;
 import models.EnvelopeDeposit;
 import models.db.LgBag;
+import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgEnvelope;
@@ -15,6 +19,7 @@ import models.db.LgEnvelopeContent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
+import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 
@@ -27,6 +32,37 @@ public class ReportController extends Controller {
         if (format != null) {
             request.format = format;
         }
+    }
+
+    public static F.T3<Long, Long, Map<Currency, Map<LgBillType, Bill>>> getTotals(Set<LgDeposit> deps) {
+        long envelopes = 0;
+        long deposits = 0;
+        Map<Currency, Map<LgBillType, Bill>> totals = new HashMap();
+        for (LgDeposit d : deps) {
+            deposits++;
+            if (d instanceof BillDeposit) {
+                BillDeposit bd = (BillDeposit) d;
+                for (LgBill b : bd.bills) {
+                    Currency c = b.billType.getCurrency();
+                    Map<LgBillType, Bill> ct = totals.get(c);
+                    if (ct == null) {
+                        ct = new HashMap();
+                    }
+                    Bill bill = ct.get(b.billType);
+                    if (bill == null) {
+                        bill = new Bill(b.billType);
+                    }
+                    bill.q += b.quantity;
+                    ct.put(b.billType, bill);
+                    totals.put(c, ct);
+                }
+            } else if (d instanceof EnvelopeDeposit) {
+                envelopes++;
+            } else {
+                Logger.error("Invalid deposit type");
+            }
+        }
+        return new F.T3<Long, Long, Map<Currency, Map<LgBillType, Bill>>>(envelopes, deposits, totals);
     }
 
     static public class ContentData {

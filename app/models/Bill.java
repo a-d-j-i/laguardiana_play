@@ -17,7 +17,7 @@ import models.lov.Currency;
  */
 public class Bill {
 
-    transient public LgBillType billType;
+    transient final public LgBillType billType;
     // Bill type id
     public Integer tid;
     // Bill type description
@@ -30,20 +30,20 @@ public class Bill {
     public Integer q = 0;
     // Currency
     public String c = "";
-    
+
     public Bill(LgBillType bb) {
         this.billType = bb;
         this.tid = bb.billTypeId;
         this.btd = bb.toString();
         this.d = bb.denomination;
-        Currency c = bb.getCurrency();
-        if ( c == null ) {
+        Currency currency = bb.getCurrency();
+        if (currency == null) {
             this.c = "-";
         } else {
-            this.c = c.textId;
+            this.c = currency.textId;
         }
     }
-
+    // TODO: Refactor into controller and model parts.
     static public List<Bill> getBillList(Integer currency) {
         List<Bill> ret = new ArrayList<Bill>();
         List<LgBillType> billTypes = LgBillType.find(currency);

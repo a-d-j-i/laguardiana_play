@@ -1,20 +1,14 @@
 package models.db;
 
-import devices.DeviceFactory;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.Bill;
 import models.ZProcessedEvent;
 import play.Logger;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 
 @Entity
 @Table( name = "lg_z", schema = "public")
@@ -41,7 +35,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
     // TODO: Search for the z that has withdraw data null.
     // Or add a new bug logging the error.
     public static LgZ getCurrentZ() {
-        LgZ currentZ = null;
+        LgZ currentZ;
         List<LgZ> zs = LgZ.find("select bg from LgZ bg where bg.closeDate is null order by bg.creationDate desc").fetch();
         if (zs == null || zs.isEmpty()) {
             Logger.error("There's no z where to deposit, creating one!!");
@@ -65,10 +59,6 @@ public class LgZ extends GenericModel implements java.io.Serializable {
             Logger.error("APP ERROR z = null");
         }
         return currentZ;
-    }
-
-    public F.T4<Long, Long, Long, Collection<Bill>> getTotals() {
-        return LgDeposit.getTotals(deposits);
     }
 
     public static LgZ rotateZ() {
@@ -140,20 +130,5 @@ public class LgZ extends GenericModel implements java.io.Serializable {
     @Override
     public String toString() {
         return "LgZ{" + "zId=" + zId + ", creationDate=" + creationDate + ", closeDate=" + closeDate + '}';
-    }
-
-    public void print(boolean reprint) {
-        Map<String, Object> args = new HashMap<String, Object>();
-        setRenderArgs(args);
-        if (reprint) {
-            args.put("reprint", "true");
-        }
-        DeviceFactory.getPrinter().print("ReportZController/print.html", args, 200);
-    }
-
-    public void setRenderArgs(Map<String, Object> args) {
-        args.put("z", this);
-        args.put("totals", this.getTotals());
-        args.put("currentDate", new Date());
     }
 }

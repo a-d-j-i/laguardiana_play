@@ -1,32 +1,42 @@
-<table class="">
-    <thead>
-        <tr>
-            <th>&{ 'counting_page.denomination' }</th>
-            <th>&{ 'counting_page.quantity' }</th>
-            <th>&{ 'counting_page.total' }</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- detalle de billetes -->
-        %{ total = 0; cnt_total = 0;}%
-        #{list items:_bill_data, as:'b'}
-        <tr class="BTRID_${b.tid}">
-            <td id="bill_denomination">${b.d} &{b.c}</td>
-            <td class="bill_quantity">${b.q}</td>
-            <td class="bill_total">${b.d  * b.q}</td>
-            %{ total += b.d  * b.q; cnt_total += b.q }%
-        </tr>
-        #{/list}
-        <!-- /detalle de billetes -->
-    </tbody>
+Total de sobres ${ _bill_data._1 }<br>
+Total de depositos ${ _bill_data._2 }<br>
+<ul style="display: inline-block; height: 100px; white-space: nowrap; padding: 4px 0;">
+    #{list items:_bill_data._3.keySet(), as:'currency'}
+    <li style="display: inline-block; margin: 0 4px;">
+        <div>
+            <table class="">
+                <thead>
+                    <tr>
+                        <th>&{ 'counting_page.denomination' }</th>
+                        <th>&{ 'counting_page.quantity' }</th>
+                        <th>&{ 'counting_page.total' }</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- detalle de billetes -->
+                    %{ total = 0; cnt_total = 0;}%
+                    #{list items:_bill_data._3.get( currency ).values(), as:'b'}
+                    <tr class="BTRID_${b.tid}">
+                        <td id="bill_denomination">${b.d} &{b.c}</td>
+                        <td class="bill_quantity">${b.q}</td>
+                        <td class="bill_total">${b.d  * b.q}</td>
+                        %{ total += b.d  * b.q; cnt_total += b.q }%
+                    </tr>
+                    #{/list}
+                    <!-- /detalle de billetes -->
+                </tbody>
 
-    <tfoot>
-        <tr>
-            <td>&{ 'counting_page.totals' }</td>
-            <!-- totales -->
-            <td class ="cnt_total">${ cnt_total }</td>
-            <td class ="total">${ total }</td>
-            <!-- /totales -->
-        </tr>
-    </tfoot>
-</table>
+                <tfoot>
+                    <tr>
+                        <td>&{ 'counting_page.totals' }</td>
+                        <!-- totales -->
+                        <td class ="cnt_total">${ cnt_total }</td>
+                        <td class ="total">${ total }</td>
+                        <!-- /totales -->
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </li>
+    #{/list}
+</ul>

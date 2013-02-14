@@ -1,21 +1,15 @@
 package models.db;
 
-import devices.DeviceFactory;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import models.BagEvent;
 import models.BagProcessedEvent;
-import models.Bill;
 import play.Logger;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 
 @Entity
 @Table( name = "lg_bag", schema = "public")
@@ -97,7 +91,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     // TODO: Search for the bag that has withdraw data null.
     // Or add a new bug logging the error.
     public static LgBag getCurrentBag() {
-        LgBag currentBag = null;
+        LgBag currentBag;
         List<LgBag> bags = LgBag.find("select bg from LgBag bg where bg.withdrawDate is null order by bg.creationDate desc").fetch();
         if (bags == null || bags.isEmpty()) {
             Logger.error("There's no bag where to deposit, creating one!!");
@@ -125,10 +119,6 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         return currentBag;
     }
 
-    public F.T4<Long, Long, Long, Collection<Bill>> getTotals() {
-        return LgDeposit.getTotals(deposits);
-    }
-
     public static void rotateBag(boolean force) {
 
         LgBag current = getCurrentBag();
@@ -149,20 +139,5 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     @Override
     public String toString() {
         return "LgBag{" + "bagId=" + bagId + ", bagCode=" + bagCode + ", creationDate=" + creationDate + ", withdrawDate=" + withdrawDate + '}';
-    }
-
-    public void print(boolean reprint) {
-        Map args = new HashMap();
-        setRenderArgs(args);
-        if (reprint) {
-            args.put("reprint", "true");
-        }
-        DeviceFactory.getPrinter().print("ReportBagController/print.html", args, 200);
-    }
-
-    public void setRenderArgs(Map<String, Object> args) {
-        args.put("bag", this);
-        args.put("currentDate", new Date());
-        args.put("totals", getTotals());
     }
 }

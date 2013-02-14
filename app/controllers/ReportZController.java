@@ -1,12 +1,18 @@
 package controllers;
 
+import devices.DeviceFactory;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import models.Bill;
+import models.db.LgBillType;
 import models.db.LgZ;
 import play.data.binding.As;
+import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
+import play.mvc.Util;
 import play.mvc.With;
 
 @With({Secure.class})
@@ -51,7 +57,7 @@ public class ReportZController extends Controller {
             z = LgZ.findById(zId);
         }
         renderArgs.put("backUrl", flash.get("backUrl"));
-        z.setRenderArgs(renderArgs.data);
+        setRenderArgs(z);
         render();
     }
 
@@ -62,23 +68,32 @@ public class ReportZController extends Controller {
         } else {
             z = LgZ.findById(zId);
         }
-        z.print(true);
+        setRenderArgs(z);
+        renderArgs.put("reprint", "true");
+        DeviceFactory.getPrinter().print("ReportZController/print.html", renderArgs.data, 200);
         list(zId, null, null);
     }
 
     public static void rotateZ() {
         LgZ currentZ = LgZ.rotateZ();
-        currentZ.setRenderArgs(renderArgs.data);
-        currentZ.print(false);
+        setRenderArgs(currentZ);
+        DeviceFactory.getPrinter().print("ReportZController/print.html", renderArgs.data, 200);
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentZ.zId);
     }
 
     public static void print() {
         LgZ currentZ = LgZ.getCurrentZ();
-        currentZ.setRenderArgs(renderArgs.data);
-        currentZ.print(false);
+        setRenderArgs(currentZ);
+        DeviceFactory.getPrinter().print("ReportZController/print.html", renderArgs.data, 200);
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentZ.zId);
+    }
+
+    @Util
+    static public void setRenderArgs(LgZ z) {
+        renderArgs.put("z", z);
+        renderArgs.put("currentDate", new Date());
+        renderArgs.put("totals", ReportController.getTotals(z.deposits));
     }
 }

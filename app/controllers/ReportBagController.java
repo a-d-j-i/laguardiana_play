@@ -1,11 +1,17 @@
 package controllers;
 
+import devices.DeviceFactory;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import models.Bill;
 import models.db.LgBag;
+import models.db.LgBillType;
 import play.data.binding.As;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Router;
+import play.mvc.Util;
 import play.mvc.With;
 
 @With({Secure.class})
@@ -44,7 +50,7 @@ public class ReportBagController extends Controller {
             b = LgBag.findById(bId);
         }
         renderArgs.put("backUrl", flash.get("backUrl"));
-        b.setRenderArgs(renderArgs.data);
+        setRenderArgs(b);
         render();
     }
 
@@ -55,7 +61,9 @@ public class ReportBagController extends Controller {
         } else {
             b = LgBag.findById(bId);
         }
-        b.print(true);
+        setRenderArgs(b);
+        renderArgs.put("reprint", "true");
+        DeviceFactory.getPrinter().print("ReportBagController/print.html", renderArgs.data, 200);
         list(bId, null, null);
     }
 
@@ -66,9 +74,16 @@ public class ReportBagController extends Controller {
 
     public static void print() {
         LgBag currentBag = LgBag.getCurrentBag();
-        currentBag.print(false);
-        currentBag.setRenderArgs(renderArgs.data);
+        setRenderArgs(currentBag);
+        DeviceFactory.getPrinter().print("ReportBagController/print.html", renderArgs.data, 200);
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentBag.bagId);
+    }
+
+    @Util
+    static public void setRenderArgs(LgBag b) {
+        renderArgs.put("bag", b);
+        renderArgs.put("currentDate", new Date());
+        renderArgs.put("totals", ReportController.getTotals(b.deposits));
     }
 }

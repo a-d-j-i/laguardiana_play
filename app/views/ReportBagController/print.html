@@ -4,8 +4,5 @@ Contenido actual de la maquina en la bolsa ${ bag.bagId }, colocada el ${ bag.cr
 #{if reprint } 
 &{ 'summary.reprint' }<br>
 #{/if}
-#{ bills_table_printer bill_data: totals._4 /}
-Total de efectivo ${ totals._1 }<br>
-Total de sobres ${ totals._2 }<br>
-Total de depositos ${ totals._3 }<br>
+#{ bills_table_printer bill_data: totals /}
 ${ currentDate.format('dd/MM/yyyy hh:mm:ss') }&nbsp;S.E.U.O.

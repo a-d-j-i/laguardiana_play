@@ -30,7 +30,7 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date", nullable = true, length = 13)
     public Date endDate;
-
+    
     LgBillType(int denomination, int unitLov) {
         this.denomination = denomination;
         this.unitLov = unitLov;
@@ -56,7 +56,12 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
         return (d.toString() + " " + Currency.findByNumericId(unitLov));
     }
 
+    transient private Currency unitLovObj = null;
+    
     public Currency getCurrency() {
-        return Currency.findByNumericId(unitLov);
+        if ( unitLovObj == null ) {
+            unitLovObj = Currency.findByNumericId(unitLov);
+        }
+        return unitLovObj;
     }
 }
