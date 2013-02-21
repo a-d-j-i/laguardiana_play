@@ -20,5 +20,32 @@
 #{if reprint } 
 &{ 'summary.reprint' }<br>
 #{/if}
-#{ bills_table_printer bill_data: billData /}
+<table border="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th>&{ 'counting_page.denomination' }</th>
+            <th>&{ 'counting_page.quantity' }</th>
+            <th>&{ 'counting_page.total' }</th>
+        </tr>
+    </thead>
+    <tbody>
+        %{ total = 0; cnt_total = 0;}%
+        #{list items:billData, as:'b'}
+        <tr id="BTRID_${b.tid}"  style="text-align: center;">
+            <td id="bill_denomination">${b.d} &{b.c}</td>
+            <td id="bill_quantity">${b.q}</td>
+            <td id="bill_total">${b.d  * b.q}</td>
+            %{ total += b.d  * b.q; cnt_total += b.q }%
+        </tr>
+        #{/list}
+    </tbody>
+
+    <tfoot>
+        <tr style="text-align: center;">
+            <td><b>&{ 'counting_page.totals' }</b></td>
+            <td id ="cnt_total"><b>${ cnt_total }</b></td>
+            <td id ="total"><b>${ total }</b></td>
+        </tr>
+    </tfoot>
+</table>
 ${ deposit.finishDate?.format('dd/MM/yyyy HH:mm:ss') }&nbsp;S.E.U.O.
