@@ -20,14 +20,14 @@
         #{/else}
         <td>${deposit.depositId} </td>
         <td>${deposit.user.username} &nbsp; ${deposit.user.gecos}</td>
-        <td>${deposit.creationDate?.format('dd/MM/yyyy hh:mm:ss')}</td>
+        <td>${deposit.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
         <td style="width:180px;">
-            ${deposit.z.creationDate?.format('dd/MM/yyyy hh:mm:ss')}
+            ${deposit.z.creationDate?.format('dd/MM/yyyy HH:mm:ss')}
             <br>
-            ${deposit.z.closeDate?.format('dd/MM/yyyy hh:mm:ss')}
+            ${deposit.z.closeDate?.format('dd/MM/yyyy HH:mm:ss')}
         </td>
         <td style="width:180px;">
-            ${deposit.bag.withdrawDate?.format('dd/MM/yyyy hh:mm:ss')}
+            ${deposit.bag.withdrawDate?.format('dd/MM/yyyy HH:mm:ss')}
         </td>
         <td style="width:150px;">
             #{if ( deposit.class.getSimpleName() == "BillDeposit" )}

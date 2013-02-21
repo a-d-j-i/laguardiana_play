@@ -17,9 +17,9 @@
     <tr style="background-color: lightgreen;">
         #{/else}
         <td>${z.zId} </td>
-        <td>${z.creationDate?.format('dd/MM/yyyy hh:mm:ss')}</td>
+        <td>${z.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
         <td style="width:180px;">
-            ${z.closeDate?.format('dd/MM/yyyy hh:mm:ss')}
+            ${z.closeDate?.format('dd/MM/yyyy HH:mm:ss')}
         </td>
         <td style="background-color: lightblue; border: 1px solid;">
             <a id="${ z.zId }" href="@{detail}" class="submitForm">Detalle</a>
@@ -32,7 +32,7 @@
 </tbody>
 <tfoot> 
     <tr>
-        <td colspan="3" style="text-align: left;">Cantidad de bolsas: ${cnt}</td>
+        <td colspan="3" style="text-align: left;">Cantidad de cierres contables: ${cnt}</td>
         <td colspan="3" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
     </tr>
 </tfoot>

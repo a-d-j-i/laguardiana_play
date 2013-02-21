@@ -19,9 +19,9 @@
     <tr style="background-color: lightgreen;">
         #{/else}
         <td>${bag.bagId} </td>
-        <td>${bag.creationDate?.format('dd/MM/yyyy hh:mm:ss')}</td>
+        <td>${bag.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
         <td style="width:180px;">
-            ${bag.withdrawDate?.format('dd/MM/yyyy hh:mm:ss')}
+            ${bag.withdrawDate?.format('dd/MM/yyyy HH:mm:ss')}
         </td>
         <td style="width:100px;">
             ${bag.getTotals()._1}
