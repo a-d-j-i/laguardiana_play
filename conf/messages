@@ -36,6 +36,7 @@ application.wellcome_x=Bienvenido
 application.choose_currency=Seleccione divisa
 application.thanks=MUCHAS GRACIAS POR OPERAR CON %s
 application.error=ERROR
+application.ok=LISTO
 application.close=CERRAR
 application.printers=Impresoras
 application.timeout=Necesita mas tiempo

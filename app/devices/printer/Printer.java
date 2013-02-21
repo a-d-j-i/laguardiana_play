@@ -2,13 +2,12 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices;
+package devices.printer;
 
 import devices.printHelper.EditorPanePrinter;
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.print.Paper;
-import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -18,6 +17,7 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Observable;
 import javax.print.Doc;
 import javax.print.DocFlavor;
 import javax.print.DocPrintJob;
@@ -46,44 +46,44 @@ import play.templates.TemplateLoader;
  *
  * @author adji
  */
-public class Printer {
-    
+public class Printer extends Observable {
+
     final double INCH = 72;
     final double MM = INCH / 25.5;
     final int PAGE_WIDTH = 80;
     final int DEFAULT_PAGE_LEN = 200;
-    // TODO: Manage errors.
+    public Map<String, PrintService> printers = new HashMap<String, PrintService>();
+    private final String port;
 
     class MyPrintListener implements PrintJobListener {
-        
+
         public void printDataTransferCompleted(PrintJobEvent pje) {
-            Logger.debug("printDataTransferCompleted");
+            Logger.debug("PRINTER : printDataTransferCompleted");
+            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTING_DONE, "DONE"));
         }
-        
+
         public void printJobCompleted(PrintJobEvent pje) {
-            Logger.debug("printJobCompleted");
+            Logger.debug("PRINTER : printJobCompleted");
         }
-        
+
         public void printJobFailed(PrintJobEvent pje) {
-            Logger.debug("printJobFailed");
+            Logger.debug("PRINTER : printJobFailed");
         }
-        
+
         public void printJobCanceled(PrintJobEvent pje) {
-            Logger.debug("printJobCanceled");
+            Logger.debug("PRINTER : printJobCanceled");
         }
-        
+
         public void printJobNoMoreEvents(PrintJobEvent pje) {
-            Logger.debug("printJobNoMoreEvents");
+            Logger.debug("PRINTER : printJobNoMoreEvents");
         }
-        
+
         public void printJobRequiresAttention(PrintJobEvent pje) {
-            Logger.debug("printJobRequiresAttention");
+            Logger.debug("PRINTER : printJobRequiresAttention");
         }
     }
-    public Map<String, PrintService> printers = new HashMap<String, PrintService>();
-    String port = null;
-    
-    Printer(String port) {
+
+    public Printer(String port) {
         this.port = port;
         PrintService[] prnSvcs;
         prnSvcs = PrintServiceLookup.lookupPrintServices(null, null);
@@ -91,16 +91,8 @@ public class Printer {
             printers.put(p.getName(), p);
         }
     }
-    
+
     public void print(String templateName, Map<String, Object> args, int paperLen) {
-        try {
-            printInt(templateName, args, paperLen);
-        } catch (Exception ex) {
-            Logger.debug("Error printing : " + ex.getMessage());
-        }
-    }
-    
-    public void printInt(String templateName, Map<String, Object> args, int paperLen) throws PrinterException, PrintException {
         if (paperLen <= 0) {
             paperLen = DEFAULT_PAGE_LEN;
         }
@@ -112,7 +104,8 @@ public class Printer {
             template = TemplateLoader.load(templateName + ".txt");
         }
         if (template == null) {
-            throw new PrinterException(String.format("Template %s not found", templateName));
+            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.TEMPLATE_NOT_FOUND,
+                    String.format("Template %s not found", templateName)));
         }
         args.put("currentDate", new Date());
         String body = template.render(args);
@@ -149,12 +142,12 @@ public class Printer {
             kit.read(fin, doc, 0);
             fin.close();
         } catch (IOException ex) {
-            throw new PrinterException("IOException : " + ex.toString());
+            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "IOException : " + ex.toString()));
         } catch (BadLocationException ex) {
-            throw new PrinterException("BadLocationException : " + ex.toString());
+            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "BadLocationException : " + ex.toString()));
         }
-        
-        
+
+
         JEditorPane item = new JEditorPane();
         item.setEditorKit(kit);
 //        item.getDocument().putProperty("ZOOM_FACTOR", new Double(1.5));
@@ -187,27 +180,32 @@ public class Printer {
          */
         // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
         if (port == null || !printers.containsKey(port)) {
-            throw new PrinterException(String.format("Printer %s not found", port == null ? "NULL" : port));
+            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", port == null ? "NULL" : port)));
         }
         PrintService p = printers.get(port);
-        
+
         Paper pp = new Paper();
         pp.setImageableArea(0, 0, PAGE_WIDTH * MM, paperLen * MM);
         pp.setSize(PAGE_WIDTH * MM, paperLen * MM);
         EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
-        
+
         if (!Configuration.isPrinterTest()) {
-            DocPrintJob printJob = p.createPrintJob();
-            Doc docc = new SimpleDoc(pnl, DocFlavor.SERVICE_FORMATTED.PRINTABLE, null);
-            printJob.addPrintJobListener(new MyPrintListener());
-            printJob.print(docc, null);
-//            pnl.print(p);
+            try {
+                DocPrintJob printJob = p.createPrintJob();
+                Doc docc = new SimpleDoc(pnl, DocFlavor.SERVICE_FORMATTED.PRINTABLE, null);
+                printJob.addPrintJobListener(new MyPrintListener());
+                printJob.print(docc, null);
+                //            pnl.print(p);
+            } catch (PrintException ex) {
+                sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
+            }
         } else {
             JFrame frame = new JFrame("Main print frame");
             pnl.setBackground(Color.black);
             frame.add(pnl);
             frame.pack();
             frame.setVisible(true);
+            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTING_DONE, "DONE"));
         }
 
 
@@ -242,7 +240,7 @@ public class Printer {
                 == null) {
             return;
         }
-        
+
         if (o.getClass()
                 .isArray()) {
             for (int k = 0; k < Array.getLength(o); k++) {
@@ -259,14 +257,14 @@ public class Printer {
             Logger.debug(" O %s %s", o.getClass(), o);
         }
     }
-    
+
     void addMediaSizeByName(PrintService p, DocAttributeSet attrs, String name) {
         Object o = p.getSupportedAttributeValues(javax.print.attribute.standard.Media.class, null, null);
         if (o
                 == null) {
             return;
         }
-        
+
         if (o.getClass()
                 .isArray()) {
             for (int k = 0; k < Array.getLength(o); k++) {
@@ -283,16 +281,24 @@ public class Printer {
             Logger.debug(" O %s %s", o.getClass(), o);
         }
     }
-    
+
+    private void sendEvent(PrinterStatus stat) {
+        if (stat.isError()) {
+            Logger.debug("PRINTER ERROR : " + stat);
+        }
+        setChanged();
+        notifyObservers(stat);
+    }
+
     public void printAttributes() {
         if (printers.containsKey(port)) {
             PrintService p = printers.get(port);
-            
+
             PrintServiceAttributeSet pts = p.getAttributes();
             for (Attribute a : pts.toArray()) {
                 Logger.debug(" Attribute %s %s %s %s", a.getClass(), a.getName(), a.getCategory(), a);
             }
-            
+
             Class[] cats = p.getSupportedAttributeCategories();
             for (int j = 0; j < cats.length; j++) {
                 if (cats[j] == null) {
@@ -314,7 +320,7 @@ public class Printer {
                         Object o2 = Array.get(o, k);
                         if (o2 != null) {
                             Logger.debug(" Possible values %s %s", o2.getClass().toString(), o2);
-                            
+
                             if (o2.getClass() != null && o2.getClass().toString() != null && o2.getClass().toString().equalsIgnoreCase("sun.print.CustomMediaSizeName")) {
                                 /*if (o2.toString().equalsIgnoreCase("custom")) {
                                  Logger.debug("-------------> Possible values %s %s", o2.getClass().toString(), o2);

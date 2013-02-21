@@ -1,6 +1,6 @@
 package models;
 
-import devices.DeviceFactory;
+import devices.printer.Printer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -63,13 +63,13 @@ public class BillDeposit extends LgDeposit {
     }
 
     @Override
-    public void print(boolean reprint) {
+    public void print(Printer p, boolean reprint) {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
         if (reprint) {
             args.put("reprint", "true");
         }
-        DeviceFactory.getPrinter().print("PrinterController/billDeposit.html", args, 200);
+        p.print("PrinterController/billDeposit.html", args, 200);
     }
 }

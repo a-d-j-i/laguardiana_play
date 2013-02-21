@@ -1,5 +1,6 @@
 package controllers;
 
+import devices.DeviceFactory;
 import java.util.Date;
 import java.util.List;
 import models.db.LgDeposit;
@@ -56,7 +57,7 @@ public class ReportDepositController extends Controller {
 
     public static void reprint(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate, Integer id) {
         LgDeposit d = LgDeposit.findById(id);
-        d.print(true);
+        d.print(DeviceFactory.getPrinter(), true);
         list(page, startDate, endDate);
     }
 }

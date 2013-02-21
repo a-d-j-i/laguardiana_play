@@ -2,24 +2,28 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices.glory.manager;
+package devices.printer;
 
 /**
  *
  * @author adji
  */
-public class GloryManagerError {
+public class PrinterStatus {
 
     public enum ERROR_CODE {
 
-        GLORY_MANAGER_ERROR, STORING_ERROR_CALL_ADMIN, BILLS_IN_ESCROW_CALL_ADMIN;
+        PRINTING_DONE, TEMPLATE_NOT_FOUND, IO_EXCEPTION, PRINTER_NOT_FOUND;
     }
     final ERROR_CODE errorCode;
     final String detail;
 
-    public GloryManagerError(ERROR_CODE errorCode, String detail) {
+    public PrinterStatus(ERROR_CODE errorCode, String detail) {
         this.errorCode = errorCode;
         this.detail = detail;
+    }
+
+    public boolean isError() {
+        return errorCode != ERROR_CODE.PRINTING_DONE;
     }
 
     public ERROR_CODE getErrorCode() {
@@ -32,6 +36,6 @@ public class GloryManagerError {
 
     @Override
     public String toString() {
-        return "code = " + errorCode + ", detail = " + detail;
+        return "PrinterStatus{" + "error=" + errorCode + ", detail=" + detail + '}';
     }
 }

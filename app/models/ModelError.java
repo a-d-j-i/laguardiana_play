@@ -6,6 +6,7 @@ package models;
 
 import devices.glory.manager.GloryManagerError;
 import devices.ioboard.IoBoardError;
+import devices.printer.PrinterStatus;
 import play.Logger;
 
 /**
@@ -19,17 +20,23 @@ public class ModelError {
         APP_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_OPEN;
     }
     private GloryManagerError gloryError = null;
+    private PrinterStatus printerError = null;
     private IoBoardError ioBoardError = null;
     private ERROR_CODE errorCode;
     private String detail;
 
     synchronized public boolean isError() {
-        return errorCode != null || gloryError != null || ioBoardError != null;
+        return errorCode != null || gloryError != null || ioBoardError != null || printerError != null;
     }
 
     synchronized public void setError(GloryManagerError error) {
         Logger.debug("Error in gloryError %s", error);
         this.gloryError = error;
+    }
+
+    synchronized public void setError(PrinterStatus error) {
+        Logger.debug("Error in printerError %s", error);
+        this.printerError = error;
     }
 
     synchronized public void setError(IoBoardError error) {
@@ -43,15 +50,36 @@ public class ModelError {
         this.detail = detail;
     }
 
+    synchronized public GloryManagerError getGloryError() {
+        return gloryError;
+    }
+
+    synchronized public PrinterStatus getPrinterError() {
+        return printerError;
+    }
+
+    synchronized public IoBoardError getIoBoardError() {
+        return ioBoardError;
+    }
+
+    synchronized public ERROR_CODE getErrorCode() {
+        return errorCode;
+    }
+
+    synchronized public String getDetail() {
+        return detail;
+    }
+
     synchronized void clearError() {
         this.errorCode = null;
         this.detail = null;
         this.gloryError = null;
+        this.printerError = null;
         this.ioBoardError = null;
     }
 
     @Override
-    synchronized public String toString() {
-        return "ModelError{" + "gloryError=" + gloryError + ", ioBoardError=" + ioBoardError + ", errorCode=" + errorCode + ", detail=" + detail + '}';
+    public String toString() {
+        return "gloryError = { " + gloryError + " }, printerError = { " + printerError + " }, ioBoardError = { " + ioBoardError + "}, errorCode = { " + errorCode + " }, detail = { " + detail + " }";
     }
 }

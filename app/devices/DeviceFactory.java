@@ -1,5 +1,6 @@
 package devices;
 
+import devices.printer.Printer;
 import devices.ioboard.IoBoard;
 import devices.SerialPortAdapterAbstract.PORTBITS;
 import devices.SerialPortAdapterAbstract.PORTPARITY;
@@ -38,8 +39,8 @@ public class DeviceFactory extends PlayPlugin {
     }
 
     public static ManagerInterface getGloryManager() {
-        
-        if ( Configuration.isGloryIgnore() ) {
+
+        if (Configuration.isGloryIgnore()) {
             return new FakeGloryManager();
         }
         Glory glory = getCounter(Play.configuration.getProperty("glory.port"));

@@ -6,6 +6,7 @@ package models.actions.states;
 
 import devices.ioboard.IoBoard;
 import devices.glory.manager.ManagerInterface;
+import devices.printer.PrinterStatus;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -46,6 +47,10 @@ abstract public class ActionState {
 
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("ActionState invalid onIoBoardEvent %s", status.toString());
+    }
+
+    public void onPrinterEvent(PrinterStatus status) {
+        Logger.error("ActionState invalid onPrinterEvent %s", status.toString());
     }
 
     public void onTimeoutEvent(TimeoutTimer timer) {

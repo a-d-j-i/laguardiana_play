@@ -1,6 +1,6 @@
 package models;
 
-import devices.DeviceFactory;
+import devices.printer.Printer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,23 +32,23 @@ public class EnvelopeDeposit extends LgDeposit {
     }
 
     @Override
-    public void print(boolean reprint) {
+    public void print(Printer p, boolean reprint) {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
         if (reprint) {
             args.put("reprint", "true");
         }
-        DeviceFactory.getPrinter().print("PrinterController/envelopeDeposit_finish.html", args, 200);
+        p.print("PrinterController/envelopeDeposit_finish.html", args, 200);
     }
 
     // Merge somehow with print...
-    public void printStart() {
+    public void printStart(Printer p) {
         Map args = new HashMap();
         // Print the ticket.
         //List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         //List<Currency> currencies = Currency.findAll();
         setRenderArgs(args);
-        DeviceFactory.getPrinter().print("PrinterController/envelopeDeposit_start.html", args, 200);
+        p.print("PrinterController/envelopeDeposit_start.html", args, 200);
     }
 }

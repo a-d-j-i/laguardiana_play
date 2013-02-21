@@ -6,6 +6,7 @@ package models.actions;
 
 import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
+import devices.printer.PrinterStatus;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
@@ -192,6 +193,11 @@ abstract public class UserAction {
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         state.onIoBoardEvent(status);
     }
+
+    public void onPrinterEvent(PrinterStatus status) {
+        state.onPrinterEvent(status);
+    }
+
 
     public void onTimeoutEvent(TimeoutTimer timer) {
         Date currentDate = new Date();

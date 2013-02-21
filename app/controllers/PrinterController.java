@@ -19,7 +19,7 @@ public class PrinterController extends Controller {
         List<BillDeposit> depositList = BillDeposit.findAll();
         BillDeposit d = depositList.get(0);
         //BillDeposit d = BillDeposit.findById(33);
-        d.print(true);
+        d.print(DeviceFactory.getPrinter(), true);
         d.setRenderArgs(renderArgs.data);
         render();
     }
@@ -28,7 +28,7 @@ public class PrinterController extends Controller {
         List<EnvelopeDeposit> depositList = EnvelopeDeposit.findAll();
         EnvelopeDeposit d = depositList.get(0);
         //BillDeposit d = BillDeposit.findById(33);
-        d.print(true);
+        d.print(DeviceFactory.getPrinter(), true);
         d.setRenderArgs(renderArgs.data);
         render();
     }
@@ -37,7 +37,7 @@ public class PrinterController extends Controller {
         List<EnvelopeDeposit> depositList = EnvelopeDeposit.findAll();
         EnvelopeDeposit d = depositList.get(0);
         //BillDeposit d = BillDeposit.findById(33);
-        d.printStart();
+        d.printStart(DeviceFactory.getPrinter());
         d.setRenderArgs(renderArgs.data);
         render();
     }

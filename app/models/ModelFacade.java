@@ -6,8 +6,10 @@ package models;
 
 import controllers.Secure;
 import devices.DeviceFactory;
+import devices.printer.Printer;
 import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
+import devices.printer.PrinterStatus;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -17,6 +19,7 @@ import models.db.LgDeposit;
 import models.events.ActionEvent;
 import models.events.GloryEvent;
 import models.events.IoBoardEvent;
+import models.events.PrinterEvent;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
@@ -33,9 +36,10 @@ public class ModelFacade {
 
     final static private ManagerInterface manager;
     final static private IoBoard ioBoard;
-    final private static ModelError modelError = new ModelError();
-    private static UserAction currentUserAction = null;
-    private static User currentUser = null;
+    final static private ModelError modelError = new ModelError();
+    final static private Printer printer;
+    static private UserAction currentUserAction = null;
+    static private User currentUser = null;
 
     static {
         manager = DeviceFactory.getGloryManager();
@@ -49,6 +53,13 @@ public class ModelFacade {
         ioBoard.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
+            }
+        });
+
+        printer = DeviceFactory.getPrinter();
+        printer.addObserver(new Observer() {
+            public void update(Observable o, Object data) {
+                Promise now = new OnPrinterEvent((PrinterStatus) data).now();
             }
         });
     }
@@ -141,6 +152,29 @@ public class ModelFacade {
         }
     }
 
+    static class OnPrinterEvent extends Job {
+
+        PrinterStatus status;
+
+        private OnPrinterEvent(PrinterStatus status) {
+            this.status = status;
+        }
+
+        @Override
+        public void doJob() throws Exception {
+            PrinterEvent.save(currentUserAction, status.toString());
+            if (status.isError()) {
+                // A development option
+                Logger.error("Setting printer error : %s", status.toString());
+                modelError.setError(status);
+                return;
+            }
+            if (currentUserAction != null) {
+                currentUserAction.onPrinterEvent(status);
+            }
+        }
+    }
+
     static public class UserActionApi {
 
         public void count(Integer numericId) {
@@ -201,6 +235,10 @@ public class ModelFacade {
 
         public void closeGate() {
             ioBoard.closeGate();
+        }
+
+        public Printer getPrinter() {
+            return printer;
         }
     }
 
