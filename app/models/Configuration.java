@@ -24,7 +24,7 @@ public class Configuration {
         return isProperty("secure.dontAskForPassword");
     }
 
-    public static boolean ioBoardIgnore() {
+    public static boolean isIoBoardIgnore() {
         return isProperty("io_board.ignore") && Play.mode.isDev();
     }
 

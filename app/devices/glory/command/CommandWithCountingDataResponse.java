@@ -41,7 +41,7 @@ public class CommandWithCountingDataResponse extends CommandWithDataResponse {
                 if ( debug.isGratherThan( DebugLevel.PRINT_INFO ) ) {
                     Logger.debug( String.format( "readed bill %d %d", slot, value ) );
                 }
-                if ( debug.isGratherThan( DebugLevel.NONE ) ) {
+                if ( debug.isGratherThan( DebugLevel.PRINT_INFO ) ) {
                     Logger.debug( String.format( "Bill %d: quantity %d", slot, value ) );
                 }
             }

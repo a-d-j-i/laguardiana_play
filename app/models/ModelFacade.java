@@ -6,9 +6,9 @@ package models;
 
 import controllers.Secure;
 import devices.DeviceFactory;
-import devices.printer.Printer;
 import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
+import devices.printer.Printer;
 import devices.printer.PrinterStatus;
 import java.util.List;
 import java.util.Observable;
@@ -33,14 +33,14 @@ import play.libs.F.Promise;
  * @author aweil
  */
 public class ModelFacade {
-
+    
     final static private ManagerInterface manager;
     final static private IoBoard ioBoard;
     final static private ModelError modelError = new ModelError();
     final static private Printer printer;
     static private UserAction currentUserAction = null;
     static private User currentUser = null;
-
+    
     static {
         manager = DeviceFactory.getGloryManager();
         manager.addObserver(new Observer() {
@@ -48,14 +48,14 @@ public class ModelFacade {
                 Promise now = new OnGloryEvent((ManagerInterface.Status) data).now();
             }
         });
-
+        
         ioBoard = DeviceFactory.getIoBoard();
         ioBoard.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
             }
         });
-
+        
         printer = DeviceFactory.getPrinter();
         printer.addObserver(new Observer() {
             public void update(Observable o, Object data) {
@@ -63,19 +63,19 @@ public class ModelFacade {
             }
         });
     }
-
+    
     public static ModelError getError() {
         return modelError;
     }
-
+    
     static class OnGloryEvent extends Job {
-
+        
         ManagerInterface.Status status;
-
+        
         public OnGloryEvent(ManagerInterface.Status status) {
             this.status = status;
         }
-
+        
         @Override
         public void doJob() throws Exception {
             GloryEvent.save(currentUserAction, status.name());
@@ -106,15 +106,15 @@ public class ModelFacade {
             }
         }
     }
-
+    
     static class OnIoBoardEvent extends Job {
-
+        
         IoBoard.IoBoardStatus status;
-
+        
         public OnIoBoardEvent(IoBoard.IoBoardStatus status) {
             this.status = status;
         }
-
+        
         @Override
         public void doJob() throws Exception {
             if (status == null) {
@@ -122,14 +122,6 @@ public class ModelFacade {
                 return;
             }
             IoBoardEvent.save(currentUserAction, status.toString());
-            if (status.getError() != null) {
-                // A development option
-                if (!Configuration.ioBoardIgnore()) {
-                    Logger.error("Setting ioboard error : %s", status.getError());
-                    modelError.setError(status.getError());
-                }
-                return;
-            }
 
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
@@ -146,20 +138,26 @@ public class ModelFacade {
                         break;
                 }
             }
+            
+            if (!isIoBoardOk(status)) {
+                return;
+            }
+            
+            
             if (currentUserAction != null) {
                 currentUserAction.onIoBoardEvent(status);
             }
         }
     }
-
+    
     static class OnPrinterEvent extends Job {
-
+        
         PrinterStatus status;
-
+        
         private OnPrinterEvent(PrinterStatus status) {
             this.status = status;
         }
-
+        
         @Override
         public void doJob() throws Exception {
             PrinterEvent.save(currentUserAction, status.toString());
@@ -174,9 +172,9 @@ public class ModelFacade {
             }
         }
     }
-
+    
     static public class UserActionApi {
-
+        
         public void count(Integer numericId) {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
@@ -188,21 +186,21 @@ public class ModelFacade {
                 }
             }
         }
-
+        
         public boolean store(Integer depositId) {
             return manager.storeDeposit(depositId);
         }
-
+        
         public void withdraw() {
             if (!manager.withdrawDeposit()) {
                 setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
             }
         }
-
+        
         public void cancelDeposit() {
             manager.cancelCommand();
         }
-
+        
         public void envelopeDeposit() {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
@@ -214,81 +212,77 @@ public class ModelFacade {
                 }
             }
         }
-
+        
         public ManagerInterface.ManagerState getManagerState() {
             return manager.getStatus().getState();
         }
-
+        
         public void setError(ModelError.ERROR_CODE errorCode, String detail) {
-            ModelFacade.setError(errorCode, detail);
+            modelError.setError(errorCode, detail);
+            finishAction();
         }
-
+        
         public void clearError() {
             // Todo Put int the ResetAction if needed.
             ioBoard.clearError();
             ModelFacade.clearError();
         }
-
+        
         public void openGate() {
             ioBoard.openGate();
         }
-
+        
         public void closeGate() {
             ioBoard.closeGate();
         }
-
+        
         public Printer getPrinter() {
             return printer;
         }
     }
-
+    
     synchronized public static boolean isError() {
         return modelError.isError();
     }
-
+    
     synchronized public static void errorReset() {
         manager.reset();
         ioBoard.clearError();
         clearError();
     }
-
+    
     synchronized public static void storingErrorReset() {
         manager.storingErrorReset();
         ioBoard.clearError();
         clearError();
     }
-
+    
     synchronized static public void startAction(UserAction userAction) {
         ActionEvent.save(userAction, "Start try", getNeededController());
-        if (modelError.isError()) {
-            Logger.info("Can't start an action when on error");
-            return;
-        }
         if (currentUserAction != null || currentUser != null) {
             Logger.error("startAction currentAction is not null");
             return;
         }
-        if (!Configuration.ioBoardIgnore()) {
-            if (ioBoard.getStatus().getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-                setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-                return;
-            }
-            if (ioBoard.getStatus().getShutterState() != IoBoard.SHUTTER_STATE.SHUTTER_OPEN) {
-                setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPEN, "shutter is not open");
-                return;
-            }
+        
+        if (!isIoBoardOk(ioBoard.getStatus())) {
+            return;
         }
-
+        
+        if (modelError.isError()) {
+            Logger.info("Can't start an action when on error");
+            return;
+        }
+        
         currentUser = Secure.getCurrentUser();
         currentUserAction = userAction;
         ActionEvent.save(currentUserAction, "Start", getNeededController());
         currentUserAction.start(currentUser, new UserActionApi());
     }
-
+    
     synchronized public static void finishAction() {
         if (currentUserAction != null && currentUser != null) {
             ActionEvent.save(currentUserAction, "Finish", getNeededController());
-
+            
             if (currentUserAction.canFinishAction() || modelError.isError()) {
                 currentUserAction.finish();
                 currentUserAction = null;
@@ -296,30 +290,31 @@ public class ModelFacade {
             }
         }
     }
-
+    
     synchronized static public String getState() {
         if (isLocked()) {
             return null;
         }
         if (manager.getStatus().getState() == ManagerInterface.ManagerState.ERROR) {
             if (Play.configuration.getProperty("glory.ignore") == null) {
-                setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
+                modelError.setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
             }
         }
-
-        if (ioBoard.getError() != null && !Configuration.ioBoardIgnore()) {
-            setError(ModelError.ERROR_CODE.APP_ERROR, String.format("IoBoard error %s", ioBoard.getStatus()));
+        
+        if (!isIoBoardOk(ioBoard.getStatus())) {
         }
+        
         if (modelError.isError()) {
+            finishAction();
             return "ERROR";
         }
         if (currentUserAction != null) {
             return currentUserAction.getStateName();
         }
-
+        
         return "IDLE";
     }
-
+    
     synchronized static public String getNeededController() {
         if (isLocked()) {
             return null;
@@ -332,7 +327,7 @@ public class ModelFacade {
         }
         return null;
     }
-
+    
     synchronized static public String getNeededAction() {
         if (isLocked()) {
             return null;
@@ -345,28 +340,22 @@ public class ModelFacade {
         }
         return null;
     }
-
+    
     synchronized public static boolean isLocked() {
         if (currentUser != null && !currentUser.equals(Secure.getCurrentUser())) {
             return true;
         }
         return false;
     }
-
-    private static void setError(ModelError.ERROR_CODE errorCode, String detail) {
-        modelError.setError(errorCode, detail);
-        finishAction();
-    }
-
+    
     private static void clearError() {
         Logger.debug("clearing error");
         ManagerInterface.ManagerState m = manager.getStatus().getState();
-        if (m != ManagerInterface.ManagerState.ERROR
-                && ioBoard.getError() == null) {
+        if (m != ManagerInterface.ManagerState.ERROR && ioBoard.getError() == null) {
             modelError.clearError();
         }
     }
-
+    
     synchronized public static List<Bill> getCurrentCounters() {
         if (currentUserAction == null) {
             Logger.error("getCurrentCounters invalid current User Action");
@@ -378,7 +367,7 @@ public class ModelFacade {
         }
         return Bill.getBillList(currentUserAction.getCurrency().numericId);
     }
-
+    
     synchronized public static Object getFormData() {
         if (currentUserAction == null) {
             Logger.error("getFormData invalid current User Action");
@@ -386,7 +375,7 @@ public class ModelFacade {
         }
         return currentUserAction.getFormData();
     }
-
+    
     synchronized public static String getActionMessage() {
         if (currentUserAction == null) {
             Logger.error("getActionMessage invalid current User Action");
@@ -394,7 +383,7 @@ public class ModelFacade {
         }
         return currentUserAction.getMessage();
     }
-
+    
     public static LgDeposit getDeposit() {
         if (currentUserAction == null) {
             Logger.error("getDeposit invalid current User Action");
@@ -406,7 +395,7 @@ public class ModelFacade {
         }
         return LgDeposit.findById(currentUserAction.getDepositId());
     }
-
+    
     public static void cancel() {
         if (currentUserAction == null) {
             Logger.error("cancel invalid current User Action");
@@ -414,7 +403,7 @@ public class ModelFacade {
         }
         currentUserAction.cancel();
     }
-
+    
     public static void accept() {
         if (currentUserAction == null) {
             Logger.error("accept invalid current User Action");
@@ -422,12 +411,32 @@ public class ModelFacade {
         }
         currentUserAction.accept();
     }
-
+    
     public static void suspendTimeout() {
         if (currentUserAction == null) {
             Logger.error("cancelTimeout invalid current User Action");
             return;
         }
         currentUserAction.suspendTimeout();
+    }
+    
+    private static boolean isIoBoardOk(IoBoard.IoBoardStatus status) {
+        if (!Configuration.isIoBoardIgnore()) {
+            if (status != null && status.getError() != null) {
+                Logger.error("Setting ioboard error : %s", status.getError());
+                modelError.setError(status.getError());
+                return false;
+            }
+            if (ioBoard.getStatus().getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+                modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
+                return false;
+            }
+            if (!Configuration.isIgnoreShutter()
+                    && ioBoard.getStatus().getShutterState() != IoBoard.SHUTTER_STATE.SHUTTER_OPEN) {
+                modelError.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPEN, "shutter is not open");
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -37,7 +37,7 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case READY_TO_STORE:
-                if (Configuration.ioBoardIgnore()) {
+                if (Configuration.isIoBoardIgnore()) {
                     if (!stateApi.store()) {
                         Logger.error("startBillDeposit can't cancel glory");
                     }

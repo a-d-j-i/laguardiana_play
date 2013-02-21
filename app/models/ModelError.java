@@ -71,6 +71,7 @@ public class ModelError {
     }
 
     synchronized void clearError() {
+        Logger.debug("--> Model error cleared");
         this.errorCode = null;
         this.detail = null;
         this.gloryError = null;

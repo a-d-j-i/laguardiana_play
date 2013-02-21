@@ -36,7 +36,7 @@ public class BillDepositStoring extends ActionState {
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
                 stateApi.closeDeposit();
-                if (Configuration.ioBoardIgnore()) {
+                if (Configuration.isIoBoardIgnore()) {
                     stateApi.setState(new Finish(stateApi));
                 } else {
                     stateApi.closeGate();
@@ -46,7 +46,7 @@ public class BillDepositStoring extends ActionState {
                 break;
             case COUNTING:
                 stateApi.closeBatch();
-                if (Configuration.ioBoardIgnore()) {
+                if (Configuration.isIoBoardIgnore()) {
                     stateApi.setState(new BillDepositStart(stateApi));
                 } else {
                     stateApi.closeGate();

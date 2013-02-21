@@ -143,7 +143,7 @@ public class IoBoard {
 
         synchronized private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt, Boolean bagAproved) {
             Logger.debug("IOBOARD setBagState : %s, setShutterState : %s, setLockState : %d",
-                    bagState.name(), shutterState.name(), lockState);
+                    bagState, shutterState, lockState);
             bagState = BAG_STATE.factory(bagSt);
             shutterState = SHUTTER_STATE.factory(shutterSt);
             lockState = lockSt;
@@ -294,6 +294,7 @@ public class IoBoard {
                     if (!(ex.getCause() instanceof TimeoutException)) {
                         state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
                                 String.format("StatusThread exception %s %s %s", ex, ex.getCause(), ex.getMessage())));
+                        //throw new RuntimeException( ex );
                     } else { // timeout
                         // Try again
                         if (state.getError() == null) {
