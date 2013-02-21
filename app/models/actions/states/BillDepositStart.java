@@ -4,6 +4,7 @@
  */
 package models.actions.states;
 
+import devices.ioboard.IoBoard;
 import devices.glory.manager.ManagerInterface;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
@@ -64,7 +65,7 @@ public class BillDepositStart extends ActionState {
             case REMOVE_THE_BILLS_FROM_ESCROW:
                 break;
             default:
-                Logger.debug("BillDepositStart onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("%s onGloryEvent invalid state %s %s", this.getClass().getSimpleName(), m.name(), name());
                 break;
         }
     }

@@ -24,6 +24,8 @@ public class GloryManager {
         this.managerThreadState = new ManagerThreadState();
         this.thread = new ManagerThread(new ThreadCommandApi());
     }
+    
+    
     /*
      *
      *
@@ -72,8 +74,8 @@ public class GloryManager {
             status.clearError();
         }
 
-        public void setErrorInfo(ManagerInterface.ManagerError e, String msg) {
-            status.setError(e, msg);
+        public void setError(GloryManagerError e) {
+            status.setError(e);
         }
     }
 

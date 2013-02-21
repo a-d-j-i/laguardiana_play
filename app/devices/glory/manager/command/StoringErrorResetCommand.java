@@ -5,7 +5,7 @@
 package devices.glory.manager.command;
 
 import devices.glory.manager.GloryManager;
-import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.GloryManagerError;
 import play.Logger;
 
 /**
@@ -60,8 +60,8 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             }
                             break;
                         default:
-                            setError(ManagerInterface.ManagerError.APP_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
+                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
@@ -76,8 +76,8 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             clearError();
                             return;
                         default:
-                            setError(ManagerInterface.ManagerError.APP_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
+                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
@@ -91,18 +91,17 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                     }
                     break;
                 default:
-                    setError(ManagerInterface.ManagerError.APP_ERROR,
-                            String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name()));
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                            String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name())));
                     break;
             }
             sleep();
         }
         if (!mustCancel()) {
-            setError(ManagerInterface.ManagerError.APP_ERROR, "GOTO NEUTRAL TIMEOUT");
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "GOTO NEUTRAL TIMEOUT"));
             Logger.debug("GOTO NEUTRAL TIMEOUT!!!");
         }
 
         Logger.debug("GOTO NEUTRAL DONE CANCEL");
-        return;
     }
 }

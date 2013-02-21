@@ -4,10 +4,12 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.GloryStatus;
+import devices.glory.GloryState;
 import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
+import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -73,7 +75,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             w.unlock();
         }
     }
-    protected final GloryStatus gloryStatus = new GloryStatus();
+    protected final GloryState gloryStatus = new GloryState();
     private final ThreadCommandApi threadCommandApi;
 
     public ManagerCommandAbstract(ThreadCommandApi threadCommandApi) {
@@ -106,7 +108,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             }
             switch (gloryStatus.getSr1Mode()) {
                 case storing_error:
-                    setError(ManagerInterface.ManagerError.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin"));
                     return false;
             }
 
@@ -119,8 +121,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     switch (gloryStatus.getSr1Mode()) {
                         case escrow_open_request:
                             if (!openEscrow) {
-                                setError(ManagerInterface.ManagerError.BILLS_IN_ESCROW_CALL_ADMIN,
-                                        "There are bills in the escrow call an admin");
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
+                                        "There are bills in the escrow call an admin"));
                                 return false;
                             }
                             if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
@@ -129,7 +131,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             break;
                         case abnormal_device:
                             setState(ManagerInterface.ManagerState.JAM);
-                            if (gloryStatus.getD1Mode() == GloryStatus.D1Mode.normal_error_recovery_mode) {
+                            if (gloryStatus.getD1Mode() == GloryState.D1Mode.normal_error_recovery_mode) {
                                 resetDevice();
                             } else {
                                 if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
@@ -158,11 +160,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             setState(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_ESCROW);
                             break;
                         case storing_error:
-                            setError(ManagerInterface.ManagerError.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags");
+                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags"));
                             return false;
                         case storing_start_request:
                             if (!openEscrow) {
-                                setError(ManagerInterface.ManagerError.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin");
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin"));
                                 return false;
                             }
                             if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
@@ -185,8 +187,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             }
                             break;
                         default:
-                            setError(ManagerInterface.ManagerError.APP_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
+                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
@@ -200,8 +202,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case abnormal_device:
                             setState(ManagerInterface.ManagerState.JAM);
                             if (!sendGCommand(new devices.glory.command.SetErrorRecoveryMode())) {
-                                setError(ManagerInterface.ManagerError.APP_ERROR,
-                                        String.format("gotoNeutral Error setting normal error recovery mode Error %s", gloryStatus.getLastError()));
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                                        String.format("gotoNeutral Error setting normal error recovery mode Error %s", gloryStatus.getLastError())));
                                 return false;
                             }
                             break;
@@ -217,7 +219,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             }
                             if (gloryStatus.isEscrowBillPresent()) {
                                 if (!openEscrow) {
-                                    setError(ManagerInterface.ManagerError.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin");
+                                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin"));
                                     return false;
                                 }
                                 if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
@@ -225,31 +227,33 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 }
                             }
                             if (!bagRotated) {
-                                // Rotate the bag once to fix the glory proble.
+                                // Rotate the bag once to fix the glory problem.
                                 bagRotated = true;
                                 if (!sendGloryCommand(new devices.glory.command.SetCollectMode())) {
                                     break;
                                 }
                                 break;
                             }
+                            // Set the machine time.
+                            sendGloryCommand(new devices.glory.command.SetTime(new Date()));
                             setState(ManagerInterface.ManagerState.NEUTRAL);
                             Logger.debug("GOTO NEUTRAL DONE");
                             return true;
                         default:
-                            setError(ManagerInterface.ManagerError.APP_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name()));
+                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
                 default:
-                    setError(ManagerInterface.ManagerError.APP_ERROR,
-                            String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name()));
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                            String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name())));
                     break;
             }
             sleep();
         }
         if (!mustCancel()) {
-            setError(ManagerInterface.ManagerError.APP_ERROR, "GOTO NEUTRAL TIMEOUT");
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "GOTO NEUTRAL TIMEOUT"));
             Logger.debug("GOTO NEUTRAL TIMEOUT!!!");
         }
 
@@ -262,7 +266,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             if (!sendGCommand(cmd)) {
                 String error = gloryStatus.getLastError();
                 Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
-                setError(ManagerInterface.ManagerError.APP_ERROR, error);
+                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
                 return false;
             }
         }
@@ -273,7 +277,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         if (!sendGCommand(new devices.glory.command.Sense())) {
             String error = gloryStatus.getLastError();
             Logger.error("Error %s sending cmd : SENSE", error);
-            setError(ManagerInterface.ManagerError.APP_ERROR, error);
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
             return false;
         }
         Logger.debug(String.format("D1Mode %s SR1 Mode : %s", gloryStatus.getD1Mode().name(), gloryStatus.getSr1Mode().name()));
@@ -282,7 +286,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     boolean sendGCommand(GloryCommandAbstract cmd) {
         if (cmd == null) {
-            setError(ManagerInterface.ManagerError.APP_ERROR, "Invalid command null");
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "Invalid command null"));
             return false;
         }
         return gloryStatus.setStatusOk(threadCommandApi.sendGloryCommand(cmd, DEBUG));
@@ -342,9 +346,9 @@ abstract public class ManagerCommandAbstract implements Runnable {
         }
     }
 
-    protected void setError(ManagerInterface.ManagerError e, String s) {
-        Logger.error("MANAGER ERROR : %s %s", e.name(), s);
-        threadCommandApi.setErrorInfo(e, s);
+    protected void setError(GloryManagerError e) {
+        Logger.error("MANAGER ERROR : %s", e);
+        threadCommandApi.setError(e);
         setState(ManagerInterface.ManagerState.ERROR);
     }
 

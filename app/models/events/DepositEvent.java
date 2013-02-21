@@ -1,4 +1,4 @@
-package models;
+package models.events;
 
 import javax.persistence.Entity;
 import models.db.LgDeposit;

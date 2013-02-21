@@ -8,10 +8,10 @@ import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
 import models.BillDeposit;
-import models.DepositEvent;
-import models.DepositProcessedEvent;
 import models.EnvelopeDeposit;
 import models.db.LgLov.LovCol;
+import models.events.DepositEvent;
+import models.events.DepositProcessedEvent;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -88,10 +88,10 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
             end = new Date();
         }
         if (start == null) {
-            return LgDeposit.find("select d from LgDeposit d where creationDate <= ? order by depositId", end);
+            return LgDeposit.find("select d from LgDeposit d where creationDate <= ? order by creationDate desc", end);
         } else {
             return LgDeposit.find("select d from LgDeposit d where "
-                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by depositId",
+                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by creationDate desc",
                     start, end);
         }
     }

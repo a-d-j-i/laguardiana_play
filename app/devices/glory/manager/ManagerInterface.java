@@ -29,22 +29,14 @@ public interface ManagerInterface {
         ERROR;
     };
 
-    static public enum ManagerError {
-
-        APP_ERROR,
-        STORING_ERROR_CALL_ADMIN,
-        BILLS_IN_ESCROW_CALL_ADMIN;
-    };
-
     static public class Status extends Observable {
 
         private ManagerState state = ManagerState.INITIALIZING;
-        private ManagerError error;
-        private String errorMsg;
+        private GloryManagerError error;
 
         @Override
         synchronized public String toString() {
-            return "Error ( " + error + " ) : " + errorMsg;
+            return "Error ( " + error + " ) ";
         }
 
         synchronized public ManagerState getState() {
@@ -68,13 +60,12 @@ public interface ManagerInterface {
             }
         }
 
-        synchronized public String getErrorDetail() {
-            return "ErrorDetail{" + "code=" + error + ", data=" + errorMsg + '}';
+        synchronized public GloryManagerError getError() {
+            return error;
         }
 
-        synchronized protected void setError(ManagerError e, String msg) {
+        synchronized protected void setError(GloryManagerError e) {
             this.error = e;
-            this.errorMsg = msg;
         }
 
         synchronized public String name() {

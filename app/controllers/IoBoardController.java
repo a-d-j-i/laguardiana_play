@@ -1,7 +1,7 @@
 package controllers;
 
 import devices.DeviceFactory;
-import devices.IoBoard.IoBoardStatus;
+import devices.ioboard.IoBoard.IoBoardStatus;
 import java.io.IOException;
 import play.Play;
 import play.mvc.Before;
@@ -9,7 +9,7 @@ import play.mvc.Router;
 
 public class IoBoardController extends Application {
 
-    static devices.IoBoard ioBoard;
+    static devices.ioboard.IoBoard ioBoard;
 
     @Before
     static void getBoard() throws Throwable {
@@ -27,7 +27,7 @@ public class IoBoardController extends Application {
             render();
         }
         IoBoardStatus s = null;
-        s = ioBoard.getStatusCopy();
+        s = ioBoard.getStatus();
         if (s != null) {
             renderArgs.put("status", s);
         }

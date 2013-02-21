@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author adji
  */
-public class GloryStatus implements Serializable {
+public class GloryState implements Serializable {
 
     public enum D1Mode {
 

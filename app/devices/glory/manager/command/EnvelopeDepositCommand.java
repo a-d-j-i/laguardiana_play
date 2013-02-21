@@ -1,6 +1,7 @@
 package devices.glory.manager.command;
 
 import devices.glory.manager.GloryManager.ThreadCommandApi;
+import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
 
 /**
@@ -26,8 +27,8 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
             return;
         }
         if (!sendGCommand(new devices.glory.command.SetManualMode())) {
-            setError(ManagerInterface.ManagerError.APP_ERROR,
-                    String.format("EnvelopeDepositCommand gotoManualDeposit Error %s", gloryStatus.getLastError()));
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                    String.format("EnvelopeDepositCommand gotoManualDeposit Error %s", gloryStatus.getLastError())));
             return;
         }
         boolean storeTry = false;
@@ -84,12 +85,12 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                     setState(ManagerInterface.ManagerState.JAM);
                     break;
                 case storing_error:
-                    setError(ManagerInterface.ManagerError.STORING_ERROR_CALL_ADMIN,
-                            String.format("EnvelopeDeposit Storing error, todo: get the flags"));
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
+                            String.format("EnvelopeDeposit Storing error, todo: get the flags")));
                     return;
                 default:
-                    setError(ManagerInterface.ManagerError.APP_ERROR,
-                            String.format("EnvelopeDeposit invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                            String.format("EnvelopeDeposit invalid sr1 mode %s", gloryStatus.getSr1Mode().name())));
                     return;
             }
             sleep();

@@ -4,7 +4,8 @@
  */
 package models.actions.states;
 
-import devices.IoBoard;
+import devices.ioboard.IoBoard;
+import models.ModelError;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -23,7 +24,7 @@ public class WaitForOpenGate extends ActionState {
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        switch (status.shutterState) {
+        switch (status.getShutterState()) {
             case SHUTTER_OPEN:
                 if (!stateApi.store()) {
                     Logger.error("WaitForGate error calling store");
@@ -31,10 +32,10 @@ public class WaitForOpenGate extends ActionState {
                 stateApi.setState(nextAction);
                 break;
             case SHUTTER_CLOSED:
-                stateApi.setError("WaitForGate shutter closed");
+                stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPEN, "WaitForGate shutter closed");
                 break;
             default:
-                Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.shutterState.name(), name());
+                Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name(), name());
                 break;
         }
     }

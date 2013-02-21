@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
-import models.BagEvent;
-import models.BagProcessedEvent;
+import models.events.BagEvent;
+import models.events.BagProcessedEvent;
 import play.Logger;
 import play.db.jpa.GenericModel;
 
@@ -54,10 +54,10 @@ public class LgBag extends GenericModel implements java.io.Serializable {
             end = new Date();
         }
         if (start == null) {
-            return LgBag.find("select b from LgBag b where cast(creationDate as date) <= cast(? as date) order by bagId", end);
+            return LgBag.find("select b from LgBag b where cast(creationDate as date) <= cast(? as date) order by creationDate desc", end);
         } else {
             return LgBag.find("select b from LgBag b where "
-                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by bagId",
+                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by creationDate desc",
                     start, end);
         }
     }

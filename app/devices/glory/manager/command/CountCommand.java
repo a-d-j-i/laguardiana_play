@@ -1,8 +1,8 @@
 package devices.glory.manager.command;
 
 import devices.glory.manager.GloryManager.ThreadCommandApi;
+import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import play.Logger;
@@ -110,8 +110,8 @@ public class CountCommand extends ManagerCommandAbstract {
             return;
         }
         if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
-            setError(ManagerInterface.ManagerError.APP_ERROR,
-                    String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError()));
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                    String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError())));
             return;
         }
         boolean batchEnd = false;
@@ -149,7 +149,7 @@ public class CountCommand extends ManagerCommandAbstract {
                         if (!refreshQuantity()) {
                             String error = gloryStatus.getLastError();
                             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-                            setError(ManagerInterface.ManagerError.APP_ERROR, error);
+                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
                             return;
                         }
                         if (gloryStatus.isEscrowFull()) {
@@ -193,7 +193,7 @@ public class CountCommand extends ManagerCommandAbstract {
                     if (!refreshQuantity()) {
                         String error = gloryStatus.getLastError();
                         Logger.error("Error %s sending cmd : CouProcessJamntingDataRequest", error);
-                        setError(ManagerInterface.ManagerError.APP_ERROR, error);
+                        setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
                         return;
                     }
                     if (!gloryStatus.isHopperBillPresent()) {
@@ -233,18 +233,18 @@ public class CountCommand extends ManagerCommandAbstract {
                         return;
                     }
                     if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
-                        setError(ManagerInterface.ManagerError.APP_ERROR,
-                                String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError()));
+                        setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                                String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError())));
                         return;
                     }
                     break;
                 case storing_error:
-                    setError(ManagerInterface.ManagerError.STORING_ERROR_CALL_ADMIN,
-                            String.format("Count Storing error, todo: get the flags"));
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
+                            String.format("Count Storing error, todo: get the flags")));
                     return;
                 default:
-                    setError(ManagerInterface.ManagerError.APP_ERROR,
-                            String.format("Count invalid sr1 mode %s", gloryStatus.getSr1Mode().name()));
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                            String.format("Count invalid sr1 mode %s", gloryStatus.getSr1Mode().name())));
                     return;
             }
             sleep();
@@ -284,7 +284,7 @@ public class CountCommand extends ManagerCommandAbstract {
         if (!countData.isBatch) {
             if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
                 return false;
-            };
+            }
             setState(ManagerInterface.ManagerState.COUNTING);
             return true;
         }
@@ -293,13 +293,13 @@ public class CountCommand extends ManagerCommandAbstract {
         if (!sendGCommand(new devices.glory.command.CountingDataRequest())) {
             String error = gloryStatus.getLastError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            setError(ManagerInterface.ManagerError.APP_ERROR, error);
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
             return false;
         }
         Map<Integer, Integer> currentQuantity = gloryStatus.getBills();
         if (currentQuantity == null) {
-            setError(ManagerInterface.ManagerError.APP_ERROR,
-                    String.format("Error getting current count"));
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                    String.format("Error getting current count")));
             return false;
         }
 
@@ -310,8 +310,8 @@ public class CountCommand extends ManagerCommandAbstract {
             }
             int current = currentQuantity.get(countData.currentSlot);
             if (current > desired) {
-                setError(ManagerInterface.ManagerError.APP_ERROR,
-                        String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired));
+                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                        String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired)));
                 return false;
             }
             bills[ countData.currentSlot] = desired - current;

@@ -1,8 +1,7 @@
-package models;
+package models.events;
 
 import controllers.Secure;
 import javax.persistence.Entity;
-import models.actions.UserAction;
 import models.db.LgBag;
 import models.db.LgEvent;
 import models.db.LgUser;

@@ -29,7 +29,7 @@ public class GloryManagerController extends Application {
         } else {
             success = manager.getStatus().name();
             if (manager.getStatus().getState() == ManagerInterface.ManagerState.ERROR) {
-                error = manager.getStatus().getErrorDetail();
+                error = manager.getStatus().getError().toString();
             } else {
                 error = null;
             }
@@ -89,8 +89,8 @@ public class GloryManagerController extends Application {
                     }
                 }
             }
-            
-        
+
+
             if (!manager.count(desiredQuantity, currency)) {
                 error = "Still executing another command";
             }

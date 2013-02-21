@@ -1,5 +1,6 @@
 package devices;
 
+import devices.ioboard.IoBoard;
 import devices.SerialPortAdapterAbstract.PORTBITS;
 import devices.SerialPortAdapterAbstract.PORTPARITY;
 import devices.SerialPortAdapterAbstract.PORTSPEED;

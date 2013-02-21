@@ -4,19 +4,20 @@
  */
 package models.actions;
 
-import devices.IoBoard;
 import devices.glory.manager.ManagerInterface;
+import devices.ioboard.IoBoard;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 import models.Bill;
+import models.ModelError;
 import models.ModelFacade.UserActionApi;
-import models.TimeoutEvent;
 import models.User;
 import models.actions.states.ActionState;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgDeposit;
+import models.events.TimeoutEvent;
 import models.lov.Currency;
 import play.Logger;
 
@@ -128,8 +129,8 @@ abstract public class UserAction {
             timer.cancel();
         }
 
-        public void setError(String msg) {
-            userActionApi.setError(msg);
+        public void setError(ModelError.ERROR_CODE errorCode, String detail) {
+            userActionApi.setError(errorCode, detail);
         }
 
         public void clearError() {

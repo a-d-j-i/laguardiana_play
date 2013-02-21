@@ -1,19 +1,20 @@
-package models;
+package models.events;
 
 import javax.persistence.Entity;
+import models.User;
 import models.actions.UserAction;
 import models.db.LgEvent;
 import models.db.LgUser;
 import play.Logger;
 
 @Entity
-public class TimeoutEvent extends LgEvent {
+public class ActionEvent extends LgEvent {
 
-    public TimeoutEvent(LgUser user, Integer eventSourceId, String message) {
+    public ActionEvent(LgUser user, Integer eventSourceId, String message) {
         super(user, eventSourceId, message);
     }
 
-    public static void save(UserAction userAction, String name) {
+    public static void save(UserAction userAction, String msg, String controller) {
         Integer depositId = null;
         User u = null;
         if (userAction != null) {
@@ -21,7 +22,7 @@ public class TimeoutEvent extends LgEvent {
             u = userAction.getCurrentUser();
         }
         try {
-            TimeoutEvent e = new TimeoutEvent(u, depositId, name);
+            ActionEvent e = new ActionEvent(u, depositId, msg + controller);
             e.save();
         } catch (Exception ex) {
             Logger.error("Error saving event %s", ex);

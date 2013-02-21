@@ -1,6 +1,7 @@
-package models;
+package models.events;
 
 import javax.persistence.Entity;
+import models.User;
 import models.db.LgDeposit;
 import models.db.LgEvent;
 import models.db.LgUser;

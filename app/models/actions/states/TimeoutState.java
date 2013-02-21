@@ -4,7 +4,7 @@
  */
 package models.actions.states;
 
-import devices.IoBoard;
+import devices.ioboard.IoBoard;
 import devices.glory.manager.ManagerInterface;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;

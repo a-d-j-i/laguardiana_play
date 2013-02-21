@@ -67,7 +67,7 @@ public class LgEnvelopeContent extends GenericModel implements java.io.Serializa
     }
 
     public Currency getCurrency() {
-        return Currency.findByNumericId(Configuration.getDefaultCurrency());
+        return Currency.findByNumericId(unitLov);
     }
 
     @Override

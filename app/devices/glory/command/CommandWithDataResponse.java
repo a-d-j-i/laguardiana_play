@@ -1,8 +1,8 @@
 package devices.glory.command;
 
 import devices.glory.GloryReturnParser;
-import devices.glory.GloryStatus.D1Mode;
-import devices.glory.GloryStatus.SR1Mode;
+import devices.glory.GloryState.D1Mode;
+import devices.glory.GloryState.SR1Mode;
 import play.Logger;
 
 public class CommandWithDataResponse extends CommandWithAckResponse {

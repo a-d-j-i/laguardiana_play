@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
-import models.ZProcessedEvent;
+import models.events.ZProcessedEvent;
 import models.lov.Currency;
 import play.Logger;
 import play.db.jpa.GenericModel;
@@ -97,10 +97,10 @@ public class LgZ extends GenericModel implements java.io.Serializable {
             end = new Date();
         }
         if (start == null) {
-            return LgZ.find("select z from LgZ z where cast(creationDate as date) <= cast(? as date) order by zId", end);
+            return LgZ.find("select z from LgZ z where cast(creationDate as date) <= cast(? as date) order by creationDate desc", end);
         } else {
             return LgZ.find("select z from LgZ z where "
-                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by zId",
+                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by creationDate desc",
                     start, end);
         }
     }
