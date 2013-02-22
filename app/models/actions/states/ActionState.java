@@ -41,7 +41,7 @@ abstract public class ActionState {
         Logger.error("ActionState accept Invalid step %s", name());
     }
 
-    public void onGloryEvent(ManagerInterface.Status m) {
+    public void onGloryEvent(ManagerInterface.State m) {
         Logger.error("ActionState invalid onGloryEvent %s %s", m.name(), name());
     }
 

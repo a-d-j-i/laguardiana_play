@@ -32,12 +32,12 @@
             <b class="">&{ 'application.ok' }</b>
             #{/else}
 
-            <!--            <p id="mstatus">ModelFacade status ${ mstatus }</p>
-                        <p id="gstatus">Glory Status ${ gstatus }</p>
-                        <p id="gerror">Glory Error ${ gError }</p>
-                        <p id="ierror">IOBoard Status ${ istatus }</p>
-                        <p id="ierror">IOBoard Error ${ ierror }</p>
-            -->
+            <p id="mstatus">ModelFacade status ${ mstatus }</p>
+            <p id="gstatus">Glory Status ${ gstatus }</p>
+            <p id="gerror">Glory Error ${ gError }</p>
+            <p id="ierror">IOBoard Status ${ istatus }</p>
+            <p id="ierror">IOBoard Error ${ ierror }</p>
+
             <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(1)}">Reset</a>
             <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(2)}">StoringErrorReset</a>
             <!-- datos del deposito -->

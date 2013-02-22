@@ -33,29 +33,29 @@ import play.libs.F.Promise;
  * @author aweil
  */
 public class ModelFacade {
-    
+
     final static private ManagerInterface manager;
     final static private IoBoard ioBoard;
     final static private ModelError modelError = new ModelError();
     final static private Printer printer;
     static private UserAction currentUserAction = null;
     static private User currentUser = null;
-    
+
     static {
         manager = DeviceFactory.getGloryManager();
         manager.addObserver(new Observer() {
             public void update(Observable o, Object data) {
-                Promise now = new OnGloryEvent((ManagerInterface.Status) data).now();
+                Promise now = new OnGloryEvent((ManagerInterface.State) data).now();
             }
         });
-        
+
         ioBoard = DeviceFactory.getIoBoard();
         ioBoard.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
             }
         });
-        
+
         printer = DeviceFactory.getPrinter();
         printer.addObserver(new Observer() {
             public void update(Observable o, Object data) {
@@ -63,71 +63,86 @@ public class ModelFacade {
             }
         });
     }
-    
+
     public static ModelError getError() {
         return modelError;
     }
-    
+
     static class OnGloryEvent extends Job {
-        
-        ManagerInterface.Status status;
-        
-        public OnGloryEvent(ManagerInterface.Status status) {
+
+        ManagerInterface.State status;
+
+        public OnGloryEvent(ManagerInterface.State status) {
             this.status = status;
         }
-        
+
         @Override
         public void doJob() throws Exception {
-            GloryEvent.save(currentUserAction, status.name());
+            UserAction u;
+            synchronized (ModelFacade.class) {
+                u = currentUserAction;
+            }
+            GloryEvent.save(u, status.name());
             Logger.debug("OnGloryEvent event %s", status.name());
             switch (status.getState()) {
                 //Could happen on startup
                 case INITIALIZING:
                 case NEUTRAL:
-                    if (currentUserAction != null) {
-                        currentUserAction.onGloryEvent(status);
+                    if (u != null) {
+                        u.onGloryEvent(status);
                     }
                     break;
+                // Dont aprove the bag if not collected
+                case BAG_COLLECTED:
+                    Logger.debug("-------> BAG COLLECTED, aprove change");
+                    ioBoard.aproveBag();
+                    break;
                 case ERROR:
-                    if (currentUserAction != null) {
-                        currentUserAction.cancel();
+                    if (u != null) {
+                        u.cancel();
                     }
                     if (status.getError() != null) {
                         modelError.setError(status.getError());
                     }
                     break;
                 default:
-                    if (currentUserAction == null) {
+                    if (u == null) {
                         Logger.error(String.format("OnGloryEvent current user action is null : %s", status.name()));
                     } else {
-                        currentUserAction.onGloryEvent(status);
+                        u.onGloryEvent(status);
                     }
                     break;
             }
         }
     }
-    
+
     static class OnIoBoardEvent extends Job {
-        
+
         IoBoard.IoBoardStatus status;
-        
+
         public OnIoBoardEvent(IoBoard.IoBoardStatus status) {
             this.status = status;
         }
-        
+
         @Override
         public void doJob() throws Exception {
             if (status == null) {
                 Logger.debug("doJob status is null");
                 return;
             }
-            IoBoardEvent.save(currentUserAction, status.toString());
+            UserAction u;
+            synchronized (ModelFacade.class) {
+                u = currentUserAction;
+            }
+            IoBoardEvent.save(u, status.toString());
 
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
                 switch (status.getBagAproveState()) {
                     case BAG_NOT_APROVED:
-                        ioBoard.aproveBag();
+                        if (!manager.collect()) {
+                            modelError.setError(ModelError.ERROR_CODE.ERROR_TRYING_TO_COLLECT, "error trying to collect");
+                        }
                         break;
                     case BAG_APROVE_WAIT:
                     case BAG_APROVED:
@@ -137,44 +152,51 @@ public class ModelFacade {
                         ioBoard.aproveBagConfirm();
                         break;
                 }
+                if (u != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+                    modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag rotated during deposit");
+                }
             }
-            
+
             if (!isIoBoardOk(status)) {
                 return;
             }
-            
-            
-            if (currentUserAction != null) {
-                currentUserAction.onIoBoardEvent(status);
+
+            if (u != null) {
+                u.onIoBoardEvent(status);
             }
+
         }
     }
-    
+
     static class OnPrinterEvent extends Job {
-        
+
         PrinterStatus status;
-        
+
         private OnPrinterEvent(PrinterStatus status) {
             this.status = status;
         }
-        
+
         @Override
         public void doJob() throws Exception {
-            PrinterEvent.save(currentUserAction, status.toString());
+            UserAction u;
+            synchronized (ModelFacade.class) {
+                u = currentUserAction;
+            }
+            PrinterEvent.save(u, status.toString());
             if (status.isError()) {
                 // A development option
                 Logger.error("Setting printer error : %s", status.toString());
                 modelError.setError(status);
                 return;
             }
-            if (currentUserAction != null) {
-                currentUserAction.onPrinterEvent(status);
+            if (u != null) {
+                u.onPrinterEvent(status);
             }
         }
     }
-    
+
     static public class UserActionApi {
-        
+
         public void count(Integer numericId) {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
@@ -186,21 +208,21 @@ public class ModelFacade {
                 }
             }
         }
-        
+
         public boolean store(Integer depositId) {
             return manager.storeDeposit(depositId);
         }
-        
+
         public void withdraw() {
             if (!manager.withdrawDeposit()) {
                 setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
             }
         }
-        
+
         public void cancelDeposit() {
             manager.cancelCommand();
         }
-        
+
         public void envelopeDeposit() {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
@@ -212,77 +234,77 @@ public class ModelFacade {
                 }
             }
         }
-        
+
         public ManagerInterface.ManagerState getManagerState() {
             return manager.getStatus().getState();
         }
-        
+
         public void setError(ModelError.ERROR_CODE errorCode, String detail) {
             modelError.setError(errorCode, detail);
             finishAction();
         }
-        
+
         public void clearError() {
             // Todo Put int the ResetAction if needed.
             ioBoard.clearError();
             ModelFacade.clearError();
         }
-        
+
         public void openGate() {
             ioBoard.openGate();
         }
-        
+
         public void closeGate() {
             ioBoard.closeGate();
         }
-        
+
         public Printer getPrinter() {
             return printer;
         }
     }
-    
+
     synchronized public static boolean isError() {
         return modelError.isError();
     }
-    
+
     synchronized public static void errorReset() {
         manager.reset();
         ioBoard.clearError();
         clearError();
     }
-    
+
     synchronized public static void storingErrorReset() {
         manager.storingErrorReset();
         ioBoard.clearError();
         clearError();
     }
-    
+
     synchronized static public void startAction(UserAction userAction) {
         ActionEvent.save(userAction, "Start try", getNeededController());
         if (currentUserAction != null || currentUser != null) {
             Logger.error("startAction currentAction is not null");
             return;
         }
-        
+
         if (!isIoBoardOk(ioBoard.getStatus())) {
             return;
         }
-        
+
         if (modelError.isError()) {
             Logger.info("Can't start an action when on error");
             return;
         }
-        
+
         currentUser = Secure.getCurrentUser();
         currentUserAction = userAction;
         ActionEvent.save(currentUserAction, "Start", getNeededController());
         currentUserAction.start(currentUser, new UserActionApi());
     }
-    
+
     synchronized public static void finishAction() {
         if (currentUserAction != null && currentUser != null) {
             ActionEvent.save(currentUserAction, "Finish", getNeededController());
-            
+
             if (currentUserAction.canFinishAction() || modelError.isError()) {
                 currentUserAction.finish();
                 currentUserAction = null;
@@ -290,7 +312,7 @@ public class ModelFacade {
             }
         }
     }
-    
+
     synchronized static public String getState() {
         if (isLocked()) {
             return null;
@@ -300,10 +322,10 @@ public class ModelFacade {
                 modelError.setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
             }
         }
-        
+
         if (!isIoBoardOk(ioBoard.getStatus())) {
         }
-        
+
         if (modelError.isError()) {
             finishAction();
             return "ERROR";
@@ -311,10 +333,10 @@ public class ModelFacade {
         if (currentUserAction != null) {
             return currentUserAction.getStateName();
         }
-        
+
         return "IDLE";
     }
-    
+
     synchronized static public String getNeededController() {
         if (isLocked()) {
             return null;
@@ -327,7 +349,7 @@ public class ModelFacade {
         }
         return null;
     }
-    
+
     synchronized static public String getNeededAction() {
         if (isLocked()) {
             return null;
@@ -340,14 +362,14 @@ public class ModelFacade {
         }
         return null;
     }
-    
+
     synchronized public static boolean isLocked() {
         if (currentUser != null && !currentUser.equals(Secure.getCurrentUser())) {
             return true;
         }
         return false;
     }
-    
+
     private static void clearError() {
         Logger.debug("clearing error");
         ManagerInterface.ManagerState m = manager.getStatus().getState();
@@ -355,7 +377,7 @@ public class ModelFacade {
             modelError.clearError();
         }
     }
-    
+
     synchronized public static List<Bill> getCurrentCounters() {
         if (currentUserAction == null) {
             Logger.error("getCurrentCounters invalid current User Action");
@@ -367,7 +389,7 @@ public class ModelFacade {
         }
         return Bill.getBillList(currentUserAction.getCurrency().numericId);
     }
-    
+
     synchronized public static Object getFormData() {
         if (currentUserAction == null) {
             Logger.error("getFormData invalid current User Action");
@@ -375,7 +397,7 @@ public class ModelFacade {
         }
         return currentUserAction.getFormData();
     }
-    
+
     synchronized public static String getActionMessage() {
         if (currentUserAction == null) {
             Logger.error("getActionMessage invalid current User Action");
@@ -383,7 +405,7 @@ public class ModelFacade {
         }
         return currentUserAction.getMessage();
     }
-    
+
     public static LgDeposit getDeposit() {
         if (currentUserAction == null) {
             Logger.error("getDeposit invalid current User Action");
@@ -395,7 +417,7 @@ public class ModelFacade {
         }
         return LgDeposit.findById(currentUserAction.getDepositId());
     }
-    
+
     public static void cancel() {
         if (currentUserAction == null) {
             Logger.error("cancel invalid current User Action");
@@ -403,7 +425,7 @@ public class ModelFacade {
         }
         currentUserAction.cancel();
     }
-    
+
     public static void accept() {
         if (currentUserAction == null) {
             Logger.error("accept invalid current User Action");
@@ -411,7 +433,7 @@ public class ModelFacade {
         }
         currentUserAction.accept();
     }
-    
+
     public static void suspendTimeout() {
         if (currentUserAction == null) {
             Logger.error("cancelTimeout invalid current User Action");
@@ -419,7 +441,7 @@ public class ModelFacade {
         }
         currentUserAction.suspendTimeout();
     }
-    
+
     private static boolean isIoBoardOk(IoBoard.IoBoardStatus status) {
         if (!Configuration.isIoBoardIgnore()) {
             if (status != null && status.getError() != null) {

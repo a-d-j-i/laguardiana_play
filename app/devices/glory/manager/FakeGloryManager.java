@@ -10,7 +10,7 @@ import java.util.Observer;
  */
 public class FakeGloryManager implements ManagerInterface {
 
-    final private static ManagerInterface.Status status = new ManagerInterface.Status();
+    final private static ManagerInterface.State status = new ManagerInterface.State();
     static Map<Integer, Integer> desiredQuantity = null;
     static Integer currency;
     static int counter = 0;
@@ -89,7 +89,7 @@ public class FakeGloryManager implements ManagerInterface {
         return true;
     }
 
-    public ManagerInterface.Status getStatus() {
+    public ManagerInterface.State getStatus() {
         counter++;
         if (counter % 10 == 0) {
             if (billDeposit) {

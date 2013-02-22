@@ -3,6 +3,7 @@ package devices.glory.manager;
 import devices.glory.Glory;
 import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.ManagerInterface.ManagerState;
+import devices.glory.manager.ManagerInterface.State;
 import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.Observer;
@@ -17,15 +18,14 @@ public class GloryManager {
     final private Thread thread;
     final private Glory device;
     final private ManagerThreadState managerThreadState;
-    final private ManagerInterface.Status status = new ManagerInterface.Status();
+    final private static ManagerInterface.State state = new ManagerInterface.State();
 
     public GloryManager(Glory device) {
         this.device = device;
         this.managerThreadState = new ManagerThreadState();
         this.thread = new ManagerThread(new ThreadCommandApi());
     }
-    
-    
+
     /*
      *
      *
@@ -33,7 +33,6 @@ public class GloryManager {
      *
      *
      */
-
     public class ThreadCommandApi {
 
         private final ManagerThreadState.ThreadApi managerThreadApi;
@@ -63,19 +62,19 @@ public class GloryManager {
         }
 
         public ManagerState getState() {
-            return status.getState();
+            return state.getState();
         }
 
         public void setState(ManagerState s) {
-            status.setState(s);
+            state.setState(s);
         }
 
         public void clearError() {
-            status.clearError();
+            state.clearError();
         }
 
         public void setError(GloryManagerError e) {
-            status.setError(e);
+            state.setError(e);
         }
     }
 
@@ -103,9 +102,39 @@ public class GloryManager {
             return managerControllerApi.sendCommand(new EnvelopeDepositCommand(threadCommandApi));
         }
 
+        // syncronous cancel and collect.
         public boolean collect() {
-            return managerControllerApi.sendCommand(new CollectCommand(threadCommandApi));
-
+            ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                Logger.debug("Collect canceling last command");
+                cmd.cancel();
+                try {
+                    managerControllerApi.waitUntilWaiting(120 * 1000);
+                } catch (InterruptedException ex) {
+                    return false;
+                }
+                cmd = managerControllerApi.getCurrentCommand();
+                if (cmd != null) {
+                    return false;
+                }
+                Logger.debug("Collect last command canceled");
+            }
+            Logger.debug("Collect send collect to glory");
+            if (!managerControllerApi.sendCommand(new CollectCommand(threadCommandApi))) {
+                return false;
+            }
+            try {
+                managerControllerApi.waitUntilWaiting(120 * 1000);
+            } catch (InterruptedException ex) {
+                return false;
+            }
+            Logger.debug("Collect send collect to glory done");
+            cmd = managerControllerApi.getCurrentCommand();
+            if (cmd != null) {
+                return false;
+            }
+            Logger.debug("Collect done");
+            return true;
         }
 
         public boolean reset() {
@@ -162,9 +191,11 @@ public class GloryManager {
         public void cancelCommand() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
+                Logger.debug("-----> CANCEL COMMAND");
                 managerControllerApi.sendCommand(new GotoNeutral(threadCommandApi));
                 return;
             }
+            Logger.debug("-----> CMD CANCEL");
             cmd.cancel();
         }
 
@@ -199,12 +230,12 @@ public class GloryManager {
             return false;
         }
 
-        public Status getStatus() {
-            return status;
+        public State getStatus() {
+            return state;
         }
 
         public void addObserver(Observer observer) {
-            status.addObserver(observer);
+            state.addObserver(observer);
         }
     }
     /*

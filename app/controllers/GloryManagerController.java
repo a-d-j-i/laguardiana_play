@@ -1,7 +1,6 @@
 package controllers;
 
 import devices.DeviceFactory;
-import devices.glory.manager.GloryManager;
 import devices.glory.manager.ManagerInterface;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,6 +101,8 @@ public class GloryManagerController extends Application {
     public static void cancelDeposit() throws IOException {
         if (manager != null) {
             manager.cancelCommand();
+        } else {
+            Logger.error("MANAGER IS NULL");
         }
         index();
     }

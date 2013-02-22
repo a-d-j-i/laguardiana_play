@@ -24,15 +24,23 @@ public interface ManagerInterface {
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
-        CANCELING, COLLECTING,
+        CANCELING, BAG_COLLECTED,
         JAM,
         ERROR;
     };
 
-    static public class Status extends Observable {
+    static public class State extends Observable {
 
         private ManagerState state = ManagerState.INITIALIZING;
         private GloryManagerError error;
+
+        private State(State aThis) {
+            this.state = aThis.state;
+            this.error = aThis.error;
+        }
+
+        public State() {
+        }
 
         @Override
         synchronized public String toString() {
@@ -47,16 +55,15 @@ public interface ManagerInterface {
             if (this.state != ManagerState.ERROR) {
                 this.state = state;
                 setChanged();
-                notifyObservers(this);
+                notifyObservers(new State(this));
             }
-
         }
 
         synchronized protected void clearError() {
             if (state == ManagerState.ERROR) {
                 this.state = ManagerState.INITIALIZING;
                 setChanged();
-                notifyObservers(this);
+                notifyObservers(new State(this));
             }
         }
 
@@ -95,7 +102,7 @@ public interface ManagerInterface {
 
     public boolean storingErrorReset();
 
-    public Status getStatus();
+    public State getStatus();
 
     public void addObserver(Observer observer);
 }

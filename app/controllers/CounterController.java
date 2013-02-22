@@ -48,7 +48,7 @@ public class CounterController extends Controller {
     }
 
     public static void counterError(Integer cmd) {
-        ManagerInterface.Status gstatus = null;
+        ManagerInterface.State gstatus = null;
         String gerror = null;
         String ierror = null;
 

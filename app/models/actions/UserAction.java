@@ -45,7 +45,7 @@ abstract public class UserAction {
         messages.put(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
         messages.put(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
         messages.put(ManagerInterface.ManagerState.CANCELING, "application.canceling");
-        //messages.put(ManagerInterface.State.CANCELED, "counting_page.deposit_canceled");
+        //messages.put(ManagerInterface.Status.CANCELED, "counting_page.deposit_canceled");
         messages.put(ManagerInterface.ManagerState.ERROR, "application.error");
         messages.put(ManagerInterface.ManagerState.JAM, "application.jam");
         for (Map.Entry<ManagerInterface.ManagerState, String> m : messages.entrySet()) {
@@ -186,7 +186,7 @@ abstract public class UserAction {
 
     abstract public void finish();
 
-    public void onGloryEvent(ManagerInterface.Status m) {
+    public void onGloryEvent(ManagerInterface.State m) {
         state.onGloryEvent(m);
     }
 

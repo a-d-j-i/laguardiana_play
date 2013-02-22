@@ -17,7 +17,7 @@ public class ModelError {
 
     public enum ERROR_CODE {
 
-        APP_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_OPEN;
+        APP_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_OPEN, ERROR_TRYING_TO_COLLECT;
     }
     private GloryManagerError gloryError = null;
     private PrinterStatus printerError = null;

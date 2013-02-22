@@ -5,7 +5,10 @@
 package devices.glory.manager.command;
 
 import devices.glory.manager.GloryManager.ThreadCommandApi;
+import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
+import java.util.Date;
+import play.Logger;
 
 /**
  *
@@ -19,9 +22,68 @@ public class CollectCommand extends ManagerCommandAbstract {
 
     @Override
     public void run() {
-        setState(ManagerInterface.ManagerState.COLLECTING);
-        if (sendGloryCommand(new devices.glory.command.SetCollectMode())) {
-            gotoNeutral(false, false);
+        // Set the machine time.
+        for (int i = 0; i < retries; i++) {
+            Logger.debug("COLLECT");
+
+            if (!sense()) {
+                return;
+            }
+
+            if (!gloryStatus.isCassetteFullCounter()) {
+                sendGloryCommand(new devices.glory.command.SetTime(new Date()));
+                clearError();
+                setState(ManagerInterface.ManagerState.BAG_COLLECTED);
+                Logger.debug("COLLECT DONE");
+                return;
+            }
+            // If I can open the escrow then I must wait untill it is empty
+            if (mustCancel()) {
+                Logger.debug("COLLECT CANCELED...");
+                break;
+            }
+            switch (gloryStatus.getSr1Mode()) {
+                case storing_error:
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin"));
+                    return;
+            }
+            switch (gloryStatus.getD1Mode()) {
+                case collect_mode:
+                case normal_error_recovery_mode:
+                case storing_error_recovery_mode:
+                case deposit:
+                case manual:
+                case initial:
+                    if (gloryStatus.isRejectBillPresent()) {
+                        setState(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS);
+                        break;
+                    }
+                    if (gloryStatus.isHopperBillPresent()) {
+                        setState(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_HOPER);
+                        break;
+                    }
+                    if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                    }
+                    break;
+                case neutral:
+                    if (gloryStatus.isCassetteFullCounter()) {
+                        if (!sendGloryCommand(new devices.glory.command.SetCollectMode())) {
+                            return;
+                        }
+                    }
+                    break;
+                default:
+                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                            String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name())));
+                    break;
+            }
+            sleep();
         }
+        if (!mustCancel()) {
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "COLLECT TIMEOUT"));
+            Logger.debug("COLLECT TIMEOUT!!!");
+        }
+
+        Logger.debug("COLLECT DONE CANCEL");
     }
 }

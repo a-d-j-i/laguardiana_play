@@ -27,7 +27,7 @@ public class Jam extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.Status m) {
+    public void onGloryEvent(ManagerInterface.State m) {
         switch (m.getState()) {
             case REMOVE_REJECTED_BILLS:
                 stateApi.setState(new RemoveRejectedBills(stateApi, this));

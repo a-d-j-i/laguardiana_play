@@ -40,7 +40,6 @@ public class BillDepositAction extends UserAction {
         return "BillDepositController";
     }
 
-    // TODO: Move to states
     @Override
     public void start() {
         BillDeposit deposit = new BillDeposit(currentUser, userCode, userCodeLov);
@@ -50,7 +49,6 @@ public class BillDepositAction extends UserAction {
         userActionApi.count(currency.numericId);
     }
 
-    // TODO: Move to states
     @Override
     public void finish() {
         BillDeposit deposit = BillDeposit.findById(getDepositId());

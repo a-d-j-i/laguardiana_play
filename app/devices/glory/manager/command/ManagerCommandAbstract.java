@@ -9,7 +9,6 @@ import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -84,6 +83,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     private AtomicBoolean mustCancel = new AtomicBoolean(false);
 
     public void cancel() {
+        Logger.debug("-------> SET CANCEL");
         mustCancel.set(true);
     }
 
@@ -92,13 +92,15 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     boolean gotoNeutral(boolean openEscrow, boolean forceEmptyHoper) {
-        boolean bagRotated = false;
         for (int i = 0; i < retries; i++) {
             Logger.debug("GOTO NEUTRAL %s %s",
                     (openEscrow ? "OPEN ESCROW" : ""),
                     (forceEmptyHoper ? "FORCE EMPTY HOPER" : ""));
 
             // If I can open the escrow then I must wait untill it is empty
+            if (mustCancel()) {
+                Logger.debug("GOTO NEUTRAL MUST CANCEL");
+            }
             if (mustCancel() && !openEscrow) {
                 Logger.debug("GOTO NEUTRAL CANCELED...");
                 break;
@@ -111,7 +113,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin"));
                     return false;
             }
-
+            if (gloryStatus.isCassetteFullCounter()) {
+                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.CASSETE_FULL, "Cassete Full"));
+                return false;
+            }
             switch (gloryStatus.getD1Mode()) {
                 case normal_error_recovery_mode:
                 case storing_error_recovery_mode:
@@ -226,16 +231,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                     break;
                                 }
                             }
-                            if (!bagRotated) {
-                                // Rotate the bag once to fix the glory problem.
-                                bagRotated = true;
-                                if (!sendGloryCommand(new devices.glory.command.SetCollectMode())) {
-                                    break;
-                                }
-                                break;
-                            }
-                            // Set the machine time.
-                            sendGloryCommand(new devices.glory.command.SetTime(new Date()));
                             setState(ManagerInterface.ManagerState.NEUTRAL);
                             Logger.debug("GOTO NEUTRAL DONE");
                             return true;

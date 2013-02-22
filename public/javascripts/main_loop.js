@@ -3,7 +3,8 @@ $( "#main_overlay" ).overlay({
     left: "center",
     mask: {
         color: "#000",
-        loadSpeed: 100,
+        loadSpeed: 1,
+        closeSpeed: 1,
         opacity: 0.9
     },
     closeOnClick: false,

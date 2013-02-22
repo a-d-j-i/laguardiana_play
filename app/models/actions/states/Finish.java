@@ -34,7 +34,7 @@ public class Finish extends ActionState {
     }
 
     @Override
-        public void onGloryEvent(ManagerInterface.Status m) {
+        public void onGloryEvent(ManagerInterface.State m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             // Was canceled is ok

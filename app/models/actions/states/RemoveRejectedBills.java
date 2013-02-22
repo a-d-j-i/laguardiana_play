@@ -27,7 +27,7 @@ public class RemoveRejectedBills extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.Status m) {
+    public void onGloryEvent(ManagerInterface.State m) {
         switch (m.getState()) {
             // Envelope deposit.
             case REMOVE_REJECTED_BILLS:

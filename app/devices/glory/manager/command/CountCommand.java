@@ -110,6 +110,10 @@ public class CountCommand extends ManagerCommandAbstract {
             return;
         }
         if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
+            if (gloryStatus.isCassetteFullCounter()) {
+                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.CASSETE_FULL, "Cassete Full"));
+                return;
+            }
             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
                     String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError())));
             return;
@@ -118,6 +122,10 @@ public class CountCommand extends ManagerCommandAbstract {
         while (!mustCancel()) {
             Logger.debug("Count Command Counting");
             if (!sense()) {
+                return;
+            }
+            if (gloryStatus.isCassetteFullCounter()) {
+                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.CASSETE_FULL, "Cassete Full"));
                 return;
             }
             switch (gloryStatus.getSr1Mode()) {
