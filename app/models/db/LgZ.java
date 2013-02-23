@@ -136,7 +136,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         return "LgZ{" + "zId=" + zId + ", creationDate=" + creationDate + ", closeDate=" + closeDate + '}';
     }
 
-    public Object getTotals() {
+    public F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals() {
         return LgDeposit.getTotals(this.deposits);
     }
 }

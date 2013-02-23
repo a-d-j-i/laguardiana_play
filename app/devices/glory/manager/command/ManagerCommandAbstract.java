@@ -9,6 +9,7 @@ import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -92,6 +93,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
     }
 
     boolean gotoNeutral(boolean openEscrow, boolean forceEmptyHoper) {
+        boolean bagRotated = false;
         for (int i = 0; i < retries; i++) {
             Logger.debug("GOTO NEUTRAL %s %s",
                     (openEscrow ? "OPEN ESCROW" : ""),
@@ -230,6 +232,17 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
                                     break;
                                 }
+                            }
+                            if (!bagRotated) {
+                                // Rotate the bag once to fix the glory proble.
+                                bagRotated = true;
+                                if (!sendGloryCommand(new devices.glory.command.SetTime(new Date()))) {
+                                    break;
+                                }
+                                if (!sendGloryCommand(new devices.glory.command.SetCollectMode())) {
+                                    break;
+                                }
+                                break;
                             }
                             setState(ManagerInterface.ManagerState.NEUTRAL);
                             Logger.debug("GOTO NEUTRAL DONE");

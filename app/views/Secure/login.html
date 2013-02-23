@@ -19,7 +19,7 @@
                 <button type="submit" class="btn" >&{'secure.signin'}</button>
                 <a href="${lastUrl}"><input type="button" name="cancel" value="Cancel" class="btn" /></a>
         -->
-        <input type="text" placeholder="&{'secure.username'}"  class="focus_me" name="username"/>
+        <input id="username" type="text" placeholder="&{'secure.username'}"  class="focus_me" name="username"/>
         #{if ( play.configuration[ 'secure.dontAskForPassword' ] ) }
         <input id="password" type="password" placeholder="&{'secure.password'}" name="password" style="display: none;"/>
         #{/if}
@@ -155,6 +155,8 @@
         function( data ) {
             var status = data[ 0 ];
             var extra = data[ 1 ];
+            $( '#username' ).val( "" );
+            $( '#password' ).val( "" );
             if ( status == 'error' ) {
                 $( '#error_text' ).html( extra );
                 $( "#alerta" ).overlay().load();

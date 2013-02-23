@@ -100,4 +100,26 @@ public class Configuration {
         }
         return false;
     }
+
+    static long maxBillsPerBag() {
+        String d = LgSystemProperty.getProperty(LgSystemProperty.Types.MAX_BILLS_PER_BAG);
+        if (d == null) {
+            d = Play.configuration.getProperty("glory.maxBillsPerBag");
+        }
+        if (d == null) {
+            return 15000;
+        }
+        return Long.parseLong(d);
+    }
+
+    static long maxEnvelopesPerBag() {
+        String d = LgSystemProperty.getProperty(LgSystemProperty.Types.MAX_ENVELOPES_PER_BAG);
+        if (d == null) {
+            d = Play.configuration.getProperty("glory.maxEnvelopesPerBag");
+        }
+        if (d == null) {
+            return 1000;
+        }
+        return Long.parseLong(d);
+    }
 }

@@ -170,9 +170,10 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         public long q = 0;
     }
 
-    public static F.T4<Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals(Set<LgDeposit> deps) {
+    public static F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals(Set<LgDeposit> deps) {
         long envelopes = 0;
         long deposits = 0;
+        long bills = 0;
         Map<Currency, Map<LgBillType, Bill>> totals = new HashMap();
         Map<Currency, Total> qaTotals = new HashMap();
         for (LgDeposit d : deps) {
@@ -180,6 +181,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
             if (d instanceof BillDeposit) {
                 BillDeposit bd = (BillDeposit) d;
                 for (LgBill b : bd.bills) {
+                    bills += b.quantity;
                     Currency c = b.billType.getCurrency();
                     Total at = qaTotals.get(c);
                     if (at == null) {
@@ -207,6 +209,6 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 Logger.error("Invalid deposit type");
             }
         }
-        return new F.T4<Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>>(envelopes, deposits, qaTotals, totals);
+        return new F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>>(envelopes, deposits, bills, qaTotals, totals);
     }
 }

@@ -11,18 +11,22 @@ import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import devices.printer.PrinterStatus;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import models.actions.UserAction;
 import models.db.LgBag;
+import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.events.ActionEvent;
 import models.events.GloryEvent;
 import models.events.IoBoardEvent;
 import models.events.PrinterEvent;
+import models.lov.Currency;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
+import play.libs.F;
 import play.libs.F.Promise;
 
 /**
@@ -95,7 +99,7 @@ public class ModelFacade {
                 // Dont aprove the bag if not collected
                 case BAG_COLLECTED:
                     Logger.debug("-------> BAG COLLECTED, aprove change");
-                    ioBoard.aproveBag();
+                    //ioBoard.aproveBag();
                     break;
                 case ERROR:
                     if (u != null) {
@@ -140,9 +144,10 @@ public class ModelFacade {
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
                 switch (status.getBagAproveState()) {
                     case BAG_NOT_APROVED:
-                        if (!manager.collect()) {
-                            modelError.setError(ModelError.ERROR_CODE.ERROR_TRYING_TO_COLLECT, "error trying to collect");
-                        }
+                        ioBoard.aproveBag();
+                        /*if (!manager.collect()) {
+                         modelError.setError(ModelError.ERROR_CODE.ERROR_TRYING_TO_COLLECT, "error trying to collect");
+                         }*/
                         break;
                     case BAG_APROVE_WAIT:
                     case BAG_APROVED:
@@ -294,7 +299,16 @@ public class ModelFacade {
             Logger.info("Can't start an action when on error");
             return;
         }
-
+        LgBag currentBag = LgBag.getCurrentBag();
+        F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> totals = currentBag.getTotals();
+        if (totals._3 > Configuration.maxBillsPerBag()) {
+            modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills");
+            return;
+        }
+        if (totals._1 > Configuration.maxEnvelopesPerBag()) {
+            modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many envelopes");
+            return;
+        }
         currentUser = Secure.getCurrentUser();
         currentUserAction = userAction;
         ActionEvent.save(currentUserAction, "Start", getNeededController());

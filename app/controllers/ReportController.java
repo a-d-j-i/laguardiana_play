@@ -2,16 +2,12 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import models.Bill;
 import models.BillDeposit;
 import models.Configuration;
 import models.EnvelopeDeposit;
 import models.db.LgBag;
-import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgEnvelope;
@@ -19,7 +15,6 @@ import models.db.LgEnvelopeContent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
-import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 
@@ -73,6 +68,7 @@ public class ReportController extends Controller {
         final public Integer type;
         final public Integer bag_id;
         final public String user_id;
+        final public String gecos;
         final public Date startDate;
         final public Date finishDate;
 
@@ -81,6 +77,7 @@ public class ReportController extends Controller {
             this.id = d.depositId;
             this.bag_id = d.bag.bagId;
             this.user_id = d.user.externalId;
+            this.gecos = d.user.gecos;
             this.startDate = d.startDate;
             this.finishDate = d.finishDate;
         }

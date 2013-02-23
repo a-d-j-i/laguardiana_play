@@ -5,8 +5,9 @@
     <th>Transaccion</th>
     <th>Fecha de la bolsa</th>
     <th>Fecha retiro de bolsa</th>
-    <th>Total de sobres</th>
     <th>Total de depositos</th>
+    <th>Total de sobres</th>
+    <th>Total de billetes</th>
     <th>Total de efectivo &nbsp; / &nbsp; billetes</th>
     <th colspan="2">Acciones</th>
 </thead>
@@ -29,9 +30,12 @@
         <td style="width:100px;">
             ${bag.getTotals()._2}
         </td>
+        <td style="width:100px;">
+            ${bag.getTotals()._3}
+        </td>
         <td style="width:350px;">
-            #{list items:bag.getTotals()._3.keySet(), as:'currency'}
-            ${ bag.getTotals()._3.get( currency ).a } &nbsp; / &nbsp; ${ bag.getTotals()._3.get( currency ).q } &nbsp; ${ currency }<br>
+            #{list items:bag.getTotals()._4.keySet(), as:'currency'}
+            ${ bag.getTotals()._4.get( currency ).a } &nbsp; / &nbsp; ${ bag.getTotals()._4.get( currency ).q } &nbsp; ${ currency }<br>
             #{/list}
         </td>
         <td style="background-color: lightblue; border: 1px solid;">
