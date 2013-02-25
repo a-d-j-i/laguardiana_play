@@ -1,0 +1,12 @@
+#{extends 'ReportController/unprocessed.html' /}
+#{set title: 'Unprocessed Events' /}
+<ul>
+    #{list items:data, as:'event' }
+    <li>${event.eventId} : ${event.toString()}
+        <a href="@{processEvent(event.eventId)}" style="color: green">process</a>
+    </li>
+    #{/list}
+</ul>
+
+
+

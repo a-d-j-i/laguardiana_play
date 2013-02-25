@@ -1,8 +1,6 @@
 package models.db;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
@@ -27,8 +25,6 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
     public Date creationDate = new Date();
     @Column( name = "message", nullable = true, length = 256)
     public String message;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "event")
-    public Set<LgExternalAppLog> externalAppLogs = new HashSet<LgExternalAppLog>(0);
 
     public LgEvent(LgUser user, Integer eventSourceId, String message) {
         this.user = user;
@@ -38,8 +34,56 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "{" + "eventId=" + eventId + ", user=" + user + ", eventSourceId=" + eventSourceId + ", creationDate=" + creationDate + ", message=" + message + ", externalAppLogs=" + externalAppLogs + '}';
+        return this.getClass().getSimpleName() + "{" + "eventId=" + eventId + ", user=" + user + ", eventSourceId=" + eventSourceId + ", creationDate=" + creationDate + ", message=" + message + '}';
     }
-    
-    
+
+    public static long count(Date start, Date end) {
+        if (end == null) {
+            end = new Date();
+        }
+        if (start == null) {
+            return LgEvent.count("select count(e) from LgEvent e where cast(creationDate as date) <= cast(? as date)", end);
+        } else {
+            return LgEvent.count("select count(e) from LgEvent e where "
+                    + "cast(creationDate as date)  >= cast(? as date) and cast(creationDate as date) <= cast(? as date)",
+                    start, end);
+        }
+    }
+
+    public static JPAQuery find(Date start, Date end) {
+        if (end == null) {
+            end = new Date();
+        }
+        if (start == null) {
+            return LgEvent.find("select e from LgEvent e where cast(creationDate as date) <= cast(? as date) order by creationDate desc", end);
+        } else {
+            return LgEvent.find("select e from LgEvent e where "
+                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by creationDate desc",
+                    start, end);
+        }
+    }
+
+    public static JPAQuery findUnprocessed(int appId) {
+        return LgEvent.find(
+                "select e from LgEvent e where "
+                + "not exists ("
+                + " from LgExternalAppLog al, LgExternalApp ea"
+                + " where al.externalApp = ea "
+                + " and e.eventId = al.logSourceId"
+                + " and ea.appId = ?"
+                + ")", appId);
+    }
+
+    public static boolean process(int appId, int eventId, String resultCode) {
+        LgEvent e = LgEvent.findById(eventId);
+        LgExternalApp ea = LgExternalApp.findByAppId(appId);
+        if (e == null || ea == null) {
+            return false;
+        }
+        LgExternalAppLog el = new LgExternalAppLog(e, resultCode, String.format("Exporting to app %d", appId));
+        el.successDate = new Date();
+        el.setExternalApp(ea);
+        el.save();
+        return true;
+    }
 }

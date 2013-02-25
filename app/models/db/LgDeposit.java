@@ -12,7 +12,6 @@ import models.BillDeposit;
 import models.EnvelopeDeposit;
 import models.db.LgLov.LovCol;
 import models.events.DepositEvent;
-import models.events.DepositProcessedEvent;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -102,10 +101,10 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 "select d from LgDeposit d where "
                 + " finishDate is not null "
                 + "and not exists ("
-                + " from DepositProcessedEvent e, LgExternalAppLog al, LgExternalApp ea"
+                + " from LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
-                + " and d.depositId = e.eventSourceId"
-                + " and al.event = e and ea.appId = ?"
+                + " and d.depositId = al.logSourceId"
+                + " and ea.appId = ?"
                 + ")", appId);
     }
 
@@ -115,10 +114,9 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         if (d == null || ea == null) {
             return false;
         }
-        DepositProcessedEvent e = DepositProcessedEvent.save(d, String.format("Exporting to app %d", appId));
-        LgExternalAppLog el = new LgExternalAppLog(e, resultCode);
+
+        LgExternalAppLog el = new LgExternalAppLog(d, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
-        el.setEvent(e);
         el.setExternalApp(ea);
         el.save();
         return true;

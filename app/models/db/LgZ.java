@@ -9,7 +9,6 @@ import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
 import models.events.ZEvent;
-import models.events.ZProcessedEvent;
 import models.lov.Currency;
 import play.Logger;
 import play.db.jpa.GenericModel;
@@ -89,9 +88,9 @@ public class LgZ extends GenericModel implements java.io.Serializable {
             end = new Date();
         }
         if (start == null) {
-            return LgDeposit.count("select count(z) from LgZ z where cast(creationDate as date) <= cast(? as date)", end);
+            return LgZ.count("select count(z) from LgZ z where cast(creationDate as date) <= cast(? as date)", end);
         } else {
-            return LgDeposit.count("select count(z) from LgZ z where "
+            return LgZ.count("select count(z) from LgZ z where "
                     + "cast(creationDate as date)  >= cast(? as date) and cast(creationDate as date) <= cast(? as date)",
                     start, end);
         }
@@ -111,13 +110,13 @@ public class LgZ extends GenericModel implements java.io.Serializable {
     }
 
     public static JPAQuery findUnprocessed(int appId) {
-        return LgDeposit.find(
+        return LgZ.find(
                 "select z from LgZ z where "
                 + "not exists ("
-                + " from ZProcessedEvent e, LgExternalAppLog al, LgExternalApp ea"
+                + " from LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
-                + " and z.zId = e.eventSourceId"
-                + " and al.event = e and ea.appId = ?"
+                + " and z.zId = al.logSourceId"
+                + " and ea.appId = ?"
                 + ")", appId);
     }
 
@@ -127,10 +126,8 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         if (z == null || ea == null || z.closeDate == null) {
             return false;
         }
-        ZProcessedEvent e = ZProcessedEvent.save(z, String.format("Exporting to app %d", appId));
-        LgExternalAppLog el = new LgExternalAppLog(e, resultCode);
+        LgExternalAppLog el = new LgExternalAppLog(z, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
-        el.setEvent(e);
         el.setExternalApp(ea);
         el.save();
         return true;

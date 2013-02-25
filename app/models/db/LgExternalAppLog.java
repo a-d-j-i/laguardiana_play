@@ -6,7 +6,7 @@ import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Table( name = "lg_external_app_log", schema = "public")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class LgExternalAppLog extends GenericModel implements java.io.Serializable {
 
     @Id
@@ -17,35 +17,47 @@ public class LgExternalAppLog extends GenericModel implements java.io.Serializab
     @ManyToOne( fetch = FetchType.LAZY)
     @JoinColumn( name = "external_app_id", nullable = false)
     public LgExternalApp externalApp;
-    @ManyToOne( fetch = FetchType.LAZY)
-    @JoinColumn( name = "event_id", nullable = false)
-    public LgEvent event;
     @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "creation_date", nullable = false, length = 13)
     public Date creationDate = new Date();
-    @Column( name = "result_code", nullable = false, length = 32)
-    public String resultCode;
     @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "success_date", nullable = false, length = 13)
     public Date successDate;
+    @Column( name = "result_code", nullable = false, length = 32)
+    public String resultCode;
+    @Column( name = "log_type", nullable = false, length = 128)
+    public String logType;
+    @Column(name = "log_source_id", nullable = true)
+    public Integer logSourceId;
+    @Column( name = "message", nullable = true, length = 256)
+    public String message;
 
-    public LgExternalAppLog(LgEvent event, String resultCode) {
-        this.event = event;
+    public LgExternalAppLog(LgBag b, String resultCode, String message) {
+        this(b.getClass(), b.bagId, resultCode, message);
+    }
+
+    public LgExternalAppLog(LgDeposit d, String resultCode, String message) {
+        this(d.getClass(), d.depositId, resultCode, message);
+    }
+
+    public LgExternalAppLog(LgZ z, String resultCode, String message) {
+        this(z.getClass(), z.zId, resultCode, message);
+    }
+
+    public LgExternalAppLog(LgEvent e, String resultCode, String message) {
+        this(e.getClass(), e.eventId, resultCode, message);
+    }
+
+    public LgExternalAppLog(Class logType, Integer logSourceId, String resultCode, String message) {
+        this.logType = logType.getSimpleName();
+        this.logSourceId = logSourceId;
         this.resultCode = resultCode;
+        this.message = message;
     }
 
     @Override
     public String toString() {
-        return "LgExternalAppLog{" + "logId=" + logId + ", externalApp=" + externalApp + ", event=" + event + ", creationDate=" + creationDate + ", resultCode=" + resultCode + ", successDate=" + successDate + '}';
-    }
-
-    public void setEvent(LgEvent e) {
-        if (e != null) {
-            this.event = e;
-            e.externalAppLogs.add(this);
-        } else {
-            Logger.error("LgExternalAppLog event null");
-        }
+        return "LgExternalAppLog{" + "logId=" + logId + ", externalApp=" + externalApp + ", creationDate=" + creationDate + ", successDate=" + successDate + ", resultCode=" + resultCode + ", logType=" + logType + ", logSourceId=" + logSourceId + ", message=" + message + '}';
     }
 
     public void setExternalApp(LgExternalApp ea) {

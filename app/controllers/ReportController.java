@@ -12,6 +12,7 @@ import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
+import models.db.LgEvent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
@@ -289,6 +290,64 @@ public class ReportController extends Controller {
         }
     }
 
+    static public class EventData {
+
+        public Integer eventId;
+        public Date creationDate;
+
+        private EventData(LgEvent e) {
+            this.eventId = e.eventId;
+            this.creationDate = e.creationDate;
+        }
+    }
+
+    static public class EventList {
+
+        final public String clientCode = Configuration.getClientCode();
+        final public String branchCode = Configuration.getBranchCode();
+        final public String machineCode = Configuration.getMachineCode();
+        final public String machineDescription = Configuration.getMachineDescription();
+        public List<EventData> eventData;
+    }
+
+    public static void eventList(Integer page) {
+        unprocessedEvents(page);
+    }
+
+    public static void unprocessedEvents(Integer page) {
+        if (request.format.equalsIgnoreCase("html")) {
+            if (page == null || page < 1) {
+                page = 1;
+            }
+            int length = 4;
+            List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            if (page > 1) {
+                renderArgs.put("prevPage", page - 1);
+            } else {
+                renderArgs.put("prevPage", 1);
+            }
+            if (eventList.size() == length) {
+                renderArgs.put("nextPage", page + 1);
+            } else {
+                renderArgs.put("nextPage", page);
+            }
+            renderArgs.put("data", eventList);
+            render();
+            return;
+        }
+        List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch();
+        EventList ret = new EventList();
+        ret.eventData = new ArrayList<EventData>(eventList.size());
+        for (LgEvent e : eventList) {
+            ret.eventData.add(new EventData(e));
+        }
+        if (request.format.equalsIgnoreCase("xml")) {
+            renderXml(ret);
+        } else {
+            renderJSON(ret);
+        }
+    }
+
     public static void processDeposit(Integer depositId) {
         if (depositId == null) {
             unprocessedDeposits(1);
@@ -320,6 +379,18 @@ public class ReportController extends Controller {
         boolean stat = LgZ.process(EXTERNAL_APP_ID, zId, "DONE");
         if (request.format.equalsIgnoreCase("html")) {
             unprocessedZs(1);
+        } else {
+            renderHtml(stat ? "DONE" : "ERROR");
+        }
+    }
+
+    public static void processEvent(Integer eventId) {
+        if (eventId == null) {
+            unprocessedEvents(1);
+        }
+        boolean stat = LgEvent.process(EXTERNAL_APP_ID, eventId, "DONE");
+        if (request.format.equalsIgnoreCase("html")) {
+            unprocessedEvents(1);
         } else {
             renderHtml(stat ? "DONE" : "ERROR");
         }

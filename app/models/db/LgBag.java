@@ -9,7 +9,6 @@ import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
 import models.events.BagEvent;
-import models.events.BagProcessedEvent;
 import models.lov.Currency;
 import play.Logger;
 import play.db.jpa.GenericModel;
@@ -45,9 +44,9 @@ public class LgBag extends GenericModel implements java.io.Serializable {
             end = new Date();
         }
         if (start == null) {
-            return LgDeposit.count("select count(b) from LgBag b where cast(creationDate as date) <= cast(? as date)", end);
+            return LgBag.count("select count(b) from LgBag b where cast(creationDate as date) <= cast(? as date)", end);
         } else {
-            return LgDeposit.count("select count(b) from LgBag b where "
+            return LgBag.count("select count(b) from LgBag b where "
                     + "cast(creationDate as date)  >= cast(? as date) and cast(creationDate as date) <= cast(? as date)",
                     start, end);
         }
@@ -67,26 +66,24 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     }
 
     public static JPAQuery findUnprocessed(int appId) {
-        return LgDeposit.find(
+        return LgBag.find(
                 "select b from LgBag b where "
                 + "not exists ("
-                + " from BagProcessedEvent e, LgExternalAppLog al, LgExternalApp ea"
+                + " from LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
-                + " and b.bagId = e.eventSourceId"
-                + " and al.event = e and ea.appId = ?"
+                + " and b.bagId = al.logSourceId"
+                + " and ea.appId = ?"
                 + ")", appId);
     }
 
-    public static boolean process(int appId, int depositId, String resultCode) {
-        LgBag b = LgBag.findById(depositId);
+    public static boolean process(int appId, int bagId, String resultCode) {
+        LgBag b = LgBag.findById(bagId);
         LgExternalApp ea = LgExternalApp.findByAppId(appId);
         if (b == null || ea == null || b.withdrawDate == null) {
             return false;
         }
-        BagProcessedEvent e = BagProcessedEvent.save(b, String.format("Exporting to app %d", appId));
-        LgExternalAppLog el = new LgExternalAppLog(e, resultCode);
+        LgExternalAppLog el = new LgExternalAppLog(b, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
-        el.setEvent(e);
         el.setExternalApp(ea);
         el.save();
         return true;
