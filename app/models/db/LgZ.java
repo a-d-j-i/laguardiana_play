@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
+import models.events.ZEvent;
 import models.events.ZProcessedEvent;
 import models.lov.Currency;
 import play.Logger;
@@ -43,6 +44,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         List<LgZ> zs = LgZ.find("select bg from LgZ bg where bg.closeDate is null order by bg.creationDate desc").fetch();
         if (zs == null || zs.isEmpty()) {
             Logger.error("There's no z where to deposit, creating one!!");
+            ZEvent.save(null, "There is no z creating one");
             currentZ = new LgZ();
             currentZ.save();
         } else {
@@ -54,6 +56,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
                     toClose.closeDate = new Date();
                     toClose.save();
                     Logger.error("There are more than one open z, closing the z %d", toClose.zId);
+                    ZEvent.save(toClose, String.format("There are more than one open z, closing the z %d", toClose.zId));
                 }
             } else {
                 currentZ = zs.get(0);
@@ -70,9 +73,11 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         if (current.deposits.size() > 0) {
             Logger.debug("Rotating Z");
             current.closeDate = new Date();
+            ZEvent.save(current, "Closing z");
             current.save();
             LgZ newZ = new LgZ();
             newZ.save();
+            ZEvent.save(newZ, "Opening new z");
         } else {
             Logger.debug("this Z is empty so don't rotate");
         }
