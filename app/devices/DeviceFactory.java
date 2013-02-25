@@ -1,16 +1,16 @@
 package devices;
 
-import devices.printer.Printer;
-import devices.ioboard.IoBoard;
 import devices.SerialPortAdapterAbstract.PORTBITS;
 import devices.SerialPortAdapterAbstract.PORTPARITY;
 import devices.SerialPortAdapterAbstract.PORTSPEED;
 import devices.SerialPortAdapterAbstract.PORTSTOPBITS;
 import devices.SerialPortAdapterAbstract.PortConfiguration;
 import devices.glory.Glory;
-import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.FakeGloryManager;
 import devices.glory.manager.GloryManager;
+import devices.glory.manager.ManagerInterface;
+import devices.ioboard.IoBoard;
+import devices.printer.Printer;
 import java.util.HashMap;
 import models.Configuration;
 import play.Logger;

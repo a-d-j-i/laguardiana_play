@@ -4,7 +4,7 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -31,7 +31,7 @@ public class IdleFiltering extends ActionState {
     }
 
     @Override
-        public void onGloryEvent(ManagerInterface.State m) {
+        public void onGloryEvent(ManagerStatus m) {
         switch (m.getState()) {
             case READY_TO_STORE:
                 stateApi.setState(new ReadyToStoreCounting(stateApi));

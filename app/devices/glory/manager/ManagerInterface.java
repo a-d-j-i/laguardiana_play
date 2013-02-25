@@ -10,7 +10,7 @@ import java.util.Observer;
  */
 public interface ManagerInterface {
 
-    static public enum ManagerState {
+    static public enum MANAGER_STATE {
 
         NEUTRAL,
         READY_TO_STORE,
@@ -29,54 +29,74 @@ public interface ManagerInterface {
         ERROR;
     };
 
-    static public class State extends Observable {
+    public class ManagerStatus {
 
-        private ManagerState state = ManagerState.INITIALIZING;
-        private GloryManagerError error;
+        final private MANAGER_STATE state;
+        final private GloryManagerError error;
 
-        private State(State aThis) {
+        protected ManagerStatus(State aThis) {
             this.state = aThis.state;
             this.error = aThis.error;
         }
 
-        public State() {
+        @Override
+        public String toString() {
+            return "Status{" + "state=" + state + ", error=" + error + '}';
         }
+
+        public MANAGER_STATE getState() {
+            return state;
+        }
+
+        public GloryManagerError getError() {
+            return error;
+        }
+
+        public String name() {
+            return state.name();
+        }
+    }
+    
+    class State extends Observable {
+
+        private MANAGER_STATE state = MANAGER_STATE.INITIALIZING;
+        private GloryManagerError error;
 
         @Override
         synchronized public String toString() {
             return "Error ( " + error + " ) ";
         }
 
-        synchronized public ManagerState getState() {
-            return state;
+        synchronized ManagerStatus getStatus() {
+            return new ManagerStatus( this );
         }
 
-        synchronized protected void setState(ManagerState state) {
-            if (this.state != ManagerState.ERROR) {
-                this.state = state;
-                setChanged();
-                notifyObservers(new State(this));
+        synchronized void setState(MANAGER_STATE state) {
+            if (this.state != MANAGER_STATE.ERROR) {
+                if (this.state != state) {
+                    this.state = state;
+                    setChanged();
+                    notifyObservers(new ManagerStatus(this));
+                }
             }
         }
 
-        synchronized protected void clearError() {
-            if (state == ManagerState.ERROR) {
-                this.state = ManagerState.INITIALIZING;
+        synchronized void clearError() {
+            if (state == MANAGER_STATE.ERROR) {
+                this.state = MANAGER_STATE.INITIALIZING;
                 setChanged();
-                notifyObservers(new State(this));
+                notifyObservers(new ManagerStatus(this));
             }
         }
 
-        synchronized public GloryManagerError getError() {
+        synchronized GloryManagerError getError() {
             return error;
         }
 
-        synchronized protected void setError(GloryManagerError e) {
+        synchronized void setError(GloryManagerError e) {
             this.error = e;
-        }
-
-        synchronized public String name() {
-            return state.name();
+            setChanged();
+            notifyObservers(new ManagerStatus(this));
         }
     }
 
@@ -102,7 +122,7 @@ public interface ManagerInterface {
 
     public boolean storingErrorReset();
 
-    public State getStatus();
+    public ManagerStatus getStatus();
 
     public void addObserver(Observer observer);
 }

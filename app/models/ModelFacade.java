@@ -7,6 +7,7 @@ package models;
 import controllers.Secure;
 import devices.DeviceFactory;
 import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import devices.printer.PrinterStatus;
@@ -49,7 +50,7 @@ public class ModelFacade {
         manager = DeviceFactory.getGloryManager();
         manager.addObserver(new Observer() {
             public void update(Observable o, Object data) {
-                Promise now = new OnGloryEvent((ManagerInterface.State) data).now();
+                Promise now = new OnGloryEvent((ManagerStatus) data).now();
             }
         });
 
@@ -74,9 +75,9 @@ public class ModelFacade {
 
     static class OnGloryEvent extends Job {
 
-        ManagerInterface.State status;
+        ManagerStatus status;
 
-        public OnGloryEvent(ManagerInterface.State status) {
+        public OnGloryEvent(ManagerStatus status) {
             this.status = status;
         }
 
@@ -86,8 +87,8 @@ public class ModelFacade {
             synchronized (ModelFacade.class) {
                 u = currentUserAction;
             }
-            GloryEvent.save(u, status.name());
-            Logger.debug("OnGloryEvent event %s", status.name());
+            GloryEvent.save(u, status.toString());
+            Logger.debug("OnGloryEvent event %s", status.toString());
             switch (status.getState()) {
                 //Could happen on startup
                 case INITIALIZING:
@@ -240,7 +241,7 @@ public class ModelFacade {
             }
         }
 
-        public ManagerInterface.ManagerState getManagerState() {
+        public ManagerInterface.MANAGER_STATE getManagerState() {
             return manager.getStatus().getState();
         }
 
@@ -331,7 +332,7 @@ public class ModelFacade {
         if (isLocked()) {
             return null;
         }
-        if (manager.getStatus().getState() == ManagerInterface.ManagerState.ERROR) {
+        if (manager.getStatus().getState() == ManagerInterface.MANAGER_STATE.ERROR) {
             if (Play.configuration.getProperty("glory.ignore") == null) {
                 modelError.setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
             }
@@ -386,8 +387,8 @@ public class ModelFacade {
 
     private static void clearError() {
         Logger.debug("clearing error");
-        ManagerInterface.ManagerState m = manager.getStatus().getState();
-        if (m != ManagerInterface.ManagerState.ERROR && ioBoard.getError() == null) {
+        ManagerInterface.MANAGER_STATE m = manager.getStatus().getState();
+        if (m != ManagerInterface.MANAGER_STATE.ERROR && ioBoard.getError() == null) {
             modelError.clearError();
         }
     }
@@ -463,12 +464,12 @@ public class ModelFacade {
                 modelError.setError(status.getError());
                 return false;
             }
-            if (ioBoard.getStatus().getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+            if (status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
                 modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
                 return false;
             }
             if (!Configuration.isIgnoreShutter()
-                    && ioBoard.getStatus().getShutterState() != IoBoard.SHUTTER_STATE.SHUTTER_OPEN) {
+                    && status.getShutterState() != IoBoard.SHUTTER_STATE.SHUTTER_OPEN) {
                 modelError.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPEN, "shutter is not open");
                 return false;
             }

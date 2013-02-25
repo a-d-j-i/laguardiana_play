@@ -26,8 +26,7 @@ public class IoBoardController extends Application {
             renderArgs.put("error", error);
             render();
         }
-        IoBoardStatus s = null;
-        s = ioBoard.getStatus();
+        IoBoardStatus s = ioBoard.getStatus();
         if (s != null) {
             renderArgs.put("status", s);
         }

@@ -4,8 +4,8 @@
  */
 package models.actions.states;
 
+import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
-import devices.glory.manager.ManagerInterface;
 import devices.printer.PrinterStatus;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
@@ -41,7 +41,7 @@ abstract public class ActionState {
         Logger.error("ActionState accept Invalid step %s", name());
     }
 
-    public void onGloryEvent(ManagerInterface.State m) {
+    public void onGloryEvent(ManagerStatus m) {
         Logger.error("ActionState invalid onGloryEvent %s %s", m.name(), name());
     }
 

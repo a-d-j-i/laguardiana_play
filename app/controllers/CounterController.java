@@ -7,6 +7,7 @@ package controllers;
 import devices.DeviceFactory;
 import devices.ioboard.IoBoard;
 import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.Configuration;
 import models.ModelFacade;
 import play.Logger;
@@ -48,7 +49,7 @@ public class CounterController extends Controller {
     }
 
     public static void counterError(Integer cmd) {
-        ManagerInterface.State gstatus = null;
+        ManagerStatus gstatus = null;
         String gerror = null;
         String ierror = null;
 

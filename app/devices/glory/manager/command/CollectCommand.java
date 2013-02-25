@@ -33,7 +33,7 @@ public class CollectCommand extends ManagerCommandAbstract {
             if (!gloryStatus.isCassetteFullCounter()) {
                 sendGloryCommand(new devices.glory.command.SetTime(new Date()));
                 clearError();
-                setState(ManagerInterface.ManagerState.BAG_COLLECTED);
+                setState(ManagerInterface.MANAGER_STATE.BAG_COLLECTED);
                 Logger.debug("COLLECT DONE");
                 return;
             }
@@ -55,11 +55,11 @@ public class CollectCommand extends ManagerCommandAbstract {
                 case manual:
                 case initial:
                     if (gloryStatus.isRejectBillPresent()) {
-                        setState(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS);
+                        setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
                         break;
                     }
                     if (gloryStatus.isHopperBillPresent()) {
-                        setState(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_HOPER);
+                        setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER);
                         break;
                     }
                     if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {

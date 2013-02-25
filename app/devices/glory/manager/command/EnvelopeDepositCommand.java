@@ -38,7 +38,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
             }
             switch (gloryStatus.getSr1Mode()) {
                 case escrow_open:
-                    setState(ManagerInterface.ManagerState.PUT_THE_ENVELOPE_IN_THE_ESCROW);
+                    setState(ManagerInterface.MANAGER_STATE.PUT_THE_ENVELOPE_IN_THE_ESCROW);
                     break;
                 case waiting_for_an_envelope_to_set:
                     break;
@@ -57,10 +57,10 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
-                        setState(ManagerInterface.ManagerState.STORING);
+                        setState(ManagerInterface.MANAGER_STATE.STORING);
                         break;
                     } else {
-                        setState(ManagerInterface.ManagerState.READY_TO_STORE);
+                        setState(ManagerInterface.MANAGER_STATE.READY_TO_STORE);
                     }
                     break;
 
@@ -75,14 +75,14 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                             return;
                         }
                     } else {
-                        setState(ManagerInterface.ManagerState.READY_TO_STORE);
+                        setState(ManagerInterface.MANAGER_STATE.READY_TO_STORE);
                     }
                     break;
                 case being_store:
                     storeTry = true;
                     break;
                 case abnormal_device:
-                    setState(ManagerInterface.ManagerState.JAM);
+                    setState(ManagerInterface.MANAGER_STATE.JAM);
                     break;
                 case storing_error:
                     setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
@@ -96,7 +96,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
             sleep();
         }
         if (mustCancel()) {
-            setState(ManagerInterface.ManagerState.CANCELING);
+            setState(ManagerInterface.MANAGER_STATE.CANCELING);
         }
         gotoNeutral(true, false);
     }

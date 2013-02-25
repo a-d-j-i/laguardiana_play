@@ -18,11 +18,11 @@ import models.lov.DepositUserCodeReference;
  */
 public class BillDepositAction extends UserAction {
 
-    static final EnumMap<ManagerInterface.ManagerState, String> messageMap = new EnumMap<ManagerInterface.ManagerState, String>(ManagerInterface.ManagerState.class);
+    static final EnumMap<ManagerInterface.MANAGER_STATE, String> messageMap = new EnumMap<ManagerInterface.MANAGER_STATE, String>(ManagerInterface.MANAGER_STATE.class);
 
     static {
-        messageMap.put(ManagerInterface.ManagerState.READY_TO_STORE, "bill_deposit.ready_to_store");
-        messageMap.put(ManagerInterface.ManagerState.ESCROW_FULL, "bill_deposit.escrow_full");
+        messageMap.put(ManagerInterface.MANAGER_STATE.READY_TO_STORE, "bill_deposit.ready_to_store");
+        messageMap.put(ManagerInterface.MANAGER_STATE.ESCROW_FULL, "bill_deposit.escrow_full");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;

@@ -4,8 +4,7 @@
  */
 package models.actions.states;
 
-import devices.ioboard.IoBoard;
-import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -35,7 +34,7 @@ public class BillDepositStart extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.State m) {
+    public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case REMOVE_REJECTED_BILLS:

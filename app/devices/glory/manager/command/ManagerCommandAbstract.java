@@ -137,7 +137,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             }
                             break;
                         case abnormal_device:
-                            setState(ManagerInterface.ManagerState.JAM);
+                            setState(ManagerInterface.MANAGER_STATE.JAM);
                             if (gloryStatus.getD1Mode() == GloryState.D1Mode.normal_error_recovery_mode) {
                                 resetDevice();
                             } else {
@@ -164,7 +164,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             break;
                         case being_restoration:
                         case escrow_open:
-                            setState(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_ESCROW);
+                            setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_ESCROW);
                             break;
                         case storing_error:
                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags"));
@@ -182,11 +182,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case being_exchange_the_cassette:
                         case waiting:
                             if (gloryStatus.isRejectBillPresent()) {
-                                setState(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS);
+                                setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
                                 break;
                             }
                             if (gloryStatus.isHopperBillPresent()) {
-                                setState(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_HOPER);
+                                setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER);
                                 break;
                             }
                             if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
@@ -207,7 +207,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case neutral:
                     switch (gloryStatus.getSr1Mode()) {
                         case abnormal_device:
-                            setState(ManagerInterface.ManagerState.JAM);
+                            setState(ManagerInterface.MANAGER_STATE.JAM);
                             if (!sendGCommand(new devices.glory.command.SetErrorRecoveryMode())) {
                                 setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
                                         String.format("gotoNeutral Error setting normal error recovery mode Error %s", gloryStatus.getLastError())));
@@ -217,10 +217,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case waiting:
                             if (forceEmptyHoper) {
                                 if (gloryStatus.isRejectBillPresent()) {
-                                    setState(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS);
+                                    setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
                                     break;
                                 } else if (gloryStatus.isHopperBillPresent()) {
-                                    setState(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_HOPER);
+                                    setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER);
                                     break;
                                 }
                             }
@@ -244,7 +244,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 }
                                 break;
                             }
-                            setState(ManagerInterface.ManagerState.NEUTRAL);
+                            setState(ManagerInterface.MANAGER_STATE.NEUTRAL);
                             Logger.debug("GOTO NEUTRAL DONE");
                             return true;
                         default:
@@ -357,10 +357,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
     protected void setError(GloryManagerError e) {
         Logger.error("MANAGER ERROR : %s", e);
         threadCommandApi.setError(e);
-        setState(ManagerInterface.ManagerState.ERROR);
+        setState(ManagerInterface.MANAGER_STATE.ERROR);
     }
 
-    protected void setState(ManagerInterface.ManagerState state) {
+    protected void setState(ManagerInterface.MANAGER_STATE state) {
         threadCommandApi.setState(state);
     }
 

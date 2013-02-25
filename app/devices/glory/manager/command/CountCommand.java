@@ -131,7 +131,7 @@ public class CountCommand extends ManagerCommandAbstract {
             switch (gloryStatus.getSr1Mode()) {
                 case storing_start_request:
                     if (gloryStatus.isRejectBillPresent()) {
-                        setState(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS);
+                        setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
                         break;
                     }
                     if (countData.needToStoreDeposit()) {
@@ -140,7 +140,7 @@ public class CountCommand extends ManagerCommandAbstract {
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
-                        setState(ManagerInterface.ManagerState.STORING);
+                        setState(ManagerInterface.MANAGER_STATE.STORING);
                         break;
                     } else if (countData.needToWithdrawDeposit()) {
                         if (!sendGCommand(new devices.glory.command.OpenEscrow())) {
@@ -161,7 +161,7 @@ public class CountCommand extends ManagerCommandAbstract {
                             return;
                         }
                         if (gloryStatus.isEscrowFull()) {
-                            setState(ManagerInterface.ManagerState.ESCROW_FULL);
+                            setState(ManagerInterface.MANAGER_STATE.ESCROW_FULL);
                             break;
                         }
                         if (gloryStatus.isHopperBillPresent()) {
@@ -170,11 +170,11 @@ public class CountCommand extends ManagerCommandAbstract {
                             }
                             break;
                         }
-                        setState(ManagerInterface.ManagerState.READY_TO_STORE);
+                        setState(ManagerInterface.MANAGER_STATE.READY_TO_STORE);
                     }
                     break;
                 case escrow_open:
-                    setState(ManagerInterface.ManagerState.REMOVE_THE_BILLS_FROM_ESCROW);
+                    setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_ESCROW);
                     break;
                 case escrow_close: // The escrow is closing... wait.
                 case being_restoration:
@@ -192,7 +192,7 @@ public class CountCommand extends ManagerCommandAbstract {
                     break;
 
                 case counting:
-                    setState(ManagerInterface.ManagerState.COUNTING);
+                    setState(ManagerInterface.MANAGER_STATE.COUNTING);
                     // The second time after storing.
                     // Ignore error.
                     refreshQuantity();
@@ -205,7 +205,7 @@ public class CountCommand extends ManagerCommandAbstract {
                         return;
                     }
                     if (!gloryStatus.isHopperBillPresent()) {
-                        setState(ManagerInterface.ManagerState.PUT_THE_BILLS_ON_THE_HOPER);
+                        setState(ManagerInterface.MANAGER_STATE.PUT_THE_BILLS_ON_THE_HOPER);
                     }
                     break;
                 case being_store:
@@ -223,7 +223,7 @@ public class CountCommand extends ManagerCommandAbstract {
                             return;
                         }
                         if (gloryStatus.isRejectBillPresent()) {
-                            setState(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS);
+                            setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
                             break;
                         }
                         if (batchCountStart()) { // batch end
@@ -231,12 +231,12 @@ public class CountCommand extends ManagerCommandAbstract {
                         }
                     }
                     if (gloryStatus.isRejectBillPresent()) {
-                        setState(ManagerInterface.ManagerState.REMOVE_REJECTED_BILLS);
+                        setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
                         break;
                     }
                     break;
                 case abnormal_device:
-                    setState(ManagerInterface.ManagerState.JAM);
+                    setState(ManagerInterface.MANAGER_STATE.JAM);
                     if (!gotoNeutral(true, true)) {
                         return;
                     }
@@ -261,7 +261,7 @@ public class CountCommand extends ManagerCommandAbstract {
             if (!sendGloryCommand(new devices.glory.command.StopCounting())) {
                 return;
             }
-            setState(ManagerInterface.ManagerState.CANCELING);
+            setState(ManagerInterface.MANAGER_STATE.CANCELING);
         }
         gotoNeutral(true, false);
     }
@@ -293,7 +293,7 @@ public class CountCommand extends ManagerCommandAbstract {
             if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
                 return false;
             }
-            setState(ManagerInterface.ManagerState.COUNTING);
+            setState(ManagerInterface.MANAGER_STATE.COUNTING);
             return true;
         }
 
@@ -334,7 +334,7 @@ public class CountCommand extends ManagerCommandAbstract {
             if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
                 return false;
             }
-            setState(ManagerInterface.ManagerState.COUNTING);
+            setState(ManagerInterface.MANAGER_STATE.COUNTING);
             return false;
         }
         return true;

@@ -4,7 +4,7 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -27,7 +27,7 @@ public class Jam extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.State m) {
+    public void onGloryEvent(ManagerStatus m) {
         switch (m.getState()) {
             case REMOVE_REJECTED_BILLS:
                 stateApi.setState(new RemoveRejectedBills(stateApi, this));

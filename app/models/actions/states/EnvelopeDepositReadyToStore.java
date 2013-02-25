@@ -4,7 +4,7 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.Configuration;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -33,7 +33,7 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
     }
 
     @Override
-        public void onGloryEvent(ManagerInterface.State m) {
+        public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case READY_TO_STORE:

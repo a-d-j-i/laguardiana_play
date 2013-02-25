@@ -4,9 +4,8 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface;
+import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.UserAction.StateApi;
-import play.Logger;
 
 /**
  *
@@ -27,7 +26,7 @@ public class RemoveRejectedBills extends ActionState {
     }
 
     @Override
-    public void onGloryEvent(ManagerInterface.State m) {
+    public void onGloryEvent(ManagerStatus m) {
         switch (m.getState()) {
             // Envelope deposit.
             case REMOVE_REJECTED_BILLS:

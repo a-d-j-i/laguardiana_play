@@ -102,7 +102,7 @@ public class IoBoard {
         private final BAG_STATE bagState;
         private final IoBoardError error;
 
-        private IoBoardStatus(IoBoardState currentState) {
+        private IoBoardStatus(State currentState) {
             this.shutterState = currentState.shutterState;
             this.bagAproveState = currentState.bagAproveState;
             this.error = currentState.error;
@@ -126,8 +126,7 @@ public class IoBoard {
         }
     }
     // A singleton create to hold the state of the ioboard.
-
-    private class IoBoardState extends Observable {
+    private class State extends Observable {
 
         private Byte A = 0;
         private Byte B = 0;
@@ -144,34 +143,43 @@ public class IoBoard {
         synchronized private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt, Boolean bagAproved) {
             Logger.debug("IOBOARD setBagState : %s, setShutterState : %s, setLockState : %d",
                     bagState, shutterState, lockState);
-            bagState = BAG_STATE.factory(bagSt);
-            shutterState = SHUTTER_STATE.factory(shutterSt);
-            lockState = lockSt;
+            BAG_STATE bs = BAG_STATE.factory(bagSt);
+            if (bs != bagState) {
+                bagState = bs;
+                setChanged();
+            }
+            SHUTTER_STATE ss = SHUTTER_STATE.factory(shutterSt);
+            if (ss != shutterState) {
+                shutterState = ss;
+                setChanged();
+            }
+            if (lockSt != lockState) {
+                lockState = lockSt;
+                setChanged();
+            }
             // The bag changed the state.
             switch (bagAproveState) {
                 case BAG_APROVED:
                     if (!bagAproved) {
                         Logger.debug("IOBOARD BAG NOT APROVED");
                         bagAproveState = BAG_APROVE_STATE.BAG_NOT_APROVED;
+                        setChanged();
                     }
                     break;
                 case BAG_APROVE_WAIT:
                     if (bagAproved) {
                         Logger.debug("IOBOARD BAG APROVE CONFIRM");
                         bagAproveState = BAG_APROVE_STATE.BAG_APROVE_CONFIRM;
+                        setChanged();
                     }
                     break;
                 case BAG_APROVE_CONFIRM:
                 case BAG_NOT_APROVED:
                     break;
             }
-            setChanged();
-            notifyObservers(state.getStatus());
-
-        }
-
-        synchronized private IoBoardStatus getStatus() {
-            return new IoBoardStatus(this);
+            if (hasChanged()) {
+                notifyObservers(new IoBoardStatus(this));
+            }
         }
 
         synchronized private void setStatusBytes(Byte A, Byte B, Byte C, Byte D, Byte BAG) {
@@ -186,7 +194,7 @@ public class IoBoard {
         synchronized private void setError(IoBoardError error) {
             this.error = error;
             setChanged();
-            notifyObservers(state.getStatus());
+            notifyObservers(new IoBoardStatus(this));
         }
 
         synchronized private void setAproveBagState(BAG_APROVE_STATE state) {
@@ -197,6 +205,8 @@ public class IoBoard {
             // Don't overwrite the first error!!!.
             this.error = null;
             statusThread.sendCmd('E');
+            setChanged();
+            notifyObservers(new IoBoardStatus(this));
         }
 
         synchronized private IoBoardError getError() {
@@ -234,11 +244,7 @@ public class IoBoard {
     public static final int IOBOARD_READ_TIMEOUT = 10000;
     public static final int IOBOARD_STATUS_CHECK_FREQ = 2000;
     public static final int IOBOARD_MAX_RETRIES = 5;
-    final private IoBoardState state = new IoBoardState();
-
-    public IoBoardStatus getStatus() {
-        return state.getStatus();
-    }
+    final private State state = new State();
 
     @Override
     public String toString() {
@@ -364,6 +370,10 @@ public class IoBoard {
         }
         this.serialPort = serialPort;
         statusThread = new StatusThread();
+    }
+
+    public IoBoardStatus getStatus() {
+        return new IoBoardStatus(state);
     }
 
     public void startStatusThread() {

@@ -1,4 +1,4 @@
-$( "#main_overlay" ).overlay({
+/*$( "#main_overlay" ).overlay({
     top: 100,
     left: "center",
     mask: {
@@ -11,15 +11,35 @@ $( "#main_overlay" ).overlay({
     closeOnEsc: false,
     speed: "fast",
     oneInstance: true
-});
+});*/
 
 var current_alert = undefined;
+var current_overlay = undefined;
 function showAlert( a ) {
     if ( current_alert == a ) {
         return;
     }
     current_alert = a;
-    $( "#overlay_contents" ).html( $( a ).html() );
+    if ( current_overlay ) {
+        current_overlay.close();
+    }
+    current_overlay = $( a ).overlay({
+        top: 100,
+        left: "center",
+        mask: {
+            color: "#000",
+            loadSpeed: 1,
+            closeSpeed: 1,
+            opacity: 0.9
+        },
+        closeOnClick: false,
+        closeOnEsc: false,
+        speed: "fast",
+        oneInstance: true
+    });
+    current_overlay = $( a ).overlay();
+    current_overlay.load();
+/*    $( "#overlay_contents" ).html( $( a ).html() );
     $( a ).find( "a" ).each( function() {
         var id = $( this ).attr( "id" );
         if ( id ) {
@@ -27,7 +47,7 @@ function showAlert( a ) {
                 $( a ).find( "#" + id ).click()
             });
         }
-    });
+    });*/
 };
 
 function closeAlert( a ) {
@@ -35,9 +55,11 @@ function closeAlert( a ) {
         return;
     }
     current_alert = undefined;
+    current_overlay.close();
+    current_overlay = undefined;
 }
 
-function testAlert() {
+/*function testAlert() {
     var ov = $( "#main_overlay" ).overlay();
     
     if ( current_alert ) {
@@ -53,9 +75,9 @@ function testAlert() {
             return;
         }
     }
-}
+}*/
 // Call refresh every 1.5 seconds
-setInterval( testAlert, 100);
+//setInterval( testAlert, 100);
 
 
 var waiting = false;

@@ -19,10 +19,10 @@ import models.lov.DepositUserCodeReference;
  */
 public class EnvelopeDepositAction extends UserAction {
 
-    static final EnumMap<ManagerInterface.ManagerState, String> messageMap = new EnumMap<ManagerInterface.ManagerState, String>(ManagerInterface.ManagerState.class);
+    static final EnumMap<ManagerInterface.MANAGER_STATE, String> messageMap = new EnumMap<ManagerInterface.MANAGER_STATE, String>(ManagerInterface.MANAGER_STATE.class);
 
     static {
-        messageMap.put(ManagerInterface.ManagerState.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
+        messageMap.put(ManagerInterface.MANAGER_STATE.PUT_THE_ENVELOPE_IN_THE_ESCROW, "envelope_deposit.put_the_envelope_in_the_escrow");
     }
     public DepositUserCodeReference userCodeLov;
     public String userCode;

@@ -10,7 +10,7 @@ import java.util.Observer;
  */
 public class FakeGloryManager implements ManagerInterface {
 
-    final private static ManagerInterface.State status = new ManagerInterface.State();
+    final private static ManagerInterface.State state = new ManagerInterface.State();
     static Map<Integer, Integer> desiredQuantity = null;
     static Integer currency;
     static int counter = 0;
@@ -18,7 +18,7 @@ public class FakeGloryManager implements ManagerInterface {
     static boolean stepOneDone = false;
 
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
-        status.setState(ManagerState.NEUTRAL);
+        state.setState(MANAGER_STATE.NEUTRAL);
         billDeposit = true;
         FakeGloryManager.desiredQuantity = desiredQuantity;
         FakeGloryManager.currency = currency;
@@ -29,7 +29,7 @@ public class FakeGloryManager implements ManagerInterface {
 
     public boolean envelopeDeposit() {
         billDeposit = false;
-        status.setState(ManagerState.NEUTRAL);
+        state.setState(MANAGER_STATE.NEUTRAL);
         counter = 0;
         return true;
     }
@@ -52,68 +52,68 @@ public class FakeGloryManager implements ManagerInterface {
     }
 
     public void cancelCommand() {
-        status.setState(ManagerState.CANCELING);
-        status.setState(ManagerState.NEUTRAL);
+        state.setState(MANAGER_STATE.CANCELING);
+        state.setState(MANAGER_STATE.NEUTRAL);
     }
 
     public boolean storeDeposit(Integer sequenceNumber) {
-        if (status.getState() != ManagerState.CANCELING && status.getState() != ManagerState.NEUTRAL) {
-            if (status.getState() == ManagerState.ESCROW_FULL) {
-                status.setState(ManagerState.STORING);
-                status.setState(ManagerState.COUNTING);
+        if (getStatus().getState() != MANAGER_STATE.CANCELING && getStatus().getState() != MANAGER_STATE.NEUTRAL) {
+            if (getStatus().getState() == MANAGER_STATE.ESCROW_FULL) {
+                state.setState(MANAGER_STATE.STORING);
+                state.setState(MANAGER_STATE.COUNTING);
             } else {
-                status.setState(ManagerState.STORING);
-                status.setState(ManagerState.PUT_THE_BILLS_ON_THE_HOPER);
+                state.setState(MANAGER_STATE.STORING);
+                state.setState(MANAGER_STATE.PUT_THE_BILLS_ON_THE_HOPER);
             }
         }
         return true;
     }
 
     public boolean withdrawDeposit() {
-        status.setState(ManagerState.NEUTRAL);
+        state.setState(MANAGER_STATE.NEUTRAL);
         return true;
     }
 
     public boolean collect() {
-        status.setState(ManagerState.NEUTRAL);
+        state.setState(MANAGER_STATE.NEUTRAL);
         return true;
     }
 
     public boolean reset() {
-        status.setState(ManagerState.NEUTRAL);
+        state.setState(MANAGER_STATE.NEUTRAL);
         return true;
     }
 
     public boolean storingErrorReset() {
-        status.setState(ManagerState.NEUTRAL);
+        state.setState(MANAGER_STATE.NEUTRAL);
         return true;
     }
 
-    public ManagerInterface.State getStatus() {
+    public ManagerStatus getStatus() {
         counter++;
         if (counter % 10 == 0) {
             if (billDeposit) {
                 if (!stepOneDone) {
-                    status.setState(ManagerState.ESCROW_FULL);
+                    state.setState(MANAGER_STATE.ESCROW_FULL);
                     stepOneDone = true;
                 }
             } else {
-                status.setState(ManagerState.PUT_THE_ENVELOPE_IN_THE_ESCROW);
+                state.setState(MANAGER_STATE.PUT_THE_ENVELOPE_IN_THE_ESCROW);
             }
         }
         if (counter % 20 == 0) {
-            status.setState(ManagerState.READY_TO_STORE);
+            state.setState(MANAGER_STATE.READY_TO_STORE);
         }
 
         if (counter == 40) {
-            status.setState(ManagerState.PUT_THE_BILLS_ON_THE_HOPER);
+            state.setState(MANAGER_STATE.PUT_THE_BILLS_ON_THE_HOPER);
             counter = 0;
         }
 
-        return status;
+        return new ManagerStatus(state);
     }
 
     public void addObserver(Observer observer) {
-        status.addObserver(observer);
+        state.addObserver(observer);
     }
 }
