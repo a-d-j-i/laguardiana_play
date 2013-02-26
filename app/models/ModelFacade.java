@@ -302,8 +302,10 @@ public class ModelFacade {
         }
         LgBag currentBag = LgBag.getCurrentBag();
         F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> totals = currentBag.getTotals();
-        if (totals._3 > Configuration.maxBillsPerBag()) {
-            modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills");
+        // bills  + 50 * envelopes
+        long billEquvalent = totals._3 + (50 * totals._1);
+        if (billEquvalent > Configuration.maxBillsPerBag()) {
+            modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
             return;
         }
         if (totals._1 > Configuration.maxEnvelopesPerBag()) {

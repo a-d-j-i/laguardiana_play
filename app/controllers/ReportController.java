@@ -150,23 +150,24 @@ public class ReportController extends Controller {
             renderArgs.put("data", depositList);
             render();
             return;
-        }
-        List<LgDeposit> depositList = LgDeposit.findUnprocessed(2).fetch();
-        UnprocessedDeposits ret = new UnprocessedDeposits();
-        ret.depositData = new ArrayList<DepositData>(depositList.size());
-        for (LgDeposit d : depositList) {
-            if (d instanceof BillDeposit) {
-                ret.depositData.add(new BillDepositData((BillDeposit) d));
-            } else if (d instanceof EnvelopeDeposit) {
-                ret.depositData.add(new EnvelopeDepositData((EnvelopeDeposit) d));
-            } else {
-                Logger.error("Invalid deposit type");
-            }
-        }
-        if (request.format.equalsIgnoreCase("xml")) {
-            renderXml(ret);
         } else {
-            renderJSON(ret);
+            List<LgDeposit> depositList = LgDeposit.findUnprocessed(2).fetch(50);
+            UnprocessedDeposits ret = new UnprocessedDeposits();
+            ret.depositData = new ArrayList<DepositData>(depositList.size());
+            for (LgDeposit d : depositList) {
+                if (d instanceof BillDeposit) {
+                    ret.depositData.add(new BillDepositData((BillDeposit) d));
+                } else if (d instanceof EnvelopeDeposit) {
+                    ret.depositData.add(new EnvelopeDepositData((EnvelopeDeposit) d));
+                } else {
+                    Logger.error("Invalid deposit type");
+                }
+            }
+            if (request.format.equalsIgnoreCase("xml")) {
+                renderXml(ret);
+            } else {
+                renderJSON(ret);
+            }
         }
     }
 
@@ -216,17 +217,18 @@ public class ReportController extends Controller {
             renderArgs.put("data", bagList);
             render();
             return;
-        }
-        List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch();
-        BagList ret = new BagList();
-        ret.bagData = new ArrayList<BagData>(bagList.size());
-        for (LgBag b : bagList) {
-            ret.bagData.add(new BagData(b));
-        }
-        if (request.format.equalsIgnoreCase("xml")) {
-            renderXml(ret);
         } else {
-            renderJSON(ret);
+            List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
+            BagList ret = new BagList();
+            ret.bagData = new ArrayList<BagData>(bagList.size());
+            for (LgBag b : bagList) {
+                ret.bagData.add(new BagData(b));
+            }
+            if (request.format.equalsIgnoreCase("xml")) {
+                renderXml(ret);
+            } else {
+                renderJSON(ret);
+            }
         }
     }
 
@@ -276,28 +278,42 @@ public class ReportController extends Controller {
             renderArgs.put("data", zList);
             render();
             return;
-        }
-        List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch();
-        ZList ret = new ZList();
-        ret.zData = new ArrayList<ZData>(zList.size());
-        for (LgZ z : zList) {
-            ret.zData.add(new ZData(z));
-        }
-        if (request.format.equalsIgnoreCase("xml")) {
-            renderXml(ret);
         } else {
-            renderJSON(ret);
+            List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
+            ZList ret = new ZList();
+            ret.zData = new ArrayList<ZData>(zList.size());
+            for (LgZ z : zList) {
+                ret.zData.add(new ZData(z));
+            }
+            if (request.format.equalsIgnoreCase("xml")) {
+                renderXml(ret);
+            } else {
+                renderJSON(ret);
+            }
         }
     }
 
     static public class EventData {
 
-        public Integer eventId;
-        public Date creationDate;
+        final public Integer eventId;
+        final public Date creationDate;
+        final public String user_id;
+        final public String gecos;
+        final public Integer eventSourceId;
+        final public String message;
 
         private EventData(LgEvent e) {
             this.eventId = e.eventId;
             this.creationDate = e.creationDate;
+            if (e.user != null) {
+                this.user_id = e.user.username;
+                this.gecos = e.user.gecos;
+            } else {
+                this.user_id = null;
+                this.gecos = null;
+            }
+            this.eventSourceId = e.eventSourceId;
+            this.message = e.message;
         }
     }
 
@@ -334,17 +350,18 @@ public class ReportController extends Controller {
             renderArgs.put("data", eventList);
             render();
             return;
-        }
-        List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch();
-        EventList ret = new EventList();
-        ret.eventData = new ArrayList<EventData>(eventList.size());
-        for (LgEvent e : eventList) {
-            ret.eventData.add(new EventData(e));
-        }
-        if (request.format.equalsIgnoreCase("xml")) {
-            renderXml(ret);
         } else {
-            renderJSON(ret);
+            List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
+            EventList ret = new EventList();
+            ret.eventData = new ArrayList<EventData>(eventList.size());
+            for (LgEvent e : eventList) {
+                ret.eventData.add(new EventData(e));
+            }
+            if (request.format.equalsIgnoreCase("xml")) {
+                renderXml(ret);
+            } else {
+                renderJSON(ret);
+            }
         }
     }
 

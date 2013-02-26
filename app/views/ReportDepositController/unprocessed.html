@@ -1,9 +1,0 @@
-#{extends 'unprocessedMain.html' /}
-#{set title: 'Unprocessed Deposits' /}
-<ul>
-    #{list items:data, as:'deposit' }
-    <li>${deposit.depositId} : ${deposit.toString()}
-        <a href="@{process(deposit.depositId)}" style="color: green">process</a>
-    </li>
-    #{/list}
-</ul>

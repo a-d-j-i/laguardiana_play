@@ -75,7 +75,7 @@ other_menu.unprocessed_events=Eventos a procesar
 other_menu.list_zs=Listar cierres contables
 other_menu.list_bags=Listar bolsas
 other_menu.list_deposits=Listar depositos
-
+other_menu.list_events=Listar eventos
 
 main_menu.title=MENÚ PRINCIPAL
 main_menu.cash_deposit=DEPOSITAR EFECTIVO

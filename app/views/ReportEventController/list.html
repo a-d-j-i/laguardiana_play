@@ -1,0 +1,34 @@
+#{extends 'reportList.html' /}
+#{set title: 'List Zs' /}
+<table style="margin-left: auto; margin-right: auto; border: 1px solid;">
+    <thead>
+    <th>Transaccion</th>
+    <th>Fecha de creacion</th>
+    <th>Usuario</th>
+    <th>Tipo</th>
+    <th>Transaccion origen</th>
+    <th>Acciones</th>
+</thead>
+<tbody>
+    #{list items:data, as:'event' }
+    <tr style="background-color: lightgreen;">
+        <td>${event.eventId} </td>
+        <td>${event.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
+        <td style="width:180px;">
+            ${event.user?.username}
+        </td>
+        <td>${event.class.getSimpleName()} </td>
+        <td>${event.eventSourceId} </td>
+        <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ event.eventId }" href="@{detail}" class="submitForm">Detalle</a>
+        </td>
+    </tr>
+    #{/list}
+</tbody>
+<tfoot> 
+    <tr>
+        <td colspan="3" style="text-align: left;">Cantidad de cierres contables: ${cnt}</td>
+        <td colspan="3" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
+    </tr>
+</tfoot>
+</table>

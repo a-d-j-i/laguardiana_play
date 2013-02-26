@@ -124,8 +124,14 @@ public class IoBoard {
         public IoBoardError getError() {
             return error;
         }
+
+        @Override
+        public String toString() {
+            return "IoBoardStatus{" + "shutterState=" + shutterState + ", bagAproveState=" + bagAproveState + ", bagState=" + bagState + ", error=" + error + '}';
+        }
     }
     // A singleton create to hold the state of the ioboard.
+
     private class State extends Observable {
 
         private Byte A = 0;

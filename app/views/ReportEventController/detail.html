@@ -1,0 +1,17 @@
+#{extends 'main.html' /}
+#{set title: 'current Event totals' /}
+<section>
+    <header></header>
+    <a href="${ backUrl }" class="boton_top">◄ &{ 'application.back' }</a>
+    <article>
+        Transaccion : ${event.eventId} <br>
+        Fecha de creacion : ${event.creationDate?.format('dd/MM/yyyy HH:mm:ss')}<br>
+        Usuario : ${event.user?.username}&nbsp;${event.user?.gecos}<br>
+        Tipo : ${event.class.getSimpleName()} <br>
+        Transaccion de origen : ${event.eventSourceId} <br>
+        Mensage : ${event.message} <br>
+    </article>
+</section>
+
+
+

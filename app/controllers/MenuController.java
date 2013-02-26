@@ -49,10 +49,10 @@ public class MenuController extends Controller {
 
     public static void reportMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"MenuController.unprocessedMenu",
-            "ReportDepositController.list", "ReportBagController.list", "ReportZController.list"};
-        String[] titles = {"other_menu.unprocessed_menu",
-            "other_menu.list_deposits", "other_menu.list_bags", "other_menu.list_zs"};
+        String[] buttons = {"ReportDepositController.list", "ReportBagController.list", "ReportZController.list", "ReportEventController.list",
+            "MenuController.unprocessedMenu"};
+        String[] titles = {"other_menu.list_deposits", "other_menu.list_bags", "other_menu.list_zs", "other_menu.list_events",
+            "other_menu.unprocessed_menu"};
         checkMenu(back, backAction, buttons, titles, 2);
     }
 
