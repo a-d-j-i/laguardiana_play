@@ -9,7 +9,7 @@
     <th>Total de sobres</th>
     <th>Total de billetes</th>
     <th>Total de efectivo &nbsp; / &nbsp; billetes</th>
-    <th colspan="2">Acciones</th>
+    <th colspan="4">Acciones</th>
 </thead>
 <tbody>
     #{list items:data, as:'bag' }
@@ -42,6 +42,9 @@
             <a id="${ bag.bagId }" href="@{detail}" class="submitForm">Detalle</a>
         </td>
         <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ bag.bagId }" href="@{ReportDepositController.list( 1, null, null, bag.bagId, null )}" class="NosubmitForm">Depositos</a>
+        </td>
+        <td style="background-color: lightblue; border: 1px solid;">
             <a id="${ bag.bagId }" href="@{reprint}" class="submitForm">Reimprimir Ticket</a>
         </td>
     </tr>
@@ -50,7 +53,7 @@
 <tfoot> 
     <tr>
         <td colspan="3" style="text-align: left;">Cantidad de bolsas: ${cnt}</td>
-        <td colspan="5" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
+        <td colspan="8" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
     </tr>
 </tfoot>
 </table>

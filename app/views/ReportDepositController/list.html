@@ -53,3 +53,13 @@
     </tr>
 </tfoot>
 </table>
+#{if bag}
+    Contenido de la bolsa ${ bag.bagId }, colocada el ${ bag.creationDate.format('dd/MM/yyyy HH:mm:ss') } y
+    #{if bag.withdrawDate} retirada el ${ bag.withdrawDate.format('dd/MM/yyyy HH:mm:ss') }#{/if}
+    #{else} aun no retirada#{/else}
+#{/if}
+#{if z}
+    Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy HH:mm:ss') } y 
+    #{ if z.closeDate == null } aun no cerrado#{/if}
+    #{ else } cerrado el ${ z.closeDate.format('dd/MM/yyyy HH:mm:ss') }#{/else}
+#{/if}

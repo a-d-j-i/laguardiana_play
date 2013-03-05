@@ -5,7 +5,7 @@ def next_url = actionBridge."$action".call(nextPage);
 }%
 <section>
     <header></header>
-    <a href="@{MenuController.reportMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    <a href="#" class="boton_top clickBack">◄ &{ 'application.back' }</a>
     <article>
         <div class="contenido_grande">
             <div style="text-align: center;">
@@ -15,6 +15,8 @@ def next_url = actionBridge."$action".call(nextPage);
                     <li  style="display: inline;">Fecha hasta: <input class="datepicker" type="datetime" name="endDate" value="${endDate?.format('dd/MM/yyyy')}" /></li>
                 </ul>
                 <input type="hidden" name="page" value="${page}">
+                <input type="hidden" name="bagId" value="${bagId}">
+                <input type="hidden" name="zId" value="${zId}">
                 <input type="hidden" name="id">
                 #{/form}
             </div>
@@ -49,6 +51,14 @@ def next_url = actionBridge."$action".call(nextPage);
 </section>
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
+    function getPage() {
+        var form = $( "#mainForm" );
+        var data = $.get( form.attr( "action" ) + "?" + form.serialize(),
+        function(data) {
+            $('body').html( data );
+            //            $('.result').html(data);
+        });    
+    }
     $(function() {
         $( ".datepicker" ).datepicker({
             dateFormat : "dd/mm/yy",
@@ -58,28 +68,49 @@ def next_url = actionBridge."$action".call(nextPage);
         });
         $( "#first" ).click(function( event ) {
             $( "[name = page]" ).val( 1 );
-            $( "#mainForm" ).submit();
+            getPage();
+            //            $( "#mainForm" ).submit();
             event.preventDefault();
         });
         $( "#prev" ).click(function( event ) {
             $( "[name = page]" ).val( parseInt( $( "[name = page]" ).val() ) - 1 );
-            $( "#mainForm" ).submit();
+            getPage();
+            //            $( "#mainForm" ).submit();
             event.preventDefault();
         });
         $( "#next" ).click(function( event ) {
             $( "[name = page]" ).val( parseInt( $( "[name = page]" ).val() ) + 1 );
-            $( "#mainForm" ).submit();
+            getPage();
+            //            $( "#mainForm" ).submit();
             event.preventDefault();
         });
         $( "#last" ).click(function( event ) {
             $( "[name = page]" ).val( ${totalPage} );
-            $( "#mainForm" ).submit();
+            getPage();
+            //            $( "#mainForm" ).submit();
             event.preventDefault();
         });
         $( ".submitForm" ).click(function( event ) {
             $( "[name = id]" ).val( $(this).attr( "id" ) );
             $( "#mainForm" ).attr("action", $(this).attr("href") ).submit();
             event.preventDefault();
+        });
+        $( ".clickBack" ).click( function( e ) {
+            {
+                var defaultLocation = "@{MenuController.reportMenu(1)}";
+                var oldHash = window.location.hash;
+                
+                history.back(); // Try to go back
+                
+                var newHash = window.location.hash;
+                
+                if( newHash === oldHash &&
+                    (typeof(document.referrer) !== "string" || document.referrer  === "")){
+                    window.location.href = defaultLocation;
+                }
+                //e.preventDefault();
+                return false; // stop event propagation and browser default event
+            }
         });
     });
 </script>

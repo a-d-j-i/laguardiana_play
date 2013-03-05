@@ -1,9 +1,11 @@
 package models.db;
 
 import devices.printer.Printer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
@@ -70,30 +72,38 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         this.creationDate = new Date();
     }
 
-    public static long count(Date start, Date end) {
+    private static String getFindQuery(String query, List<Object> args, Date start, Date end, Integer bagId, Integer zId) {
         if (end == null) {
             end = new Date();
         }
-        if (start == null) {
-            return LgDeposit.count("select count(d) from LgDeposit d where creationDate <= ?", end);
-        } else {
-            return LgDeposit.count("select count(d) from LgDeposit d where "
-                    + "cast(creationDate as date)  >= cast(? as date) and cast(creationDate as date) <= cast(? as date)",
-                    start, end);
+
+        String whereClause = " cast(creationDate as date) <= cast(? as date)";
+        args.add(end);
+        if (start != null) {
+            whereClause += " and cast(creationDate as date) >= cast(? as date)";
+            args.add(start);
         }
+        if (bagId != null) {
+            whereClause += " and bag.bagId = ?";
+            args.add(bagId);
+        }
+        if (zId != null) {
+            whereClause += " and z.zId = ?";
+            args.add(zId);
+        }
+        return query + " from LgDeposit d where " + whereClause;
     }
 
-    public static JPAQuery find(Date start, Date end) {
-        if (end == null) {
-            end = new Date();
-        }
-        if (start == null) {
-            return LgDeposit.find("select d from LgDeposit d where creationDate <= ? order by creationDate desc", end);
-        } else {
-            return LgDeposit.find("select d from LgDeposit d where "
-                    + "cast(creationDate as date) >= cast(? as date) and cast(creationDate as date) <= cast(? as date) order by creationDate desc",
-                    start, end);
-        }
+    public static long count(Date start, Date end, Integer bagId, Integer zId) {
+        List<Object> args = new ArrayList<Object>();
+        String query = getFindQuery("select count(d)", args, start, end, bagId, zId);
+        return LgDeposit.count(query, args.toArray());
+    }
+
+    public static JPAQuery find(Date start, Date end, Integer bagId, Integer zId) {
+        List<Object> args = new ArrayList<Object>();
+        String query = getFindQuery("select d", args, start, end, bagId, zId) + " order by creationDate desc";
+        return LgDeposit.find(query, args.toArray());
     }
 
     public static JPAQuery findUnprocessed(int appId) {
@@ -207,6 +217,6 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 Logger.error("Invalid deposit type");
             }
         }
-        return new F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>>(envelopes, deposits, bills, qaTotals, totals);
+        return new F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>>(deposits, envelopes, bills, qaTotals, totals);
     }
 }

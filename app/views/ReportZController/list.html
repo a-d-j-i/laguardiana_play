@@ -5,8 +5,7 @@
     <th>Transaccion</th>
     <th>Fecha de creacion</th>
     <th>Cierre contable</th>
-    <th>Total</th>
-    <th colspan="2">Acciones</th>
+    <th colspan="4">Acciones</th>
 </thead>
 <tbody>
     #{list items:data, as:'z' }
@@ -25,6 +24,9 @@
             <a id="${ z.zId }" href="@{detail}" class="submitForm">Detalle</a>
         </td>
         <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ z.zId }" href="@{ReportDepositController.list( 1, null, null, null, z.zId )}" class="NosubmitForm">Depositos</a>
+        </td>
+        <td style="background-color: lightblue; border: 1px solid;">
             <a id="${ z.zId }" href="@{reprint}" class="submitForm">Reimprimir Ticket</a>
         </td>
     </tr>
@@ -33,7 +35,7 @@
 <tfoot> 
     <tr>
         <td colspan="3" style="text-align: left;">Cantidad de cierres contables: ${cnt}</td>
-        <td colspan="3" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
+        <td colspan="4" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
     </tr>
 </tfoot>
 </table>

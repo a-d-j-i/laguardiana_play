@@ -3,7 +3,9 @@ package controllers;
 import devices.DeviceFactory;
 import java.util.Date;
 import java.util.List;
+import models.db.LgBag;
 import models.db.LgDeposit;
+import models.db.LgZ;
 import play.Logger;
 import play.data.binding.As;
 import play.mvc.Before;
@@ -20,7 +22,7 @@ public class ReportDepositController extends Controller {
         }
     }
 
-    public static void list(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate) {
+    public static void list(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate, Integer bagId, Integer zId) {
         if (endDate == null) {
             endDate = new Date();
         }
@@ -28,7 +30,7 @@ public class ReportDepositController extends Controller {
             page = 1;
         }
         int length = 3;
-        long cnt = LgDeposit.count(startDate, endDate);
+        long cnt = LgDeposit.count(startDate, endDate, bagId, zId);
         renderArgs.put("cnt", cnt);
         Integer totalPage = (int) ((cnt + 1) / length);
         if (page > totalPage) {
@@ -37,9 +39,17 @@ public class ReportDepositController extends Controller {
         renderArgs.put("prevPage", page - 1);
         renderArgs.put("nextPage", page + 1);
 
-        List<LgDeposit> dList = LgDeposit.find(startDate, endDate).fetch(page, length);
+        List<LgDeposit> dList = LgDeposit.find(startDate, endDate, bagId, zId).fetch(page, length);
         renderArgs.put("startDate", startDate);
         renderArgs.put("endDate", endDate);
+        if ( bagId != null ) {
+            renderArgs.put("bag", LgBag.findById(bagId));
+        }
+        renderArgs.put("bagId", bagId);
+        if ( zId != null ) {
+            renderArgs.put("z", LgZ.findById(zId));
+        }
+        renderArgs.put("zId", zId);
         renderArgs.put("page", page);
         renderArgs.put("totalPage", totalPage);
         renderArgs.put("data", dList);
@@ -55,9 +65,9 @@ public class ReportDepositController extends Controller {
         render(d.getDetailView());
     }
 
-    public static void reprint(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate, Integer id) {
+    public static void reprint(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate, Integer bagId, Integer zId, Integer id) {
         LgDeposit d = LgDeposit.findById(id);
         d.print(DeviceFactory.getPrinter(), true);
-        list(page, startDate, endDate);
+        list(page, startDate, endDate, bagId, zId);
     }
 }
