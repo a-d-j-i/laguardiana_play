@@ -30,7 +30,7 @@ class EnvelopeDepositStoring extends ActionState {
         switch (m.getState()) {
             case NEUTRAL:
                 stateApi.closeDeposit();
-                if (Configuration.isIoBoardIgnore()) {
+                if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new Finish(stateApi));
                 } else {
                     stateApi.closeGate();

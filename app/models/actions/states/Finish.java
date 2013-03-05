@@ -40,6 +40,9 @@ public class Finish extends ActionState {
             // Was canceled is ok
             case CANCELING:
                 break;
+            // Ok, came here from previous state.
+            case PUT_THE_BILLS_ON_THE_HOPER:
+                break;
             default:
                 Logger.debug("Finish invalid state %s %s", m.name(), name());
                 break;

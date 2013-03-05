@@ -19,10 +19,17 @@ function showAlert( a ) {
     if ( current_alert == a ) {
         return;
     }
-    current_alert = a;
+    console.log( "showAlert start" + a );
     if ( current_overlay ) {
-        current_overlay.close();
+        /*        console.log( "close overlay 1 " + a + " " + current_alert );
+        current_overlay.close().onClose( function() {
+            console.log( "onClose overlay 1 " + a + " " + current_alert );
+            showAlert( a );
+        } );
+        current_alert = a;*/
+        return;
     }
+    current_alert = a;
     current_overlay = $( a ).overlay({
         top: 100,
         left: "center",
@@ -38,6 +45,7 @@ function showAlert( a ) {
         oneInstance: true
     });
     current_overlay = $( a ).overlay();
+    console.log( "load overlay" + a );
     current_overlay.load();
 /*    $( "#overlay_contents" ).html( $( a ).html() );
     $( a ).find( "a" ).each( function() {
@@ -54,9 +62,11 @@ function closeAlert( a ) {
     if ( current_alert != a ) {
         return;
     }
+    console.log( "close overlay 2 " + a + " " + current_alert );
     current_alert = undefined;
-    current_overlay.close();
-    current_overlay = undefined;
+    current_overlay.close().onClose( function(){
+        current_overlay = undefined;
+    });
 }
 
 /*function testAlert() {

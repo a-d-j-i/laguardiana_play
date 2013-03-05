@@ -29,6 +29,9 @@ public class Configuration {
     }
 
     public static boolean isIgnoreShutter() {
+        if (isIoBoardIgnore()) {
+            return true;
+        }
         return isProperty("io_board.ignore_shutter");
     }
 

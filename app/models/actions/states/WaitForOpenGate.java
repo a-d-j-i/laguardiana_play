@@ -4,6 +4,7 @@
  */
 package models.actions.states;
 
+import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
 import models.ModelError;
 import models.actions.UserAction.StateApi;
@@ -20,6 +21,12 @@ public class WaitForOpenGate extends ActionState {
     public WaitForOpenGate(StateApi stateApi, ActionState nextAction) {
         super(stateApi);
         this.nextAction = nextAction;
+    }
+
+    @Override
+    public void onGloryEvent(ManagerInterface.ManagerStatus m) {
+        // TODO: Save the event for later !!!.
+        super.onGloryEvent(m);
     }
 
     @Override

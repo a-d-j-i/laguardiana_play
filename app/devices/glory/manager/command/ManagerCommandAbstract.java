@@ -84,7 +84,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
     private AtomicBoolean mustCancel = new AtomicBoolean(false);
 
     public void cancel() {
-        Logger.debug("-------> SET CANCEL");
         mustCancel.set(true);
     }
 

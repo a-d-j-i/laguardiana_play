@@ -34,7 +34,7 @@ public class BillDepositReadyToStore extends ActionState {
     public void accept() {
         stateApi.cancelTimer();
         stateApi.addBatchToDeposit();
-        if (Configuration.isIoBoardIgnore()) {
+        if (Configuration.isIgnoreShutter()) {
             if (!stateApi.store()) {
                 Logger.error("startBillDeposit can't cancel glory");
             }

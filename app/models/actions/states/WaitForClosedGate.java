@@ -4,6 +4,7 @@
  */
 package models.actions.states;
 
+import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -24,6 +25,12 @@ public class WaitForClosedGate extends ActionState {
     @Override
     public String name() {
         return "STORING";
+    }
+
+    @Override
+    public void onGloryEvent(ManagerInterface.ManagerStatus m) {
+        // TODO: Save the event for later !!!.
+        super.onGloryEvent(m);
     }
 
     @Override

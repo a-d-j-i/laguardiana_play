@@ -171,9 +171,6 @@
                 } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
                 } else if ( status == 'JAM' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
-                    if ( lastStatus != status ) {
-                        showAlert( "#alerta_escrow_full" );
-                    }
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
@@ -186,7 +183,11 @@
                     alert( "Invalid status : " + status + " last status : " + lastStatus );
                 }
                 
-                
+                if ( status == 'ESCROW_FULL' ) {
+                    showAlert( "#alerta_escrow_full" );
+                } else {
+                    closeAlert( "#alerta_escrow_full" );
+                }
                 if ( status == 'TIMEOUT_WARNING' ) {
                     showAlert( "#alerta_timeout" );
                 } else {
@@ -270,12 +271,12 @@
     
     
     $( '#alerta_cancelButton' ).click( function(event) {
-        closeAlert( "#alerta_escrow_full" );
+        //closeAlert( "#alerta_escrow_full" );
         $.getJSON( '@{cancel()}', function( data ) {});
     });
     
     $( '#alerta_continueButton' ).click( function(event) {
-        closeAlert( "#alerta_escrow_full" );
+        //closeAlert( "#alerta_escrow_full" );
         if ( lastStatus == 'IDLE' || lastStatus == 'READY_TO_STORE' || lastStatus == 'STORING' || lastStatus == 'CONTINUE_DEPOSIT'  ) {
             // waiting the glory.
         } else if ( lastStatus == 'ESCROW_FULL' ) {

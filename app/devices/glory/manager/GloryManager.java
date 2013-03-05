@@ -190,11 +190,9 @@ public class GloryManager {
         public void cancelCommand() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd == null) {
-                Logger.debug("-----> CANCEL COMMAND");
                 managerControllerApi.sendCommand(new GotoNeutral(threadCommandApi));
                 return;
             }
-            Logger.debug("-----> CMD CANCEL");
             cmd.cancel();
         }
 

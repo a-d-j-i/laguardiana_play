@@ -188,17 +188,34 @@ abstract public class UserAction {
     abstract public void finish();
 
     public void onGloryEvent(ManagerStatus m) {
-        state.onGloryEvent(m);
+        ActionState currState = state;
+        do {
+            Logger.debug("Action : OnGloryEvent state %s currState %s event %s",
+                    state.getClass().getSimpleName(), currState.getClass().getSimpleName(), m.toString());
+            currState = state;
+            currState.onGloryEvent(m);
+        } while (state != currState);
     }
 
-    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        state.onIoBoardEvent(status);
+    public void onIoBoardEvent(IoBoard.IoBoardStatus s) {
+        ActionState currState = state;
+        do {
+            Logger.debug("Action : onIoBoardEvent state %s currState %s event %s",
+                    state.getClass().getSimpleName(), currState.getClass().getSimpleName(), s.toString());
+            currState = state;
+            currState.onIoBoardEvent(s);
+        } while (state != currState);
     }
 
-    public void onPrinterEvent(PrinterStatus status) {
-        state.onPrinterEvent(status);
+    public void onPrinterEvent(PrinterStatus p) {
+        ActionState currState = state;
+        do {
+            Logger.debug("Action : onIoBoardEvent state %s currState %s event %s",
+                    state.getClass().getSimpleName(), currState.getClass().getSimpleName(), p.toString());
+            currState = state;
+            state.onPrinterEvent(p);
+        } while (state != currState);
     }
-
 
     public void onTimeoutEvent(TimeoutTimer timer) {
         Date currentDate = new Date();
