@@ -74,22 +74,14 @@ public class CounterController extends Controller {
                     break;
             }
         }
-        renderArgs.put("mstatus", ModelFacade.getState());
-        renderArgs.put("merror", ModelFacade.getError());
-        renderArgs.put("gstatus", gstatus);
-        renderArgs.put("gerror", gerror);
-        renderArgs.put("ierror", ierror);
-
         if (request.isAjax()) {
-            Object[] o = new Object[3];
-            o[0] = gstatus.name();
-            if (gerror != null) {
-                o[1] = gerror.toString();
-            } else {
-                o[1] = "";
-            }
-            renderJSON(o);
+            renderJSON(ModelFacade.isError());
         } else {
+            renderArgs.put("mstatus", ModelFacade.getState());
+            renderArgs.put("merror", ModelFacade.getError());
+            renderArgs.put("gstatus", gstatus);
+            renderArgs.put("gerror", gerror);
+            renderArgs.put("ierror", ierror);
             renderArgs.put("isError", ModelFacade.isError());
             render();
         }

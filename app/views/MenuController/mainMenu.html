@@ -13,10 +13,12 @@
             #{/else}
 
             <div class="botonera">
-                <ul class="on-2 columns">
+                <ul class="on-2 unit">
                     #{menuButtons buttons: buttons, perms: perms, titles: titles/}
                 </ul>
             </div>
+            &{'application.bagTotals', totals._3, totals._2 }<br/>
+            &{'application.bagSpace', bagFreeSpace }<br/>
         </div>
         <hr />
         #{menuBottomButtons}

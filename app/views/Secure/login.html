@@ -32,7 +32,7 @@
         </div>
         <hr>
         <div class="botonera">
-            <ul class="on-2 columns">
+            <ul class="on-2 unit">
                 <li class="column">
                     <div class="columna">
                         &nbsp;
@@ -160,6 +160,8 @@
             if ( status == 'error' ) {
                 $( '#error_text' ).html( extra );
                 $( "#alerta" ).overlay().load();
+                $( '#username' ).val( "" ).focus();
+                $( '#password' ).val( "" );
             } else if ( status == 'success' ) { 
                 #{if ( play.configuration[ 'secure.wellcomePopup' ] ) }
                 $( '#info_text' ).html( data[ 2 ] + "<br> " + data [ 3 ] );

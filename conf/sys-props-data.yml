@@ -47,7 +47,7 @@
     name:  "max_bills_per_bag"
     value:  "15000"
      
-  db.LgSystemProperty(maxEnvelopesPerBag):
-    name:  "max_envelopes_per_bag"
-    value:  "150"
+  db.LgSystemProperty(envelopeBillEquivalency):
+    name:  "envelope_bill_equivalency"
+    value:  "50"
     

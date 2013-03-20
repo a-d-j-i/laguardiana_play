@@ -151,7 +151,13 @@ public class ModelFacade {
                          }*/
                         break;
                     case BAG_APROVE_WAIT:
+                        break;
                     case BAG_APROVED:
+                        // Bag aproved, recover from error.
+                        if (modelError.getErrorCode() == ModelError.ERROR_CODE.BAG_NOT_INPLACE) {
+                            errorReset();
+                            //clearError();
+                        }
                         break;
                     case BAG_APROVE_CONFIRM:
                         LgBag.rotateBag(true);
@@ -163,11 +169,10 @@ public class ModelFacade {
                 }
             }
 
-            if (!isIoBoardOk(status)) {
-                return;
-            }
-
             if (u != null) {
+                if (!isIoBoardOk(status)) {
+                    return;
+                }
                 u.onIoBoardEvent(status);
             }
 
@@ -250,12 +255,6 @@ public class ModelFacade {
             finishAction();
         }
 
-        public void clearError() {
-            // Todo Put int the ResetAction if needed.
-            ioBoard.clearError();
-            ModelFacade.clearError();
-        }
-
         public void openGate() {
             ioBoard.openGate();
         }
@@ -302,14 +301,8 @@ public class ModelFacade {
         }
         LgBag currentBag = LgBag.getCurrentBag();
         F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> totals = currentBag.getTotals();
-        // bills  + 50 * envelopes
-        long billEquvalent = totals._3 + (50 * totals._1);
-        if (billEquvalent > Configuration.maxBillsPerBag()) {
+        if (Configuration.isBagFull(totals._3, totals._2)) {
             modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
-            return;
-        }
-        if (totals._1 > Configuration.maxEnvelopesPerBag()) {
-            modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many envelopes");
             return;
         }
         currentUser = Secure.getCurrentUser();
@@ -469,6 +462,12 @@ public class ModelFacade {
             if (status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
                 modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
                 return false;
+//            } else {
+//                // Bag aproved, recover from error.
+//                if (modelError.getErrorCode() == ModelError.ERROR_CODE.BAG_NOT_INPLACE) {
+//                    errorReset();
+//                    //clearError();
+//                }
             }
             if (!Configuration.isIgnoreShutter()
                     && status.getShutterState() != IoBoard.SHUTTER_STATE.SHUTTER_OPEN) {

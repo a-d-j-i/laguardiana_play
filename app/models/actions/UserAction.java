@@ -135,10 +135,6 @@ abstract public class UserAction {
             userActionApi.setError(errorCode, detail);
         }
 
-        public void clearError() {
-            userActionApi.clearError();
-        }
-
         public void openGate() {
             userActionApi.openGate();
         }

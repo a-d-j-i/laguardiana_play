@@ -138,8 +138,8 @@ public class IoBoard {
         private Byte B = 0;
         private Byte C = 0;
         private Byte D = 0;
-        private Byte bagStatus = 0;
-        private boolean isRunning;
+//        private Byte bagStatus = 0;
+//        private boolean isRunning;
         private IoBoardError error = null;
         private BAG_STATE bagState = null;
         private SHUTTER_STATE shutterState = null;
@@ -194,7 +194,7 @@ public class IoBoard {
             this.B = B;
             this.C = C;
             this.D = D;
-            this.bagStatus = BAG;
+            //this.bagStatus = BAG;
         }
 
         synchronized private void setError(IoBoardError error) {
@@ -205,6 +205,8 @@ public class IoBoard {
 
         synchronized private void setAproveBagState(BAG_APROVE_STATE state) {
             this.bagAproveState = state;
+            setChanged();
+            notifyObservers(new IoBoardStatus(this));
         }
 
         synchronized public void clearError() {
@@ -248,7 +250,7 @@ public class IoBoard {
         }
     }
     public static final int IOBOARD_READ_TIMEOUT = 10000;
-    public static final int IOBOARD_STATUS_CHECK_FREQ = 2000;
+    public static final int IOBOARD_STATUS_CHECK_FREQ = 500;
     public static final int IOBOARD_MAX_RETRIES = 5;
     final private State state = new State();
 

@@ -1,5 +1,12 @@
 package controllers;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,8 +23,10 @@ import models.db.LgEvent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
+import play.exceptions.UnexpectedException;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Http;
 
 public class ReportController extends Controller {
 
@@ -54,7 +63,7 @@ public class ReportController extends Controller {
 
         private EnvelopeContentData(LgEnvelopeContent c) {
             this.type = LgEnvelopeContent.EnvelopeContentType.find(c.contentTypeLov).name();
-            this.amount = c.amount;
+            this.amount = new Double(c.amount);
             if (c.unitLov == null) {
                 this.currency = "-";
             } else {
@@ -411,5 +420,29 @@ public class ReportController extends Controller {
         } else {
             renderHtml(stat ? "DONE" : "ERROR");
         }
+    }
+
+    protected static void renderXml(Object o) {
+        XStream xStream = new XStream();
+        xStream.registerConverter(new Converter() {
+            public boolean canConvert(Class clazz) {
+                return clazz.equals(Double.class);
+            }
+
+            public void marshal(Object value, HierarchicalStreamWriter writer,
+                    MarshallingContext context) {
+                DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance();
+                df.setMaximumFractionDigits(1000);
+                df.setMaximumIntegerDigits(1000);
+                df.setGroupingUsed(false);
+                writer.setValue(df.format((Double) value));
+            }
+
+            public Object unmarshal(HierarchicalStreamReader reader,
+                    UnmarshallingContext context) {
+                return null;
+            }
+        });
+        renderXml(o, xStream);
     }
 }

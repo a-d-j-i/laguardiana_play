@@ -104,7 +104,7 @@ public class Configuration {
         return false;
     }
 
-    static long maxBillsPerBag() {
+    static public long maxBillsPerBag() {
         String d = LgSystemProperty.getProperty(LgSystemProperty.Types.MAX_BILLS_PER_BAG);
         if (d == null) {
             d = Play.configuration.getProperty("glory.maxBillsPerBag");
@@ -115,14 +115,22 @@ public class Configuration {
         return Long.parseLong(d);
     }
 
-    static long maxEnvelopesPerBag() {
-        String d = LgSystemProperty.getProperty(LgSystemProperty.Types.MAX_ENVELOPES_PER_BAG);
+    static public long envelopeBillEquivalency() {
+        String d = LgSystemProperty.getProperty(LgSystemProperty.Types.ENVELOPE_BILL_EQUIVALENCY);
         if (d == null) {
-            d = Play.configuration.getProperty("glory.maxEnvelopesPerBag");
+            d = Play.configuration.getProperty("glory.envelopeBillEquivalency");
         }
         if (d == null) {
-            return 1000;
+            return 50;
         }
         return Long.parseLong(d);
+    }
+
+    static public long equivalentBillQuantity(Long billQuantity, Long envelopeQuantity) {
+        return billQuantity + (Configuration.envelopeBillEquivalency() * envelopeQuantity);
+    }
+
+    static public boolean isBagFull(Long billQuantity, Long envelopeQuantity) {
+        return (equivalentBillQuantity(billQuantity, envelopeQuantity) > Configuration.maxBillsPerBag());
     }
 }
