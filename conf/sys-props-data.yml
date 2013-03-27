@@ -50,4 +50,8 @@
   db.LgSystemProperty(envelopeBillEquivalency):
     name:  "envelope_bill_equivalency"
     value:  "50"
+         
+  db.LgSystemProperty(withdrawUser):
+    name:  "withdraw_user"
+    value:  "123"
     

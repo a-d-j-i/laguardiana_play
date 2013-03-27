@@ -181,6 +181,7 @@ public class Printer extends Observable {
         // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
         if (port == null || !printers.containsKey(port)) {
             sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", port == null ? "NULL" : port)));
+            return;
         }
         PrintService p = printers.get(port);
 

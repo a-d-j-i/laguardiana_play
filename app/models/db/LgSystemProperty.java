@@ -17,7 +17,8 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
         PROVIDER_DESCRIPTION,
         BRANCH_CODE,
         MAX_BILLS_PER_BAG,
-        ENVELOPE_BILL_EQUIVALENCY;
+        ENVELOPE_BILL_EQUIVALENCY,
+        WITHDRAW_USER;
 
         public String getTypeName() {
             return name().toLowerCase();

@@ -23,10 +23,8 @@ import models.db.LgEvent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
-import play.exceptions.UnexpectedException;
 import play.mvc.Before;
 import play.mvc.Controller;
-import play.mvc.Http;
 
 public class ReportController extends Controller {
 
@@ -185,11 +183,13 @@ public class ReportController extends Controller {
         public Integer bagId;
         public Date creationDate;
         public Date withdrawDate;
+        public final String userId;
 
         private BagData(LgBag b) {
             this.bagId = b.bagId;
             this.creationDate = b.creationDate;
             this.withdrawDate = b.withdrawDate;
+            this.userId = b.withdrawUser;
         }
     }
 

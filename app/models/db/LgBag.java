@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
+import models.Configuration;
+import models.User;
 import models.events.BagEvent;
 import models.lov.Currency;
 import play.Logger;
@@ -33,10 +35,17 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public Date withdrawDate;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "bag")
     public Set<LgDeposit> deposits = new HashSet<LgDeposit>(0);
+    @Transient
+    transient public String withdrawUser;
 
     public LgBag(String bagCode) {
         this.bagCode = bagCode;
         this.creationDate = new Date();
+    }
+
+    @PostLoad
+    public void postLoad() {
+        this.withdrawUser = Configuration.getWithdrawUser();
     }
 
     public static long count(Date start, Date end) {

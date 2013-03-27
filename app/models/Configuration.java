@@ -133,4 +133,8 @@ public class Configuration {
     static public boolean isBagFull(Long billQuantity, Long envelopeQuantity) {
         return (equivalentBillQuantity(billQuantity, envelopeQuantity) > Configuration.maxBillsPerBag());
     }
+
+    public static String getWithdrawUser() {
+        return LgSystemProperty.getProperty(LgSystemProperty.Types.WITHDRAW_USER);
+    }
 }
