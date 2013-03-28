@@ -101,7 +101,7 @@ counting.ready_to_store=Coloque mas billetes.
 counting.escrow_full=Retire los billetes de la maquina para continuar.
 
 counting_page.put_the_bills_on_the_hoper=Coloque los billetes en la maquina
-counting_page.remove_the_bills_from_escrow=Retire los billetes de la maquina.
+counting_page.remove_the_bills_from_escrow=Retire los objetos del interior de la maquina.
 counting_page.remove_the_bills_from_hoper=Retire los billetes de la parte superior de la maquina.
 counting_page.remove_rejected_bills=Retire los billetes rechazados.
 counting_page.storing=Depositando.
