@@ -7,6 +7,7 @@ package models.actions.states;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.PrinterStatus;
+import models.ModelError;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -41,12 +42,13 @@ abstract public class ActionState {
         Logger.error("ActionState accept Invalid step %s", name());
     }
 
-    public void onGloryEvent(ManagerStatus m) {
-        Logger.error("ActionState invalid onGloryEvent %s %s", m.name(), name());
-    }
+    abstract public void onGloryEvent(ManagerStatus m);
 
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        Logger.error("ActionState invalid onIoBoardEvent %s", status.toString());
+        if (status.getShutterState() != IoBoard.SHUTTER_STATE.SHUTTER_CLOSED) {
+            stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_CLOSED,
+                    String.format("ActionState shutter open %s %s", status.getShutterState().name(), name()));
+        }
     }
 
     public void onPrinterEvent(PrinterStatus status) {

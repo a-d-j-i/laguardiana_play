@@ -105,9 +105,13 @@ abstract public class UserAction {
         public void closeBatch() {
             if (currentBatchId != null) {
                 LgBatch b = LgBatch.findById(currentBatchId);
-                if (b.finishDate == null) {
-                    b.finishDate = new Date();
-                    b.save();
+                if (b == null) {
+                    Logger.error("current batch is null, batch id %d", currentBatchId);
+                } else {
+                    if (b.finishDate == null) {
+                        b.finishDate = new Date();
+                        b.save();
+                    }
                 }
             }
         }

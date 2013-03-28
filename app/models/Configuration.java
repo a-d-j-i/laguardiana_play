@@ -35,6 +35,13 @@ public class Configuration {
         return isProperty("io_board.ignore_shutter");
     }
 
+    public static boolean isIgnoreBag() {
+        if (isIoBoardIgnore()) {
+            return true;
+        }
+        return isProperty("io_board.ignore_bag");
+    }
+
     public static boolean isGloryIgnore() {
         return isProperty("glory.ignore") && Play.mode.isDev();
     }

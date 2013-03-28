@@ -164,7 +164,9 @@ public class ModelFacade {
                         ioBoard.aproveBagConfirm();
                         break;
                 }
-                if (u != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+                if (u != null
+                        && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED
+                        && !Configuration.isIgnoreBag()) {
                     modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag rotated during deposit");
                 }
             }
@@ -459,19 +461,9 @@ public class ModelFacade {
                 modelError.setError(status.getError());
                 return false;
             }
-            if (status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+            if (!Configuration.isIgnoreBag()
+                    && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
                 modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-                return false;
-//            } else {
-//                // Bag aproved, recover from error.
-//                if (modelError.getErrorCode() == ModelError.ERROR_CODE.BAG_NOT_INPLACE) {
-//                    errorReset();
-//                    //clearError();
-//                }
-            }
-            if (!Configuration.isIgnoreShutter()
-                    && status.getShutterState() != IoBoard.SHUTTER_STATE.SHUTTER_OPEN) {
-                modelError.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPEN, "shutter is not open");
                 return false;
             }
         }

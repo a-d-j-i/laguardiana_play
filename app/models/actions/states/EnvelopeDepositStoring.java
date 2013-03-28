@@ -5,7 +5,9 @@
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface.ManagerStatus;
+import devices.ioboard.IoBoard;
 import models.Configuration;
+import models.ModelError;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -25,7 +27,7 @@ class EnvelopeDepositStoring extends ActionState {
     }
 
     @Override
-        public void onGloryEvent(ManagerStatus m) {
+    public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case NEUTRAL:
@@ -42,6 +44,20 @@ class EnvelopeDepositStoring extends ActionState {
                 break;
             default:
                 Logger.debug("StoringEnvelopeDeposit invalid state %s %s", m.name(), name());
+                break;
+        }
+    }
+
+    @Override
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
+        switch (status.getShutterState()) {
+            case SHUTTER_OPEN:
+                break;
+            case SHUTTER_CLOSED:
+                stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPENING, "WaitForGate shutter closed");
+                break;
+            default:
+                Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name(), name());
                 break;
         }
     }

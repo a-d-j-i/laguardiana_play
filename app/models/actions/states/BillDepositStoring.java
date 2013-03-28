@@ -5,7 +5,9 @@
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface.ManagerStatus;
+import devices.ioboard.IoBoard;
 import models.Configuration;
+import models.ModelError;
 import models.actions.UserAction;
 import play.Logger;
 
@@ -57,6 +59,20 @@ public class BillDepositStoring extends ActionState {
                 break;
             default:
                 Logger.debug("StoringBillDeposit invalid state %s %s", m.name(), name());
+                break;
+        }
+    }
+
+    @Override
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
+        switch (status.getShutterState()) {
+            case SHUTTER_OPEN:
+                break;
+            case SHUTTER_CLOSED:
+                stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPENING, "WaitForGate shutter closed");
+                break;
+            default:
+                Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name(), name());
                 break;
         }
     }

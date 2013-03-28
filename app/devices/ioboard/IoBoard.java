@@ -384,6 +384,10 @@ public class IoBoard {
         return new IoBoardStatus(state);
     }
 
+    public State getInternalState() {
+        return state;
+    }
+
     public void startStatusThread() {
         Logger.debug("IoBoard status thread start");
         statusThread.start();

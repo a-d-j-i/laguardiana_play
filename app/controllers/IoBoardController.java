@@ -1,7 +1,7 @@
 package controllers;
 
 import devices.DeviceFactory;
-import devices.ioboard.IoBoard.IoBoardStatus;
+import devices.ioboard.IoBoard;
 import java.io.IOException;
 import play.Play;
 import play.mvc.Before;
@@ -26,10 +26,7 @@ public class IoBoardController extends Application {
             renderArgs.put("error", error);
             render();
         }
-        IoBoardStatus s = ioBoard.getStatus();
-        if (s != null) {
-            renderArgs.put("status", s);
-        }
+        renderArgs.put("status", ioBoard.getInternalState());
         render();
     }
 

@@ -25,8 +25,7 @@ public class WaitForOpenGate extends ActionState {
 
     @Override
     public void onGloryEvent(ManagerInterface.ManagerStatus m) {
-        // TODO: Save the event for later !!!.
-        super.onGloryEvent(m);
+        Logger.error("ActionState invalid onGloryEvent %s", m.toString());
     }
 
     @Override
@@ -39,7 +38,7 @@ public class WaitForOpenGate extends ActionState {
                 stateApi.setState(nextAction);
                 break;
             case SHUTTER_CLOSED:
-                stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPEN, "WaitForGate shutter closed");
+                stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPENING, "WaitForGate shutter closed");
                 break;
             default:
                 Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name(), name());
