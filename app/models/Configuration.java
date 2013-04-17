@@ -144,4 +144,44 @@ public class Configuration {
     public static String getWithdrawUser() {
         return LgSystemProperty.getProperty(LgSystemProperty.Types.WITHDRAW_USER);
     }
+
+    public static int getBagPrintLen() {
+        try {
+            return Integer.parseInt(Play.configuration.getProperty("print.bagLen"));
+        } catch (NumberFormatException e) {
+            return 220;
+        }
+    }
+
+    public static int getZPrintLen() {
+        try {
+            return Integer.parseInt(Play.configuration.getProperty("print.zLen"));
+        } catch (NumberFormatException e) {
+            return 220;
+        }
+    }
+
+    static int getBillDepositPrintLen() {
+        try {
+            return Integer.parseInt(Play.configuration.getProperty("print.billDepositLen"));
+        } catch (NumberFormatException e) {
+            return 220;
+        }
+    }
+
+    static int getEvelopeFinishPrintLen() {
+        try {
+            return Integer.parseInt(Play.configuration.getProperty("print.envelopeFinishLen"));
+        } catch (NumberFormatException e) {
+            return 220;
+        }
+    }
+
+    static int getEvenlopeStartPrintLen() {
+        try {
+            return Integer.parseInt(Play.configuration.getProperty("print.envelopeStartLen"));
+        } catch (NumberFormatException e) {
+            return 220;
+        }
+    }
 }

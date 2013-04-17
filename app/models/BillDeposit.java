@@ -70,6 +70,6 @@ public class BillDeposit extends LgDeposit {
         if (reprint) {
             args.put("reprint", "true");
         }
-        p.print("PrinterController/billDeposit.html", args, 200);
+        p.print("PrinterController/billDeposit.html", args, Configuration.getBillDepositPrintLen());
     }
 }
