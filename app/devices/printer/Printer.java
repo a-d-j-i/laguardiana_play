@@ -191,15 +191,15 @@ public class Printer extends Observable {
         EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
 
         if (!Configuration.isPrinterTest()) {
-            try {
-                DocPrintJob printJob = p.createPrintJob();
-                Doc docc = new SimpleDoc(pnl, DocFlavor.SERVICE_FORMATTED.PRINTABLE, null);
-                printJob.addPrintJobListener(new MyPrintListener());
-                printJob.print(docc, null);
-                //            pnl.print(p);
-            } catch (PrintException ex) {
-                sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
-            }
+//            try {
+            DocPrintJob printJob = p.createPrintJob();
+//                Doc docc = new SimpleDoc(pnl, DocFlavor.SERVICE_FORMATTED.PRINTABLE, null);
+            printJob.addPrintJobListener(new MyPrintListener());
+//                printJob.print(docc, null);
+            pnl.print(p);
+//            } catch (PrintException ex) {
+//                sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
+//            }
         } else {
             JFrame frame = new JFrame("Main print frame");
             pnl.setBackground(Color.black);
