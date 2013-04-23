@@ -72,12 +72,20 @@ public class Configuration {
         }
     }
 
-    public static Boolean mustShowReference1() {
+    public static Boolean mustShowBillDepositReference1() {
         return LgSystemProperty.isProperty("bill_deposit.show_reference1");
     }
 
-    public static Boolean mustShowReference2() {
+    public static Boolean mustShowBillDepositReference2() {
         return LgSystemProperty.isProperty("bill_deposit.show_reference2");
+    }
+
+    public static Boolean mustShowEnvelopeDepositReference1() {
+        return LgSystemProperty.isProperty("envelope_deposit.show_reference1");
+    }
+
+    public static Boolean mustShowEnvelopeDepositReference2() {
+        return LgSystemProperty.isProperty("envelope_deposit.show_reference2");
     }
 
     public static String getClientCode() {

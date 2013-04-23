@@ -13,18 +13,18 @@ import play.data.validation.Check;
  *
  * @author adji
  */
-public class FormDepositUserCodeReference {
+public class FormDepositUserCodeBillReference {
 
     static public class Validate extends Check {
 
         @Override
         public boolean isSatisfied(Object validatedObject, Object data) {
-            return isSatisfied(validatedObject, (FormDepositUserCodeReference) data);
+            return isSatisfied(validatedObject, (FormDepositUserCodeEnvelopeReference) data);
         }
 
-        public boolean isSatisfied(Object validatedObject, FormDepositUserCodeReference data) {
+        public boolean isSatisfied(Object validatedObject, FormDepositUserCodeBillReference data) {
             try {
-                if (!Configuration.mustShowReference1()) {
+                if (!Configuration.mustShowBillDepositReference1()) {
                     return true;
                 }
                 if (data == null || data.value == null || data.value.isEmpty()) {

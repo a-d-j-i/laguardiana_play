@@ -61,7 +61,11 @@ public class ReportController extends Controller {
 
         private EnvelopeContentData(LgEnvelopeContent c) {
             this.type = LgEnvelopeContent.EnvelopeContentType.find(c.contentTypeLov).name();
-            this.amount = new Double(c.amount);
+            if (c.amount != null) {
+                this.amount = new Double(c.amount);
+            } else {
+                this.amount = new Double(0);
+            }
             if (c.unitLov == null) {
                 this.currency = "-";
             } else {

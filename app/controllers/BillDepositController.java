@@ -17,7 +17,8 @@ import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Router;
 import validation.FormCurrency;
-import validation.FormDepositUserCodeReference;
+import validation.FormDepositUserCodeBillReference;
+import validation.FormDepositUserCodeEnvelopeReference;
 
 public class BillDepositController extends CounterController {
 
@@ -44,10 +45,10 @@ public class BillDepositController extends CounterController {
 
     static public class FormData {
 
-        final public Boolean showReference1 = Configuration.mustShowReference1();
-        final public Boolean showReference2 = Configuration.mustShowReference2();
-        @CheckWith(FormDepositUserCodeReference.Validate.class)
-        public FormDepositUserCodeReference reference1 = new FormDepositUserCodeReference();
+        final public Boolean showReference1 = Configuration.mustShowBillDepositReference1();
+        final public Boolean showReference2 = Configuration.mustShowBillDepositReference2();
+        @CheckWith(FormDepositUserCodeBillReference.Validate.class)
+        public FormDepositUserCodeBillReference reference1 = new FormDepositUserCodeBillReference();
         //@Required(message = "validation.required.reference2")
         public String reference2 = null;
         @CheckWith(FormCurrency.Validate.class)
@@ -64,8 +65,8 @@ public class BillDepositController extends CounterController {
         List<Currency> currencies = Currency.findAll();
 
         if (currencies.size() == 1
-                && (referenceCodes.size() <= 1 || !Configuration.mustShowReference1())
-                && !Configuration.mustShowReference2()) {
+                && (referenceCodes.size() <= 1 || !Configuration.mustShowBillDepositReference1())
+                && !Configuration.mustShowBillDepositReference2()) {
             // Nothing to complete, navigte to next step
             formData = new FormData();
             formData.currency = new FormCurrency(currencies.get(0));
@@ -113,8 +114,7 @@ public class BillDepositController extends CounterController {
             renderJSON(o);
         } else {
             List<Bill> bls = ModelFacade.getCurrentCounters();
-            long currentTotalSum = 0;
-            currentTotalSum = totalSum;
+            long currentTotalSum = totalSum;
             for (Bill b : bls) {
                 currentTotalSum += (b.d * b.q);
             }

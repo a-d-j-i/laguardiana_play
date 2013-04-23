@@ -161,6 +161,7 @@ validation.required.envelopeCode=campo obligatorio
 validation.required.cashData_amount=campo obligatorio
 validation.required.checkData_amount=campo obligatorio
 validation.required.ticketData_amount=campo obligatorio
+validation.atleastone=debe elegir al menos un contenido
 
 filter.choose_denomination=Elija la denominacion
 

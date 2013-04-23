@@ -22,7 +22,7 @@ import play.mvc.Before;
 import play.mvc.Router;
 import play.mvc.With;
 import validation.FormCurrency;
-import validation.FormDepositUserCodeReference;
+import validation.FormDepositUserCodeEnvelopeReference;
 
 @With(Secure.class)
 public class EnvelopeDepositController extends CounterController {
@@ -77,10 +77,10 @@ public class EnvelopeDepositController extends CounterController {
 
     static public class FormData {
 
-        final public Boolean showReference1 = Configuration.mustShowReference1();
-        final public Boolean showReference2 = Configuration.mustShowReference2();
-        @CheckWith(FormDepositUserCodeReference.Validate.class)
-        public FormDepositUserCodeReference reference1 = new FormDepositUserCodeReference();
+        final public Boolean showReference1 = Configuration.mustShowEnvelopeDepositReference1();
+        final public Boolean showReference2 = Configuration.mustShowEnvelopeDepositReference2();
+        @CheckWith(FormDepositUserCodeEnvelopeReference.Validate.class)
+        public FormDepositUserCodeEnvelopeReference reference1 = new FormDepositUserCodeEnvelopeReference();
         //@Required(message = "validation.required.reference2")
         public String reference2 = null;
         @Required(message = "validation.required.envelopeCode")
