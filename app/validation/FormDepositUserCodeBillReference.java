@@ -19,7 +19,7 @@ public class FormDepositUserCodeBillReference {
 
         @Override
         public boolean isSatisfied(Object validatedObject, Object data) {
-            return isSatisfied(validatedObject, (FormDepositUserCodeEnvelopeReference) data);
+            return isSatisfied(validatedObject, (FormDepositUserCodeBillReference) data);
         }
 
         public boolean isSatisfied(Object validatedObject, FormDepositUserCodeBillReference data) {

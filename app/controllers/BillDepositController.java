@@ -18,7 +18,6 @@ import play.mvc.Before;
 import play.mvc.Router;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeBillReference;
-import validation.FormDepositUserCodeEnvelopeReference;
 
 public class BillDepositController extends CounterController {
 
