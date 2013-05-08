@@ -25,7 +25,6 @@ import models.events.IoBoardEvent;
 import models.events.PrinterEvent;
 import models.lov.Currency;
 import play.Logger;
-import play.Play;
 import play.jobs.Job;
 import play.libs.F;
 import play.libs.F.Promise;
@@ -197,9 +196,11 @@ public class ModelFacade {
             }
             PrinterEvent.save(u, status.toString());
             if (status.isError()) {
-                // A development option
-                Logger.error("Setting printer error : %s", status.toString());
-                modelError.setError(status);
+                if (!Configuration.isPrinterIgnore()) {
+                    // A development option
+                    Logger.error("Setting printer error : %s", status.toString());
+                    modelError.setError(status);
+                }
                 return;
             }
             if (u != null) {
@@ -330,7 +331,7 @@ public class ModelFacade {
             return null;
         }
         if (manager.getStatus().getState() == ManagerInterface.MANAGER_STATE.ERROR) {
-            if (Play.configuration.getProperty("glory.ignore") == null) {
+            if (!Configuration.isGloryIgnore()) {
                 modelError.setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
             }
         }

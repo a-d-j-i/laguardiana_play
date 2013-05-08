@@ -46,6 +46,11 @@ public class Configuration {
         return isProperty("glory.ignore") && Play.mode.isDev();
     }
 
+    static boolean isPrinterIgnore() {
+        return isProperty("printer.ignore") && Play.mode.isDev();
+
+    }
+
     public static String getProviderDescription() {
         String pc = LgSystemProperty.getProperty(LgSystemProperty.Types.PROVIDER_DESCRIPTION);
         if (pc == null || pc.isEmpty()) {
