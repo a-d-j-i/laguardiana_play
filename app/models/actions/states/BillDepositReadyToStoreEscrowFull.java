@@ -39,10 +39,10 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
             if (!stateApi.store()) {
                 Logger.error("startBillDeposit can't cancel glory");
             }
-            stateApi.setState(new BillDepositStoring(stateApi));
+            stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
         } else {
             stateApi.openGate();
-            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoring(stateApi)));
+            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
         }
     }
 

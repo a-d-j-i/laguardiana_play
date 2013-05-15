@@ -58,7 +58,7 @@ public class BillDepositStoring extends ActionState {
             case STORING:
                 break;
             default:
-                Logger.debug("StoringBillDeposit invalid state %s %s", m.name(), name());
+                Logger.debug("BillDepositStoring invalid state %s %s", m.name(), name());
                 break;
         }
     }

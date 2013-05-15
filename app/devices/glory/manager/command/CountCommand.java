@@ -102,6 +102,8 @@ public class CountCommand extends ManagerCommandAbstract {
 
     @Override
     public void run() {
+        boolean fakeCount = false;
+
         if (!gotoNeutral(false, false)) {
             return;
         }
@@ -192,10 +194,12 @@ public class CountCommand extends ManagerCommandAbstract {
                     break;
 
                 case counting:
-                    setState(ManagerInterface.MANAGER_STATE.COUNTING);
-                    // The second time after storing.
-                    // Ignore error.
-                    refreshQuantity();
+                    if (!fakeCount) {
+                        setState(ManagerInterface.MANAGER_STATE.COUNTING);
+                        // The second time after storing.
+                        // Ignore error.
+                        refreshQuantity();
+                    }
                     break;
                 case waiting:
                     if (!refreshQuantity()) {
@@ -209,9 +213,11 @@ public class CountCommand extends ManagerCommandAbstract {
                     }
                     break;
                 case being_store:
+                    fakeCount = true;
                     countData.storeDepositDone();
                     break;
                 case counting_start_request:
+                    fakeCount = false;
                     countData.withdrawDepositDone();
                     if (!countData.needToStoreDeposit()) {
                         // If there are bills in the hoper then it comes here after storing a full escrow
