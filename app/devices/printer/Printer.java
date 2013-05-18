@@ -18,13 +18,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
-import javax.print.Doc;
-import javax.print.DocFlavor;
 import javax.print.DocPrintJob;
-import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
-import javax.print.SimpleDoc;
 import javax.print.attribute.Attribute;
 import javax.print.attribute.DocAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
@@ -179,9 +175,13 @@ public class Printer extends Observable {
          }
          */
         // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
-        if (port == null || !printers.containsKey(port)) {
-            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", port == null ? "NULL" : port)));
-            return;
+        if (!Configuration.isPrinterTest()) {
+            if (port == null || !printers.containsKey(port)) {
+                if (!Configuration.isIgnorePrinter()) {
+                    sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", port == null ? "NULL" : port)));
+                }
+                return;
+            }
         }
         PrintService p = printers.get(port);
 
@@ -189,7 +189,7 @@ public class Printer extends Observable {
         pp.setImageableArea(0, 0, PAGE_WIDTH * MM, paperLen * MM);
         pp.setSize(PAGE_WIDTH * MM, paperLen * MM);
         EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
-
+        Logger.debug(" 0----123ajsdklasd-=----------");
         if (!Configuration.isPrinterTest()) {
 //            try {
             DocPrintJob printJob = p.createPrintJob();

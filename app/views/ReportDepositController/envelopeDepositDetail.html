@@ -7,8 +7,8 @@
             <ul class="columns">
                 <li class="column">
                     <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
-                    #{if ( deposit.findUserCodeLov() ) }
-                    <p>&{ 'counting_page.reference1_title' }: ${deposit.findUserCodeLov()}</p>
+                    #{if ( deposit.findUserCode() ) }
+                    <p>&{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}</p>
                     #{/if}
                     #{if ( deposit.userCode ) }
                     <p>&{ 'counting_page.reference2_title' }: ${deposit.userCode}</p>

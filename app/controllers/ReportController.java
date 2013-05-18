@@ -187,13 +187,13 @@ public class ReportController extends Controller {
         public Integer bagId;
         public Date creationDate;
         public Date withdrawDate;
-        public final String userId;
+        public final String user_Id;
 
         private BagData(LgBag b) {
             this.bagId = b.bagId;
             this.creationDate = b.creationDate;
             this.withdrawDate = b.withdrawDate;
-            this.userId = b.withdrawUser;
+            this.user_Id = b.withdrawUser;
         }
     }
 

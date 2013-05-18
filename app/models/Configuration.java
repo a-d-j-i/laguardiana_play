@@ -20,6 +20,10 @@ public class Configuration {
         return isProperty("printer.test");
     }
 
+    public static boolean isIgnorePrinter() {
+        return isProperty("printer.ignore");
+    }
+
     public static boolean dontAskForPassword() {
         return isProperty("secure.dontAskForPassword");
     }
@@ -107,6 +111,11 @@ public class Configuration {
 
     public static String getMachineDescription() {
         return LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
+    }
+
+    public static boolean isUseUserCode() {
+        return isProperty("style.useUserCode");
+      
     }
 
     public static boolean isAllAlowed() {
@@ -197,4 +206,5 @@ public class Configuration {
             return 220;
         }
     }
+
 }

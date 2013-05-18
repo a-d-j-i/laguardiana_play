@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
 import models.BillDeposit;
+import models.Configuration;
 import models.EnvelopeDeposit;
 import models.db.LgLov.LovCol;
 import models.events.DepositEvent;
@@ -154,11 +155,22 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         return ret;
     }
 
-    public LgLov findUserCodeLov() {
-        if (userCodeLov == null) {
-            return null;
+    public String findUserCode() {
+        if (Configuration.isUseUserCode()) {
+            if (userCodeLov == null) {
+                return null;
+            }
+            DepositUserCodeReference d = DepositUserCodeReference.findByNumericId(userCodeLov);
+            if (d == null) {
+                return null;
+            }
+            return d.description;
+        } else {
+            if (user == null) {
+                return null;
+            }
+            return user.gecos;
         }
-        return DepositUserCodeReference.findByNumericId(userCodeLov);
     }
 
     @Override
