@@ -309,8 +309,6 @@
         
       
         $("#mainForm").bind("step_shown", function(event, data) {
-            Elastic.refresh();
-    
             if (data.currentStep == 'second') {
                 validateAndCheck();
             } else if ( data.currentStep == 'envelope_code') {
@@ -320,7 +318,7 @@
             if ( data.currentStep != 'cash' && data.currentStep != 'checks' && data.currentStep != 'tickets' ) {
                 $("#cancelButton").show();
             }
-    
+            Elastic.refresh();    
         });
         $( '#cash_link' ).click( function(event) {
             $("#cancelButton").hide();
