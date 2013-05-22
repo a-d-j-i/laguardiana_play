@@ -1,0 +1,9 @@
+#{if ( _user ) }
+    #{if play.Play.configuration.get( "style.useGecosAsUsername" ) == 'true' }
+        ${_user.gecos}
+    #{/if}
+    #{else}
+        ${_user.username}
+    #{/else}
+#{/if}
+
