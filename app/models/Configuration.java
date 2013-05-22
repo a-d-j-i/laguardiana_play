@@ -113,11 +113,6 @@ public class Configuration {
         return LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
     }
 
-    public static boolean isUseUserCode() {
-        return isProperty("style.useUserCode");
-      
-    }
-
     public static boolean isAllAlowed() {
         return isProperty("secure.allowAll");
     }
@@ -206,5 +201,4 @@ public class Configuration {
             return 220;
         }
     }
-
 }

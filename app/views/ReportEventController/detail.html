@@ -2,7 +2,7 @@
 #{set title: 'current Event totals' /}
 Transaccion : ${event.eventId} <br>
 Fecha de creacion : ${event.creationDate?.format('dd/MM/yyyy HH:mm:ss')}<br>
-Usuario : ${event.user?.username}&nbsp;${event.user?.gecos}<br>
+Usuario : #{usernameTag user: event.user/}<br>
 Tipo : ${event.class.getSimpleName()} <br>
 Transaccion de origen : ${event.eventSourceId} <br>
 Mensage : ${event.message} <br>

@@ -156,21 +156,11 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     }
 
     public String findUserCode() {
-        if (Configuration.isUseUserCode()) {
-            if (userCodeLov == null) {
-                return null;
-            }
-            DepositUserCodeReference d = DepositUserCodeReference.findByNumericId(userCodeLov);
-            if (d == null) {
-                return null;
-            }
-            return d.description;
-        } else {
-            if (user == null) {
-                return null;
-            }
-            return user.gecos;
+        DepositUserCodeReference d = DepositUserCodeReference.findByNumericId(userCodeLov);
+        if (d == null) {
+            return null;
         }
+        return d.description;
     }
 
     @Override

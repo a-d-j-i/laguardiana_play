@@ -13,8 +13,7 @@
                 <li class="fixed column" style="width: 45%">
                     <div class="columna_1">
                         <!-- resumen de datos -->
-                        <p style="font-size: larger;">&{ 'application.wellcome_x' }&nbsp;${user?.username}</p>
-                        <p style="font-size: larger;">${user?.gecos}</p>
+                        <p style="font-size: larger;">&{ 'application.wellcome' }&nbsp;#{usernameTag user: user/}</p>
                         <p>&{ 'counting_page.currency_title' }: ${formData.currency.currency.description}</p>
                         #{if ( formData.showReference1 ) }
                         <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>

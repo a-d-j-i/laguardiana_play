@@ -19,7 +19,7 @@
     <tr style="background-color: lightgreen;">
         #{/else}
         <td>${deposit.depositId} </td>
-        <td>${deposit.user.username} &nbsp; ${deposit.user.gecos}</td>
+        <td>#{usernameTag user: deposit.user/}</td>
         <td>${deposit.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
         <td style="width:180px;">
             ${deposit.z.creationDate?.format('dd/MM/yyyy HH:mm:ss')}

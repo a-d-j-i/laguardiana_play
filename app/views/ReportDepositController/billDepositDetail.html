@@ -5,11 +5,14 @@
         <li class="fixed column" style="width: 45%">
             <div class="columna_1">
                 <!-- resumen de datos -->
-                <p style="font-size: larger;">&{ 'summary.user_gecos' }&nbsp;${deposit.user?.username}</p>
-                <p style="font-size: larger;">${deposit.user?.gecos}</p>
+                <p style="font-size: larger;">&{ 'summary.username' }&nbsp;#{usernameTag user: deposit.user/}</p>
                 <p>&{ 'counting_page.currency_title' }: ${deposit.getCurrency().description}</p>
-                <p>&{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}</p>
-                <p>&{ 'counting_page.reference2_title' }: ${deposit.userCode}</p>
+                #{if ( deposit.findUserCode() ) }
+                &{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}<br>
+                #{/if}
+                #{if ( deposit.userCode ) }
+                &{ 'counting_page.reference2_title' }: ${deposit.userCode}<br>
+                #{/if}
                 <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
                 <p>&nbsp;</p>
             </div>

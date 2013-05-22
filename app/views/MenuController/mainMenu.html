@@ -6,7 +6,11 @@
         <h1 class="casa">&{'main_menu.title'}</h1>
         <div class="contenido">
             #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
-            <div class="mensaje"><span>&{ 'application.wellcome', controllers.Secure.getCurrentUser().gecos } &{'application.choose_one'}</span></div>
+            <div class="mensaje">
+                <span>
+                    &{ 'application.wellcome' }&nbsp;#{usernameTag user:controllers.Secure.getCurrentUser()/}&nbsp;&{'application.choose_one'}
+                </span>
+            </div>
             #{/if}
             #{else}
             <div class="mensaje"><span>&{'application.choose_one'}</span></div>

@@ -12,8 +12,7 @@
 #{/if}
 &{ 'summary.total' }: ${depositTotal} ${deposit.getCurrency().description}<br>
 &{ 'summary.transaction_code' }: ${deposit.depositId}<br>
-&{ 'summary.user_gecos' }: ${deposit.user.username}<br>
-&{ 'summary.user_gecos' }: ${deposit.user.gecos}<br>
+&{ 'summary.username' }: #{usernameTag user:user/}<br>
 &{ 'summary.client_code' }: ${clientCode}<br>
 &{ 'summary.branch_code' }: ${branchCode}<br>
 &{ 'summary.machine_code' }: ${machineCode}<br>
