@@ -10,7 +10,7 @@
             <div class="mensaje"><span>&{ 'envelope_deposit.put_ticket_in_envelope' }</span></div>
             <ul class="columns">
                 <li class="column">
-                    <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                    <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                     #{if ( formData.showReference1 ) }
                     <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
                     #{/if}

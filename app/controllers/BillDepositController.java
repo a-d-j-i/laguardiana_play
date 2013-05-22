@@ -119,8 +119,7 @@ public class BillDepositController extends CounterController {
             }
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
-            User u = Secure.getCurrentUser();
-            renderArgs.put("user", u);
+            renderArgs.put("user", Secure.getCurrentUser());
             renderArgs.put("billData", bls);
             renderArgs.put("formData", ModelFacade.getFormData());
             renderArgs.put("totalSum", totalSum);
@@ -152,6 +151,7 @@ public class BillDepositController extends CounterController {
             return;
         }
         renderArgs.put("clientCode", Configuration.getClientDescription());
+        renderArgs.put("user", Secure.getCurrentUser());
         renderArgs.put("providerCode", Configuration.getProviderDescription());
         renderArgs.put("formData", formData);
         if (deposit != null) {

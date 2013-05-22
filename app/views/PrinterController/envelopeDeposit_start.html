@@ -30,7 +30,7 @@
 <br/>
 &{ 'summary.transaction_code' }: ${deposit.depositId}<br>
 &{ 'summary.username' }: #{usernameTag user:user/}<br>
-&{ 'summary.client_code' }: ${clientCode}<br>
+&{ 'summary.client_code' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}}<br>
 &{ 'summary.branch_code' }: ${branchCode}<br>
 &{ 'summary.machine_code' }: ${machineCode}<br>
 <br/>

@@ -1,5 +1,6 @@
 package models;
 
+import controllers.Secure;
 import devices.printer.Printer;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ public class EnvelopeDeposit extends LgDeposit {
     @Override
     public void setRenderArgs(Map args) {
         args.put("clientCode", Configuration.getClientDescription());
+        args.put("user", Secure.getCurrentUser());
         args.put("providerCode", Configuration.getProviderDescription());
         args.put("branchCode", Configuration.getBranchCode());
         args.put("machineCode", Configuration.getMachineCode());

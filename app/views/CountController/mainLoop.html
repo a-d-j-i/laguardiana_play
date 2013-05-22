@@ -16,7 +16,7 @@
                     <div class="columna_1">
                         <!-- resumen de datos -->
                         <p>&{ 'counting_page.currency_title' }: ${currency}</p>
-                        <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                        <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
                         <div id="info_message" style="color: green;"> 

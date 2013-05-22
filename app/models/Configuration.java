@@ -4,6 +4,7 @@
  */
 package models;
 
+import controllers.Secure;
 import models.db.LgSystemProperty;
 import play.Logger;
 import play.Play;

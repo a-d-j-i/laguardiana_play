@@ -155,6 +155,7 @@ public class EnvelopeDepositController extends CounterController {
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
+            renderArgs.put("user", Secure.getCurrentUser());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
             renderArgs.put("formData", ModelFacade.getFormData());
             render();
@@ -186,6 +187,7 @@ public class EnvelopeDepositController extends CounterController {
             return;
         }
         renderArgs.put("clientCode", Configuration.getClientDescription());
+        renderArgs.put("user", Secure.getCurrentUser());
         renderArgs.put("providerCode", Configuration.getProviderDescription());
         render();
     }

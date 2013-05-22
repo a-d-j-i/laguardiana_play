@@ -13,7 +13,7 @@
                 #{if ( deposit.userCode ) }
                 &{ 'counting_page.reference2_title' }: ${deposit.userCode}<br>
                 #{/if}
-                <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                 <p>&nbsp;</p>
             </div>
         </li>

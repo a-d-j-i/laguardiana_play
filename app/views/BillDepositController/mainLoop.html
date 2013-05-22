@@ -21,7 +21,7 @@
                         #{if ( formData.showReference2 && formData.reference2 != "" ) }
                         <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
                         #{/if}
-                        <p>&{ 'counting_page.client_code_title' }: ${clientCode}</p>
+                        <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                         <div id="total_sum_field" style="display: none;">
                             <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
                         </div>
