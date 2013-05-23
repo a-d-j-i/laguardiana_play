@@ -56,6 +56,8 @@ insert into lg_acl_rule( acl_id, role_id, operation, permission, priority, resou
                     or name = 'ReportZController.list' 
                     or name = 'ReportZController.detail' 
                     or name = 'ReportZController.rotateZ'
+                    or name = 'ReportZController.reprint'
+                    or name = 'ReportDepositController.reprint'
                     or name = 'ReportDepositController.list'
                     or name = 'ReportDepositController.detail'
         );

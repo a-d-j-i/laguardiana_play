@@ -148,16 +148,22 @@ public class Secure extends Controller {
             expire = "30d";
         }
         Cache.set(session.getId() + "-user", user, expire);
+
+        Map<String, String> m = Router.route("GET", getOriginalUrl());
         if (request.isAjax()) {
-            String[] d = {"success", getOriginalUrl(), username, user.gecos};
-            renderJSON(d);
+            if (checkPermission(m.get("action"), "GET")) {
+                String[] d = {"success", getOriginalUrl(), username, user.gecos};
+                renderJSON(d);
+            } else {
+                String[] d = {"success", "/", username, user.gecos};
+                renderJSON(d);
+            }
         } else {
             String a = flash.get("authenticated");
             flash.put("authenticated", "authenticated");
             if (a != null) {
                 redirect("/");
             } else {
-                Map<String, String> m = Router.route("GET", getOriginalUrl());
                 if (checkPermission(m.get("action"), "GET")) {
                     redirect(getOriginalUrl());
                 } else {
