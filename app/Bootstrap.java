@@ -50,6 +50,17 @@ public class Bootstrap extends Job {
                 LgRole reportDesposit = loadRolsResourcesAndAcls(controllers.ReportDepositController.class);
                 LgRole reportZ = loadRolsResourcesAndAcls(controllers.ReportZController.class);
                 LgRole reportBag = loadRolsResourcesAndAcls(controllers.ReportBagController.class);
+                LgRole printer = loadRolsResourcesAndAcls(controllers.PrinterController.class);
+
+                // Reset and Storing reset
+                LgRole reset = new LgRole();
+                reset.name = "Reset";
+                reset.save();
+                createAcl( reset, "Application.reset");
+                LgRole storingReset = new LgRole();
+                storingReset.name = "StoringReset";
+                storingReset.save();
+                createAcl( storingReset, "Application.storingReset");
 
                 // Add application envelope and bill to demo.
                 LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
@@ -109,6 +120,8 @@ public class Bootstrap extends Job {
                 reportDesposit.users.add(supervisor);
                 supervisor.save();
 
+
+                
 
                 Logger.info("loading lov-data.yml");
                 Fixtures.loadModels("lov-data.yml");
