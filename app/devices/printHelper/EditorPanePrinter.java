@@ -261,31 +261,27 @@ public final class EditorPanePrinter extends JPanel implements Pageable, Printab
         }
     }
 
-    public void print() {
+    public void print() throws PrinterException {
         print((PrintService) null);
     }
 
-    public void print(PrintService ps) {
-        try {
-            PrinterJob pj = PrinterJob.getPrinterJob();
-            JFrame tmp = null;
-            if (this.getParent() == null) {
-                tmp = new JFrame();
-                tmp.getContentPane().add(new JScrollPane(this));
-                tmp.pack();
-                tmp.setVisible(false);
-            }
-            pj.setPageable(this);
-            if (ps != null) {
-                pj.setPrintService(ps);
-            }
-            pj.print();
+    public void print(PrintService ps) throws PrinterException {
+        PrinterJob pj = PrinterJob.getPrinterJob();
+        JFrame tmp = null;
+        if (this.getParent() == null) {
+            tmp = new JFrame();
+            tmp.getContentPane().add(new JScrollPane(this));
+            tmp.pack();
+            tmp.setVisible(false);
+        }
+        pj.setPageable(this);
+        if (ps != null) {
+            pj.setPrintService(ps);
+        }
+        pj.print();
 
-            if (tmp != null) {
-                tmp.dispose();
-            }
-        } catch (PrinterException e1) {
-            e1.printStackTrace();
+        if (tmp != null) {
+            tmp.dispose();
         }
     }
 

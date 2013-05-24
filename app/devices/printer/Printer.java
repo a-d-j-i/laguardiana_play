@@ -8,6 +8,7 @@ import devices.printHelper.EditorPanePrinter;
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.print.Paper;
+import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -191,15 +192,15 @@ public class Printer extends Observable {
         EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
         Logger.debug(" 0----123ajsdklasd-=----------");
         if (!Configuration.isPrinterTest()) {
-//            try {
-            DocPrintJob printJob = p.createPrintJob();
+            try {
+                DocPrintJob printJob = p.createPrintJob();
 //                Doc docc = new SimpleDoc(pnl, DocFlavor.SERVICE_FORMATTED.PRINTABLE, null);
-            printJob.addPrintJobListener(new MyPrintListener());
+                printJob.addPrintJobListener(new MyPrintListener());
 //                printJob.print(docc, null);
-            pnl.print(p);
-//            } catch (PrintException ex) {
-//                sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
-//            }
+                pnl.print(p);
+            } catch (PrinterException ex) {
+                sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
+            }
         } else {
             JFrame frame = new JFrame("Main print frame");
             pnl.setBackground(Color.black);
