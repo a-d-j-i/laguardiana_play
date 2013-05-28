@@ -4,19 +4,19 @@
    
   db.LgSystemProperty(billDepositShowReference1):
     name:  "bill_deposit.show_reference1"
-    value:  "true"
+    value:  "false"
     
   db.LgSystemProperty(billDepositShowReference2):
     name:  "bill_deposit.show_reference2"
-    value:  "true"
+    value:  "false"
     
   db.LgSystemProperty(envelopeDepositShowReference1):
     name:  "envelope_deposit.show_reference1"
-    value:  "true"
+    value:  "false"
     
   db.LgSystemProperty(envelopeDepositShowReference2):
     name:  "envelope_deposit.show_reference2"
-    value:  "true"
+    value:  "false"
     
         
   db.LgSystemProperty(machineCode):

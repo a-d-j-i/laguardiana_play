@@ -190,7 +190,6 @@ public class Printer extends Observable {
         pp.setImageableArea(0, 0, PAGE_WIDTH * MM, paperLen * MM);
         pp.setSize(PAGE_WIDTH * MM, paperLen * MM);
         EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
-        Logger.debug(" 0----123ajsdklasd-=----------");
         if (!Configuration.isPrinterTest()) {
             try {
                 DocPrintJob printJob = p.createPrintJob();

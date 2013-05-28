@@ -42,11 +42,11 @@ public class ReportDepositController extends Controller {
         List<LgDeposit> dList = LgDeposit.find(startDate, endDate, bagId, zId).fetch(page, length);
         renderArgs.put("startDate", startDate);
         renderArgs.put("endDate", endDate);
-        if ( bagId != null ) {
+        if (bagId != null) {
             renderArgs.put("bag", LgBag.findById(bagId));
         }
         renderArgs.put("bagId", bagId);
-        if ( zId != null ) {
+        if (zId != null) {
             renderArgs.put("z", LgZ.findById(zId));
         }
         renderArgs.put("zId", zId);
@@ -60,7 +60,7 @@ public class ReportDepositController extends Controller {
     public static void detail(Integer id) {
         LgDeposit d = LgDeposit.findById(id);
         d.setRenderArgs(renderArgs.data);
-        Logger.debug("-------- BACK URL -> %s", flash.get("backUrl"));
+        //Logger.debug("-------- BACK URL -> %s", flash.get("backUrl"));
         renderArgs.put("backUrl", flash.get("backUrl"));
         render(d.getDetailView());
     }
