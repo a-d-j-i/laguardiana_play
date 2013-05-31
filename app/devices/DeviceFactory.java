@@ -24,7 +24,7 @@ import play.PlayPlugin;
  */
 public class DeviceFactory extends PlayPlugin {
 
-    static final PortConfiguration iBoardPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_19200, PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
+    static final PortConfiguration iBoardPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_38400, PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
     static final PortConfiguration gloryPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_9600, PORTBITS.BITS_7, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_EVEN);
     static HashMap<String, Glory> gloryDevices = new HashMap();
     static HashMap<Glory, GloryManager.CounterFactoryApi> gloryManagers = new HashMap();

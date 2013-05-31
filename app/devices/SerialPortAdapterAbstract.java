@@ -19,6 +19,7 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         BAUDRATE_9600(9600),
         BAUDRATE_14400(14400),
         BAUDRATE_19200(19200),
+        BAUDRATE_38400(38400),
         BAUDRATE_57600(57600),
         BAUDRATE_115200(115200),
         BAUDRATE_128000(128000),

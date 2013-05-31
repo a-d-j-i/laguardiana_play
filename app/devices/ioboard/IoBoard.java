@@ -138,7 +138,8 @@ public class IoBoard {
         private Byte B = 0;
         private Byte C = 0;
         private Byte D = 0;
-//        private Byte bagStatus = 0;
+        private Byte BAG_STATUS = 0;
+        private Byte BAG_SENSOR = 0;
 //        private boolean isRunning;
         private IoBoardError error = null;
         private BAG_STATE bagState = null;
@@ -147,8 +148,7 @@ public class IoBoard {
         private BAG_APROVE_STATE bagAproveState = BAG_APROVE_STATE.BAG_APROVED;
 
         synchronized private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt, Boolean bagAproved) {
-            Logger.debug("IOBOARD setBagState : %s, setShutterState : %s, setLockState : %d",
-                    bagState, shutterState, lockState);
+            //Logger.debug("IOBOARD setSTATE : %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
             BAG_STATE bs = BAG_STATE.factory(bagSt);
             if (bs != bagState) {
                 bagState = bs;
@@ -188,13 +188,14 @@ public class IoBoard {
             }
         }
 
-        synchronized private void setStatusBytes(Byte A, Byte B, Byte C, Byte D, Byte BAG) {
-            Logger.debug("IOBOARD setStatus : A 0x%x B 0x%x C 0x%x D 0x%x BAG STATUS 0x%x", A, B, C, D, BAG);
+        synchronized private void setStatusBytes(Byte A, Byte B, Byte C, Byte D, Byte BAG_SENSOR, Byte BAG_STATUS) {
+            //Logger.debug("IOBOARD setStatusBytes : A 0x%x B 0x%x C 0x%x D 0x%x BAG_SENSOR 0x%x BAG_STATUS 0x%x", A, B, C, D, BAG_SENSOR, BAG_STATUS);
             this.A = A;
             this.B = B;
             this.C = C;
             this.D = D;
-            //this.bagStatus = BAG;
+            this.BAG_SENSOR = BAG_SENSOR;
+            this.BAG_STATUS = BAG_STATUS;
         }
 
         synchronized private void setError(IoBoardError error) {
@@ -248,6 +249,14 @@ public class IoBoard {
         public String reprD() {
             return repr(D);
         }
+
+        public String reprBAG_SENSOR() {
+            return repr(BAG_SENSOR);
+        }
+
+        public String reprBAG_STATUS() {
+            return repr(BAG_STATUS);
+        }
     }
     public static final int IOBOARD_READ_TIMEOUT = 10000;
     public static final int IOBOARD_STATUS_CHECK_FREQ = 500;
@@ -257,6 +266,19 @@ public class IoBoard {
     @Override
     public String toString() {
         return "IoBoard{" + "state=" + state + ", lastCmdSentTime=" + lastCmdSentTime + ", mustStop=" + mustStop + ", statusThread=" + statusThread + ", serialPort=" + serialPort + '}';
+    }
+
+    public static String bytesToHex(byte[] bytes) {
+        final char[] hexArray = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        char[] hexChars = new char[bytes.length * 3];
+        int v;
+        for (int j = 0; j < bytes.length; j++) {
+            v = bytes[j] & 0xFF;
+            hexChars[j * 3] = hexArray[v >>> 4];
+            hexChars[j * 3 + 1] = hexArray[v & 0x0F];
+            hexChars[j * 3 + 2] = ' ';
+        }
+        return new String(hexChars);
     }
 
     private class StatusThread extends Thread {
@@ -271,20 +293,23 @@ public class IoBoard {
                         throw new IOException("IoBoard StatusThread IoBoard Serial port closed");
                     }
                     String l = serialPort.readLine(IOBOARD_STATUS_CHECK_FREQ);
-                    Logger.debug("IOBOARD reader %s", l);
+                    Logger.debug("IOBOARD %d reader : %s", l.length(), l);
+                    //Logger.debug("IOBOARD reader %s", bytesToHex(l.getBytes()));
                     retries = 0;
-                    if (l.startsWith("STATUS :") && l.length() > 70) {
+                    if (l.startsWith("STATUS :") && l.length() > 71) {
                         try {
                             Integer A = Integer.parseInt(l.substring(13, 15), 16);
                             Integer B = Integer.parseInt(l.substring(21, 23), 16);
-                            Integer C = Integer.parseInt(l.substring(37, 39), 16);
-                            Integer D = Integer.parseInt(l.substring(54, 56), 16);
-                            Integer BAG = Integer.parseInt(l.substring(70, 72), 16);
-                            state.setStatusBytes(A.byteValue(), B.byteValue(), C.byteValue(), D.byteValue(), BAG.byteValue());
+                            Integer C = Integer.parseInt(l.substring(29, 31), 16);
+                            Integer D = Integer.parseInt(l.substring(37, 39), 16);
+                            Integer BAG_SENSOR = Integer.parseInt(l.substring(54, 56), 16);
+                            Integer BAG_STATUS = Integer.parseInt(l.substring(70, 72), 16);
+                            //Logger.debug("------------- 0x%02X 0x%02X 0x%02X 0x%02X ", A, B, C, D);
+                            state.setStatusBytes(A.byteValue(), B.byteValue(), C.byteValue(), D.byteValue(), BAG_STATUS.byteValue(), BAG_SENSOR.byteValue());
                         } catch (NumberFormatException e) {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
-                    } else if (l.startsWith("STATE :") && l.length() > 47) {
+                    } else if (l.startsWith("STATE :") && l.length() > 45) {
                         try {
                             Integer bagSt = Integer.parseInt(l.substring(12, 14), 10);
                             Boolean bagAproved = (Integer.parseInt(l.substring(27, 28), 10) == 1);
