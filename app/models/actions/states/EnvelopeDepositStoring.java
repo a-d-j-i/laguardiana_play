@@ -50,15 +50,17 @@ class EnvelopeDepositStoring extends ActionState {
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        switch (status.getShutterState()) {
-            case SHUTTER_OPEN:
-                break;
-            case SHUTTER_CLOSED:
-                stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPENING, "WaitForGate shutter closed");
-                break;
-            default:
-                Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name(), name());
-                break;
+        if (!Configuration.isIgnoreShutter()) {
+            switch (status.getShutterState()) {
+                case SHUTTER_OPEN:
+                    break;
+                case SHUTTER_CLOSED:
+                    stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPENING, "WaitForGate shutter closed");
+                    break;
+                default:
+                    Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name(), name());
+                    break;
+            }
         }
     }
 }

@@ -105,7 +105,7 @@ public class CommandWithDataResponse extends CommandWithAckResponse {
             for (String ss : s.getSrBits()) {
                 Logger.debug(ss);
             }
-            Logger.debug(s.getD1Mode());
+            //Logger.debug(s.getD1Mode());
             if (debug.isGratherThan(DebugLevel.DEBUG)) {
                 for (String ss : s.getD2Bits()) {
                     Logger.debug(ss);

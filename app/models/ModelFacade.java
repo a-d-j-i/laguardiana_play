@@ -139,6 +139,7 @@ public class ModelFacade {
                 u = currentUserAction;
             }
             IoBoardEvent.save(u, status.toString());
+            Logger.debug("OnIoBoardEvent event %s", status.toString());
 
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
@@ -163,20 +164,18 @@ public class ModelFacade {
                         ioBoard.aproveBagConfirm();
                         break;
                 }
-                if (u != null
-                        && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED
-                        && !Configuration.isIgnoreBag()) {
-                    modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag rotated during deposit");
-                }
+                /*                if (u != null
+                 && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED
+                 && !Configuration.isIgnoreBag()) {
+                 modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag rotated during deposit");
+                 }*/
             }
 
-            if (u != null) {
-                if (!isIoBoardOk(status)) {
-                    return;
-                }
+            if (u == null) {
+                Logger.error(String.format("OnIoBoardEvent current user action is null : %s", status));
+            } else {
                 u.onIoBoardEvent(status);
             }
-
         }
     }
 
@@ -224,6 +223,9 @@ public class ModelFacade {
         }
 
         public boolean store(Integer depositId) {
+            if (!isIoBoardOk()) {
+                return false;
+            }
             return manager.storeDeposit(depositId);
         }
 
@@ -269,6 +271,10 @@ public class ModelFacade {
         public Printer getPrinter() {
             return printer;
         }
+
+        public boolean isIoBoardOk() {
+            return ModelFacade.isIoBoardOk(ioBoard.getStatus());
+        }
     }
 
     synchronized public static boolean isError() {
@@ -294,9 +300,10 @@ public class ModelFacade {
             return;
         }
 
-        if (!isIoBoardOk(ioBoard.getStatus())) {
-            return;
-        }
+//        if (!isIoBoardOk(ioBoard.getStatus())) {
+//            modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag not in place");
+//            return;
+//        }
 
         if (modelError.isError()) {
             Logger.info("Can't start an action when on error");
@@ -336,14 +343,20 @@ public class ModelFacade {
             }
         }
 
-        if (!isIoBoardOk(ioBoard.getStatus())) {
+        IoBoard.IoBoardStatus status = ioBoard.getStatus();
+        if (status != null && status.getError() != null) {
+            if (!Configuration.isIoBoardIgnore()) {
+                Logger.error("Setting ioboard error : %s", status.getError());
+                modelError.setError(status.getError());
+            }
         }
 
         if (modelError.isError()) {
             finishAction();
             return "ERROR";
         }
-        if (currentUserAction != null) {
+        if (currentUserAction
+                != null) {
             return currentUserAction.getStateName();
         }
 
@@ -455,18 +468,17 @@ public class ModelFacade {
         currentUserAction.suspendTimeout();
     }
 
-    private static boolean isIoBoardOk(IoBoard.IoBoardStatus status) {
-        if (!Configuration.isIoBoardIgnore()) {
-            if (status != null && status.getError() != null) {
-                Logger.error("Setting ioboard error : %s", status.getError());
-                modelError.setError(status.getError());
-                return false;
-            }
-            if (!Configuration.isIgnoreBag()
-                    && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-                modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-                return false;
-            }
+    public static boolean isIoBoardOk(IoBoard.IoBoardStatus status) {
+        if (status != null && status.getError() != null) {
+            Logger.error("Setting ioboard error : %s", status.getError());
+            modelError.setError(status.getError());
+            return false;
+        }
+        if (!Configuration.isIgnoreBag()
+                && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+            Logger.error("IoBoard bag not inplace can't stores");
+            //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
+            return false;
         }
         return true;
     }

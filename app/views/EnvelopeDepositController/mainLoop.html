@@ -35,7 +35,7 @@
                     <p>&{ 'envelope_deposit.envelope_code' }: ${ formData.envelopeCode }</p>
                     <p>&nbsp;</p>
                     <!-- /resumen de datos -->
-                    <div class="info_message" style="color: green;"> 
+                    <div class="info_message blink" style="color: green;"> 
                 </li>
             </ul>
         </div>
@@ -45,7 +45,7 @@
                 <li class="column">
                     <!-- link cancelar -->
                     <div class="columna">
-                        <a id="cancelButton" href="#" class="boton full_width rojo">&{ 'application.cancel' }</a>
+                        <a href="#" class="cancelButton boton full_width rojo">&{ 'application.cancel' }</a>
                     </div>
                 </li>
                 <li class="column">
@@ -75,6 +75,17 @@
                 <span id="error_text">&{ 'counting_page.storing_detail' }</span>
                 <span class="info_message" style="color: green;"></span>
             </div>
+        </div>
+    </div>
+    <div id="alerta_bag_removed" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.bag_not_in_place' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'application.bag_not_in_place' }</span>
+            </div>
+        </div>
+        <div id="alerta_botonera">
+            <a href="#" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
         </div>
     </div>
     <div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
@@ -121,13 +132,17 @@
                 } else {
                     closeAlert( "#alerta_remove_rejected_bills" );    
                 }
-
-                if ( status == 'IDLE' || status == 'CANCELING' || status == 'STORING' || status == 'REMOVE_REJECTED_BILLS' ) {
+                if ( status == 'BAG_REMOVED' ) {
+                    showAlert( '#alerta_bag_removed' );                
+                } else {
+                    closeAlert( "#alerta_bag_removed" );    
+                }
+                if ( status == 'IDLE' || status == 'CANCELING' || status == 'STORING' || status == 'REMOVE_REJECTED_BILLS' || status == 'BAG_REMOVED' ) {
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
                 } else if ( status == 'READY_TO_STORE' ) {
-                    //                    $( '#continueButton' ).attr( { 'class' : 'boton ${play.configuration['style.button_color']}'});
+                    //                    $( '.continueButton' ).attr( { 'class' : 'boton ${play.configuration['style.button_color']}'});
                 } else if ( status == 'ERROR' ) {
                     window.location.href = "@{counterError()}";
                 } else {          
@@ -140,11 +155,11 @@
     };
     
     
-    $( '#continueButton' ).click( function(event) {
+    $( '.continueButton' ).click( function(event) {
         $.getJSON( '@{accept()}', function( data ) {});
     });
     
-    $( '#cancelButton' ).click( function(event) {
+    $( '.cancelButton' ).click( function(event) {
         $.getJSON( '@{cancel()}', function( data ) {});
     });
 </script>

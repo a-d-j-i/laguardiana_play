@@ -56,7 +56,7 @@ public interface ManagerInterface {
             return state.name();
         }
     }
-    
+
     class State extends Observable {
 
         private MANAGER_STATE state = MANAGER_STATE.INITIALIZING;
@@ -68,7 +68,7 @@ public interface ManagerInterface {
         }
 
         synchronized ManagerStatus getStatus() {
-            return new ManagerStatus( this );
+            return new ManagerStatus(this);
         }
 
         synchronized void setState(MANAGER_STATE state) {

@@ -73,13 +73,13 @@
                 <li class="column">
                     <div class="columna">
                         <!-- link cancelar -->
-                        <a id ="cancelButton" href="#" class="boton full_width rojo">&{ 'application.cancel' }</a>
+                        <a href="#" class="cancelButton boton full_width rojo">&{ 'application.cancel' }</a>
                     </div>
                 </li>
                 <li class="column">
                     <div class="columna">
                         <!-- link continuar -->
-                        <a id ="continueButton" href="#" class="boton full_width ${play.configuration['style.button_color']}" style="display: none;">&{ 'application.continue' }</a>
+                        <a id ="continueButton" href="#" class="continueButton boton full_width ${play.configuration['style.button_color']}" style="display: none;">&{ 'application.continue' }</a>
                     </div>
                 </li>
             </ul>
@@ -97,8 +97,19 @@
             </div>
         </div>
         <div id="alerta_botonera">
-            <a id ="alerta_cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
-            <a id="alerta_continueButton" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+            <a href="#" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
+            <a class="continueButton boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+        </div>
+    </div>
+    <div id="alerta_bag_removed" class="alerta info" style="display: none;">
+        <div id="alerta_titulo">&{ 'application.bag_not_in_place' }</div>
+        <div id="alerta_cuerpo">
+            <div id="alerta_texto">
+                <span id="error_text">&{ 'application.bag_not_in_place' }</span>
+            </div>
+        </div>
+        <div id="alerta_botonera">
+            <a href="#" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
         </div>
     </div>
     <div id="alerta_timeout" class="alerta info" style="display: none;">
@@ -169,6 +180,7 @@
                 } else if ( status == 'STORING' ) {
                 } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
                 } else if ( status == 'JAM' ) {
+                } else if ( status == 'BAG_REMOVED' ) {
                 } else if ( status == 'ESCROW_FULL' ) {
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
@@ -212,6 +224,11 @@
                 } else {
                     closeAlert( "#alerta_jam" );    
                 }
+                if ( status == 'BAG_REMOVED' ) {
+                    showAlert( '#alerta_bag_removed' );
+                } else {
+                    closeAlert( "#alerta_bag_removed" );    
+                }
                 if ( status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT') {
                     $( '#continueButton' ).show();
                 } else {
@@ -253,15 +270,13 @@
         })
     }
     
-    $( '#cancelButton' ).click( function(event) {
+    $( '.cancelButton' ).click( function(event) {
         $.getJSON( '@{cancel()}', function( data ) {});
     });
-    
-    $( '#continueButton' ).click( function(event) {
+   
+    $( '.continueButton' ).click( function(event) {
         if ( lastStatus == 'IDLE' ) {
-        } else if ( lastStatus == 'ESCROW_FULL' ) {
-            showAlert( "#alerta_escrow_full" );
-        } else if ( lastStatus == 'READY_TO_STORE' || lastStatus == 'CONTINUE_DEPOSIT' ) {
+        } else if ( lastStatus == 'ESCROW_FULL' || lastStatus == 'READY_TO_STORE' || lastStatus == 'CONTINUE_DEPOSIT' ) {
             $.getJSON( '@{accept()}', function( data ) {});
         } else {
             //alert( "Invalid last status : " + lastStatus );
@@ -269,21 +284,6 @@
     });
     
     
-    $( '#alerta_cancelButton' ).click( function(event) {
-        //closeAlert( "#alerta_escrow_full" );
-        $.getJSON( '@{cancel()}', function( data ) {});
-    });
-    
-    $( '#alerta_continueButton' ).click( function(event) {
-        //closeAlert( "#alerta_escrow_full" );
-        if ( lastStatus == 'IDLE' || lastStatus == 'READY_TO_STORE' || lastStatus == 'STORING' || lastStatus == 'CONTINUE_DEPOSIT'  ) {
-            // waiting the glory.
-        } else if ( lastStatus == 'ESCROW_FULL' ) {
-            $.getJSON( '@{accept()}', function( data ) {});
-        } else {
-            alert( "Invalid last status : " + lastStatus );
-        }
-    });
     
     $( '#timeout_cancelButton' ).click( function(event) {
         closeAlert( "#alerta_timeout" );

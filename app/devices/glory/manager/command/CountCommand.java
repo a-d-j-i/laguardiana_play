@@ -122,7 +122,7 @@ public class CountCommand extends ManagerCommandAbstract {
         }
         boolean batchEnd = false;
         while (!mustCancel()) {
-            Logger.debug("Count Command Counting");
+            //Logger.debug("Count Command Counting");
             if (!sense()) {
                 return;
             }

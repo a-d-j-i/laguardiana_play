@@ -57,7 +57,7 @@ public class Secure extends Controller {
 
     public static boolean checkPermission(String resource, String operation) {
         if (Configuration.isAllAlowed()) {
-            Logger.info("IN DEV MODE ALL ALLOWED!!!");
+            //Logger.info("IN DEV MODE ALL ALLOWED!!!");
             return true;
         }
         User user = Cache.get(session.getId() + "-user", User.class);

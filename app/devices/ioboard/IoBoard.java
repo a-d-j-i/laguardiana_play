@@ -148,7 +148,7 @@ public class IoBoard {
         private BAG_APROVE_STATE bagAproveState = BAG_APROVE_STATE.BAG_APROVED;
 
         synchronized private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt, Boolean bagAproved) {
-            //Logger.debug("IOBOARD setSTATE : %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
+            //Logger.debug("IOBOARD setSTATE : bagSt %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
             BAG_STATE bs = BAG_STATE.factory(bagSt);
             if (bs != bagState) {
                 bagState = bs;
@@ -186,6 +186,7 @@ public class IoBoard {
             if (hasChanged()) {
                 notifyObservers(new IoBoardStatus(this));
             }
+            //Logger.debug("IOBOARD setSTATE : bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
         }
 
         synchronized private void setStatusBytes(Byte A, Byte B, Byte C, Byte D, Byte BAG_SENSOR, Byte BAG_STATUS) {
@@ -293,7 +294,7 @@ public class IoBoard {
                         throw new IOException("IoBoard StatusThread IoBoard Serial port closed");
                     }
                     String l = serialPort.readLine(IOBOARD_STATUS_CHECK_FREQ);
-                    Logger.debug("IOBOARD %d reader : %s", l.length(), l);
+                    //Logger.debug("IOBOARD %d reader : %s", l.length(), l);
                     //Logger.debug("IOBOARD reader %s", bytesToHex(l.getBytes()));
                     retries = 0;
                     if (l.startsWith("STATUS :") && l.length() > 71) {
