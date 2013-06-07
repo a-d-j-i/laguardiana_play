@@ -8,7 +8,6 @@ import controllers.Secure;
 import java.util.Date;
 import models.EnvelopeDeposit;
 import models.actions.states.EnvelopeDepositStart;
-import models.db.LgDeposit;
 import models.db.LgEnvelope;
 import models.lov.DepositUserCodeReference;
 

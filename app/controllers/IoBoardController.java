@@ -1,7 +1,6 @@
 package controllers;
 
 import devices.DeviceFactory;
-import devices.ioboard.IoBoard;
 import java.io.IOException;
 import play.Play;
 import play.mvc.Before;

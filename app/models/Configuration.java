@@ -202,4 +202,12 @@ public class Configuration {
             return 220;
         }
     }
+
+    public static int getPrintWidth() {
+        try {
+            return Integer.parseInt(Play.configuration.getProperty("print.paperWidth"));
+        } catch (NumberFormatException e) {
+            return 80;
+        }
+    }
 }

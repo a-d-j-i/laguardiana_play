@@ -7,7 +7,7 @@ package models.actions.states;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
-import devices.printer.PrinterStatus;
+import devices.printer.Printer;
 import java.util.EnumMap;
 import java.util.Map;
 import models.Configuration;
@@ -69,7 +69,7 @@ abstract public class ActionState {
         }
     }
 
-    public void onPrinterEvent(PrinterStatus status) {
+    public void onPrinterEvent(Printer.PrinterStatus status) {
         Logger.error("ActionState invalid onPrinterEvent %s", status.toString());
     }
 

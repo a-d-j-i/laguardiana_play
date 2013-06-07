@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import models.Bill;
 import models.Configuration;
+import models.ModelFacade;
 import models.db.LgBag;
 import models.db.LgBillType;
 import models.db.LgDeposit;
@@ -49,6 +50,7 @@ public class MenuController extends Controller {
             "PrinterController.envelopeDeposit_start", "PrinterController.test"};
         String[] titles = {"other_menu.print_billDeposit", "other_menu.print_envelopeDeposit_finish",
             "other_menu.print_envelopeDeposit_start", "print_other_menu.test"};
+        renderArgs.put("printerStatus", ModelFacade.getPrinterStatus());
         checkMenu(back, backAction, buttons, titles, 3);
     }
 

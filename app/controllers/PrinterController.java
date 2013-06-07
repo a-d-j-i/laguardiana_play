@@ -45,10 +45,10 @@ public class PrinterController extends Controller {
     public static void test() {
         try {
             //DeviceFactory.getPrinter().printAttributes();
-            DeviceFactory.getPrinter().print("PrinterController/test.html", renderArgs.data, 150);
+            DeviceFactory.getPrinter().print("PrinterController/test.html", renderArgs.data, 80, 30);
         } catch (Throwable ex) {
             Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }
-        render();
+        MenuController.printTemplateMenu(null);
     }
 }

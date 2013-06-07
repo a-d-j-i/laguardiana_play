@@ -62,7 +62,7 @@ public class ReportBagController extends Controller {
         }
         setRenderArgs(b);
         renderArgs.put("reprint", "true");
-        DeviceFactory.getPrinter().print("ReportBagController/print.html", renderArgs.data, Configuration.getBagPrintLen());
+        DeviceFactory.getPrinter().print("ReportBagController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getBagPrintLen());
         list(page, startDate, endDate);
     }
 
@@ -74,7 +74,7 @@ public class ReportBagController extends Controller {
     public static void print() {
         LgBag currentBag = LgBag.getCurrentBag();
         setRenderArgs(currentBag);
-        DeviceFactory.getPrinter().print("ReportBagController/print.html", renderArgs.data, Configuration.getBagPrintLen());
+        DeviceFactory.getPrinter().print("ReportBagController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getBagPrintLen());
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentBag.bagId);
     }

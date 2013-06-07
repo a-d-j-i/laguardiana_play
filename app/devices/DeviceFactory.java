@@ -34,6 +34,7 @@ public class DeviceFactory extends PlayPlugin {
     public static Printer getPrinter() {
         if (printer == null) {
             printer = new Printer(Play.configuration.getProperty("printer.port"));
+            printer.startStatusThread();
         }
         return printer;
     }

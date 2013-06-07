@@ -10,7 +10,6 @@ import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
-import devices.printer.PrinterStatus;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -63,7 +62,7 @@ public class ModelFacade {
         printer = DeviceFactory.getPrinter();
         printer.addObserver(new Observer() {
             public void update(Observable o, Object data) {
-                Promise now = new OnPrinterEvent((PrinterStatus) data).now();
+                Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
             }
         });
     }
@@ -181,9 +180,9 @@ public class ModelFacade {
 
     static class OnPrinterEvent extends Job {
 
-        PrinterStatus status;
+        Printer.PrinterStatus status;
 
-        private OnPrinterEvent(PrinterStatus status) {
+        private OnPrinterEvent(Printer.PrinterStatus status) {
             this.status = status;
         }
 
@@ -194,11 +193,11 @@ public class ModelFacade {
                 u = currentUserAction;
             }
             PrinterEvent.save(u, status.toString());
-            if (status.isError()) {
+            if (status.getError() != null) {
                 if (!Configuration.isPrinterIgnore()) {
                     // A development option
                     Logger.error("Setting printer error : %s", status.toString());
-                    modelError.setError(status);
+                    modelError.setError(status.getError());
                 }
                 return;
             }
@@ -242,7 +241,7 @@ public class ModelFacade {
         public void envelopeDeposit() {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
-                    setError(ModelError.ERROR_CODE.APP_ERROR, "count currentAction is null");
+                    setError(ModelError.ERROR_CODE.APP_ERROR, "envelopeDeposit currentAction is null");
                     return;
                 }
                 if (!manager.envelopeDeposit()) {
@@ -481,5 +480,9 @@ public class ModelFacade {
             return false;
         }
         return true;
+    }
+
+    public static Printer.PrinterStatus getPrinterStatus() {
+        return printer.getStatus();
     }
 }

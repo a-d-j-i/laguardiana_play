@@ -7,7 +7,7 @@ package models.actions;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
-import devices.printer.PrinterStatus;
+import devices.printer.Printer;
 import java.util.Date;
 import models.Bill;
 import models.ModelError;
@@ -191,7 +191,7 @@ abstract public class UserAction {
         } while (state != currState);
     }
 
-    public void onPrinterEvent(PrinterStatus p) {
+    public void onPrinterEvent(Printer.PrinterStatus p) {
         ActionState currState = state;
         do {
             Logger.debug("Action : onIoBoardEvent state %s currState %s event %s",
