@@ -101,12 +101,22 @@ public class IoBoard {
         private final BAG_APROVE_STATE bagAproveState;
         private final BAG_STATE bagState;
         private final IoBoardError error;
+        private final String criticalEvent;
 
         private IoBoardStatus(State currentState) {
             this.shutterState = currentState.shutterState;
             this.bagAproveState = currentState.bagAproveState;
             this.error = currentState.error;
             this.bagState = currentState.bagState;
+            this.criticalEvent = null;
+        }
+
+        private IoBoardStatus(State currentState, String criticalEvent) {
+            this.shutterState = currentState.shutterState;
+            this.bagAproveState = currentState.bagAproveState;
+            this.error = currentState.error;
+            this.bagState = currentState.bagState;
+            this.criticalEvent = criticalEvent;
         }
 
         public SHUTTER_STATE getShutterState() {
@@ -123,6 +133,10 @@ public class IoBoard {
 
         public IoBoardError getError() {
             return error;
+        }
+
+        public String getCriticalEvent() {
+            return criticalEvent;
         }
 
         @Override
@@ -184,6 +198,8 @@ public class IoBoard {
                     break;
             }
             if (hasChanged()) {
+                Logger.debug("IOBOARD setSTATE prev: bagSt %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
+                Logger.debug("IOBOARD setSTATE next: bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
                 notifyObservers(new IoBoardStatus(this));
             }
             //Logger.debug("IOBOARD setSTATE : bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
@@ -203,6 +219,13 @@ public class IoBoard {
             this.error = error;
             setChanged();
             notifyObservers(new IoBoardStatus(this));
+        }
+        // Critical states
+
+        synchronized private void setCriticalEvent(String criticalEvent) {
+            setChanged();
+            notifyObservers(new IoBoardStatus(this, criticalEvent));
+
         }
 
         synchronized private void setAproveBagState(BAG_APROVE_STATE state) {
@@ -321,6 +344,8 @@ public class IoBoard {
                         } catch (NumberFormatException e) {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
+                    } else if (l.startsWith("CRITICAL :") && l.length() > 45) {
+                        state.setCriticalEvent(l);
                     } else if (l.contains("ERROR")) {
                         if (l.contains("SHUTTER") && Configuration.isIgnoreShutter()) {
                             // Ignore.
