@@ -1,5 +1,6 @@
 package devices.glory.manager.command;
 
+import devices.glory.command.GloryCommandAbstract;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
@@ -295,12 +296,29 @@ public class CountCommand extends ManagerCommandAbstract {
     boolean batchCountStart() {
         int[] bills = new int[32];
 
+        // Sometimes the BatchDataTransmition fails, trying randomly to see what can be.
+        for (int i = 0; i < bills.length; i++) {
+            bills[ i] = 0;
+        }
         if (!countData.isBatch) {
-            if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
-                return false;
+            /*if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
+             return false;
+             }*/
+            // Sometimes the BatchDataTransmition fails, trying randomly to see what can be.
+            GloryCommandAbstract cmd = new devices.glory.command.BatchDataTransmition(bills);
+            for (int retry = 0; retry < 3; retry++) {
+                if (sendGCommand(cmd)) {
+                    if (sense()) {
+                        setState(ManagerInterface.MANAGER_STATE.COUNTING);
+                        return true;
+                    }
+                }
+                sleep();
             }
-            setState(ManagerInterface.MANAGER_STATE.COUNTING);
-            return true;
+            String error = gloryStatus.getLastError();
+            Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
+            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
+            return false;
         }
 
         Logger.debug("ISBATCH");

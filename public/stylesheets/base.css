@@ -447,6 +447,7 @@ table tfoot tr td {
 
 .botonera .columna {
     padding: 0 10px;
+    height: 50px;
 }
 
 .botonera .columna a {

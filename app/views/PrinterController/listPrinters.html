@@ -21,6 +21,8 @@
                     #{/list}
                 </tbody>
             </table>
+            <p>Current : ${currentPrinter.getPort()}</p>
+            <p>Status : ${printerStatus.getPrinterState()} ${printerStatus.getStateDesc()} ${printerStatus.getError()}</p>
         </div>
         <hr />
         #{menuBottomButtons}&nbsp;#{/menuBottomButtons}

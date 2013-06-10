@@ -4,6 +4,7 @@ import devices.DeviceFactory;
 import java.util.List;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
+import models.ModelFacade;
 import play.Logger;
 import play.mvc.*;
 
@@ -12,6 +13,9 @@ public class PrinterController extends Controller {
 
     public static void listPrinters() {
         renderArgs.put("printers", DeviceFactory.getPrinter().printers.values());
+        renderArgs.put("printerStatus", ModelFacade.getPrinterStatus());
+        renderArgs.put("currentPrinter", ModelFacade.getCurrentPrinter());
+
         render();
     }
 
@@ -49,6 +53,6 @@ public class PrinterController extends Controller {
         } catch (Throwable ex) {
             Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }
-        MenuController.printTemplateMenu(null);
+        MenuController.hardwareMenu(null);
     }
 }

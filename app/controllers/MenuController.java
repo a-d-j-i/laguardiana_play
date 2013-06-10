@@ -38,9 +38,11 @@ public class MenuController extends Controller {
     public static void hardwareMenu(String back) {
         String backAction = "MenuController.otherMenu";
         String[] buttons = {"GloryController.index", "GloryManagerController.index", "IoBoardController.index",
-            "CounterController.counterError", "PrinterController.listPrinters", "MenuController.printTemplateMenu"};
+            "CounterController.counterError", "PrinterController.listPrinters", "PrinterController.test"};
+//            "CounterController.counterError", "PrinterController.listPrinters", "MenuController.printTemplateMenu"};
         String[] titles = {"other_menu.glory_cmd", "other_menu.glory_manager", "other_menu.ioboard_cmd", "other_menu.status",
-            "other_menu.printer_list", "other_menu.printer_test"};
+            "other_menu.printer_list", "print_other_menu.test"};
+//            "other_menu.printer_list", "other_menu.printer_test"};
         checkMenu(back, backAction, buttons, titles, 2);
     }
 
@@ -50,7 +52,6 @@ public class MenuController extends Controller {
             "PrinterController.envelopeDeposit_start", "PrinterController.test"};
         String[] titles = {"other_menu.print_billDeposit", "other_menu.print_envelopeDeposit_finish",
             "other_menu.print_envelopeDeposit_start", "print_other_menu.test"};
-        renderArgs.put("printerStatus", ModelFacade.getPrinterStatus());
         checkMenu(back, backAction, buttons, titles, 3);
     }
 

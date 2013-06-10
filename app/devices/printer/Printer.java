@@ -432,4 +432,8 @@ public class Printer extends Observable {
         }
         return true;
     }
+
+    public String getPort() {
+        return port;
+    }
 }

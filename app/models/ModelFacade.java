@@ -67,6 +67,10 @@ public class ModelFacade {
         });
     }
 
+    public static Printer getCurrentPrinter() {
+        return printer;
+    }
+
     public static ModelError getError() {
         return modelError;
     }
