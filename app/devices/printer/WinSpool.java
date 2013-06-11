@@ -20,13 +20,12 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
 import devices.printer.WinSpool.WinspoolLib.PRINTER_INFO_2;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 public class WinSpool {
 
-    public enum PrinterStatus {
+    public enum WinSpoolPrinterStatus {
 
         PRINTER_STATUS_READY("The printer is ready", 0),
         PRINTER_STATUS_BUSY("The printer is busy", 0x00000200),
@@ -57,8 +56,8 @@ public class WinSpool {
         PRINTER_STATUS_APP_ERROR("An application error calling getStatus.", 0xFFFFFFFF);
 
         // they are flags, but I keep the first I find!!!
-        static public PrinterStatus getStatus(int b) {
-            for (PrinterStatus s : PrinterStatus.values()) {
+        static public WinSpoolPrinterStatus getStatus(int b) {
+            for (WinSpoolPrinterStatus s : WinSpoolPrinterStatus.values()) {
                 if ((b & s.stat) != 0) {
                     return s;
                 }
@@ -68,7 +67,7 @@ public class WinSpool {
         final private int stat;
         final private String desc;
 
-        private PrinterStatus(String desc, int stat) {
+        private WinSpoolPrinterStatus(String desc, int stat) {
             this.desc = desc;
             this.stat = stat;
         }
@@ -264,11 +263,11 @@ public class WinSpool {
         return (PRINTER_INFO_2) pinfo2;
     }
 
-    public static PrinterStatus getPrinterStatus(String printerName) {
+    public static WinSpoolPrinterStatus getPrinterStatus(String printerName) {
         PRINTER_INFO_2 pi = getPrinterInfo2(printerName);
         if (pi == null) {
-            return PrinterStatus.PRINTER_STATUS_APP_ERROR;
+            return WinSpoolPrinterStatus.PRINTER_STATUS_APP_ERROR;
         }
-        return PrinterStatus.getStatus(pi.Status);
+        return WinSpoolPrinterStatus.getStatus(pi.Status);
     }
 }

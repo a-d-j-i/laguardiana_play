@@ -118,7 +118,7 @@ public class Printer extends Observable {
         PRINTER_READY,
         PRINTER_PRINTING,
         PRINTER_NOT_ACCEPTING_JOBS,
-        PRINTER_WINSPOOL_STATUS;
+        PRINTER_SPOOL_STATUS;
     };
 
     // An immutable cloned version of PrinterState 
@@ -199,6 +199,11 @@ public class Printer extends Observable {
 
         synchronized private String getStateDesc() {
             return stateDesc;
+        }
+
+        synchronized private void sendEvent() {
+            setChanged();
+            notifyObservers(new PrinterStatus(this));
         }
     }
     public static final int PRINTER_STATUS_POOL_TIMEOUT = 1000;
@@ -368,6 +373,7 @@ public class Printer extends Observable {
         }
         PrintService p = printers.get(port);
         if (!isPrinterOk(p)) {
+            state.sendEvent();
             return;
         }
         /*
@@ -424,11 +430,18 @@ public class Printer extends Observable {
             }
         }
         if (Platform.isWindows()) {
-            WinSpool.PrinterStatus st = WinSpool.getPrinterStatus(p.getName());
-            if (st != WinSpool.PrinterStatus.PRINTER_STATUS_READY) {
-                state.setSTATE(PRINTER_STATE.PRINTER_WINSPOOL_STATUS, st.getDesc());
+            WinSpool.WinSpoolPrinterStatus st = WinSpool.getPrinterStatus(p.getName());
+            if (st != WinSpool.WinSpoolPrinterStatus.PRINTER_STATUS_READY) {
+                state.setSTATE(PRINTER_STATE.PRINTER_SPOOL_STATUS, st.getDesc());
                 return false;
             }
+        } else {
+            LinuxSpool.LinuxSpoolPrinterStatus st = LinuxSpool.getPrinterStatus(p.getName());
+            if (st != LinuxSpool.LinuxSpoolPrinterStatus.IPP_PRINTER_IDLE) {
+                state.setSTATE(PRINTER_STATE.PRINTER_SPOOL_STATUS, st.getDesc());
+                return false;
+            }
+
         }
         return true;
     }

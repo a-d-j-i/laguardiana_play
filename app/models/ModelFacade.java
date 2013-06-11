@@ -200,6 +200,7 @@ public class ModelFacade {
                 u = currentUserAction;
             }
             PrinterEvent.save(u, status.toString());
+            Logger.debug("OnPrinterEvent event %s", status.toString());
             if (status.getError() != null) {
                 if (!Configuration.isPrinterIgnore()) {
                     // A development option

@@ -194,7 +194,7 @@ abstract public class UserAction {
     public void onPrinterEvent(Printer.PrinterStatus p) {
         ActionState currState = state;
         do {
-            Logger.debug("Action : onIoBoardEvent state %s currState %s event %s",
+            Logger.debug("Action : onPrinterEvent state %s currState %s event %s",
                     state.getClass().getSimpleName(), currState.getClass().getSimpleName(), p.toString());
             currState = state;
             state.onPrinterEvent(p);
