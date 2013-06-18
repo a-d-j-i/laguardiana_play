@@ -190,6 +190,9 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         Map<Currency, Map<LgBillType, Bill>> totals = new HashMap();
         Map<Currency, Total> qaTotals = new HashMap();
         for (LgDeposit d : deps) {
+            if (d.finishDate == null) {
+                continue;
+            }
             deposits++;
             if (d instanceof BillDeposit) {
                 BillDeposit bd = (BillDeposit) d;
