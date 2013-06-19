@@ -8,11 +8,9 @@ import com.sun.jna.Structure;
 import com.sun.jna.ptr.PointerByReference;
 import devices.printer.LinuxSpool.LinuxCupsLib.CupsDest;
 import devices.printer.LinuxSpool.LinuxCupsLib.CupsOptions;
-import devices.printer.Printer.PrinterStatus;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import play.Logger;
 
 /**
  *

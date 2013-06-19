@@ -36,12 +36,20 @@ public class BillDepositReadyToStore extends ActionState {
     @Override
     public void accept() {
         if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
-            if (!delayedStore) {
-                delayedStore = true;
-                stateApi.setState(new BagRemoved(stateApi, this));
+            delayedStore = true;
+            stateApi.setState(new BagRemoved(stateApi, this));
+            return;
+        }
+        stateApi.cancelTimer();
+        stateApi.addBatchToDeposit();
+        if (Configuration.isIgnoreShutter()) {
+            if (!stateApi.store()) {
+                Logger.error("startBillDeposit can't deposit");
             }
+            stateApi.setState(new BillDepositStoring(stateApi));
         } else {
-            store();
+            stateApi.openGate();
+            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoring(stateApi)));
         }
     }
 
@@ -56,6 +64,10 @@ public class BillDepositReadyToStore extends ActionState {
                 stateApi.setState(new Jam(stateApi, this));
                 break;
             case READY_TO_STORE:
+                if (delayedStore) {
+                    Logger.error("BillDepositReadyToStore DELAYED STORE!!!");
+                    accept();
+                }
                 break;
             case CANCELING:
                 stateApi.setState(new Canceling(stateApi));
@@ -78,26 +90,10 @@ public class BillDepositReadyToStore extends ActionState {
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("ReadyToStoreEnvelopeDeposit onIoBoardEvent %s", status.toString());
-        if (!Configuration.isIgnoreBag() && status.getBagAproveState() == IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-            if (delayedStore) {
-                Logger.error("ReadyToStoreEnvelopeDeposit DELAYED STORE!!!");
-                store();
-            }
+        if (delayedStore) {
+            Logger.error("BillDepositReadyToStore DELAYED STORE!!!");
+            accept();
         }
         super.onIoBoardEvent(status);
-    }
-
-    private void store() {
-        stateApi.cancelTimer();
-        stateApi.addBatchToDeposit();
-        if (Configuration.isIgnoreShutter()) {
-            if (!stateApi.store()) {
-                Logger.error("startBillDeposit can't deposit");
-            }
-            stateApi.setState(new BillDepositStoring(stateApi));
-        } else {
-            stateApi.openGate();
-            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoring(stateApi)));
-        }
     }
 }

@@ -85,7 +85,7 @@
             </div>
         </div>
         <div id="alerta_botonera">
-            <a href="#" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
+            <a href="#" id="alerta_bag_removed_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
         </div>
     </div>
     <div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
@@ -112,31 +112,26 @@
             var billData = data[ 1 ];
             if ( status != null && status.toString() != 'null' ) {
                 $( '.info_message' ).html(  data[ 2 ] );
+                
                 if ( status == 'TIMEOUT_WARNING' ) {
                     showAlert( "#alerta_timeout" );
-                } else {
-                    closeAlert( "#alerta_timeout" );
-                }
-                if ( status == 'CANCELING' ) {
+                } else if ( status == 'CANCELING' ) {
                     showAlert( '#alerta_cancel' );                
-                } else {
-                    closeAlert( "#alerta_cancel" );
-                }
-                if ( status == 'STORING' ) {
+                } else if ( status == 'STORING' ) {
                     showAlert( '#alerta_storing' );                
-                } else {
-                    closeAlert( "#alerta_storing" );    
-                }
-                if ( status == 'REMOVE_REJECTED_BILLS' ) {
+                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
                     showAlert( '#alerta_remove_rejected_bills' );                
-                } else {
-                    closeAlert( "#alerta_remove_rejected_bills" );    
-                }
-                if ( status == 'BAG_REMOVED' ) {
+                } else if ( status == 'BAG_REMOVED' ) {
                     showAlert( '#alerta_bag_removed' );                
                 } else {
-                    closeAlert( "#alerta_bag_removed" );    
+                    closeAlert();
+                    /*closeAlert( "#alerta_timeout" );
+                    closeAlert( "#alerta_cancel" );
+                    closeAlert( "#alerta_storing" );    
+                    closeAlert( "#alerta_remove_rejected_bills" );    
+                    closeAlert( "#alerta_bag_removed" );    */
                 }
+                
                 if ( status == 'IDLE' || status == 'CANCELING' || status == 'STORING' || status == 'REMOVE_REJECTED_BILLS' || status == 'BAG_REMOVED' ) {
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";

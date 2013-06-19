@@ -482,7 +482,7 @@ public class ModelFacade {
         }
         if (!Configuration.isIgnoreBag()
                 && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-            Logger.error("IoBoard bag not inplace can't stores");
+            Logger.error("IoBoard bag not inplace can't store");
             //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
             return false;
         }

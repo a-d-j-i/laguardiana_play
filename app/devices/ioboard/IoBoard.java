@@ -20,7 +20,7 @@ public class IoBoard {
 
     // read timeout in ms
     public enum SHUTTER_STATE {
-        
+
         SHUTTER_START_CLOSE(0),
         SHUTTER_START_OPEN(1),
         SHUTTER_RUN_OPEN(2),
@@ -32,37 +32,37 @@ public class IoBoard {
         SHUTTER_OPEN(8),
         SHUTTER_CLOSED(9);
         static final HashMap< Byte, SHUTTER_STATE> reverse = new HashMap< Byte, SHUTTER_STATE>();
-        
+
         static {
             for (SHUTTER_STATE s : SHUTTER_STATE.values()) {
                 reverse.put(s.stId, s);
             }
         }
         private Byte stId;
-        
+
         private SHUTTER_STATE(int stId) {
             this.stId = (byte) stId;
         }
-        
+
         public static SHUTTER_STATE factory(int stId) {
             return reverse.get((byte) stId);
         }
-        
+
         public boolean isOpen() {
             return this == SHUTTER_OPEN;
         }
     };
-    
+
     public enum BAG_APROVE_STATE {
-        
+
         BAG_APROVED,
         BAG_NOT_APROVED,
         BAG_APROVE_WAIT,
         BAG_APROVE_CONFIRM,;
     };
-    
+
     public enum BAG_STATE {
-        
+
         BAG_STATE_ERROR(0),
         BAG_STATE_REMOVED(1),
         BAG_STATE_INPLACE(2),
@@ -77,18 +77,18 @@ public class IoBoard {
         BAG_STATE_PUTTING_5(11),
         BAG_STATE_PUTTING_6(12),;
         static final HashMap< Byte, BAG_STATE> reverse = new HashMap< Byte, BAG_STATE>();
-        
+
         static {
             for (BAG_STATE s : BAG_STATE.values()) {
                 reverse.put(s.stId, s);
             }
         }
         private Byte stId;
-        
+
         private BAG_STATE(int stId) {
             this.stId = (byte) stId;
         }
-        
+
         public static BAG_STATE factory(int stId) {
             return reverse.get((byte) stId);
         }
@@ -96,13 +96,13 @@ public class IoBoard {
 
     // An immutable cloned version of IoBoardState 
     public class IoBoardStatus {
-        
+
         private final SHUTTER_STATE shutterState;
         private final BAG_APROVE_STATE bagAproveState;
         private final BAG_STATE bagState;
         private final IoBoardError error;
         private final String criticalEvent;
-        
+
         private IoBoardStatus(State currentState) {
             this.shutterState = currentState.shutterState;
             this.bagAproveState = currentState.bagAproveState;
@@ -110,7 +110,7 @@ public class IoBoard {
             this.bagState = currentState.bagState;
             this.criticalEvent = null;
         }
-        
+
         private IoBoardStatus(State currentState, String criticalEvent) {
             this.shutterState = currentState.shutterState;
             this.bagAproveState = currentState.bagAproveState;
@@ -118,27 +118,27 @@ public class IoBoard {
             this.bagState = currentState.bagState;
             this.criticalEvent = criticalEvent;
         }
-        
+
         public SHUTTER_STATE getShutterState() {
             return shutterState;
         }
-        
+
         public BAG_APROVE_STATE getBagAproveState() {
             return bagAproveState;
         }
-        
+
         public BAG_STATE getBagState() {
             return bagState;
         }
-        
+
         public IoBoardError getError() {
             return error;
         }
-        
+
         public String getCriticalEvent() {
             return criticalEvent;
         }
-        
+
         @Override
         public String toString() {
             return "IoBoardStatus{" + "shutterState=" + shutterState + ", bagAproveState=" + bagAproveState + ", bagState=" + bagState + ", error=" + error + '}';
@@ -147,7 +147,7 @@ public class IoBoard {
     // A singleton create to hold the state of the ioboard.
 
     private class State extends Observable {
-        
+
         private Byte A = 0;
         private Byte B = 0;
         private Byte C = 0;
@@ -160,7 +160,7 @@ public class IoBoard {
         private SHUTTER_STATE shutterState = null;
         private Integer lockState = null;
         private BAG_APROVE_STATE bagAproveState = BAG_APROVE_STATE.BAG_APROVED;
-        
+
         synchronized private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt, Boolean bagAproved) {
             //Logger.debug("IOBOARD setSTATE : bagSt %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
             BAG_STATE bs = BAG_STATE.factory(bagSt);
@@ -204,7 +204,7 @@ public class IoBoard {
             }
             //Logger.debug("IOBOARD setSTATE : bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
         }
-        
+
         synchronized private void setStatusBytes(Byte A, Byte B, Byte C, Byte D, Byte BAG_SENSOR, Byte BAG_STATUS) {
             //Logger.debug("IOBOARD setStatusBytes : A 0x%x B 0x%x C 0x%x D 0x%x BAG_SENSOR 0x%x BAG_STATUS 0x%x", A, B, C, D, BAG_SENSOR, BAG_STATUS);
             this.A = A;
@@ -214,7 +214,7 @@ public class IoBoard {
             this.BAG_SENSOR = BAG_SENSOR;
             this.BAG_STATUS = BAG_STATUS;
         }
-        
+
         synchronized private void setError(IoBoardError error) {
             this.error = error;
             setChanged();
@@ -225,15 +225,15 @@ public class IoBoard {
         synchronized private void setCriticalEvent(String criticalEvent) {
             setChanged();
             notifyObservers(new IoBoardStatus(this, criticalEvent));
-            
+
         }
-        
+
         synchronized private void setAproveBagState(BAG_APROVE_STATE state) {
             this.bagAproveState = state;
             setChanged();
             notifyObservers(new IoBoardStatus(this));
         }
-        
+
         synchronized public void clearError() {
             // Don't overwrite the first error!!!.
             this.error = null;
@@ -241,11 +241,11 @@ public class IoBoard {
             setChanged();
             notifyObservers(new IoBoardStatus(this));
         }
-        
+
         synchronized private IoBoardError getError() {
             return error;
         }
-        
+
         public String repr(Byte d) {
             BitSet b = new BitSet();
             byte c = 1;
@@ -257,27 +257,27 @@ public class IoBoard {
             }
             return String.format("0x%02X : %s", d, b.toString());
         }
-        
+
         public String reprA() {
             return repr(A);
         }
-        
+
         public String reprB() {
             return repr(B);
         }
-        
+
         public String reprC() {
             return repr(C);
         }
-        
+
         public String reprD() {
             return repr(D);
         }
-        
+
         public String reprBAG_SENSOR() {
             return repr(BAG_SENSOR);
         }
-        
+
         public String reprBAG_STATUS() {
             return repr(BAG_STATUS);
         }
@@ -286,12 +286,12 @@ public class IoBoard {
     public static final int IOBOARD_STATUS_CHECK_FREQ = 500;
     public static final int IOBOARD_MAX_RETRIES = 5;
     final private State state = new State();
-    
+
     @Override
     public String toString() {
         return "IoBoard{" + "state=" + state + ", lastCmdSentTime=" + lastCmdSentTime + ", mustStop=" + mustStop + ", statusThread=" + statusThread + ", serialPort=" + serialPort + '}';
     }
-    
+
     public static String bytesToHex(byte[] bytes) {
         final char[] hexArray = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
         char[] hexChars = new char[bytes.length * 3];
@@ -304,9 +304,9 @@ public class IoBoard {
         }
         return new String(hexChars);
     }
-    
+
     private class StatusThread extends Thread {
-        
+
         @Override
         public void run() {
             int retries = 0;
@@ -365,7 +365,7 @@ public class IoBoard {
                         if (state.getError() == null) {
                             sendCmd('S');
                             retries++;
-                            
+
                             if (retries == IOBOARD_MAX_RETRIES) {
                                 state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
                                         String.format("StatusThread timeout reading from port, exception %s", ex.getMessage())));
@@ -388,7 +388,7 @@ public class IoBoard {
             }
             Logger.debug("IOBOARD status thread done");
         }
-        
+
         private void sendCmd(char cmd) {
             if (serialPort == null) {
                 Logger.error("IoBoard Serial port closed");
@@ -419,7 +419,7 @@ public class IoBoard {
     private AtomicBoolean mustStop = new AtomicBoolean(false);
     private final StatusThread statusThread;
     private SerialPortAdapterInterface serialPort = null;
-    
+
     public IoBoard(SerialPortAdapterInterface serialPort) {
         if (serialPort == null) {
             throw new InvalidParameterException("IoBoard invalid parameter serial port");
@@ -430,20 +430,20 @@ public class IoBoard {
         this.serialPort = serialPort;
         statusThread = new StatusThread();
     }
-    
+
     public IoBoardStatus getStatus() {
         return new IoBoardStatus(state);
     }
-    
+
     public State getInternalState() {
         return state;
     }
-    
+
     public void startStatusThread() {
         Logger.debug("IoBoard status thread start");
         statusThread.start();
     }
-    
+
     public void close() {
         mustStop.set(true);
         try {
@@ -460,36 +460,39 @@ public class IoBoard {
         }
         serialPort = null;
     }
-    
+
     public void openGate() {
+        Logger.debug("openGate");
         statusThread.sendCmd('O');
     }
-    
+
     public void closeGate() {
+        Logger.debug("closeGate");
         statusThread.sendCmd('C');
     }
-    
+
     public void aproveBag() {
         state.setAproveBagState(BAG_APROVE_STATE.BAG_APROVE_WAIT);
+        Logger.debug("aproveBag");
         statusThread.sendCmd('A');
     }
-    
+
     public void aproveBagConfirm() {
         state.setAproveBagState(BAG_APROVE_STATE.BAG_APROVED);
     }
-    
+
     public void clearError() {
         state.clearError();
     }
-    
+
     public IoBoardError getError() {
         return state.getError();
     }
-    
+
     public void addObserver(Observer observer) {
         state.addObserver(observer);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -504,7 +507,7 @@ public class IoBoard {
         }
         return true;
     }
-    
+
     @Override
     public int hashCode() {
         int hash = 5;

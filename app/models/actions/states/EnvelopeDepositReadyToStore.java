@@ -39,10 +39,8 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
         switch (m.getState()) {
             case READY_TO_STORE:
                 if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
-                    if (!delayedStore) {
-                        delayedStore = true;
-                        stateApi.setState(new BagRemoved(stateApi, this));
-                    }
+                    delayedStore = true;
+                    stateApi.setState(new BagRemoved(stateApi, this));
                 } else {
                     store();
                 }
@@ -59,7 +57,7 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("ReadyToStoreEnvelopeDeposit onIoBoardEvent %s", status.toString());
-        if (!Configuration.isIgnoreBag() && status.getBagAproveState() == IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+        if (!Configuration.isIgnoreBag() && stateApi.isIoBoardOk()) {
             if (delayedStore) {
                 Logger.error("ReadyToStoreEnvelopeDeposit DELAYED STORE!!!");
                 store();

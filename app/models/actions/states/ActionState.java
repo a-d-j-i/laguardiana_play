@@ -89,4 +89,22 @@ abstract public class ActionState {
     public String getMessage(UserAction userAction) {
         return managerMessages.get(stateApi.getManagerState());
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ActionState other = (ActionState) obj;
+        return (this.name().equals(other.name()));
+    }
 }

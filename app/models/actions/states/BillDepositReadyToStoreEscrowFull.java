@@ -37,12 +37,20 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
     @Override
     public void accept() {
         if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
-            if (!delayedStore) {
-                delayedStore = true;
-                stateApi.setState(new BagRemoved(stateApi, this));
+            delayedStore = true;
+            stateApi.setState(new BagRemoved(stateApi, this));
+            return;
+        }
+        stateApi.cancelTimer();
+        stateApi.addBatchToDeposit();
+        if (Configuration.isIgnoreShutter()) {
+            if (!stateApi.store()) {
+                Logger.error("startBillDeposit can't cancel glory");
             }
+            stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
         } else {
-            store();
+            stateApi.openGate();
+            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
         }
     }
 
@@ -55,6 +63,10 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
             case JAM:
                 break;
             case ESCROW_FULL:
+                if (delayedStore) {
+                    Logger.error("BillDepositReadyToStoreEscrowFull DELAYED STORE!!!");
+                    accept();
+                }
                 break;
             case CANCELING:
                 stateApi.setState(new Canceling(stateApi));
@@ -70,27 +82,11 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        Logger.error("ReadyToStoreEnvelopeDeposit onIoBoardEvent %s", status.toString());
-        if (!Configuration.isIgnoreBag() && status.getBagAproveState() == IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-            if (delayedStore) {
-                Logger.error("ReadyToStoreEnvelopeDeposit DELAYED STORE!!!");
-                store();
-            }
+        Logger.error("BillDepositReadyToStoreEscrowFull onIoBoardEvent %s", status.toString());
+        if (delayedStore) {
+            Logger.error("BillDepositReadyToStoreEscrowFull DELAYED STORE!!!");
+            accept();
         }
         super.onIoBoardEvent(status);
-    }
-
-    private void store() {
-        stateApi.cancelTimer();
-        stateApi.addBatchToDeposit();
-        if (Configuration.isIgnoreShutter()) {
-            if (!stateApi.store()) {
-                Logger.error("startBillDeposit can't cancel glory");
-            }
-            stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
-        } else {
-            stateApi.openGate();
-            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
-        }
     }
 }

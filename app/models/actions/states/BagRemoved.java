@@ -32,7 +32,7 @@ public class BagRemoved extends ActionState {
 
     @Override
     public void cancel() {
-        stateApi.setState(prevState);
+        //stateApi.setState(prevState);
         prevState.cancel();
     }
 

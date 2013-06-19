@@ -178,7 +178,7 @@ abstract public class UserAction {
                     state.getClass().getSimpleName(), currState.getClass().getSimpleName(), m.toString());
             currState = state;
             currState.onGloryEvent(m);
-        } while (state != currState);
+        } while (!state.equals(currState));
     }
 
     public void onIoBoardEvent(IoBoard.IoBoardStatus s) {
@@ -188,7 +188,7 @@ abstract public class UserAction {
                     state.getClass().getSimpleName(), currState.getClass().getSimpleName(), s.toString());
             currState = state;
             currState.onIoBoardEvent(s);
-        } while (state != currState);
+        } while (!state.equals(currState));
     }
 
     public void onPrinterEvent(Printer.PrinterStatus p) {
@@ -198,7 +198,7 @@ abstract public class UserAction {
                     state.getClass().getSimpleName(), currState.getClass().getSimpleName(), p.toString());
             currState = state;
             state.onPrinterEvent(p);
-        } while (state != currState);
+        } while (!state.equals(currState));
     }
 
     public void onTimeoutEvent(TimeoutTimer timer) {
