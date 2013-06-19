@@ -173,7 +173,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     abstract public void setRenderArgs(Map args);
 
-    abstract public void print(Printer p, boolean reprint);
+    abstract public void print(boolean reprint);
 
     abstract public String getDetailView();
 

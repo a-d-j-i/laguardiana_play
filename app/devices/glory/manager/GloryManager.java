@@ -239,6 +239,10 @@ public class GloryManager {
         public void addObserver(Observer observer) {
             state.addObserver(observer);
         }
+
+        public Glory getCounter() {
+            return device;
+        }
     }
     /*
      *

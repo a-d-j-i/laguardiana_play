@@ -1,7 +1,6 @@
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import models.ModelFacade;
 import models.db.LgAclRule;
 import models.db.LgResource;
 import models.db.LgRole;
@@ -19,8 +18,6 @@ public class Bootstrap extends Job {
 
     @Override
     public void doJob() {
-        // Initialize static model Facada :(
-        ModelFacade.getError();
         // Load roles.
         if (Play.mode.isDev()) {
             if (LgSystemProperty.find("select l from LgSystemProperty l where name = 'db_initialized'").fetch().isEmpty()) {

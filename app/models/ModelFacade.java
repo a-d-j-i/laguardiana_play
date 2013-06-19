@@ -6,6 +6,7 @@ package models;
 
 import controllers.Secure;
 import devices.DeviceFactory;
+import devices.glory.Glory;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
@@ -24,6 +25,7 @@ import models.events.IoBoardEvent;
 import models.events.PrinterEvent;
 import models.lov.Currency;
 import play.Logger;
+import play.Play;
 import play.jobs.Job;
 import play.libs.F;
 import play.libs.F.Promise;
@@ -45,21 +47,21 @@ public class ModelFacade {
     static private User currentUser = null;
 
     static {
-        manager = DeviceFactory.getGloryManager();
+        manager = DeviceFactory.getGloryManager(Play.configuration.getProperty("glory.port"));
         manager.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnGloryEvent((ManagerStatus) data).now();
             }
         });
 
-        ioBoard = DeviceFactory.getIoBoard();
+        ioBoard = DeviceFactory.getIoBoard(Play.configuration.getProperty("io_board.port"));
         ioBoard.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
             }
         });
 
-        printer = DeviceFactory.getPrinter();
+        printer = DeviceFactory.getPrinter(Play.configuration.getProperty("printer.port"));
         printer.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
@@ -276,10 +278,6 @@ public class ModelFacade {
             ioBoard.closeGate();
         }
 
-        public Printer getPrinter() {
-            return printer;
-        }
-
         public boolean isIoBoardOk() {
             return ModelFacade.isIoBoardOk(ioBoard.getStatus());
         }
@@ -493,5 +491,30 @@ public class ModelFacade {
 
     public static Printer.PrinterStatus getPrinterStatus() {
         return printer.getStatus();
+    }
+
+    public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+        printer.print(templateName, args, paperWidth, paperLen);
+    }
+
+    public static ManagerInterface getGloryManager() {
+        return manager;
+    }
+
+    public static IoBoard getIoBoard() {
+        //Play.configuration.getProperty("io_board.port")
+        return ioBoard;
+    }
+
+    public static Printer getPrinter() {
+        return printer;
+    }
+
+    public static Glory getCounter() {
+        return manager.getCounter();
+    }
+
+    public static Object getPrinters() {
+        return printer.printers.values();
     }
 }

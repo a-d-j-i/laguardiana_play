@@ -4,7 +4,6 @@
  */
 package models;
 
-import devices.DeviceFactory;
 import devices.glory.manager.ManagerInterface;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +12,8 @@ import models.db.LgBillType;
 import models.lov.Currency;
 
 /**
- * @author adji
- * This class must be splitted between controller and model in a happier way.
+ * @author adji This class must be splitted between controller and model in a
+ * happier way.
  */
 public class Bill {
 
@@ -45,6 +44,7 @@ public class Bill {
         }
     }
     // TODO: Refactor into controller and model parts.
+
     static public List<Bill> getBillList(Integer currency) {
         List<Bill> ret = new ArrayList<Bill>();
         List<LgBillType> billTypes = LgBillType.find(currency);
@@ -52,7 +52,7 @@ public class Bill {
 
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
-        ManagerInterface manager = DeviceFactory.getGloryManager();
+        ManagerInterface manager = ModelFacade.getGloryManager();
         if (manager != null) {
             currentQuantity = manager.getCurrentQuantity();
             desiredQuantity = manager.getDesiredQuantity();
@@ -89,7 +89,7 @@ public class Bill {
 
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
-        ManagerInterface manager = DeviceFactory.getGloryManager();
+        ManagerInterface manager = ModelFacade.getGloryManager();
         if (manager != null) {
             currentQuantity = manager.getCurrentQuantity();
             desiredQuantity = manager.getDesiredQuantity();

@@ -4,7 +4,6 @@
  */
 package controllers;
 
-import devices.DeviceFactory;
 import devices.ioboard.IoBoard;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
@@ -53,13 +52,13 @@ public class CounterController extends Controller {
         String gerror = null;
         String ierror = null;
 
-        final ManagerInterface manager = DeviceFactory.getGloryManager();
+        final ManagerInterface manager = ModelFacade.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
             gerror = manager.getStatus().toString();
         }
         if (!Configuration.isIoBoardIgnore()) {
-            final IoBoard ioBoard = DeviceFactory.getIoBoard();
+            final IoBoard ioBoard = ModelFacade.getIoBoard();
             if (ioBoard != null && ioBoard.getError() != null) {
                 ierror = ioBoard.getError().toString();
             }

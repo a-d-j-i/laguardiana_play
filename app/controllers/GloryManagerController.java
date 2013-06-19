@@ -1,6 +1,5 @@
 package controllers;
 
-import devices.DeviceFactory;
 import devices.glory.manager.ManagerInterface;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import models.Bill;
+import models.ModelFacade;
 import models.db.LgBillType;
 import play.Logger;
 import play.mvc.Before;
@@ -22,7 +22,7 @@ public class GloryManagerController extends Application {
 
     @Before
     static void getManager() throws Throwable {
-        manager = DeviceFactory.getGloryManager();
+        manager = ModelFacade.getGloryManager();
         if (manager == null) {
             error = "Manager error opening port";
         } else {

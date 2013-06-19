@@ -1,5 +1,6 @@
 package devices.glory.manager;
 
+import devices.glory.Glory;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -125,4 +126,6 @@ public interface ManagerInterface {
     public ManagerStatus getStatus();
 
     public void addObserver(Observer observer);
+
+    public Glory getCounter();
 }

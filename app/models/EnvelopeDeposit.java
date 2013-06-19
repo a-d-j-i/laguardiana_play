@@ -1,7 +1,6 @@
 package models;
 
 import controllers.Secure;
-import devices.printer.Printer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,23 +33,23 @@ public class EnvelopeDeposit extends LgDeposit {
     }
 
     @Override
-    public void print(Printer p, boolean reprint) {
+    public void print(boolean reprint) {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
         if (reprint) {
             args.put("reprint", "true");
         }
-        p.print("PrinterController/envelopeDeposit_finish.html", args, Configuration.getPrintWidth(), Configuration.getEvelopeFinishPrintLen());
+        ModelFacade.print("PrinterController/envelopeDeposit_finish.html", args, Configuration.getPrintWidth(), Configuration.getEvelopeFinishPrintLen());
     }
 
     // Merge somehow with print...
-    public void printStart(Printer p) {
+    public void printStart() {
         Map args = new HashMap();
         // Print the ticket.
         //List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         //List<Currency> currencies = Currency.findAll();
         setRenderArgs(args);
-        p.print("PrinterController/envelopeDeposit_start.html", args, Configuration.getPrintWidth(), Configuration.getEvenlopeStartPrintLen());
+        ModelFacade.print("PrinterController/envelopeDeposit_start.html", args, Configuration.getPrintWidth(), Configuration.getEvenlopeStartPrintLen());
     }
 }

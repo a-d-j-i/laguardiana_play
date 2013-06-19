@@ -42,7 +42,7 @@ public class EnvelopeDepositAction extends UserAction {
         deposit.save();
         currentDepositId = deposit.depositId;
         userActionApi.envelopeDeposit();
-        deposit.printStart(userActionApi.getPrinter());
+        deposit.printStart();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class EnvelopeDepositAction extends UserAction {
         if (currentDepositId != null) {
             EnvelopeDeposit d = EnvelopeDeposit.findById(currentDepositId);
             if (d != null && d.finishDate != null) {
-                d.print(userActionApi.getPrinter(), false);
+                d.print(false);
             }
         }
     }

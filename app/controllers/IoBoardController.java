@@ -1,8 +1,7 @@
 package controllers;
 
-import devices.DeviceFactory;
 import java.io.IOException;
-import play.Play;
+import models.ModelFacade;
 import play.mvc.Before;
 import play.mvc.Router;
 
@@ -12,7 +11,7 @@ public class IoBoardController extends Application {
 
     @Before
     static void getBoard() throws Throwable {
-        ioBoard = DeviceFactory.getIoBoard(Play.configuration.getProperty("io_board.port"));
+        ioBoard = ModelFacade.getIoBoard();
         if (ioBoard == null) {
             flash.put("error", "Error opening port");
             redirect(Router.reverse("IoBoardController.index").url);

@@ -1,12 +1,10 @@
 package controllers;
 
-import devices.DeviceFactory;
 import java.util.Date;
 import java.util.List;
 import models.db.LgBag;
 import models.db.LgDeposit;
 import models.db.LgZ;
-import play.Logger;
 import play.data.binding.As;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -67,7 +65,7 @@ public class ReportDepositController extends Controller {
 
     public static void reprint(Integer page, @As("dd/MM/yyyy") Date startDate, @As("dd/MM/yyyy") Date endDate, Integer bagId, Integer zId, Integer id) {
         LgDeposit d = LgDeposit.findById(id);
-        d.print(DeviceFactory.getPrinter(), true);
+        d.print(true);
         list(page, startDate, endDate, bagId, zId);
     }
 }

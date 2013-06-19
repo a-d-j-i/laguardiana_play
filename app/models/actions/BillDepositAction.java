@@ -45,7 +45,7 @@ public class BillDepositAction extends UserAction {
     public void finish() {
         BillDeposit deposit = BillDeposit.findById(getDepositId());
         if (deposit != null && deposit.getTotal() > 0) {
-            deposit.print(userActionApi.getPrinter(), false);
+            deposit.print(false);
         }
     }
 }

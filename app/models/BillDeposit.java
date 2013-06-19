@@ -1,7 +1,6 @@
 package models;
 
 import controllers.Secure;
-import devices.printer.Printer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,13 +64,13 @@ public class BillDeposit extends LgDeposit {
     }
 
     @Override
-    public void print(Printer p, boolean reprint) {
+    public void print(boolean reprint) {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
         if (reprint) {
             args.put("reprint", "true");
         }
-        p.print("PrinterController/billDeposit.html", args, Configuration.getPrintWidth(),Configuration.getBillDepositPrintLen());
+        ModelFacade.print("PrinterController/billDeposit.html", args, Configuration.getPrintWidth(), Configuration.getBillDepositPrintLen());
     }
 }
