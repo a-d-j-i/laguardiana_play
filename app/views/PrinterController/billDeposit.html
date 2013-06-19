@@ -1,9 +1,11 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
-<img src="../public/images/${play.configuration['style.plogo']}">
+<center><img src="../public/images/${play.configuration['style.plogo']}"></center>
 <h3 style="margin-left: -30; text-align: justify; width: 70%; font-weight: bold;">
     &{ 'application.thanks', providerCode }
 </h3>
-<br>
+#{if reprint } 
+&{ 'summary.reprint' }<br/>
+#{/if}
 #{if ( deposit.findUserCode() ) }
 &{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}<br>
 #{/if}
@@ -12,13 +14,10 @@
 #{/if}
 &{ 'summary.total' }: ${depositTotal} ${deposit.getCurrency().description}<br>
 &{ 'summary.transaction_code' }: ${deposit.depositId}<br>
-&{ 'summary.username' }: #{usernameTag user:user/}<br>
-&{ 'summary.client_code' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}<br>
+&{ 'summary.username' }: #{usernameTag user:deposit.user/}<br>
+&{ 'summary.client_code' }: #{if play.configuration['style.useGecosAsClientCode']}${deposit.user.gecos}#{/if}#{else}${clientCode}#{/else}<br>
 &{ 'summary.branch_code' }: ${branchCode}<br>
 &{ 'summary.machine_code' }: ${machineCode}<br>
-#{if reprint } 
-&{ 'summary.reprint' }<br>
-#{/if}
 <table border="0" cellpadding="0">
     <thead>
         <tr>

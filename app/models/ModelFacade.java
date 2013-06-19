@@ -142,10 +142,11 @@ public class ModelFacade {
                 u = currentUserAction;
             }
             IoBoardEvent.save(u, status.toString());
+            Logger.debug("OnIoBoardEvent event %s", status.toString());
+
             if (status.getCriticalEvent() != null) {
                 IoBoardEvent.save(u, status.getCriticalEvent());
             }
-            Logger.debug("OnIoBoardEvent event %s", status.toString());
 
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {

@@ -1,13 +1,13 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
 <img src="../public/images/${play.configuration['style.plogo']}">
-<div style="width: 70mm;">
-Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy HH:mm:ss') } y 
-#{ if z.closeDate == null }aun no cerrado#{/if}
-#{ else }cerrado el ${ z.closeDate.format('dd/MM/yyyy HH:mm:ss') }#{/else}
-</div>
+<br/>
+Contenido del cierre contable<br/>
+iniciado el ${ z.creationDate.format('dd/MM/yyyy HH:mm:ss') }<br/>
+#{ if z.closeDate == null }y aun no cerrado#{/if}
+#{ else }y cerrado el ${ z.closeDate.format('dd/MM/yyyy HH:mm:ss') }#{/else}
+<br/>
 #{if reprint } 
-&{ 'summary.reprint' }<br>
+&{ 'summary.reprint' }<br/>
 #{/if}
-<br>
 #{ bills_table_printer bill_data: totals /}
 ${ currentDate.format('dd/MM/yyyy HH:mm:ss') }&nbsp;S.E.U.O.

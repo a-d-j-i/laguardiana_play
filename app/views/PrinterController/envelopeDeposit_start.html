@@ -3,9 +3,8 @@
     &{ 'envelope_deposit.put_ticket_in_envelope' }
 </h3>
 #{if reprint } 
-&{ 'summary.reprint' }
+&{ 'summary.reprint' }<br/>
 #{/if}
-
 #{if ( deposit.findUserCode() ) }
 &{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}<br>
 #{/if}
@@ -29,8 +28,8 @@
 #{/list}
 <br/>
 &{ 'summary.transaction_code' }: ${deposit.depositId}<br>
-&{ 'summary.username' }: #{usernameTag user:user/}<br>
-&{ 'summary.client_code' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}}<br>
+&{ 'summary.username' }: #{usernameTag user:deposit.user/}<br>
+&{ 'summary.client_code' }: #{if play.configuration['style.useGecosAsClientCode']}${deposit.user.gecos}#{/if}#{else}${clientCode}#{/else}<br>
 &{ 'summary.branch_code' }: ${branchCode}<br>
 &{ 'summary.machine_code' }: ${machineCode}<br>
 <br/>

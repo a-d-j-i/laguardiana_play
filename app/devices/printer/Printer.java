@@ -240,7 +240,7 @@ public class Printer extends Observable {
     }
     final double INCH = 72;
     final double MM = INCH / 25.5;
-    final int DEFAULT_PAPER_WIDTH = 80;
+    final int DEFAULT_PAPER_WIDTH = 77;
     final int DEFAULT_PAPER_LEN = 200;
     private AtomicBoolean mustStop = new AtomicBoolean(false);
     private final StatusThread statusThread;

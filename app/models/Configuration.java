@@ -207,7 +207,7 @@ public class Configuration {
         try {
             return Integer.parseInt(Play.configuration.getProperty("print.paperWidth"));
         } catch (NumberFormatException e) {
-            return 80;
+            return 77;
         }
     }
 }
