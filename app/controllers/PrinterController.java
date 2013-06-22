@@ -12,7 +12,7 @@ public class PrinterController extends Controller {
 
     public static void listPrinters() {
         renderArgs.put("printers", ModelFacade.getPrinters());
-        renderArgs.put("printerStatus", ModelFacade.getPrinterStatus());
+        renderArgs.put("printerStatus", ModelFacade.getPrinter().getInternalState());
         renderArgs.put("currentPrinter", ModelFacade.getCurrentPrinter());
 
         render();

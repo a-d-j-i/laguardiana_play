@@ -489,8 +489,8 @@ public class ModelFacade {
         return true;
     }
 
-    public static Printer.PrinterStatus getPrinterStatus() {
-        return printer.getStatus();
+    public static boolean printerNeedCheck() {
+        return printer.needCheck();
     }
 
     public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {

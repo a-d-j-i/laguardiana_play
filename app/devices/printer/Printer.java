@@ -101,10 +101,10 @@ public class Printer extends Observable {
         }
 
         public void printJobNoMoreEvents(PrintJobEvent pje) {
-            if (isPrinterOk(pje.getPrintJob().getPrintService())) {
-                Logger.debug("PRINTER : print DONE");
-                state.setSTATE(PRINTER_STATE.PRINTER_READY, null);
-            }
+            /*            if (isPrinterOk(pje.getPrintJob().getPrintService())) {
+             Logger.debug("PRINTER : print DONE");
+             state.setState(PRINTER_STATE.PRINTER_READY, null);
+             }*/
         }
 
         public void printJobRequiresAttention(PrintJobEvent pje) {
@@ -118,7 +118,7 @@ public class Printer extends Observable {
         PRINTER_READY,
         PRINTER_PRINTING,
         PRINTER_NOT_ACCEPTING_JOBS,
-        PRINTER_SPOOL_STATUS;
+        PRINTER_SPOOL_PROBLEM;
     };
 
     // An immutable cloned version of PrinterState 
@@ -153,13 +153,13 @@ public class Printer extends Observable {
     }
     // A singleton create to hold the state of the printer.
 
-    private class State extends Observable {
+    class State extends Observable {
 
         private PRINTER_STATE printerState = null;
         private String stateDesc;
         private PrinterError error = null;
 
-        synchronized private void setSTATE(PRINTER_STATE state, String stateDesc) {
+        synchronized void setState(PRINTER_STATE state, String stateDesc) {
             //Logger.debug("Printer setState prev : printerSTate %s stateDesc %s", state, stateDesc);
             if (this.printerState != state) {
                 this.printerState = state;
@@ -176,7 +176,7 @@ public class Printer extends Observable {
             }
         }
 
-        synchronized private void setError(PrinterError error) {
+        synchronized void setError(PrinterError error) {
             this.error = error;
             setChanged();
             notifyObservers(new PrinterStatus(this));
@@ -184,13 +184,19 @@ public class Printer extends Observable {
 
         synchronized public void clearError() {
             // Don't overwrite the first error!!!.
-            this.error = null;
-            setChanged();
-            notifyObservers(new PrinterStatus(this));
+            if (this.error != null) {
+                this.error = null;
+                setChanged();
+                notifyObservers(new PrinterStatus(this));
+            }
         }
+//
+//        synchronized private PrinterError getError() {
+//            return error;
+//        }
 
-        synchronized private PrinterError getError() {
-            return error;
+        synchronized private boolean isError() {
+            return error.getErrorCode() != null;
         }
 
         synchronized private PRINTER_STATE getPrinterState() {
@@ -199,6 +205,13 @@ public class Printer extends Observable {
 
         synchronized private String getStateDesc() {
             return stateDesc;
+        }
+
+        synchronized public boolean needCheck() {
+            if (printerState == null) {
+                return false;
+            }
+            return (printerState != PRINTER_STATE.PRINTER_READY && printerState != PRINTER_STATE.PRINTER_PRINTING);
         }
 
         synchronized private void sendEvent() {
@@ -212,6 +225,10 @@ public class Printer extends Observable {
     @Override
     public String toString() {
         return "Printer{" + "state=" + state + ", mustStop=" + mustStop + ", statusThread=" + statusThread + '}';
+
+
+
+
     }
 
     private class StatusThread extends Thread {
@@ -226,9 +243,18 @@ public class Printer extends Observable {
                     break;
                 }
                 // pool the status of the printer every 2 secs.
-                if (isPrinterOk(p)) {
-                    state.setSTATE(PRINTER_STATE.PRINTER_READY, null);
-                    //Logger.debug("printer status error");
+                AttributeSet att = p.getAttributes();
+
+                if (att != null && att.get(PrinterIsAcceptingJobs.class) != null) {
+                    if (!att.get(PrinterIsAcceptingJobs.class).equals(PrinterIsAcceptingJobs.ACCEPTING_JOBS)) {
+                        state.setState(PRINTER_STATE.PRINTER_NOT_ACCEPTING_JOBS, "Printer not accepting jobs");
+                        continue;
+                    }
+                }
+                if (Platform.isWindows()) {
+                    WinSpool.refreshState(p.getName(), state);
+                } else {
+                    LinuxSpool.refreshState(p.getName(), state);
                 }
                 try {
                     Thread.sleep(2 * 1000);
@@ -261,12 +287,12 @@ public class Printer extends Observable {
         statusThread = new StatusThread();
     }
 
-    public PrinterStatus getStatus() {
-        return new PrinterStatus(state);
+    public boolean needCheck() {
+        return state.needCheck();
     }
 
-    public State getInternalState() {
-        return state;
+    public PrinterStatus getInternalState() {
+        return new PrinterStatus(state);
     }
 
     public void startStatusThread() {
@@ -287,10 +313,7 @@ public class Printer extends Observable {
         state.clearError();
     }
 
-    public PrinterError getError() {
-        return state.getError();
-    }
-
+    @Override
     public void addObserver(Observer observer) {
         state.addObserver(observer);
     }
@@ -372,7 +395,7 @@ public class Printer extends Observable {
             }
         }
         PrintService p = printers.get(port);
-        if (!isPrinterOk(p)) {
+        if (state.isError()) {
             state.sendEvent();
             return;
         }
@@ -400,7 +423,7 @@ public class Printer extends Observable {
                 book.append(pnl, pageFormat);
 
                 Doc docc = new SimpleDoc(book, DocFlavor.SERVICE_FORMATTED.PAGEABLE, null);
-                state.setSTATE(PRINTER_STATE.PRINTER_PRINTING, "Printing");
+                state.setState(PRINTER_STATE.PRINTER_PRINTING, "Printing");
                 printJob.print(docc, null);
 //  pnl.print(p);
 /*                PrinterJob pj = PrinterJob.getPrinterJob();
@@ -419,31 +442,6 @@ public class Printer extends Observable {
             frame.pack();
             frame.setVisible(true);
         }
-    }
-
-    private boolean isPrinterOk(PrintService p) {
-        AttributeSet att = p.getAttributes();
-        if (att.get(PrinterIsAcceptingJobs.class) != null) {
-            if (!att.get(PrinterIsAcceptingJobs.class).equals(PrinterIsAcceptingJobs.ACCEPTING_JOBS)) {
-                state.setSTATE(PRINTER_STATE.PRINTER_NOT_ACCEPTING_JOBS, "Printer not accepting jobs");
-                return false;
-            }
-        }
-        if (Platform.isWindows()) {
-            WinSpool.WinSpoolPrinterStatus st = WinSpool.getPrinterStatus(p.getName());
-            if (st != WinSpool.WinSpoolPrinterStatus.PRINTER_STATUS_READY) {
-                state.setSTATE(PRINTER_STATE.PRINTER_SPOOL_STATUS, st.getDesc());
-                return false;
-            }
-        } else {
-            LinuxSpool.LinuxSpoolPrinterStatus st = LinuxSpool.getPrinterStatus(p.getName());
-            if (st != LinuxSpool.LinuxSpoolPrinterStatus.IPP_PRINTER_IDLE) {
-                state.setSTATE(PRINTER_STATE.PRINTER_SPOOL_STATUS, st.getDesc());
-                return false;
-            }
-
-        }
-        return true;
     }
 
     public String getPort() {

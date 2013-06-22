@@ -21,13 +21,15 @@ import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
 import devices.printer.WinSpool.WinspoolLib.PRINTER_INFO_2;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class WinSpool {
 
     public enum WinSpoolPrinterStatus {
 
-        PRINTER_STATUS_READY("The printer is ready", 0),
+        //PRINTER_STATUS_READY("The printer is ready", 0),
         PRINTER_STATUS_BUSY("The printer is busy", 0x00000200),
         PRINTER_STATUS_DOOR_OPEN("The printer door is open", 0x00400000),
         PRINTER_STATUS_ERROR("The printer is in an error state.", 0x00000002),
@@ -55,14 +57,14 @@ public class WinSpool {
         PRINTER_STATUS_WARMING_UP("The printer is warming up.", 0x00010000),
         PRINTER_STATUS_APP_ERROR("An application error calling getStatus.", 0xFFFFFFFF);
 
-        // they are flags, but I keep the first I find!!!
-        static public WinSpoolPrinterStatus getStatus(int b) {
+        static public Set<WinSpoolPrinterStatus> getStatusBits(int b) {
+            EnumSet<WinSpoolPrinterStatus> hs = EnumSet.noneOf(WinSpoolPrinterStatus.class);
             for (WinSpoolPrinterStatus s : WinSpoolPrinterStatus.values()) {
                 if ((b & s.stat) != 0) {
-                    return s;
+                    hs.add(s);
                 }
             }
-            return PRINTER_STATUS_READY;
+            return hs;
         }
         final private int stat;
         final private String desc;
@@ -263,11 +265,60 @@ public class WinSpool {
         return (PRINTER_INFO_2) pinfo2;
     }
 
-    public static WinSpoolPrinterStatus getPrinterStatus(String printerName) {
-        PRINTER_INFO_2 pi = getPrinterInfo2(printerName);
+    /*    public static WinSpoolPrinterStatus getPrinterStatus(String printerName) {
+     PRINTER_INFO_2 pi = getPrinterInfo2(printerName);
+     if (pi == null) {
+     return WinSpoolPrinterStatus.PRINTER_STATUS_APP_ERROR;
+     }
+     return WinSpoolPrinterStatus.getStatus(pi.Status);
+     }*/
+    static void refreshState(String name, Printer.State state) {
+        PRINTER_INFO_2 pi = getPrinterInfo2(name);
         if (pi == null) {
-            return WinSpoolPrinterStatus.PRINTER_STATUS_APP_ERROR;
+            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "Printer info is null");
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "Printer info is null"));
+            return;
         }
-        return WinSpoolPrinterStatus.getStatus(pi.Status);
+
+        Set hs = WinSpoolPrinterStatus.getStatusBits(pi.Status);
+
+        if (hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_SERVER_UNKNOWN)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PENDING_DELETION)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_NOT_AVAILABLE)) {
+            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hs.toString());
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, hs.toString()));
+            return;
+        }
+        state.clearError();
+
+        if (hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_OFFLINE)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_DOOR_OPEN)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_ERROR)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_OUT_OF_MEMORY)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_NO_TONER)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_OUTPUT_BIN_FULL)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PAPER_JAM)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PAPER_OUT)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PAPER_PROBLEM)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PAUSED)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_POWER_SAVE)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_OUTPUT_BIN_FULL)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_TONER_LOW)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_USER_INTERVENTION)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_OUTPUT_BIN_FULL)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PAGE_PUNT)) {
+            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hs.toString());
+        } else if (hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_BUSY)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_WARMING_UP)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_INITIALIZING)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_IO_ACTIVE)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_MANUAL_FEED)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PRINTING)
+                || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PROCESSING)) {
+            state.setState(Printer.PRINTER_STATE.PRINTER_PRINTING, "Printing " + hs.toString());
+        } else {
+            //if (hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_WAITING)) {
+            state.setState(Printer.PRINTER_STATE.PRINTER_READY, "Ready");
+        }
     }
 }

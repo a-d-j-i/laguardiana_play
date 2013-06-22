@@ -19,7 +19,12 @@ var current_overlay = undefined;
 
 function showAlert( a ) {
     console.log( "showAlert start" + a );
-    $( "#overlay_contents" ).html( $( a ).html() );
+    if ( current_alert != a ) {
+        $( ".alerta_info" ).hide();
+        $( a ).show();
+    }
+    current_alert = a;
+    /*    $( "#overlay_contents" ).html( $( a ).html() );
     $( a ).find( "a" ).each( function() {
         var id = $( this ).attr( "id" );
         if ( id ) {
@@ -29,6 +34,7 @@ function showAlert( a ) {
             });
         }
     });
+*/
     if ( current_overlay ) {
         return;
     }

@@ -85,83 +85,85 @@
             </ul>
         </div>
     </article>
-    <div id="alerta_escrow_full" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'bill_deposit.escrow_full' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <div id="error_text">
-                    &{ 'bill_deposit.escrow_full_text_t1' }
-                    <span class="total">${ total }</span>&nbsp;${formData.currency.currency.description}<br>
-                    &{ 'bill_deposit.escrow_full_text_t2' }
+    <div id="main_overlay" class="alerta info" style="display: none;">
+        <!--        <div id="overlay_contents"></div>-->
+
+        <div id="alerta_escrow_full" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'bill_deposit.escrow_full' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <div id="error_text">
+                        &{ 'bill_deposit.escrow_full_text_t1' }
+                        <span class="total">${ total }</span>&nbsp;${formData.currency.currency.description}<br>
+                        &{ 'bill_deposit.escrow_full_text_t2' }
+                    </div>
+                </div>
+            </div>
+            <div id="alerta_botonera">
+                <a href="#" id="alerta_escrow_full_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
+                <a href="#" id="alerta_escrow_full_continue_btn" class="continueButton boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+            </div>
+        </div>
+        <div id="alerta_bag_removed" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.bag_not_in_place' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'application.bag_not_in_place' }</span>
+                </div>
+            </div>
+            <div id="alerta_botonera">
+                <a href="#" id="alerta_bag_removed_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
+            </div>
+        </div>
+        <div id="alerta_timeout" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.timeout' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'application.timeout_detail' }</span>
+                </div>
+                <div id="timeout_botonera">
+                    <a href="#" id ="alerta_timeout_cancel_btn" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a href="#" id="alerta_timeout_continue_btn" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
                 </div>
             </div>
         </div>
-        <div id="alerta_botonera">
-            <a href="#" id="alerta_escrow_full_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
-            <a href="#" id="alerta_escrow_full_continue_btn" class="continueButton boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
-        </div>
-    </div>
-    <div id="alerta_bag_removed" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'application.bag_not_in_place' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'application.bag_not_in_place' }</span>
+        <div id="alerta_cancel" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.canceling' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <div id="error_text">
+                        <span>&{ 'application.canceling_detail' }</span>
+                        <span class="info_message" style="color: green;"></span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div id="alerta_botonera">
-            <a href="#" id="alerta_bag_removed_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
-        </div>
-    </div>
-    <div id="alerta_timeout" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'application.timeout' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'application.timeout_detail' }</span>
-            </div>
-            <div id="timeout_botonera">
-                <a href="#" id ="alerta_timeout_cancel_btn" class="boton rojo">&{ 'application.cancel' }</a>
-                <a href="#" id="alerta_timeout_continue_btn" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
-            </div>
-        </div>
-    </div>
-    <div id="alerta_cancel" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'application.canceling' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <div id="error_text">
-                    <span>&{ 'application.canceling_detail' }</span>
+        <div id="alerta_storing" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'counting_page.storing_detail' }</span>
                     <span class="info_message" style="color: green;"></span>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="alerta_storing" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'counting_page.storing_detail' }</span>
-                <span class="info_message" style="color: green;"></span>
+        <div id="alerta_remove_rejected_bills" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+                </div>
             </div>
         </div>
-    </div>
-    <div id="alerta_remove_rejected_bills" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+        <div id="alerta_jam" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.jam' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'application.jam' }</span>
+                </div>
             </div>
         </div>
-    </div>
-    <div id="alerta_jam" class="alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'application.jam' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text">&{ 'application.jam' }</span>
-            </div>
-        </div>
-    </div>
-    <div id="main_overlay" class="alerta info" style="display: none;">
-        <div id="overlay_contents"></div>
+
     </div>
 </div>
 </section>
@@ -210,7 +212,7 @@
                     showAlert( '#alerta_bag_removed' );
                 } else {
                     closeAlert();
-/*                    closeAlert( "#alerta_escrow_full" );
+                    /*                    closeAlert( "#alerta_escrow_full" );
                     closeAlert( "#alerta_timeout" );
                     closeAlert( "#alerta_cancel" );
                     closeAlert( "#alerta_storing" );    

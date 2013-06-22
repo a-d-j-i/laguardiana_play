@@ -16,6 +16,11 @@ import play.mvc.*;
 public class MenuController extends Controller {
 
     public static void mainMenu(String back) {
+        if (request.isAjax()) {
+            Object[] o = new Object[1];
+            o[0] = ModelFacade.printerNeedCheck();
+            renderJSON(o);
+        }
         String backAction = "MenuController.mainMenu";
         String[] buttons = {"BillDepositController.start", "CountController.start", "EnvelopeDepositController.start", "FilterController.start"};
         String[] extraButtons = {"MenuController.otherMenu"};
@@ -25,6 +30,7 @@ public class MenuController extends Controller {
         renderArgs.put("totals", totals);
         Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(totals._3, totals._2);
         renderArgs.put("bagFreeSpace", bagFreeSpace);
+        renderArgs.put("checkPrinter", ModelFacade.printerNeedCheck());
         checkMenu(back, backAction, buttons, titles, 0, extraButtons);
     }
 

@@ -23,6 +23,7 @@
             </div>
             &{'application.bagTotals', totals._3, totals._2 }<br/>
             &{'application.bagSpace', bagFreeSpace }<br/>
+            <div id="checkPrinter" style="color: red; #{if !checkPrinter}display: none;#{/if}">&{'application.checkPrinter'}</div><br/>
         </div>
         <hr />
         #{menuBottomButtons}
@@ -33,3 +34,22 @@
         #{/menuBottomButtons}
     </article>
 </section>
+
+
+#{set 'moreScripts'}
+<script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script type="text/javascript" charset="${_response_encoding}">
+    doRefresh = function() {
+        $.getJSON( '@{MenuController.mainMenu}', function( data ) {
+            var checkPrinter = data[ 0 ];
+            if ( checkPrinter ){
+                $("#checkPrinter").show();
+            } else{
+                $("#checkPrinter").hide();
+            }
+            doneRefresh();
+        } );
+
+    }
+</script>
+#{/set}
