@@ -196,7 +196,7 @@ public class Printer extends Observable {
 //        }
 
         synchronized private boolean isError() {
-            return error.getErrorCode() != null;
+            return error != null;
         }
 
         synchronized private PRINTER_STATE getPrinterState() {
