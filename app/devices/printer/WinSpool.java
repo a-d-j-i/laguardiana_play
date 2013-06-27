@@ -8,14 +8,9 @@ import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
-import com.sun.jna.platform.win32.Kernel32;
-import com.sun.jna.platform.win32.Win32Exception;
-import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinDef.INT_PTR;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.platform.win32.WinNT.HANDLEByReference;
-import com.sun.jna.platform.win32.Winspool.PRINTER_INFO_1;
-import com.sun.jna.platform.win32.Winspool.PRINTER_INFO_4;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
@@ -26,6 +21,46 @@ import java.util.List;
 import java.util.Set;
 
 public class WinSpool {
+
+    public enum WinSpoolPrinterAttributes {
+
+        PRINTER_ATTRIBUTE_QUEUED(0x00000001),
+        PRINTER_ATTRIBUTE_DIRECT(0x00000002),
+        PRINTER_ATTRIBUTE_DEFAULT(0x00000004),
+        PRINTER_ATTRIBUTE_SHARED(0x00000008),
+        PRINTER_ATTRIBUTE_NETWORK(0x00000010),
+        PRINTER_ATTRIBUTE_HIDDEN(0x00000020),
+        PRINTER_ATTRIBUTE_LOCAL(0x00000040),
+        PRINTER_ATTRIBUTE_ENABLE_DEVQ(0x00000080),
+        PRINTER_ATTRIBUTE_KEEPPRINTEDJOBS(0x00000100),
+        PRINTER_ATTRIBUTE_DO_COMPLETE_FIRST(0x00000200),
+        PRINTER_ATTRIBUTE_WORK_OFFLINE(0x00000400),
+        PRINTER_ATTRIBUTE_ENABLE_BIDI(0x00000800),
+        PRINTER_ATTRIBUTE_RAW_ONLY(0x00001000),
+        PRINTER_ATTRIBUTE_PUBLISHED(0x00002000),
+        PRINTER_ATTRIBUTE_FAX(0x00004000),
+        PRINTER_ATTRIBUTE_TS(0x00008000),
+        PRINTER_ATTRIBUTE_PUSHED_USER(0x00020000),
+        PRINTER_ATTRIBUTE_PUSHED_MACHINE(0x00040000),
+        PRINTER_ATTRIBUTE_MACHINE(0x00080000),
+        PRINTER_ATTRIBUTE_FRIENDLY_NAME(0x00100000),
+        PRINTER_ATTRIBUTE_TS_GENERIC_DRIVER(0x00200000);
+
+        static public Set<WinSpoolPrinterAttributes> getAttributesBits(int b) {
+            EnumSet<WinSpoolPrinterAttributes> hat = EnumSet.noneOf(WinSpoolPrinterAttributes.class);
+            for (WinSpoolPrinterAttributes a : WinSpoolPrinterAttributes.values()) {
+                if ((b & a.attr) != 0) {
+                    hat.add(a);
+                }
+            }
+            return hat;
+        }
+        final private int attr;
+
+        private WinSpoolPrinterAttributes(int stat) {
+            this.attr = stat;
+        }
+    }
 
     public enum WinSpoolPrinterStatus {
 
@@ -83,31 +118,11 @@ public class WinSpool {
 
         WinspoolLib INSTANCE = (WinspoolLib) Native.loadLibrary("Winspool.drv", WinspoolLib.class, W32APIOptions.UNICODE_OPTIONS);
 
-        boolean EnumPrinters(int Flags, String Name, int Level, Pointer pPrinterEnum,
-                int cbBuf, IntByReference pcbNeeded, IntByReference pcReturned);
-
         boolean GetPrinter(HANDLE hPrinter, int Level, Pointer pPrinter, int cbBuf, IntByReference pcbNeeded);
 
         boolean OpenPrinter(String pPrinterName, HANDLEByReference phPrinter, Pointer pDefault);
 
-        public static class PRINTER_INFO_1 extends Structure {
-
-            public int Flags;
-            public String pDescription;
-            public String pName;
-            public String pComment;
-
-            protected List<String> getFieldOrder() {
-                return Arrays.asList(new String[]{"Flags", "pDescription", "pName", "pComment"});
-            }
-
-            public PRINTER_INFO_1() {
-            }
-
-            public PRINTER_INFO_1(int size) {
-                super(new Memory(size));
-            }
-        }
+        void ClosePrinter(HANDLE hPrinter);
 
         public static class PRINTER_INFO_2 extends Structure {
 
@@ -147,24 +162,6 @@ public class WinSpool {
                 super(new Memory(size));
             }
         }
-
-        public static class PRINTER_INFO_4 extends Structure {
-
-            public String pPrinterName;
-            public String pServerName;
-            public DWORD Attributes;
-
-            protected List<String> getFieldOrder() {
-                return Arrays.asList(new String[]{"pPrinterName", "pServerName", "Attributes"});
-            }
-
-            public PRINTER_INFO_4() {
-            }
-
-            public PRINTER_INFO_4(int size) {
-                super(new Memory(size));
-            }
-        }
         int PRINTER_ENUM_DEFAULT = 0x00000001;
         int PRINTER_ENUM_LOCAL = 0x00000002;
         int PRINTER_ENUM_CONNECTIONS = 0x00000004;
@@ -187,101 +184,53 @@ public class WinSpool {
         int PRINTER_ENUM_HIDE = 0x01000000;
     }
 
-    public static PRINTER_INFO_1[] getPrinterInfo1() {
-        IntByReference pcbNeeded = new IntByReference();
-        IntByReference pcReturned = new IntByReference();
-        WinspoolLib.INSTANCE.EnumPrinters(WinspoolLib.PRINTER_ENUM_LOCAL,
-                null, 1, null, 0, pcbNeeded, pcReturned);
-        if (pcbNeeded.getValue() <= 0) {
-            return new PRINTER_INFO_1[0];
-        }
-
-        PRINTER_INFO_1 pPrinterEnum = new PRINTER_INFO_1(pcbNeeded.getValue());
-        if (!WinspoolLib.INSTANCE.EnumPrinters(WinspoolLib.PRINTER_ENUM_LOCAL,
-                null, 1, pPrinterEnum.getPointer(), pcbNeeded.getValue(), pcbNeeded, pcReturned)) {
-            throw new Win32Exception(Kernel32.INSTANCE.GetLastError());
-        }
-
-        pPrinterEnum.read();
-
-        return (PRINTER_INFO_1[]) pPrinterEnum.toArray(pcReturned.getValue());
-    }
-
-    public static PRINTER_INFO_2[] getPrinterInfo2() {
-        IntByReference pcbNeeded = new IntByReference();
-        IntByReference pcReturned = new IntByReference();
-        WinspoolLib.INSTANCE.EnumPrinters(WinspoolLib.PRINTER_ENUM_LOCAL,
-                null, 2, null, 0, pcbNeeded, pcReturned);
-        if (pcbNeeded.getValue() <= 0) {
-            return new PRINTER_INFO_2[0];
-        }
-
-        PRINTER_INFO_2 pPrinterEnum = new PRINTER_INFO_2(pcbNeeded.getValue());
-        if (!WinspoolLib.INSTANCE.EnumPrinters(WinspoolLib.PRINTER_ENUM_LOCAL,
-                null, 2, pPrinterEnum.getPointer(), pcbNeeded.getValue(), pcbNeeded, pcReturned)) {
-            throw new Win32Exception(Kernel32.INSTANCE.GetLastError());
-        }
-        pPrinterEnum.read();
-        return (PRINTER_INFO_2[]) pPrinterEnum.toArray(pcReturned.getValue());
-    }
-
-    public static PRINTER_INFO_4[] getPrinterInfo4() {
-        IntByReference pcbNeeded = new IntByReference();
-        IntByReference pcReturned = new IntByReference();
-        WinspoolLib.INSTANCE.EnumPrinters(WinspoolLib.PRINTER_ENUM_LOCAL,
-                null, 4, null, 0, pcbNeeded, pcReturned);
-        if (pcbNeeded.getValue() <= 0) {
-            return new PRINTER_INFO_4[0];
-        }
-
-        PRINTER_INFO_4 pPrinterEnum = new PRINTER_INFO_4(pcbNeeded.getValue());
-        if (!WinspoolLib.INSTANCE.EnumPrinters(WinspoolLib.PRINTER_ENUM_LOCAL,
-                null, 4, pPrinterEnum.getPointer(), pcbNeeded.getValue(), pcbNeeded, pcReturned)) {
-            throw new Win32Exception(Kernel32.INSTANCE.GetLastError());
-        }
-
-        pPrinterEnum.read();
-
-        return (PRINTER_INFO_4[]) pPrinterEnum.toArray(pcReturned.getValue());
-    }
-
-    public static PRINTER_INFO_2 getPrinterInfo2(String printerName) {
+    static void refreshState(String name, Printer.State state) {
+        PRINTER_INFO_2 pi;
         IntByReference pcbNeeded = new IntByReference();
         IntByReference pcReturned = new IntByReference();
         HANDLEByReference pHandle = new HANDLEByReference();
 
-        WinspoolLib.INSTANCE.OpenPrinter(printerName, pHandle, null);
+        if (!WinspoolLib.INSTANCE.OpenPrinter(name, pHandle, null)) {
+            WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
+            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling OpenPrinter");
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "WinspoolLib Error calling OpenPrinter"));
+            return;
+        }
 
         WinspoolLib.INSTANCE.GetPrinter(pHandle.getValue(), 2, null, 0, pcbNeeded);
         if (pcbNeeded.getValue() <= 0) {
-            return new PRINTER_INFO_2();
+            WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
+            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling GetPrinter pcbNedeed <= 0");
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "WinspoolLib Error calling GetPrinter pcbNedeed <= 0"));
+            return;
         }
 
-        PRINTER_INFO_2 pinfo2 = new PRINTER_INFO_2(pcbNeeded.getValue());
 
-        WinspoolLib.INSTANCE.GetPrinter(pHandle.getValue(), 2, pinfo2.getPointer(), pcbNeeded.getValue(), pcReturned);
+        PRINTER_INFO_2 pinfo2 = new PRINTER_INFO_2(pcbNeeded.getValue());
+        if (!WinspoolLib.INSTANCE.GetPrinter(pHandle.getValue(), 2, pinfo2.getPointer(), pcbNeeded.getValue(), pcReturned)) {
+            WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
+            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling GetPrinter");
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "WinspoolLib Error calling GetPrinter"));
+            return;
+        }
 
         pinfo2.read();
-        return (PRINTER_INFO_2) pinfo2;
-    }
-
-    /*    public static WinSpoolPrinterStatus getPrinterStatus(String printerName) {
-     PRINTER_INFO_2 pi = getPrinterInfo2(printerName);
-     if (pi == null) {
-     return WinSpoolPrinterStatus.PRINTER_STATUS_APP_ERROR;
-     }
-     return WinSpoolPrinterStatus.getStatus(pi.Status);
-     }*/
-    static void refreshState(String name, Printer.State state) {
-        PRINTER_INFO_2 pi = getPrinterInfo2(name);
+        pi = (PRINTER_INFO_2) pinfo2;
         if (pi == null) {
-            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "Printer info is null");
-            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "Printer info is null"));
+            WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
+            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib pi is null");
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "WinspoolLib pi is null"));
+            return;
+        }
+        WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
+
+        Set hat = WinSpoolPrinterAttributes.getAttributesBits(pi.Attributes);
+        if (hat.contains(WinSpoolPrinterAttributes.PRINTER_ATTRIBUTE_WORK_OFFLINE)) {
+            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hat.toString());
             return;
         }
 
         Set hs = WinSpoolPrinterStatus.getStatusBits(pi.Status);
-
         if (hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_SERVER_UNKNOWN)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PENDING_DELETION)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_NOT_AVAILABLE)) {
