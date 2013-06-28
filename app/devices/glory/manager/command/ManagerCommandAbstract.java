@@ -287,7 +287,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
             return false;
         }
-        //Logger.debug(String.format("D1Mode %s SR1 Mode : %s", gloryStatus.getD1Mode().name(), gloryStatus.getSr1Mode().name()));
+        Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", gloryStatus.getD1Mode().name(), gloryStatus.getSr1Mode().name()));
         return true;
     }
 

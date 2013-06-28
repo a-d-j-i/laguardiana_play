@@ -108,7 +108,7 @@ public class CountCommand extends ManagerCommandAbstract {
         if (!gotoNeutral(false, false)) {
             return;
         }
-        Logger.error("CURRENCY %d", countData.currency.byteValue());
+        Logger.error("CountCommand CURRENCY %d", countData.currency.byteValue());
         if (!sendGloryCommand(new devices.glory.command.SwitchCurrency(countData.currency.byteValue()))) {
             return;
         }
@@ -312,6 +312,8 @@ public class CountCommand extends ManagerCommandAbstract {
                         setState(ManagerInterface.MANAGER_STATE.COUNTING);
                         return true;
                     }
+                } else {
+                    setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER);
                 }
                 sleep();
             }
