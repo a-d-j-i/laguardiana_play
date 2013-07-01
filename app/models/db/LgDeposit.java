@@ -1,6 +1,5 @@
 package models.db;
 
-import devices.printer.Printer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,9 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.Bill;
+import models.BillDAO;
 import models.BillDeposit;
-import models.Configuration;
 import models.EnvelopeDeposit;
 import models.db.LgLov.LovCol;
 import models.events.DepositEvent;
@@ -183,11 +181,11 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         public long q = 0;
     }
 
-    public static F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals(Set<LgDeposit> deps) {
+    public static F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, BillDAO>>> getTotals(Set<LgDeposit> deps) {
         long envelopes = 0;
         long deposits = 0;
         long bills = 0;
-        Map<Currency, Map<LgBillType, Bill>> totals = new HashMap();
+        Map<Currency, Map<LgBillType, BillDAO>> totals = new HashMap();
         Map<Currency, Total> qaTotals = new HashMap();
         for (LgDeposit d : deps) {
             if (d.finishDate == null) {
@@ -207,13 +205,13 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                     at.q += b.quantity;
                     qaTotals.put(c, at);
 
-                    Map<LgBillType, Bill> ct = totals.get(c);
+                    Map<LgBillType, BillDAO> ct = totals.get(c);
                     if (ct == null) {
                         ct = new HashMap();
                     }
-                    Bill bill = ct.get(b.billType);
+                    BillDAO bill = ct.get(b.billType);
                     if (bill == null) {
-                        bill = new Bill(b.billType);
+                        bill = new BillDAO(b.billType);
                     }
                     bill.q += b.quantity;
                     totals.put(c, ct);
@@ -225,6 +223,6 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 Logger.error("Invalid deposit type");
             }
         }
-        return new F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>>(deposits, envelopes, bills, qaTotals, totals);
+        return new F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, BillDAO>>>(deposits, envelopes, bills, qaTotals, totals);
     }
 }

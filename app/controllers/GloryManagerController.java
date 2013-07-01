@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import models.Bill;
+import models.BillDAO;
 import models.ModelFacade;
 import models.db.LgBillType;
 import play.Logger;
@@ -47,7 +47,7 @@ public class GloryManagerController extends Application {
                 currency = 1;
             }
         }
-        List<Bill> billData = Bill.getBillList(currency);
+        List<BillDAO> billData = ModelFacade.getBillList(currency);
         if (request.isAjax()) {
             Object[] o = new Object[4];
             o[0] = error;

@@ -11,10 +11,13 @@ import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import models.actions.UserAction;
 import models.db.LgBag;
 import models.db.LgBillType;
@@ -316,7 +319,7 @@ public class ModelFacade {
             return;
         }
         LgBag currentBag = LgBag.getCurrentBag();
-        F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> totals = currentBag.getTotals();
+        F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> totals = currentBag.getTotals();
         if (Configuration.isBagFull(totals._3, totals._2)) {
             modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
             return;
@@ -410,7 +413,7 @@ public class ModelFacade {
         }
     }
 
-    synchronized public static List<Bill> getCurrentCounters() {
+    synchronized public static List<BillDAO> getCurrentCounters() {
         if (currentUserAction == null) {
             Logger.error("getCurrentCounters invalid current User Action");
             return null;
@@ -419,7 +422,43 @@ public class ModelFacade {
             Logger.error("getCurrentCounters invalid currency null");
             return null;
         }
-        return Bill.getBillList(currentUserAction.getCurrency().numericId);
+        return getBillList(currentUserAction.getCurrency().numericId);
+    }
+
+    synchronized static public List<BillDAO> getBillList(Integer currency) {
+        List<BillDAO> ret = new ArrayList<BillDAO>();
+        List<LgBillType> billTypes = LgBillType.find(currency);
+
+        Map<Integer, Integer> desiredQuantity = null;
+        Map<Integer, Integer> currentQuantity = null;
+        if (manager != null) {
+            currentQuantity = manager.getCurrentQuantity();
+            desiredQuantity = manager.getDesiredQuantity();
+        }
+        Set<Integer> slots = new HashSet();
+        if (currentQuantity != null) {
+            slots = new HashSet(currentQuantity.keySet());
+        }
+        for (LgBillType bb : billTypes) {
+            BillDAO b = new BillDAO(bb);
+            if (currentQuantity != null && currentQuantity.containsKey(bb.slot)) {
+                slots.remove(bb.slot);
+                b.q = currentQuantity.get(bb.slot);
+            }
+            if (desiredQuantity != null && desiredQuantity.containsKey(bb.slot)) {
+                b.dq = desiredQuantity.get(bb.slot);
+            }
+            ret.add(b);
+        }
+        if (!slots.isEmpty()) {
+            for (Integer s : slots) {
+                if (currentQuantity.get(s) > 0) {
+                    modelError.setError(ModelError.ERROR_CODE.APP_ERROR,
+                            String.format("The bill type slots must be configured correctly slot %d value %d", s, currentQuantity.get(s)));
+                }
+            }
+        }
+        return ret;
     }
 
     synchronized public static Object getFormData() {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.Bill;
+import models.BillDAO;
 import models.events.ZEvent;
 import models.lov.Currency;
 import play.Logger;
@@ -138,7 +138,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         return "LgZ{" + "zId=" + zId + ", creationDate=" + creationDate + ", closeDate=" + closeDate + '}';
     }
 
-    public F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals() {
+    public F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> getTotals() {
         return LgDeposit.getTotals(this.deposits);
     }
 }

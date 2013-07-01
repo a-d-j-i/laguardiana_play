@@ -2,7 +2,7 @@ package controllers;
 
 import java.util.HashMap;
 import java.util.Map;
-import models.Bill;
+import models.BillDAO;
 import models.Configuration;
 import models.ModelFacade;
 import models.db.LgBag;
@@ -26,7 +26,7 @@ public class MenuController extends Controller {
         String[] extraButtons = {"MenuController.otherMenu"};
         String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter"};
         LgBag currentBag = LgBag.getCurrentBag();
-        F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> totals = currentBag.getTotals();
+        F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> totals = currentBag.getTotals();
         renderArgs.put("totals", totals);
         Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(totals._3, totals._2);
         renderArgs.put("bagFreeSpace", bagFreeSpace);

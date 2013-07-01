@@ -1,6 +1,7 @@
 package models;
 
 import controllers.Secure;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Entity;
 import models.db.LgBill;
+import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgUser;
 import models.lov.Currency;
@@ -40,8 +42,33 @@ public class BillDeposit extends LgDeposit {
         return r;
     }
 
-    public List<Bill> getBillList() {
-        return Bill.getDepositBillList(this);
+    public List getDepositContent() {
+        List qret = BillDeposit.find(" "
+                + "select bt, sum( b.quantity )"
+                + " from BillDeposit d, LgBill b, LgBillType bt"
+                + " where b.deposit = d "
+                + " and b.billType = bt"
+                + " and d.depositId = ?"
+                + " group by bt.billTypeId, bt.denomination, bt.unitLov, bt.slot, bt.currency, bt.creationDate, bt.endDate"
+                + " order by bt.denomination desc"
+                + "", this.depositId).fetch();
+        return qret;
+    }
+
+    public List<BillDAO> getBillList() {
+        List<BillDAO> ret = new ArrayList<BillDAO>();
+        List qret = getDepositContent();
+
+        for (Object b : qret) {
+            Object[] a = (Object[]) b;
+            Long quantity = (Long) a[ 1];
+
+            BillDAO bill = new BillDAO((LgBillType) a[0]);
+            bill.q = quantity.intValue();
+            bill.dq = quantity.intValue();
+            ret.add(bill);
+        }
+        return ret;
     }
 
     @Override
@@ -51,7 +78,7 @@ public class BillDeposit extends LgDeposit {
         args.put("providerCode", Configuration.getProviderDescription());
         args.put("branchCode", Configuration.getBranchCode());
         args.put("machineCode", Configuration.getMachineCode());
-        List<Bill> bl = this.getBillList();
+        List<BillDAO> bl = this.getBillList();
         args.put("billData", bl);
         args.put("depositTotal", this.getTotal());
         args.put("deposit", this);

@@ -1,7 +1,7 @@
 package controllers;
 
 import java.util.List;
-import models.Bill;
+import models.BillDAO;
 import models.BillDeposit;
 import models.Configuration;
 import models.ModelFacade;
@@ -112,9 +112,9 @@ public class BillDepositController extends CounterController {
             o[3] = totalSum;
             renderJSON(o);
         } else {
-            List<Bill> bls = ModelFacade.getCurrentCounters();
+            List<BillDAO> bls = ModelFacade.getCurrentCounters();
             long currentTotalSum = totalSum;
-            for (Bill b : bls) {
+            for (BillDAO b : bls) {
                 currentTotalSum += (b.d * b.q);
             }
             renderArgs.put("clientCode", Configuration.getClientDescription());

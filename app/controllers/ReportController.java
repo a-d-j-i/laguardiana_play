@@ -10,10 +10,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import models.Bill;
 import models.BillDeposit;
 import models.Configuration;
 import models.EnvelopeDeposit;
+import models.ModelFacade;
 import models.db.LgBag;
 import models.db.LgBillType;
 import models.db.LgDeposit;
@@ -101,7 +101,7 @@ public class ReportController extends Controller {
 
         public BillDepositData(BillDeposit d) {
             super(d, 0);
-            List qret = Bill.getDepositContent(d);
+            List qret = d.getDepositContent();
 
             for (Object b : qret) {
                 Object[] a = (Object[]) b;
@@ -160,7 +160,6 @@ public class ReportController extends Controller {
             }
             renderArgs.put("data", depositList);
             render();
-            return;
         } else {
             List<LgDeposit> depositList = LgDeposit.findUnprocessed(2).fetch(50);
             UnprocessedDeposits ret = new UnprocessedDeposits();
@@ -229,7 +228,6 @@ public class ReportController extends Controller {
             }
             renderArgs.put("data", bagList);
             render();
-            return;
         } else {
             List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
             BagList ret = new BagList();
@@ -290,7 +288,6 @@ public class ReportController extends Controller {
             }
             renderArgs.put("data", zList);
             render();
-            return;
         } else {
             List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
             ZList ret = new ZList();
@@ -362,7 +359,6 @@ public class ReportController extends Controller {
             }
             renderArgs.put("data", eventList);
             render();
-            return;
         } else {
             List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
             EventList ret = new EventList();

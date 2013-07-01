@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.Bill;
+import models.BillDAO;
 import models.Configuration;
 import models.User;
 import models.events.BagEvent;
@@ -150,9 +150,9 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public String toString() {
         return "LgBag{" + "bagId=" + bagId + ", bagCode=" + bagCode + ", creationDate=" + creationDate + ", withdrawDate=" + withdrawDate + '}';
     }
-    transient private F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> totals = null;
+    transient private F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> totals = null;
 
-    public F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals() {
+    public F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> getTotals() {
         if (totals == null) {
             totals = LgDeposit.getTotals(this.deposits);
         }
