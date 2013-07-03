@@ -306,20 +306,14 @@ public class CountCommand extends ManagerCommandAbstract {
              }*/
             // Sometimes the BatchDataTransmition fails, trying randomly to see what can be.
             GloryCommandAbstract cmd = new devices.glory.command.BatchDataTransmition(bills);
-            for (int retry = 0; retry < 3; retry++) {
-                if (sendGCommand(cmd)) {
-                    if (sense()) {
-                        setState(ManagerInterface.MANAGER_STATE.COUNTING);
-                        return true;
-                    }
-                } else {
-                    setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER);
+            if (sendGCommand(cmd)) {
+                if (sense()) {
+                    setState(ManagerInterface.MANAGER_STATE.COUNTING);
+                    return true;
                 }
-                sleep();
+            } else {
+                setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER);
             }
-            String error = gloryStatus.getLastError();
-            Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
-            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
             return false;
         }
 
