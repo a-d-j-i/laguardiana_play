@@ -282,7 +282,20 @@ public class ModelFacade {
         }
 
         public boolean isIoBoardOk() {
-            return ModelFacade.isIoBoardOk(ioBoard.getStatus());
+            IoBoard.IoBoardStatus status = ioBoard.getStatus();
+
+            if (!Configuration.isIoBoardIgnore() && status != null && status.getError() != null) {
+                Logger.error("Setting ioboard error : %s", status.getError());
+                modelError.setError(status.getError());
+                return false;
+            }
+            if (!Configuration.isIgnoreBag()
+                    && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+                Logger.error("IoBoard bag not inplace can't store");
+                //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
+                return false;
+            }
+            return true;
         }
     }
 
@@ -511,21 +524,6 @@ public class ModelFacade {
             return;
         }
         currentUserAction.suspendTimeout();
-    }
-
-    public static boolean isIoBoardOk(IoBoard.IoBoardStatus status) {
-        if (status != null && status.getError() != null) {
-            Logger.error("Setting ioboard error : %s", status.getError());
-            modelError.setError(status.getError());
-            return false;
-        }
-        if (!Configuration.isIgnoreBag()
-                && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-            Logger.error("IoBoard bag not inplace can't store");
-            //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-            return false;
-        }
-        return true;
     }
 
     public static boolean printerNeedCheck() {
