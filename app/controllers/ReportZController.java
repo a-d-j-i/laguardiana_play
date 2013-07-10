@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import models.Configuration;
 import models.ModelFacade;
+import models.ReportTotals;
 import models.db.LgZ;
 import play.data.binding.As;
 import play.mvc.Before;

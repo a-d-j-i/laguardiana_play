@@ -4,15 +4,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.BillDAO;
+import models.ReportTotals;
 import models.events.ZEvent;
-import models.lov.Currency;
 import play.Logger;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 
 @Entity
 @Table( name = "lg_z", schema = "public")
@@ -138,7 +135,8 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         return "LgZ{" + "zId=" + zId + ", creationDate=" + creationDate + ", closeDate=" + closeDate + '}';
     }
 
-    public F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> getTotals() {
-        return LgDeposit.getTotals(this.deposits);
+    public ReportTotals getTotals() {
+        ReportTotals totals = new ReportTotals();
+        return totals.getTotals(deposits);
     }
 }

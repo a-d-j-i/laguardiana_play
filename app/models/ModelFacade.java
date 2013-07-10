@@ -12,25 +12,27 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import models.actions.UserAction;
 import models.db.LgBag;
+import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.events.ActionEvent;
 import models.events.GloryEvent;
 import models.events.IoBoardEvent;
 import models.events.PrinterEvent;
-import models.lov.Currency;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
-import play.libs.F;
 import play.libs.F.Promise;
 
 /**
@@ -70,6 +72,12 @@ public class ModelFacade {
                 Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
             }
         });
+    }
+    // TODO: Review
+
+    interface BillListVisitor {
+
+        public void visit(LgBillType billType, Integer desired, Integer current);
     }
 
     public static Printer getCurrentPrinter() {
@@ -297,6 +305,19 @@ public class ModelFacade {
             }
             return true;
         }
+
+        public List<LgBill> getCurrentBillList() {
+            synchronized (ModelFacade.class) {
+                final List<LgBill> ret = new ArrayList<LgBill>();
+                visitBillList(new BillListVisitor() {
+                    public void visit(LgBillType billType, Integer desired, Integer current) {
+                        LgBill b = new LgBill(current, billType);
+                        ret.add(b);
+                    }
+                });
+                return ret;
+            }
+        }
     }
 
     synchronized public static boolean isError() {
@@ -332,8 +353,7 @@ public class ModelFacade {
             return;
         }
         LgBag currentBag = LgBag.getCurrentBag();
-        F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> totals = currentBag.getTotals();
-        if (Configuration.isBagFull(totals._3, totals._2)) {
+        if (Configuration.isBagFull(currentBag.getItemQuantity())) {
             modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
             return;
         }
@@ -426,20 +446,30 @@ public class ModelFacade {
         }
     }
 
-    synchronized public static List<BillDAO> getCurrentCounters() {
-        if (currentUserAction == null) {
-            Logger.error("getCurrentCounters invalid current User Action");
-            return null;
-        }
-        if (currentUserAction.getCurrency() == null) {
-            Logger.error("getCurrentCounters invalid currency null");
-            return null;
-        }
-        return getBillList(currentUserAction.getCurrency().numericId);
+    synchronized public static Collection<BillQuantity> getBillQuantities() {
+        final SortedMap<BillValue, BillQuantity> ret = new TreeMap<BillValue, BillQuantity>();
+        visitBillList(new BillListVisitor() {
+            public void visit(LgBillType billType, Integer desired, Integer current) {
+                BillValue bv = billType.getValue();
+                BillQuantity billQuantity = ret.get(bv);
+                if (billQuantity == null) {
+                    billQuantity = new BillQuantity(bv);
+                }
+                billQuantity.quantity += current;
+                billQuantity.desiredQuantity += desired;
+                ret.put(bv, billQuantity);
+
+            }
+        });
+        return ret.values();
     }
 
-    synchronized static public List<BillDAO> getBillList(Integer currency) {
-        List<BillDAO> ret = new ArrayList<BillDAO>();
+    private static void visitBillList(BillListVisitor visitor) {
+        Integer currency = manager.getCurrency();
+        if (currency == null) {
+            return;
+        }
+
         List<LgBillType> billTypes = LgBillType.find(currency);
 
         Map<Integer, Integer> desiredQuantity = null;
@@ -452,16 +482,18 @@ public class ModelFacade {
         if (currentQuantity != null) {
             slots = new HashSet(currentQuantity.keySet());
         }
-        for (LgBillType bb : billTypes) {
-            BillDAO b = new BillDAO(bb);
-            if (currentQuantity != null && currentQuantity.containsKey(bb.slot)) {
-                slots.remove(bb.slot);
-                b.q = currentQuantity.get(bb.slot);
+        for (LgBillType billType : billTypes) {
+            Integer desired = 0;
+            Integer current = 0;
+
+            if (currentQuantity != null && currentQuantity.containsKey(billType.slot)) {
+                slots.remove(billType.slot);
+                current = currentQuantity.get(billType.slot);
             }
-            if (desiredQuantity != null && desiredQuantity.containsKey(bb.slot)) {
-                b.dq = desiredQuantity.get(bb.slot);
+            if (desiredQuantity != null && desiredQuantity.containsKey(billType.slot)) {
+                desired = desiredQuantity.get(billType.slot);
             }
-            ret.add(b);
+            visitor.visit(billType, desired, current);
         }
         if (!slots.isEmpty()) {
             for (Integer s : slots) {
@@ -471,7 +503,6 @@ public class ModelFacade {
                 }
             }
         }
-        return ret;
     }
 
     synchronized public static Object getFormData() {

@@ -9,12 +9,16 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import models.BillDeposit;
+import models.BillQuantity;
+import models.BillValue;
 import models.Configuration;
 import models.EnvelopeDeposit;
-import models.ModelFacade;
 import models.db.LgBag;
+import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgEnvelope;
@@ -23,8 +27,10 @@ import models.db.LgEvent;
 import models.db.LgZ;
 import models.lov.Currency;
 import play.Logger;
+import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 
 public class ReportController extends Controller {
 

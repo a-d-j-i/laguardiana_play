@@ -1,12 +1,13 @@
 package controllers;
 
+import controllers.serializers.BillQuantitySerializer;
+import controllers.serializers.BillValueSerializer;
 import devices.glory.manager.ManagerInterface;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import models.BillDAO;
 import models.ModelFacade;
 import models.db.LgBillType;
 import play.Logger;
@@ -47,19 +48,18 @@ public class GloryManagerController extends Application {
                 currency = 1;
             }
         }
-        List<BillDAO> billData = ModelFacade.getBillList(currency);
         if (request.isAjax()) {
             Object[] o = new Object[4];
             o[0] = error;
             o[1] = success;
-            o[2] = billData;
+            o[2] = ModelFacade.getBillQuantities();
             o[3] = currency;
-            renderJSON(o);
+            renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         }
 
         renderArgs.put("status", success);
         renderArgs.put("error", error);
-        renderArgs.put("billData", billData);
+        renderArgs.put("billData", ModelFacade.getBillQuantities());
         renderArgs.put("currency", currency);
         List<Integer> currencyList = new ArrayList<Integer>();
         for (int i = 0; i < 8; i++) {

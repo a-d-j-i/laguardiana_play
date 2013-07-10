@@ -4,17 +4,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.BillDAO;
+import models.BillDeposit;
 import models.Configuration;
-import models.User;
+import models.EnvelopeDeposit;
+import models.ItemQuantity;
+import models.ReportTotals;
 import models.events.BagEvent;
-import models.lov.Currency;
 import play.Logger;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 
 @Entity
 @Table( name = "lg_bag", schema = "public")
@@ -150,12 +149,28 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public String toString() {
         return "LgBag{" + "bagId=" + bagId + ", bagCode=" + bagCode + ", creationDate=" + creationDate + ", withdrawDate=" + withdrawDate + '}';
     }
-    transient private F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> totals = null;
 
-    public F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> getTotals() {
-        if (totals == null) {
-            totals = LgDeposit.getTotals(this.deposits);
-        }
-        return totals;
+    public ItemQuantity getItemQuantity() {
+        final ItemQuantity ret = new ItemQuantity();
+        LgDeposit.visitDeposits(deposits, new LgDeposit.DepositVisitor() {
+            public void visit(BillDeposit item) {
+                for (LgBill b : item.bills) {
+                    ret.bills += b.quantity;
+                }
+            }
+
+            public void visit(EnvelopeDeposit item) {
+                ret.envelopes++;
+            }
+
+            public void visit(LgDeposit item) {
+            }
+        });
+        return ret;
+    }
+
+    public ReportTotals getTotals() {
+        ReportTotals totals = new ReportTotals();
+        return totals.getTotals(deposits);
     }
 }

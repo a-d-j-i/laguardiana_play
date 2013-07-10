@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Entity;
 import models.db.LgBill;
-import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgUser;
 import models.lov.Currency;
@@ -55,17 +54,25 @@ public class BillDeposit extends LgDeposit {
         return qret;
     }
 
-    public List<BillDAO> getBillList() {
-        List<BillDAO> ret = new ArrayList<BillDAO>();
-        List qret = getDepositContent();
+    public List<BillQuantity> getBillList() {
+        List<BillQuantity> ret = new ArrayList<BillQuantity>();
+        List qret = BillDeposit.find(" "
+                + "select bt.denomination, bt.unitLov, sum( b.quantity )"
+                + " from BillDeposit d, LgBill b, LgBillType bt"
+                + " where b.deposit = d "
+                + " and b.billType = bt"
+                + " and bt.endDate is null"
+                + " and d.depositId = ?"
+                + " group by bt.denomination, bt.unitLov"
+                + " order by bt.denomination desc"
+                + "", this.depositId).fetch();
 
         for (Object b : qret) {
             Object[] a = (Object[]) b;
-            Long quantity = (Long) a[ 1];
-
-            BillDAO bill = new BillDAO((LgBillType) a[0]);
-            bill.q = quantity.intValue();
-            bill.dq = quantity.intValue();
+            Long quantity = (Long) a[ 2];
+            BillValue bv = new BillValue((Integer) a[1], (Integer) a[ 0]);
+            BillQuantity bill = new BillQuantity(bv);
+            bill.quantity = quantity.intValue();
             ret.add(bill);
         }
         return ret;
@@ -78,8 +85,8 @@ public class BillDeposit extends LgDeposit {
         args.put("providerCode", Configuration.getProviderDescription());
         args.put("branchCode", Configuration.getBranchCode());
         args.put("machineCode", Configuration.getMachineCode());
-        List<BillDAO> bl = this.getBillList();
-        args.put("billData", bl);
+        ReportTotals totals = new ReportTotals();
+        args.put("billData", totals.visitBillDeposit(this));
         args.put("depositTotal", this.getTotal());
         args.put("deposit", this);
         args.put("currentDate", new Date());

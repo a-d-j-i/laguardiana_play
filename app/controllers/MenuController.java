@@ -2,14 +2,10 @@ package controllers;
 
 import java.util.HashMap;
 import java.util.Map;
-import models.BillDAO;
 import models.Configuration;
+import models.ItemQuantity;
 import models.ModelFacade;
 import models.db.LgBag;
-import models.db.LgBillType;
-import models.db.LgDeposit;
-import models.lov.Currency;
-import play.libs.F;
 import play.mvc.*;
 
 @With({Secure.class})
@@ -26,9 +22,9 @@ public class MenuController extends Controller {
         String[] extraButtons = {"MenuController.otherMenu"};
         String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter"};
         LgBag currentBag = LgBag.getCurrentBag();
-        F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, BillDAO>>> totals = currentBag.getTotals();
-        renderArgs.put("totals", totals);
-        Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(totals._3, totals._2);
+        ItemQuantity iq = currentBag.getItemQuantity();
+        renderArgs.put("bagTotals", iq);
+        Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(iq);
         renderArgs.put("bagFreeSpace", bagFreeSpace);
         renderArgs.put("checkPrinter", ModelFacade.printerNeedCheck());
         checkMenu(back, backAction, buttons, titles, 0, extraButtons);

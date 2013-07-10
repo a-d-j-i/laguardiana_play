@@ -9,9 +9,7 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;
-import models.BillDAO;
 import models.ModelError;
-import models.ModelFacade;
 import models.ModelFacade.UserActionApi;
 import models.User;
 import models.actions.states.ActionState;
@@ -76,10 +74,9 @@ abstract public class UserAction {
         public void addBatchToDeposit() {
             LgDeposit deposit = LgDeposit.findById(currentDepositId);
             LgBatch batch = new LgBatch();
-            for (BillDAO bill : ModelFacade.getBillList(currency.numericId)) {
-                Logger.debug(" -> quantity %d", bill.q);
-                LgBill b = new LgBill(bill.q, bill.billType);
-                batch.addBill(b);
+            for (LgBill bill : userActionApi.getCurrentBillList()) {
+                Logger.debug(" -> quantity %d", bill.quantity);
+                batch.addBill(bill);
             }
             deposit.addBatch(batch);
             batch.save();
@@ -206,10 +203,6 @@ abstract public class UserAction {
         Date currentDate = new Date();
         TimeoutEvent.save(this, currentDate.toString());
         state.onTimeoutEvent(timer);
-    }
-
-    public Currency getCurrency() {
-        return currency;
     }
 
     abstract public String getNeededController();
