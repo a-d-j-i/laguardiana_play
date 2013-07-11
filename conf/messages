@@ -118,7 +118,9 @@ counting_page.reference1_title=Referencia
 counting_page.reference2_title=Aplicar a
 counting_page.client_code_title=Razón Social
 counting_page.denomination=DENOMINACIÓN
+counting_page.slot=SLOT
 counting_page.quantity=CANTIDAD
+counting_page.desired=CANTIDAD DESEADA
 counting_page.total=TOTAL
 counting_page.totals=TOTALES
 
