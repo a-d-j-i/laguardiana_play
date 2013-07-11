@@ -7,7 +7,7 @@ iniciado el ${ z.creationDate.format('dd/MM/yyyy HH:mm:ss') }<br/>
 #{ else }y cerrado el ${ z.closeDate.format('dd/MM/yyyy HH:mm:ss') }#{/else}
 <br/>
 #{if reprint } 
-&{ 'summary.reprint' }<br/>
+<b>&{ 'summary.reprint' }</b><br/>
 #{/if}
 #{ bills_table_printer bill_data: totals /}
 ${ currentDate.format('dd/MM/yyyy HH:mm:ss') }&nbsp;S.E.U.O.

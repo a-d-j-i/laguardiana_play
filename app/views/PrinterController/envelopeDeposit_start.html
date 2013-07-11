@@ -3,7 +3,7 @@
     &{ 'envelope_deposit.put_ticket_in_envelope' }
 </h3>
 #{if reprint } 
-&{ 'summary.reprint' }<br/>
+<b>&{ 'summary.reprint' }</b><br/>
 #{/if}
 #{if ( deposit.findUserCode() ) }
 &{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}<br>

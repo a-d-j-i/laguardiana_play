@@ -68,10 +68,10 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
                 "select e from LgEvent e where "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
-                + " where al.externalApp = ea "
+                + " where al.externalApp = ea and al.logType = ?"
                 + " and e.eventId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")", appId);
+                + ")", LgExternalAppLog.LOG_TYPES.EVENT.name(), appId);
     }
 
     public static boolean process(int appId, int eventId, String resultCode) {

@@ -36,6 +36,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public Set<LgDeposit> deposits = new HashSet<LgDeposit>(0);
     @Transient
     transient public String withdrawUser;
+//    @Transient
+//    transient private Long totalAmount = null;
 
     public LgBag(String bagCode) {
         this.bagCode = bagCode;
@@ -47,6 +49,19 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         this.withdrawUser = Configuration.getWithdrawUser();
     }
 
+    /*    public Long getTotalAmount() {
+     if (totalAmount == null) {
+     totalAmount = BillDeposit.find("select sum(b.quantity * bt.denomination) "
+     + " from BillDeposit d, LgBill b, LgBillType bt, LgBag bg "
+     + " where b.deposit = d and b.billType = bt and bg = d.bag"
+     + " and bg.bagId= ?", bagId).first();
+     }
+     if (totalAmount == null) {
+     totalAmount = new Long(0);
+     }
+     return totalAmount;
+     }
+     */
     public static long count(Date start, Date end) {
         if (end == null) {
             end = new Date();
@@ -75,13 +90,13 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
     public static JPAQuery findUnprocessed(int appId) {
         return LgBag.find(
-                "select b from LgBag b where "
+                "select b from LgBag b where b.withdrawDate is not null and "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
-                + " where al.externalApp = ea "
+                + " where al.externalApp = ea and al.logType = ?"
                 + " and b.bagId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")", appId);
+                + ")",LgExternalAppLog.LOG_TYPES.BAG.name(), appId);
     }
 
     public static boolean process(int appId, int bagId, String resultCode) {
@@ -128,13 +143,17 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         return currentBag;
     }
 
-    public static void rotateBag(boolean force) {
+    public static void rotateBag(boolean byIoBoard) {
 
         LgBag current = getCurrentBag();
 
-        if (current.deposits.size() > 0 || force) {
+        if (current.deposits.size() > 0 || byIoBoard) {
             current.withdrawDate = new Date();
-            BagEvent.save(current, "Closing bag");
+            if (byIoBoard) {
+                BagEvent.save(current, "Closing bag byIoBoard");
+            } else {
+                BagEvent.save(current, "Closing bag manually");
+            }
             current.save();
             LgBag newBag = new LgBag("AUTOMATIC_ROTATED_BY_APP");
             newBag.save();

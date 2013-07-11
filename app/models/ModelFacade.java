@@ -75,6 +75,10 @@ public class ModelFacade {
     }
     // TODO: Review
 
+    public static void initialize() {
+        // used to force the execution of the static code.
+    }
+
     interface BillListVisitor {
 
         public void visit(LgBillType billType, Integer desired, Integer current);

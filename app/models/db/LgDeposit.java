@@ -104,10 +104,10 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 + " finishDate is not null "
                 + "and not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
-                + " where al.externalApp = ea "
+                + " where al.externalApp = ea and al.logType = ?"
                 + " and d.depositId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")", appId);
+                + ")", LgExternalAppLog.LOG_TYPES.DEPOSIT.name(), appId);
     }
 
     public static boolean process(int appId, int depositId, String resultCode) {

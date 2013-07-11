@@ -193,12 +193,14 @@ public class ReportController extends Controller {
         public Date creationDate;
         public Date withdrawDate;
         public final String user_Id;
+//        public final Long totalAmount;
 
         private BagData(LgBag b) {
             this.bagId = b.bagId;
             this.creationDate = b.creationDate;
             this.withdrawDate = b.withdrawDate;
             this.user_Id = b.withdrawUser;
+//            this.totalAmount = b.getTotalAmount();
         }
     }
 

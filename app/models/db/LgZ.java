@@ -111,10 +111,10 @@ public class LgZ extends GenericModel implements java.io.Serializable {
                 "select z from LgZ z where "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
-                + " where al.externalApp = ea "
+                + " where al.externalApp = ea and al.logType = ?"
                 + " and z.zId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")", appId);
+                + ")", LgExternalAppLog.LOG_TYPES.Z.name(), appId);
     }
 
     public static boolean process(int appId, int depositId, String resultCode) {

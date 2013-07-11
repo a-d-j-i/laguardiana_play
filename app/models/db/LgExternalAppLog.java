@@ -6,9 +6,15 @@ import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table( name = "lg_external_app_log", schema = "public")
 public class LgExternalAppLog extends GenericModel implements java.io.Serializable {
-
+    public enum LOG_TYPES {
+        BAG,
+        DEPOSIT,
+        Z,
+        EVENT,
+    };
     @Id
     @Column( name = "log_id", unique = true, nullable = false)
     @GeneratedValue(generator = "LgExternalAppLogGenerator")
@@ -33,23 +39,23 @@ public class LgExternalAppLog extends GenericModel implements java.io.Serializab
     public String message;
 
     public LgExternalAppLog(LgBag b, String resultCode, String message) {
-        this(b.getClass(), b.bagId, resultCode, message);
+        this(LOG_TYPES.BAG, b.bagId, resultCode, message);
     }
 
     public LgExternalAppLog(LgDeposit d, String resultCode, String message) {
-        this(d.getClass(), d.depositId, resultCode, message);
+        this(LOG_TYPES.DEPOSIT, d.depositId, resultCode, message);
     }
 
     public LgExternalAppLog(LgZ z, String resultCode, String message) {
-        this(z.getClass(), z.zId, resultCode, message);
+        this(LOG_TYPES.Z, z.zId, resultCode, message);
     }
 
     public LgExternalAppLog(LgEvent e, String resultCode, String message) {
-        this(e.getClass(), e.eventId, resultCode, message);
+        this(LOG_TYPES.EVENT, e.eventId, resultCode, message);
     }
 
-    public LgExternalAppLog(Class logType, Integer logSourceId, String resultCode, String message) {
-        this.logType = logType.getSimpleName();
+    public LgExternalAppLog(LOG_TYPES logType, Integer logSourceId, String resultCode, String message) {
+        this.logType = logType.name();
         this.logSourceId = logSourceId;
         this.resultCode = resultCode;
         this.message = message;
