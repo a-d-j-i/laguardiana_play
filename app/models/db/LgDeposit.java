@@ -117,7 +117,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
             return false;
         }
 
-        LgExternalAppLog el = new LgExternalAppLog(d, resultCode, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(LgExternalAppLog.LOG_TYPES.DEPOSIT, d.depositId, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
         el.setExternalApp(ea);
         el.save();

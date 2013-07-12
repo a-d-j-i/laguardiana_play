@@ -80,7 +80,7 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
         if (e == null || ea == null) {
             return false;
         }
-        LgExternalAppLog el = new LgExternalAppLog(e, resultCode, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(LgExternalAppLog.LOG_TYPES.EVENT, e.eventId, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
         el.setExternalApp(ea);
         el.save();

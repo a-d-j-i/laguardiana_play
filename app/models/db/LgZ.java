@@ -123,7 +123,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         if (z == null || ea == null || z.closeDate == null) {
             return false;
         }
-        LgExternalAppLog el = new LgExternalAppLog(z, resultCode, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(LgExternalAppLog.LOG_TYPES.Z, z.zId, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
         el.setExternalApp(ea);
         el.save();

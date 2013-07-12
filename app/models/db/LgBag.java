@@ -96,7 +96,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
                 + " where al.externalApp = ea and al.logType = ?"
                 + " and b.bagId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")",LgExternalAppLog.LOG_TYPES.BAG.name(), appId);
+                + ")", LgExternalAppLog.LOG_TYPES.BAG.name(), appId);
     }
 
     public static boolean process(int appId, int bagId, String resultCode) {
@@ -105,7 +105,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         if (b == null || ea == null || b.withdrawDate == null) {
             return false;
         }
-        LgExternalAppLog el = new LgExternalAppLog(b, resultCode, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(LgExternalAppLog.LOG_TYPES.BAG, b.bagId, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
         el.setExternalApp(ea);
         el.save();
