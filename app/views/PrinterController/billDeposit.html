@@ -6,11 +6,15 @@
 #{if reprint } 
 <b>&{ 'summary.reprint' }</b><br/>
 #{/if}
+#{if ( showReference1 ) }
 #{if ( deposit.findUserCode() ) }
 &{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}<br>
 #{/if}
+#{/if}
+#{if ( showReference2 ) }
 #{if ( deposit.userCode ) }
 &{ 'counting_page.reference2_title' }: ${deposit.userCode}<br>
+#{/if}
 #{/if}
 &{ 'summary.total' }: ${depositTotal} ${deposit.getCurrency().description}<br>
 &{ 'summary.transaction_code' }: ${deposit.depositId}<br>

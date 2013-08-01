@@ -80,6 +80,8 @@ public class BillDeposit extends LgDeposit {
 
     @Override
     public void setRenderArgs(Map args) {
+        args.put("showReference1", Configuration.mustShowBillDepositReference1());
+        args.put("showReference2", Configuration.mustShowBillDepositReference2());
         args.put("clientCode", Configuration.getClientDescription());
         args.put("current_user", Secure.getCurrentUser());
         args.put("providerCode", Configuration.getProviderDescription());

@@ -125,6 +125,10 @@ public class LinuxSpool {
         size = LinuxCupsLib.INSTANCE.cupsGetDests(p);
         Pointer pp = p.getValue();
         CupsDest cd = new CupsDest(pp);
+
+        if (size == 0) {
+            return LinuxSpoolPrinterStatus.PRINTER_NOT_FOUND;
+        }
         CupsDest[] cda = (CupsDest[]) cd.toArray(size);
         int i;
         for (i = 0; i < size; i++) {
@@ -136,6 +140,7 @@ public class LinuxSpool {
         if (i >= size) {
             return LinuxSpoolPrinterStatus.PRINTER_NOT_FOUND;
         }
+
         CupsOptions co = new CupsOptions(cda[i].options);
         CupsOptions[] coa = (CupsOptions[]) co.toArray(cda[i].num_options);
         for (int j = 0; j < cda[i].num_options; j++) {

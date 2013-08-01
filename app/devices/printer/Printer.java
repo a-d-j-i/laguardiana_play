@@ -148,7 +148,7 @@ public class Printer extends Observable {
 
         @Override
         public String toString() {
-            return "PrinterStatus{" + "printerState=" + printerState + ", error=" + error + '}';
+            return "PrinterStatus{" + "printerState=" + printerState + ", stateDesc=" + stateDesc + ", error=" + error + '}';
         }
     }
     // A singleton create to hold the state of the printer.
@@ -208,6 +208,9 @@ public class Printer extends Observable {
         }
 
         synchronized public boolean needCheck() {
+            if (Configuration.isPrinterTest()) {
+                return false;
+            }
             if (printerState == null) {
                 return false;
             }

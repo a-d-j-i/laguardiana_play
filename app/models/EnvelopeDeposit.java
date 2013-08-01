@@ -23,6 +23,8 @@ public class EnvelopeDeposit extends LgDeposit {
 
     @Override
     public void setRenderArgs(Map args) {
+        args.put("showReference1", Configuration.mustShowEnvelopeDepositReference1());
+        args.put("showReference2", Configuration.mustShowEnvelopeDepositReference2());
         args.put("clientCode", Configuration.getClientDescription());
         args.put("current_user", Secure.getCurrentUser());
         args.put("providerCode", Configuration.getProviderDescription());
