@@ -62,6 +62,7 @@ public interface ManagerInterface {
 
         private MANAGER_STATE state = MANAGER_STATE.INITIALIZING;
         private GloryManagerError error;
+        private boolean closing = false;
 
         @Override
         synchronized public String toString() {
@@ -98,6 +99,14 @@ public interface ManagerInterface {
             this.error = e;
             setChanged();
             notifyObservers(new ManagerStatus(this));
+        }
+
+        synchronized public boolean isClosing() {
+            return closing;
+        }
+
+        synchronized public void setClosing(boolean closing) {
+            this.closing = closing;
         }
     }
 

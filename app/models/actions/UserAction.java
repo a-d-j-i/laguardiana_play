@@ -11,11 +11,11 @@ import devices.printer.Printer;
 import java.util.Date;
 import models.ModelError;
 import models.ModelFacade.UserActionApi;
-import models.User;
 import models.actions.states.ActionState;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgDeposit;
+import models.db.LgUser;
 import models.events.TimeoutEvent;
 import models.lov.Currency;
 import play.Logger;
@@ -29,7 +29,7 @@ abstract public class UserAction {
     final protected Object formData;
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
-    protected User currentUser = null;
+    protected LgUser currentUser = null;
     protected ActionState state = null;
     protected Integer currentDepositId = null;
     protected Integer currentBatchId = null;
@@ -134,13 +134,13 @@ abstract public class UserAction {
         }
     }
 
-    public void start(User currentUser, UserActionApi userActionApi) {
+    public void start(LgUser currentUser, UserActionApi userActionApi) {
         this.userActionApi = userActionApi;
         this.currentUser = currentUser;
         start();
     }
 
-    public User getCurrentUser() {
+    public LgUser getCurrentUser() {
         return currentUser;
     }
 

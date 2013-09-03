@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import models.Configuration;
-import models.User;
+import models.db.LgUser;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -42,7 +42,7 @@ public class Secure extends Controller {
         }
 
         // Authentication
-        User user = getCurrentUser();
+        LgUser user = getCurrentUser();
         if (user == null) {
             login();
             return;
@@ -60,7 +60,7 @@ public class Secure extends Controller {
             //Logger.info("IN DEV MODE ALL ALLOWED!!!");
             return true;
         }
-        User user = Cache.get(session.getId() + "-user", User.class);
+        LgUser user = Cache.get(session.getId() + "-user", LgUser.class);
         if (user == null) {
             Logger.error("Invalid user");
             return false;
@@ -117,7 +117,7 @@ public class Secure extends Controller {
 
         Logger.info("received user: %s password: %s", username, password);
 
-        User user = User.authenticate(username, password);
+        LgUser user = LgUser.authenticate(username, password);
         if (user == null) {
             Logger.error("no such user!");
             flash.keep("url");
@@ -194,18 +194,18 @@ public class Secure extends Controller {
     }
 
     // Is it ok to be public?? 
-    public static User getCurrentUser() {
-        User user = null;
+    public static LgUser getCurrentUser() {
+        LgUser user = null;
         if (session != null) {
-            user = Cache.get(session.getId() + "-user", User.class);
+            user = Cache.get(session.getId() + "-user", LgUser.class);
         }
         if (user == null) {
-            List<User> q = User.find("byUserName", User.GUEST_NAME).fetch();
+            List<LgUser> q = LgUser.find("byUserName", LgUser.GUEST_NAME).fetch();
             if (q.size() > 1) {
                 Logger.info("There are too many guest users, taking the first");
             } else if (q.size() == 0) {
                 Logger.error("Create the user guest in the db");
-                user = new User();
+                user = new LgUser();
             }
             if (user == null) {
                 user = q.get(0);

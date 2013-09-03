@@ -4,9 +4,11 @@
  */
 package models.actions.states;
 
+import static devices.glory.manager.ManagerInterface.MANAGER_STATE.JAM;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
+import models.ModelError;
 import models.actions.UserAction;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -45,11 +47,14 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
                     store();
                 }
                 break;
+            case JAM: //The door is jamed.
+                stateApi.setError(ModelError.ERROR_CODE.ESCROW_JAMED, "Escrow jamed");
+                break;
             /*            case STORING:
              stateApi.setState(new StoringEnvelopeDeposit(stateApi));
              break;*/
             default:
-                Logger.debug("ReadyToStoreEnvelopeDeposit onGloryEvent invalid state %s %s", m.name(), name());
+                Logger.debug("EnvelopeDepositReadyToStore onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
     }

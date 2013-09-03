@@ -21,6 +21,8 @@ public class ResetCommand extends ManagerCommandAbstract {
     public void run() {
         Logger.debug("Reset command");
         clearError();
+        // retry the closing process;
+        threadCommandApi.setClosing(false);
         if (gotoNeutral(false, true)) {
             Logger.debug("Reset command done");
         } else {

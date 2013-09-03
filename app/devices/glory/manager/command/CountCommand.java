@@ -64,6 +64,20 @@ public class CountCommand extends ManagerCommandAbstract {
             }
         }
 
+        private boolean isNoCounts() {
+            rlock();
+            try {
+                for (Integer i : currentQuantity.values()) {
+                    if (i != 0) {
+                        return false;
+                    }
+                }
+                return true;
+            } finally {
+                runlock();
+            }
+        }
+
         private void setCurrentQuantity(Map<Integer, Integer> billData) {
             wlock();
             try {
@@ -104,6 +118,7 @@ public class CountCommand extends ManagerCommandAbstract {
     @Override
     public void run() {
         boolean fakeCount = false;
+        int count_retries = 0;
 
         if (!gotoNeutral(false, false)) {
             return;
@@ -146,7 +161,7 @@ public class CountCommand extends ManagerCommandAbstract {
                         setState(ManagerInterface.MANAGER_STATE.STORING);
                         break;
                     } else if (countData.needToWithdrawDeposit()) {
-                        if (!sendGCommand(new devices.glory.command.OpenEscrow())) {
+                        if (!openEscrow()) {
                             return;
                         }
 //                        countData.withdrawDepositDone();
@@ -180,6 +195,8 @@ public class CountCommand extends ManagerCommandAbstract {
                     setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_ESCROW);
                     break;
                 case escrow_close: // The escrow is closing... wait.
+                    threadCommandApi.setClosing(true);
+                    break;
                 case being_restoration:
                     break;
                 case escrow_close_request:
@@ -189,7 +206,7 @@ public class CountCommand extends ManagerCommandAbstract {
                 // don't break
                 case being_recover_from_storing_error:
                 case waiting_for_an_envelope_to_set:
-                    if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
+                    if (!closeEscrow()) {
                         return;
                     }
                     break;
@@ -218,12 +235,28 @@ public class CountCommand extends ManagerCommandAbstract {
                     countData.storeDepositDone();
                     break;
                 case counting_start_request:
+                    if (!refreshQuantity()) {
+                        String error = gloryStatus.getLastError();
+                        Logger.error("Error %s sending cmd : CouProcessJamntingDataRequest", error);
+                        setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
+                        return;
+                    }
+                    if (countData.isNoCounts()) {
+                        count_retries++;
+                        if (count_retries > 10) {
+                            Logger.error("Error in hopper sensor");
+                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "Error in hopper sensor"));
+                            return;
+                        }
+                    } else {
+                        count_retries = 0;
+                    }
                     fakeCount = false;
                     countData.withdrawDepositDone();
                     if (!countData.needToStoreDeposit()) {
                         // If there are bills in the hoper then it comes here after storing a full escrow
                         if (countData.isBatch && batchEnd) { //BATCH END
-                            if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                            if (!openEscrow()) {
                                 return;
                             }
                             gotoNeutral(true, true);

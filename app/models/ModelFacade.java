@@ -26,6 +26,7 @@ import models.db.LgBag;
 import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
+import models.db.LgUser;
 import models.events.ActionEvent;
 import models.events.GloryEvent;
 import models.events.IoBoardEvent;
@@ -49,7 +50,7 @@ public class ModelFacade {
     final static private ModelError modelError = new ModelError();
     final static private Printer printer;
     static private UserAction currentUserAction = null;
-    static private User currentUser = null;
+    static private LgUser currentUser = null;
 
     static {
         manager = DeviceFactory.getGloryManager(Play.configuration.getProperty("glory.port"));

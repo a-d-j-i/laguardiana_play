@@ -283,8 +283,8 @@ public class IoBoard {
         }
     }
     public static final int IOBOARD_READ_TIMEOUT = 10000;
-    public static final int IOBOARD_STATUS_CHECK_FREQ = 500;
-    public static final int IOBOARD_MAX_RETRIES = 5;
+    public static final int IOBOARD_STATUS_CHECK_FREQ = 250;
+    public static final int IOBOARD_MAX_RETRIES = 50;
     final private State state = new State();
 
     @Override
@@ -344,7 +344,7 @@ public class IoBoard {
                         } catch (NumberFormatException e) {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
-                    } else if (l.startsWith("CRITICAL :") && l.length() > 45) {
+                    } else if (l.startsWith("CRITICAL :") && l.length() > 15) {
                         state.setCriticalEvent(l);
                     } else if (l.contains("ERROR")) {
                         if (l.contains("SHUTTER") && Configuration.isIgnoreShutter()) {
@@ -353,7 +353,7 @@ public class IoBoard {
                             state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_FW_ERROR, l));
                         }
                     } else {
-                        Logger.warn("IOBOARD Ignoring line : %s", l);
+                        Logger.warn("IOBOARD Ignoring line (%d): %s", l.length(), l);
                     }
                 } catch (Exception ex) {
                     if (!(ex.getCause() instanceof TimeoutException)) {

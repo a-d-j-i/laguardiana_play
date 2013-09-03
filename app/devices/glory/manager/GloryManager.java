@@ -76,6 +76,14 @@ public class GloryManager {
         public void setError(GloryManagerError e) {
             state.setError(e);
         }
+
+        public boolean isClosing() {
+            return state.isClosing();
+        }
+
+        public void setClosing(boolean closing) {
+            state.setClosing(closing);
+        }
     }
 
     /*
