@@ -187,13 +187,13 @@ public class ReportController extends Controller {
         public Integer bagId;
         public Date creationDate;
         public Date withdrawDate;
-        public final String user_Id;
+        public final String user_id;
 
         private BagData(LgBag b) {
             this.bagId = b.bagId;
             this.creationDate = b.creationDate;
             this.withdrawDate = b.withdrawDate;
-            this.user_Id = b.withdrawUser;
+            this.user_id = b.withdrawUser;
         }
     }
 
@@ -216,7 +216,7 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID,"LgBag" ).fetch(page, length);
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
@@ -231,7 +231,7 @@ public class ReportController extends Controller {
             render();
             return;
         } else {
-            List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
+            List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID, "LgBag").fetch(50);
             BagList ret = new BagList();
             ret.bagData = new ArrayList<BagData>(bagList.size());
             for (LgBag b : bagList) {
@@ -277,7 +277,7 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID, "LgZ").fetch(page, length);
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
@@ -292,7 +292,7 @@ public class ReportController extends Controller {
             render();
             return;
         } else {
-            List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
+            List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID,"LgZ").fetch(50);
             ZList ret = new ZList();
             ret.zData = new ArrayList<ZData>(zList.size());
             for (LgZ z : zList) {
@@ -349,7 +349,7 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID, "LgEvent").fetch(page, length);
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
@@ -364,7 +364,7 @@ public class ReportController extends Controller {
             render();
             return;
         } else {
-            List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
+            List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID,"LgEvent").fetch(50);
             EventList ret = new EventList();
             ret.eventData = new ArrayList<EventData>(eventList.size());
             for (LgEvent e : eventList) {

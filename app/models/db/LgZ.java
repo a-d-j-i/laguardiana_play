@@ -109,15 +109,15 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         }
     }
 
-    public static JPAQuery findUnprocessed(int appId) {
+    public static JPAQuery findUnprocessed(int appId,String logType) {
         return LgZ.find(
                 "select z from LgZ z where "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
                 + " and z.zId = al.logSourceId"
-                + " and ea.appId = ?"
-                + ")", appId);
+                + " and ea.appId = ? and al.logType = ?"
+                + ")", appId, logType);
     }
 
     public static boolean process(int appId, int depositId, String resultCode) {

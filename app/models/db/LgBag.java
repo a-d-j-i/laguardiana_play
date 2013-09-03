@@ -74,15 +74,15 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         }
     }
 
-    public static JPAQuery findUnprocessed(int appId) {
+    public static JPAQuery findUnprocessed(int appId, String log_type) {
         return LgBag.find(
                 "select b from LgBag b where "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
                 + " and b.bagId = al.logSourceId"
-                + " and ea.appId = ?"
-                + ")", appId);
+                + " and ea.appId = ? and al.logType = ?"
+                + ")", appId, log_type);
     }
 
     public static boolean process(int appId, int bagId, String resultCode) {

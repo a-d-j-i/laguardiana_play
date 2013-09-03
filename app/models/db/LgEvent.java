@@ -63,15 +63,15 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
         }
     }
 
-    public static JPAQuery findUnprocessed(int appId) {
+    public static JPAQuery findUnprocessed(int appId, String logType) {
         return LgEvent.find(
                 "select e from LgEvent e where "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea "
                 + " and e.eventId = al.logSourceId"
-                + " and ea.appId = ?"
-                + ")", appId);
+                + " and ea.appId = ? and al.logType = ?"
+                + ")", appId, logType);
     }
 
     public static boolean process(int appId, int eventId, String resultCode) {
