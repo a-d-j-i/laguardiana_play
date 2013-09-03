@@ -11,7 +11,6 @@ import java.util.Set;
 import javax.persistence.*;
 import models.Bill;
 import models.BillDeposit;
-import models.Configuration;
 import models.EnvelopeDeposit;
 import models.db.LgLov.LovCol;
 import models.events.DepositEvent;

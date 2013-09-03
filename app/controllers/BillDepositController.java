@@ -5,7 +5,6 @@ import models.Bill;
 import models.BillDeposit;
 import models.Configuration;
 import models.ModelFacade;
-import models.User;
 import models.actions.BillDepositAction;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
