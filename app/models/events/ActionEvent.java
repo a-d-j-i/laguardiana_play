@@ -1,7 +1,6 @@
 package models.events;
 
 import javax.persistence.Entity;
-import models.User;
 import models.actions.UserAction;
 import models.db.LgEvent;
 import models.db.LgUser;
@@ -16,7 +15,7 @@ public class ActionEvent extends LgEvent {
 
     public static void save(UserAction userAction, String msg, String controller) {
         Integer depositId = null;
-        User u = null;
+        LgUser u = null;
         if (userAction != null) {
             depositId = userAction.getDepositId();
             u = userAction.getCurrentUser();

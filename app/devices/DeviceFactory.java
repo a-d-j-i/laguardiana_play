@@ -14,7 +14,6 @@ import devices.printer.Printer;
 import java.util.HashMap;
 import models.Configuration;
 import play.Logger;
-import play.Play;
 import play.PlayPlugin;
 
 /**
@@ -31,19 +30,20 @@ public class DeviceFactory extends PlayPlugin {
     static HashMap<String, IoBoard> ioBoardDevices = new HashMap();
     static Printer printer = null;
 
-    public static Printer getPrinter() {
+    public static Printer getPrinter(String port) {
         if (printer == null) {
-            printer = new Printer(Play.configuration.getProperty("printer.port"));
+            printer = new Printer(port);
+            printer.startStatusThread();
         }
         return printer;
     }
 
-    public static ManagerInterface getGloryManager() {
+    public static ManagerInterface getGloryManager(String port) {
 
         if (Configuration.isGloryIgnore()) {
             return new FakeGloryManager();
         }
-        Glory glory = getCounter(Play.configuration.getProperty("glory.port"));
+        Glory glory = getCounter(port);
 
         if (glory == null) {
             return null;
@@ -72,10 +72,6 @@ public class DeviceFactory extends PlayPlugin {
         Glory device = new Glory(serialPort);
         gloryDevices.put(port, device);
         return device;
-    }
-
-    public static IoBoard getIoBoard() {
-        return getIoBoard(Play.configuration.getProperty("io_board.port"));
     }
 
     synchronized public static IoBoard getIoBoard(String port) {

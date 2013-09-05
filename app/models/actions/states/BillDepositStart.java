@@ -63,6 +63,8 @@ public class BillDepositStart extends ActionState {
                 break;
             case REMOVE_THE_BILLS_FROM_ESCROW:
                 break;
+            case NEUTRAL:
+                break;
             default:
                 Logger.debug("%s onGloryEvent invalid state %s %s", this.getClass().getSimpleName(), m.name(), name());
                 break;

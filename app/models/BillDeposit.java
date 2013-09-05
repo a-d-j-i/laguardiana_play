@@ -1,7 +1,7 @@
 package models;
 
 import controllers.Secure;
-import devices.printer.Printer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,19 +41,54 @@ public class BillDeposit extends LgDeposit {
         return r;
     }
 
-    public List<Bill> getBillList() {
-        return Bill.getDepositBillList(this);
+    public List getDepositContent() {
+        List qret = BillDeposit.find(" "
+                + "select bt, sum( b.quantity )"
+                + " from BillDeposit d, LgBill b, LgBillType bt"
+                + " where b.deposit = d "
+                + " and b.billType = bt"
+                + " and d.depositId = ?"
+                + " group by bt.billTypeId, bt.denomination, bt.unitLov, bt.slot, bt.currency, bt.creationDate, bt.endDate"
+                + " order by bt.denomination desc"
+                + "", this.depositId).fetch();
+        return qret;
+    }
+
+    public List<BillQuantity> getBillList() {
+        List<BillQuantity> ret = new ArrayList<BillQuantity>();
+        List qret = BillDeposit.find(" "
+                + "select bt.denomination, bt.unitLov, sum( b.quantity )"
+                + " from BillDeposit d, LgBill b, LgBillType bt"
+                + " where b.deposit = d "
+                + " and b.billType = bt"
+                + " and bt.endDate is null"
+                + " and d.depositId = ?"
+                + " group by bt.denomination, bt.unitLov"
+                + " order by bt.denomination desc"
+                + "", this.depositId).fetch();
+
+        for (Object b : qret) {
+            Object[] a = (Object[]) b;
+            Long quantity = (Long) a[ 2];
+            BillValue bv = new BillValue((Integer) a[1], (Integer) a[ 0]);
+            BillQuantity bill = new BillQuantity(bv);
+            bill.quantity = quantity.intValue();
+            ret.add(bill);
+        }
+        return ret;
     }
 
     @Override
     public void setRenderArgs(Map args) {
+        args.put("showReference1", Configuration.mustShowBillDepositReference1());
+        args.put("showReference2", Configuration.mustShowBillDepositReference2());
         args.put("clientCode", Configuration.getClientDescription());
-        args.put("user", Secure.getCurrentUser());
+        args.put("current_user", Secure.getCurrentUser());
         args.put("providerCode", Configuration.getProviderDescription());
         args.put("branchCode", Configuration.getBranchCode());
         args.put("machineCode", Configuration.getMachineCode());
-        List<Bill> bl = this.getBillList();
-        args.put("billData", bl);
+        ReportTotals totals = new ReportTotals();
+        args.put("billData", totals.visitBillDeposit(this));
         args.put("depositTotal", this.getTotal());
         args.put("deposit", this);
         args.put("currentDate", new Date());
@@ -65,13 +100,13 @@ public class BillDeposit extends LgDeposit {
     }
 
     @Override
-    public void print(Printer p, boolean reprint) {
+    public void print(boolean reprint) {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
         if (reprint) {
             args.put("reprint", "true");
         }
-        p.print("PrinterController/billDeposit.html", args, Configuration.getBillDepositPrintLen());
+        ModelFacade.print("PrinterController/billDeposit.html", args, Configuration.getPrintWidth(), Configuration.getBillDepositPrintLen());
     }
 }

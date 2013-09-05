@@ -1,6 +1,11 @@
 package controllers;
 
+import controllers.serializers.BillQuantitySerializer;
+import controllers.serializers.BillValueSerializer;
 import java.util.List;
+import java.util.SortedMap;
+import models.BillQuantity;
+import models.BillValue;
 import models.Configuration;
 import models.ModelFacade;
 import models.actions.CountingAction;
@@ -77,14 +82,14 @@ public class CountController extends CounterController {
         if (request.isAjax()) {
             Object[] o = new Object[3];
             o[0] = ModelFacade.getState();
-            o[1] = ModelFacade.getCurrentCounters();
+            o[1] = ModelFacade.getBillQuantities();
             o[2] = Messages.get(ModelFacade.getActionMessage());
-            renderJSON(o);
+            renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("user", Secure.getCurrentUser());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
-            renderArgs.put("billData", ModelFacade.getCurrentCounters());
+            renderArgs.put("billData", ModelFacade.getBillQuantities());
             renderArgs.put("formData", ModelFacade.getFormData());
             render();
         }

@@ -7,18 +7,15 @@ package models.actions;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
-import devices.printer.PrinterStatus;
+import devices.printer.Printer;
 import java.util.Date;
-import java.util.EnumMap;
-import java.util.Map;
-import models.Bill;
 import models.ModelError;
 import models.ModelFacade.UserActionApi;
-import models.User;
 import models.actions.states.ActionState;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgDeposit;
+import models.db.LgUser;
 import models.events.TimeoutEvent;
 import models.lov.Currency;
 import play.Logger;
@@ -32,26 +29,14 @@ abstract public class UserAction {
     final protected Object formData;
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
-    protected User currentUser = null;
-    protected final Map<ManagerInterface.MANAGER_STATE, String> messages = new EnumMap<ManagerInterface.MANAGER_STATE, String>(ManagerInterface.MANAGER_STATE.class);
+    protected LgUser currentUser = null;
     protected ActionState state = null;
     protected Integer currentDepositId = null;
     protected Integer currentBatchId = null;
 
-    public UserAction(Currency currency, Object formData, Map<ManagerInterface.MANAGER_STATE, String> msgs) {
+    public UserAction(Currency currency, Object formData) {
         this.formData = formData;
         this.currency = currency;
-        messages.put(ManagerInterface.MANAGER_STATE.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
-        messages.put(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
-        messages.put(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
-        messages.put(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
-        messages.put(ManagerInterface.MANAGER_STATE.CANCELING, "application.canceling");
-        //messages.put(ManagerInterface.Status.CANCELED, "counting_page.deposit_canceled");
-        messages.put(ManagerInterface.MANAGER_STATE.ERROR, "application.error");
-        messages.put(ManagerInterface.MANAGER_STATE.JAM, "application.jam");
-        for (Map.Entry<ManagerInterface.MANAGER_STATE, String> m : messages.entrySet()) {
-            messages.put(m.getKey(), m.getValue());
-        }
     }
 
     public class StateApi {
@@ -78,6 +63,10 @@ abstract public class UserAction {
             return userActionApi.store(currentDepositId);
         }
 
+        public boolean isIoBoardOk() {
+            return userActionApi.isIoBoardOk();
+        }
+
         public void withdraw() {
             userActionApi.withdraw();
         }
@@ -85,21 +74,14 @@ abstract public class UserAction {
         public void addBatchToDeposit() {
             LgDeposit deposit = LgDeposit.findById(currentDepositId);
             LgBatch batch = new LgBatch();
-            for (Bill bill : Bill.getBillList(currency.numericId)) {
-                Logger.debug(" -> quantity %d", bill.q);
-                LgBill b = new LgBill(bill.q, bill.billType);
-                batch.addBill(b);
+            for (LgBill bill : userActionApi.getCurrentBillList()) {
+                Logger.debug(" -> quantity %d", bill.quantity);
+                batch.addBill(bill);
             }
             deposit.addBatch(batch);
             batch.save();
             deposit.save();
             currentBatchId = batch.batchId;
-        }
-
-        public void openEnvelopeDeposit() {
-            LgDeposit d = LgDeposit.findById(currentDepositId);
-            d.startDate = new Date();
-            d.save();
         }
 
         public void closeBatch() {
@@ -146,19 +128,19 @@ abstract public class UserAction {
         public void closeGate() {
             userActionApi.closeGate();
         }
+
+        public ManagerInterface.MANAGER_STATE getManagerState() {
+            return userActionApi.getManagerState();
+        }
     }
 
-    public String getStateName() {
-        return state.name();
-    }
-
-    public void start(User currentUser, UserActionApi userActionApi) {
+    public void start(LgUser currentUser, UserActionApi userActionApi) {
         this.userActionApi = userActionApi;
         this.currentUser = currentUser;
         start();
     }
 
-    public User getCurrentUser() {
+    public LgUser getCurrentUser() {
         return currentUser;
     }
 
@@ -194,7 +176,7 @@ abstract public class UserAction {
                     state.getClass().getSimpleName(), currState.getClass().getSimpleName(), m.toString());
             currState = state;
             currState.onGloryEvent(m);
-        } while (state != currState);
+        } while (!state.equals(currState));
     }
 
     public void onIoBoardEvent(IoBoard.IoBoardStatus s) {
@@ -204,17 +186,17 @@ abstract public class UserAction {
                     state.getClass().getSimpleName(), currState.getClass().getSimpleName(), s.toString());
             currState = state;
             currState.onIoBoardEvent(s);
-        } while (state != currState);
+        } while (!state.equals(currState));
     }
 
-    public void onPrinterEvent(PrinterStatus p) {
+    public void onPrinterEvent(Printer.PrinterStatus p) {
         ActionState currState = state;
         do {
-            Logger.debug("Action : onIoBoardEvent state %s currState %s event %s",
+            Logger.debug("Action : onPrinterEvent state %s currState %s event %s",
                     state.getClass().getSimpleName(), currState.getClass().getSimpleName(), p.toString());
             currState = state;
             state.onPrinterEvent(p);
-        } while (state != currState);
+        } while (!state.equals(currState));
     }
 
     public void onTimeoutEvent(TimeoutTimer timer) {
@@ -223,18 +205,18 @@ abstract public class UserAction {
         state.onTimeoutEvent(timer);
     }
 
-    public Currency getCurrency() {
-        return currency;
-    }
-
     abstract public String getNeededController();
+
+    public String getStateName() {
+        return state.name();
+    }
 
     public String getNeededAction() {
         return state.getNeededActionAction();
     }
 
     public String getMessage() {
-        return messages.get(userActionApi.getManagerState());
+        return state.getMessage(this);
     }
 
     public Integer getDepositId() {

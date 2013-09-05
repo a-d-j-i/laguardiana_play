@@ -63,15 +63,15 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
         }
     }
 
-    public static JPAQuery findUnprocessed(int appId, String logType) {
+    public static JPAQuery findUnprocessed(int appId) {
         return LgEvent.find(
                 "select e from LgEvent e where "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
-                + " where al.externalApp = ea "
+                + " where al.externalApp = ea and al.logType = ?"
                 + " and e.eventId = al.logSourceId"
-                + " and ea.appId = ? and al.logType = ?"
-                + ")", appId, logType);
+                + " and ea.appId = ?"
+                + ")", LgExternalAppLog.LOG_TYPES.EVENT.name(), appId);
     }
 
     public static boolean process(int appId, int eventId, String resultCode) {
@@ -80,7 +80,7 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
         if (e == null || ea == null) {
             return false;
         }
-        LgExternalAppLog el = new LgExternalAppLog(e, resultCode, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(LgExternalAppLog.LOG_TYPES.EVENT, e.eventId, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
         el.setExternalApp(ea);
         el.save();

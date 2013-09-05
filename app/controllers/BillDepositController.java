@@ -1,7 +1,8 @@
 package controllers;
 
+import controllers.serializers.BillQuantitySerializer;
+import controllers.serializers.BillValueSerializer;
 import java.util.List;
-import models.Bill;
 import models.BillDeposit;
 import models.Configuration;
 import models.ModelFacade;
@@ -106,23 +107,22 @@ public class BillDepositController extends CounterController {
         if (request.isAjax()) {
             Object[] o = new Object[4];
             o[0] = ModelFacade.getState();
-            o[1] = ModelFacade.getCurrentCounters();
+            o[1] = ModelFacade.getBillQuantities();
             o[2] = Messages.get(ModelFacade.getActionMessage());
             o[3] = totalSum;
-            renderJSON(o);
+            renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         } else {
-            List<Bill> bls = ModelFacade.getCurrentCounters();
-            long currentTotalSum = totalSum;
-            for (Bill b : bls) {
-                currentTotalSum += (b.d * b.q);
-            }
+            /*            long currentTotalSum = totalSum;
+             for (BillDAO b : billList) {
+             currentTotalSum += (b.d * b.q);
+             }*/
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
             renderArgs.put("user", Secure.getCurrentUser());
-            renderArgs.put("billData", bls);
+            renderArgs.put("billData", ModelFacade.getBillQuantities());
             renderArgs.put("formData", ModelFacade.getFormData());
             renderArgs.put("totalSum", totalSum);
-            renderArgs.put("currentTotalSum", currentTotalSum);
+            //renderArgs.put("currentTotalSum", currentTotalSum);
             render();
         }
     }

@@ -1,8 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'Glory (Manager)' /}
 #{form @count() }
-
-<div style="background: wheat;">
+<div style="background: wheat;  font-size: 15pt;  padding: 0px;">
     <header></header>
     <!-- link volver -->
     <a id ="backButton" href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
@@ -15,78 +14,101 @@
             <table class="full_width">
                 <thead>
                     <tr>
-                        <th>&{ 'counting_page.denomination' }</th>
+                        <th>&{ 'counting_page.slot' }</th>
+                        <th>&{ 'counting_page.desired' }</th>
                         <th>&{ 'counting_page.quantity' }</th>
-                        <th>&{ 'counting_page.total' }</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     <!-- detalle de billetes -->
-                    %{ total = 0; cnt_total = 0;}%
-                    #{list items:billData, as:'b'}
-                    <tr id="BTRID_${b.tid}">
-                        <td id="bill_denomination">${b.d}</td>
-                        <td id="bill_quantity">${b.q}</td>
-                        <td id="bill_total">${b.d  * b.q}</td>
-                        <td>
-                            <input id="DID_${b.billType.billTypeId}" value="${b.dq}" name="billTypeIds.${b.billType.billTypeId}" type="text">
+                    #{list items:slots, as:'s'}
+                    <tr id="BTRID_${s}">
+                        <td id="bill_slot">${s}
                         </td>
-                        %{ total += b.d  * b.q; cnt_total += b.q }%
-                    </tr>
-                    #{/list}
-                    <!-- /detalle de billetes -->
-                </tbody>
+                        <td id="bill_desired">
+                            <input id="DID_${s}" value="${desired.get( s )}" name="slotsIds.${s}" type="text">
+                        </td>
 
-                <tfoot>
-                    <tr>
-                        <td>&{ 'counting_page.totals' }</td>
-                        <!-- totales -->
-                        <td id ="cnt_total">${ cnt_total }</td>
-                        <td id ="total">${ total }</td>
-                        <!-- /totales -->
-                    </tr>
-                </tfoot>
-            </table>
+                        <td id="CID_${s}" 
+                            #{if current.get( s ) != 0 }style="color: red;"
+                            #{/if}
+                            > ${current.get( s )}
+
+                    </td>
+                </tr>
+                #{/list}
+                <!-- /detalle de billetes -->
+            </tbody>
+
+        </table>
+    </li>
+    <li class="fixed column" style="width: 5%">
+        &nbsp;
+    </li>
+
+    <li class="fixed column" style="width: 15%">
+        <div class="columna_1">
+                    <label for="currency">Currency</label>
+                    <select id="currency" name="currency" class="full_width">
+                        #{list items:currencyList, as:'b'}
+                        #{if ( b == 0 ) }
+                        <option value="0" #{if ( b == currency )}selected="selected"#{/if}>-</option>
+                        #{/if}
+                        #{else}
+                        <option value="${b}" #{if ( b == currency )}selected="selected"#{/if}>${b}</option>
+                        #{/else}
+                        #{/list}
+                    </select>
+                    <button type="submit" class="boton ${play.configuration['style.button_color']} full_width">Count</button>
+                </div>
+                Status: <div id="statusMsg" class="mensaje">${ status }</div>
+                Error: <div id="errorMsg" class="mensaje">${ error }</div>
         </li>
         <li class="fixed column" style="width: 5%">
             &nbsp;
         </li>
-
         <li class="fixed column" style="width: 15%">
-            <div class="columna_1">
-                <label for="currency">Currency</label>
-                <select id="currency" name="currency" class="full_width">
-                    #{list items:currencyList, as:'b'}
-                    #{if ( b == 0 ) }
-                    <option value="0" #{if ( b == currency )}selected="selected"#{/if}>-</option>
-                    #{/if}
-                    #{else}
-                    <option value="${b}" #{if ( b == currency )}selected="selected"#{/if}>${b}</option>
-                    #{/else}
-                    #{/list}
-                </select>
-                <button type="submit" class="boton ${play.configuration['style.button_color']} full_width">Count</button>
-            </div>
-            Status: <div id="statusMsg" class="mensaje">${ status }</div>
-            Error: <div id="errorMsg" class="mensaje">${ error }</div>
-        </li>
-        <li class="fixed column" style="width: 5%">
-            &nbsp;
-        </li>
-        <li class="fixed column" style="width: 15%">
-            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{cancelDeposit()}">CancelDeposit</a>
-            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storeDeposit()}">StoreDeposit</a>
-            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{withdrawDeposit()}">WithdrawDeposit</a>
-            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{reset()}">Reset</a>
-            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storingErrorReset()}">StoringErrorReset</a>
-            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{collectBag()}">Collect</a>
-            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{envelopeDeposit()}">EnvelopeDeposit</a>
-        </li>
-    </ul>
+        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{cancelDeposit()}">CancelDeposit</a>
+        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storeDeposit()}">StoreDeposit</a>
+        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{withdrawDeposit()}">WithdrawDeposit</a>
+        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{reset()}">Reset</a>
+        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storingErrorReset()}">StoringErrorReset</a>
+        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{collectBag()}">Collect</a>
+        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{envelopeDeposit()}">EnvelopeDeposit</a>
+    </li>
+</ul>
 </div>
 #{/form}
 
+
+#{set 'moreStyles'}
+<style>
+    input[type='text'], input[type='password'], input[type='number'], textarea {
+        padding: 0px;
+        font-size: 10pt;
+        margin-bottom: 0px;
+    }
+
+    table thead tr th {
+        padding: 0px;
+        font-size: 10pt;
+        margin-bottom: 0px;
+    }
+
+    table tbody tr td {
+        padding: 0px;
+        font-size: 10pt;
+        margin-bottom: 0px;
+    }
+
+    table tfoot tr td {
+        padding: 0px;
+        font-size: 10pt;
+        margin-bottom: 0px;
+    }
+</style>
+#{/set}
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     var waiting = false;
@@ -111,24 +133,29 @@
             } else {
                 $( "#statusMsg" ).html( success );
             }
-            var total = 0;
-            var cnt_total = 0;
-            for( var i = 0 ; i < billData.length; i ++ ) {
-                var nid = '#BTRID_' + billData[ i ].billTypeId;
-                $( nid ).children( '#bill_denomination' ).html( billData[ i ].denomination );
-                $( nid ).children( '#bill_quantity' ).html( billData[ i ].quantity );
-                var t = ( billData[ i ].denomination * billData[ i ].quantity );
-                $( nid ).children( '#bill_total' ).html( t );
-                total += t;
-                cnt_total += billData[ i ].quantity;
+            $( "currency").html( data[ 2 ] );
+            var slots = data[ 3 ];
+            var current = data[ 4 ];
+            var desired = data[ 5 ];
+            for( var i = 0 ; i < slots.length; i ++ ) {
+                var s = slots[ i ];
+                var nid = '#CID_' + s;
+                $( nid ).html( current[ s ] );
+                if ( current[ s ] > 0 ) {
+                    $( nid ).css( 'color', 'red' );
+                } else {
+                    $( nid ).css( 'color', 'grey' );
+                }
+
+                var nid = '#DID_' + s;
+                if ( desired[ s ] > 0 ) {
+                    $( nid ).val( desired[ s ] );
+                    $( nid ).css( 'color', 'red' );
+                } else {
+                    $( nid ).css( 'color', 'grey' );
+                }
+
             }
-            $( '#cnt_total' ).html( cnt_total );
-            $( '#total' ).html( total );
-            for( var i = 0 ; i < billData.length; i ++ ) {
-                var nid = '#DID_' + billData[ i ].billTypeId;
-                $( nid ).html( billData[ i ].desiredQuantity);
-            }
-            $( "currency").html( data[3] );
         })
     }
     // Call refresh every 1.5 seconds

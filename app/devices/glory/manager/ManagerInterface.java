@@ -1,5 +1,6 @@
 package devices.glory.manager;
 
+import devices.glory.Glory;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -56,11 +57,12 @@ public interface ManagerInterface {
             return state.name();
         }
     }
-    
+
     class State extends Observable {
 
         private MANAGER_STATE state = MANAGER_STATE.INITIALIZING;
         private GloryManagerError error;
+        private boolean closing = false;
 
         @Override
         synchronized public String toString() {
@@ -68,7 +70,7 @@ public interface ManagerInterface {
         }
 
         synchronized ManagerStatus getStatus() {
-            return new ManagerStatus( this );
+            return new ManagerStatus(this);
         }
 
         synchronized void setState(MANAGER_STATE state) {
@@ -98,6 +100,14 @@ public interface ManagerInterface {
             setChanged();
             notifyObservers(new ManagerStatus(this));
         }
+
+        synchronized public boolean isClosing() {
+            return closing;
+        }
+
+        synchronized public void setClosing(boolean closing) {
+            this.closing = closing;
+        }
     }
 
     public Integer getCurrency();
@@ -125,4 +135,6 @@ public interface ManagerInterface {
     public ManagerStatus getStatus();
 
     public void addObserver(Observer observer);
+
+    public Glory getCounter();
 }

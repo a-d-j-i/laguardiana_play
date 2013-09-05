@@ -1,33 +1,42 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.printer;
 
+import com.sun.jna.Platform;
 import devices.printHelper.EditorPanePrinter;
 import java.awt.Color;
 import java.awt.Insets;
+import java.awt.print.Book;
+import java.awt.print.PageFormat;
 import java.awt.print.Paper;
-import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.print.Doc;
+import javax.print.DocFlavor;
 import javax.print.DocPrintJob;
+import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
 import javax.print.attribute.Attribute;
-import javax.print.attribute.DocAttributeSet;
-import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.AttributeSet;
+import javax.print.attribute.PrintJobAttributeSet;
 import javax.print.attribute.PrintServiceAttributeSet;
+import javax.print.attribute.standard.PrinterIsAcceptingJobs;
+import javax.print.attribute.standard.QueuedJobCount;
+import javax.print.event.PrintJobAttributeEvent;
+import javax.print.event.PrintJobAttributeListener;
 import javax.print.event.PrintJobEvent;
 import javax.print.event.PrintJobListener;
+import javax.print.event.PrintServiceAttributeEvent;
+import javax.print.event.PrintServiceAttributeListener;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.text.BadLocationException;
@@ -45,53 +54,301 @@ import play.templates.TemplateLoader;
  */
 public class Printer extends Observable {
 
-    final double INCH = 72;
-    final double MM = INCH / 25.5;
-    final int PAGE_WIDTH = 80;
-    final int DEFAULT_PAGE_LEN = 200;
-    public Map<String, PrintService> printers = new HashMap<String, PrintService>();
-    private final String port;
+    class MyPrintJobAttributeListener implements PrintJobAttributeListener {
 
-    class MyPrintListener implements PrintJobListener {
+        public void attributeUpdate(PrintJobAttributeEvent pjae) {
+            PrintJobAttributeSet attrs = pjae.getAttributes();
+            if (attrs != null) {
+                Attribute a = attrs.get(QueuedJobCount.class);
+                if (a != null) {
+                    QueuedJobCount q = (QueuedJobCount) a;
+                    Logger.debug("MyPrintJobAttributeListener 0: %s %d", pjae.getPrintJob().getPrintService().getName(), q.getValue());
+                }
+            }
+        }
+    }
+
+    class MyPrintServiceAttributeListener implements PrintServiceAttributeListener {
+
+        public void attributeUpdate(PrintServiceAttributeEvent psae) {
+            PrintServiceAttributeSet attrs = psae.getAttributes();
+            if (attrs != null) {
+                Attribute a = attrs.get(QueuedJobCount.class);
+                if (a != null) {
+                    QueuedJobCount q = (QueuedJobCount) a;
+                    Logger.debug("MyPrintJobAttributeListener 0: %s %d", psae.getPrintService().getName(), q.getValue());
+                }
+            }
+        }
+    }
+
+    class MyPrintJobListener implements PrintJobListener {
 
         public void printDataTransferCompleted(PrintJobEvent pje) {
-            Logger.debug("PRINTER : printDataTransferCompleted");
-            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTING_DONE, "DONE"));
+            //Logger.debug("PRINTER : printDataTransferCompleted");
         }
 
         public void printJobCompleted(PrintJobEvent pje) {
-            Logger.debug("PRINTER : printJobCompleted");
+            //Logger.debug("PRINTER : printJobCompleted");
         }
 
         public void printJobFailed(PrintJobEvent pje) {
-            Logger.debug("PRINTER : printJobFailed");
+            //Logger.debug("PRINTER : printJobFailed");
         }
 
         public void printJobCanceled(PrintJobEvent pje) {
-            Logger.debug("PRINTER : printJobCanceled");
+            //Logger.debug("PRINTER : printJobCanceled");
         }
 
         public void printJobNoMoreEvents(PrintJobEvent pje) {
-            Logger.debug("PRINTER : printJobNoMoreEvents");
+            /*            if (isPrinterOk(pje.getPrintJob().getPrintService())) {
+             Logger.debug("PRINTER : print DONE");
+             state.setState(PRINTER_STATE.PRINTER_READY, null);
+             }*/
         }
 
         public void printJobRequiresAttention(PrintJobEvent pje) {
-            Logger.debug("PRINTER : printJobRequiresAttention");
+            //Logger.debug("PRINTER : printJobRequiresAttention");
+        }
+    }
+
+    // read timeout in ms
+    public enum PRINTER_STATE {
+
+        PRINTER_READY,
+        PRINTER_PRINTING,
+        PRINTER_NOT_ACCEPTING_JOBS,
+        PRINTER_SPOOL_PROBLEM;
+    };
+
+    // An immutable cloned version of PrinterState 
+    public class PrinterStatus {
+
+        private final PRINTER_STATE printerState;
+        private final String stateDesc;
+        private final PrinterError error;
+
+        private PrinterStatus(State currentState) {
+            this.printerState = currentState.printerState;
+            this.stateDesc = currentState.stateDesc;
+            this.error = currentState.error;
+        }
+
+        public PRINTER_STATE getPrinterState() {
+            return printerState;
+        }
+
+        public PrinterError getError() {
+            return error;
+        }
+
+        public String getStateDesc() {
+            return stateDesc;
+        }
+
+        @Override
+        public String toString() {
+            return "PrinterStatus{" + "printerState=" + printerState + ", stateDesc=" + stateDesc + ", error=" + error + '}';
+        }
+    }
+    // A singleton create to hold the state of the printer.
+
+    class State extends Observable {
+
+        private PRINTER_STATE printerState = null;
+        private String stateDesc;
+        private PrinterError error = null;
+
+        synchronized void setState(PRINTER_STATE state, String stateDesc) {
+            //Logger.debug("Printer setState prev : printerSTate %s stateDesc %s", state, stateDesc);
+            if (this.printerState != state) {
+                this.printerState = state;
+                setChanged();
+            }
+            if ((this.stateDesc == null && stateDesc != null)
+                    || (this.stateDesc != null && !this.stateDesc.equals(stateDesc))) {
+                this.stateDesc = stateDesc;
+                setChanged();
+            }
+            if (hasChanged()) {
+                Logger.debug("Printer setState : printerSTate %s stateDesc %s", this.printerState, this.stateDesc);
+                notifyObservers(new PrinterStatus(this));
+            }
+        }
+
+        synchronized void setError(PrinterError error) {
+            this.error = error;
+            setChanged();
+            notifyObservers(new PrinterStatus(this));
+        }
+
+        synchronized public void clearError() {
+            // Don't overwrite the first error!!!.
+            if (this.error != null) {
+                this.error = null;
+                setChanged();
+                notifyObservers(new PrinterStatus(this));
+            }
+        }
+//
+//        synchronized private PrinterError getError() {
+//            return error;
+//        }
+
+        synchronized private boolean isError() {
+            return error != null;
+        }
+
+        synchronized private PRINTER_STATE getPrinterState() {
+            return printerState;
+        }
+
+        synchronized private String getStateDesc() {
+            return stateDesc;
+        }
+
+        synchronized public boolean needCheck() {
+            if (Configuration.isPrinterTest()) {
+                return false;
+            }
+            if (printerState == null) {
+                return false;
+            }
+            return (printerState != PRINTER_STATE.PRINTER_READY && printerState != PRINTER_STATE.PRINTER_PRINTING);
+        }
+
+        synchronized private void sendEvent() {
+            setChanged();
+            notifyObservers(new PrinterStatus(this));
+        }
+    }
+    public static final int PRINTER_STATUS_POOL_TIMEOUT = 1000;
+    final private State state = new State();
+
+    @Override
+    public String toString() {
+        return "Printer{" + "state=" + state + ", mustStop=" + mustStop + ", statusThread=" + statusThread + '}';
+
+
+
+
+    }
+
+    private class StatusThread extends Thread {
+
+        @Override
+        public void run() {
+            Logger.debug("Printer status thread started");
+            while (!mustStop.get()) {
+                PrintService p = printers.get(port);
+                if (p == null) {
+                    Logger.error("Printer status thread invalid port");
+                    break;
+                }
+                // pool the status of the printer every 2 secs.
+                AttributeSet att = p.getAttributes();
+
+                if (att != null && att.get(PrinterIsAcceptingJobs.class) != null) {
+                    if (!att.get(PrinterIsAcceptingJobs.class).equals(PrinterIsAcceptingJobs.ACCEPTING_JOBS)) {
+                        state.setState(PRINTER_STATE.PRINTER_NOT_ACCEPTING_JOBS, "Printer not accepting jobs");
+                        continue;
+                    }
+                }
+                if (Platform.isWindows()) {
+                    WinSpool.refreshState(p.getName(), state);
+                } else {
+                    LinuxSpool.refreshState(p.getName(), state);
+                }
+                try {
+                    Thread.sleep(2 * 1000);
+                } catch (InterruptedException ex) {
+                }
+            }
+            Logger.debug("Printer status thread done");
+        }
+    }
+    final double INCH = 72;
+    final double MM = INCH / 25.5;
+    final int DEFAULT_PAPER_WIDTH = 77;
+    final int DEFAULT_PAPER_LEN = 200;
+    private AtomicBoolean mustStop = new AtomicBoolean(false);
+    private final StatusThread statusThread;
+    public static final Map<String, PrintService> printers = new HashMap<String, PrintService>();
+    private final String port;
+
+    static {
+        PrintService[] prnSvcs;
+        prnSvcs = PrintServiceLookup.lookupPrintServices(null, null);
+        for (PrintService p : prnSvcs) {
+            printers.put(p.getName(), p);
+            //p.addPrintServiceAttributeListener(new MyPrintServiceAttributeListener());
         }
     }
 
     public Printer(String port) {
         this.port = port;
-        PrintService[] prnSvcs;
-        prnSvcs = PrintServiceLookup.lookupPrintServices(null, null);
-        for (PrintService p : prnSvcs) {
-            printers.put(p.getName(), p);
+        statusThread = new StatusThread();
+    }
+
+    public boolean needCheck() {
+        return state.needCheck();
+    }
+
+    public PrinterStatus getInternalState() {
+        return new PrinterStatus(state);
+    }
+
+    public void startStatusThread() {
+        Logger.debug("Printer status thread start");
+        statusThread.start();
+    }
+
+    public void close() {
+        mustStop.set(true);
+        try {
+            statusThread.join(PRINTER_STATUS_POOL_TIMEOUT * 2);
+        } catch (InterruptedException ex) {
+            Logger.error("Error closing the printer status thread %s", ex.getMessage());
         }
     }
 
-    public void print(String templateName, Map<String, Object> args, int paperLen) {
+    public void clearError() {
+        state.clearError();
+    }
+
+    @Override
+    public void addObserver(Observer observer) {
+        state.addObserver(observer);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + (this.port != null ? this.port.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Printer other = (Printer) obj;
+        if ((this.port == null) ? (other.port != null) : !this.port.equals(other.port)) {
+            return false;
+        }
+        return true;
+    }
+
+    public void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
         if (paperLen <= 0) {
-            paperLen = DEFAULT_PAGE_LEN;
+            paperLen = DEFAULT_PAPER_LEN;
+        }
+        if (paperWidth <= 0) {
+            paperWidth = DEFAULT_PAPER_WIDTH;
         }
         Template template = TemplateLoader.load(templateName);
         if (template == null) {
@@ -101,30 +358,13 @@ public class Printer extends Observable {
             template = TemplateLoader.load(templateName + ".txt");
         }
         if (template == null) {
-            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.TEMPLATE_NOT_FOUND,
-                    String.format("Template %s not found", templateName)));
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.TEMPLATE_NOT_FOUND, String.format("Template %s not found", templateName)));
         }
         args.put("currentDate", new Date());
         String body = template.render(args);
         //Logger.debug("PRINT : %s", body);
 
         HTMLEditorKit kit = new HTMLEditorKit();
-
-        //HTMLEditorKit kit = new LargeHTMLEditorKit();
-/*
-         try {
-         StyleSheet styles = new StyleSheet();
-         FileInputStream is = new FileInputStream(new File(Play.applicationPath, "public/stylesheets/printer.css"));
-         Reader r = new BufferedReader(new InputStreamReader(is, "ISO-8859-1"));
-         styles.loadRules(r, null);
-         r.close();
-         kit.setStyleSheet(styles);
-         } catch (Throwable e) {
-         Logger.error("error loading stylesheet %s", e.toString());
-         }
-         */
-        //Logger.debug("Stylesheet %s", kit.getStyleSheet());
-
         HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
         try {
             URI u;
@@ -139,199 +379,75 @@ public class Printer extends Observable {
             kit.read(fin, doc, 0);
             fin.close();
         } catch (IOException ex) {
-            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "IOException : " + ex.toString()));
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "IOException : " + ex.toString()));
         } catch (BadLocationException ex) {
-            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "BadLocationException : " + ex.toString()));
+            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "BadLocationException : " + ex.toString()));
         }
 
 
         JEditorPane item = new JEditorPane();
         item.setEditorKit(kit);
-//        item.getDocument().putProperty("ZOOM_FACTOR", new Double(1.5));
         item.setDocument(doc);
         item.setEditable(false);
 
 
-        //PrintRequestAttributeSet attrs = new HashPrintRequestAttributeSet();
-        // http://docs.oracle.com/javase/1.4.2/docs/api/javax/print/attribute/PrintRequestAttribute.html
-        //attrs.add(new Copies(1));
-        //attrs.add(Sides.ONE_SIDED);
-
-        //attrs.add(OrientationRequested.PORTRAIT);
-        //attrs.add(MediaSizeName.ISO_A4);
-        //attrs.add(PrintQuality.DRAFT);
-        //attrs.add(new PrinterResolution(600, 600, PrinterResolution.DPI));
-        //attrs.add(new MediaPrintableArea(0, 0, 10, 10, MediaPrintableArea.MM));
-
-        /*        HashDocAttributeSet attrc = new HashDocAttributeSet();
-         //attrc.add(new MediaPrintableArea((float) 0, (float) 0, (float) PAGE_WIDTH, (float) paperLen, MediaPrintableArea.MM));
-         attrc.add(OrientationRequested.PORTRAIT);
-         MediaSizeName m = MediaSize.findMedia((float) PAGE_WIDTH, (float) paperLen, MediaSize.MM);
-         if (m != null) {
-         Logger.debug("MEDIA SIZE NAME %s", m);
-         attrc.add(m);
-         } else {
-         Logger.error("MEDIA SIZE NAME IS NULL");
-         return;
-         }
-         */
-        // Two "false" args mean "no print dialog" and "non-interactive" ( ie, batch - mode printing). 
         if (!Configuration.isPrinterTest()) {
             if (port == null || !printers.containsKey(port)) {
-                if (!Configuration.isIgnorePrinter()) {
-                    sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", port == null ? "NULL" : port)));
-                }
+                state.setError(new PrinterError(PrinterError.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", port == null ? "NULL" : port)));
                 return;
             }
         }
         PrintService p = printers.get(port);
-
+        if (state.isError()) {
+            state.sendEvent();
+            return;
+        }
+        /*
+         for (Attribute a : att.toArray()) {
+         Logger.debug("attr : %s %s %s", a.getClass(), a.getName(), att.get(a.getClass()).toString());
+         }*/
         Paper pp = new Paper();
-        pp.setImageableArea(0, 0, PAGE_WIDTH * MM, paperLen * MM);
-        pp.setSize(PAGE_WIDTH * MM, paperLen * MM);
+        pp.setImageableArea(0, 0, paperWidth * MM, paperLen * MM);
+        pp.setSize(paperWidth * MM, paperLen * MM);
+        pp.setImageableArea(0, 0, pp.getWidth(), pp.getHeight());
         EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
+
         if (!Configuration.isPrinterTest()) {
             try {
                 DocPrintJob printJob = p.createPrintJob();
-//                Doc docc = new SimpleDoc(pnl, DocFlavor.SERVICE_FORMATTED.PRINTABLE, null);
-                printJob.addPrintJobListener(new MyPrintListener());
-//                printJob.print(docc, null);
-                pnl.print(p);
-            } catch (PrinterException ex) {
-                sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
+
+                printJob.addPrintJobListener(new MyPrintJobListener());
+                //printJob.addPrintJobAttributeListener(new MyPrintJobAttributeListener(), null);
+
+                PageFormat pageFormat = new PageFormat();
+                pageFormat.setPaper(pp);
+
+                Book book = new Book();
+                book.append(pnl, pageFormat);
+
+                Doc docc = new SimpleDoc(book, DocFlavor.SERVICE_FORMATTED.PAGEABLE, null);
+                state.setState(PRINTER_STATE.PRINTER_PRINTING, "Printing");
+                printJob.print(docc, null);
+//  pnl.print(p);
+/*                PrinterJob pj = PrinterJob.getPrinterJob();
+                 pj.setPageable(pnl);
+                 pj.setPrintService(p);
+                 pj.print();
+                 */
+            } catch (PrintException ex) {
+                state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
             }
         } else {
             JFrame frame = new JFrame("Main print frame");
             pnl.setBackground(Color.black);
             frame.add(pnl);
+            //frame.getContentPane().add(item);
             frame.pack();
             frame.setVisible(true);
-            sendEvent(new PrinterStatus(PrinterStatus.ERROR_CODE.PRINTING_DONE, "DONE"));
-        }
-
-
-        /*
-         DocPrintJob printJob = p.createPrintJob();
-         //attrc.add(MediaSize.findMedia((float) 80, (float) 160, MediaSize.MM));
-         //addMediaSizeByName(p, attrc, "80mm * 160mm");
-         Doc docc = new SimpleDoc(item.getPrintable(null, null), DocFlavor.SERVICE_FORMATTED.PRINTABLE, attrc);
-         printJob.addPrintJobListener(new MyPrintListener());
-         if (!Configuration.isPrinterTest()) {
-         printJob.print(docc, null);
-         } else {
-         JFrame frame = new JFrame("Main print frame");
-         frame.getContentPane().add(item);
-         frame.setSize((int) (4.1 * PAGE_WIDTH), (int) (4.1 * paperLen));
-         frame.pack();
-         frame.setVisible(true);
-         }
-         */
-        /*            attrs.add(new MediaPrintableArea((float) 0, (float) 0, (float) 80, (float) 160, MediaPrintableArea.MM));
-         attrs.add(OrientationRequested.PORTRAIT);
-         addMediaSizeByName(p, attrs, "80mm * 160mm");
-         */
-        //Logger.debug("Printer : " + p.getName() + " " + p.toString());
-        //item.print(null, null, false, p, attrs, false);
-    }
-// Hack to add something from sun.print.
-
-    void addMediaSizeByName(PrintService p, PrintRequestAttributeSet attrs, String name) {
-        Object o = p.getSupportedAttributeValues(javax.print.attribute.standard.Media.class, null, null);
-        if (o
-                == null) {
-            return;
-        }
-
-        if (o.getClass()
-                .isArray()) {
-            for (int k = 0; k < Array.getLength(o); k++) {
-                Object o2 = Array.get(o, k);
-                if (o2 != null) {
-                    //Logger.debug(" O2 %s %s", o2.getClass(), o2);
-                    if (o2.toString().equalsIgnoreCase(name)) {
-                        attrs.add((javax.print.attribute.standard.Media) o2);
-                        break;
-                    }
-                }
-            }
-        } else {
-            Logger.debug(" O %s %s", o.getClass(), o);
         }
     }
 
-    void addMediaSizeByName(PrintService p, DocAttributeSet attrs, String name) {
-        Object o = p.getSupportedAttributeValues(javax.print.attribute.standard.Media.class, null, null);
-        if (o
-                == null) {
-            return;
-        }
-
-        if (o.getClass()
-                .isArray()) {
-            for (int k = 0; k < Array.getLength(o); k++) {
-                Object o2 = Array.get(o, k);
-                if (o2 != null) {
-                    //Logger.debug(" O2 %s %s", o2.getClass(), o2);
-                    if (o2.toString().equalsIgnoreCase(name)) {
-                        attrs.add((javax.print.attribute.standard.Media) o2);
-                        break;
-                    }
-                }
-            }
-        } else {
-            Logger.debug(" O %s %s", o.getClass(), o);
-        }
-    }
-
-    private void sendEvent(PrinterStatus stat) {
-        if (stat.isError()) {
-            Logger.debug("PRINTER ERROR : " + stat);
-        }
-        setChanged();
-        notifyObservers(stat);
-    }
-
-    public void printAttributes() {
-        if (printers.containsKey(port)) {
-            PrintService p = printers.get(port);
-
-            PrintServiceAttributeSet pts = p.getAttributes();
-            for (Attribute a : pts.toArray()) {
-                Logger.debug(" Attribute %s %s %s %s", a.getClass(), a.getName(), a.getCategory(), a);
-            }
-
-            Class[] cats = p.getSupportedAttributeCategories();
-            for (int j = 0; j < cats.length; j++) {
-                if (cats[j] == null) {
-                    continue;
-                }
-                Logger.debug("Category %s %s", cats[ j].getClass(), cats[j]);
-                Attribute attr = (Attribute) p.getDefaultAttributeValue(cats[j]);
-                if (attr == null) {
-                    continue;
-                }
-                Logger.debug(" Attr %s %s", attr.getName(), attr.toString());
-                Object o = p.getSupportedAttributeValues(attr.getCategory(), null, null);
-                if (o == null) {
-                    continue;
-                }
-                Logger.debug(" O %s %s", o.getClass(), o);
-                if (o.getClass().isArray()) {
-                    for (int k = 0; k < Array.getLength(o); k++) {
-                        Object o2 = Array.get(o, k);
-                        if (o2 != null) {
-                            Logger.debug(" Possible values %s %s", o2.getClass().toString(), o2);
-
-                            if (o2.getClass() != null && o2.getClass().toString() != null && o2.getClass().toString().equalsIgnoreCase("sun.print.CustomMediaSizeName")) {
-                                /*if (o2.toString().equalsIgnoreCase("custom")) {
-                                 Logger.debug("-------------> Possible values %s %s", o2.getClass().toString(), o2);
-                                 //attrs.add((MediaSize) o2);
-                                 }*/
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    public String getPort() {
+        return port;
     }
 }

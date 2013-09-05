@@ -11,56 +11,57 @@
         #{/else}
         <div class="contenido">
             #{if ( merror?.isError() ) }
-            #{if ( controllers.Secure.checkPermission( 'Application.reset', 'GET' ) || controllers.Secure.checkPermission( 'Application.storingReset', 'GET' ) ) }
-            <div style="overflow-y: scroll; height: 220px;">
-                #{if merror?.isError() }
-                #{if merror.getGloryError() }
-                <h2>GLORY ERROR : ${ merror.getGloryError() }</h2>
-                #{/if}
-                #{if merror.getPrinterError() }
-                <h2>PRINTER ERROR : ${ merror.getPrinterError() }</h2>
-                #{/if}
-                #{if merror.getIoBoardError() }
-                <h2>IOBOARD ERROR : ${ merror.getIoBoardError() }</h2>
-                #{/if}
-                #{if merror.getErrorCode() }
-                <h2>APLICATION ERROR : code ${ merror.getErrorCode() }
-                    #{if merror.getDetail() } detail : ${ merror.getDetail() }#{/if}
-                </h2>
-                #{/if}
+                #{if ( merror?.getErrorCode() == models.ModelError.ERROR_CODE.BAG_NOT_INPLACE ) }
+                    <h2>&{ 'application.bag_not_in_place' }<br/>&{ 'application.wait' }</h2>
                 #{/if}
                 #{else}
-                <b class="">&{ 'application.ok' }</b>
+                    #{if ( controllers.Secure.checkPermission( 'Application.reset', 'GET' ) || controllers.Secure.checkPermission( 'Application.storingReset', 'GET' ) ) }
+                    <div style="overflow-y: scroll; height: 220px;">
+                        #{if merror?.isError() }
+                        #{if merror.getGloryError() }
+                        <h2>GLORY ERROR : ${ merror.getGloryError() }</h2>
+                        #{/if}
+                        #{if merror.getPrinterError() }
+                        <h2>PRINTER ERROR : ${ merror.getPrinterError() }</h2>
+                        #{/if}
+                        #{if merror.getIoBoardError() }
+                        <h2>IOBOARD ERROR : ${ merror.getIoBoardError() }</h2>
+                        #{/if}
+                        #{if merror.getErrorCode() }
+                        <h2>APLICATION ERROR : code ${ merror.getErrorCode() }
+                            #{if merror.getDetail() } detail : ${ merror.getDetail() }#{/if}
+                        </h2>
+                        #{/if}
+                        #{/if}
+                        #{else}
+                        <b class="">&{ 'application.ok' }</b>
+                        #{/else}
+                        <p id="mstatus">ModelFacade status ${ mstatus }</p>
+                        <p id="gstatus">Glory Status ${ gstatus }</p>
+                        <p id="gerror">Glory Error ${ gError }</p>
+                        <p id="ierror">IOBoard Status ${ istatus }</p>
+                        <p id="ierror">IOBoard Error ${ ierror }</p>
+                        <p id="ierror">Printer Status ${ pstatus }</p>
+                    </div>
+                    <div class="botonera">
+                        <ul class="on-2 unit">
+                            <li class="column">
+                                <div class="columna">
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(1)}">Reset</a>
+                                </div>
+                            </li>
+                            <li class="column">
+                                <div class="columna">
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(2)}">StoringErrorReset</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    #{/if}
+                    #{else}
+                    <h2>&{ 'application.hardware_error' }</h2>
+                    #{/else}
                 #{/else}
-                <p id="mstatus">ModelFacade status ${ mstatus }</p>
-                <p id="gstatus">Glory Status ${ gstatus }</p>
-                <p id="gerror">Glory Error ${ gError }</p>
-                <p id="ierror">IOBoard Status ${ istatus }</p>
-                <p id="ierror">IOBoard Error ${ ierror }</p>
-            </div>
-            <div class="botonera">
-                <ul class="on-2 unit">
-                    <li class="column">
-                        <div class="columna">
-                            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(1)}">Reset</a>
-                        </div>
-                    </li>
-                    <li class="column">
-                        <div class="columna">
-                            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(2)}">StoringErrorReset</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            #{/if}
-            #{else}
-            #{if ( merror?.getErrorCode() == models.ModelError.ERROR_CODE.BAG_NOT_INPLACE ) }
-            <h2>&{ 'application.bag_not_in_place' }<br/>&{ 'application.wait' }</h2>
-            #{/if}
-            #{else}
-            <h2>&{ 'application.hardware_error' }</h2>
-            #{/else}
-            #{/else}
             #{/if}
         </div>
         <hr />

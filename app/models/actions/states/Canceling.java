@@ -5,6 +5,7 @@
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface.ManagerStatus;
+import models.ModelError;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -39,6 +40,9 @@ public class Canceling extends ActionState {
             case REMOVE_THE_BILLS_FROM_ESCROW:
                 break;
             case REMOVE_THE_BILLS_FROM_HOPER:
+                break;
+            case JAM: //The door is jamed.
+                stateApi.setError(ModelError.ERROR_CODE.ESCROW_JAMED, "Escrow jamed");
                 break;
             default:
                 Logger.debug("Canceling invalid state %s %s", m.name(), name());

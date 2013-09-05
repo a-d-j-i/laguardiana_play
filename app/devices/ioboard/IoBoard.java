@@ -101,12 +101,22 @@ public class IoBoard {
         private final BAG_APROVE_STATE bagAproveState;
         private final BAG_STATE bagState;
         private final IoBoardError error;
+        private final String criticalEvent;
 
         private IoBoardStatus(State currentState) {
             this.shutterState = currentState.shutterState;
             this.bagAproveState = currentState.bagAproveState;
             this.error = currentState.error;
             this.bagState = currentState.bagState;
+            this.criticalEvent = null;
+        }
+
+        private IoBoardStatus(State currentState, String criticalEvent) {
+            this.shutterState = currentState.shutterState;
+            this.bagAproveState = currentState.bagAproveState;
+            this.error = currentState.error;
+            this.bagState = currentState.bagState;
+            this.criticalEvent = criticalEvent;
         }
 
         public SHUTTER_STATE getShutterState() {
@@ -123,6 +133,10 @@ public class IoBoard {
 
         public IoBoardError getError() {
             return error;
+        }
+
+        public String getCriticalEvent() {
+            return criticalEvent;
         }
 
         @Override
@@ -148,7 +162,7 @@ public class IoBoard {
         private BAG_APROVE_STATE bagAproveState = BAG_APROVE_STATE.BAG_APROVED;
 
         synchronized private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt, Boolean bagAproved) {
-            //Logger.debug("IOBOARD setSTATE : %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
+            //Logger.debug("IOBOARD setSTATE : bagSt %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
             BAG_STATE bs = BAG_STATE.factory(bagSt);
             if (bs != bagState) {
                 bagState = bs;
@@ -184,8 +198,11 @@ public class IoBoard {
                     break;
             }
             if (hasChanged()) {
+                Logger.debug("IOBOARD setSTATE prev: bagSt %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
+                Logger.debug("IOBOARD setSTATE next: bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
                 notifyObservers(new IoBoardStatus(this));
             }
+            //Logger.debug("IOBOARD setSTATE : bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
         }
 
         synchronized private void setStatusBytes(Byte A, Byte B, Byte C, Byte D, Byte BAG_SENSOR, Byte BAG_STATUS) {
@@ -202,6 +219,13 @@ public class IoBoard {
             this.error = error;
             setChanged();
             notifyObservers(new IoBoardStatus(this));
+        }
+        // Critical states
+
+        synchronized private void setCriticalEvent(String criticalEvent) {
+            setChanged();
+            notifyObservers(new IoBoardStatus(this, criticalEvent));
+
         }
 
         synchronized private void setAproveBagState(BAG_APROVE_STATE state) {
@@ -259,8 +283,8 @@ public class IoBoard {
         }
     }
     public static final int IOBOARD_READ_TIMEOUT = 10000;
-    public static final int IOBOARD_STATUS_CHECK_FREQ = 500;
-    public static final int IOBOARD_MAX_RETRIES = 5;
+    public static final int IOBOARD_STATUS_CHECK_FREQ = 250;
+    public static final int IOBOARD_MAX_RETRIES = 50;
     final private State state = new State();
 
     @Override
@@ -293,7 +317,7 @@ public class IoBoard {
                         throw new IOException("IoBoard StatusThread IoBoard Serial port closed");
                     }
                     String l = serialPort.readLine(IOBOARD_STATUS_CHECK_FREQ);
-                    Logger.debug("IOBOARD %d reader : %s", l.length(), l);
+                    //Logger.debug("IOBOARD %d reader : %s", l.length(), l);
                     //Logger.debug("IOBOARD reader %s", bytesToHex(l.getBytes()));
                     retries = 0;
                     if (l.startsWith("STATUS :") && l.length() > 71) {
@@ -320,6 +344,8 @@ public class IoBoard {
                         } catch (NumberFormatException e) {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }
+                    } else if (l.startsWith("CRITICAL :") && l.length() > 15) {
+                        state.setCriticalEvent(l);
                     } else if (l.contains("ERROR")) {
                         if (l.contains("SHUTTER") && Configuration.isIgnoreShutter()) {
                             // Ignore.
@@ -327,7 +353,7 @@ public class IoBoard {
                             state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_FW_ERROR, l));
                         }
                     } else {
-                        Logger.warn("IOBOARD Ignoring line : %s", l);
+                        Logger.warn("IOBOARD Ignoring line (%d): %s", l.length(), l);
                     }
                 } catch (Exception ex) {
                     if (!(ex.getCause() instanceof TimeoutException)) {
@@ -436,15 +462,18 @@ public class IoBoard {
     }
 
     public void openGate() {
+        Logger.debug("openGate");
         statusThread.sendCmd('O');
     }
 
     public void closeGate() {
+        Logger.debug("closeGate");
         statusThread.sendCmd('C');
     }
 
     public void aproveBag() {
         state.setAproveBagState(BAG_APROVE_STATE.BAG_APROVE_WAIT);
+        Logger.debug("aproveBag");
         statusThread.sendCmd('A');
     }
 

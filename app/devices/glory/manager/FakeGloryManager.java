@@ -1,5 +1,6 @@
 package devices.glory.manager;
 
+import devices.glory.Glory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observer;
@@ -115,5 +116,9 @@ public class FakeGloryManager implements ManagerInterface {
 
     public void addObserver(Observer observer) {
         state.addObserver(observer);
+    }
+
+    public Glory getCounter() {
+        return null;
     }
 }

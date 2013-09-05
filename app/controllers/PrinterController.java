@@ -1,9 +1,9 @@
 package controllers;
 
-import devices.DeviceFactory;
 import java.util.List;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
+import models.ModelFacade;
 import play.Logger;
 import play.mvc.*;
 
@@ -11,7 +11,10 @@ import play.mvc.*;
 public class PrinterController extends Controller {
 
     public static void listPrinters() {
-        renderArgs.put("printers", DeviceFactory.getPrinter().printers.values());
+        renderArgs.put("printers", ModelFacade.getPrinters());
+        renderArgs.put("printerStatus", ModelFacade.getPrinter().getInternalState());
+        renderArgs.put("currentPrinter", ModelFacade.getCurrentPrinter());
+
         render();
     }
 
@@ -19,7 +22,7 @@ public class PrinterController extends Controller {
         List<BillDeposit> depositList = BillDeposit.findAll();
         BillDeposit d = depositList.get(0);
         //BillDeposit d = BillDeposit.findById(33);
-        d.print(DeviceFactory.getPrinter(), true);
+        d.print(true);
         d.setRenderArgs(renderArgs.data);
         render();
     }
@@ -28,7 +31,7 @@ public class PrinterController extends Controller {
         List<EnvelopeDeposit> depositList = EnvelopeDeposit.findAll();
         EnvelopeDeposit d = depositList.get(0);
         //BillDeposit d = BillDeposit.findById(33);
-        d.print(DeviceFactory.getPrinter(), true);
+        d.print(true);
         d.setRenderArgs(renderArgs.data);
         render();
     }
@@ -37,7 +40,7 @@ public class PrinterController extends Controller {
         List<EnvelopeDeposit> depositList = EnvelopeDeposit.findAll();
         EnvelopeDeposit d = depositList.get(0);
         //BillDeposit d = BillDeposit.findById(33);
-        d.printStart(DeviceFactory.getPrinter());
+        d.printStart();
         d.setRenderArgs(renderArgs.data);
         render();
     }
@@ -45,10 +48,10 @@ public class PrinterController extends Controller {
     public static void test() {
         try {
             //DeviceFactory.getPrinter().printAttributes();
-            DeviceFactory.getPrinter().print("PrinterController/test.html", renderArgs.data, 150);
+            ModelFacade.print("PrinterController/test.html", renderArgs.data, 77, 30);
         } catch (Throwable ex) {
             Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }
-        render();
+        MenuController.hardwareMenu(null);
     }
 }

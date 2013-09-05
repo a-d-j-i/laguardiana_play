@@ -1,26 +1,29 @@
 #{extends 'main.html' /}
 #{set title:'Doing transaction..' /}
 
-
 <section id="depositar_efectivo_02">
     <header></header>
     <!-- link volver -->
-    <a id ="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
-    <!-- /link volver -->
+    <!--    <a href="@{cancel()}" class="boton_top">◄ &{ 'application.back' }</a>-->
     <article>
-        <h1 class="contar_dinero">&{ 'main_menu.count' }</h1>
+        <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
 
         <div class="contenido">
             <ul class="columns">
                 <li class="fixed column" style="width: 45%">
                     <div class="columna_1">
                         <!-- resumen de datos -->
-                        <p>&{ 'counting_page.currency_title' }: ${currency}</p>
+                        <p style="font-size: larger;">&{ 'application.wellcome' }&nbsp;#{usernameTag user: user/}</p>
+                        <p>&{ 'counting_page.currency_title' }: ${formData.currency.currency.description}</p>
                         <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
+                        <div id="total_sum_field" style="display: none;">
+                            <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
+                        </div>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
-                        <div id="info_message" style="color: green;"> 
+                        <div class="info_message blink" style="color: green; font-size: x-large;"> 
                         </div>
+                    </div>
                 </li>
                 <li class="fixed column" style="width: 55%">
                     <table class="full_width">
@@ -31,16 +34,15 @@
                                 <th>&{ 'counting_page.total' }</th>
                             </tr>
                         </thead>
-
                         <tbody>
                             <!-- detalle de billetes -->
                             %{ total = 0; cnt_total = 0;}%
                             #{list items:billData, as:'b'}
-                            <tr id="BTRID_${b.tid}">
-                                <td id="bill_denomination">${b.d}</td>
-                                <td id="bill_quantity">${b.q}</td>
-                                <td id="bill_total">${b.d * b.q}</td>
-                                %{ total += b.d * b.q; cnt_total += b.q }%
+                            <tr class="BTRID_${b.key}">
+                                <td id="bill_denomination">${b.denomination} ${b.currency.textId}</td>
+                                <td class="bill_quantity">${b.quantity}</td>
+                                <td class="bill_total">${b.ammount}</td>
+                                %{ total += b.ammount; cnt_total += b.quantity; }%
                             </tr>
                             #{/list}
                             <!-- /detalle de billetes -->
@@ -50,8 +52,8 @@
                             <tr>
                                 <td>&{ 'counting_page.totals' }</td>
                                 <!-- totales -->
-                                <td id ="cnt_total">${ cnt_total }</td>
-                                <td id ="total">${ total }</td>
+                                <td class ="cnt_total">${ cnt_total }</td>
+                                <td class ="total">${ total }</td>
                                 <!-- /totales -->
                             </tr>
                         </tfoot>
@@ -61,85 +63,222 @@
         </div>
         <div class="botonera">
             <ul class="columns">
-                <li class="fixed column" style="width: 50%">
-                    <!-- link cancelar -->
-                    <a id ="cancelButton" href="#" class="boton rojo">&{ 'application.cancel' }</a>
-                    <!-- /link cancelar -->
+                <li class="column">
+                    <div class="columna">
+                        <!-- link cancelar -->
+                        <a href="#" class="cancelButton boton full_width rojo">&{ 'application.cancel' }</a>
+                    </div>
                 </li>
-                <li class="fixed column" style="width: 50%">
-                    <div class="columna_2">
+                <li class="column">
+                    <div class="columna">
                         <!-- link continuar -->
-                        <a id ="continueButton" href="#" class="boton gris">&{ 'application.finish' }</a>
-                        <!-- /link continuar -->
+                        <a id ="continueButton" href="#" class="continueButton boton full_width ${play.configuration['style.button_color']}" style="display: none;">&{ 'application.continue' }</a>
                     </div>
                 </li>
             </ul>
         </div>
     </article>
+    <div id="main_overlay" class="alerta info" style="display: none;">
+        <!--        <div id="overlay_contents"></div>-->
+
+        <div id="alerta_escrow_full" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'bill_deposit.escrow_full' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <div id="error_text">
+                        &{ 'bill_deposit.escrow_full_text_t1' }
+                        <span class="total">${ total }</span>&nbsp;${formData.currency.currency.description}<br>
+                        &{ 'bill_deposit.escrow_full_text_t2' }
+                    </div>
+                </div>
+            </div>
+            <div id="alerta_botonera">
+                <a href="#" id="alerta_escrow_full_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
+                <a href="#" id="alerta_escrow_full_continue_btn" class="continueButton boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+            </div>
+        </div>
+        <div id="alerta_bag_removed" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.bag_not_in_place' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'application.bag_not_in_place' }</span>
+                </div>
+            </div>
+            <div id="alerta_botonera">
+                <a href="#" id="alerta_bag_removed_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
+            </div>
+        </div>
+        <div id="alerta_timeout" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.timeout' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'application.timeout_detail' }</span>
+                </div>
+                <div id="timeout_botonera">
+                    <a href="#" id ="alerta_timeout_cancel_btn" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a href="#" id="alerta_timeout_continue_btn" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+                </div>
+            </div>
+        </div>
+        <div id="alerta_cancel" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.canceling' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <div id="error_text">
+                        <span>&{ 'application.canceling_detail' }</span>
+                        <span class="info_message" style="color: green;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="alerta_storing" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'counting_page.storing_detail' }</span>
+                    <span class="info_message" style="color: green;"></span>
+                </div>
+            </div>
+        </div>
+        <div id="alerta_remove_rejected_bills" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+                </div>
+            </div>
+        </div>
+        <div id="alerta_jam" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.jam' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'application.jam' }</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
 </section>
 
+
 #{set 'moreScripts'}
+<script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
-    var waiting = false;
-    var lastStatus = false;
-    
-    // Reload the whole messages panel
-    function refresh() {
-        if ( waiting ) {
-            return;
-        }
-        waiting = true;
+    doRefresh = function() {
         $.getJSON( '@{mainLoop}', function( data ) {
-            waiting = false;
+            
             var status = data[ 0 ];
-            var billData = data[ 1 ];
+           
             if ( status != null && status.toString() != 'null' ) {
-                $( '#info_message' ).html(  data[ 2 ] );
-                if ( status == 'IDLE' || status == 'CANCELING' || status == 'ESCROW_FULL' ) {
+                if ( status == 'IDLE' || status == 'REMOVE_THE_BILLS_FROM_ESCROW' || status == 'TIMEOUT_WARNING' || status == 'CANCELING' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' ) {
+                } else if ( status == 'STORING' ) {
+                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
+                } else if ( status == 'JAM' ) {
+                } else if ( status == 'BAG_REMOVED' ) {
+                } else if ( status == 'ESCROW_FULL' ) {
                 } else if ( status == 'FINISH' ) {
                     window.location.href = "@{finish}";
                     return;
-                } else if ( status == 'READY_TO_STORE' ) {
-                    $( '#continueButton' ).attr( { 'class' : 'boton ${play.configuration['style.button_color']}'});
+                } else if ( status == 'TIMEOUT_WARNING') {
+                } else if ( status == 'COUNTING' ) {
                 } else if ( status == 'ERROR' ) {
                     window.location.href = "@{counterError()}";
+                    return;
                 } else {          
                     alert( "Invalid status : " + status + " last status : " + lastStatus );
                 }
+                
+                if ( status == 'ESCROW_FULL' ) {
+                    showAlert( "#alerta_escrow_full" );
+                } else if ( status == 'TIMEOUT_WARNING' ) {
+                    showAlert( "#alerta_timeout" );
+                } else if ( status == 'CANCELING' ) {
+                    showAlert( '#alerta_cancel' );                
+                } else if ( status == 'STORING' ) {
+                    showAlert( '#alerta_storing' );                
+                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
+                    showAlert( '#alerta_remove_rejected_bills' );
+                } else if ( status == 'JAM' ) {
+                    showAlert( '#alerta_jam' );
+                } else if ( status == 'BAG_REMOVED' ) {
+                    showAlert( '#alerta_bag_removed' );
+                } else {
+                    closeAlert();
+                    /*                    closeAlert( "#alerta_escrow_full" );
+                    closeAlert( "#alerta_timeout" );
+                    closeAlert( "#alerta_cancel" );
+                    closeAlert( "#alerta_storing" );    
+                    closeAlert( "#alerta_remove_rejected_bills" );    
+                    closeAlert( "#alerta_jam" );    
+                    closeAlert( "#alerta_bag_removed" );*/
+                }
+
+                if ( status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT') {
+                    $( '#continueButton' ).show();
+                } else {
+                    $( '#continueButton' ).hide();
+                }
+                
                 lastStatus = status
             }
+                       
+            $( '.info_message' ).html(  data[ 2 ] );
+            var totalSum = data[ 3 ];
+            if ( totalSum > 0 ) {
+                $( '.totalSum' ).html( totalSum ).show();
+                $( '#total_sum_field' ).show();
+            } else {
+                $( '#total_sum_field' ).hide();
+            }
+
+            var billData = data[ 1 ];
             var total = 0;
             var cnt_total = 0;
-            for( var i = 0 ; i < billData.length; i ++ ) {
-                var nid = '#BTRID_' + billData[ i ].tid;
-                $( nid ).children( '#bill_denomination' ).html( billData[ i ].d );
-                $( nid ).children( '#bill_quantity' ).html( billData[ i ].q );
-                var t = ( billData[ i ].d * billData[ i ].q );
-                $( nid ).children( '#bill_total' ).html( t );
-                total += t;
-                cnt_total += billData[ i ].q;
+            if ( billData ) {
+                for( var i = 0 ; i < billData.length; i ++ ) {
+                    var nid = '.BTRID_' + billData[ i ].tid;
+                    $( nid ).children( '.bill_denomination' ).html( billData[ i ].d );
+                    $( nid ).children( '.bill_quantity' ).html( billData[ i ].q );
+                    var t = ( billData[ i ].d * billData[ i ].q );
+                    $( nid ).children( '.bill_total' ).html( t );
+                    total += t;
+                    cnt_total += billData[ i ].q;
+                }
+                $( '.cnt_total' ).html( cnt_total );
+                $( '.total' ).html( total );
+                if ( status != 'STORING' ) { // when storing the deposit total have the current quantity and the machine still report the same quantity.
+                    $( '.currentTotalSum' ).html( parseInt( totalSum ) + parseInt( total ) );
+                }
             }
-            $( '#cnt_total' ).html( cnt_total );
-            $( '#total' ).html( total );
+            doneRefresh();
         })
     }
     
-    $( '#cancelButton' ).click( function(event) {
+    $( '.cancelButton' ).click( function(event) {
         $.getJSON( '@{cancel()}', function( data ) {});
     });
-            
-    $( '#continueButton' ).click( function(event) {
-        if ( lastStatus == 'ESCROW_FULL' ) {
-            $.getJSON( '@{accept()}', function( data ) {});
-        } else if ( lastStatus == 'READY_TO_STORE' ) {
+   
+    $( '.continueButton' ).click( function(event) {
+        if ( lastStatus == 'IDLE' ) {
+        } else if ( lastStatus == 'ESCROW_FULL' || lastStatus == 'READY_TO_STORE' || lastStatus == 'CONTINUE_DEPOSIT' ) {
             $.getJSON( '@{accept()}', function( data ) {});
         } else {
-            alert( "Invalid last status : " + lastStatus );
+            //alert( "Invalid last status : " + lastStatus );
         }
     });
     
-    // Call refresh every 1.5 seconds
-    setInterval(refresh, 500);
-    refresh();
+    
+    
+    $( '#timeout_cancelButton' ).click( function(event) {
+        closeAlert( "#alerta_timeout" );
+        $.getJSON( '@{cancel()}', function( data ) {});
+    });
+    
+    $( '#timeout_continueButton' ).click( function(event) {
+        closeAlert( "#alerta_timeout" );
+    });
+
+
 </script>
 #{/set}

@@ -4,10 +4,10 @@
  */
 package controllers;
 
-import devices.DeviceFactory;
 import devices.ioboard.IoBoard;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
+import devices.printer.Printer.PrinterStatus;
 import models.Configuration;
 import models.ModelFacade;
 import play.Logger;
@@ -51,18 +51,22 @@ public class CounterController extends Controller {
     public static void counterError(Integer cmd) {
         ManagerStatus gstatus = null;
         String gerror = null;
+        PrinterStatus pstatus = null;
         String ierror = null;
 
-        final ManagerInterface manager = DeviceFactory.getGloryManager();
+        final ManagerInterface manager = ModelFacade.getGloryManager();
         if (manager != null) {
             gstatus = manager.getStatus();
             gerror = manager.getStatus().toString();
         }
         if (!Configuration.isIoBoardIgnore()) {
-            final IoBoard ioBoard = DeviceFactory.getIoBoard();
+            final IoBoard ioBoard = ModelFacade.getIoBoard();
             if (ioBoard != null && ioBoard.getError() != null) {
                 ierror = ioBoard.getError().toString();
             }
+        }
+        if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
+            pstatus = ModelFacade.getPrinter().getInternalState();
         }
         if (cmd != null) {
             switch (cmd) {
@@ -79,6 +83,7 @@ public class CounterController extends Controller {
         } else {
             renderArgs.put("mstatus", ModelFacade.getState());
             renderArgs.put("merror", ModelFacade.getError());
+            renderArgs.put("pstatus", pstatus);
             renderArgs.put("gstatus", gstatus);
             renderArgs.put("gerror", gerror);
             renderArgs.put("ierror", ierror);

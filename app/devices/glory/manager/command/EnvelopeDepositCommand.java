@@ -39,16 +39,18 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
             switch (gloryStatus.getSr1Mode()) {
                 case escrow_open:
                     setState(ManagerInterface.MANAGER_STATE.PUT_THE_ENVELOPE_IN_THE_ESCROW);
+                    threadCommandApi.setClosing(false);
                     break;
                 case waiting_for_an_envelope_to_set:
                     break;
                 case escrow_close:
+                    threadCommandApi.setClosing(true);
                     break;
                 case escrow_close_request:
                     if (gloryStatus.isEscrowBillPresent()) {
                         sleep(2000);
-                        if (!sendGCommand(new devices.glory.command.CloseEscrow())) {
-                            // Ignore the error, could happen if some one takes the envelope quickly.
+                        if (!closeEscrow()) {
+                            return;
                         }
                     }
                     break;
@@ -71,7 +73,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                         return;
                     }
                     if (!gloryStatus.isEscrowBillPresent()) {
-                        if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                        if (!openEscrow()) {
                             return;
                         }
                     } else {
@@ -82,6 +84,11 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                     storeTry = true;
                     break;
                 case abnormal_device:
+                    if (threadCommandApi.isClosing()) {
+                        setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                "Escrow door jamed"));
+                        return;
+                    }
                     setState(ManagerInterface.MANAGER_STATE.JAM);
                     break;
                 case storing_error:

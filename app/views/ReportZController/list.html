@@ -2,13 +2,18 @@
 #{set title: 'List Zs' /}
 <table style="margin-left: auto; margin-right: auto; border: 1px solid;">
     <thead>
-    <th>Transaccion</th>
+    <th>Nro cierre</th>
     <th>Fecha de creacion</th>
-    <th>Cierre contable</th>
+    <th>Fecha Cierre contable</th>
+    <th>Total de depositos</th>
+    <th>Total de sobres</th>
+    <th>Total de billetes</th>
+    <th>Total de efectivo &nbsp; / &nbsp; billetes</th>
     <th colspan="4">Acciones</th>
 </thead>
 <tbody>
     #{list items:data, as:'z' }
+    %{ def totals = z.getTotals(); }%
     #{if ( ! z.closeDate ) } 
     <tr style="background-color: lightpink;">
         #{/if}
@@ -20,14 +25,28 @@
         <td style="width:180px;">
             ${z.closeDate?.format('dd/MM/yyyy HH:mm:ss')}
         </td>
-        <td style="background-color: lightblue; border: 1px solid;">
+        <td style="width:100px;">
+            ${totals.deposits}
+        </td>
+        <td style="width:100px;">
+            ${totals.envelopes}
+        </td>
+        <td style="width:100px;">
+            ${totals.bills}
+        </td>
+        <td style="width:350px;">
+            #{list items:totals.currencies, as:'currency'}
+            ${ totals.byCurrencyTotal.get( currency ).ammount } &nbsp; / &nbsp; ${ totals.byCurrencyTotal.get( currency ).quantity } &nbsp; ${ currency }<br>
+            #{/list}
+        </td>
+        <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
+            <a id="${ z.zId }" href="@{reprint}" class="submitForm">Reimprimir Ticket</a>
+        </td>
+        <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
             <a id="${ z.zId }" href="@{detail}" class="submitForm">Detalle</a>
         </td>
-        <td style="background-color: lightblue; border: 1px solid;">
+        <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
             <a id="${ z.zId }" href="@{ReportDepositController.list( 1, null, null, null, z.zId )}" class="NosubmitForm">Depositos</a>
-        </td>
-        <td style="background-color: lightblue; border: 1px solid;">
-            <a id="${ z.zId }" href="@{reprint}" class="submitForm">Reimprimir Ticket</a>
         </td>
     </tr>
     #{/list}
@@ -35,7 +54,7 @@
 <tfoot> 
     <tr>
         <td colspan="3" style="text-align: left;">Cantidad de cierres contables: ${cnt}</td>
-        <td colspan="4" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
+        <td colspan="8" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
     </tr>
 </tfoot>
 </table>

@@ -1,25 +1,17 @@
 package models.db;
 
-import devices.printer.Printer;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.Bill;
-import models.BillDeposit;
-import models.EnvelopeDeposit;
 import models.db.LgLov.LovCol;
 import models.events.DepositEvent;
-import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import play.Logger;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPABase;
-import play.libs.F;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -112,10 +104,10 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
                 + " finishDate is not null "
                 + "and not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
-                + " where al.externalApp = ea "
+                + " where al.externalApp = ea and al.logType = ?"
                 + " and d.depositId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")", appId);
+                + ")", LgExternalAppLog.LOG_TYPES.DEPOSIT.name(), appId);
     }
 
     public static boolean process(int appId, int depositId, String resultCode) {
@@ -125,7 +117,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
             return false;
         }
 
-        LgExternalAppLog el = new LgExternalAppLog(d, resultCode, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(LgExternalAppLog.LOG_TYPES.DEPOSIT, d.depositId, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
         el.setExternalApp(ea);
         el.save();
@@ -172,55 +164,73 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     abstract public void setRenderArgs(Map args);
 
-    abstract public void print(Printer p, boolean reprint);
+    abstract public void print(boolean reprint);
 
     abstract public String getDetailView();
 
-    public static class Total {
+    public interface DepositVisitor {
 
-        public long a = 0;
-        public long q = 0;
+        void visit(LgDeposit item);
     }
 
-    public static F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals(Set<LgDeposit> deps) {
-        long envelopes = 0;
-        long deposits = 0;
-        long bills = 0;
-        Map<Currency, Map<LgBillType, Bill>> totals = new HashMap();
-        Map<Currency, Total> qaTotals = new HashMap();
+    public static void visitDeposits(Set<LgDeposit> deps, DepositVisitor visitor) {
         for (LgDeposit d : deps) {
-            deposits++;
-            if (d instanceof BillDeposit) {
-                BillDeposit bd = (BillDeposit) d;
-                for (LgBill b : bd.bills) {
-                    bills += b.quantity;
-                    Currency c = b.billType.getCurrency();
-                    Total at = qaTotals.get(c);
-                    if (at == null) {
-                        at = new Total();
-                    }
-                    at.a += b.getTotal();
-                    at.q += b.quantity;
-                    qaTotals.put(c, at);
-
-                    Map<LgBillType, Bill> ct = totals.get(c);
-                    if (ct == null) {
-                        ct = new HashMap();
-                    }
-                    Bill bill = ct.get(b.billType);
-                    if (bill == null) {
-                        bill = new Bill(b.billType);
-                    }
-                    bill.q += b.quantity;
-                    totals.put(c, ct);
-                    ct.put(b.billType, bill);
-                }
-            } else if (d instanceof EnvelopeDeposit) {
-                envelopes++;
-            } else {
-                Logger.error("Invalid deposit type");
+            if (d.finishDate == null) {
+                continue;
             }
+            visitor.visit(d);
         }
-        return new F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<LgBillType, Bill>>>(deposits, envelopes, bills, qaTotals, totals);
     }
+
+    /*
+     public static class Total {
+
+     public long ammount = 0;
+     public long quantity = 0;
+     }
+
+     public static F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<BillValue, BillQuantity>>> getTotals1(Set<LgDeposit> deps) {
+     long envelopes = 0;
+     long deposits = 0;
+     long bills = 0;
+     Map<Currency, Map<BillValue, BillQuantity>> totals = new HashMap();
+     Map<Currency, Total> qaTotals = new HashMap();
+     for (LgDeposit d : deps) {
+     if (d.finishDate == null) {
+     continue;
+     }
+     deposits++;
+     if (d instanceof BillDeposit) {
+     BillDeposit bd = (BillDeposit) d;
+     for (LgBill b : bd.bills) {
+     bills += b.quantity;
+     Currency c = b.billType.getCurrency();
+     Total at = qaTotals.get(c);
+     if (at == null) {
+     at = new Total();
+     }
+     at.ammount += b.getTotal();
+     at.quantity += b.quantity;
+     qaTotals.put(c, at);
+
+     Map<BillValue, BillQuantity> ct = totals.get(c);
+     if (ct == null) {
+     ct = new HashMap();
+     }
+     BillQuantity bill = ct.get(b.billType.getValue());
+     if (bill == null) {
+     bill = new BillQuantity(b.billType.getValue());
+     }
+     bill.quantity += b.quantity;
+     totals.put(c, ct);
+     ct.put(b.billType.getValue(), bill);
+     }
+     } else if (d instanceof EnvelopeDeposit) {
+     envelopes++;
+     } else {
+     Logger.error("Invalid deposit type");
+     }
+     }
+     return new F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<BillValue, BillQuantity>>>(deposits, envelopes, bills, qaTotals, totals);
+     }*/
 }

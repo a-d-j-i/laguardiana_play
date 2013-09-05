@@ -49,7 +49,7 @@
     permission:     ALLOW
 
 # Basic users
-  User(admin):
+  db.LgUser(admin):
     externalApp:    PlayInternalApp
     username:       admin
     password:       admin
@@ -60,7 +60,7 @@
     locked:         #x42
     roles:          [ RoleAdmin ]
 
-  User(guest):
+  db.LgUser(guest):
     externalApp:    PlayInternalApp
     username:       guest
     password:       guest
@@ -71,7 +71,7 @@
     endDate:        2112-01-01    
     roles:          [ RoleGuest ]
     
-  User(demo):
+  db.LgUser(demo):
     externalApp:    PlayInternalApp
     username:       demo
     password:       demo
@@ -82,7 +82,7 @@
     endDate:        2112-01-01    
     roles:          []
 
-  User(user):
+  db.LgUser(user):
     externalApp:    PlayInternalApp
     username:       user
     password:       ""
@@ -93,7 +93,7 @@
     endDate:        2112-01-01    
     roles:          []
 
-  User(supervisor):
+  db.LgUser(supervisor):
     externalApp:    PlayInternalApp
     username:       supervisor
     password:       supervisor

@@ -1,6 +1,7 @@
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import models.ModelFacade;
 import models.db.LgAclRule;
 import models.db.LgResource;
 import models.db.LgRole;
@@ -133,6 +134,8 @@ public class Bootstrap extends Job {
         }
         // Start glory Manager
         //CounterFactory.getManager( Play.configuration.getProperty( "glory.port" ) );
+        // Start Model Facade.
+        ModelFacade.initialize();
     }
 
     @Util

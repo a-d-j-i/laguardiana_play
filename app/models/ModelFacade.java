@@ -6,27 +6,34 @@ package models;
 
 import controllers.Secure;
 import devices.DeviceFactory;
+import devices.glory.Glory;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
-import devices.printer.PrinterStatus;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import models.actions.UserAction;
 import models.db.LgBag;
+import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
+import models.db.LgUser;
 import models.events.ActionEvent;
 import models.events.GloryEvent;
 import models.events.IoBoardEvent;
 import models.events.PrinterEvent;
-import models.lov.Currency;
 import play.Logger;
+import play.Play;
 import play.jobs.Job;
-import play.libs.F;
 import play.libs.F.Promise;
 
 /**
@@ -43,29 +50,43 @@ public class ModelFacade {
     final static private ModelError modelError = new ModelError();
     final static private Printer printer;
     static private UserAction currentUserAction = null;
-    static private User currentUser = null;
+    static private LgUser currentUser = null;
 
     static {
-        manager = DeviceFactory.getGloryManager();
+        manager = DeviceFactory.getGloryManager(Play.configuration.getProperty("glory.port"));
         manager.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnGloryEvent((ManagerStatus) data).now();
             }
         });
 
-        ioBoard = DeviceFactory.getIoBoard();
+        ioBoard = DeviceFactory.getIoBoard(Play.configuration.getProperty("io_board.port"));
         ioBoard.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
             }
         });
 
-        printer = DeviceFactory.getPrinter();
+        printer = DeviceFactory.getPrinter(Play.configuration.getProperty("printer.port"));
         printer.addObserver(new Observer() {
             public void update(Observable o, Object data) {
-                Promise now = new OnPrinterEvent((PrinterStatus) data).now();
+                Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
             }
         });
+    }
+    // TODO: Review
+
+    public static void initialize() {
+        // used to force the execution of the static code.
+    }
+
+    interface BillListVisitor {
+
+        public void visit(LgBillType billType, Integer desired, Integer current);
+    }
+
+    public static Printer getCurrentPrinter() {
+        return printer;
     }
 
     public static ModelError getError() {
@@ -139,6 +160,11 @@ public class ModelFacade {
                 u = currentUserAction;
             }
             IoBoardEvent.save(u, status.toString());
+            Logger.debug("OnIoBoardEvent event %s", status.toString());
+
+            if (status.getCriticalEvent() != null) {
+                IoBoardEvent.save(u, status.getCriticalEvent());
+            }
 
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
@@ -163,28 +189,26 @@ public class ModelFacade {
                         ioBoard.aproveBagConfirm();
                         break;
                 }
-                if (u != null
-                        && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED
-                        && !Configuration.isIgnoreBag()) {
-                    modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag rotated during deposit");
-                }
+                /*                if (u != null
+                 && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED
+                 && !Configuration.isIgnoreBag()) {
+                 modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag rotated during deposit");
+                 }*/
             }
 
-            if (u != null) {
-                if (!isIoBoardOk(status)) {
-                    return;
-                }
+            if (u == null) {
+                Logger.error(String.format("OnIoBoardEvent current user action is null : %s", status));
+            } else {
                 u.onIoBoardEvent(status);
             }
-
         }
     }
 
     static class OnPrinterEvent extends Job {
 
-        PrinterStatus status;
+        Printer.PrinterStatus status;
 
-        private OnPrinterEvent(PrinterStatus status) {
+        private OnPrinterEvent(Printer.PrinterStatus status) {
             this.status = status;
         }
 
@@ -195,11 +219,12 @@ public class ModelFacade {
                 u = currentUserAction;
             }
             PrinterEvent.save(u, status.toString());
-            if (status.isError()) {
+            Logger.debug("OnPrinterEvent event %s", status.toString());
+            if (status.getError() != null) {
                 if (!Configuration.isPrinterIgnore()) {
                     // A development option
                     Logger.error("Setting printer error : %s", status.toString());
-                    modelError.setError(status);
+                    modelError.setError(status.getError());
                 }
                 return;
             }
@@ -224,6 +249,9 @@ public class ModelFacade {
         }
 
         public boolean store(Integer depositId) {
+            if (!isIoBoardOk()) {
+                return false;
+            }
             return manager.storeDeposit(depositId);
         }
 
@@ -240,7 +268,7 @@ public class ModelFacade {
         public void envelopeDeposit() {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
-                    setError(ModelError.ERROR_CODE.APP_ERROR, "count currentAction is null");
+                    setError(ModelError.ERROR_CODE.APP_ERROR, "envelopeDeposit currentAction is null");
                     return;
                 }
                 if (!manager.envelopeDeposit()) {
@@ -266,8 +294,34 @@ public class ModelFacade {
             ioBoard.closeGate();
         }
 
-        public Printer getPrinter() {
-            return printer;
+        public boolean isIoBoardOk() {
+            IoBoard.IoBoardStatus status = ioBoard.getStatus();
+
+            if (!Configuration.isIoBoardIgnore() && status != null && status.getError() != null) {
+                Logger.error("Setting ioboard error : %s", status.getError());
+                modelError.setError(status.getError());
+                return false;
+            }
+            if (!Configuration.isIgnoreBag()
+                    && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+                Logger.error("IoBoard bag not inplace can't store");
+                //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
+                return false;
+            }
+            return true;
+        }
+
+        public List<LgBill> getCurrentBillList() {
+            synchronized (ModelFacade.class) {
+                final List<LgBill> ret = new ArrayList<LgBill>();
+                visitBillList(new BillListVisitor() {
+                    public void visit(LgBillType billType, Integer desired, Integer current) {
+                        LgBill b = new LgBill(current, billType);
+                        ret.add(b);
+                    }
+                });
+                return ret;
+            }
         }
     }
 
@@ -294,17 +348,17 @@ public class ModelFacade {
             return;
         }
 
-        if (!isIoBoardOk(ioBoard.getStatus())) {
-            return;
-        }
+//        if (!isIoBoardOk(ioBoard.getStatus())) {
+//            modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag not in place");
+//            return;
+//        }
 
         if (modelError.isError()) {
             Logger.info("Can't start an action when on error");
             return;
         }
         LgBag currentBag = LgBag.getCurrentBag();
-        F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> totals = currentBag.getTotals();
-        if (Configuration.isBagFull(totals._3, totals._2)) {
+        if (Configuration.isBagFull(currentBag.getItemQuantity())) {
             modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
             return;
         }
@@ -336,14 +390,20 @@ public class ModelFacade {
             }
         }
 
-        if (!isIoBoardOk(ioBoard.getStatus())) {
+        IoBoard.IoBoardStatus status = ioBoard.getStatus();
+        if (status != null && status.getError() != null) {
+            if (!Configuration.isIoBoardIgnore()) {
+                Logger.error("Setting ioboard error : %s", status.getError());
+                modelError.setError(status.getError());
+            }
         }
 
         if (modelError.isError()) {
             finishAction();
             return "ERROR";
         }
-        if (currentUserAction != null) {
+        if (currentUserAction
+                != null) {
             return currentUserAction.getStateName();
         }
 
@@ -391,16 +451,63 @@ public class ModelFacade {
         }
     }
 
-    synchronized public static List<Bill> getCurrentCounters() {
-        if (currentUserAction == null) {
-            Logger.error("getCurrentCounters invalid current User Action");
-            return null;
+    synchronized public static Collection<BillQuantity> getBillQuantities() {
+        final SortedMap<BillValue, BillQuantity> ret = new TreeMap<BillValue, BillQuantity>();
+        visitBillList(new BillListVisitor() {
+            public void visit(LgBillType billType, Integer desired, Integer current) {
+                BillValue bv = billType.getValue();
+                BillQuantity billQuantity = ret.get(bv);
+                if (billQuantity == null) {
+                    billQuantity = new BillQuantity(bv);
+                }
+                billQuantity.quantity += current;
+                billQuantity.desiredQuantity += desired;
+                ret.put(bv, billQuantity);
+
+            }
+        });
+        return ret.values();
+    }
+
+    private static void visitBillList(BillListVisitor visitor) {
+        Integer currency = manager.getCurrency();
+        if (currency == null) {
+            return;
         }
-        if (currentUserAction.getCurrency() == null) {
-            Logger.error("getCurrentCounters invalid currency null");
-            return null;
+
+        List<LgBillType> billTypes = LgBillType.find(currency);
+
+        Map<Integer, Integer> desiredQuantity = null;
+        Map<Integer, Integer> currentQuantity = null;
+        if (manager != null) {
+            currentQuantity = manager.getCurrentQuantity();
+            desiredQuantity = manager.getDesiredQuantity();
         }
-        return Bill.getBillList(currentUserAction.getCurrency().numericId);
+        Set<Integer> slots = new HashSet();
+        if (currentQuantity != null) {
+            slots = new HashSet(currentQuantity.keySet());
+        }
+        for (LgBillType billType : billTypes) {
+            Integer desired = 0;
+            Integer current = 0;
+
+            if (currentQuantity != null && currentQuantity.containsKey(billType.slot)) {
+                slots.remove(billType.slot);
+                current = currentQuantity.get(billType.slot);
+            }
+            if (desiredQuantity != null && desiredQuantity.containsKey(billType.slot)) {
+                desired = desiredQuantity.get(billType.slot);
+            }
+            visitor.visit(billType, desired, current);
+        }
+        if (!slots.isEmpty()) {
+            for (Integer s : slots) {
+                if (currentQuantity.get(s) > 0) {
+                    modelError.setError(ModelError.ERROR_CODE.APP_ERROR,
+                            String.format("The bill type slots must be configured correctly slot %d value %d", s, currentQuantity.get(s)));
+                }
+            }
+        }
     }
 
     synchronized public static Object getFormData() {
@@ -455,19 +562,32 @@ public class ModelFacade {
         currentUserAction.suspendTimeout();
     }
 
-    private static boolean isIoBoardOk(IoBoard.IoBoardStatus status) {
-        if (!Configuration.isIoBoardIgnore()) {
-            if (status != null && status.getError() != null) {
-                Logger.error("Setting ioboard error : %s", status.getError());
-                modelError.setError(status.getError());
-                return false;
-            }
-            if (!Configuration.isIgnoreBag()
-                    && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-                modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-                return false;
-            }
-        }
-        return true;
+    public static boolean printerNeedCheck() {
+        return printer.needCheck();
+    }
+
+    public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+        printer.print(templateName, args, paperWidth, paperLen);
+    }
+
+    public static ManagerInterface getGloryManager() {
+        return manager;
+    }
+
+    public static IoBoard getIoBoard() {
+        //Play.configuration.getProperty("io_board.port")
+        return ioBoard;
+    }
+
+    public static Printer getPrinter() {
+        return printer;
+    }
+
+    public static Glory getCounter() {
+        return manager.getCounter();
+    }
+
+    public static Object getPrinters() {
+        return printer.printers.values();
     }
 }
