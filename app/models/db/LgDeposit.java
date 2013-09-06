@@ -42,6 +42,8 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "finish_date", length = 13)
     public Date finishDate;
+    @Column(name = "canceled", nullable = false)
+    public Boolean canceled = true;
     @Column(name = "user_code", length = 128)
     public String userCode;
     @Column(name = "user_code_lov")

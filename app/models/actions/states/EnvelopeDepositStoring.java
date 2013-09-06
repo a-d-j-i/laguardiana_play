@@ -31,7 +31,7 @@ class EnvelopeDepositStoring extends ActionState {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case NEUTRAL:
-                stateApi.closeDeposit();
+                stateApi.closeDeposit(false);
                 if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new Finish(stateApi));
                 } else {

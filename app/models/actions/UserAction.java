@@ -98,9 +98,12 @@ abstract public class UserAction {
             }
         }
 
-        public void closeDeposit() {
-            closeBatch();
+        public void closeDeposit(boolean isCanceled) {
+            if ( ! isCanceled ) {
+                closeBatch(); 
+            }
             LgDeposit d = LgDeposit.findById(currentDepositId);
+            d.canceled = isCanceled;
             d.finishDate = new Date();
             d.save();
         }

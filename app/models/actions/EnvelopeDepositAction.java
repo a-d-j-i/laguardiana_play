@@ -49,7 +49,7 @@ public class EnvelopeDepositAction extends UserAction {
     public void finish() {
         if (currentDepositId != null) {
             EnvelopeDeposit d = EnvelopeDeposit.findById(currentDepositId);
-            if (d != null && d.finishDate != null) {
+            if (d != null && d.finishDate != null && !d.canceled) {
                 d.print(false);
             }
         }

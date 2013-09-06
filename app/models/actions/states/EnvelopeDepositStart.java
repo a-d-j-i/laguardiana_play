@@ -14,23 +14,24 @@ import play.Logger;
  * @author adji
  */
 public class EnvelopeDepositStart extends ActionState {
-
+    
     public EnvelopeDepositStart(StateApi stateApi) {
         super(stateApi);
     }
-
+    
     @Override
     public String name() {
         return "IDLE";
     }
-
+    
     @Override
     public void cancel() {
+        stateApi.closeDeposit(true);
         stateApi.cancelTimer();
         stateApi.cancelDeposit();
         stateApi.setState(new Canceling(stateApi));
     }
-
+    
     @Override
     public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());

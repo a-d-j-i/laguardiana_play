@@ -29,6 +29,7 @@ public class BillDepositReadyToStore extends ActionState {
 
     @Override
     public void cancel() {
+        stateApi.closeDeposit(true);
         stateApi.cancelTimer();
         stateApi.cancelDeposit();
     }

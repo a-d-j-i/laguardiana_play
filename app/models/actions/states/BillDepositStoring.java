@@ -37,7 +37,7 @@ public class BillDepositStoring extends ActionState {
                 stateApi.setState(new Jam(stateApi, this));
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
-                stateApi.closeDeposit();
+                stateApi.closeDeposit(false);
                 if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new Finish(stateApi));
                 } else {

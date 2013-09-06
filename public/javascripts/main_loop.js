@@ -22,19 +22,9 @@ function showAlert( a ) {
     if ( current_alert != a ) {
         $( ".alerta_info" ).hide();
         $( a ).show();
+        current_alert = a;
     }
-    current_alert = a;
-    /*    $( "#overlay_contents" ).html( $( a ).html() );
-    $( a ).find( "a" ).each( function() {
-        var id = $( this ).attr( "id" );
-        if ( id ) {
-            $( "#overlay_contents" ).find( "#" + id ).click( function () {
-                //alert( "click " + id);
-                $( a ).find( "#" + id ).click()
-            });
-        }
-    });
-*/
+
     if ( current_overlay ) {
         return;
     }
@@ -55,7 +45,6 @@ function showAlert( a ) {
     current_overlay = $( "#main_overlay" ).overlay();
     console.log( "load overlay" + a );
     current_overlay.load();
-
 }
 
 function closeAlert() {
