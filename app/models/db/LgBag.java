@@ -171,7 +171,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
     public ItemQuantity getItemQuantity() {
         final ItemQuantity ret = new ItemQuantity();
-        LgDeposit.visitDeposits(deposits, new LgDeposit.DepositVisitor() {
+        LgDeposit.visitFinishedDeposits(deposits, new LgDeposit.DepositVisitor() {
             public void visit(BillDeposit item) {
                 for (LgBill b : item.bills) {
                     ret.bills += b.quantity;

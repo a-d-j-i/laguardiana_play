@@ -84,6 +84,8 @@ public class ModelFacade {
 
     public static void initialize() {
         // used to force the execution of the static code.
+        // Close unifnished deposits.
+        LgDeposit.closeUnfinished();
     }
 
     interface BillListVisitor {

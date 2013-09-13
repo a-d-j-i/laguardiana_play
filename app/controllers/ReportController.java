@@ -80,7 +80,9 @@ public class ReportController extends Controller {
         final public Integer bag_id;
         final public String user_id;
         final public String gecos;
+        final public Boolean canceled;
         final public Date startDate;
+        final public Date closeDate;
         final public Date finishDate;
 
         public DepositData(LgDeposit d, Integer type) {
@@ -89,7 +91,9 @@ public class ReportController extends Controller {
             this.bag_id = d.bag.bagId;
             this.user_id = d.user.externalId;
             this.gecos = d.user.gecos;
+            this.canceled = d.canceled;
             this.startDate = d.startDate;
+            this.closeDate = d.closeDate;
             this.finishDate = d.finishDate;
         }
     }

@@ -100,7 +100,7 @@ public class ReportTotals implements DepositVisitor {
      }*/
 
     synchronized public ReportTotals getTotals(Set<LgDeposit> deps) {
-        LgDeposit.visitDeposits(deps, this);
+        LgDeposit.visitFinishedDeposits(deps, this);
         return this;
     }
 }

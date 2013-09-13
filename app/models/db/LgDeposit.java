@@ -40,6 +40,11 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     @Column(name = "start_date", length = 13)
     public Date startDate;
     @Temporal(TemporalType.TIMESTAMP)
+    // Closed correctly canceld or not.
+    @Column(name = "close_date", length = 13)
+    public Date closeDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    // not currently processed.
     @Column(name = "finish_date", length = 13)
     public Date finishDate;
     @Column(name = "canceled", nullable = false)
@@ -98,6 +103,15 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         List<Object> args = new ArrayList<Object>();
         String query = getFindQuery("select d", args, start, end, bagId, zId) + " order by creationDate desc";
         return LgDeposit.find(query, args.toArray());
+    }
+
+    public static void closeUnfinished() {
+        List< LgDeposit> unfinished = LgDeposit.find("select d from LgDeposit d where finishDate is null").fetch();
+        for (LgDeposit l : unfinished) {
+            DepositEvent.save(l.user, l, String.format("Deposit finished automatically"));
+            l.finishDate = new Date();
+            l.save();
+        }
     }
 
     public static JPAQuery findUnprocessed(int appId) {
@@ -161,7 +175,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     @Override
     public String toString() {
-        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag + ", z=" + z + '}';
+        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", closeDate=" + closeDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag + ", z=" + z + '}';
     }
 
     abstract public void setRenderArgs(Map args);
@@ -175,7 +189,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         void visit(LgDeposit item);
     }
 
-    public static void visitDeposits(Set<LgDeposit> deps, DepositVisitor visitor) {
+    public static void visitFinishedDeposits(Set<LgDeposit> deps, DepositVisitor visitor) {
         for (LgDeposit d : deps) {
             if (d.finishDate == null) {
                 continue;
@@ -183,56 +197,4 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
             visitor.visit(d);
         }
     }
-
-    /*
-     public static class Total {
-
-     public long ammount = 0;
-     public long quantity = 0;
-     }
-
-     public static F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<BillValue, BillQuantity>>> getTotals1(Set<LgDeposit> deps) {
-     long envelopes = 0;
-     long deposits = 0;
-     long bills = 0;
-     Map<Currency, Map<BillValue, BillQuantity>> totals = new HashMap();
-     Map<Currency, Total> qaTotals = new HashMap();
-     for (LgDeposit d : deps) {
-     if (d.finishDate == null) {
-     continue;
-     }
-     deposits++;
-     if (d instanceof BillDeposit) {
-     BillDeposit bd = (BillDeposit) d;
-     for (LgBill b : bd.bills) {
-     bills += b.quantity;
-     Currency c = b.billType.getCurrency();
-     Total at = qaTotals.get(c);
-     if (at == null) {
-     at = new Total();
-     }
-     at.ammount += b.getTotal();
-     at.quantity += b.quantity;
-     qaTotals.put(c, at);
-
-     Map<BillValue, BillQuantity> ct = totals.get(c);
-     if (ct == null) {
-     ct = new HashMap();
-     }
-     BillQuantity bill = ct.get(b.billType.getValue());
-     if (bill == null) {
-     bill = new BillQuantity(b.billType.getValue());
-     }
-     bill.quantity += b.quantity;
-     totals.put(c, ct);
-     ct.put(b.billType.getValue(), bill);
-     }
-     } else if (d instanceof EnvelopeDeposit) {
-     envelopes++;
-     } else {
-     Logger.error("Invalid deposit type");
-     }
-     }
-     return new F.T5<Long, Long, Long, Map<Currency, Total>, Map<Currency, Map<BillValue, BillQuantity>>>(deposits, envelopes, bills, qaTotals, totals);
-     }*/
 }

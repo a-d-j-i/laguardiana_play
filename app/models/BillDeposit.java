@@ -54,6 +54,7 @@ public class BillDeposit extends LgDeposit {
         return qret;
     }
 
+
     public List<BillQuantity> getBillList() {
         List<BillQuantity> ret = new ArrayList<BillQuantity>();
         List qret = BillDeposit.find(" "

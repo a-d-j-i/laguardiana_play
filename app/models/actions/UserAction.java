@@ -9,6 +9,7 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;
+import models.BillDeposit;
 import models.ModelError;
 import models.ModelFacade.UserActionApi;
 import models.actions.states.ActionState;
@@ -99,12 +100,12 @@ abstract public class UserAction {
         }
 
         public void closeDeposit(boolean isCanceled) {
-            if ( ! isCanceled ) {
-                closeBatch(); 
+            if (!isCanceled) {
+                closeBatch();
             }
             LgDeposit d = LgDeposit.findById(currentDepositId);
             d.canceled = isCanceled;
-            d.finishDate = new Date();
+            d.closeDate = new Date();
             d.save();
         }
 
@@ -138,6 +139,9 @@ abstract public class UserAction {
     }
 
     public void start(LgUser currentUser, UserActionApi userActionApi) {
+        // Close any old unfinished deposit.
+        LgDeposit.closeUnfinished();
+
         this.userActionApi = userActionApi;
         this.currentUser = currentUser;
         start();
