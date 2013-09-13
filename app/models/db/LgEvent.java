@@ -23,7 +23,7 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
     @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "creation_date", nullable = false, length = 13)
     public Date creationDate = new Date();
-    @Column( name = "message", nullable = true, length = 256)
+    @Column( name = "message", nullable = true, length = 512)
     public String message;
 
     public LgEvent(LgUser user, Integer eventSourceId, String message) {

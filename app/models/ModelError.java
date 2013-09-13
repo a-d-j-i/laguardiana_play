@@ -17,7 +17,7 @@ public class ModelError {
 
     public enum ERROR_CODE {
 
-        APP_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_CLOSED, SHUTTER_NOT_OPENING, ERROR_TRYING_TO_COLLECT, BAG_FULL, ESCROW_JAMED;
+        APPLICATION_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_CLOSED, SHUTTER_NOT_OPENING, ERROR_TRYING_TO_COLLECT, BAG_FULL, ESCROW_JAMED;
     }
     private GloryManagerError gloryError = null;
     private PrinterError printerError = null;
@@ -70,13 +70,25 @@ public class ModelError {
         return detail;
     }
 
-    synchronized void clearError() {
-        Logger.debug("--> Model error cleared");
+    synchronized void clearIoBoardError() {
+        Logger.debug("--> Model ioboard error cleared");
+        this.ioBoardError = null;
+    }
+
+    synchronized void clearGloryError() {
+        Logger.debug("--> Model glory error cleared");
+        this.gloryError = null;
+    }
+
+    synchronized void clearPrinterError() {
+        Logger.debug("--> Model printer error cleared");
+        this.gloryError = null;
+    }
+
+    synchronized void clearErrorCodeError() {
+        Logger.debug("--> Model errorCode error cleared");
         this.errorCode = null;
         this.detail = null;
-        this.gloryError = null;
-        this.printerError = null;
-        this.ioBoardError = null;
     }
 
     @Override

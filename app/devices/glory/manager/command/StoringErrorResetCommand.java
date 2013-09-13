@@ -4,7 +4,6 @@
  */
 package devices.glory.manager.command;
 
-import devices.glory.GloryState;
 import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManagerError;
 import play.Logger;
@@ -60,7 +59,6 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             }
                             break;
                         case being_reset:
-                            threadCommandApi.setClosing(true);
                             break;
                         case escrow_close_request:
                             if (threadCommandApi.isClosing()) {

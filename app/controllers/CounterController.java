@@ -35,7 +35,7 @@ public class CounterController extends Controller {
         }
         String neededAction = ModelFacade.getNeededAction();
         Logger.debug("Needed action : %s  Needed controller : %s", neededAction, neededController);
-        if (neededController == null || neededAction == null) {
+        if (neededAction == null) {
             return;
         }
         if (neededAction.equalsIgnoreCase("counterError")) {

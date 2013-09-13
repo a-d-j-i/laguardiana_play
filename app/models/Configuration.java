@@ -209,4 +209,16 @@ public class Configuration {
             return 77;
         }
     }
+
+    public static String getGloryPort() {
+        return Play.configuration.getProperty("glory.port");
+    }
+
+    public static String getIoBoardPort() {
+        return Play.configuration.getProperty("io_board.port");
+    }
+
+    public static String getIoBoardBaudRate() {
+        return Play.configuration.getProperty("io_board.baudRate");
+    }
 }

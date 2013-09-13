@@ -49,7 +49,7 @@ public class IoBoardController extends Application {
     }
 
     public static void clearError() {
-        ioBoard.clearError();
+        ioBoard.reset();
         index();
     }
 }

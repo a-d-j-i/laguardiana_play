@@ -6,7 +6,6 @@ import devices.glory.manager.ManagerInterface.MANAGER_STATE;
 import devices.glory.manager.command.*;
 import java.util.Map;
 import java.util.Observer;
-import java.util.logging.Level;
 import play.Logger;
 
 /**
@@ -148,6 +147,9 @@ public class GloryManager {
         public boolean reset() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
+                if (cmd instanceof ResetCommand) {
+                    return true;
+                }
                 cmd.cancel();
                 try {
                     managerControllerApi.waitUntilWaiting(10000);
@@ -161,6 +163,9 @@ public class GloryManager {
         public boolean storingErrorReset() {
             ManagerCommandAbstract cmd = managerControllerApi.getCurrentCommand();
             if (cmd != null) {
+                if (cmd instanceof StoringErrorResetCommand) {
+                    return true;
+                }
                 cmd.cancel();
                 return false;
             }

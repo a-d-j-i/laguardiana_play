@@ -7,6 +7,7 @@ package models;
 import controllers.Secure;
 import devices.DeviceFactory;
 import devices.glory.Glory;
+import devices.glory.manager.FakeGloryManager;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
@@ -53,14 +54,19 @@ public class ModelFacade {
     static private LgUser currentUser = null;
 
     static {
-        manager = DeviceFactory.getGloryManager(Play.configuration.getProperty("glory.port"));
+
+        if (Configuration.isGloryIgnore()) {
+            manager = new FakeGloryManager();
+        } else {
+            manager = DeviceFactory.getGloryManager(Configuration.getGloryPort());
+        }
         manager.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnGloryEvent((ManagerStatus) data).now();
             }
         });
 
-        ioBoard = DeviceFactory.getIoBoard(Play.configuration.getProperty("io_board.port"));
+        ioBoard = DeviceFactory.getIoBoard(Configuration.getIoBoardPort(), Configuration.getIoBoardBaudRate());
         ioBoard.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
@@ -111,8 +117,10 @@ public class ModelFacade {
             Logger.debug("OnGloryEvent event %s", status.toString());
             switch (status.getState()) {
                 //Could happen on startup
-                case INITIALIZING:
                 case NEUTRAL:
+                    if (modelError.getGloryError() != null) {
+                        modelError.clearGloryError();
+                    }
                     if (u != null) {
                         u.onGloryEvent(status);
                     }
@@ -130,6 +138,7 @@ public class ModelFacade {
                         modelError.setError(status.getError());
                     }
                     break;
+                case INITIALIZING:
                 default:
                     if (u == null) {
                         Logger.error(String.format("OnGloryEvent current user action is null : %s", status.name()));
@@ -166,6 +175,15 @@ public class ModelFacade {
                 IoBoardEvent.save(u, status.getCriticalEvent());
             }
 
+            if (status.getError() != null) {
+                if (u != null) {
+                    u.cancel();
+                }
+                modelError.setError(status.getError());
+                return;
+            } else {
+                modelError.clearIoBoardError();
+            }
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
                 switch (status.getBagAproveState()) {
@@ -239,11 +257,11 @@ public class ModelFacade {
         public void count(Integer numericId) {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
-                    setError(ModelError.ERROR_CODE.APP_ERROR, "count currentAction is null");
+                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "count currentAction is null");
                     return;
                 }
                 if (!manager.count(null, numericId)) {
-                    setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
+                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start count");
                 }
             }
         }
@@ -257,7 +275,7 @@ public class ModelFacade {
 
         public void withdraw() {
             if (!manager.withdrawDeposit()) {
-                setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
+                setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start withdraw");
             }
         }
 
@@ -268,11 +286,11 @@ public class ModelFacade {
         public void envelopeDeposit() {
             synchronized (ModelFacade.class) {
                 if (ModelFacade.currentUserAction == null) {
-                    setError(ModelError.ERROR_CODE.APP_ERROR, "envelopeDeposit currentAction is null");
+                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "envelopeDeposit currentAction is null");
                     return;
                 }
                 if (!manager.envelopeDeposit()) {
-                    setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
+                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start envelope deposit");
                 }
             }
         }
@@ -303,7 +321,7 @@ public class ModelFacade {
                 return false;
             }
             if (!Configuration.isIgnoreBag()
-                    && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+                    && status != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
                 Logger.error("IoBoard bag not inplace can't store");
                 //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
                 return false;
@@ -330,15 +348,19 @@ public class ModelFacade {
     }
 
     synchronized public static void errorReset() {
-        manager.reset();
-        ioBoard.clearError();
-        clearError();
+        if (manager.getStatus().getError() != null) {
+            manager.reset();
+        }
+        if (ioBoard.getStatus().getError() != null) {
+            ioBoard.reset();
+        }
+        if (modelError.getErrorCode() != null) {
+            modelError.clearErrorCodeError();
+        }
     }
 
     synchronized public static void storingErrorReset() {
         manager.storingErrorReset();
-        ioBoard.clearError();
-        clearError();
     }
 
     synchronized static public void startAction(UserAction userAction) {
@@ -384,9 +406,10 @@ public class ModelFacade {
         if (isLocked()) {
             return null;
         }
-        if (manager.getStatus().getState() == ManagerInterface.MANAGER_STATE.ERROR) {
+        ManagerStatus mstate = manager.getStatus();
+        if (mstate.getState() == ManagerInterface.MANAGER_STATE.ERROR) {
             if (!Configuration.isGloryIgnore()) {
-                modelError.setError(ModelError.ERROR_CODE.APP_ERROR, String.format("Glory error %s", manager.getStatus()));
+                modelError.setError(mstate.getError());
             }
         }
 
@@ -443,14 +466,6 @@ public class ModelFacade {
         return false;
     }
 
-    private static void clearError() {
-        Logger.debug("clearing error");
-        ManagerInterface.MANAGER_STATE m = manager.getStatus().getState();
-        if (m != ManagerInterface.MANAGER_STATE.ERROR && ioBoard.getError() == null) {
-            modelError.clearError();
-        }
-    }
-
     synchronized public static Collection<BillQuantity> getBillQuantities() {
         final SortedMap<BillValue, BillQuantity> ret = new TreeMap<BillValue, BillQuantity>();
         visitBillList(new BillListVisitor() {
@@ -502,8 +517,8 @@ public class ModelFacade {
         }
         if (!slots.isEmpty()) {
             for (Integer s : slots) {
-                if (currentQuantity.get(s) > 0) {
-                    modelError.setError(ModelError.ERROR_CODE.APP_ERROR,
+                if (currentQuantity != null && currentQuantity.get(s) > 0) {
+                    modelError.setError(ModelError.ERROR_CODE.APPLICATION_ERROR,
                             String.format("The bill type slots must be configured correctly slot %d value %d", s, currentQuantity.get(s)));
                 }
             }

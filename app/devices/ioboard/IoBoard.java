@@ -197,6 +197,11 @@ public class IoBoard {
                 case BAG_NOT_APROVED:
                     break;
             }
+            if (error != null) {
+                error = null;
+                setChanged();
+            }
+
             if (hasChanged()) {
                 Logger.debug("IOBOARD setSTATE prev: bagSt %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
                 Logger.debug("IOBOARD setSTATE next: bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
@@ -234,12 +239,8 @@ public class IoBoard {
             notifyObservers(new IoBoardStatus(this));
         }
 
-        synchronized public void clearError() {
-            // Don't overwrite the first error!!!.
-            this.error = null;
+        synchronized public void reset() {
             statusThread.sendCmd('E');
-            setChanged();
-            notifyObservers(new IoBoardStatus(this));
         }
 
         synchronized private IoBoardError getError() {
@@ -282,9 +283,9 @@ public class IoBoard {
             return repr(BAG_STATUS);
         }
     }
-    public static final int IOBOARD_READ_TIMEOUT = 10000;
-    public static final int IOBOARD_STATUS_CHECK_FREQ = 250;
-    public static final int IOBOARD_MAX_RETRIES = 50;
+    public static final int IOBOARD_READ_TIMEOUT = 3000;
+    public static final int IOBOARD_STATUS_CHECK_FREQ = 1000;
+    public static final int IOBOARD_MAX_RETRIES = 3;
     final private State state = new State();
 
     @Override
@@ -362,25 +363,24 @@ public class IoBoard {
                         //throw new RuntimeException( ex );
                     } else { // timeout
                         // Try again
-                        if (state.getError() == null) {
-                            sendCmd('S');
-                            retries++;
+                        sendCmd('S');
+                        retries++;
 
-                            if (retries == IOBOARD_MAX_RETRIES) {
+                        if (retries == IOBOARD_MAX_RETRIES) {
+                            state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
+                                    String.format("StatusThread timeout reading from port, exception %s", ex.getMessage())));
+                            retries = 0;
+                        }
+                        Date currTime = new Date();
+                        if (lastCmdSentTime != null && (currTime.getTime() - lastCmdSentTime.getTime()) > IOBOARD_READ_TIMEOUT) {
+                            state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
+                                    String.format("StatusThread timeout reading from port, exception %s", ex.getMessage())));
+                            try {
+                                Logger.debug("IOBOARD TRY TO RECONNECT");
+                                serialPort.reconect();
+                            } catch (IOException ex1) {
                                 state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
-                                        String.format("StatusThread timeout reading from port, exception %s", ex.getMessage())));
-                                retries = 0;
-                            }
-                            Date currTime = new Date();
-                            if (lastCmdSentTime != null && (currTime.getTime() - lastCmdSentTime.getTime()) > IOBOARD_READ_TIMEOUT) {
-                                state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
-                                        String.format("StatusThread timeout reading from port, exception %s", ex.getMessage())));
-                                try {
-                                    serialPort.reconect();
-                                } catch (IOException ex1) {
-                                    state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
-                                            String.format("Error in reconection %s", ex1.getMessage())));
-                                }
+                                        String.format("Error in reconection %s", ex1.getMessage())));
                             }
                         }
                     }
@@ -481,8 +481,8 @@ public class IoBoard {
         state.setAproveBagState(BAG_APROVE_STATE.BAG_APROVED);
     }
 
-    public void clearError() {
-        state.clearError();
+    public void reset() {
+        state.reset();
     }
 
     public IoBoardError getError() {

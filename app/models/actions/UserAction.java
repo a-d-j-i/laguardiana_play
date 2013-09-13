@@ -26,7 +26,7 @@ import play.Logger;
  */
 abstract public class UserAction {
 
-    final protected Object formData;
+    final protected Object actionData;
     final protected Currency currency;
     protected UserActionApi userActionApi = null;
     protected LgUser currentUser = null;
@@ -35,7 +35,7 @@ abstract public class UserAction {
     protected Integer currentBatchId = null;
 
     public UserAction(Currency currency, Object formData) {
-        this.formData = formData;
+        this.actionData = formData;
         this.currency = currency;
     }
 
@@ -148,7 +148,7 @@ abstract public class UserAction {
     }
 
     public Object getFormData() {
-        return formData;
+        return actionData;
     }
 
     public void accept() {

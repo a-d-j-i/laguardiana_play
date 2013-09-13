@@ -42,7 +42,7 @@ public interface ManagerInterface {
 
         @Override
         public String toString() {
-            return "Status{" + "state=" + state + ", error=" + error + '}';
+            return "Status{" + "state=" + state + ", error = ( " + error + " ) }";
         }
 
         public MANAGER_STATE getState() {
@@ -86,6 +86,7 @@ public interface ManagerInterface {
         synchronized void clearError() {
             if (state == MANAGER_STATE.ERROR) {
                 this.state = MANAGER_STATE.INITIALIZING;
+                this.error = null;
                 setChanged();
                 notifyObservers(new ManagerStatus(this));
             }
