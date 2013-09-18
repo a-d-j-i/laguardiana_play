@@ -8,7 +8,7 @@
     <th>Total de depositos</th>
     <th>Total de sobres</th>
     <th>Total de billetes</th>
-    <th>Total de efectivo &nbsp; / &nbsp; billetes</th>
+    <th>Total de efectivo validado+no validado/billetes</th>
     <th colspan="4">Acciones</th>
 </thead>
 <tbody>
@@ -36,7 +36,11 @@
         </td>
         <td style="width:350px;">
             #{list items:totals.currencies, as:'currency'}
-            ${ totals.byCurrencyTotal.get( currency ).ammount } &nbsp; / &nbsp; ${ totals.byCurrencyTotal.get( currency ).quantity } &nbsp; ${ currency }<br>
+                ${ totals.byCurrencyTotal.get( currency ).validatedAmmount } 
+                    &nbsp; + &nbsp; 
+                ${ totals.byCurrencyTotal.get( currency ).toValidateTotal } 
+                    &nbsp; / &nbsp; 
+                ${ totals.byCurrencyTotal.get( currency ).validatedQuantity } &nbsp; ${ currency }<br>
             #{/list}
         </td>
         <td style="background-color: lightblue; border: 1px solid;">

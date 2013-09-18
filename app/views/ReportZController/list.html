@@ -36,7 +36,11 @@
         </td>
         <td style="width:350px;">
             #{list items:totals.currencies, as:'currency'}
-            ${ totals.byCurrencyTotal.get( currency ).ammount } &nbsp; / &nbsp; ${ totals.byCurrencyTotal.get( currency ).quantity } &nbsp; ${ currency }<br>
+                ${ totals.byCurrencyTotal.get( currency ).validatedAmmount } 
+                    &nbsp; + &nbsp; 
+                ${ totals.byCurrencyTotal.get( currency ).toValidateTotal } 
+                    &nbsp; / &nbsp; 
+                ${ totals.byCurrencyTotal.get( currency ).validatedQuantity } &nbsp; ${ currency }<br>
             #{/list}
         </td>
         <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">

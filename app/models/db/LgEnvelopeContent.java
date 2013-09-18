@@ -2,7 +2,6 @@ package models.db;
 
 import java.util.HashMap;
 import javax.persistence.*;
-import models.Configuration;
 import models.lov.Currency;
 import play.db.jpa.GenericModel;
 

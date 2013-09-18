@@ -86,7 +86,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             break;
                         default:
                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
+                                    String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
@@ -102,7 +102,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             return;
                         default:
                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
+                                    String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
@@ -116,7 +116,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                     break;
                 default:
                     setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                            String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name())));
+                            String.format("StoringErrorResetCommand Invalid D1-4 mode %s", gloryStatus.getD1Mode().name())));
                     break;
             }
             sleep();

@@ -6,7 +6,6 @@ package models;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -14,6 +13,8 @@ import java.util.TreeMap;
 import models.db.LgBill;
 import models.db.LgDeposit;
 import models.db.LgDeposit.DepositVisitor;
+import models.db.LgEnvelope;
+import models.db.LgEnvelopeContent;
 import models.lov.Currency;
 
 /**
@@ -24,12 +25,18 @@ public class ReportTotals implements DepositVisitor {
 
     public static class Total {
 
-        public long ammount = 0;
-        public long quantity = 0;
+        public long validatedAmmount = 0;
+        public long validatedQuantity = 0;
+        public long cashToValidate = 0;
+        public long checksToValidate = 0;
+        public long ticketsToValidate = 0;
         private SortedMap<BillValue, BillQuantity> detail = new TreeMap<BillValue, BillQuantity>();
 
         public Collection<BillQuantity> getDetail() {
             return detail.values();
+        }
+        public long getToValidateTotal() {
+            return cashToValidate + checksToValidate + ticketsToValidate;
         }
     }
     public long envelopes = 0;
@@ -61,8 +68,8 @@ public class ReportTotals implements DepositVisitor {
                 at = new Total();
                 byCurrencyTotal.put(c, at);
             }
-            at.ammount += b.getTotal();
-            at.quantity += b.quantity;
+            at.validatedAmmount += b.getTotal();
+            at.validatedQuantity += b.quantity;
 
             SortedMap<BillValue, BillQuantity> ct = at.detail;
             if (ct == null) {
@@ -82,6 +89,36 @@ public class ReportTotals implements DepositVisitor {
     public ReportTotals visitEnvelopeDeposit(EnvelopeDeposit item) {
         deposits++;
         envelopes++;
+        for (LgEnvelope e : item.envelopes) {
+            for (LgEnvelopeContent ec : e.envelopeContents) {
+                switch (ec.getType()) {
+                    case CASH:
+                    case CHECKS:
+                    case TICKETS:
+                        break;
+                    case DOCUMENTS:
+                    case OTHERS:
+                        continue;
+                }
+                Currency c = ec.getCurrency();
+                Total at = byCurrencyTotal.get(c);
+                if (at == null) {
+                    at = new Total();
+                    byCurrencyTotal.put(c, at);
+                }
+                switch (ec.getType()) {
+                    case CASH:
+                        at.cashToValidate += ec.amount;
+                        break;
+                    case CHECKS:
+                        at.checksToValidate += ec.amount;
+                        break;
+                    case TICKETS:
+                        at.ticketsToValidate += ec.amount;
+                        break;
+                }
+            }
+        }
         return this;
     }
 

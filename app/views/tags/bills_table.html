@@ -37,6 +37,16 @@ Total de billetes ${ _bill_data.bills }<br>
                     </tr>
                 </tfoot>
             </table>
+            <p>
+                Total de dinero validado ${ _bill_data.byCurrencyTotal.get( currency ).validatedAmmount }<br>
+                Total de billetes ${ _bill_data.byCurrencyTotal.get( currency ).validatedQuantity }<br>
+            </p>
+            <p>
+                Total de dinero sin validar ${ _bill_data.byCurrencyTotal.get( currency ).toValidateTotal }<br>
+                <span class="tab">Efectivo : ${ _bill_data.byCurrencyTotal.get( currency ).cashToValidate }</span><br>
+                <span class="tab">Cheques : ${ _bill_data.byCurrencyTotal.get( currency ).checksToValidate }</span><br>
+                <span class="tab">Tickets : ${ _bill_data.byCurrencyTotal.get( currency ).ticketsToValidate }</span><br>
+            </p>
         </div>
     </li>
     #{/list}

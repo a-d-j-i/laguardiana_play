@@ -264,7 +264,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             return true;
                         default:
                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
+                                    String.format("gotoNeutral Abnormal device Invalid SR1-2 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
