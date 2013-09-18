@@ -162,6 +162,9 @@ public class ModelFacade {
 
         @Override
         public void doJob() throws Exception {
+            if (Configuration.isIoBoardIgnore()) {
+                return;
+            }
             if (status == null) {
                 Logger.debug("doJob status is null");
                 return;

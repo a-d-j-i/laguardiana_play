@@ -1,12 +1,11 @@
 package devices.printer;
 
 import com.sun.jna.Platform;
-import devices.printHelper.EditorPanePrinter;
 import java.awt.Color;
-import java.awt.Insets;
 import java.awt.print.Book;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
+import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -42,6 +41,7 @@ import javax.swing.JFrame;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 import models.Configuration;
 import play.Logger;
 import play.Play;
@@ -344,6 +344,19 @@ public class Printer extends Observable {
     }
 
     public void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+
+        if (!Configuration.isPrinterTest()) {
+            if (port == null || !printers.containsKey(port)) {
+                state.setError(new PrinterError(PrinterError.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", port == null ? "NULL" : port)));
+                return;
+            }
+        }
+        PrintService p = printers.get(port);
+        if (state.isError()) {
+            state.sendEvent();
+            return;
+        }
+
         if (paperLen <= 0) {
             paperLen = DEFAULT_PAPER_LEN;
         }
@@ -364,7 +377,13 @@ public class Printer extends Observable {
         String body = template.render(args);
         //Logger.debug("PRINT : %s", body);
 
-        HTMLEditorKit kit = new HTMLEditorKit();
+        HTMLEditorKit kit = new HTMLEditorKit() {
+            // TODO: Test this.
+            @Override
+            public StyleSheet getStyleSheet() {
+                return super.getStyleSheet();
+            }
+        };
         HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
         try {
             URI u;
@@ -385,62 +404,66 @@ public class Printer extends Observable {
         }
 
 
-        JEditorPane item = new JEditorPane();
+        final JEditorPane item = new JEditorPane();
         item.setEditorKit(kit);
         item.setDocument(doc);
         item.setEditable(false);
 
 
-        if (!Configuration.isPrinterTest()) {
-            if (port == null || !printers.containsKey(port)) {
-                state.setError(new PrinterError(PrinterError.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", port == null ? "NULL" : port)));
-                return;
-            }
-        }
-        PrintService p = printers.get(port);
-        if (state.isError()) {
-            state.sendEvent();
-            return;
-        }
-        /*
-         for (Attribute a : att.toArray()) {
-         Logger.debug("attr : %s %s %s", a.getClass(), a.getName(), att.get(a.getClass()).toString());
-         }*/
+
+
+
         Paper pp = new Paper();
-        pp.setImageableArea(0, 0, paperWidth * MM, paperLen * MM);
-        pp.setSize(paperWidth * MM, paperLen * MM);
+        pp.setImageableArea(0, 0, paperWidth * MM, Integer.MAX_VALUE);
+        pp.setSize(paperWidth * MM, Integer.MAX_VALUE);
         pp.setImageableArea(0, 0, pp.getWidth(), pp.getHeight());
-        EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
+        PageFormat pageFormat = new PageFormat();
+        pageFormat.setPaper(pp);
+
+        try {
+            VirtualGraphics vg = new VirtualGraphics();
+            item.getPrintable(null, null).print(vg, pageFormat, 0);
+            Logger.debug("VirtualGraphics RESULT : %d", vg.getHeightLimit());
+            int desiredPaperLen = (int) (240 * vg.getHeightLimit() / 625);
+            if (desiredPaperLen > paperLen) {
+                paperLen = desiredPaperLen;
+            }
+        } catch (PrinterException ex) {
+            Logger.debug("Exception %s", ex);
+        }
+        Logger.debug("Print paper len %d mm", paperLen);
+        pp = new Paper();
+        pp.setImageableArea(0, 0, paperWidth * MM, paperLen * MM);
+        pp.setSize(paperWidth * MM, paperLen * MM + 10 * MM);
+        pp.setImageableArea(0, 0, pp.getWidth(), pp.getHeight());
+        //        EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
 
         if (!Configuration.isPrinterTest()) {
             try {
-                DocPrintJob printJob = p.createPrintJob();
 
-                printJob.addPrintJobListener(new MyPrintJobListener());
-                //printJob.addPrintJobAttributeListener(new MyPrintJobAttributeListener(), null);
-
-                PageFormat pageFormat = new PageFormat();
+                pageFormat = new PageFormat();
                 pageFormat.setPaper(pp);
 
                 Book book = new Book();
-                book.append(pnl, pageFormat);
+                //                book.append(pnl, pageFormat);
+                book.append(item.getPrintable(null, null), pageFormat);
 
                 Doc docc = new SimpleDoc(book, DocFlavor.SERVICE_FORMATTED.PAGEABLE, null);
                 state.setState(PRINTER_STATE.PRINTER_PRINTING, "Printing");
+
+                DocPrintJob printJob = p.createPrintJob();
+                printJob.addPrintJobListener(new MyPrintJobListener());
                 printJob.print(docc, null);
-//  pnl.print(p);
-/*                PrinterJob pj = PrinterJob.getPrinterJob();
-                 pj.setPageable(pnl);
-                 pj.setPrintService(p);
-                 pj.print();
-                 */
             } catch (PrintException ex) {
                 state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
             }
         } else {
             JFrame frame = new JFrame("Main print frame");
-            pnl.setBackground(Color.black);
-            frame.add(pnl);
+            //            pnl.setBackground(Color.black);
+            //            frame.add(pnl);
+            item.setBackground(Color.black);
+            frame.add(item);
+
             //frame.getContentPane().add(item);
             frame.pack();
             frame.setVisible(true);
