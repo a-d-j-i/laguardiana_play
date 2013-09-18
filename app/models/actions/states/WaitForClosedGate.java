@@ -6,6 +6,7 @@ package models.actions.states;
 
 import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
+import models.Configuration;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -34,15 +35,17 @@ public class WaitForClosedGate extends ActionState {
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        switch (status.getShutterState()) {
-            case SHUTTER_CLOSED:
-                stateApi.setState(nextAction);
-                break;
-            case SHUTTER_OPEN:
-                break;
-            default:
-                Logger.error("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name());
-                break;
+        if (!Configuration.isIgnoreShutter()) {
+            switch (status.getShutterState()) {
+                case SHUTTER_CLOSED:
+                    stateApi.setState(nextAction);
+                    break;
+                case SHUTTER_OPEN:
+                    break;
+                default:
+                    Logger.error("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name());
+                    break;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package models.db;
 
 import javax.persistence.*;
+import models.BillValue;
 import models.lov.*;
 import play.db.jpa.GenericModel;
 
@@ -41,5 +42,9 @@ public class LgBill extends GenericModel implements java.io.Serializable {
 
     public Integer getTotal() {
         return quantity * billType.denomination;
+    }
+
+    public BillValue getValue() {
+        return billType.getValue();
     }
 }

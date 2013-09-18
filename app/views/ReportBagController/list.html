@@ -8,11 +8,12 @@
     <th>Total de depositos</th>
     <th>Total de sobres</th>
     <th>Total de billetes</th>
-    <th>Total de efectivo &nbsp; / &nbsp; billetes</th>
+    <th>Total de efectivo validado+no validado/billetes</th>
     <th colspan="4">Acciones</th>
 </thead>
 <tbody>
     #{list items:data, as:'bag' }
+    %{ def totals = bag.getTotals(); }%
     #{if ( ! bag.withdrawDate ) } 
     <tr style="background-color: lightpink;">
         #{/if}
@@ -25,17 +26,21 @@
             ${bag.withdrawDate?.format('dd/MM/yyyy HH:mm:ss')}
         </td>
         <td style="width:100px;">
-            ${bag.getTotals()._1}
+            ${totals.deposits}
         </td>
         <td style="width:100px;">
-            ${bag.getTotals()._2}
+            ${totals.envelopes}
         </td>
         <td style="width:100px;">
-            ${bag.getTotals()._3}
+            ${totals.bills}
         </td>
         <td style="width:350px;">
-            #{list items:bag.getTotals()._4.keySet(), as:'currency'}
-            ${ bag.getTotals()._4.get( currency ).a } &nbsp; / &nbsp; ${ bag.getTotals()._4.get( currency ).q } &nbsp; ${ currency }<br>
+            #{list items:totals.currencies, as:'currency'}
+                ${ totals.byCurrencyTotal.get( currency ).validatedAmmount } 
+                    &nbsp; + &nbsp; 
+                ${ totals.byCurrencyTotal.get( currency ).toValidateTotal } 
+                    &nbsp; / &nbsp; 
+                ${ totals.byCurrencyTotal.get( currency ).validatedQuantity } &nbsp; ${ currency }<br>
             #{/list}
         </td>
         <td style="background-color: lightblue; border: 1px solid;">

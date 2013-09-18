@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import play.Logger;
 import play.Play;
@@ -99,7 +101,11 @@ public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract imple
                 }
             }
         } catch (Exception ex) {
-            Logger.error("SerialPortAdapter : " + ex.getMessage());
+            Logger.error("SerialPortAdapter Exception: " + ex.toString() + " " + ex.getMessage());
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            Logger.error("SerialPortAdapter Exception: " + sw.toString());
             throw new IOException(String.format("Error initializing serial port %s", portName), ex);
         }
     }

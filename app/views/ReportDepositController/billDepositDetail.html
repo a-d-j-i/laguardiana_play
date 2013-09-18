@@ -17,6 +17,7 @@
                 <p>&nbsp;</p>
             </div>
         </li>
+        #{list items:billData.currencies, as:'currency'}
         <li class="fixed column" style="width: 55%">
             <table class="full_width">
                 <thead>
@@ -29,12 +30,12 @@
                 <tbody>
                     <!-- detalle de billetes -->
                     %{ total = 0; cnt_total = 0;}%
-                    #{list items:billData, as:'b'}
-                    <tr class="BTRID_${b.tid}">
-                        <td class="bill_denomination">${b.d}</td>
-                        <td class="bill_quantity">${b.q}</td>
-                        <td class="bill_total">${b.d  * b.q}</td>
-                        %{ total += b.d  * b.q; cnt_total += b.q }%
+                    #{list items:billData.getDetail( currency ), as:'b'}
+                    <tr class="BTRID_${b.key}">
+                        <td id="bill_denomination">${b.denomination} ${b.currency.textId}</td>
+                        <td class="bill_quantity">${b.quantity}</td>
+                        <td class="bill_total">${b.ammount}</td>
+                        %{ total += b.ammount; cnt_total += b.quantity; }%
                     </tr>
                     #{/list}
                     <!-- /detalle de billetes -->
@@ -51,6 +52,7 @@
                 </tfoot>
             </table>
         </li>
+        #{/list}
     </ul>
 </div>
 

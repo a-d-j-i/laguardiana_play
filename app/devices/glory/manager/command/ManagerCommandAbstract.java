@@ -76,7 +76,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
         }
     }
     protected final GloryState gloryStatus = new GloryState();
-    private final ThreadCommandApi threadCommandApi;
+    protected final ThreadCommandApi threadCommandApi;
 
     public ManagerCommandAbstract(ThreadCommandApi threadCommandApi) {
         this.threadCommandApi = threadCommandApi;
@@ -91,18 +91,18 @@ abstract public class ManagerCommandAbstract implements Runnable {
         return (mustCancel.get() || threadCommandApi.mustStop());
     }
 
-    boolean gotoNeutral(boolean openEscrow, boolean forceEmptyHoper) {
+    boolean gotoNeutral(boolean canOpenEscrow, boolean forceEmptyHoper) {
         boolean bagRotated = false;
         for (int i = 0; i < retries; i++) {
             Logger.debug("GOTO NEUTRAL %s %s",
-                    (openEscrow ? "OPEN ESCROW" : ""),
+                    (canOpenEscrow ? "OPEN ESCROW" : ""),
                     (forceEmptyHoper ? "FORCE EMPTY HOPER" : ""));
 
             // If I can open the escrow then I must wait untill it is empty
             if (mustCancel()) {
                 Logger.debug("GOTO NEUTRAL MUST CANCEL");
             }
-            if (mustCancel() && !openEscrow) {
+            if (mustCancel() && !canOpenEscrow) {
                 Logger.debug("GOTO NEUTRAL CANCELED...");
                 break;
             }
@@ -126,12 +126,17 @@ abstract public class ManagerCommandAbstract implements Runnable {
                 case manual:
                     switch (gloryStatus.getSr1Mode()) {
                         case escrow_open_request:
-                            if (!openEscrow) {
-                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
-                                        "There are bills in the escrow call an admin"));
+                            if (threadCommandApi.isClosing()) {
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                        "Escrow door jamed"));
                                 return false;
                             }
-                            if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                            /*                            if (!canOpenEscrow) {
+                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
+                             "There are bills in the escrow call an admin 1"));
+                             return false;
+                             }*/
+                            if (!openEscrow()) {
                                 break;
                             }
                             break;
@@ -147,33 +152,44 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             }
                             break;
                         case escrow_close_request:
+                        case being_recover_from_storing_error:
+                            if (threadCommandApi.isClosing()) {
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                        "Escrow door jamed"));
+                                return false;
+                            }
                             if (gloryStatus.isEscrowBillPresent()) {
                                 break;
                             }
                         // don't break
-                        case being_recover_from_storing_error:
                         case waiting_for_an_envelope_to_set:
-                            if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
+                            if (!closeEscrow()) {
                                 return false;
                             }
                             break;
                         case being_reset:
+                            break;
                         case escrow_close: // The escrow is closing... wait.
+                            threadCommandApi.setClosing(true);
+                            break;
                         case counting: // Japaneese hack...
                             break;
                         case being_restoration:
+                            setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_ESCROW);
+                            break;
                         case escrow_open:
                             setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_ESCROW);
+                            threadCommandApi.setClosing(false);
                             break;
                         case storing_error:
                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags"));
                             return false;
                         case storing_start_request:
-                            if (!openEscrow) {
-                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin"));
+                            if (!canOpenEscrow) {
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 2"));
                                 return false;
                             }
-                            if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                            if (!openEscrow()) {
                                 break;
                             }
                             break;
@@ -224,11 +240,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 }
                             }
                             if (gloryStatus.isEscrowBillPresent()) {
-                                if (!openEscrow) {
-                                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin"));
+                                if (!canOpenEscrow) {
+                                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 3"));
                                     return false;
                                 }
-                                if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                                if (!openEscrow()) {
                                     break;
                                 }
                             }
@@ -248,7 +264,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             return true;
                         default:
                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
+                                    String.format("gotoNeutral Abnormal device Invalid SR1-2 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
@@ -287,7 +303,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
             return false;
         }
-        Logger.debug(String.format("D1Mode %s SR1 Mode : %s", gloryStatus.getD1Mode().name(), gloryStatus.getSr1Mode().name()));
+        Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", gloryStatus.getD1Mode().name(), gloryStatus.getSr1Mode().name()));
         return true;
     }
 
@@ -365,5 +381,18 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     protected void clearError() {
         threadCommandApi.clearError();
+    }
+
+    protected boolean closeEscrow() {
+        if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
+            return false;
+        }
+        threadCommandApi.setClosing(true);
+        return true;
+    }
+
+    protected boolean openEscrow() {
+        threadCommandApi.setClosing(false);
+        return sendGCommand(new devices.glory.command.OpenEscrow());
     }
 }

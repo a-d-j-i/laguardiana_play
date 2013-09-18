@@ -10,7 +10,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import models.Bill;
 import models.BillDeposit;
 import models.Configuration;
 import models.EnvelopeDeposit;
@@ -81,7 +80,9 @@ public class ReportController extends Controller {
         final public Integer bag_id;
         final public String user_id;
         final public String gecos;
+        final public Boolean canceled;
         final public Date startDate;
+        final public Date closeDate;
         final public Date finishDate;
 
         public DepositData(LgDeposit d, Integer type) {
@@ -90,7 +91,9 @@ public class ReportController extends Controller {
             this.bag_id = d.bag.bagId;
             this.user_id = d.user.externalId;
             this.gecos = d.user.gecos;
+            this.canceled = d.canceled;
             this.startDate = d.startDate;
+            this.closeDate = d.closeDate;
             this.finishDate = d.finishDate;
         }
     }
@@ -101,7 +104,7 @@ public class ReportController extends Controller {
 
         public BillDepositData(BillDeposit d) {
             super(d, 0);
-            List qret = Bill.getDepositContent(d);
+            List qret = d.getDepositContent();
 
             for (Object b : qret) {
                 Object[] a = (Object[]) b;
@@ -160,7 +163,6 @@ public class ReportController extends Controller {
             }
             renderArgs.put("data", depositList);
             render();
-            return;
         } else {
             List<LgDeposit> depositList = LgDeposit.findUnprocessed(2).fetch(50);
             UnprocessedDeposits ret = new UnprocessedDeposits();
@@ -187,13 +189,15 @@ public class ReportController extends Controller {
         public Integer bagId;
         public Date creationDate;
         public Date withdrawDate;
-        public final String user_Id;
+        public final String user_id;
+//        public final Long totalAmount;
 
         private BagData(LgBag b) {
             this.bagId = b.bagId;
             this.creationDate = b.creationDate;
             this.withdrawDate = b.withdrawDate;
-            this.user_Id = b.withdrawUser;
+            this.user_id = b.withdrawUser;
+//            this.totalAmount = b.getTotalAmount();
         }
     }
 
@@ -229,7 +233,6 @@ public class ReportController extends Controller {
             }
             renderArgs.put("data", bagList);
             render();
-            return;
         } else {
             List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
             BagList ret = new BagList();
@@ -290,7 +293,6 @@ public class ReportController extends Controller {
             }
             renderArgs.put("data", zList);
             render();
-            return;
         } else {
             List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
             ZList ret = new ZList();
@@ -362,7 +364,6 @@ public class ReportController extends Controller {
             }
             renderArgs.put("data", eventList);
             render();
-            return;
         } else {
             List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
             EventList ret = new EventList();

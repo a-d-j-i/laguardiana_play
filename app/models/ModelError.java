@@ -6,7 +6,7 @@ package models;
 
 import devices.glory.manager.GloryManagerError;
 import devices.ioboard.IoBoardError;
-import devices.printer.PrinterStatus;
+import devices.printer.PrinterError;
 import play.Logger;
 
 /**
@@ -17,10 +17,10 @@ public class ModelError {
 
     public enum ERROR_CODE {
 
-        APP_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_CLOSED, SHUTTER_NOT_OPENING, ERROR_TRYING_TO_COLLECT, BAG_FULL;
+        APPLICATION_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_CLOSED, SHUTTER_NOT_OPENING, ERROR_TRYING_TO_COLLECT, BAG_FULL, ESCROW_JAMED;
     }
     private GloryManagerError gloryError = null;
-    private PrinterStatus printerError = null;
+    private PrinterError printerError = null;
     private IoBoardError ioBoardError = null;
     private ERROR_CODE errorCode;
     private String detail;
@@ -34,7 +34,7 @@ public class ModelError {
         this.gloryError = error;
     }
 
-    synchronized public void setError(PrinterStatus error) {
+    synchronized public void setError(PrinterError error) {
         Logger.debug("Error in printerError %s", error);
         this.printerError = error;
     }
@@ -54,7 +54,7 @@ public class ModelError {
         return gloryError;
     }
 
-    synchronized public PrinterStatus getPrinterError() {
+    synchronized public PrinterError getPrinterError() {
         return printerError;
     }
 
@@ -70,13 +70,25 @@ public class ModelError {
         return detail;
     }
 
-    synchronized void clearError() {
-        Logger.debug("--> Model error cleared");
+    synchronized void clearIoBoardError() {
+        Logger.debug("--> Model ioboard error cleared");
+        this.ioBoardError = null;
+    }
+
+    synchronized void clearGloryError() {
+        Logger.debug("--> Model glory error cleared");
+        this.gloryError = null;
+    }
+
+    synchronized void clearPrinterError() {
+        Logger.debug("--> Model printer error cleared");
+        this.gloryError = null;
+    }
+
+    synchronized void clearErrorCodeError() {
+        Logger.debug("--> Model errorCode error cleared");
         this.errorCode = null;
         this.detail = null;
-        this.gloryError = null;
-        this.printerError = null;
-        this.ioBoardError = null;
     }
 
     @Override

@@ -8,22 +8,20 @@ package devices.printer;
  *
  * @author adji
  */
-public class PrinterStatus {
+public class PrinterError {
 
     public enum ERROR_CODE {
 
-        PRINTING_DONE, TEMPLATE_NOT_FOUND, IO_EXCEPTION, PRINTER_NOT_FOUND;
+        IO_EXCEPTION,
+        TEMPLATE_NOT_FOUND,
+        PRINTER_NOT_FOUND;
     }
     final ERROR_CODE errorCode;
     final String detail;
 
-    public PrinterStatus(ERROR_CODE errorCode, String detail) {
+    public PrinterError(ERROR_CODE errorCode, String detail) {
         this.errorCode = errorCode;
         this.detail = detail;
-    }
-
-    public boolean isError() {
-        return errorCode != ERROR_CODE.PRINTING_DONE;
     }
 
     public ERROR_CODE getErrorCode() {
@@ -36,6 +34,6 @@ public class PrinterStatus {
 
     @Override
     public String toString() {
-        return "PrinterStatus{" + "error=" + errorCode + ", detail=" + detail + '}';
+        return "PrinterError{" + "errorCode=" + errorCode + ", detail=" + detail + '}';
     }
 }

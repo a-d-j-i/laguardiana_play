@@ -37,7 +37,7 @@ public class BillDepositStoring extends ActionState {
                 stateApi.setState(new Jam(stateApi, this));
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
-                stateApi.closeDeposit();
+                stateApi.closeDeposit(false);
                 if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new Finish(stateApi));
                 } else {
@@ -65,15 +65,17 @@ public class BillDepositStoring extends ActionState {
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        switch (status.getShutterState()) {
-            case SHUTTER_OPEN:
-                break;
-            case SHUTTER_CLOSED:
-                stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPENING, "WaitForGate shutter closed");
-                break;
-            default:
-                Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name(), name());
-                break;
+        if (!Configuration.isIgnoreShutter()) {
+            switch (status.getShutterState()) {
+                case SHUTTER_OPEN:
+                    break;
+                case SHUTTER_CLOSED:
+                    stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_OPENING, "WaitForGate shutter closed");
+                    break;
+                default:
+                    Logger.debug("WaitForGate onIoBoardEvent invalid state %s %s", status.getShutterState().name(), name());
+                    break;
+            }
         }
     }
 }

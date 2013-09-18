@@ -5,6 +5,7 @@
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface.ManagerStatus;
+import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -14,6 +15,8 @@ import play.Logger;
  * @author adji
  */
 public class BillDepositReadyToStore extends ActionState {
+
+    protected boolean delayedStore = false;
 
     public BillDepositReadyToStore(StateApi stateApi) {
         super(stateApi);
@@ -26,17 +29,23 @@ public class BillDepositReadyToStore extends ActionState {
 
     @Override
     public void cancel() {
+        stateApi.closeDeposit(true);
         stateApi.cancelTimer();
         stateApi.cancelDeposit();
     }
 
     @Override
     public void accept() {
+        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+            delayedStore = true;
+            stateApi.setState(new BagRemoved(stateApi, this));
+            return;
+        }
         stateApi.cancelTimer();
         stateApi.addBatchToDeposit();
         if (Configuration.isIgnoreShutter()) {
             if (!stateApi.store()) {
-                Logger.error("startBillDeposit can't cancel glory");
+                Logger.error("startBillDeposit can't deposit");
             }
             stateApi.setState(new BillDepositStoring(stateApi));
         } else {
@@ -56,6 +65,10 @@ public class BillDepositReadyToStore extends ActionState {
                 stateApi.setState(new Jam(stateApi, this));
                 break;
             case READY_TO_STORE:
+                if (delayedStore) {
+                    Logger.error("BillDepositReadyToStore DELAYED STORE!!!");
+                    accept();
+                }
                 break;
             case CANCELING:
                 stateApi.setState(new Canceling(stateApi));
@@ -73,5 +86,15 @@ public class BillDepositReadyToStore extends ActionState {
                 Logger.debug("BillDepositReadyToStore onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
+    }
+
+    @Override
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
+        Logger.error("ReadyToStoreEnvelopeDeposit onIoBoardEvent %s", status.toString());
+        if (delayedStore) {
+            Logger.error("BillDepositReadyToStore DELAYED STORE!!!");
+            accept();
+        }
+        super.onIoBoardEvent(status);
     }
 }

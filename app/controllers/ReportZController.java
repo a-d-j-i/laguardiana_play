@@ -1,9 +1,9 @@
 package controllers;
 
-import devices.DeviceFactory;
 import java.util.Date;
 import java.util.List;
 import models.Configuration;
+import models.ModelFacade;
 import models.db.LgZ;
 import play.data.binding.As;
 import play.mvc.Before;
@@ -69,14 +69,14 @@ public class ReportZController extends Controller {
         }
         setRenderArgs(z);
         renderArgs.put("reprint", "true");
-        DeviceFactory.getPrinter().print("ReportZController/print.html", renderArgs.data, Configuration.getZPrintLen());
+        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
         list(page, startDate, endDate);
     }
 
     public static void rotateZ() {
         LgZ currentZ = LgZ.rotateZ();
         setRenderArgs(currentZ);
-        DeviceFactory.getPrinter().print("ReportZController/print.html", renderArgs.data, Configuration.getZPrintLen());
+        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentZ.zId);
     }
@@ -84,7 +84,7 @@ public class ReportZController extends Controller {
     public static void print() {
         LgZ currentZ = LgZ.getCurrentZ();
         setRenderArgs(currentZ);
-        DeviceFactory.getPrinter().print("ReportZController/print.html", renderArgs.data, Configuration.getZPrintLen());
+        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentZ.zId);
     }

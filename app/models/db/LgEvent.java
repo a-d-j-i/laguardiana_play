@@ -23,7 +23,7 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
     @Temporal( TemporalType.TIMESTAMP)
     @Column( name = "creation_date", nullable = false, length = 13)
     public Date creationDate = new Date();
-    @Column( name = "message", nullable = true, length = 256)
+    @Column( name = "message", nullable = true, length = 512)
     public String message;
 
     public LgEvent(LgUser user, Integer eventSourceId, String message) {
@@ -68,10 +68,10 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
                 "select e from LgEvent e where "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
-                + " where al.externalApp = ea "
+                + " where al.externalApp = ea and al.logType = ?"
                 + " and e.eventId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")", appId);
+                + ")", LgExternalAppLog.LOG_TYPES.EVENT.name(), appId);
     }
 
     public static boolean process(int appId, int eventId, String resultCode) {
@@ -80,7 +80,7 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
         if (e == null || ea == null) {
             return false;
         }
-        LgExternalAppLog el = new LgExternalAppLog(e, resultCode, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(LgExternalAppLog.LOG_TYPES.EVENT, e.eventId, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
         el.setExternalApp(ea);
         el.save();

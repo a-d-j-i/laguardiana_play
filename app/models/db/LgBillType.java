@@ -3,6 +3,7 @@ package models.db;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
+import models.BillValue;
 import models.lov.Currency;
 import play.db.jpa.GenericModel;
 
@@ -30,7 +31,7 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date", nullable = true, length = 13)
     public Date endDate;
-    
+
     LgBillType(int denomination, int unitLov) {
         this.denomination = denomination;
         this.unitLov = unitLov;
@@ -55,13 +56,16 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
         Integer d = denomination;
         return (d.toString() + " " + Currency.findByNumericId(unitLov));
     }
-
     transient private Currency unitLovObj = null;
-    
+
     public Currency getCurrency() {
-        if ( unitLovObj == null ) {
+        if (unitLovObj == null) {
             unitLovObj = Currency.findByNumericId(unitLov);
         }
         return unitLovObj;
+    }
+
+    public BillValue getValue() {
+        return new BillValue(unitLov, denomination);
     }
 }

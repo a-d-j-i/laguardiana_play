@@ -29,6 +29,7 @@ public class BillDepositStart extends ActionState {
 
     @Override
     public void cancel() {
+        stateApi.closeDeposit(true);
         stateApi.cancelTimer();
         stateApi.cancelDeposit();
     }
@@ -62,6 +63,8 @@ public class BillDepositStart extends ActionState {
             case REMOVE_THE_BILLS_FROM_HOPER:
                 break;
             case REMOVE_THE_BILLS_FROM_ESCROW:
+                break;
+            case NEUTRAL:
                 break;
             default:
                 Logger.debug("%s onGloryEvent invalid state %s %s", this.getClass().getSimpleName(), m.name(), name());

@@ -178,7 +178,8 @@ public class EnvelopeDepositController extends CounterController {
         if (deposit != null) {
             Set<LgEnvelope> envelopes = deposit.envelopes;
             renderArgs.put("envelopes", envelopes);
-            renderArgs.put("canceled", (deposit != null && deposit.finishDate == null));
+            renderArgs.put("canceled", (deposit != null && deposit.canceled == null));
+            renderArgs.put("truncated", (deposit != null && deposit.closeDate == null));
         }
         if (formData != null) {
             ModelFacade.finishAction();

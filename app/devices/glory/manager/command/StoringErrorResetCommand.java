@@ -13,29 +13,47 @@ import play.Logger;
  * @author adji
  */
 public class StoringErrorResetCommand extends ManagerCommandAbstract {
-
+    
     public StoringErrorResetCommand(GloryManager.ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
-
+    
     @Override
     public void run() {
+        // retry closing at least once.
+        threadCommandApi.setClosing(false);
         for (int i = 0; i < retries && !mustCancel(); i++) {
             Logger.debug("StoringErrorReset command");
             if (!sense()) {
                 return;
             }
             switch (gloryStatus.getD1Mode()) {
+                case normal_error_recovery_mode:
                 case storing_error_recovery_mode:
                     switch (gloryStatus.getSr1Mode()) {
+                        case abnormal_device:
+                            resetDevice();
+                            break;
                         case storing_error:
-                            if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                        case escrow_open_request:
+                            if (threadCommandApi.isClosing()) {
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                        "Escrow door jamed"));
+                                return;
+                            }
+                            if (!openEscrow()) {
                                 return;
                             }
                             break;
                         case escrow_open:
+                            threadCommandApi.setClosing(false);
                             break;
                         case being_recover_from_storing_error:
+                            if (threadCommandApi.isClosing()) {
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                        "Escrow door jamed"));
+                                return;
+                            }
                             if (!sendGloryCommand(new devices.glory.command.ResetDevice())) {
                                 return;
                             }
@@ -43,10 +61,17 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                         case being_reset:
                             break;
                         case escrow_close_request:
-                            if (!sendGloryCommand(new devices.glory.command.CloseEscrow())) {
+                            if (threadCommandApi.isClosing()) {
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                        "Escrow door jamed"));
                                 return;
                             }
+                            if (!closeEscrow()) {
+                                return;
+                            }
+                            break;
                         case escrow_close:
+                            threadCommandApi.setClosing(true);
                             break;
                         case storing_start_request:
                             if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
@@ -61,7 +86,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             break;
                         default:
                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
+                                    String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
@@ -77,11 +102,10 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             return;
                         default:
                             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                                    String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
+                                    String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", gloryStatus.getSr1Mode().name())));
                             break;
                     }
                     break;
-                case normal_error_recovery_mode:
                 case deposit:
                 case collect_mode:
                 case manual:
@@ -92,16 +116,16 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                     break;
                 default:
                     setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                            String.format("gotoNeutralInvalid D1-4 mode %s", gloryStatus.getD1Mode().name())));
+                            String.format("StoringErrorResetCommand Invalid D1-4 mode %s", gloryStatus.getD1Mode().name())));
                     break;
             }
             sleep();
         }
         if (!mustCancel()) {
             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "GOTO NEUTRAL TIMEOUT"));
-            Logger.debug("GOTO NEUTRAL TIMEOUT!!!");
+            Logger.debug("StoringErrorReset TIMEOUT!!!");
         }
-
-        Logger.debug("GOTO NEUTRAL DONE CANCEL");
+        
+        Logger.debug("StoringErrorReset DONE CANCEL");
     }
 }

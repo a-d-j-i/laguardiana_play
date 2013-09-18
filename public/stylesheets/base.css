@@ -91,6 +91,11 @@ h2 {
     margin-bottom: 15px !important;
 }
 
+.blink {
+    font-size: 19pt !important;
+    margin-bottom: 15px !important;
+}
+
 /* separador */
 
 hr {
@@ -442,6 +447,7 @@ table tfoot tr td {
 
 .botonera .columna {
     padding: 0 10px;
+    height: 50px;
 }
 
 .botonera .columna a {
@@ -469,17 +475,19 @@ hr {
 /*Jquery tools calendar */
 
 #calbody {
-	/* background gradient with image. background color can be changed */
-	background:#F5F9FF url('../images/h300.png') repeat-x;
- 	/* CSS shadow for the calendar body */
-	-moz-box-shadow:0 0 10px 0px #ccc;
-	-webkit-box-shadow:0 0 10px 0px #ccc;
+    /* background gradient with image. background color can be changed */
+    background:#F5F9FF url('../images/h300.png') repeat-x;
+    /* CSS shadow for the calendar body */
+    -moz-box-shadow:0 0 10px 0px #ccc;
+    -webkit-box-shadow:0 0 10px 0px #ccc;
 }
- 
+
 /* styling of the current date */
 #caltoday {
-	/* some shadow for the text */
-	text-shadow:0 1px 0 #000;
- 	/* inner shadow */
-	-moz-box-shadow:inset 0 0 10px 0px #000;
+    /* some shadow for the text */
+    text-shadow:0 1px 0 #000;
+    /* inner shadow */
+    -moz-box-shadow:inset 0 0 10px 0px #000;
 }
+
+.tab { margin-left: 40px; }

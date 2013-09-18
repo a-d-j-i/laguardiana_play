@@ -24,6 +24,16 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         BAUDRATE_115200(115200),
         BAUDRATE_128000(128000),
         BAUDRATE_256000(256000),;
+
+        static PORTSPEED getBaudRate(String baudRate) {
+            for (PORTSPEED ps : PORTSPEED.values()) {
+                if (baudRate.equalsIgnoreCase(Integer.toString(ps.q))) {
+                    return ps;
+                }
+            }
+            // Default.
+            return PORTSPEED.BAUDRATE_115200;
+        }
         private int q;
 
         private PORTSPEED(int q) {

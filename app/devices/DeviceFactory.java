@@ -6,15 +6,12 @@ import devices.SerialPortAdapterAbstract.PORTSPEED;
 import devices.SerialPortAdapterAbstract.PORTSTOPBITS;
 import devices.SerialPortAdapterAbstract.PortConfiguration;
 import devices.glory.Glory;
-import devices.glory.manager.FakeGloryManager;
 import devices.glory.manager.GloryManager;
 import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.HashMap;
-import models.Configuration;
 import play.Logger;
-import play.Play;
 import play.PlayPlugin;
 
 /**
@@ -24,26 +21,21 @@ import play.PlayPlugin;
  */
 public class DeviceFactory extends PlayPlugin {
 
-    static final PortConfiguration iBoardPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_38400, PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
-    static final PortConfiguration gloryPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_9600, PORTBITS.BITS_7, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_EVEN);
     static HashMap<String, Glory> gloryDevices = new HashMap();
     static HashMap<Glory, GloryManager.CounterFactoryApi> gloryManagers = new HashMap();
     static HashMap<String, IoBoard> ioBoardDevices = new HashMap();
     static Printer printer = null;
 
-    public static Printer getPrinter() {
+    public static Printer getPrinter(String port) {
         if (printer == null) {
-            printer = new Printer(Play.configuration.getProperty("printer.port"));
+            printer = new Printer(port);
+            printer.startStatusThread();
         }
         return printer;
     }
 
-    public static ManagerInterface getGloryManager() {
-
-        if (Configuration.isGloryIgnore()) {
-            return new FakeGloryManager();
-        }
-        Glory glory = getCounter(Play.configuration.getProperty("glory.port"));
+    public static ManagerInterface getGloryManager(String port) {
+        Glory glory = getCounter(port);
 
         if (glory == null) {
             return null;
@@ -67,6 +59,7 @@ public class DeviceFactory extends PlayPlugin {
         }
         Logger.info(String.format("Configuring glory on serial port %s", port));
         //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
+        PortConfiguration gloryPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_9600, PORTBITS.BITS_7, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_EVEN);
         SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, gloryPortConf);
         Logger.info(String.format("Configuring glory"));
         Glory device = new Glory(serialPort);
@@ -74,20 +67,16 @@ public class DeviceFactory extends PlayPlugin {
         return device;
     }
 
-    public static IoBoard getIoBoard() {
-        return getIoBoard(Play.configuration.getProperty("io_board.port"));
-    }
-
-    synchronized public static IoBoard getIoBoard(String port) {
+    synchronized public static IoBoard getIoBoard(String port, String baudRate) {
         if (port == null) {
             port = "0";
         }
         if (ioBoardDevices.containsKey(port)) {
             return ioBoardDevices.get(port);
         }
-
         Logger.info(String.format("Configuring ioboard on serial port %s", port));
         //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
+        PortConfiguration iBoardPortConf = new PortConfiguration(PORTSPEED.getBaudRate(baudRate), PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
         SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, iBoardPortConf);
         Logger.info(String.format("Configuring glory"));
         IoBoard device = new IoBoard(serialPort);

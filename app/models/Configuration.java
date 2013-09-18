@@ -4,7 +4,6 @@
  */
 package models;
 
-import controllers.Secure;
 import models.db.LgSystemProperty;
 import play.Logger;
 import play.Play;
@@ -151,12 +150,12 @@ public class Configuration {
         return Long.parseLong(d);
     }
 
-    static public long equivalentBillQuantity(Long billQuantity, Long envelopeQuantity) {
-        return billQuantity + (Configuration.envelopeBillEquivalency() * envelopeQuantity);
+    static public long equivalentBillQuantity(ItemQuantity itemQuantity) {
+        return itemQuantity.bills + (Configuration.envelopeBillEquivalency() * itemQuantity.envelopes);
     }
 
-    static public boolean isBagFull(Long billQuantity, Long envelopeQuantity) {
-        return (equivalentBillQuantity(billQuantity, envelopeQuantity) > Configuration.maxBillsPerBag());
+    static public boolean isBagFull(ItemQuantity itemQuantity) {
+        return (equivalentBillQuantity(itemQuantity) > Configuration.maxBillsPerBag());
     }
 
     public static String getWithdrawUser() {
@@ -201,5 +200,25 @@ public class Configuration {
         } catch (NumberFormatException e) {
             return 220;
         }
+    }
+
+    public static int getPrintWidth() {
+        try {
+            return Integer.parseInt(Play.configuration.getProperty("print.paperWidth"));
+        } catch (NumberFormatException e) {
+            return 77;
+        }
+    }
+
+    public static String getGloryPort() {
+        return Play.configuration.getProperty("glory.port");
+    }
+
+    public static String getIoBoardPort() {
+        return Play.configuration.getProperty("io_board.port");
+    }
+
+    public static String getIoBoardBaudRate() {
+        return Play.configuration.getProperty("io_board.baudRate");
     }
 }

@@ -25,13 +25,14 @@ public class IdleCounting extends ActionState {
 
     @Override
     public void cancel() {
+        stateApi.closeDeposit(true);
         stateApi.cancelTimer();
         stateApi.cancelDeposit();
         stateApi.setState(new Canceling(stateApi));
     }
 
     @Override
-        public void onGloryEvent(ManagerStatus m) {
+    public void onGloryEvent(ManagerStatus m) {
         switch (m.getState()) {
             case READY_TO_STORE:
                 stateApi.setState(new ReadyToStoreCounting(stateApi));

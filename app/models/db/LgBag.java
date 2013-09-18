@@ -4,17 +4,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.Bill;
+import models.BillDeposit;
 import models.Configuration;
-import models.User;
+import models.EnvelopeDeposit;
+import models.ItemQuantity;
+import models.ReportTotals;
 import models.events.BagEvent;
-import models.lov.Currency;
 import play.Logger;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 
 @Entity
 @Table( name = "lg_bag", schema = "public")
@@ -37,6 +36,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public Set<LgDeposit> deposits = new HashSet<LgDeposit>(0);
     @Transient
     transient public String withdrawUser;
+//    @Transient
+//    transient private Long totalAmount = null;
 
     public LgBag(String bagCode) {
         this.bagCode = bagCode;
@@ -48,6 +49,19 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         this.withdrawUser = Configuration.getWithdrawUser();
     }
 
+    /*    public Long getTotalAmount() {
+     if (totalAmount == null) {
+     totalAmount = BillDeposit.find("select sum(b.quantity * bt.denomination) "
+     + " from BillDeposit d, LgBill b, LgBillType bt, LgBag bg "
+     + " where b.deposit = d and b.billType = bt and bg = d.bag"
+     + " and bg.bagId= ?", bagId).first();
+     }
+     if (totalAmount == null) {
+     totalAmount = new Long(0);
+     }
+     return totalAmount;
+     }
+     */
     public static long count(Date start, Date end) {
         if (end == null) {
             end = new Date();
@@ -76,13 +90,13 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
     public static JPAQuery findUnprocessed(int appId) {
         return LgBag.find(
-                "select b from LgBag b where "
+                "select b from LgBag b where b.withdrawDate is not null and "
                 + "not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
-                + " where al.externalApp = ea "
+                + " where al.externalApp = ea and al.logType = ?"
                 + " and b.bagId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")", appId);
+                + ")", LgExternalAppLog.LOG_TYPES.BAG.name(), appId);
     }
 
     public static boolean process(int appId, int bagId, String resultCode) {
@@ -91,7 +105,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         if (b == null || ea == null || b.withdrawDate == null) {
             return false;
         }
-        LgExternalAppLog el = new LgExternalAppLog(b, resultCode, String.format("Exporting to app %d", appId));
+        LgExternalAppLog el = new LgExternalAppLog(LgExternalAppLog.LOG_TYPES.BAG, b.bagId, resultCode, String.format("Exporting to app %d", appId));
         el.successDate = new Date();
         el.setExternalApp(ea);
         el.save();
@@ -129,13 +143,17 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         return currentBag;
     }
 
-    public static void rotateBag(boolean force) {
+    public static void rotateBag(boolean byIoBoard) {
 
         LgBag current = getCurrentBag();
 
-        if (current.deposits.size() > 0 || force) {
+        if (current.deposits.size() > 0 || byIoBoard) {
             current.withdrawDate = new Date();
-            BagEvent.save(current, "Closing bag");
+            if (byIoBoard) {
+                BagEvent.save(current, "Closing bag byIoBoard");
+            } else {
+                BagEvent.save(current, "Closing bag manually");
+            }
             current.save();
             LgBag newBag = new LgBag("AUTOMATIC_ROTATED_BY_APP");
             newBag.save();
@@ -150,12 +168,28 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public String toString() {
         return "LgBag{" + "bagId=" + bagId + ", bagCode=" + bagCode + ", creationDate=" + creationDate + ", withdrawDate=" + withdrawDate + '}';
     }
-    transient private F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> totals = null;
 
-    public F.T5<Long, Long, Long, Map<Currency, LgDeposit.Total>, Map<Currency, Map<LgBillType, Bill>>> getTotals() {
-        if (totals == null) {
-            totals = LgDeposit.getTotals(this.deposits);
-        }
-        return totals;
+    public ItemQuantity getItemQuantity() {
+        final ItemQuantity ret = new ItemQuantity();
+        LgDeposit.visitFinishedDeposits(deposits, new LgDeposit.DepositVisitor() {
+            public void visit(BillDeposit item) {
+                for (LgBill b : item.bills) {
+                    ret.bills += b.quantity;
+                }
+            }
+
+            public void visit(EnvelopeDeposit item) {
+                ret.envelopes++;
+            }
+
+            public void visit(LgDeposit item) {
+            }
+        });
+        return ret;
+    }
+
+    public ReportTotals getTotals() {
+        ReportTotals totals = new ReportTotals();
+        return totals.getTotals(deposits);
     }
 }

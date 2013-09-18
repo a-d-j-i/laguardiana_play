@@ -1,7 +1,7 @@
-Total de depositos ${ _bill_data._1 }<br>
-Total de sobres ${ _bill_data._2 }<br>
-Total de billetes ${ _bill_data._3 }<br>
-#{list items:_bill_data._5.keySet(), as:'currency'}
+Total de depositos ${ _bill_data.deposits }<br>
+Total de sobres ${ _bill_data.envelopes }<br>
+Total de billetes ${ _bill_data.bills }<br>
+#{list items:_bill_data.currencies, as:'currency'}
 <div>
     <table border="0" cellpadding="0">
         <thead>
@@ -13,16 +13,15 @@ Total de billetes ${ _bill_data._3 }<br>
         </thead>
         <tbody>
             %{ total = 0; cnt_total = 0;}%
-            #{list items:_bill_data._5.get( currency ).values(), as:'b'}
-            <tr id="BTRID_${b.tid}"  style="text-align: center;">
-                <td id="bill_denomination">${b.d} &{b.c}</td>
-                <td id="bill_quantity">${b.q}</td>
-                <td id="bill_total">${b.d  * b.q}</td>
-                %{ total += b.d  * b.q; cnt_total += b.q }%
+            #{list items:_bill_data.getDetail( currency ), as:'b'}
+            <tr class="BTRID_${b.key}">
+                <td id="bill_denomination">${b.denomination} ${b.currency.textId}</td>
+                <td class="bill_quantity">${b.quantity}</td>
+                <td class="bill_total">${b.ammount}</td>
+                %{ total += b.ammount; cnt_total += b.quantity; }%
             </tr>
             #{/list}
         </tbody>
-
         <tfoot>
             <tr style="text-align: center;">
                 <td><b>&{ 'counting_page.totals' }</b></td>

@@ -1,5 +1,6 @@
 package devices.glory.manager;
 
+import devices.glory.Glory;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -41,7 +42,7 @@ public interface ManagerInterface {
 
         @Override
         public String toString() {
-            return "Status{" + "state=" + state + ", error=" + error + '}';
+            return "Status{" + "state=" + state + ", error = ( " + error + " ) }";
         }
 
         public MANAGER_STATE getState() {
@@ -56,11 +57,12 @@ public interface ManagerInterface {
             return state.name();
         }
     }
-    
+
     class State extends Observable {
 
         private MANAGER_STATE state = MANAGER_STATE.INITIALIZING;
         private GloryManagerError error;
+        private boolean closing = false;
 
         @Override
         synchronized public String toString() {
@@ -68,7 +70,7 @@ public interface ManagerInterface {
         }
 
         synchronized ManagerStatus getStatus() {
-            return new ManagerStatus( this );
+            return new ManagerStatus(this);
         }
 
         synchronized void setState(MANAGER_STATE state) {
@@ -84,6 +86,7 @@ public interface ManagerInterface {
         synchronized void clearError() {
             if (state == MANAGER_STATE.ERROR) {
                 this.state = MANAGER_STATE.INITIALIZING;
+                this.error = null;
                 setChanged();
                 notifyObservers(new ManagerStatus(this));
             }
@@ -97,6 +100,14 @@ public interface ManagerInterface {
             this.error = e;
             setChanged();
             notifyObservers(new ManagerStatus(this));
+        }
+
+        synchronized public boolean isClosing() {
+            return closing;
+        }
+
+        synchronized public void setClosing(boolean closing) {
+            this.closing = closing;
         }
     }
 
@@ -125,4 +136,6 @@ public interface ManagerInterface {
     public ManagerStatus getStatus();
 
     public void addObserver(Observer observer);
+
+    public Glory getCounter();
 }

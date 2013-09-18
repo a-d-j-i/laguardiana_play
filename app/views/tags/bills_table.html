@@ -1,8 +1,8 @@
-Total de depositos ${ _bill_data._1 }<br>
-Total de sobres ${ _bill_data._2 }<br>
-Total de billetes ${ _bill_data._3 }<br>
-<ul style="display: inline-block; height: 100px; white-space: nowrap; padding: 4px 0;">
-    #{list items:_bill_data._5.keySet(), as:'currency'}
+Total de depositos ${ _bill_data.deposits }<br>
+Total de sobres ${ _bill_data.envelopes }<br>
+Total de billetes ${ _bill_data.bills }<br>
+<ul style="display: inline-block; height: 300px; white-space: nowrap; padding: 4px 0;">
+    #{list items:_bill_data.currencies, as:'currency'}
     <li style="display: inline-block; margin: 0 4px;">
         <div>
             <table class="">
@@ -16,12 +16,12 @@ Total de billetes ${ _bill_data._3 }<br>
                 <tbody>
                     <!-- detalle de billetes -->
                     %{ total = 0; cnt_total = 0;}%
-                    #{list items:_bill_data._5.get( currency ).values(), as:'b'}
-                    <tr class="BTRID_${b.tid}">
-                        <td id="bill_denomination">${b.d} &{b.c}</td>
-                        <td class="bill_quantity">${b.q}</td>
-                        <td class="bill_total">${b.d  * b.q}</td>
-                        %{ total += b.d  * b.q; cnt_total += b.q }%
+                    #{list items:_bill_data.getDetail( currency ), as:'b'}
+                    <tr class="BTRID_${b.key}">
+                        <td id="bill_denomination">${b.denomination} ${b.currency.textId}</td>
+                        <td class="bill_quantity">${b.quantity}</td>
+                        <td class="bill_total">${b.ammount}</td>
+                        %{ total += b.ammount; cnt_total += b.quantity; }%
                     </tr>
                     #{/list}
                     <!-- /detalle de billetes -->
@@ -37,6 +37,16 @@ Total de billetes ${ _bill_data._3 }<br>
                     </tr>
                 </tfoot>
             </table>
+            <p>
+                Total de dinero validado ${ _bill_data.byCurrencyTotal.get( currency ).validatedAmmount }<br>
+                Total de billetes ${ _bill_data.byCurrencyTotal.get( currency ).validatedQuantity }<br>
+            </p>
+            <p>
+                Total de dinero sin validar ${ _bill_data.byCurrencyTotal.get( currency ).toValidateTotal }<br>
+                <span class="tab">Efectivo : ${ _bill_data.byCurrencyTotal.get( currency ).cashToValidate }</span><br>
+                <span class="tab">Cheques : ${ _bill_data.byCurrencyTotal.get( currency ).checksToValidate }</span><br>
+                <span class="tab">Tickets : ${ _bill_data.byCurrencyTotal.get( currency ).ticketsToValidate }</span><br>
+            </p>
         </div>
     </li>
     #{/list}

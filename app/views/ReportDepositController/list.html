@@ -14,10 +14,15 @@
     #{list items:data, as:'deposit' }
     #{if ( ! deposit.finishDate ) } 
     <tr style="background-color: lightpink;">
+    #{/if}
+    #{else}
+        #{if ( deposit.canceled ) } 
+            <tr style="background-color: lightyellow;">
         #{/if}
         #{else}
-    <tr style="background-color: lightgreen;">
+            <tr style="background-color: lightgreen;">
         #{/else}
+    #{/else}
         <td>${deposit.depositId} </td>
         <td>#{usernameTag user: deposit.user/}</td>
         <td>${deposit.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
