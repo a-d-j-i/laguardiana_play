@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 <section>
     <header></header>
-    <a href="${ backUrl }" class="boton_top">◄ &{ 'application.back' }</a>
+    <a href="#" class="boton_top clickBack">◄ &{ 'application.back' }</a>
     <article>
         <div class="contenido_grande">
             <ul class="columns">
@@ -33,6 +33,27 @@
         </div>
     </article>
 </section>
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    $(function() {
+        $( ".clickBack" ).click( function( e ) {
+            {
+                var defaultLocation = "${ backUrl }";
+                var oldHash = window.location.hash;
+                
+                history.back(); // Try to go back
+                
+                var newHash = window.location.hash;
+                
+                if( newHash === oldHash &&
+                    (typeof(document.referrer) !== "string" || document.referrer  === "")){
+                    window.location.href = defaultLocation;
+                }
+                //e.preventDefault();
+                return false; // stop event propagation and browser default event
+            }
+        });
+    });
+</script>
 
-
-
+#{/set}

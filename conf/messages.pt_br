@@ -127,6 +127,8 @@ summary.client_code=Empresa
 summary.branch_code=Sucursal
 summary.machine_code=Terminal
 summary.reprint=Re-impresão
+summary.original=Original
+summary.copy=Copia
 
 envelope_deposit.select_contents=Selecione os conteúdos do envelope
 envelope_deposit.contents=Conteúdos do envelope
