@@ -10,6 +10,7 @@ import javax.persistence.*;
 import models.db.LgLov.LovCol;
 import models.events.DepositEvent;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPABase;
 
@@ -108,6 +109,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     public static void closeUnfinished() {
         List< LgDeposit> unfinished = LgDeposit.find("select d from LgDeposit d where finishDate is null").fetch();
         for (LgDeposit l : unfinished) {
+            Logger.debug("Closing deposit %d unfinished", l.depositId);
             DepositEvent.save(l.user, l, String.format("Deposit finished automatically"));
             l.finishDate = new Date();
             l.save();
