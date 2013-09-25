@@ -77,6 +77,8 @@ public class ReportZController extends Controller {
         LgZ currentZ = LgZ.rotateZ();
         setRenderArgs(currentZ);
         ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
+        renderArgs.put("copy", "copy");
+        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentZ.zId);
     }
@@ -84,8 +86,6 @@ public class ReportZController extends Controller {
     public static void print() {
         LgZ currentZ = LgZ.getCurrentZ();
         setRenderArgs(currentZ);
-        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
-        renderArgs.put("copy", "copy");
         ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentZ.zId);
