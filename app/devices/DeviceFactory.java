@@ -9,6 +9,7 @@ import devices.glory.Glory;
 import devices.glory.manager.GloryManager;
 import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
+import devices.ioboard.IoBoard.IOBOARD_VERSION;
 import devices.printer.Printer;
 import java.util.HashMap;
 import play.Logger;
@@ -67,7 +68,7 @@ public class DeviceFactory extends PlayPlugin {
         return device;
     }
 
-    synchronized public static IoBoard getIoBoard(String port, String baudRate) {
+    synchronized public static IoBoard getIoBoard(String port, IOBOARD_VERSION version) {
         if (port == null) {
             port = "0";
         }
@@ -76,10 +77,10 @@ public class DeviceFactory extends PlayPlugin {
         }
         Logger.info(String.format("Configuring ioboard on serial port %s", port));
         //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
-        PortConfiguration iBoardPortConf = new PortConfiguration(PORTSPEED.getBaudRate(baudRate), PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
+        PortConfiguration iBoardPortConf = new PortConfiguration(version.getBaudRate(), PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
         SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, iBoardPortConf);
         Logger.info(String.format("Configuring glory"));
-        IoBoard device = new IoBoard(serialPort);
+        IoBoard device = new IoBoard(serialPort, version);
         device.startStatusThread();
         ioBoardDevices.put(port, device);
         return device;

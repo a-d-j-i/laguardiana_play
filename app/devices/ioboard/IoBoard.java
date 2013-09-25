@@ -1,5 +1,6 @@
 package devices.ioboard;
 
+import devices.SerialPortAdapterAbstract.PORTSPEED;
 import devices.SerialPortAdapterInterface;
 import java.io.IOException;
 import java.security.InvalidParameterException;
@@ -18,7 +19,35 @@ import play.Logger;
  */
 public class IoBoard {
 
+    public enum IOBOARD_VERSION {
+
+        V4520_1_0("4520_1.0", PORTSPEED.BAUDRATE_38400),
+        V4520_1_2("4520_1.2", PORTSPEED.BAUDRATE_115200),
+        MX220_1_0("MX220_1.0", PORTSPEED.BAUDRATE_115200);
+        String version;
+        PORTSPEED baudRate;
+
+        IOBOARD_VERSION(String version, PORTSPEED baudRate) {
+            this.version = version;
+            this.baudRate = baudRate;
+        }
+
+        static public IOBOARD_VERSION getVersion(String ver) {
+            for (IOBOARD_VERSION r : IOBOARD_VERSION.values()) {
+                if (r.version.equals(ver)) {
+                    return r;
+                }
+            }
+            Logger.error("INVALID IOBOARD VERSION, switch to default");
+            return V4520_1_0;
+        }
+
+        public PORTSPEED getBaudRate() {
+            return baudRate;
+        }
+    }
     // read timeout in ms
+
     public enum SHUTTER_STATE {
 
         SHUTTER_START_CLOSE(0),
@@ -419,8 +448,9 @@ public class IoBoard {
     private AtomicBoolean mustStop = new AtomicBoolean(false);
     private final StatusThread statusThread;
     private SerialPortAdapterInterface serialPort = null;
+    private IOBOARD_VERSION version;
 
-    public IoBoard(SerialPortAdapterInterface serialPort) {
+    public IoBoard(SerialPortAdapterInterface serialPort, IOBOARD_VERSION version) {
         if (serialPort == null) {
             throw new InvalidParameterException("IoBoard invalid parameter serial port");
         }
@@ -428,6 +458,7 @@ public class IoBoard {
             throw new InvalidParameterException("IoBoard serial port allready open");
         }
         this.serialPort = serialPort;
+        this.version = version;
         statusThread = new StatusThread();
     }
 

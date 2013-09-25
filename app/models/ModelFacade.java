@@ -66,7 +66,8 @@ public class ModelFacade {
             }
         });
 
-        ioBoard = DeviceFactory.getIoBoard(Configuration.getIoBoardPort(), Configuration.getIoBoardBaudRate());
+        IoBoard.IOBOARD_VERSION ver = IoBoard.IOBOARD_VERSION.getVersion(Configuration.getIoBoardVersion());
+        ioBoard = DeviceFactory.getIoBoard(Configuration.getIoBoardPort(), ver);
         ioBoard.addObserver(new Observer() {
             public void update(Observable o, Object data) {
                 Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();

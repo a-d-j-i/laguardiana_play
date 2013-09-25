@@ -218,7 +218,7 @@ public class Configuration {
         return Play.configuration.getProperty("io_board.port");
     }
 
-    public static String getIoBoardBaudRate() {
-        return Play.configuration.getProperty("io_board.baudRate");
+    public static String getIoBoardVersion() {
+        return Play.configuration.getProperty("io_board.version");
     }
 }
