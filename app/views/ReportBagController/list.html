@@ -44,14 +44,13 @@
             #{/list}
         </td>
         <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
-            <a id="${ bag.bagId }" href="@{reprint}" class="submitForm"><img src="../public/images/printer.png" border="0" alt="Reimprimir Ticket"></a>
+            <a id="${ bag.bagId }" href="@{reprint}" class="submitForm"><img src="../public/images/list_reprint.png" border="0" alt="Reimprimir Ticket"></a>
         </td>
         <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
-            <a id="${ bag.bagId }" href="@{detail}" class="submitForm"><img src="../public/images/search_add.png" border="0" alt="Detalle"></a>
+            <a id="${ bag.bagId }" href="@{detail}" class="submitForm"><img src="../public/images/list_detail.png" border="0" alt="Detalle"></a>
         </td>
         <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
-            <a id="${ bag.bagId }" href="@{ReportDepositController.list( 1, null, null, bag.bagId, null )}" class="NosubmitForm"><img src="../public/images/folder_put.png" border="0" alt="Depositos"></a>
-        </td>
+            <a id="${ bag.bagId }" href="@{ReportDepositController.list( 1, null, null, bag.bagId, null )}" class="NosubmitForm"><img src="../public/images/list_deposits.png" border="0" alt="Depositos"></a>        </td>
     </tr>
     #{/list}
 </tbody>
