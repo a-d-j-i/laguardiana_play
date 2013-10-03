@@ -1,11 +1,12 @@
 #{extends 'main.html' /}
 #{set title:'Depositar Sobre' /}
-#{form @start(deposit), 'id' : 'mainForm', 'class' : "bbq" }
 <section>
     <header></header>
     <a id="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
+#{form @start(deposit), 'id' : 'mainForm', 'class' : "bbq" }
+
         #{ if ( formData.showReference1 || formData.showReference2 ) }
         <div class="step" id="first" >
             <div class="contenido">
@@ -207,9 +208,9 @@
             </div>
         </div>
         #{ popup_keyboard /}
+#{/form}
     </article>
 </section>
-#{/form}
 
 
 #{set 'moreScripts'}

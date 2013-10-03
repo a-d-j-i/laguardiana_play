@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<html lang="${lang}">
     <head>
         <title>#{get 'title' /}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=${_response_encoding}">
@@ -15,9 +15,6 @@
             header {
                 background: url('../public/images/${play.configuration['style.logo']}') 94% 50% no-repeat;
             }
-            section {
-                background: url('../public/images/${play.configuration['style.background']}');
-            }
             .boton_top {
                 background: url('../public/images/${play.configuration['style.button_top']}') top left repeat-y;
             }
@@ -32,7 +29,12 @@
     </head>
 
     <body>
+        <div id="background">
+            <img src="../public/images/${play.configuration['style.background']}" class="stretch" alt="" />
+        </div>
+        <div id="foreground">
         #{doLayout /}
+        </div>
     </body>
     <!-- javascript Placed at the end of the document so the pages load faster -->
     <!-- jquery -->
@@ -45,11 +47,11 @@
     #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
     <script src="@{'/public/javascripts/jquery/jquery.keyboard.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     <script>
-        $(function(){
+        $(function() {
             $(":text, [type='password'], textarea").keyboard({
                 layout: 'custom',
-                autoAccept   : true,
-                openOn       : 'click',
+                autoAccept: true,
+                openOn: 'click',
                 customLayout: {
                     'default': [
                         '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
@@ -69,10 +71,10 @@
             });
             $("[type='number']").keyboard({
                 layout: 'custom',
-                autoAccept   : true,
-                openOn       : 'click',
+                autoAccept: true,
+                openOn: 'click',
                 customLayout: {
-                    'default' : [
+                    'default': [
                         '7 8 9 {c}',
                         '4 5 6 {b}',
                         '1 2 3 {clear}',

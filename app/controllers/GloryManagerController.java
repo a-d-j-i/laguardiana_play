@@ -6,10 +6,8 @@ import devices.glory.manager.ManagerInterface;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import models.ModelFacade;
 import play.Logger;
 import play.mvc.Before;
@@ -48,7 +46,7 @@ public class GloryManagerController extends Application {
 
         Map<Integer, Integer> current = manager.getCurrentQuantity();
         Map<Integer, Integer> desired = manager.getDesiredQuantity();
-        Set<Integer> slots = new HashSet<Integer>();
+        List<Integer> slots = new ArrayList<Integer>();
         if (current == null) {
             current = new HashMap<Integer, Integer>();
         }

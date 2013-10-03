@@ -100,103 +100,106 @@
             </ul>
         </div>
         #{/else}
+        <div id="alerta" class="alerta_automatica alerta error" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.error' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text"></span>
+                </div>
+                <div id="alerta_botonera">
+                    <a class="alerta_cerrar boton ${play.configuration['style.button_color']}">&{ 'application.close' }</a>
+                </div>
+            </div>
+        </div>
+        <div id="alerta_success" class="alerta_automatica alerta info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.wellcome' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="info_text"></span>
+                </div>
+                <div id="alerta_botonera">
+                    <a id ="alerta_success_cancel" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a id="alerta_success_done" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+                </div>
+            </div>
+        </div>
     </article>
-    <div id="alerta" class="alerta_automatica alerta error" style="display: none;">
-        <div id="alerta_titulo">&{ 'application.error' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="error_text"></span>
-            </div>
-            <div id="alerta_botonera">
-                <a class="alerta_cerrar boton ${play.configuration['style.button_color']}">&{ 'application.close' }</a>
-            </div>
-        </div>
-    </div>
-    <div id="alerta_success" class="alerta_automatica alerta info" style="display: none;">
-        <div id="alerta_titulo">&{ 'application.wellcome' }</div>
-        <div id="alerta_cuerpo">
-            <div id="alerta_texto">
-                <span id="info_text"></span>
-            </div>
-            <div id="alerta_botonera">
-                <a id ="alerta_success_cancel" href="#" class="boton rojo">&{ 'application.cancel' }</a>
-                <a id="alerta_success_done" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
-            </div>
-        </div>
-    </div>
 </section>
 
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     var candado_count = 0;
-    $("#candado").click( function( event ) {
-        candado_count++;
-        if ( candado_count >= 3 ) {
-            if ( $( "#password" ).is(":visible") ) {
-                $( "#password" ).val( "" );
-                $( "#password" ).hide();
-            } else {
-                $( "#password" ).show();
-            }
-            candado_count=0;
-        }
-    } );
-    function refresh() {
-        candado_count=0;
-    };
-    setInterval(refresh, 3000);
-    
-    /* attach a submit handler to the form */
-    $("#mainForm").submit( function(event) {
-        /* stop form from submitting normally */
-        event.preventDefault(); 
-        /* Send the data using post and put the results in a div */
-        $.post( $( this ).attr( 'action' ), $( this ).serialize(),
-        function( data ) {
+            $("#candado").click(function(event) {
+    candado_count++;
+            if (candado_count >= 3) {
+    if ($("#password").is(":visible")) {
+    $("#password").val("");
+            $("#password").hide();
+    } else {
+    $("#password").show();
+    }
+    candado_count = 0;
+    }
+    });
+            function refresh() {
+            candado_count = 0;
+            };
+            setInterval(refresh, 3000);
+            /* attach a submit handler to the form */
+            $("#mainForm").submit(function(event) {
+    /* stop form from submitting normally */
+    event.preventDefault();
+            /* Send the data using post and put the results in a div */
+            $.post($(this).attr('action'), $(this).serialize(),
+            function(data) {
             var status = data[ 0 ];
-            var extra = data[ 1 ];
-            $( '#username' ).val( "" );
-            $( '#password' ).val( "" );
-            if ( status == 'error' ) {
-                $( '#error_text' ).html( extra );
-                $( "#alerta" ).overlay().load();
-                $( '#username' ).val( "" ).focus();
-                $( '#password' ).val( "" );
-            } else if ( status == 'success' ) { 
-                #{if ( play.configuration[ 'secure.wellcomePopup' ] ) }
-                $( '#info_text' ).html( data[ 2 ] + "<br> " + data [ 3 ] );
-                $( '#alerta_success_done' ).click( function(event) {
-                    window.location.href = extra;
-                });
-                $( "#alerta_success" ).overlay().onClose( function( event ) {
-                    window.location.href = extra;
-                }).load();
-                #{/if}
-                #{else}
-                window.location.href = extra;
-                #{/else}
+                    var extra = data[ 1 ];
+                    $('#username').val("");
+                    $('#password').val("");
+                    if (status == 'error') {
+            $('#error_text').html(extra);
+                    $("#alerta").overlay().load();
+                    $('#username').val("").focus();
+                    $('#password').val("");
+            } else if (status == 'success') {
+            #{if (play.configuration[ 'secure.wellcomePopup' ]) }
+            $('#info_text').html(data[ 2 ] + "<br> " + data [ 3 ]);
+                    $('#alerta_success_done').click(function(event) {
+            window.location.href = extra;
+            });
+                    $("#alerta_success").overlay().onClose(function(event) {
+            window.location.href = extra;
+            }).load();
+                    #{/if}
+                    #{ else}
+            window.location.href = extra;
+                    #{/else}
             } else {
-                $( '#error_text' ).html( 'Estado invalido : ' + data );
-                $( "#alerta" ).overlay().load();
+            $('#error_text').html('Estado invalido : ' + data);
+                    $("#alerta").overlay().load();
             }
-        }
-    );
-    } );
-    
-    $( '#continueButton' ).click( function(event) {
-        $( '#mainForm' ).submit();
-    });
-        
-    $( '#alerta_success_cancel' ).click( function(event) {
-        window.location.href = "@{Secure.logout()}";
-    });
-    $(':input').keypress(function (e) {
-        if (e.which == 13) {
+            }
+            );
+            });
+                    $('#continueButton').click(function(event) {
             $('#mainForm').submit();
-            return false;
-        }
-    });
-    Elastic.refresh();
+            });
+                    $('#alerta_success_cancel').click(function(event) {
+            window.location.href = "@{Secure.logout()}";
+            });
+                    $(':input').keypress(function (e) {
+            if (e.which == 13) {
+            $('#mainForm').submit();
+                    return false;
+            }
+            });
+            //Hack for strange behaiviour.
+                    var timer = null;
+                    var refreshOnceTimeout = function () {
+            Elastic.refresh();
+                    clearTimeout(timer); // remove timer
+                    };
+                    timer = setTimeout(refreshOnceTimeout, 200);
 </script>
 #{/set}
 

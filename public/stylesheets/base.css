@@ -9,13 +9,51 @@
     font-style: normal;
 }
 
+#foreground {
+    width: 100%; 
+    height: 100%; 
+    position: absolute; 
+    left: 0px; 
+    top: 0px; 
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
+}
+#background {
+    width: 100%; 
+    height: 100%; 
+    position: absolute; 
+    left: 0px; 
+    top: 0px; 
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
+    overflow: hidden;
+}
+
+.stretch {
+    width:100%;
+    height:100%;
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
+}
+
 html {
     height: 100%;
+    width: 100%; /*800px;*/
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
 }
 
 body {
     background: black;
+    width: 100%; /*800px;*/
     height: 100%;
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
     font-family: DIN;
     font-size: 62.5%;
     font-size: 1em;
@@ -35,19 +73,18 @@ a {
 
 section {
     width: 100%; /*800px;*/
-    height: 600px;
-    background: url('../images/fondo.png');
-    background-size: 100% 600px;
+    height: 100%;
     margin: 0 auto;
     position: relative;
 }
 
 header {
-    height: 118px;
+    height: 10%;
     background: url('../images/logo.png') 94% 50% no-repeat;
 }
 
 article {
+    height: 70%;
     padding: 35px 60px 0 60px;
 }
 
@@ -199,8 +236,6 @@ select {
 }
 
 
-
-
 select option {
     background: white;
     padding: 10px;
@@ -271,8 +306,17 @@ table tfoot tr td {
 /* teclados */
 
 .keyboard {
-
 }
+/*.keyboard {
+    margin-top: 10px;
+}*/
+
+/*.keyboard {
+    margin-top: 10px;
+    margin-bottom: 41px;
+}*/
+
+
 
 .keyboard .element {
 
@@ -349,23 +393,13 @@ table tfoot tr td {
     margin-bottom: 20px;
 }
 
-.keyboard {
-    margin-top: 10px;
-}
-
-/*.keyboard {
-    margin-top: 10px;
-    margin-bottom: 41px;
-}*/
-
-
 
 /* alertas */
 
 .alerta {
     margin-left: 100px;
-    width: 600px;
-    height: 500px;
+    width: 100%; /*600px;*/
+    height: 100%; /*500px;*/
     background: none;
     display: none;
 }
@@ -405,9 +439,7 @@ table tfoot tr td {
     background: url('../images/alertas_flecha.png') top left no-repeat;
     padding-top: 13px;
     margin-bottom: 30px;
-}
-
-.alerta #alerta_cuerpo #alerta_texto {
+    width: 80%;
     background: #FFF7C2;
     padding: 15px;
     color: black;
@@ -416,7 +448,7 @@ table tfoot tr td {
 }
 
 .alerta #alerta_cuerpo #alerta_botonera {
-
+    padding-left: 70px;
 }
 
 /* section: login */
@@ -455,13 +487,13 @@ table tfoot tr td {
 }
 
 .contenido {
-    height: 270px;
+    height: 70%; /*270px;*/
     overflow: hidden;
     margin-bottom: 20px;
 }
 
 .contenido_grande {
-    height: 345px;
+    height: 80%; /*345px;*/
     overflow: hidden;
     margin-bottom: 20px;
 }

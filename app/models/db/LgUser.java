@@ -81,10 +81,10 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     public static LgUser authenticate(String username, String password) {
         List<LgUser> users;
         if (password != null && !password.isEmpty()) {
-            users = LgUser.find("select u from User u where u.username = ? and u.password = ? and "
+            users = LgUser.find("select u from LgUser u where u.username = ? and u.password = ? and "
                     + "( u.endDate is null or u.endDate > CURRENT_TIMESTAMP )", username, password).fetch();
         } else {
-            users = LgUser.find("select u from User u where u.username = ? and ( u.password is null or password = '' ) and "
+            users = LgUser.find("select u from LgUser u where u.username = ? and ( u.password is null or password = '' ) and "
                     + "( u.endDate is null or u.endDate > CURRENT_TIMESTAMP )", username).fetch();
         }
         LgUser validated = null;

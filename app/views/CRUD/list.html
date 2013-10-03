@@ -8,26 +8,27 @@
     <header>
         <h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
     </header>
-    <a href="@{CRUD.index}" class="boton_top">◄ &{ 'application.back' }</a>
+    <article>
+        <a href="@{CRUD.index}" class="boton_top">◄ &{ 'application.back' }</a>
 
-    <div id="crudList" class="${type.name}">
+        <div id="crudList" class="${type.name}">
 
-        <div id="crudListSearch">
-            #{crud.search /}
+            <div id="crudListSearch">
+                #{crud.search /}
+            </div>
+
+            <div id="crudListTable">
+                #{crud.table /}
+            </div>
+
+            <div id="crudListPagination">
+                #{crud.pagination /}
+            </div>
+
+            <p id="crudListAdd">
+                <a href="@{blank()}">&{'crud.add', type.modelName}</a>
+            </p>
+
         </div>
-
-        <div id="crudListTable">
-            #{crud.table /}
-        </div>
-
-        <div id="crudListPagination">
-            #{crud.pagination /}
-        </div>
-
-        <p id="crudListAdd">
-            <a href="@{blank()}">&{'crud.add', type.modelName}</a>
-        </p>
-
-    </div>
-
+    </article>
 </section>

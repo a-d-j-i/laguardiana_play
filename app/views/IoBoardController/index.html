@@ -1,43 +1,46 @@
-#{extends 'main.html' /}
 #{set title:'IoBoard (Comandos)' /}
 #{extends 'main.html' /}
-#{set title:'Otras operaciones' /}
 <section id ="menu_principal">
     <header></header>
-    <!-- link volver -->
-    <a id ="backButton" href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
-    <div class="botonera">
-        <ul class="on-2 unit">
-            <li class="column">
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{index()}">status</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{openGate()}">openGate</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{closeGate()}">closeGate</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{aproveBag()}">aproveBag</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{aproveBagConfirm()}">aproveBagConfirm</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{clearError()}">clearError</a>
-            </li>
-            <li class="column">
-                <div class="columna">
-                    <p>${error}</p>
-                    <p>error : ${status?.getError()}</p>
-                    <p>A : ${status?.reprA()}</p>
-                    <p>B : ${status?.reprB()}</p>
-                    <p>C : ${status?.reprC()}</p>
-                    <p>D : ${status?.reprD()}</p>
-                    <p>BAG_SENSOR : ${status?.reprBAG_SENSOR()}</p>
-                    <p>BAG_STATUS : ${status?.reprBAG_STATUS()}</p>
-                    <p>BAG APROVE STATE: ${status?.bagAproveState}</p>
-                    <p>BAG_STATE : ${status?.bagState?.name()}</p>
-                    <p>SHUTTER_STATE : ${status?.shutterState?.name()}</p>
-                    #{if (status?.lockState ) }
-                    <p>lockState : Locked</p>
-                    #{/if}
-                    #{else}
-                    <p>lockState : UnLocked</p>
-                    #{/else}
-                    <p>BAG_APROVE_STATE : ${status?.bagAproveState}</p>
-                </div>
-            </li>
-        </ul>
-    </div>
+    <article>
+        <!-- link volver -->
+        <a id ="backButton" href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+        <div class="botonera">
+            <ul class="on-2 unit">
+                <li class="column">
+                    <div style="margin:20px;">
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{index()}">status</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{openGate()}">openGate</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{closeGate()}">closeGate</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{aproveBag()}">aproveBag</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{aproveBagConfirm()}">aproveBagConfirm</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{clearError()}">clearError</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <p>${error}</p>
+                        <p>error : ${status?.getError()}</p>
+                        <p>A : ${status?.reprA()}</p>
+                        <p>B : ${status?.reprB()}</p>
+                        <p>C : ${status?.reprC()}</p>
+                        <p>D : ${status?.reprD()}</p>
+                        <p>BAG_SENSOR : ${status?.reprBAG_SENSOR()}</p>
+                        <p>BAG_STATUS : ${status?.reprBAG_STATUS()}</p>
+                        <p>BAG APROVE STATE: ${status?.bagAproveState}</p>
+                        <p>BAG_STATE : ${status?.bagState?.name()}</p>
+                        <p>SHUTTER_STATE : ${status?.shutterState?.name()}</p>
+                        #{if (status?.lockState ) }
+                        <p>lockState : Locked</p>
+                        #{/if}
+                        #{else}
+                        <p>lockState : UnLocked</p>
+                        #{/else}
+                        <p>BAG_APROVE_STATE : ${status?.bagAproveState}</p>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+    </article>
 </section>
