@@ -6,6 +6,7 @@ import models.Configuration;
 import models.ItemQuantity;
 import models.ModelFacade;
 import models.db.LgBag;
+import play.Logger;
 import play.mvc.*;
 
 @With({Secure.class})
@@ -23,6 +24,7 @@ public class MenuController extends Controller {
         String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter"};
         LgBag currentBag = LgBag.getCurrentBag();
         ItemQuantity iq = currentBag.getItemQuantity();
+
         renderArgs.put("bagTotals", iq);
         Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(iq);
         renderArgs.put("bagFreeSpace", bagFreeSpace);

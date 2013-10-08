@@ -29,7 +29,7 @@ public class ReportEventController extends Controller {
         int length = 3;
         long cnt = LgEvent.count(startDate, endDate);
         renderArgs.put("cnt", cnt);
-        Integer totalPage = (int) ((cnt + 1) / length);
+        Integer totalPage = (int) ((cnt / length) + 1);
         if (page > totalPage) {
             page = totalPage;
         }

@@ -1,10 +1,11 @@
-Total de depositos ${ _bill_data.deposits }<br>
-Total de sobres ${ _bill_data.envelopes }<br>
-Total de billetes ${ _bill_data.bills }<br>
-<ul style="display: inline-block; height: 300px; white-space: nowrap; padding: 4px 0;">
+Total de depositos&nbsp;:&nbsp;${ _bill_data.deposits }&nbsp;
+Total de sobres&nbsp;:&nbsp;${ _bill_data.envelopes }&nbsp;
+Total de billetes&nbsp;:&nbsp;${ _bill_data.bills }&nbsp;<br>
+<ul style="display: inline-block; white-space: nowrap; padding: 4px 0;">
     #{list items:_bill_data.currencies, as:'currency'}
-    <li style="display: inline-block; margin: 0 4px;">
+    <li style="display: inline-block; margin: 0 4px; vertical-align: top;">
         <div>
+            <h2>${currency}</h2>
             <table class="">
                 <thead>
                     <tr>
@@ -18,7 +19,7 @@ Total de billetes ${ _bill_data.bills }<br>
                     %{ total = 0; cnt_total = 0;}%
                     #{list items:_bill_data.getDetail( currency ), as:'b'}
                     <tr class="BTRID_${b.key}">
-                        <td id="bill_denomination">${b.denomination} ${b.currency.textId}</td>
+                        <td id="bill_denomination">${b.denomination}</td>
                         <td class="bill_quantity">${b.quantity}</td>
                         <td class="bill_total">${b.ammount}</td>
                         %{ total += b.ammount; cnt_total += b.quantity; }%

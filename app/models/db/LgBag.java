@@ -16,23 +16,23 @@ import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Table( name = "lg_bag", schema = "public")
+@Table(name = "lg_bag", schema = "public")
 public class LgBag extends GenericModel implements java.io.Serializable {
 
     @Id
-    @Column( name = "bag_id", unique = true, nullable = false)
+    @Column(name = "bag_id", unique = true, nullable = false)
     @GeneratedValue(generator = "LgBagGenerator")
     @SequenceGenerator(name = "LgBagGenerator", sequenceName = "lg_bag_sequence")
     public Integer bagId;
-    @Column( name = "bag_code", nullable = false, length = 128)
+    @Column(name = "bag_code", nullable = false, length = 128)
     public String bagCode;
-    @Temporal( TemporalType.TIMESTAMP)
-    @Column( name = "creation_date", nullable = false, length = 13)
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
-    @Temporal( TemporalType.TIMESTAMP)
-    @Column( name = "withdraw_date", length = 13)
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "withdraw_date", length = 13)
     public Date withdrawDate;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "bag")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "bag")
     public Set<LgDeposit> deposits = new HashSet<LgDeposit>(0);
     @Transient
     transient public String withdrawUser;
@@ -172,17 +172,16 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public ItemQuantity getItemQuantity() {
         final ItemQuantity ret = new ItemQuantity();
         LgDeposit.visitFinishedDeposits(deposits, new LgDeposit.DepositVisitor() {
-            public void visit(BillDeposit item) {
-                for (LgBill b : item.bills) {
-                    ret.bills += b.quantity;
-                }
-            }
-
-            public void visit(EnvelopeDeposit item) {
-                ret.envelopes++;
-            }
-
             public void visit(LgDeposit item) {
+                if (item instanceof EnvelopeDeposit) {
+                    ret.envelopes++;
+                } else if (item instanceof BillDeposit) {
+                    for (LgBill b : item.bills) {
+                        ret.bills += b.quantity;
+                    }
+                } else {
+                    Logger.error(String.format("Invalid deposit type %s", item.getClass()));
+                }
             }
         });
         return ret;

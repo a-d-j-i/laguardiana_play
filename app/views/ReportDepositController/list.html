@@ -17,10 +17,20 @@
     #{/if}
     #{else}
         #{if ( deposit.canceled ) } 
-            <tr style="background-color: lightyellow;">
+            #{if ( deposit.closeDate ) } 
+                <tr style="background-color: lightyellow;">
+            #{/if}
+            #{else}
+                <tr style="background-color: red;">
+            #{/else}
         #{/if}
         #{else}
-            <tr style="background-color: lightgreen;">
+            #{if ( deposit.closeDate ) } 
+                <tr style="background-color: lightgreen;">
+            #{/if}
+            #{else}
+                <tr style="background-color: lightsalmon;">
+            #{/else}
         #{/else}
     #{/else}
         <td>${deposit.depositId} </td>
