@@ -20,12 +20,20 @@ public class IoBoardController extends Application {
 
     public static void index() {
         String error = flash.get("error");
-        if (error != null) {
-            renderArgs.put("error", error);
+
+        if (request.isAjax()) {
+            Object[] o = new Object[2];
+            o[0] = error;
+            o[1] = ioBoard.getInternalState();
+            renderJSON(o);
+        } else {
+            if (error != null) {
+                renderArgs.put("error", error);
+                render();
+            }
+            renderArgs.put("status", ioBoard.getInternalState());
             render();
         }
-        renderArgs.put("status", ioBoard.getInternalState());
-        render();
     }
 
     public static void openGate() throws IOException {
