@@ -45,11 +45,11 @@ public class BillDepositAction extends UserAction {
     public void finish() {
         BillDeposit deposit = BillDeposit.findById(getDepositId());
         if (deposit != null) {
+            deposit.finishDate = new Date();
+            deposit.save();
             if (deposit.getTotal() > 0) {
                 deposit.print(false);
             }
-            deposit.finishDate = new Date();
-            deposit.save();
         }
     }
 }

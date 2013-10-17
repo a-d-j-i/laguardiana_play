@@ -1,8 +1,10 @@
 package devices.glory.manager.command;
 
+import static devices.glory.GloryState.SR1Mode.waiting_for_an_envelope_to_set;
 import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
+import play.Logger;
 
 /**
  *
@@ -33,6 +35,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
         }
         boolean storeTry = false;
         while (!mustCancel()) {
+            Logger.debug("EnvelopeDepositCommand");
             if (!sense()) {
                 return;
             }
@@ -85,11 +88,22 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
                     break;
                 case abnormal_device:
                     if (threadCommandApi.isClosing()) {
-                        setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
-                                "Escrow door jamed"));
-                        return;
+                        /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                         "Escrow door jamed"));*/
+                        //return;
                     }
                     setState(ManagerInterface.MANAGER_STATE.JAM);
+                    if (gloryStatus.isEscrowBillPresent()) {
+                        break;
+                    }
+                    if (!gotoNeutral(true, true)) {
+                        return;
+                    }
+                    if (!sendGCommand(new devices.glory.command.SetManualMode())) {
+                        setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                                String.format("EnvelopeDeposit gotoDepositMode Error %s", gloryStatus.getLastError())));
+                        return;
+                    }
                     break;
                 case storing_error:
                     setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,

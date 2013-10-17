@@ -461,7 +461,7 @@ public class Printer extends Observable {
             JFrame frame = new JFrame("Main print frame");
             //            pnl.setBackground(Color.black);
             //            frame.add(pnl);
-            item.setBackground(Color.black);
+            frame.setBackground(Color.black);
             frame.add(item);
 
             //frame.getContentPane().add(item);

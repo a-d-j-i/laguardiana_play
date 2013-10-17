@@ -14,6 +14,7 @@ import play.Logger;
  */
 public class CountCommand extends ManagerCommandAbstract {
 
+    private final int MAX_COUNT_RETRIES = 10;
     private final CountData countData;
 
     public CountCommand(ThreadCommandApi threadCommandApi, Map<Integer, Integer> desiredQuantity, Integer currency) {
@@ -229,6 +230,7 @@ public class CountCommand extends ManagerCommandAbstract {
                     if (!gloryStatus.isHopperBillPresent()) {
                         setState(ManagerInterface.MANAGER_STATE.PUT_THE_BILLS_ON_THE_HOPER);
                     }
+                    count_retries = 1;
                     break;
                 case being_store:
                     fakeCount = true;
@@ -241,16 +243,24 @@ public class CountCommand extends ManagerCommandAbstract {
                         setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
                         return;
                     }
+
+                    if (gloryStatus.isRejectBillPresent()) {
+                        setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
+                        break;
+                    }
                     if (countData.isNoCounts()) {
-                        count_retries++;
-                        if (count_retries > 10) {
+                        if (count_retries > MAX_COUNT_RETRIES) {
                             Logger.error("Error in hopper sensor");
-                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "Error in hopper sensor"));
-                            return;
+                            setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER);
+                            //setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "Error in hopper sensor"));
+                            break;
+                        } else {
+                            count_retries++;
                         }
                     } else {
-                        count_retries = 0;
+                        count_retries = 1;
                     }
+
                     fakeCount = false;
                     countData.withdrawDepositDone();
                     if (!countData.needToStoreDeposit()) {
@@ -269,10 +279,6 @@ public class CountCommand extends ManagerCommandAbstract {
                         if (batchCountStart()) { // batch end
                             batchEnd = true;
                         }
-                    }
-                    if (gloryStatus.isRejectBillPresent()) {
-                        setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
-                        break;
                     }
                     break;
                 case abnormal_device:

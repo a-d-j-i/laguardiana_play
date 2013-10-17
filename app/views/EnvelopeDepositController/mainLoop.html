@@ -85,9 +85,9 @@
                 <div id="alerta_texto">
                     <span id="error_text">&{ 'application.bag_not_in_place' }</span>
                 </div>
-            <div id="alerta_botonera">
-                <a href="#" id="alerta_bag_removed_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
-            </div>
+                <div id="alerta_botonera">
+                    <a href="#" id="alerta_bag_removed_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
+                </div>
             </div>
         </div>
         <div id="alerta_remove_rejected_bills" class="alerta_info" style="display: none;">
@@ -98,6 +98,15 @@
                 </div>
             </div>
         </div>
+        <div id="alerta_jam" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.envelope_jam' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text">&{ 'application.envelope_jam' }</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
 
@@ -107,55 +116,59 @@
 <script type="text/javascript" charset="${_response_encoding}">
 
     doRefresh = function() {
-        $.getJSON( '@{mainLoop}', function( data ) {
+        $.getJSON('@{mainLoop}', function(data) {
             var status = data[ 0 ];
             var billData = data[ 1 ];
-            if ( status != null && status.toString() != 'null' ) {
-                $( '.info_message' ).html(  data[ 2 ] );
-                
-                if ( status == 'TIMEOUT_WARNING' ) {
-                    showAlert( "#alerta_timeout" );
-                } else if ( status == 'CANCELING' ) {
-                    showAlert( '#alerta_cancel' );                
-                } else if ( status == 'STORING' ) {
-                    showAlert( '#alerta_storing' );                
-                } else if ( status == 'REMOVE_REJECTED_BILLS' ) {
-                    showAlert( '#alerta_remove_rejected_bills' );                
-                } else if ( status == 'BAG_REMOVED' ) {
-                    showAlert( '#alerta_bag_removed' );                
+            if (status != null && status.toString() != 'null') {
+                $('.info_message').html(data[ 2 ]);
+
+                if (status == 'TIMEOUT_WARNING') {
+                    showAlert("#alerta_timeout");
+                } else if (status == 'CANCELING') {
+                    showAlert('#alerta_cancel');
+                } else if (status == 'STORING') {
+                    showAlert('#alerta_storing');
+                } else if (status == 'REMOVE_REJECTED_BILLS') {
+                    showAlert('#alerta_remove_rejected_bills');
+                } else if (status == 'BAG_REMOVED') {
+                    showAlert('#alerta_bag_removed');
+                } else if (status == 'JAM') {
+                    showAlert('#alerta_jam');
                 } else {
                     closeAlert();
                     /*closeAlert( "#alerta_timeout" );
-                    closeAlert( "#alerta_cancel" );
-                    closeAlert( "#alerta_storing" );    
-                    closeAlert( "#alerta_remove_rejected_bills" );    
-                    closeAlert( "#alerta_bag_removed" );    */
+                     closeAlert( "#alerta_cancel" );
+                     closeAlert( "#alerta_storing" );    
+                     closeAlert( "#alerta_remove_rejected_bills" );    
+                     closeAlert( "#alerta_bag_removed" );    */
                 }
-                
-                if ( status == 'IDLE' || status == 'CANCELING' || status == 'STORING' || status == 'REMOVE_REJECTED_BILLS' || status == 'BAG_REMOVED' ) {
-                } else if ( status == 'FINISH' ) {
+
+                if (status == 'IDLE' || status == 'JAM' || status == 'CANCELING' || status == 'STORING' || status == 'REMOVE_REJECTED_BILLS' || status == 'BAG_REMOVED') {
+                } else if (status == 'FINISH') {
                     window.location.href = "@{finish}";
                     return;
-                } else if ( status == 'READY_TO_STORE' ) {
+                } else if (status == 'READY_TO_STORE') {
                     //                    $( '.continueButton' ).attr( { 'class' : 'boton ${play.configuration['style.button_color']}'});
-                } else if ( status == 'ERROR' ) {
+                } else if (status == 'ERROR') {
                     window.location.href = "@{counterError()}";
-                } else {          
-                    alert( "Invalid status : " + status + " last status : " + lastStatus );
+                } else {
+                    alert("Invalid status : " + status + " last status : " + lastStatus);
                 }
                 lastStatus = status
             }
             doneRefresh();
         })
     };
-    
-    
-    $( '.continueButton' ).click( function(event) {
-        $.getJSON( '@{accept()}', function( data ) {});
+
+
+    $('.continueButton').click(function(event) {
+        $.getJSON('@{accept()}', function(data) {
+        });
     });
-    
-    $( '.cancelButton' ).click( function(event) {
-        $.getJSON( '@{cancel()}', function( data ) {});
+
+    $('.cancelButton').click(function(event) {
+        $.getJSON('@{cancel()}', function(data) {
+        });
     });
 </script>
 #{/set}

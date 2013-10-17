@@ -6,6 +6,7 @@ package devices.glory.manager.command;
 
 import devices.glory.manager.GloryManager;
 import devices.glory.manager.GloryManagerError;
+import devices.glory.manager.ManagerInterface;
 import play.Logger;
 
 /**
@@ -13,11 +14,11 @@ import play.Logger;
  * @author adji
  */
 public class StoringErrorResetCommand extends ManagerCommandAbstract {
-    
+
     public StoringErrorResetCommand(GloryManager.ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
     }
-    
+
     @Override
     public void run() {
         // retry closing at least once.
@@ -37,9 +38,11 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                         case storing_error:
                         case escrow_open_request:
                             if (threadCommandApi.isClosing()) {
-                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
-                                        "Escrow door jamed"));
-                                return;
+                                /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                 "Escrow door jamed"));
+                                 return;*/
+                                setState(ManagerInterface.MANAGER_STATE.JAM);
+                                break;
                             }
                             if (!openEscrow()) {
                                 return;
@@ -50,9 +53,11 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             break;
                         case being_recover_from_storing_error:
                             if (threadCommandApi.isClosing()) {
-                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
-                                        "Escrow door jamed"));
-                                return;
+                                /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                 "Escrow door jamed"));
+                                 return;*/
+                                setState(ManagerInterface.MANAGER_STATE.JAM);
+                                break;
                             }
                             if (!sendGloryCommand(new devices.glory.command.ResetDevice())) {
                                 return;
@@ -62,9 +67,11 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                             break;
                         case escrow_close_request:
                             if (threadCommandApi.isClosing()) {
-                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
-                                        "Escrow door jamed"));
-                                return;
+                                /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                 "Escrow door jamed"));
+                                 return;*/
+                                setState(ManagerInterface.MANAGER_STATE.JAM);
+                                break;
                             }
                             if (!closeEscrow()) {
                                 return;
@@ -125,7 +132,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
             setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, "GOTO NEUTRAL TIMEOUT"));
             Logger.debug("StoringErrorReset TIMEOUT!!!");
         }
-        
+
         Logger.debug("StoringErrorReset DONE CANCEL");
     }
 }

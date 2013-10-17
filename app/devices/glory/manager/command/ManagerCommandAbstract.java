@@ -127,9 +127,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
                     switch (gloryStatus.getSr1Mode()) {
                         case escrow_open_request:
                             if (threadCommandApi.isClosing()) {
-                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
                                         "Escrow door jamed"));
-                                return false;
+                                return false;*/
+                                setState(ManagerInterface.MANAGER_STATE.JAM);
+                                break;
                             }
                             /*                            if (!canOpenEscrow) {
                              setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
@@ -154,9 +156,11 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case escrow_close_request:
                         case being_recover_from_storing_error:
                             if (threadCommandApi.isClosing()) {
-                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                                /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
                                         "Escrow door jamed"));
-                                return false;
+                                return false;*/
+                                setState(ManagerInterface.MANAGER_STATE.JAM);
+                                break;
                             }
                             if (gloryStatus.isEscrowBillPresent()) {
                                 break;

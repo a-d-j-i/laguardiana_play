@@ -193,13 +193,7 @@
                     return false;
             }
             });
-            //Hack for strange behaiviour.
-                    var timer = null;
-                    var refreshOnceTimeout = function () {
-            Elastic.refresh();
-                    clearTimeout(timer); // remove timer
-                    };
-                    timer = setTimeout(refreshOnceTimeout, 200);
+
 </script>
 #{/set}
 

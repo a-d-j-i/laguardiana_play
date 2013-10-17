@@ -48,7 +48,9 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
                 }
                 break;
             case JAM: //The door is jamed.
-                stateApi.setError(ModelError.ERROR_CODE.ESCROW_JAMED, "Escrow jamed");
+                // Let it be!!!.
+                stateApi.setState(new Jam(stateApi, this));
+                //stateApi.setError(ModelError.ERROR_CODE.ESCROW_JAMED, "Escrow jamed");
                 break;
             /*            case STORING:
              stateApi.setState(new StoringEnvelopeDeposit(stateApi));
