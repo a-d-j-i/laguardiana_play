@@ -5,11 +5,11 @@
     <a id="backButton" href="#" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
-#{form @start(deposit), 'id' : 'mainForm', 'class' : "bbq" }
+        #{form @start(deposit), 'id' : 'mainForm', 'class' : "bbq", 'style' : 'height: 89%;' }
+        <div class="contenido">
 
-        #{ if ( formData.showReference1 || formData.showReference2 ) }
-        <div class="step" id="first" >
-            <div class="contenido">
+            #{ if ( formData.showReference1 || formData.showReference2 ) }
+            <div class="step" id="first" >
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
                         <div class="columna">
@@ -37,10 +37,8 @@
                     </li>
                 </ul>
             </div>
-        </div>
-        #{/if}
-        <div class="step" id="second" style="display: none">
-            <div class="contenido">
+            #{/if}
+            <div class="step" id="second" style="display: none">
                 <input  autocomplete="off" name="second_next" id="second_next" type="hidden" class="link" value="envelope_code">
                 <input  autocomplete="off" name="second_valid" id="second_valid" type="hidden" class="link" value="">
                 <div class="mensaje"><span>&{ 'envelope_deposit.select_contents' }</span></div>
@@ -65,9 +63,7 @@
                     </li>
                 </ul>
             </div>
-        </div>
-        <div id="cash" class="step amount_input" style="display: none">
-            <div class="contenido">
+            <div id="cash" class="step amount_input" style="display: none">
                 <input  autocomplete="off" name="cash_second" id="cash_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
@@ -86,9 +82,7 @@
                     #{ centered_keyboard /}
                 </ul>
             </div>
-        </div>
-        <div id="checks" class="step amount_input" style="display: none">
-            <div class="contenido">
+            <div id="checks" class="step amount_input" style="display: none">
                 <input  autocomplete="off" name="checks_second" id="checks_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
@@ -107,9 +101,7 @@
                     #{ centered_keyboard /}
                 </ul>
             </div>
-        </div>
-        <div id="tickets" class="step amount_input" style="display: none">
-            <div class="contenido">
+            <div id="tickets" class="step amount_input" style="display: none">
                 <input  autocomplete="off" name="tickets_second" id="tickets_second" type="hidden" class="link" value="second">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
@@ -129,9 +121,7 @@
                     #{ centered_keyboard /}
                 </ul>
             </div>
-        </div>
-        <div id="envelope_code" class="step submit_step" style="display: none">
-            <div class="contenido">
+            <div id="envelope_code" class="step submit_step" style="display: none">
                 <input  autocomplete="off" name="envelope_code_next" id="envelope_code_next" type="hidden" class="link" value="print_ticket">
                 <ul class="columns">
                     <li class="fixed column" style="width: 60%">
@@ -147,11 +137,11 @@
                     <li class="fixed column" style="width: 5%;">&nbsp;</li>
                     <li class="fixed column" style="width: 30%; ">
                         #{if ( play.configuration[ 'style.useHardwareKeyboard' ] ) }
-                        <div style="height: 265px;">
+                        <div>
                         </div>
                         #{/if}
                         #{else}
-                        <div class="keyboard" style="height: 265px;">
+                        <div class="keyboard">
                             <ul class="on-3 same-height columns">
                                 <li class="column"><span><a class="element key" data-key="7">7</a></span></li>
                                 <li class="column"><span><a class="element key" data-key="8">8</a></span></li>
@@ -174,6 +164,7 @@
                 </ul>
             </div>
         </div>
+
         <hr />
         <div class="botonera">
             <ul class="on-2 unit">
@@ -208,7 +199,7 @@
             </div>
         </div>
         #{ popup_keyboard /}
-#{/form}
+        #{/form}
     </article>
 </section>
 
@@ -219,43 +210,40 @@
 #{script 'jquery/bbq.js' /}
 #{script 'jquery/jquery.form.wizard.js' /}
 <script type="text/javascript" charset="${_response_encoding}">
-    function checkAndSet( check, set ) {
-        str = $( check ).val();
-        if ( ! ( ! str ) && ! /^\s*$/.test( str ) && str > 0 ) {
-            $( set ).addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
+    function checkAndSet(check, set) {
+    str = $(check).val();
+            if (! (! str) && ! /^\s*$/.test(str) && str > 0) {
+    $(set).addClass('verde').removeClass('${play.configuration['style.button_color']}');
             return true;
-        } else {
-            $( set ).addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
+    } else {
+    $(set).addClass('${play.configuration['style.button_color']}').removeClass('verde');
             return false;
-        }
-    };
-    function validateAndCheck() {
-        var atleastone = false;
-        atleastone |= checkAndSet( '#cashData' , '#cash_link' );
-        atleastone |= checkAndSet( '#checkData' , '#checks_link' );
-        atleastone |= checkAndSet( '#ticketData' , '#tickets_link' );
-        if ( $( '#hasDocuments' ).val() == 'true' ) {
-            atleastone |= true;
-            $( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-        }
-        if ( $( '#hasOthers' ).val() == 'true' ) {
-            atleastone |= true;
-            $( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-        }
-        return atleastone;
     }
+    };
+            function validateAndCheck() {
+            var atleastone = false;
+                    atleastone |= checkAndSet('#cashData', '#cash_link');
+                    atleastone |= checkAndSet('#checkData', '#checks_link');
+                    atleastone |= checkAndSet('#ticketData', '#tickets_link');
+                    if ($('#hasDocuments').val() == 'true') {
+            atleastone |= true;
+                    $('#documents_link').addClass('verde').removeClass('${play.configuration['style.button_color']}');
+            }
+            if ($('#hasOthers').val() == 'true') {
+            atleastone |= true;
+                    $('#others_link').addClass('verde').removeClass('${play.configuration['style.button_color']}');
+            }
+            return atleastone;
+            }
     $(function(){
-        jQuery.validator.addMethod("decimal", function(value, element, params) {
-            return this.optional(element) || /^\d+(\.\d{0,2})?$/.test(value); 
-        }, jQuery.validator.format("Please enter an xxxx.xx number."));
-            
-        jQuery.validator.addMethod("atleastone", function(value, element, params) {
-            return validateAndCheck();
-        }, jQuery.validator.format("Please complete at least one item."));
-            
-
-        $("#mainForm").formwizard({ 
-            formPluginEnabled: false,
+    jQuery.validator.addMethod("decimal", function(value, element, params) {
+    return this.optional(element) || /^\d+(\.\d{0,2})?$/.test(value);
+    }, jQuery.validator.format("Please enter an xxxx.xx number."));
+            jQuery.validator.addMethod("atleastone", function(value, element, params) {
+    return validateAndCheck();
+    }, jQuery.validator.format("Please complete at least one item."));
+            $("#mainForm").formwizard({
+    formPluginEnabled: false,
             validationEnabled: true,
             focusFirstInput : true,
             textSubmit: "&{ 'application.continue' }",
@@ -267,101 +255,96 @@
             outDuration: 0,
             disableUIStyles: true,
             validationOptions : {
-                ignore: "",
-                rules: {
-                    //'formData.reference2' : "required",
-                    'formData.envelopeCode' : { required: true, range : [ 0,99999 ] },
-                    'formData.cashData.amount' : { decimal: true },
-                    'formData.checkData.amount' : { decimal: true },
-                    'formData.ticketData.amount' : { decimal: true },
-                    'second_valid' : { atleastone: true }
-                },
-                onkeyup: false,
-                onclick: false,
-                onfocusout: false,
-                messages: {
-                    //'formData.reference2': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
-                    'formData.envelopeCode': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'}",  range: "&{ 'validation.must_be_a_5_number'}" },
-                    'formData.cashData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
-                    'formData.checkData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
-                    'formData.ticketData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
-                    'second_valid': { atleastone : "&{ 'validation.atleastone'} " }
-                },
-                showErrors: function(errorMap, errorList) {
-                    $( "#validation_error" ).html( "" );
-                    $.each( errorMap, function( name, value ) {
-                        $( 'input[ name="' + name + '"]' ).val( "" );
-                        $( "#validation_error" ).html( $( "#validation_error" ).html() +  "<br/>" + value );
-                    } );
-                    if ( this.numberOfInvalids() > 0 ) {
-                        $("#alerta_validacion").overlay().load();
-                    }
-                    this.defaultShowErrors();
-                }
-            }
-        }
+    ignore: "",
+            rules: {
+    //'formData.reference2' : "required",
+    'formData.envelopeCode' : { required: true, range : [ 0, 99999 ] },
+            'formData.cashData.amount' : { decimal: true },
+            'formData.checkData.amount' : { decimal: true },
+            'formData.ticketData.amount' : { decimal: true },
+            'second_valid' : { atleastone: true }
+    },
+            onkeyup: false,
+            onclick: false,
+            onfocusout: false,
+            messages: {
+    //'formData.reference2': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
+    'formData.envelopeCode': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'}", range: "&{ 'validation.must_be_a_5_number'}" },
+            'formData.cashData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
+            'formData.checkData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
+            'formData.ticketData.amount': { required: "&{ 'validation.required' }", decimal: "&{ 'validation.must_be_a_number'} "},
+            'second_valid': { atleastone : "&{ 'validation.atleastone'} " }
+    },
+            showErrors: function(errorMap, errorList) {
+    $("#validation_error").html("");
+            $.each(errorMap, function(name, value) {
+    $('input[ name="' + name + '"]').val("");
+            $("#validation_error").html($("#validation_error").html() + "<br/>" + value);
+    });
+            if (this.numberOfInvalids() > 0) {
+    $("#alerta_validacion").overlay().load();
+    }
+    this.defaultShowErrors();
+    }
+    }
+    }
     );
-          
-        $( '#alerta_continueButton' ).click( function(event) {
-            $( "#alerta_validacion" ).overlay().close();
+            $('#alerta_continueButton').click(function(event) {
+    $("#alerta_validacion").overlay().close();
             $("#mainForm").validate();
             //            onError = false;
-        });
-        
-      
-        $("#mainForm").bind("step_shown", function(event, data) {
-            if (data.currentStep == 'second') {
-                validateAndCheck();
-            } else if ( data.currentStep == 'envelope_code') {
-                // last step activate all input, (hack).
-                $(":input").not(".wizard-ignore").removeAttr("disabled")
-            } 
-            if ( data.currentStep != 'cash' && data.currentStep != 'checks' && data.currentStep != 'tickets' ) {
-                $("#cancelButton").show();
-            }
-            Elastic.refresh();    
-        });
-        $( '#cash_link' ).click( function(event) {
-            $("#cancelButton").hide();
-            $("#mainForm").formwizard("show","cash");
-        });
-        $( '#checks_link' ).click( function(event) {
-            $("#cancelButton").hide();
-            $("#mainForm").formwizard("show","checks");
-        });
-        $( '#tickets_link' ).click( function(event) {
-            $("#cancelButton").hide();
-            $("#mainForm").formwizard("show","tickets");
-        });
-        $( '#documents_link' ).click( function(event) {
-            if ( $("#hasDocuments").val() == 'true' ) {
-                $("#hasDocuments").val("false");
-                $( '#documents_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
-            } else {
-                $("#hasDocuments").val("true");
-                $( '#documents_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-
-            }
-        });
-        $( '#others_link' ).click( function(event) {
-            if ( $("#hasOthers").val() == 'true' ) {
-                $("#hasOthers").val("false");
-                $( '#others_link').addClass( '${play.configuration['style.button_color']}' ).removeClass( 'verde');
-            } else {
-                $("#hasOthers").val("true");
-                $( '#others_link').addClass( 'verde' ).removeClass( '${play.configuration['style.button_color']}');
-            }
-        });
-        $( '#backButton' ).click( function(event) {
-            state = $("#mainForm").formwizard("state");
-            if ( state.isFirstStep ) {
-                window.location.href = "@{ MenuController.mainMenu(1) }";
-            };
-            $("#mainForm").formwizard("back");
-        });
-
-        Elastic.refresh();
     });
-    
+            $("#mainForm").bind("step_shown", function(event, data) {
+    if (data.currentStep == 'second') {
+    validateAndCheck();
+    } else if (data.currentStep == 'envelope_code') {
+    // last step activate all input, (hack).
+    $(":input").not(".wizard-ignore").removeAttr("disabled")
+    }
+    if (data.currentStep != 'cash' && data.currentStep != 'checks' && data.currentStep != 'tickets') {
+    $("#cancelButton").show();
+    }
+    Elastic.refresh();
+    });
+            $('#cash_link').click(function(event) {
+    $("#cancelButton").hide();
+            $("#mainForm").formwizard("show", "cash");
+    });
+            $('#checks_link').click(function(event) {
+    $("#cancelButton").hide();
+            $("#mainForm").formwizard("show", "checks");
+    });
+            $('#tickets_link').click(function(event) {
+    $("#cancelButton").hide();
+            $("#mainForm").formwizard("show", "tickets");
+    });
+            $('#documents_link').click(function(event) {
+    if ($("#hasDocuments").val() == 'true') {
+    $("#hasDocuments").val("false");
+            $('#documents_link').addClass('${play.configuration['style.button_color']}').removeClass('verde');
+    } else {
+    $("#hasDocuments").val("true");
+            $('#documents_link').addClass('verde').removeClass('${play.configuration['style.button_color']}');
+    }
+    });
+            $('#others_link').click(function(event) {
+    if ($("#hasOthers").val() == 'true') {
+    $("#hasOthers").val("false");
+            $('#others_link').addClass('${play.configuration['style.button_color']}').removeClass('verde');
+    } else {
+    $("#hasOthers").val("true");
+            $('#others_link').addClass('verde').removeClass('${play.configuration['style.button_color']}');
+    }
+    });
+            $('#backButton').click(function(event) {
+    state = $("#mainForm").formwizard("state");
+            if (state.isFirstStep) {
+    window.location.href = "@{ MenuController.mainMenu(1) }";
+    };
+            $("#mainForm").formwizard("back");
+    });
+            Elastic.refresh();
+    });
+
 </script>
 #{/set}

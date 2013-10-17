@@ -2,10 +2,12 @@
 #{set title:'Otras operaciones' /}
 <section>
     <header></header>
-    <a href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    <nav>
+        <a href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    </nav>
     <article>
+        <h1 class="casa">&{'application.printers'}</h1>
         <div class="contenido">
-            <h1 class="casa">&{'application.printers'}</h1>
             <div class="mensaje"><span>&{'application.choose_one'}</span></div>
             <table class="full_width">
                 <thead>

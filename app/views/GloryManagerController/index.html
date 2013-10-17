@@ -3,12 +3,11 @@
 <section>
     <header>
     </header>
+    <nav>
+        <a id ="backButton" href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    </nav>
     <article>
         #{form @count() }
-
-        <!-- link volver -->
-        <a id ="backButton" href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
-        <!-- /link volver -->
         <ul class="columns">
             <li class="on-2 column">
                 <div style="padding:20px;">

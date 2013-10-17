@@ -83,9 +83,10 @@ header {
     background: url('../images/logo.png') 94% 50% no-repeat;
 }
 
+
 article {
     height: 70%;
-    padding: 35px 60px 0 60px;
+    padding: 3% 3% 0 3%;
 }
 
 /* headings */
@@ -203,11 +204,8 @@ hr {
 .boton_top {
     background: url('../images/boton_top_fondo.png') top left repeat-y;
     color: black;
-    padding: 12px 15px 12px 63px;
+    padding: 12px 189px 12px 63px;
     min-width: 252px;
-    position: absolute;
-    top: 33px;
-    left: 0;
     font-size: 15pt;
 }
 
@@ -257,6 +255,8 @@ select option {
 table {
     background: url('../images/tabla_fondo.png') top left repeat-x #B8B8B8;
     border: 1px solid #BCBCBC;
+    width: 90%;
+    height: 90%;
 }
 
 table thead {
@@ -470,6 +470,7 @@ table tfoot tr td {
 
 .botonera {
     overflow: hidden;
+    padding: 0% 0% 0% 0%;
 }
 
 .botonera .column {
@@ -486,16 +487,19 @@ table tfoot tr td {
     margin-bottom: 20px;
 }
 
-.contenido {
-    height: 70%; /*270px;*/
+.contenido_chico {
     overflow: hidden;
-    margin-bottom: 20px;
+    height: 70%;
+}
+
+.contenido {
+    overflow: hidden;
+    height: 75%;
 }
 
 .contenido_grande {
-    height: 80%; /*345px;*/
     overflow: hidden;
-    margin-bottom: 20px;
+    height: 80%;
 }
 
 hr {

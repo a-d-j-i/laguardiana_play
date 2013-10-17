@@ -96,15 +96,5 @@
     <!--[if lt IE 9]>
         <script src="@{'/public/javascripts/html5.js'}"></script>
     <![endif]-->
-    <script type="text/javascript" charset="${_response_encoding}">
-
-        //Hack for strange behaiviour.
-        var timer = null;
-        var refreshOnceTimeout = function() {
-            Elastic.refresh();
-            clearTimeout(timer); // remove timer
-        };
-        timer = setTimeout(refreshOnceTimeout, 200);
-    </script>
     #{get 'moreScripts' /}
 </html>

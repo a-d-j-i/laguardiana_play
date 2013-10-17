@@ -86,13 +86,13 @@
         return s;
     }
     /*    $( '#reference2_input' ).keyup( function(event) {
-        if ( $( this ).val() ) {
-            $( '#startCountingButton' ).removeClass( 'gris' ).addClass( '${play.configuration['style.button_color']}' );
-        } else {
-            $( '#startCountingButton' ).removeClass( '${play.configuration['style.button_color']}' ).addClass( 'gris' );
-        }
-    } );*/
-    $( '#startCountingButton' ).click( function(event) {
+     if ( $( this ).val() ) {
+     $( '#startCountingButton' ).removeClass( 'gris' ).addClass( '${play.configuration['style.button_color']}' );
+     } else {
+     $( '#startCountingButton' ).removeClass( '${play.configuration['style.button_color']}' ).addClass( 'gris' );
+     }
+     } );*/
+    $('#startCountingButton').click(function(event) {
         s = true;
         //        $("#startForm").validate( {
         //            errorPlacement: function(error, element) {
@@ -111,7 +111,7 @@
         //            }
         //        });
         //if ( $( '#reference2_input' ).val() ) {
-        $( '#startForm').submit();
+        $('#startForm').submit();
         //}
     });
 </script>
