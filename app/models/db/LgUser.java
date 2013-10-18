@@ -176,7 +176,7 @@ public class LgUser extends GenericModel implements java.io.Serializable {
             for (LgAclRule rule : rol.aclRules) {
                 PermsKey k = new PermsKey(rule.resource.name, rule.operation);
                 perms.put(k, rule);
-                Logger.info("\t\t %s", rule.toString());
+                //Logger.info("\t\t %s", rule.toString());
             }
         }
     }

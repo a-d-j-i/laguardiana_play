@@ -124,31 +124,52 @@ public class CountCommand extends ManagerCommandAbstract {
         if (!gotoNeutral(false, false)) {
             return;
         }
-        Logger.error("CountCommand CURRENCY %d", countData.currency.byteValue());
-        if (!sendGloryCommand(new devices.glory.command.SwitchCurrency(countData.currency.byteValue()))) {
-            return;
-        }
-        if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
-            if (gloryStatus.isCassetteFullCounter()) {
-                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.CASSETE_FULL, "Cassete Full"));
-                return;
-            }
-            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
-                    String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError())));
-            return;
-        }
+        Logger.error("CountCommand Start CURRENCY %d", countData.currency.byteValue());
         boolean batchEnd = false;
         while (!mustCancel()) {
             //Logger.debug("Count Command Counting");
             if (!sense()) {
                 return;
             }
+            // If I'm not in deposit mode try to get there once
+            switch (gloryStatus.getD1Mode()) {
+                case deposit:
+                    break;
+                case neutral:
+                    if (gloryStatus.isRejectBillPresent()) {
+                        setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
+                    } else {
+                        Logger.error("CountCommand CURRENCY %d", countData.currency.byteValue());
+                        if (!sendGloryCommand(new devices.glory.command.SwitchCurrency(countData.currency.byteValue()))) {
+                            return;
+                        }
+                        if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
+                            if (gloryStatus.isCassetteFullCounter()) {
+                                setError(new GloryManagerError(GloryManagerError.ERROR_CODE.CASSETE_FULL, "Cassete Full"));
+                                return;
+                            }
+                            setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
+                                    String.format("CountCommand gotoDepositMode Error %s", gloryStatus.getLastError())));
+                            return;
+                        }
+                    }
+                    sleep();
+                    continue;
+            }
+
             if (gloryStatus.isCassetteFullCounter()) {
                 setError(new GloryManagerError(GloryManagerError.ERROR_CODE.CASSETE_FULL, "Cassete Full"));
                 return;
             }
             switch (gloryStatus.getSr1Mode()) {
                 case storing_start_request:
+                    // Where there is a fake count but there are bills there I get directly a storing_start_request
+                    // Send the missing event here.
+                    if (fakeCount) {
+                        fakeCount = false;
+                        setState(ManagerInterface.MANAGER_STATE.COUNTING);
+                        refreshQuantity();
+                    }
                     if (gloryStatus.isRejectBillPresent()) {
                         setState(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS);
                         break;

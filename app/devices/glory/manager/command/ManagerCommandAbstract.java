@@ -128,8 +128,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case escrow_open_request:
                             if (threadCommandApi.isClosing()) {
                                 /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
-                                        "Escrow door jamed"));
-                                return false;*/
+                                 "Escrow door jamed"));
+                                 return false;*/
                                 setState(ManagerInterface.MANAGER_STATE.JAM);
                                 break;
                             }
@@ -157,8 +157,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case being_recover_from_storing_error:
                             if (threadCommandApi.isClosing()) {
                                 /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
-                                        "Escrow door jamed"));
-                                return false;*/
+                                 "Escrow door jamed"));
+                                 return false;*/
                                 setState(ManagerInterface.MANAGER_STATE.JAM);
                                 break;
                             }
@@ -255,10 +255,16 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             if (!bagRotated) {
                                 // Rotate the bag once to fix the glory proble.
                                 bagRotated = true;
-                                if (!sendGloryCommand(new devices.glory.command.SetTime(new Date()))) {
+                                // set the time if possible, some times it fails, ignroe this
+                                if (!sendGCommand(new devices.glory.command.SetTime(new Date()))) {
+                                    String error = gloryStatus.getLastError();
+                                    Logger.error("Error %s sending cmd SetTime", error);
                                     break;
                                 }
-                                if (!sendGloryCommand(new devices.glory.command.SetCollectMode())) {
+                                // Rotate if possible, some time it fails, ignore this
+                                if (!sendGCommand(new devices.glory.command.SetCollectMode())) {
+                                    String error = gloryStatus.getLastError();
+                                    Logger.error("Error %s sending cmd SetCollectMode", error);
                                     break;
                                 }
                                 break;

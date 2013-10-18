@@ -48,6 +48,8 @@ public class BillDepositStoringEscrowFull extends BillDepositStoring {
                     stateApi.setState(new WaitForClosedGate(stateApi, new BillDepositContinue(stateApi)));
                 }
                 break;
+            case READY_TO_STORE: // aparentrly sometimes the escrow isn't full any more.
+                break;
             case STORING:
                 break;
             default:

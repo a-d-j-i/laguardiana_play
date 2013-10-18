@@ -6,7 +6,7 @@
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
         #{form @start(deposit), 'id' : 'mainForm', 'class' : "bbq", 'style' : 'height: 89%;' }
-        <div class="contenido">
+        <div class="contenido" style="overflow: auto;">
 
             #{ if ( formData.showReference1 || formData.showReference2 ) }
             <div class="step" id="first" >

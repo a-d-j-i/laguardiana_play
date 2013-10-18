@@ -564,6 +564,7 @@ public class ModelFacade {
             Logger.error("cancel invalid current User Action");
             return;
         }
+        Logger.debug("MODELFACADE: cancel");
         currentUserAction.cancel();
     }
 
@@ -572,6 +573,7 @@ public class ModelFacade {
             Logger.error("accept invalid current User Action");
             return;
         }
+        Logger.debug("MODELFACADE: accept");
         currentUserAction.accept();
     }
 

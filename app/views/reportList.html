@@ -7,7 +7,7 @@ def next_url = actionBridge."$action".call(nextPage);
     <header></header>
     <a href="#" class="boton_top clickBack">◄ &{ 'application.back' }</a>
     <article style="padding: 35px 1%; 0 1%;">
-        <div class="contenido_grande">
+        <div class="contenido_grande" style="overflow: auto;">
             <div style="text-align: center;">
                 #{form @list(), 'id': 'mainForm', 'method' : 'GET' }
                 <ul>

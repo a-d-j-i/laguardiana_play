@@ -881,9 +881,6 @@ function Loader() {
 var timer = null;
 var refreshOnceTimeout = function() {
     Loader();
-    $('.contenido_chico').css('overflow', 'auto')
-    $('.contenido').css('overflow', 'auto')
-    $('.contenido_grande').css('overflow', 'auto')
     clearTimeout(timer); // remove timer
 };
 timer = setTimeout(refreshOnceTimeout, 100);
