@@ -52,7 +52,7 @@
   db.LgUser(admin):
     externalApp:    PlayInternalApp
     username:       admin
-    password:       admin
+    password:       X
     gecos:          "Gecos del Usario administrador"
     creationDate:   2012-01-01
     endDate:        2112-01-02    
@@ -104,3 +104,8 @@
     endDate:        2112-01-01    
     roles:          []
     
+  db.LgUserProperty(adminCrapAuth):
+    property:       crap_auth
+    value:          true
+    user:           [ admin ]
+  

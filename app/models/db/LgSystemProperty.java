@@ -1,5 +1,6 @@
 package models.db;
 
+import java.security.SecureRandom;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
 
@@ -18,7 +19,9 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
         BRANCH_CODE,
         MAX_BILLS_PER_BAG,
         ENVELOPE_BILL_EQUIVALENCY,
-        WITHDRAW_USER;
+        WITHDRAW_USER,
+        CRAPAUTH_VARIABLE_ID,
+        CRAPAUTH_CONSTANT_ID;
 
         public String getTypeName() {
             return name().toLowerCase();
@@ -35,26 +38,45 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
     public String value;
 
     static public String getProperty(Types type) {
-        return getProperty(type.getTypeName());
-    }
-
-    static private String getProperty(String name) {
-        LgSystemProperty l = LgSystemProperty.find("select p from LgSystemProperty p where p.name = ?", name).first();
+        LgSystemProperty l = getProperty(type.getTypeName());
         if (l == null) {
             return null;
         }
         return l.value;
     }
 
+    static private LgSystemProperty getProperty(String name) {
+        LgSystemProperty l = LgSystemProperty.find("select p from LgSystemProperty p where p.name = ?", name).first();
+        return l;
+    }
+
     public static Boolean isProperty(String name) {
-        String p = LgSystemProperty.getProperty(name);
-        if (p != null && !p.isEmpty()) {
-            if (p.equalsIgnoreCase("false") || p.equalsIgnoreCase("off")) {
+        LgSystemProperty p = LgSystemProperty.getProperty(name);
+        if (p != null && !p.value.isEmpty()) {
+            if (p.value.equalsIgnoreCase("false") || p.value.equalsIgnoreCase("off")) {
                 return false;
             }
             return true;
         }
         return false;
+    }
+
+    public static void initCrapId() {
+        LgSystemProperty crapId = getProperty(Types.CRAPAUTH_VARIABLE_ID.getTypeName());
+        if (crapId == null) {
+            crapId = new LgSystemProperty();
+            crapId.name = Types.CRAPAUTH_VARIABLE_ID.getTypeName();
+        }
+        SecureRandom random = new SecureRandom();
+        byte bytes[] = new byte[3];
+        random.nextBytes(bytes);
+        int val = 0;
+        for (int i = 0; i < 3; i++) {
+            val = val * 100;
+            val += ((((int) bytes[i] & 0x0F) % 9) + 1) * 10 + (((((int) bytes[i] & 0xF0) >> 4) % 9) + 1);
+        }
+        crapId.value = Integer.toString(val);
+        crapId.save();
     }
 
     @Override

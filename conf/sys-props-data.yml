@@ -54,4 +54,8 @@
   db.LgSystemProperty(withdrawUser):
     name:  "withdraw_user"
     value:  "123"
-    
+           
+  db.LgSystemProperty(crapAuthConstantId):
+    name:  "crapauth_constant_id"
+    value:  "123456"
+      

@@ -5,7 +5,7 @@
     <!--    <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>-->
     <article>
         <h1 class="candado" id="candado">&{'secure.title'}</h1>
-        #{if ( play.configuration[ 'secure.dontAskForPassword' ] ) }
+        #{if ( models.Configuration.dontAskForPassword() ) }
         <div class="mensaje"><span>&{'secure.continue_message_user' }</span></div>
         #{/if}
         #{else}
@@ -20,14 +20,20 @@
                 <a href="${lastUrl}"><input type="button" name="cancel" value="Cancel" class="btn" /></a>
         -->
         <input id="username" type="text" placeholder="&{'secure.username'}"  class="focus_me" name="username"/>
-        #{if ( play.configuration[ 'secure.dontAskForPassword' ] ) }
+        #{if ( models.Configuration.dontAskForPassword() ) }
         <input id="password" type="password" placeholder="&{'secure.password'}" name="password" style="display: none;"/>
+        #{if ( models.Configuration.isCrapAuth() ) }
+        <h1 id="crapId" style="display: none;"/>${crapId}</h1>
+        #{/if}
         #{/if}
         #{else}
         <input id="password" type="password" placeholder="&{'secure.password'}" name="password"/>
+        #{if ( models.Configuration.isCrapAuth() ) }
+        <h1 id="crapId" style="display: inline;"/>${crapId}</h1>
+        #{/if}
         #{/else}
         #{/form}
-        #{if ( play.configuration[ 'style.useHardwareKeyboard' ] ) }
+        #{if ( models.Configuration.useHardwareKeyboard() ) }
         <div class="contenido_chico">
         </div>
         <hr>
@@ -137,8 +143,10 @@
     if ($("#password").is(":visible")) {
     $("#password").val("");
             $("#password").hide();
+            $("#crapId").hide();
     } else {
     $("#password").show();
+            $("#crapId").css('display', 'inline');
     }
     candado_count = 0;
     }
@@ -164,7 +172,7 @@
                     $('#username').val("").focus();
                     $('#password').val("");
             } else if (status == 'success') {
-            #{if (play.configuration[ 'secure.wellcomePopup' ]) }
+            #{if ( models.Configuration.wellcomePopup() ) }
             $('#info_text').html(data[ 2 ] + "<br> " + data [ 3 ]);
                     $('#alerta_success_done').click(function(event) {
             window.location.href = extra;

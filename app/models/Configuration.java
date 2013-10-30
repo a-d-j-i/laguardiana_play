@@ -24,10 +24,6 @@ public class Configuration {
         return isProperty("printer.ignore");
     }
 
-    public static boolean dontAskForPassword() {
-        return isProperty("secure.dontAskForPassword");
-    }
-
     public static boolean isIoBoardIgnore() {
         return isProperty("io_board.ignore") && Play.mode.isDev();
     }
@@ -220,5 +216,21 @@ public class Configuration {
 
     public static String getIoBoardVersion() {
         return Play.configuration.getProperty("io_board.version");
+    }
+
+    public static boolean isCrapAuth() {
+        return isProperty("secure.crapAuth");
+    }
+
+    public static boolean dontAskForPassword() {
+        return isProperty("secure.dontAskForPassword");
+    }
+
+    public static boolean wellcomePopup() {
+        return isProperty("secure.wellcomePopup");
+    }
+
+    public static boolean useHardwareKeyboard() {
+        return isProperty("style.useHardwareKeyboard");
     }
 }

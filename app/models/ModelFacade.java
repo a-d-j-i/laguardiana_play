@@ -27,6 +27,7 @@ import models.db.LgBag;
 import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
+import models.db.LgSystemProperty;
 import models.db.LgUser;
 import models.events.ActionEvent;
 import models.events.GloryEvent;
@@ -87,6 +88,7 @@ public class ModelFacade {
         // used to force the execution of the static code.
         // Close unifnished deposits.
         LgDeposit.closeUnfinished();
+        LgSystemProperty.initCrapId();
     }
 
     interface BillListVisitor {

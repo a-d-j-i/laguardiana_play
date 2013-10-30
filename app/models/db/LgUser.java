@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
+import models.Configuration;
 import play.Logger;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -79,14 +80,8 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     final static public String GUEST_NAME = "guest";
 
     public static LgUser authenticate(String username, String password) {
-        List<LgUser> users;
-        if (password != null && !password.isEmpty()) {
-            users = LgUser.find("select u from LgUser u where u.username = ? and u.password = ? and "
-                    + "( u.endDate is null or u.endDate > CURRENT_TIMESTAMP )", username, password).fetch();
-        } else {
-            users = LgUser.find("select u from LgUser u where u.username = ? and ( u.password is null or password = '' ) and "
-                    + "( u.endDate is null or u.endDate > CURRENT_TIMESTAMP )", username).fetch();
-        }
+        List<LgUser> users = LgUser.find("select u from LgUser u where u.username = ? and "
+                + "( u.endDate is null or u.endDate > CURRENT_TIMESTAMP )", username).fetch();
         LgUser validated = null;
         for (LgUser user : users) {
             Logger.debug("Validating user %s", user.username);
@@ -97,6 +92,52 @@ public class LgUser extends GenericModel implements java.io.Serializable {
             }
         }
         return validated;
+    }
+
+    public boolean authenticate(String token) {
+        if (endDate != null && endDate.before(new Date())) {
+            return false;
+        }
+        if (Configuration.isCrapAuth()) {
+            String crapAuthVariableId = LgSystemProperty.getProperty(LgSystemProperty.Types.CRAPAUTH_VARIABLE_ID);
+            String crapAuthConstantId = LgSystemProperty.getProperty(LgSystemProperty.Types.CRAPAUTH_CONSTANT_ID);
+            if (crapAuthVariableId != null && crapAuthConstantId != null) {
+                try {
+                    String inv = new StringBuilder(crapAuthVariableId).reverse().toString();
+                    Integer s = Integer.parseInt(crapAuthConstantId) + Integer.parseInt(inv);
+                    char[] ss = s.toString().toCharArray();
+                    if (ss != null && ss.length >= 6) {
+                        for (LgUserProperty p : userProperties) {
+                            if (p.property.equals(LgUserProperty.Types.CRAP_AUTH.getTypeName())) {
+                                String key = "" + ss[0] + ss[2] + ss[4] + ss[1] + ss[3] + ss[5];
+                                Logger.debug("crapAuth key %s", key);
+                                if (key.equals(token)) {
+                                    LgSystemProperty.initCrapId();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    Logger.error("crapAuth invalid numbers constant %s variable %s", crapAuthConstantId, crapAuthVariableId);
+                }
+            } else {
+                Logger.error("crapAuth invalid numbers constant %s variable %s", crapAuthConstantId, crapAuthVariableId);
+            }
+        }
+        if (Configuration.dontAskForPassword()) {
+            if (password == null || password.trim().isEmpty()) {
+                return true;
+            }
+        } else {
+            if (password == null || password.trim().isEmpty()) {
+                return false;
+            }
+        }
+        if (!password.equals(token) || password.equalsIgnoreCase("X") || password.equalsIgnoreCase("!")) {
+            return false;
+        }
+        return true;
     }
 
     public boolean isGuest() {
@@ -157,16 +198,6 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     }
     @Transient
     transient private Map<PermsKey, LgAclRule> perms = new HashMap<PermsKey, LgAclRule>();
-
-    public boolean authenticate(String token) {
-        if (password == null || !password.equals(token)) {
-            return false;
-        }
-        if (endDate != null && endDate.before(new Date())) {
-            return false;
-        }
-        return true;
-    }
 
     @PostLoad
     public void postLoad() {

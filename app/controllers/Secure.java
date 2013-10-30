@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import models.Configuration;
+import models.db.LgSystemProperty;
+import models.db.LgSystemProperty.Types;
 import models.db.LgUser;
 import play.Logger;
 import play.Play;
@@ -83,6 +85,7 @@ public class Secure extends Controller {
 
         flash.keep("url");
         flash.keep("lastUrl");
+        renderArgs.put("crapId", LgSystemProperty.getProperty(Types.CRAPAUTH_VARIABLE_ID));
         render();
     }
 
