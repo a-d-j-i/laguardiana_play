@@ -45,12 +45,16 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
         return l.value;
     }
 
+    static public Boolean isProperty(LgUserProperty.Types type) {
+        return isProperty(type.getTypeName());
+    }
+
     static private LgSystemProperty getProperty(String name) {
-        LgSystemProperty l = LgSystemProperty.find("select p from LgSystemProperty p where p.name = ?", name).first();
+        LgSystemProperty l = LgSystemProperty.find("select p from LgSystemProperty p where trim( p.name ) = trim( ? )", name).first();
         return l;
     }
 
-    public static Boolean isProperty(String name) {
+    static public Boolean isProperty(String name) {
         LgSystemProperty p = LgSystemProperty.getProperty(name);
         if (p != null && !p.value.isEmpty()) {
             if (p.value.equalsIgnoreCase("false") || p.value.equalsIgnoreCase("off")) {

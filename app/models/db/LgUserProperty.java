@@ -28,6 +28,34 @@ public class LgUserProperty extends GenericModel implements java.io.Serializable
     @Column(name = "value", nullable = false, length = 128)
     public String value;
 
+    static public String getProperty(LgUserProperty.Types type) {
+        LgUserProperty l = getProperty(type.getTypeName());
+        if (l == null) {
+            return null;
+        }
+        return l.value;
+    }
+
+    static public Boolean isProperty(LgUserProperty.Types type) {
+        return isProperty(type.getTypeName());
+    }
+
+    static private LgUserProperty getProperty(String name) {
+        LgUserProperty l = LgUserProperty.find("select p from LgUserProperty p where trim( p.property ) = trim( ? )", name).first();
+        return l;
+    }
+
+    static private Boolean isProperty(String name) {
+        LgUserProperty p = LgUserProperty.getProperty(name);
+        if (p != null && !p.value.isEmpty()) {
+            if (p.value.equalsIgnoreCase("false") || p.value.equalsIgnoreCase("off")) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "LgUserProperty{" + "userPropertyId=" + userPropertyId + ", property=" + property + ", user=" + user.userId + ", value=" + value + '}';

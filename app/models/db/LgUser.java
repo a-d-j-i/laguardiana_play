@@ -107,14 +107,12 @@ public class LgUser extends GenericModel implements java.io.Serializable {
                     Integer s = Integer.parseInt(crapAuthConstantId) + Integer.parseInt(inv);
                     char[] ss = s.toString().toCharArray();
                     if (ss != null && ss.length >= 6) {
-                        for (LgUserProperty p : userProperties) {
-                            if (p.property.equals(LgUserProperty.Types.CRAP_AUTH.getTypeName())) {
-                                String key = "" + ss[0] + ss[2] + ss[4] + ss[1] + ss[3] + ss[5];
-                                Logger.debug("crapAuth key %s", key);
-                                if (key.equals(token)) {
-                                    LgSystemProperty.initCrapId();
-                                    return true;
-                                }
+                        if (LgUserProperty.isProperty(LgUserProperty.Types.CRAP_AUTH)) {
+                            String key = "" + ss[0] + ss[2] + ss[4] + ss[1] + ss[3] + ss[5];
+                            Logger.debug("crapAuth key %s", key);
+                            if (key.equals(token)) {
+                                LgSystemProperty.initCrapId();
+                                return true;
                             }
                         }
                     }

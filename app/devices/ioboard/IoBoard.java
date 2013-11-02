@@ -383,7 +383,9 @@ public class IoBoard {
                             state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_FW_ERROR, l));
                         }
                     } else {
-                        Logger.warn("IOBOARD Ignoring line (%d): %s", l.length(), l);
+                        if (l.length() > 0) {
+                            Logger.warn("IOBOARD Ignoring line (%d): %s", l.length(), l);
+                        }
                     }
                 } catch (Exception ex) {
                     if (!(ex.getCause() instanceof TimeoutException)) {
