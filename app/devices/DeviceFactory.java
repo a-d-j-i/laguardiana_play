@@ -104,7 +104,11 @@ public class DeviceFactory extends PlayPlugin {
     @Override
     public void onApplicationStop() {
         Logger.debug("onApplicationStop Close all ports");
-        closeAll();
+        try {
+            closeAll();
+        } catch (Exception ex) {
+            Logger.error("Exception in closeAll %s", ex.toString());
+        }
         Logger.debug("onApplicationStop Close all ports DONE");
     }
 }
