@@ -143,6 +143,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             }
                             break;
                         case abnormal_device:
+                            threadCommandApi.setClosing(false);
                             setState(ManagerInterface.MANAGER_STATE.JAM);
                             if (gloryStatus.getD1Mode() == GloryState.D1Mode.normal_error_recovery_mode) {
                                 resetDevice();
@@ -156,6 +157,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                         case escrow_close_request:
                         case being_recover_from_storing_error:
                             if (threadCommandApi.isClosing()) {
+                                Logger.debug("--------->ISCLOSING");
                                 /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
                                  "Escrow door jamed"));
                                  return false;*/
