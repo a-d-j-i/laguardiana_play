@@ -247,7 +247,7 @@ public class GloryController extends Application {
 
     public static void deviceSettingDataLoad() {
         //String s = "ESCROW_SET=100,\r\nREJECT_SET=1001111111111111111111111111111110000000000000000000000000000000,\r\n";
-        String s = "ESCROW_SET=5,\r\nREJECT_SET=0000000000000000000000000000000000000000000000000000000000000000,\r\n";
+        String s = "ESCROW_SET=100,\r\nREJECT_SET=0000000000000000000000000000000000000000000000000000000000000000,\r\n";
         GloryReturnParser st = UploadData(s.length(), "settings.txt", s.getBytes());
         if (st != null) {
             setStatusAndRedirect(st);
