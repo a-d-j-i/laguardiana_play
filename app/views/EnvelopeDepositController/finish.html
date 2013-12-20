@@ -13,7 +13,7 @@
             &{ 'application.remove_ticket' }
             #{/if}
             #{elseif ( finishCause == 'FINISH_CAUSE_BAG_REMOVED' ) }
-            <div class="mensaje"><span>&{ 'counting_page.deposit_canceled_bag_removed' }</span></div>
+            <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled_bag_removed' }</span></div>
             <h2>&{ 'application.thanks', providerCode }</h2>
             &{ 'counting_page.deposit_canceled' }
             #{/elseif}

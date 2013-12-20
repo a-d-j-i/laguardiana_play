@@ -36,13 +36,6 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
     }
 
     @Override
-    public void cancelWithCause(FinishCause cause) {
-        stateApi.closeDeposit(cause);
-        stateApi.cancelTimer();
-        stateApi.cancelDeposit();
-    }
-
-    @Override
     public void accept() {
         if (!isReadyToAccept(false)) {
             return;

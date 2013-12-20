@@ -64,7 +64,9 @@ abstract public class ActionState {
     }
 
     public void cancelWithCause(LgDeposit.FinishCause cause) {
-        Logger.error("cancelWithCause accept Invalid step %s", name());
+        stateApi.closeDeposit(cause);
+        stateApi.cancelTimer();
+        stateApi.cancelDeposit();
     }
 
     public boolean isReadyToAccept(boolean envelope) {

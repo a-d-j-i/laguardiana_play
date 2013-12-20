@@ -10,11 +10,9 @@ import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;
 import models.Configuration;
-import models.ItemQuantity;
 import models.ModelError;
 import models.ModelFacade.UserActionApi;
 import models.actions.states.ActionState;
-import models.db.LgBag;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgDeposit;
@@ -200,6 +198,9 @@ abstract public class UserAction {
         do {
             Logger.debug("Action : onIoBoardEvent state %s currState %s event %s",
                     state.getClass().getSimpleName(), currState.getClass().getSimpleName(), s.toString());
+            if (!Configuration.isIgnoreBag() && !userActionApi.isIoBoardOk()) {
+                currState.cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
+            }
             currState = state;
             currState.onIoBoardEvent(s);
         } while (!state.equals(currState));
