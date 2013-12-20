@@ -5,7 +5,10 @@
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface;
+import devices.ioboard.IoBoard;
+import models.Configuration;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit;
 import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
@@ -29,6 +32,14 @@ public class BillDepositContinue extends BillDepositStart {
         stateApi.closeDeposit(FinishCause.FINISH_CAUSE_OK);
         stateApi.setState(new Finish(stateApi));
         stateApi.cancelDeposit();
+    }
+
+    @Override
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
+        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+            cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
+        }
+        super.onIoBoardEvent(status);
     }
 
     @Override

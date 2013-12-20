@@ -325,8 +325,9 @@ public class CountCommand extends ManagerCommandAbstract {
             sleep();
         }
         if (mustCancel()) {
-            if (!sendGloryCommand(new devices.glory.command.StopCounting())) {
-                return;
+            if (!sendGCommand(new devices.glory.command.StopCounting())) {
+                String error = gloryStatus.getLastError();
+                Logger.error("Error %s sending cmd : StopCounting", error);
             }
             setState(ManagerInterface.MANAGER_STATE.CANCELING);
         }

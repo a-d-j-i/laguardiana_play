@@ -117,10 +117,18 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
                 case collect_mode:
                 case manual:
                 case initial:
-                    if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                        return;
+                    switch (gloryStatus.getSr1Mode()) {
+                        case storing_start_request:
+                            if (!sendGloryCommand(new devices.glory.command.OpenEscrow())) {
+                                return;
+                            }
+                            break;
+                        default:
+                            if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                                return;
+                            }
+                            break;
                     }
-                    break;
                 default:
                     setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR,
                             String.format("StoringErrorResetCommand Invalid D1-4 mode %s", gloryStatus.getD1Mode().name())));

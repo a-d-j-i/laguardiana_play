@@ -8,7 +8,7 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.actions.UserAction.StateApi;
-import models.db.LgDeposit.FinishCause;
+import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -82,6 +82,9 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("BillDepositReadyToStoreEscrowFull onIoBoardEvent %s", status.toString());
+        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+            cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
+        }
         if (delayedStore) {
             Logger.error("BillDepositReadyToStoreEscrowFull DELAYED STORE!!!");
             accept();

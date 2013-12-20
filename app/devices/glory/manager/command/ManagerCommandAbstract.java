@@ -93,6 +93,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
 
     boolean gotoNeutral(boolean canOpenEscrow, boolean forceEmptyHoper) {
         boolean bagRotated = false;
+        int remoteCancelRetries = 5;
         for (int i = 0; i < retries; i++) {
             Logger.debug("GOTO NEUTRAL %s %s",
                     (canOpenEscrow ? "OPEN ESCROW" : ""),
@@ -210,7 +211,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 break;
                             }
                             if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
-                                return false;
+                                remoteCancelRetries--;
+                                if ( remoteCancelRetries <= 0 ) {
+                                    return false;
+                                }
                             }
                             break;
                         default:

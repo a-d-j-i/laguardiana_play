@@ -10,6 +10,7 @@ import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.actions.UserAction;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -38,6 +39,10 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
     public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
+            case NEUTRAL:
+            case CANCELING:
+                stateApi.setState(new Canceling(stateApi));
+                break;
             case READY_TO_STORE:
                 if (isReadyToAccept(true)) {
                     store();
@@ -60,6 +65,9 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("ReadyToStoreEnvelopeDeposit onIoBoardEvent %s", status.toString());
+        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+            cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
+        }
         if (!Configuration.isIgnoreBag() && stateApi.isIoBoardOk()) {
             if (delayedStore) {
                 Logger.error("ReadyToStoreEnvelopeDeposit DELAYED STORE!!!");

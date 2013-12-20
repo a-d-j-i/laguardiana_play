@@ -5,8 +5,10 @@
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface;
+import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.actions.UserAction;
+import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -14,6 +16,8 @@ import play.Logger;
  * @author adji
  */
 public class BillDepositStoringEscrowFull extends BillDepositStoring {
+
+    boolean mustCancelBagRemoved = false;
 
     public BillDepositStoringEscrowFull(UserAction.StateApi stateApi) {
         super(stateApi);
@@ -39,13 +43,21 @@ public class BillDepositStoringEscrowFull extends BillDepositStoring {
              }
              stateApi.cancelDeposit();
              break;*/
+            case NEUTRAL:
+                stateApi.setState(new Canceling(stateApi));
+                break;
             case COUNTING:
                 stateApi.closeBatch();
-                if (Configuration.isIgnoreShutter()) {
-                    stateApi.setState(new BillDepositContinue(stateApi));
+                if (mustCancelBagRemoved) {
+                    stateApi.setState(new Canceling(stateApi));
+                    cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
                 } else {
-                    stateApi.closeGate();
-                    stateApi.setState(new WaitForClosedGate(stateApi, new BillDepositContinue(stateApi)));
+                    if (Configuration.isIgnoreShutter()) {
+                        stateApi.setState(new BillDepositContinue(stateApi));
+                    } else {
+                        stateApi.closeGate();
+                        stateApi.setState(new WaitForClosedGate(stateApi, new BillDepositContinue(stateApi)));
+                    }
                 }
                 break;
             case READY_TO_STORE: // aparentrly sometimes the escrow isn't full any more.
@@ -56,5 +68,15 @@ public class BillDepositStoringEscrowFull extends BillDepositStoring {
                 Logger.debug("BillDepositStoringEscrowFull invalid state %s %s", m.name(), name());
                 break;
         }
+    }
+
+    // Can't cancel now, but save the event.
+    @Override
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
+        Logger.error("BillDepositReadyToStoreEscrowFull onIoBoardEvent %s", status.toString());
+        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+            mustCancelBagRemoved = true;
+        }
+        super.onIoBoardEvent(status);
     }
 }

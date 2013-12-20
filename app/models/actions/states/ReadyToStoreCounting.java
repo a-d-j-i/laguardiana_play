@@ -4,7 +4,10 @@
  */
 package models.actions.states;
 
+import devices.ioboard.IoBoard;
+import models.Configuration;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit;
 
 /**
  *
@@ -24,5 +27,13 @@ public class ReadyToStoreCounting extends IdleCounting {
     @Override
     public void accept() {
         stateApi.cancelDeposit();
+    }
+
+    @Override
+    public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
+        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+            cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
+        }
+        super.onIoBoardEvent(status);
     }
 }

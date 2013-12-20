@@ -1,7 +1,5 @@
 package devices.glory.command;
 
-import java.io.IOException;
-
 /*    
  * stop the counting process
  * This command stops the counting.
