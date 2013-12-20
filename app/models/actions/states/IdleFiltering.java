@@ -6,6 +6,7 @@ package models.actions.states;
 
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
 /**
@@ -13,24 +14,24 @@ import play.Logger;
  * @author adji
  */
 public class IdleFiltering extends ActionState {
-    
+
     public IdleFiltering(StateApi stateApi) {
         super(stateApi);
     }
-    
+
     @Override
     public String name() {
         return "IDLE";
     }
-    
+
     @Override
     public void cancel() {
-        stateApi.closeDeposit(true);
+        stateApi.closeDeposit(FinishCause.FINISH_CAUSE_CANCEL);
         stateApi.cancelTimer();
         stateApi.cancelDeposit();
         stateApi.setState(new Canceling(stateApi));
     }
-    
+
     @Override
     public void onGloryEvent(ManagerStatus m) {
         switch (m.getState()) {

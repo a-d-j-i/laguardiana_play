@@ -6,6 +6,7 @@ import models.Configuration;
 import models.EnvelopeDeposit;
 import models.ModelFacade;
 import models.actions.EnvelopeDepositAction;
+import models.db.LgDeposit.FinishCause;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.db.LgEnvelopeContent.EnvelopeContentType;
@@ -138,6 +139,10 @@ public class EnvelopeDepositController extends CounterController {
             formData.ticketData.value = Configuration.getDefaultCurrency();
 
         }
+        if (!ModelFacade.isBagReady(true)) {
+            Application.index();
+        }
+
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
         renderArgs.put("formData", formData);
@@ -178,8 +183,8 @@ public class EnvelopeDepositController extends CounterController {
         if (deposit != null) {
             Set<LgEnvelope> envelopes = deposit.envelopes;
             renderArgs.put("envelopes", envelopes);
-            renderArgs.put("canceled", (deposit != null && deposit.canceled == null));
-            renderArgs.put("truncated", (deposit != null && deposit.closeDate == null));
+            renderArgs.put("finishCause", deposit.finishCause.name());
+            renderArgs.put("truncated", deposit.closeDate == null);
         }
         if (formData != null) {
             ModelFacade.finishAction();

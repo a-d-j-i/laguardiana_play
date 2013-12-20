@@ -173,14 +173,16 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         final ItemQuantity ret = new ItemQuantity();
         LgDeposit.visitFinishedDeposits(deposits, new LgDeposit.DepositVisitor() {
             public void visit(LgDeposit item) {
-                if (item instanceof EnvelopeDeposit) {
-                    ret.envelopes++;
-                } else if (item instanceof BillDeposit) {
-                    for (LgBill b : item.bills) {
-                        ret.bills += b.quantity;
+                if (item.finishCause == LgDeposit.FinishCause.FINISH_CAUSE_OK) {
+                    if (item instanceof EnvelopeDeposit) {
+                        ret.envelopes++;
+                    } else if (item instanceof BillDeposit) {
+                        for (LgBill b : item.bills) {
+                            ret.bills += b.quantity;
+                        }
+                    } else {
+                        Logger.error(String.format("Invalid deposit type %s", item.getClass()));
                     }
-                } else {
-                    Logger.error(String.format("Invalid deposit type %s", item.getClass()));
                 }
             }
         });

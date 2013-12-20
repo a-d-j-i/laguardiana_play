@@ -7,6 +7,7 @@ package models.actions.states;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.ModelError;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
 /**
@@ -25,7 +26,7 @@ public class Canceling extends ActionState {
     }
 
     @Override
-        public void onGloryEvent(ManagerStatus m) {
+    public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case NEUTRAL:

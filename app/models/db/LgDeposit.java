@@ -20,6 +20,14 @@ import play.db.jpa.JPABase;
 @DiscriminatorColumn(name = "type", length = 32)
 abstract public class LgDeposit extends GenericModel implements java.io.Serializable {
 
+    public enum FinishCause {
+
+        FINISH_CAUSE_OK,
+        FINISH_CAUSE_CANCEL,
+        FINISH_CAUSE_BAG_REMOVED,
+        FINISH_CAUSE_BAG_FULL,;
+
+    };
     @Id
     @Column(name = "deposit_id", unique = true, nullable = false)
     @GeneratedValue(generator = "LgDepositGenerator")
@@ -48,8 +56,9 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     // not currently processed.
     @Column(name = "finish_date", length = 13)
     public Date finishDate;
-    @Column(name = "canceled", nullable = false)
-    public Boolean canceled = true;
+    @Column(name = "finish_cause", nullable = true)
+    @Enumerated(EnumType.ORDINAL)
+    public FinishCause finishCause;
     @Column(name = "user_code", length = 128)
     public String userCode;
     @Column(name = "user_code_lov")
@@ -193,11 +202,12 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     public static void visitFinishedDeposits(Set<LgDeposit> deps, DepositVisitor visitor) {
         for (LgDeposit d : deps) {
-                    
+
             if (d.finishDate == null) {
                 continue;
             }
             visitor.visit(d);
         }
     }
+
 }

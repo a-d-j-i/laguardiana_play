@@ -5,9 +5,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.Entity;
+import models.db.LgBill;
 import models.db.LgDeposit;
 import models.db.LgUser;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
 
 @Entity
 public class EnvelopeDeposit extends LgDeposit {

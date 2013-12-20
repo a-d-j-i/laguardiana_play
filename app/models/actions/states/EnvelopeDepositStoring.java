@@ -9,6 +9,7 @@ import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.ModelError;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
 /**
@@ -31,7 +32,7 @@ class EnvelopeDepositStoring extends ActionState {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case NEUTRAL:
-                stateApi.closeDeposit(false);
+                stateApi.closeDeposit(FinishCause.FINISH_CAUSE_OK);
                 if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new Finish(stateApi));
                 } else {

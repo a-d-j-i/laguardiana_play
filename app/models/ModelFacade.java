@@ -321,20 +321,7 @@ public class ModelFacade {
         }
 
         public boolean isIoBoardOk() {
-            IoBoard.IoBoardStatus status = ioBoard.getStatus();
-
-            if (!Configuration.isIoBoardIgnore() && status != null && status.getError() != null) {
-                Logger.error("Setting ioboard error : %s", status.getError());
-                modelError.setError(status.getError());
-                return false;
-            }
-            if (!Configuration.isIgnoreBag()
-                    && status != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-                Logger.error("IoBoard bag not inplace can't store");
-                //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-                return false;
-            }
-            return true;
+            return ModelFacade.isIoBoardOk();
         }
 
         public List<LgBill> getCurrentBillList() {
@@ -382,14 +369,12 @@ public class ModelFacade {
 //            modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag not in place");
 //            return;
 //        }
-
         if (modelError.isError()) {
             Logger.info("Can't start an action when on error");
             return;
         }
-        LgBag currentBag = LgBag.getCurrentBag();
-        if (Configuration.isBagFull(currentBag.getItemQuantity())) {
-            modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
+        if (!isBagReady(false)) {
+            Logger.info("Can't start bag not ready");
             return;
         }
         currentUser = Secure.getCurrentUser();
@@ -614,5 +599,41 @@ public class ModelFacade {
 
     public static Object getPrinters() {
         return printer.printers.values();
+    }
+
+    public static boolean isIoBoardOk() {
+        IoBoard.IoBoardStatus status = ioBoard.getStatus();
+
+        if (!Configuration.isIoBoardIgnore() && status != null && status.getError() != null) {
+            Logger.error("Setting ioboard error : %s", status.getError());
+            modelError.setError(status.getError());
+            return false;
+        }
+        if (!Configuration.isIgnoreBag()
+                && status != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+            Logger.error("IoBoard bag not inplace can't store");
+            //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isBagReady(boolean envelope) {
+        if (!Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk()) {
+            Logger.info("Can't start bag removed");
+            return false;
+        }
+        LgBag currentBag = LgBag.getCurrentBag();
+        ItemQuantity iq = currentBag.getItemQuantity();
+        // for an envelope deposit I neet at least space for one envelope more.
+        if (envelope) {
+            iq.envelopes++;
+        }
+        if (Configuration.isBagFull(iq)) {
+            Logger.info("Can't start bag full");
+            //modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
+            return false;
+        }
+        return true;
     }
 }

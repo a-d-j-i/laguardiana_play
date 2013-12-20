@@ -8,6 +8,7 @@ import controllers.Secure;
 import java.util.Date;
 import models.EnvelopeDeposit;
 import models.actions.states.EnvelopeDepositStart;
+import models.db.LgDeposit;
 import models.db.LgEnvelope;
 import models.lov.DepositUserCodeReference;
 
@@ -50,7 +51,7 @@ public class EnvelopeDepositAction extends UserAction {
         if (currentDepositId != null) {
             EnvelopeDeposit d = EnvelopeDeposit.findById(currentDepositId);
             if (d != null) {
-                if (d.closeDate != null && !d.canceled) {
+                if (d.closeDate != null && d.finishCause == LgDeposit.FinishCause.FINISH_CAUSE_OK) {
                     d.print(false);
                 }
                 d.finishDate = new Date();

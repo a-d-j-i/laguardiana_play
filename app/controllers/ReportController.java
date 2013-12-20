@@ -91,7 +91,7 @@ public class ReportController extends Controller {
             this.bag_id = d.bag.bagId;
             this.user_id = d.user.externalId;
             this.gecos = d.user.gecos;
-            this.canceled = d.canceled;
+            this.canceled = (d.finishCause != LgDeposit.FinishCause.FINISH_CAUSE_OK);
             this.startDate = d.startDate;
             this.closeDate = d.closeDate;
             this.finishDate = d.finishDate;

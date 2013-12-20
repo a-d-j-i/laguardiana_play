@@ -21,6 +21,8 @@
                     #{menuButtons buttons: buttons, perms: perms, titles: titles/}
                 </ul>
             </div>
+            <div id="bagFull" style="color: red; #{if !bagFull || bagRemoved }display: none;#{/if}">&{'application.bagFull'}<br/></div>
+            <div id="bagRemoved" style="color: red; #{if !bagRemoved}display: none;#{/if}">&{'application.bagRemoved'}</div><br/>
             &{'application.bagTotals', bagTotals.bills, bagTotals.envelopes }<br/>
             &{'application.bagSpace', bagFreeSpace }<br/>
             <div id="checkPrinter" style="color: red; #{if !checkPrinter}display: none;#{/if}">&{'application.checkPrinter'}</div><br/>
@@ -40,15 +42,28 @@
 <script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
     doRefresh = function() {
-        $.getJSON( '@{MenuController.mainMenu}', function( data ) {
+        $.getJSON('@{MenuController.mainMenu}', function(data) {
             var checkPrinter = data[ 0 ];
-            if ( checkPrinter ){
+            var bagRemoved = data[ 1 ];
+            var bagFull = data[ 2 ];
+            if (checkPrinter) {
                 $("#checkPrinter").show();
-            } else{
+            } else {
                 $("#checkPrinter").hide();
             }
+            if (bagRemoved) {
+                $("#bagRemoved").show();
+                $("#bagFull").hide();
+            } else {
+                $("#bagRemoved").hide();
+                if (bagFull) {
+                    $("#bagFull").show();
+                } else {
+                    $("#bagFull").hide();
+                }
+            }
             doneRefresh();
-        } );
+        });
 
     }
 </script>

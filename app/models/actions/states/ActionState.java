@@ -11,10 +11,14 @@ import devices.printer.Printer;
 import java.util.EnumMap;
 import java.util.Map;
 import models.Configuration;
+import models.ItemQuantity;
 import models.ModelError;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction;
 import models.actions.UserAction.StateApi;
+import models.db.LgBag;
+import models.db.LgBill;
+import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -57,6 +61,35 @@ abstract public class ActionState {
 
     public void accept() {
         Logger.error("ActionState accept Invalid step %s", name());
+    }
+
+    public void cancelWithCause(LgDeposit.FinishCause cause) {
+        Logger.error("cancelWithCause accept Invalid step %s", name());
+    }
+
+    public boolean isReadyToAccept(boolean envelope) {
+        LgBag currentBag = LgBag.getCurrentBag();
+        ItemQuantity iq = currentBag.getItemQuantity();
+        if (envelope) {
+            iq.envelopes++;
+        } else {
+            for (LgBill bill : stateApi.getCurrentBillList()) {
+                iq.bills += bill.quantity;
+            }
+        }
+
+        Logger.debug("isRreadyToAccept count : %s", iq.toString());
+        if (Configuration.isBagFull(iq)) {
+            cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_FULL);
+            return false;
+        }
+        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+            /*            delayedStore = true;
+             stateApi.setState(new BagRemoved(stateApi, this));*/
+            cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
+            return false;
+        }
+        return true;
     }
 
     abstract public void onGloryEvent(ManagerStatus m);

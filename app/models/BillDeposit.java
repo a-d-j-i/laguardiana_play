@@ -13,6 +13,7 @@ import models.db.LgDeposit;
 import models.db.LgUser;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
+import play.Logger;
 
 @Entity
 public class BillDeposit extends LgDeposit {
@@ -53,7 +54,6 @@ public class BillDeposit extends LgDeposit {
                 + "", this.depositId).fetch();
         return qret;
     }
-
 
     public List<BillQuantity> getBillList() {
         List<BillQuantity> ret = new ArrayList<BillQuantity>();

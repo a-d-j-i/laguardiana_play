@@ -7,6 +7,7 @@ package models.actions.states;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.ModelError;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
 /**
@@ -14,24 +15,28 @@ import play.Logger;
  * @author adji
  */
 public class EnvelopeDepositStart extends ActionState {
-    
+
     public EnvelopeDepositStart(StateApi stateApi) {
         super(stateApi);
     }
-    
+
     @Override
     public String name() {
         return "IDLE";
     }
-    
+
     @Override
     public void cancel() {
-        stateApi.closeDeposit(true);
+        cancelWithCause(FinishCause.FINISH_CAUSE_CANCEL);
+    }
+
+    public void cancelWithCause(FinishCause cause) {
+        stateApi.closeDeposit(cause);
         stateApi.cancelTimer();
         stateApi.cancelDeposit();
         stateApi.setState(new Canceling(stateApi));
     }
-    
+
     @Override
     public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());

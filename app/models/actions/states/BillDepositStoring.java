@@ -9,6 +9,7 @@ import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.ModelError;
 import models.actions.UserAction;
+import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
 /**
@@ -37,7 +38,7 @@ public class BillDepositStoring extends ActionState {
                 stateApi.setState(new Jam(stateApi, this));
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
-                stateApi.closeDeposit(false);
+                stateApi.closeDeposit(FinishCause.FINISH_CAUSE_OK);
                 if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new Finish(stateApi));
                 } else {

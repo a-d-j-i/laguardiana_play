@@ -6,16 +6,28 @@
     <article>
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
         <div class="contenido">
-            #{if canceled}
-            <div class="mensaje"><span>&{ 'counting_page.deposit_canceled' }</span></div>
-            <h2>&{ 'application.thanks', providerCode }</h2>
-            &{ 'counting_page.deposit_canceled' }
-            #{/if}
-            #{else}
+            <!-- datos del deposito -->
+            #{if ( finishCause == 'FINISH_CAUSE_OK' ) }
             <div class="mensaje"><span>&{ 'envelope_deposit.deposit_done' }</span></div>
             <h2>&{ 'application.thanks', providerCode }</h2>
             &{ 'application.remove_ticket' }
+            #{/if}
+            #{elseif ( finishCause == 'FINISH_CAUSE_BAG_REMOVED' ) }
+            <div class="mensaje"><span>&{ 'counting_page.deposit_canceled_bag_removed' }</span></div>
+            <h2>&{ 'application.thanks', providerCode }</h2>
+            &{ 'counting_page.deposit_canceled' }
+            #{/elseif}
+            #{elseif ( finishCause == 'FINISH_CAUSE_BAG_FULL' ) }
+            <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled_bag_full' }</span></div>
+            <h2>&{ 'application.thanks', providerCode }</h2>
+            &{ 'counting_page.deposit_canceled' }
+            #{/elseif}
+            #{else }
+            <div class="mensaje"><span>&{ 'counting_page.deposit_canceled' }</span></div>
+            <h2>&{ 'application.thanks', providerCode }</h2>
+            &{ 'counting_page.deposit_canceled' }
             #{/else}
+            <!-- /datos del deposito -->
         </div>
         <hr />
         <div class="botonera">
@@ -41,8 +53,9 @@
 <script type="text/javascript" charset="${_response_encoding}">
     function done() {
         window.location.href = "@{Secure.logout()}";
-    };
-    setTimeout(done,  ${play.configuration['finish_screen.timeout']});
+    }
+    ;
+            setTimeout(done, ${play.configuration['finish_screen.timeout']});
 
 </script>
 #{/set}

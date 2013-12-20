@@ -9,13 +9,16 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;
-import models.BillDeposit;
+import models.Configuration;
+import models.ItemQuantity;
 import models.ModelError;
 import models.ModelFacade.UserActionApi;
 import models.actions.states.ActionState;
+import models.db.LgBag;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgDeposit;
+import models.db.LgDeposit.FinishCause;
 import models.db.LgUser;
 import models.events.TimeoutEvent;
 import models.lov.Currency;
@@ -72,6 +75,10 @@ abstract public class UserAction {
             userActionApi.withdraw();
         }
 
+        public Iterable<LgBill> getCurrentBillList() {
+            return userActionApi.getCurrentBillList();
+        }
+
         public void addBatchToDeposit() {
             LgDeposit deposit = LgDeposit.findById(currentDepositId);
             LgBatch batch = new LgBatch();
@@ -99,12 +106,13 @@ abstract public class UserAction {
             }
         }
 
-        public void closeDeposit(boolean isCanceled) {
-            if (!isCanceled) {
+        public void closeDeposit(FinishCause finishCause) {
+            if (finishCause == FinishCause.FINISH_CAUSE_OK) {
                 closeBatch();
             }
+            Logger.debug("Closing deposit finish cause : %s", finishCause.name());
             LgDeposit d = LgDeposit.findById(currentDepositId);
-            d.canceled = isCanceled;
+            d.finishCause = finishCause;
             d.closeDate = new Date();
             d.save();
         }
@@ -136,6 +144,7 @@ abstract public class UserAction {
         public ManagerInterface.MANAGER_STATE getManagerState() {
             return userActionApi.getManagerState();
         }
+
     }
 
     public void start(LgUser currentUser, UserActionApi userActionApi) {

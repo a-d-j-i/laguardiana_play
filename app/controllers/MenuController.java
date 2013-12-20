@@ -6,29 +6,38 @@ import models.Configuration;
 import models.ItemQuantity;
 import models.ModelFacade;
 import models.db.LgBag;
-import play.Logger;
 import play.mvc.*;
 
 @With({Secure.class})
 public class MenuController extends Controller {
 
     public static void mainMenu(String back) {
+        LgBag currentBag = LgBag.getCurrentBag();
+        ItemQuantity iq = currentBag.getItemQuantity();
+        Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(iq);
+        if (bagFreeSpace < 0) {
+            bagFreeSpace = (long) 0;
+        }
         if (request.isAjax()) {
-            Object[] o = new Object[1];
+            Object[] o = new Object[3];
             o[0] = ModelFacade.printerNeedCheck();
+            o[1] = (!Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk());
+            // I need space for at least one envelope. see ModelFacade->isBagReady too.
+            iq.envelopes++;
+            o[2] = Configuration.isBagFull(iq);
             renderJSON(o);
         }
         String backAction = "MenuController.mainMenu";
         String[] buttons = {"BillDepositController.start", "CountController.start", "EnvelopeDepositController.start", "FilterController.start"};
         String[] extraButtons = {"MenuController.otherMenu"};
         String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter"};
-        LgBag currentBag = LgBag.getCurrentBag();
-        ItemQuantity iq = currentBag.getItemQuantity();
-
+        renderArgs.put("bagRemoved", (!Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk()));
         renderArgs.put("bagTotals", iq);
-        Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(iq);
         renderArgs.put("bagFreeSpace", bagFreeSpace);
         renderArgs.put("checkPrinter", ModelFacade.printerNeedCheck());
+        // I need space for at least one envelope. see ModelFacade->isBagReady too.
+        iq.envelopes++;
+        renderArgs.put("bagFull", Configuration.isBagFull(iq));
         checkMenu(back, backAction, buttons, titles, 0, extraButtons);
     }
 

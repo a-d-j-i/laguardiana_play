@@ -6,6 +6,7 @@ package models.actions.states;
 
 import devices.glory.manager.ManagerInterface;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
 /**
@@ -25,7 +26,7 @@ public class BillDepositContinue extends BillDepositStart {
 
     @Override
     public void accept() {
-        stateApi.closeDeposit(false);
+        stateApi.closeDeposit(FinishCause.FINISH_CAUSE_OK);
         stateApi.setState(new Finish(stateApi));
         stateApi.cancelDeposit();
     }

@@ -27,6 +27,8 @@ application.back=VOLVER
 application.continue=CONTINUAR
 application.cancel=CANCELAR
 application.checkPrinter=Revise la impresora.
+application.bagRemoved=La bolsa de recaudacion fue removida, espere para depositar.
+application.bagFull=La bolsa de recaudacion esta llena, espere para depositar.
 application.bill_jam=Billete atascado revise la maquina y retirelos.
 application.envelope_jam=Sobre atascado revise la maquina y retirelos.
 application.bag_not_placed=La bolsa fue removida, espere.
@@ -110,6 +112,8 @@ counting_page.remove_rejected_bills=Retire los billetes rechazados.
 counting_page.storing=Depositando.
 counting_page.storing_detail=Depositando espere...
 counting_page.deposit_canceled=Desposito Cancelado.
+counting_page.deposit_canceled_bag_removed=Desposito Cancelado por que la bolsa de recaudacion fue removida!!!.
+counting_page.deposit_canceled_bag_full=Desposito Cancelado por que el deposito no cabe en la bolsa de recaudacion!!!.
 counting_page.total_sum=Subtotal ya depositado
 counting_page.current_total_sum=Subtotal del deposito
 

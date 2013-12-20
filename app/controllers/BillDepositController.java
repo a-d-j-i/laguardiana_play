@@ -63,6 +63,9 @@ public class BillDepositController extends CounterController {
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         List<Currency> currencies = Currency.findAll();
 
+        if (!ModelFacade.isBagReady(false)) {
+            Application.index();
+        }
         if (currencies.size() == 1
                 && (referenceCodes.size() <= 1 || !Configuration.mustShowBillDepositReference1())
                 && !Configuration.mustShowBillDepositReference2()) {
@@ -155,8 +158,7 @@ public class BillDepositController extends CounterController {
         renderArgs.put("formData", formData);
         if (deposit != null) {
             Long total = deposit.getTotal();
-//            renderArgs.put("canceled", (deposit.finishDate == null || total <= 0));
-            renderArgs.put("canceled", total <= 0);
+            renderArgs.put("finishCause", deposit.finishCause.name());
             renderArgs.put("depositTotal", total);
             renderArgs.put("depositId", deposit.depositId);
         }

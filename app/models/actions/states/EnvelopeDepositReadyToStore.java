@@ -8,7 +8,6 @@ import static devices.glory.manager.ManagerInterface.MANAGER_STATE.JAM;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
-import models.ModelError;
 import models.actions.UserAction;
 import models.actions.UserAction.StateApi;
 import play.Logger;
@@ -40,10 +39,7 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case READY_TO_STORE:
-                if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
-                    delayedStore = true;
-                    stateApi.setState(new BagRemoved(stateApi, this));
-                } else {
+                if (isReadyToAccept(true)) {
                     store();
                 }
                 break;

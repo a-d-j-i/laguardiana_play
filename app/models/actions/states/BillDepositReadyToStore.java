@@ -8,6 +8,7 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.actions.UserAction.StateApi;
+import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
 /**
@@ -29,16 +30,19 @@ public class BillDepositReadyToStore extends ActionState {
 
     @Override
     public void cancel() {
-        stateApi.closeDeposit(true);
+        cancelWithCause(FinishCause.FINISH_CAUSE_CANCEL);
+    }
+
+    @Override
+    public void cancelWithCause(FinishCause cause) {
+        stateApi.closeDeposit(cause);
         stateApi.cancelTimer();
         stateApi.cancelDeposit();
     }
 
     @Override
     public void accept() {
-        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
-            delayedStore = true;
-            stateApi.setState(new BagRemoved(stateApi, this));
+        if (!isReadyToAccept(false)) {
             return;
         }
         stateApi.cancelTimer();
