@@ -16,7 +16,7 @@
     <tr style="background-color: lightpink;">
     #{/if}
     #{else}
-        #{if ( deposit.canceled ) } 
+        #{if ( deposit.finishCause?.name() != 'FINISH_CAUSE_OK' ) } 
             #{if ( deposit.closeDate ) } 
                 <tr style="background-color: lightyellow;">
             #{/if}
