@@ -70,8 +70,7 @@ abstract public class ActionState {
     }
 
     public boolean isReadyToAccept(boolean envelope) {
-        LgBag currentBag = LgBag.getCurrentBag();
-        ItemQuantity iq = currentBag.getItemQuantity();
+        ItemQuantity iq = stateApi.getCurrentItemQuantity();
         if (envelope) {
             iq.envelopes++;
         } else {
@@ -80,8 +79,8 @@ abstract public class ActionState {
             }
         }
 
-        Logger.debug("isRreadyToAccept count : %s", iq.toString());
-        if (Configuration.isBagFull(iq)) {
+        Logger.debug("isReadyToAccept count : %s", iq.toString());
+        if (Configuration.isBagFull(iq.bills, iq.envelopes)) {
             cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_FULL);
             return false;
         }

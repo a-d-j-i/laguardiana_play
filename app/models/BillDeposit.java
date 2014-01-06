@@ -13,7 +13,6 @@ import models.db.LgDeposit;
 import models.db.LgUser;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
-import play.Logger;
 
 @Entity
 public class BillDeposit extends LgDeposit {

@@ -24,7 +24,7 @@ public class CollectCommand extends ManagerCommandAbstract {
     public void run() {
         // Set the machine time.
         for (int i = 0; i < retries; i++) {
-            Logger.debug("COLLECT");
+            Logger.debug("COLLECT_COMMAND");
 
             if (!sense()) {
                 return;

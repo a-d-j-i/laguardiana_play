@@ -6,6 +6,7 @@ import models.Configuration;
 import models.ItemQuantity;
 import models.ModelFacade;
 import models.db.LgBag;
+import play.Logger;
 import play.mvc.*;
 
 @With({Secure.class})
@@ -14,7 +15,8 @@ public class MenuController extends Controller {
     public static void mainMenu(String back) {
         LgBag currentBag = LgBag.getCurrentBag();
         ItemQuantity iq = currentBag.getItemQuantity();
-        Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(iq);
+        Logger.debug("Item quantity : %s", iq.toString());
+        Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(iq.bills, iq.envelopes);
         if (bagFreeSpace < 0) {
             bagFreeSpace = (long) 0;
         }
@@ -23,8 +25,7 @@ public class MenuController extends Controller {
             o[0] = ModelFacade.printerNeedCheck();
             o[1] = (!Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk());
             // I need space for at least one envelope. see ModelFacade->isBagReady too.
-            iq.envelopes++;
-            o[2] = Configuration.isBagFull(iq);
+            o[2] = Configuration.isBagFull(iq.bills, iq.envelopes + 1);
             renderJSON(o);
         }
         String backAction = "MenuController.mainMenu";
@@ -36,8 +37,7 @@ public class MenuController extends Controller {
         renderArgs.put("bagFreeSpace", bagFreeSpace);
         renderArgs.put("checkPrinter", ModelFacade.printerNeedCheck());
         // I need space for at least one envelope. see ModelFacade->isBagReady too.
-        iq.envelopes++;
-        renderArgs.put("bagFull", Configuration.isBagFull(iq));
+        renderArgs.put("bagFull", Configuration.isBagFull(iq.bills, iq.envelopes + 1));
         checkMenu(back, backAction, buttons, titles, 0, extraButtons);
     }
 

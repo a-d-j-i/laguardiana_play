@@ -21,7 +21,7 @@ import models.lov.Currency;
  *
  * @author adji
  */
-public class ReportTotals implements DepositVisitor {
+public class ReportTotals {
 
     public static class Total {
 
@@ -35,6 +35,7 @@ public class ReportTotals implements DepositVisitor {
         public Collection<BillQuantity> getDetail() {
             return detail.values();
         }
+
         public long getToValidateTotal() {
             return cashToValidate + checksToValidate + ticketsToValidate;
         }
@@ -122,22 +123,22 @@ public class ReportTotals implements DepositVisitor {
         return this;
     }
 
-    public void visit(LgDeposit item) {
-        if (item instanceof EnvelopeDeposit) {
-            visitEnvelopeDeposit((EnvelopeDeposit) item);
-        } else if (item instanceof BillDeposit) {
-            visitBillDeposit((BillDeposit) item);
-        } else {
-            throw new RuntimeException(String.format("Invalid deposit type %s", item.getClass()));
-        }
-    }
-    /*    public void visit(BillDeposit item) {
-     Logger.error("Invalid deposit type");
-     throw new UnsupportedOperationException("Not supported yet.");
-     }*/
-
     synchronized public ReportTotals getTotals(Set<LgDeposit> deps) {
-        LgDeposit.visitFinishedDeposits(deps, this);
+        LgDeposit.visitDeposits(deps, new DepositVisitor() {
+
+            public void visit(LgDeposit item) {
+                if (item.finishDate == null) {
+                    return;
+                }
+                if (item instanceof EnvelopeDeposit) {
+                    visitEnvelopeDeposit((EnvelopeDeposit) item);
+                } else if (item instanceof BillDeposit) {
+                    visitBillDeposit((BillDeposit) item);
+                } else {
+                    throw new RuntimeException(String.format("Invalid deposit type %s", item.getClass()));
+                }
+            }
+        });
         return this;
     }
 }

@@ -25,6 +25,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
 
     @Override
     public void run() {
+        
         if (!gotoNeutral(false, true)) {
             return;
         }
@@ -35,7 +36,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
         }
         boolean storeTry = false;
         while (!mustCancel()) {
-            Logger.debug("EnvelopeDepositCommand");
+            Logger.debug("ENVELOPE_DEPOSIT_COMMAND");
             if (!sense()) {
                 return;
             }

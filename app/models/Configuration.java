@@ -146,12 +146,12 @@ public class Configuration {
         return Long.parseLong(d);
     }
 
-    static public long equivalentBillQuantity(ItemQuantity itemQuantity) {
-        return itemQuantity.bills + (Configuration.envelopeBillEquivalency() * itemQuantity.envelopes);
+    static public long equivalentBillQuantity(Long bills, Long envelopes) {
+        return bills + (Configuration.envelopeBillEquivalency() * envelopes);
     }
 
-    static public boolean isBagFull(ItemQuantity itemQuantity) {
-        return (equivalentBillQuantity(itemQuantity) > Configuration.maxBillsPerBag());
+    static public boolean isBagFull(Long bills, Long envelopes) {
+        return (equivalentBillQuantity(bills, envelopes) >= Configuration.maxBillsPerBag());
     }
 
     public static String getWithdrawUser() {

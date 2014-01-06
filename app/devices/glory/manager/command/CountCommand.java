@@ -127,7 +127,7 @@ public class CountCommand extends ManagerCommandAbstract {
         Logger.error("CountCommand Start CURRENCY %d", countData.currency.byteValue());
         boolean batchEnd = false;
         while (!mustCancel()) {
-            //Logger.debug("Count Command Counting");
+            Logger.debug("COUNT_COMMAND");
             if (!sense()) {
                 return;
             }

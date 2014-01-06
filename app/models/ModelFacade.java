@@ -373,7 +373,7 @@ public class ModelFacade {
             Logger.info("Can't start an action when on error");
             return;
         }
-        if (!isBagReady(false)) {
+        if (!Configuration.isIgnoreBag() && !isBagReady(false)) {
             Logger.info("Can't start bag not ready");
             return;
         }
@@ -619,17 +619,22 @@ public class ModelFacade {
     }
 
     public static boolean isBagReady(boolean envelope) {
-        if (!Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk()) {
+        if (Configuration.isIgnoreBag()) {
+            return true;
+        }
+        if (!ModelFacade.isIoBoardOk()) {
             Logger.info("Can't start bag removed");
             return false;
         }
         LgBag currentBag = LgBag.getCurrentBag();
         ItemQuantity iq = currentBag.getItemQuantity();
+        Logger.debug("isBagReady quantity : %s", iq);
         // for an envelope deposit I neet at least space for one envelope more.
+        Long env = iq.envelopes;
         if (envelope) {
-            iq.envelopes++;
+            env++;
         }
-        if (Configuration.isBagFull(iq)) {
+        if (Configuration.isBagFull(iq.bills, iq.envelopes + env)) {
             Logger.info("Can't start bag full");
             //modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
             return false;

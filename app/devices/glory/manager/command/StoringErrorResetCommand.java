@@ -24,7 +24,7 @@ public class StoringErrorResetCommand extends ManagerCommandAbstract {
         // retry closing at least once.
         threadCommandApi.setClosing(false);
         for (int i = 0; i < retries && !mustCancel(); i++) {
-            Logger.debug("StoringErrorReset command");
+            Logger.debug("STORING_ERROR_RESET_COMMAND");
             if (!sense()) {
                 return;
             }

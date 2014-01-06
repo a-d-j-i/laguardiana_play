@@ -170,10 +170,14 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     }
 
     public ItemQuantity getItemQuantity() {
+        return getItemQuantity(null);
+    }
+
+    public ItemQuantity getItemQuantity(final Integer currentDepositId) {
         final ItemQuantity ret = new ItemQuantity();
-        LgDeposit.visitFinishedDeposits(deposits, new LgDeposit.DepositVisitor() {
+        LgDeposit.visitDeposits(deposits, new LgDeposit.DepositVisitor() {
             public void visit(LgDeposit item) {
-                if (item.finishCause == LgDeposit.FinishCause.FINISH_CAUSE_OK) {
+                if (item.depositId.equals(currentDepositId) || item.finishCause != LgDeposit.FinishCause.FINISH_CAUSE_CANCEL) {
                     if (item instanceof EnvelopeDeposit) {
                         ret.envelopes++;
                     } else if (item instanceof BillDeposit) {
@@ -193,4 +197,5 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         ReportTotals totals = new ReportTotals();
         return totals.getTotals(deposits);
     }
+
 }

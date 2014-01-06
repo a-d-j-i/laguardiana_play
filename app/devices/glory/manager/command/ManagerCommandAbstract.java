@@ -210,9 +210,12 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 setState(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER);
                                 break;
                             }
-                            if (!sendGloryCommand(new devices.glory.command.RemoteCancel())) {
+                            if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
                                 remoteCancelRetries--;
-                                if ( remoteCancelRetries <= 0 ) {
+                                if (remoteCancelRetries <= 0) {
+                                    String error = gloryStatus.getLastError();
+                                    Logger.error("Error %s sending cmd Remote cancel command after retries", error);
+                                    setError(new GloryManagerError(GloryManagerError.ERROR_CODE.GLORY_MANAGER_ERROR, error));
                                     return false;
                                 }
                             }

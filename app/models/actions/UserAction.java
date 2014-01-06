@@ -9,10 +9,11 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;
-import models.Configuration;
+import models.ItemQuantity;
 import models.ModelError;
 import models.ModelFacade.UserActionApi;
 import models.actions.states.ActionState;
+import models.db.LgBag;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgDeposit;
@@ -75,6 +76,11 @@ abstract public class UserAction {
 
         public Iterable<LgBill> getCurrentBillList() {
             return userActionApi.getCurrentBillList();
+        }
+
+        public ItemQuantity getCurrentItemQuantity() {
+            LgBag currentBag = LgBag.getCurrentBag();
+            return currentBag.getItemQuantity(currentDepositId);
         }
 
         public void addBatchToDeposit() {

@@ -200,12 +200,8 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         void visit(LgDeposit item);
     }
 
-    public static void visitFinishedDeposits(Set<LgDeposit> deps, DepositVisitor visitor) {
+    public static void visitDeposits(Set<LgDeposit> deps, DepositVisitor visitor) {
         for (LgDeposit d : deps) {
-
-            if (d.finishDate == null) {
-                continue;
-            }
             visitor.visit(d);
         }
     }
