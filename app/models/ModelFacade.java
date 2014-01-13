@@ -56,7 +56,7 @@ public class ModelFacade {
 
     static {
 
-        if (Configuration.isGloryIgnore()) {
+        if (Configuration.isIgnoreGlory()) {
             manager = new FakeGloryManager();
         } else {
             manager = DeviceFactory.getGloryManager(Configuration.getGloryPort());
@@ -165,7 +165,7 @@ public class ModelFacade {
 
         @Override
         public void doJob() throws Exception {
-            if (Configuration.isIoBoardIgnore()) {
+            if (Configuration.isIgnoreIoBoard()) {
                 return;
             }
             if (status == null) {
@@ -247,8 +247,7 @@ public class ModelFacade {
             PrinterEvent.save(u, status.toString());
             Logger.debug("OnPrinterEvent event %s", status.toString());
             if (status.getError() != null) {
-                if (!Configuration.isPrinterIgnore()) {
-                    // A development option
+                if (!Configuration.isIgnorePrinter()) {
                     Logger.error("Setting printer error : %s", status.toString());
                     modelError.setError(status.getError());
                 }
@@ -401,14 +400,14 @@ public class ModelFacade {
         }
         ManagerStatus mstate = manager.getStatus();
         if (mstate.getState() == ManagerInterface.MANAGER_STATE.ERROR) {
-            if (!Configuration.isGloryIgnore()) {
+            if (!Configuration.isIgnoreGlory()) {
                 modelError.setError(mstate.getError());
             }
         }
 
         IoBoard.IoBoardStatus status = ioBoard.getStatus();
         if (status != null && status.getError() != null) {
-            if (!Configuration.isIoBoardIgnore()) {
+            if (!Configuration.isIgnoreIoBoard()) {
                 Logger.error("Setting ioboard error : %s", status.getError());
                 modelError.setError(status.getError());
             }
@@ -604,7 +603,7 @@ public class ModelFacade {
     public static boolean isIoBoardOk() {
         IoBoard.IoBoardStatus status = ioBoard.getStatus();
 
-        if (!Configuration.isIoBoardIgnore() && status != null && status.getError() != null) {
+        if (!Configuration.isIgnoreIoBoard() && status != null && status.getError() != null) {
             Logger.error("Setting ioboard error : %s", status.getError());
             modelError.setError(status.getError());
             return false;

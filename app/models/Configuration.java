@@ -24,31 +24,26 @@ public class Configuration {
         return isProperty("printer.ignore");
     }
 
-    public static boolean isIoBoardIgnore() {
-        return isProperty("io_board.ignore") && Play.mode.isDev();
+    public static boolean isIgnoreIoBoard() {
+        return isProperty("io_board.ignore");
     }
 
     public static boolean isIgnoreShutter() {
-        if (isIoBoardIgnore()) {
+        if (isIgnoreIoBoard()) {
             return true;
         }
         return isProperty("io_board.ignore_shutter");
     }
 
     public static boolean isIgnoreBag() {
-        if (isIoBoardIgnore()) {
+        if (isIgnoreIoBoard()) {
             return true;
         }
         return isProperty("io_board.ignore_bag");
     }
 
-    public static boolean isGloryIgnore() {
+    public static boolean isIgnoreGlory() {
         return isProperty("glory.ignore") && Play.mode.isDev();
-    }
-
-    static boolean isPrinterIgnore() {
-        return isProperty("printer.ignore") && Play.mode.isDev();
-
     }
 
     public static String getProviderDescription() {

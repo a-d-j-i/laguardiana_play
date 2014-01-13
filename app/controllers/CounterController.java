@@ -59,7 +59,7 @@ public class CounterController extends Controller {
             gstatus = manager.getStatus();
             gerror = manager.getStatus().toString();
         }
-        if (!Configuration.isIoBoardIgnore()) {
+        if (!Configuration.isIgnoreIoBoard()) {
             final IoBoard ioBoard = ModelFacade.getIoBoard();
             if (ioBoard != null && ioBoard.getError() != null) {
                 ierror = ioBoard.getError().toString();
