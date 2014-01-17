@@ -131,6 +131,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
                                  "Escrow door jamed"));
                                  return false;*/
+                                threadCommandApi.setClosing(false);
                                 setState(ManagerInterface.MANAGER_STATE.JAM);
                                 break;
                             }
@@ -161,6 +162,7 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                 /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
                                  "Escrow door jamed"));
                                  return false;*/
+                                threadCommandApi.setClosing(false);
                                 setState(ManagerInterface.MANAGER_STATE.JAM);
                                 break;
                             }
