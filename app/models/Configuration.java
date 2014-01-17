@@ -146,6 +146,9 @@ public class Configuration {
     }
 
     static public boolean isBagFull(Long bills, Long envelopes) {
+        /*Logger.debug("isBagFull : bills %d envelopes %d eq %d max %d",
+                bills, envelopes,
+                equivalentBillQuantity(bills, envelopes), Configuration.maxBillsPerBag());*/
         return (equivalentBillQuantity(bills, envelopes) >= Configuration.maxBillsPerBag());
     }
 

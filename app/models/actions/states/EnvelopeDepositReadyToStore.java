@@ -40,6 +40,7 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
         switch (m.getState()) {
             case NEUTRAL:
+                break;
             case CANCELING:
                 stateApi.setState(new Canceling(stateApi));
                 break;

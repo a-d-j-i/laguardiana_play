@@ -158,7 +158,7 @@ public class BillDepositController extends CounterController {
         renderArgs.put("formData", formData);
         if (deposit != null) {
             Long total = deposit.getTotal();
-            renderArgs.put("finishCause", deposit.finishCause.name());
+            renderArgs.put("finishCause", deposit.finishCause);
             renderArgs.put("depositTotal", total);
             renderArgs.put("depositId", deposit.depositId);
         }

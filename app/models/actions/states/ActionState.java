@@ -72,7 +72,7 @@ abstract public class ActionState {
     public boolean isReadyToAccept(boolean envelope) {
         ItemQuantity iq = stateApi.getCurrentItemQuantity();
         if (envelope) {
-            iq.envelopes++;
+            //iq.envelopes++;
         } else {
             for (LgBill bill : stateApi.getCurrentBillList()) {
                 iq.bills += bill.quantity;
@@ -80,9 +80,7 @@ abstract public class ActionState {
         }
 
         // During bill deposit I can make the bag full, but not more than that.
-        if (iq.bills > 1 && !envelope) {
-            iq.bills--;
-        }
+        iq.bills--;
         Logger.debug("isReadyToAccept count : %s", iq.toString());
         if (Configuration.isBagFull(iq.bills, iq.envelopes)) {
             cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_FULL);

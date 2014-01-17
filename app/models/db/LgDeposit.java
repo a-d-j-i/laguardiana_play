@@ -27,6 +27,10 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         FINISH_CAUSE_BAG_REMOVED,
         FINISH_CAUSE_BAG_FULL,;
 
+        @Override
+        public String toString() {
+            return name();
+        }
     };
     @Id
     @Column(name = "deposit_id", unique = true, nullable = false)

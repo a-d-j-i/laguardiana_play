@@ -627,13 +627,13 @@ public class ModelFacade {
         }
         LgBag currentBag = LgBag.getCurrentBag();
         ItemQuantity iq = currentBag.getItemQuantity();
-        Logger.debug("isBagReady quantity : %s", iq);
         // for an envelope deposit I neet at least space for one envelope more.
-        Long env = iq.envelopes;
         if (envelope) {
-            env++;
+            iq.envelopes++;
+            iq.bills--;
         }
-        if (Configuration.isBagFull(iq.bills, iq.envelopes + env)) {
+        Logger.debug("isBagReady quantity : %s", iq);
+        if (Configuration.isBagFull(iq.bills, iq.envelopes)) {
             Logger.info("Can't start bag full");
             //modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
             return false;

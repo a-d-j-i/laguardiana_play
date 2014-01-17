@@ -7,17 +7,17 @@
         <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
         <div class="contenido">
             <!-- datos del deposito -->
-            #{if ( finishCause == 'FINISH_CAUSE_OK' ) }
+            #{if ( finishCause?.name() == 'FINISH_CAUSE_OK' ) }
             <div class="mensaje"><span>&{ 'envelope_deposit.deposit_done' }</span></div>
             <h2>&{ 'application.thanks', providerCode }</h2>
             &{ 'application.remove_ticket' }
             #{/if}
-            #{elseif ( finishCause == 'FINISH_CAUSE_BAG_REMOVED' ) }
+            #{elseif ( finishCause?.name() == 'FINISH_CAUSE_BAG_REMOVED' ) }
             <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled_bag_removed' }</span></div>
             <h2>&{ 'application.thanks', providerCode }</h2>
             &{ 'counting_page.deposit_canceled' }
             #{/elseif}
-            #{elseif ( finishCause == 'FINISH_CAUSE_BAG_FULL' ) }
+            #{elseif ( finishCause?.name() == 'FINISH_CAUSE_BAG_FULL' ) }
             <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled_bag_full' }</span></div>
             <h2>&{ 'application.thanks', providerCode }</h2>
             &{ 'counting_page.deposit_canceled' }
