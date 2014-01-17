@@ -173,8 +173,15 @@
 #{set 'moreScripts'}
 <script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
+    var deposit_finished = false;
     doRefresh = function() {
         $.getJSON('@{mainLoop}', function(data) {
+
+            if (deposit_finished) {
+                window.location.href = deposit_finished;
+                //doneRefresh();
+                return;
+            }
 
             var status = data[ 0 ];
 
@@ -186,13 +193,11 @@
                 } else if (status == 'BAG_REMOVED') {
                 } else if (status == 'ESCROW_FULL') {
                 } else if (status == 'FINISH') {
-                    window.location.href = "@{finish}";
-                    return;
+                    deposit_finished = "@{finish}";
                 } else if (status == 'TIMEOUT_WARNING') {
                 } else if (status == 'COUNTING') {
                 } else if (status == 'ERROR') {
-                    window.location.href = "@{counterError()}";
-                    return;
+                    deposit_finished = "@{counterError()}";
                 } else {
                     alert("Invalid status : " + status + " last status : " + lastStatus);
                 }
@@ -264,15 +269,19 @@
     }
 
     $('.cancelButton').click(function(event) {
-        $.getJSON('@{cancel()}', function(data) {
-        });
+        if (!deposit_finished) {
+            $.getJSON('@{cancel()}', function(data) {
+            });
+        }
     });
 
     $('.continueButton').click(function(event) {
         if (lastStatus == 'IDLE') {
         } else if (lastStatus == 'ESCROW_FULL' || lastStatus == 'READY_TO_STORE' || lastStatus == 'CONTINUE_DEPOSIT') {
-            $.getJSON('@{accept()}', function(data) {
-            });
+            if (!deposit_finished) {
+                $.getJSON('@{accept()}', function(data) {
+                });
+            }
         } else {
             //alert( "Invalid last status : " + lastStatus );
         }
