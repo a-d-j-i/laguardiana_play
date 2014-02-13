@@ -13,6 +13,8 @@ import java.util.List;
 import models.BillDeposit;
 import models.Configuration;
 import models.EnvelopeDeposit;
+import models.ReportTotals;
+import models.ReportTotals.Total;
 import models.db.LgBag;
 import models.db.LgBillType;
 import models.db.LgDeposit;
@@ -184,20 +186,39 @@ public class ReportController extends Controller {
         }
     }
 
+    static public class BagContentData {
+
+        final public String currency;
+        final public Long totalAmount;
+
+        public BagContentData(String currency, Long totalAmount) {
+            this.currency = currency;
+            this.totalAmount = totalAmount;
+        }
+
+    }
+
     static public class BagData {
 
-        public Integer bagId;
-        public Date creationDate;
-        public Date withdrawDate;
-        public final String user_id;
-//        public final Long totalAmount;
+        final public Integer bagId;
+        final public Date creationDate;
+        final public Date placementDate;
+        final public Date withdrawDate;
+        final public String user_id;
+        final public List<BagContentData> totals = new ArrayList<BagContentData>();
 
         private BagData(LgBag b) {
             this.bagId = b.bagId;
             this.creationDate = b.creationDate;
+            this.placementDate = b.placementDate;
             this.withdrawDate = b.withdrawDate;
             this.user_id = b.withdrawUser;
-//            this.totalAmount = b.getTotalAmount();
+
+            ReportTotals ts = b.getTotals();
+            for (Currency c : ts.getCurrencies()) {
+                Total t = ts.getCurrencyTotal(c);
+                totals.add(new BagContentData(c.textId, t.validatedAmmount));
+            }
         }
     }
 

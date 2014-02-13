@@ -25,13 +25,16 @@ public class DeviceFactory extends PlayPlugin {
     static HashMap<String, Glory> gloryDevices = new HashMap();
     static HashMap<Glory, GloryManager.CounterFactoryApi> gloryManagers = new HashMap();
     static HashMap<String, IoBoard> ioBoardDevices = new HashMap();
-    static Printer printer = null;
+    static HashMap<String, Printer> openPrinters = new HashMap();
 
     public static Printer getPrinter(String port) {
-        if (printer == null) {
-            printer = new Printer(port);
-            printer.startStatusThread();
+
+        if (openPrinters.containsKey(port)) {
+            return openPrinters.get(port);
         }
+        Printer printer = new Printer(port);
+        openPrinters.put(port, printer);
+        printer.startStatusThread();
         return printer;
     }
 
@@ -98,6 +101,10 @@ public class DeviceFactory extends PlayPlugin {
         for (IoBoard b : ioBoardDevices.values()) {
             Logger.debug("Closing ioBoard Device");
             b.close();
+        }
+        for (Printer p : openPrinters.values()) {
+            Logger.debug("Closing printer %s", p.getPort());
+            p.close();
         }
     }
 

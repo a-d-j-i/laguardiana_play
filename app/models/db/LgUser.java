@@ -99,8 +99,8 @@ public class LgUser extends GenericModel implements java.io.Serializable {
             return false;
         }
         if (Configuration.isCrapAuth()) {
-            String crapAuthVariableId = LgSystemProperty.getProperty(LgSystemProperty.Types.CRAPAUTH_VARIABLE_ID);
-            String crapAuthConstantId = LgSystemProperty.getProperty(LgSystemProperty.Types.CRAPAUTH_CONSTANT_ID);
+            String crapAuthVariableId = Configuration.getCrapAuthId();
+            String crapAuthConstantId = Configuration.getCrapAuthConstantId();
             if (crapAuthVariableId != null && crapAuthConstantId != null) {
                 try {
                     String inv = new StringBuilder(crapAuthVariableId).reverse().toString();
@@ -111,7 +111,7 @@ public class LgUser extends GenericModel implements java.io.Serializable {
                             String key = "" + ss[0] + ss[2] + ss[4] + ss[1] + ss[3] + ss[5];
                             Logger.debug("crapAuth key %s", key);
                             if (key.equals(token)) {
-                                LgSystemProperty.initCrapId();
+                                Configuration.initCrapId();
                                 return true;
                             }
                         }

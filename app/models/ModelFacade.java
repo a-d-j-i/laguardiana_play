@@ -22,19 +22,19 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.print.PrintService;
 import models.actions.UserAction;
 import models.db.LgBag;
 import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
-import models.db.LgSystemProperty;
 import models.db.LgUser;
 import models.events.ActionEvent;
 import models.events.GloryEvent;
 import models.events.IoBoardEvent;
 import models.events.PrinterEvent;
 import play.Logger;
-import play.Play;
 import play.jobs.Job;
 import play.libs.F.Promise;
 
@@ -50,7 +50,7 @@ public class ModelFacade {
     final static private ManagerInterface manager;
     final static private IoBoard ioBoard;
     final static private ModelError modelError = new ModelError();
-    final static private Printer printer;
+    final static private AtomicReference<Printer> printer = new AtomicReference<Printer>();
     static private UserAction currentUserAction = null;
     static private LgUser currentUser = null;
 
@@ -75,12 +75,7 @@ public class ModelFacade {
             }
         });
 
-        printer = DeviceFactory.getPrinter(Play.configuration.getProperty("printer.port"));
-        printer.addObserver(new Observer() {
-            public void update(Observable o, Object data) {
-                Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
-            }
-        });
+        setCurrentPrinter(null);
     }
     // TODO: Review
 
@@ -88,16 +83,12 @@ public class ModelFacade {
         // used to force the execution of the static code.
         // Close unifnished deposits.
         LgDeposit.closeUnfinished();
-        LgSystemProperty.initCrapId();
+        Configuration.initCrapId();
     }
 
     interface BillListVisitor {
 
         public void visit(LgBillType billType, Integer desired, Integer current);
-    }
-
-    public static Printer getCurrentPrinter() {
-        return printer;
     }
 
     public static ModelError getError() {
@@ -192,6 +183,11 @@ public class ModelFacade {
             } else {
                 modelError.clearIoBoardError();
             }
+            Logger.debug("BAG STATUS : %s", status.toString());
+            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE || status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+                // if bag not in place rotate current bag.
+                LgBag.rotateBag(true);
+            }
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
                 switch (status.getBagAproveState()) {
@@ -211,7 +207,7 @@ public class ModelFacade {
                         }
                         break;
                     case BAG_APROVE_CONFIRM:
-                        LgBag.rotateBag(true);
+                        LgBag.placeBag();
                         ioBoard.aproveBagConfirm();
                         break;
                 }
@@ -571,14 +567,6 @@ public class ModelFacade {
         currentUserAction.suspendTimeout();
     }
 
-    public static boolean printerNeedCheck() {
-        return printer.needCheck();
-    }
-
-    public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
-        printer.print(templateName, args, paperWidth, paperLen);
-    }
-
     public static ManagerInterface getGloryManager() {
         return manager;
     }
@@ -588,16 +576,8 @@ public class ModelFacade {
         return ioBoard;
     }
 
-    public static Printer getPrinter() {
-        return printer;
-    }
-
     public static Glory getCounter() {
         return manager.getCounter();
-    }
-
-    public static Object getPrinters() {
-        return printer.printers.values();
     }
 
     public static boolean isIoBoardOk() {
@@ -640,4 +620,70 @@ public class ModelFacade {
         }
         return true;
     }
+
+    public static void setCurrentPrinter(String prt) {
+        if (prt == null) {
+            prt = Configuration.getDefaultPrinter();
+            if (prt == null) {
+                Logger.error("Default printer must be configured");
+                return;
+            }
+        }
+
+        PrintService p = (PrintService) Printer.printers.get(prt);
+        if (p == null) {
+            Logger.error("Wrong printer name %s", prt);
+            return;
+        }
+        Configuration.setDefaultPrinter(prt);
+        Printer currPrinter = DeviceFactory.getPrinter(prt);
+        currPrinter.addObserver(new Observer() {
+            public void update(Observable o, Object data) {
+                Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
+            }
+        });
+
+        Printer oldPrinter = printer.getAndSet(currPrinter);
+        if (oldPrinter != null) {
+            //oldPrinter.close();
+        }
+    }
+
+    public static Object getPrinters() {
+        return Printer.printers.values();
+    }
+
+    public static boolean printerNeedCheck() {
+        return printer.get().needCheck();
+    }
+
+    public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+        print(null, templateName, args, paperWidth, paperLen);
+    }
+
+    public static void print(String prt, String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+        if (prt == null) {
+            prt = Configuration.getDefaultPrinter();
+            if (prt == null) {
+                Logger.error("Default printer must be configured");
+                return;
+            }
+        }
+
+        PrintService p = (PrintService) Printer.printers.get(prt);
+        if (p == null) {
+            Logger.error("Wrong printer name %s", prt);
+            return;
+        }
+        Printer pp = DeviceFactory.getPrinter(prt);
+        pp.print(templateName, args, paperWidth, paperLen);
+        if (pp != printer.get()) {
+            //pp.close();
+        }
+    }
+
+    public static Printer getCurrentPrinter() {
+        return printer.get();
+    }
+
 }

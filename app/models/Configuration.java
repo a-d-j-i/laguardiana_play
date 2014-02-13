@@ -4,7 +4,9 @@
  */
 package models;
 
+import java.security.SecureRandom;
 import models.db.LgSystemProperty;
+import static models.db.LgSystemProperty.setOrCreateProperty;
 import play.Logger;
 import play.Play;
 
@@ -17,37 +19,37 @@ public class Configuration {
     final public static int EXTERNAL_APP_ID = 2;
 
     public static boolean isPrinterTest() {
-        return isProperty("printer.test");
+        return isSystemProperty("printer.test");
     }
 
     public static boolean isIgnorePrinter() {
-        return isProperty("printer.ignore");
+        return isSystemProperty("printer.ignore");
     }
 
     public static boolean isIgnoreIoBoard() {
-        return isProperty("io_board.ignore");
+        return isSystemProperty("io_board.ignore");
     }
 
     public static boolean isIgnoreShutter() {
         if (isIgnoreIoBoard()) {
             return true;
         }
-        return isProperty("io_board.ignore_shutter");
+        return isSystemProperty("io_board.ignore_shutter");
     }
 
     public static boolean isIgnoreBag() {
         if (isIgnoreIoBoard()) {
             return true;
         }
-        return isProperty("io_board.ignore_bag");
+        return isSystemProperty("io_board.ignore_bag");
     }
 
     public static boolean isIgnoreGlory() {
-        return isProperty("glory.ignore") && Play.mode.isDev();
+        return isSystemProperty("glory.ignore");
     }
 
     public static String getProviderDescription() {
-        String pc = LgSystemProperty.getProperty(LgSystemProperty.Types.PROVIDER_DESCRIPTION);
+        String pc = getSystemProperty("application.provider_description");
         if (pc == null || pc.isEmpty()) {
             pc = getClientDescription();
         }
@@ -55,75 +57,56 @@ public class Configuration {
     }
 
     public static String getClientDescription() {
-        return LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_DESCRIPTION);
+        return getSystemProperty("application.client_description");
     }
 
     public static Integer getDefaultCurrency() {
-        return getIntProperty(LgSystemProperty.Types.DEFAULT_CURRENCY);
-    }
-
-    static private Integer getIntProperty(LgSystemProperty.Types type) {
         try {
-            return Integer.parseInt(LgSystemProperty.getProperty(type));
+            return Integer.parseInt(getSystemProperty("application.default_currency"));
         } catch (NumberFormatException e) {
-            Logger.warn("Fixing value 1 parsing a int property");
-            // fixed value
+            Logger.warn("Fixing value 1 for application.default_currency");
             return 1;
         }
     }
 
     public static Boolean mustShowBillDepositReference1() {
-        return LgSystemProperty.isProperty("bill_deposit.show_reference1");
+        return isSystemProperty("bill_deposit.show_reference1");
     }
 
     public static Boolean mustShowBillDepositReference2() {
-        return LgSystemProperty.isProperty("bill_deposit.show_reference2");
+        return isSystemProperty("bill_deposit.show_reference2");
     }
 
     public static Boolean mustShowEnvelopeDepositReference1() {
-        return LgSystemProperty.isProperty("envelope_deposit.show_reference1");
+        return isSystemProperty("envelope_deposit.show_reference1");
     }
 
     public static Boolean mustShowEnvelopeDepositReference2() {
-        return LgSystemProperty.isProperty("envelope_deposit.show_reference2");
+        return isSystemProperty("envelope_deposit.show_reference2");
     }
 
     public static String getClientCode() {
-        return LgSystemProperty.getProperty(LgSystemProperty.Types.CLIENT_CODE);
+        return getSystemProperty("application.client_code");
     }
 
     public static String getBranchCode() {
-        return LgSystemProperty.getProperty(LgSystemProperty.Types.BRANCH_CODE);
+        return getSystemProperty("application.branch_code");
     }
 
     public static String getMachineCode() {
-        return LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_CODE);
+        return getSystemProperty("application.machine_code");
     }
 
     public static String getMachineDescription() {
-        return LgSystemProperty.getProperty(LgSystemProperty.Types.MACHINE_DESCRIPTION);
+        return getSystemProperty("application.machine_description");
     }
 
     public static boolean isAllAlowed() {
         return isProperty("secure.allowAll");
     }
 
-    private static boolean isProperty(String property) {
-        String prop = Play.configuration.getProperty(property);
-        if (prop == null) {
-            return false;
-        }
-        if (prop.equalsIgnoreCase("true") || prop.equalsIgnoreCase("on")) {
-            return true;
-        }
-        return false;
-    }
-
     static public long maxBillsPerBag() {
-        String d = LgSystemProperty.getProperty(LgSystemProperty.Types.MAX_BILLS_PER_BAG);
-        if (d == null) {
-            d = Play.configuration.getProperty("glory.maxBillsPerBag");
-        }
+        String d = getSystemProperty("glory.max_bills_per_bag");
         if (d == null) {
             return 15000;
         }
@@ -131,10 +114,7 @@ public class Configuration {
     }
 
     static public long envelopeBillEquivalency() {
-        String d = LgSystemProperty.getProperty(LgSystemProperty.Types.ENVELOPE_BILL_EQUIVALENCY);
-        if (d == null) {
-            d = Play.configuration.getProperty("glory.envelopeBillEquivalency");
-        }
+        String d = getSystemProperty("glory.envelope_bill_equivalency");
         if (d == null) {
             return 50;
         }
@@ -147,18 +127,18 @@ public class Configuration {
 
     static public boolean isBagFull(Long bills, Long envelopes) {
         /*Logger.debug("isBagFull : bills %d envelopes %d eq %d max %d",
-                bills, envelopes,
-                equivalentBillQuantity(bills, envelopes), Configuration.maxBillsPerBag());*/
+         bills, envelopes,
+         equivalentBillQuantity(bills, envelopes), Configuration.maxBillsPerBag());*/
         return (equivalentBillQuantity(bills, envelopes) >= Configuration.maxBillsPerBag());
     }
 
     public static String getWithdrawUser() {
-        return LgSystemProperty.getProperty(LgSystemProperty.Types.WITHDRAW_USER);
+        return getSystemProperty("application.withdraw_user");
     }
 
     public static int getBagPrintLen() {
         try {
-            return Integer.parseInt(Play.configuration.getProperty("print.bagLen"));
+            return Integer.parseInt(getSystemProperty("print.bagLen"));
         } catch (NumberFormatException e) {
             return 220;
         }
@@ -166,7 +146,7 @@ public class Configuration {
 
     public static int getZPrintLen() {
         try {
-            return Integer.parseInt(Play.configuration.getProperty("print.zLen"));
+            return Integer.parseInt(getSystemProperty("print.zLen"));
         } catch (NumberFormatException e) {
             return 220;
         }
@@ -174,7 +154,7 @@ public class Configuration {
 
     static int getBillDepositPrintLen() {
         try {
-            return Integer.parseInt(Play.configuration.getProperty("print.billDepositLen"));
+            return Integer.parseInt(getSystemProperty("print.billDepositLen"));
         } catch (NumberFormatException e) {
             return 220;
         }
@@ -182,7 +162,7 @@ public class Configuration {
 
     static int getEvelopeFinishPrintLen() {
         try {
-            return Integer.parseInt(Play.configuration.getProperty("print.envelopeFinishLen"));
+            return Integer.parseInt(getSystemProperty("print.envelopeFinishLen"));
         } catch (NumberFormatException e) {
             return 220;
         }
@@ -190,7 +170,7 @@ public class Configuration {
 
     static int getEvenlopeStartPrintLen() {
         try {
-            return Integer.parseInt(Play.configuration.getProperty("print.envelopeStartLen"));
+            return Integer.parseInt(getSystemProperty("print.envelopeStartLen"));
         } catch (NumberFormatException e) {
             return 220;
         }
@@ -198,26 +178,26 @@ public class Configuration {
 
     public static int getPrintWidth() {
         try {
-            return Integer.parseInt(Play.configuration.getProperty("print.paperWidth"));
+            return Integer.parseInt(getSystemProperty("print.paperWidth"));
         } catch (NumberFormatException e) {
             return 77;
         }
     }
 
     public static String getGloryPort() {
-        return Play.configuration.getProperty("glory.port");
+        return getProperty("glory.port");
     }
 
     public static String getIoBoardPort() {
-        return Play.configuration.getProperty("io_board.port");
+        return getProperty("io_board.port");
     }
 
     public static String getIoBoardVersion() {
-        return Play.configuration.getProperty("io_board.version");
+        return getProperty("io_board.version");
     }
 
     public static boolean isCrapAuth() {
-        return isProperty("secure.crapAuth");
+        return isSystemProperty("secure.crapAuth");
     }
 
     public static boolean dontAskForPassword() {
@@ -230,5 +210,73 @@ public class Configuration {
 
     public static boolean useHardwareKeyboard() {
         return isProperty("style.useHardwareKeyboard");
+    }
+
+    public static String getDefaultPrinter() {
+        String pc = getSystemProperty("printer.port");
+        return pc;
+    }
+
+    static void setDefaultPrinter(String prt) {
+        LgSystemProperty.setOrCreateProperty("printer.port", prt);
+    }
+
+    public static String getErrorStr() {
+        return getSystemProperty("application.error_msg");
+    }
+
+    public static void initCrapId() {
+        SecureRandom random = new SecureRandom();
+        byte bytes[] = new byte[3];
+        random.nextBytes(bytes);
+        int val = 0;
+        for (int i = 0; i < 3; i++) {
+            val = val * 100;
+            val += ((((int) bytes[i] & 0x0F) % 9) + 1) * 10 + (((((int) bytes[i] & 0xF0) >> 4) % 9) + 1);
+        }
+        setOrCreateProperty("secure.crapauth_variable_id", Integer.toString(val));
+    }
+
+    public static String getCrapAuthId() {
+        return getSystemProperty("secure.crapauth_variable_id");
+    }
+
+    public static String getCrapAuthConstantId() {
+        return getSystemProperty("secure.crapauth_constant_id");
+    }
+
+    private static String getSystemProperty(String property) {
+        LgSystemProperty p = LgSystemProperty.getProperty(property);
+        if (p != null && !p.value.isEmpty()) {
+            return p.value;
+        } else {
+            return getProperty(property);
+        }
+    }
+
+    private static String getProperty(String property) {
+        return Play.configuration.getProperty(property);
+    }
+
+    private static boolean isSystemProperty(String property) {
+        LgSystemProperty p = LgSystemProperty.getProperty(property);
+        if (p != null && !p.value.isEmpty()) {
+            if (p.value.trim().equalsIgnoreCase("true") || p.value.trim().equalsIgnoreCase("on")) {
+                return true;
+            }
+            return false;
+        } else {
+            return isProperty(property);
+        }
+    }
+
+    private static boolean isProperty(String property) {
+        String prop = Play.configuration.getProperty(property);
+        if (prop != null) {
+            if (prop.trim().equalsIgnoreCase("true") || prop.trim().equalsIgnoreCase("on")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

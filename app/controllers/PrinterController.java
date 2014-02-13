@@ -10,10 +10,20 @@ import play.mvc.*;
 @With({Secure.class})
 public class PrinterController extends Controller {
 
-    public static void listPrinters() {
+    public static void listPrinters(String printer) {
+        if (printer != null) {
+            Logger.debug("Changing printer to %s", printer);
+            ModelFacade.setCurrentPrinter(printer);
+        }
+        if (request.isAjax()) {
+            Object o[] = new Object[2];
+            o[0] = ModelFacade.getCurrentPrinter().getPort();
+            o[1] = ModelFacade.getCurrentPrinter().getInternalState().toString();
+            renderJSON(o);
+        }
         renderArgs.put("printers", ModelFacade.getPrinters());
-        renderArgs.put("printerStatus", ModelFacade.getPrinter().getInternalState());
-        renderArgs.put("currentPrinter", ModelFacade.getCurrentPrinter());
+        renderArgs.put("printerStatus", ModelFacade.getCurrentPrinter().getInternalState());
+        renderArgs.put("currentPrinter", ModelFacade.getCurrentPrinter().getPort());
 
         render();
     }
@@ -45,13 +55,12 @@ public class PrinterController extends Controller {
         render();
     }
 
-    public static void test() {
+    public static void test(String printer) {
         try {
-            //DeviceFactory.getPrinter().printAttributes();
-            ModelFacade.print("PrinterController/test.html", renderArgs.data, 77, 30);
+            ModelFacade.print(printer, "PrinterController/test.html", renderArgs.data, 77, 30);
         } catch (Throwable ex) {
             Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }
-        MenuController.hardwareMenu(null);
+        listPrinters(null);
     }
 }

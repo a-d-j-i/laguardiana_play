@@ -1,0 +1,101 @@
+#{extends 'main.html' /}
+#{set title:'Estado' /}
+<section id="counterError">
+    <header></header>
+    <nav>
+        <a id ="backButton" href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    </nav>
+    <article>
+        #{if ( merror?.isError() ) }
+        <h1 class="">&{ 'application.error' }</h1>
+        #{/if}
+        #{else}
+        <h1 class="">&{ 'application.ok' }</h1>
+        #{/else}
+        <div class="contenido"  style="overflow-y: scroll;">
+            #{if ( merror?.isError() ) }
+            #{if ( merror?.getErrorCode() == models.ModelError.ERROR_CODE.BAG_NOT_INPLACE ) }
+            <h2>&{ 'application.bag_not_in_place' }<br/>&{ 'application.wait' }</h2>
+            #{/if}
+            #{else}
+            #{if ( controllers.Secure.checkPermission( 'Application.reset', 'GET' ) || controllers.Secure.checkPermission( 'Application.storingReset', 'GET' ) ) }
+            <div>
+                #{if merror?.isError() }
+                #{if merror.getGloryError() }
+                <h2>GLORY ERROR : ${ merror.getGloryError() }</h2>
+                #{/if}
+                #{if merror.getPrinterError() }
+                <h2>PRINTER ERROR : ${ merror.getPrinterError() }</h2>
+                #{/if}
+                #{if merror.getIoBoardError() }
+                <h2>IOBOARD ERROR : ${ merror.getIoBoardError() }</h2>
+                #{/if}
+                #{if merror.getErrorCode() }
+                <h2>APLICATION ERROR : code ${ merror.getErrorCode() }
+                    #{if merror.getDetail() } detail : ${ merror.getDetail() }#{/if}
+                </h2>
+                #{/if}
+                #{/if}
+                #{else}
+                <b class="">&{ 'application.ok' }</b>
+                #{/else}
+                <p id="mstatus">ModelFacade status ${ mstatus }</p>
+                <p id="gstatus">Glory Status ${ gstatus }</p>
+                <p id="gerror">Glory Error ${ gError }</p>
+                <p id="ierror">IOBoard Status ${ istatus }</p>
+                <p id="ierror">IOBoard Error ${ ierror }</p>
+                <p id="ierror">Printer Status ${ pstatus }</p>
+            </div>
+            #{/if}
+            #{else}
+            <h2>&{ 'application.hardware_error' }</h2>
+            #{/else}
+            #{/else}
+            #{/if}
+        </div>
+        <hr />
+        <div class="botonera">
+            <ul class="on-2 unit">
+                <li class="column">
+                    <div class="columna">
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
+                        <a href="@{ Secure.logout( "Application.index" ) }" class="boton verde full_width">&{'main_menu.logout'}</a>
+                        #{/if}
+                        #{else}
+                        <a href="@{ Secure.login}" class="boton verde full_width">&{'main_menu.login'}</a>
+                        #{/else}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    var waiting = false;
+
+    // Reload the whole messages panel
+    function refresh() {
+        if (waiting) {
+            return;
+        }
+        waiting = true;
+        $.getJSON('@{status}', function(data) {
+            waiting = false;
+            /*if (!data) {
+             window.location.href = "@{MenuController.MainMenu(null)}";
+             }*/
+            //$( '#gstatus' ).html(  data[ 0 ] );
+            //$( '#gerror' ).html(  data[ 1 ] );
+        });
+    }
+    setInterval(refresh, 500);
+    refresh();
+
+</script>
+#{/set}

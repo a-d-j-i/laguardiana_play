@@ -170,8 +170,9 @@ public class IoBoard {
 
         @Override
         public String toString() {
-            return "IoBoardStatus{" + "shutterState=" + shutterState + ", bagAproveState=" + bagAproveState + ", bagState=" + bagState + ", error=" + error + '}';
+            return "IoBoardStatus{" + "shutterState=" + shutterState + ", bagAproveState=" + bagAproveState + ", bagState=" + bagState + ", error=" + error + ", criticalEvent=" + criticalEvent + '}';
         }
+
     }
     // A singleton create to hold the state of the ioboard.
 

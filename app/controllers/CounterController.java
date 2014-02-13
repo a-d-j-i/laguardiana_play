@@ -66,7 +66,7 @@ public class CounterController extends Controller {
             }
         }
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
-            pstatus = ModelFacade.getPrinter().getInternalState();
+            pstatus = ModelFacade.getCurrentPrinter().getInternalState();
         }
         if (cmd != null) {
             switch (cmd) {
@@ -79,15 +79,15 @@ public class CounterController extends Controller {
             }
         }
         if (request.isAjax()) {
-            renderJSON(ModelFacade.isError());
+            Object ret[] = new Object[3];
+            ret[ 0] = ModelFacade.isError();
+            ret[ 1] = Configuration.getErrorStr();
+            ret[2] = ModelFacade.getState();
+            renderJSON(ret);
         } else {
-            renderArgs.put("mstatus", ModelFacade.getState());
-            renderArgs.put("merror", ModelFacade.getError());
-            renderArgs.put("pstatus", pstatus);
-            renderArgs.put("gstatus", gstatus);
-            renderArgs.put("gerror", gerror);
-            renderArgs.put("ierror", ierror);
             renderArgs.put("isError", ModelFacade.isError());
+            renderArgs.put("errorStr", Configuration.getErrorStr());
+            renderArgs.put("errorCode", ModelFacade.getState());
             render();
         }
     }

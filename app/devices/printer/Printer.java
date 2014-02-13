@@ -148,7 +148,7 @@ public class Printer extends Observable {
 
         @Override
         public String toString() {
-            return "PrinterStatus{" + "printerState=" + printerState + ", stateDesc=" + stateDesc + ", error=" + error + '}';
+            return "printerState=" + printerState + ", stateDesc=" + stateDesc + ", error=" + error;
         }
     }
     // A singleton create to hold the state of the printer.
@@ -229,9 +229,6 @@ public class Printer extends Observable {
     public String toString() {
         return "Printer{" + "state=" + state + ", mustStop=" + mustStop + ", statusThread=" + statusThread + '}';
 
-
-
-
     }
 
     private class StatusThread extends Thread {
@@ -300,7 +297,19 @@ public class Printer extends Observable {
 
     public void startStatusThread() {
         Logger.debug("Printer status thread start");
-        statusThread.start();
+        if (!statusThread.isAlive()) {
+            try {
+                statusThread.start();
+            } catch (IllegalThreadStateException e) {
+
+            }
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
     }
 
     public void close() {
@@ -403,15 +412,10 @@ public class Printer extends Observable {
             state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "BadLocationException : " + ex.toString()));
         }
 
-
         final JEditorPane item = new JEditorPane();
         item.setEditorKit(kit);
         item.setDocument(doc);
         item.setEditable(false);
-
-
-
-
 
         Paper pp = new Paper();
         pp.setImageableArea(0, 0, paperWidth * MM, Integer.MAX_VALUE);

@@ -14,6 +14,7 @@ import models.ReportTotals;
 import models.events.BagEvent;
 import play.Logger;
 import play.db.jpa.GenericModel;
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "lg_bag", schema = "public")
@@ -29,6 +30,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
+    @Column(name = "placement_date", nullable = true, length = 13)
+    public Date placementDate;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "withdraw_date", length = 13)
     public Date withdrawDate;
@@ -146,7 +149,12 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public static void rotateBag(boolean byIoBoard) {
 
         LgBag current = getCurrentBag();
-
+        // last bag was removed and is still no placed;
+        /*Logger.debug("--------------------------> rotate bag current %s placement %s withdraw %s",
+         current.bagId.toString(), current.placementDate, current.withdrawDate);*/
+        if (current.placementDate == null) {
+            return;
+        }
         if (current.deposits.size() > 0 || byIoBoard) {
             current.withdrawDate = new Date();
             if (byIoBoard) {
@@ -155,18 +163,35 @@ public class LgBag extends GenericModel implements java.io.Serializable {
                 BagEvent.save(current, "Closing bag manually");
             }
             current.save();
+            Logger.debug("BAG REMOVED %d", current.bagId);
             LgBag newBag = new LgBag("AUTOMATIC_ROTATED_BY_APP");
             newBag.save();
             BagEvent.save(newBag, "Opening new bag");
+            Logger.debug("BAG CREATED %d", newBag.bagId);
+            JPA.em().getTransaction().commit();
         } else {
-            Logger.debug("this bag is empty so I'm going to reuse it");
+            Logger.warn("this bag (%s) is empty so I'm going to reuse it", current.bagId.toString());
         }
+    }
 
+    public static void placeBag() {
+        Date currDate = new Date();
+        LgBag current = getCurrentBag();
+        if (current.placementDate != null) {
+            Logger.warn("Cant place a bag (%s) now %s that was allready put in date %s",
+                    current.bagId.toString(), currDate.toString(), current.placementDate.toString());
+            return;
+        }
+        current.placementDate = currDate;
+        BagEvent.save(current, "Bag placed");
+        current.save();
+        JPA.em().getTransaction().commit();
+        Logger.debug("BAG PLACED %d", current.bagId);
     }
 
     @Override
     public String toString() {
-        return "LgBag{" + "bagId=" + bagId + ", bagCode=" + bagCode + ", creationDate=" + creationDate + ", withdrawDate=" + withdrawDate + '}';
+        return "LgBag{" + "bagId=" + bagId + ", bagCode=" + bagCode + ", creationDate=" + creationDate + ", placementDate=" + placementDate + ", withdrawDate=" + withdrawDate + '}';
     }
 
     public ItemQuantity getItemQuantity() {

@@ -7,26 +7,74 @@
     </nav>
     <article>
         <h1 class="casa">&{'application.printers'}</h1>
-        <div class="contenido" style="overflow: auto;">
+        <div class="contenido">
             <div class="mensaje"><span>&{'application.choose_one'}</span></div>
-            <table class="full_width">
-                <thead>
-                    <tr>
-                        <th>&{ 'application.printers' }</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div style="overflow:auto; height:  50%;">
+                #{form @listPrinters( printer ), id:'printerForm', style:'height:  100%;'}
+                <table>
                     #{list items:printers, as:'b'}
-                    <tr >
-                        <td>${b.name}</td>
+                    <tr>
+                        <td style="text-align: left;">
+                            <input type="radio" name="printer" class="checkbox"
+                                   #{if currentPrinter == b.name }checked="checked"
+                                   #{/if}
+                                   value="${b.name}"
+                                   >&nbsp;${b.name}<br>
+                        </td>
+                        <td >
+                            <div name="${b.name}">
+                                #{if currentPrinter == b.name }
+                                ${printerStatus.toString()}
+                                #{/if}
+                                #{else}
+                                -
+                                #{/else}
+                            </div>
+                        </td>
+                        <td>
+                            <a class="test_button" href="@{test(b.name)}">&{ 'other_menu.printer_test' }</a>
+                        </td>
                     </tr>
                     #{/list}
-                </tbody>
-            </table>
-            <p>Current : ${currentPrinter.getPort()}</p>
-            <p>Status : ${printerStatus.getPrinterState()} ${printerStatus.getStateDesc()} ${printerStatus.getError()}</p>
+                </table>
+                #{/form}
+            </div>
         </div>
         <hr />
         #{menuBottomButtons}&nbsp;#{/menuBottomButtons}
     </article>
 </section>
+
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    var waiting = false;
+
+    // Reload the whole messages panel
+    function refresh() {
+        if (waiting) {
+            return;
+        }
+        waiting = true;
+        $.getJSON('@{listPrinters}', function(data) {
+            waiting = false;
+            var printer = data[0];
+            var status = data[ 1 ];
+            $("[name='" + printer + "']").html( status );
+        });
+    }
+    $(document).ready(function() {
+        $("input[name='printer']").change(function(event) {
+            waiting = true;
+            $("#printerForm").submit();
+        });
+        $(".test_button").change(function(event) {
+            waiting = true;
+            $("#printerForm").submit();
+        });
+
+        setInterval(refresh, 2000);
+        refresh();
+    });
+</script>
+#{/set}

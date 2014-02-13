@@ -1,67 +1,38 @@
 #{extends 'main.html' /}
-#{set title:'Depositar Efectivo' /}
+#{set title:'Estado' /}
 <section id="counterError">
     <header></header>
     <article>
-        #{if ( merror?.isError() ) }
-        <h1 class="">&{ 'application.error' }</h1>
+        #{if ( isError ) }
+        <h2 class="" id="errorStr">${errorStr}</h2>
         #{/if}
         #{else}
-        <h1 class="">&{ 'application.wait' }</h1>
+        <h2 class="">&{ 'application.wait' }</h2>
         #{/else}
-        <div class="contenido"  style="overflow-y: scroll;">
-            #{if ( merror?.isError() ) }
-            #{if ( merror?.getErrorCode() == models.ModelError.ERROR_CODE.BAG_NOT_INPLACE ) }
-            <h2>&{ 'application.bag_not_in_place' }<br/>&{ 'application.wait' }</h2>
-            #{/if}
-            #{else}
-            #{if ( controllers.Secure.checkPermission( 'Application.reset', 'GET' ) || controllers.Secure.checkPermission( 'Application.storingReset', 'GET' ) ) }
-            <div>
-                #{if merror?.isError() }
-                #{if merror.getGloryError() }
-                <h2>GLORY ERROR : ${ merror.getGloryError() }</h2>
+        <div class="contenido"  style="overflow-y: auto;">
+            #{if ( isError ) }
+                <div style="margin: 30px;">
+                    <p id="errorCode">
+                        &{ 'application.error_code' }&nbsp;:&nbsp;${errorCode}
+                    </p>
+                </div>
+                #{if ( controllers.Secure.checkPermission( 'Application.reset', 'GET' ) || controllers.Secure.checkPermission( 'Application.storingReset', 'GET' ) ) }
+                <!-- admin -->
+                <div class="botonera">
+                    <ul class="on-2 unit">
+                        <li class="column">
+                            <div class="columna">
+                                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(1)}">Reset</a>
+                            </div>
+                        </li>
+                        <li class="column">
+                            <div class="columna">
+                                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(2)}">StoringErrorReset</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
                 #{/if}
-                #{if merror.getPrinterError() }
-                <h2>PRINTER ERROR : ${ merror.getPrinterError() }</h2>
-                #{/if}
-                #{if merror.getIoBoardError() }
-                <h2>IOBOARD ERROR : ${ merror.getIoBoardError() }</h2>
-                #{/if}
-                #{if merror.getErrorCode() }
-                <h2>APLICATION ERROR : code ${ merror.getErrorCode() }
-                    #{if merror.getDetail() } detail : ${ merror.getDetail() }#{/if}
-                </h2>
-                #{/if}
-                #{/if}
-                #{else}
-                <b class="">&{ 'application.ok' }</b>
-                #{/else}
-                <p id="mstatus">ModelFacade status ${ mstatus }</p>
-                <p id="gstatus">Glory Status ${ gstatus }</p>
-                <p id="gerror">Glory Error ${ gError }</p>
-                <p id="ierror">IOBoard Status ${ istatus }</p>
-                <p id="ierror">IOBoard Error ${ ierror }</p>
-                <p id="ierror">Printer Status ${ pstatus }</p>
-            </div>
-            <div class="botonera">
-                <ul class="on-2 unit">
-                    <li class="column">
-                        <div class="columna">
-                            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(1)}">Reset</a>
-                        </div>
-                    </li>
-                    <li class="column">
-                        <div class="columna">
-                            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterError(2)}">StoringErrorReset</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            #{/if}
-            #{else}
-            <h2>&{ 'application.hardware_error' }</h2>
-            #{/else}
-            #{/else}
             #{/if}
         </div>
         <hr />
@@ -105,7 +76,10 @@
         waiting = true;
         $.getJSON('@{counterError}', function(data) {
             waiting = false;
-            if (!data) {
+            var error = data[ 0];
+            $("errorStr").html(data[1]);
+            $("errorCode").html(data[2]);
+            if (!error) {
                 window.location.href = "@{MenuController.MainMenu(null)}";
             }
             //$( '#gstatus' ).html(  data[ 0 ] );

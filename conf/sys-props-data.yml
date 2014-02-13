@@ -5,57 +5,116 @@
   db.LgSystemProperty(billDepositShowReference1):
     name:  "bill_deposit.show_reference1"
     value:  "false"
+    editType: BOOLEAN
     
   db.LgSystemProperty(billDepositShowReference2):
     name:  "bill_deposit.show_reference2"
     value:  "false"
+    editType: BOOLEAN
     
   db.LgSystemProperty(envelopeDepositShowReference1):
     name:  "envelope_deposit.show_reference1"
     value:  "false"
+    editType: BOOLEAN
     
   db.LgSystemProperty(envelopeDepositShowReference2):
     name:  "envelope_deposit.show_reference2"
     value:  "false"
+    editType: BOOLEAN
     
         
   db.LgSystemProperty(machineCode):
-    name:  "machine_code"
+    name:  "application.machine_code"
     value:  "el codigo de la maquina"
+    editType: STRING
     
   db.LgSystemProperty(machineDescription):
-    name:  "machine_description"
+    name:  "application.machine_description"
     value:  "P500"
+    editType: STRING
         
   db.LgSystemProperty(branchCode):
-    name:  "branch_code"
+    name:  "application.branch_code"
     value:  "el codigo de sucursal."
+    editType: STRING
         
   db.LgSystemProperty(clientCode):
-    name:  "client_code"
+    name:  "application.client_code"
     value:  "LA Guardiana S.A."
+    editType: STRING
     
   db.LgSystemProperty(clientDescription):
-    name:  "client_description"
+    name:  "application.client_description"
     value:  "LA Guardiana S.A."
-     
+    editType: STRING
+    
+  db.LgSystemProperty(clientDescription):
+    name:  "application.default_currency"
+    value:  "1"
+    editType: NOT_EDITABLE
+    
   db.LgSystemProperty(providerCode):
-    name:  "provider_description"
+    name:  "application.provider_description"
     value:  "Banco Hipotecario"
+    editType: STRING
     
   db.LgSystemProperty(maxBillsPerBag):
-    name:  "max_bills_per_bag"
+    name:  "glory.max_bills_per_bag"
     value:  "15000"
+    editType: INTEGER
      
   db.LgSystemProperty(envelopeBillEquivalency):
-    name:  "envelope_bill_equivalency"
+    name:  "glory.envelope_bill_equivalency"
     value:  "50"
+    editType: INTEGER
          
   db.LgSystemProperty(withdrawUser):
-    name:  "withdraw_user"
+    name:  "application.withdraw_user"
     value:  "123"
+    editType: INTEGER
            
   db.LgSystemProperty(crapAuthConstantId):
-    name:  "crapauth_constant_id"
+    name:  "secure.crapauth_constant_id"
     value:  "123456"
+    editType: NOT_EDITABLE
+
+  db.LgSystemProperty(crapAuth):
+    name:  "secure.crapauth"
+    value:  "true"
+    editType: BOOLEAN
       
+  db.LgSystemProperty(errorMsg):
+    name:  "application.error_msg"
+    value:  "Error llame al admin"
+    editType: STRING
+
+  db.LgSystemProperty(printerTest):
+    name:  "printer.test"
+    value:  "false"
+    editType: BOOLEAN
+      
+  db.LgSystemProperty(printerIgnore):
+    name:  "printer.ignore"
+    value:  "true"
+    editType: BOOLEAN
+      
+  db.LgSystemProperty(ioBoardIgnore):
+    name:  "io_board.ignore"
+    value:  "false"
+    editType: BOOLEAN
+      
+  db.LgSystemProperty(ioBoardIgnoreShutter):
+    name:  "io_board.ignore_shutter"
+    value:  "true"
+    editType: BOOLEAN
+
+  db.LgSystemProperty(ioBoardIgnoreBag):
+    name:  "io_board.ignore_bag"
+    value:  "false"
+    editType: BOOLEAN
+
+  db.LgSystemProperty(ioGloryIgnore):
+    name: "glory.ignore"
+    value:  "false"
+    editType: BOOLEAN
+
