@@ -12,15 +12,11 @@ import devices.ioboard.IoBoard;
 import devices.ioboard.IoBoard.IOBOARD_VERSION;
 import devices.printer.Printer;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import play.Logger;
 import play.PlayPlugin;
-import play.jobs.Job;
-import play.jobs.JobsPlugin;
-import play.libs.F;
 
 /**
  * Glory and Glory Manager factory. Plugin to close all ports on app shutdown.
