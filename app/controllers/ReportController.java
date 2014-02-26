@@ -166,7 +166,7 @@ public class ReportController extends Controller {
             renderArgs.put("data", depositList);
             render();
         } else {
-            List<LgDeposit> depositList = LgDeposit.findUnprocessed(2).fetch(50);
+            List<LgDeposit> depositList = LgDeposit.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
             UnprocessedDeposits ret = new UnprocessedDeposits();
             ret.depositData = new ArrayList<DepositData>(depositList.size());
             for (LgDeposit d : depositList) {

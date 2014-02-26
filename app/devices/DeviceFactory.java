@@ -12,11 +12,21 @@ import devices.ioboard.IoBoard;
 import devices.ioboard.IoBoard.IOBOARD_VERSION;
 import devices.printer.Printer;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import play.Logger;
 import play.PlayPlugin;
+import play.jobs.Job;
+import play.jobs.JobsPlugin;
+import play.libs.F;
 
 /**
  * Glory and Glory Manager factory. Plugin to close all ports on app shutdown.
+ *
+ * Also implements a single thread queue for event so all events are serialized
+ * in one worker thread. Based on the JobsPlugin.
  *
  * @author adji
  */
@@ -108,6 +118,13 @@ public class DeviceFactory extends PlayPlugin {
         }
     }
 
+    public static ExecutorService eventExecutor = null;
+
+    @Override
+    public void onApplicationStart() {
+        eventExecutor = Executors.newSingleThreadExecutor();
+    }
+
     @Override
     public void onApplicationStop() {
         Logger.debug("onApplicationStop Close all ports");
@@ -117,5 +134,11 @@ public class DeviceFactory extends PlayPlugin {
             Logger.error("Exception in closeAll %s", ex.toString());
         }
         Logger.debug("onApplicationStop Close all ports DONE");
+        try {
+            eventExecutor.awaitTermination(3, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+        }
+        eventExecutor.shutdownNow();
     }
+
 }

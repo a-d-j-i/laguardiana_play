@@ -67,7 +67,7 @@ public class ReportBagController extends Controller {
     }
 
     public static void rotateBag() {
-        LgBag.rotateBag(false);
+        LgBag.withdrawBag(false);
         MenuController.accountingMenu(null);
     }
 

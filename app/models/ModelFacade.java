@@ -5,6 +5,7 @@
 package models;
 
 import controllers.Secure;
+import devices.DeviceFactoryEventJob;
 import devices.DeviceFactory;
 import devices.glory.Glory;
 import devices.glory.manager.FakeGloryManager;
@@ -55,7 +56,6 @@ public class ModelFacade {
     static private LgUser currentUser = null;
 
     static {
-
         if (Configuration.isIgnoreGlory()) {
             manager = new FakeGloryManager();
         } else {
@@ -70,7 +70,7 @@ public class ModelFacade {
         IoBoard.IOBOARD_VERSION ver = IoBoard.IOBOARD_VERSION.getVersion(Configuration.getIoBoardVersion());
         ioBoard = DeviceFactory.getIoBoard(Configuration.getIoBoardPort(), ver);
         ioBoard.addObserver(new Observer() {
-            public void update(Observable o, Object data) {
+            public void update(Observable o, final Object data) {
                 Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
             }
         });
@@ -146,7 +146,7 @@ public class ModelFacade {
         }
     }
 
-    static class OnIoBoardEvent extends Job {
+    static class OnIoBoardEvent extends DeviceFactoryEventJob {
 
         IoBoard.IoBoardStatus status;
 
@@ -186,7 +186,7 @@ public class ModelFacade {
             Logger.debug("BAG STATUS : %s", status.toString());
             if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE || status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
                 // if bag not in place rotate current bag.
-                LgBag.rotateBag(true);
+                LgBag.withdrawBag(true);
             }
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {

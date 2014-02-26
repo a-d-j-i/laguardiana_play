@@ -117,6 +117,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
     // TODO: Search for the bag that has withdraw data null.
     // Or add a new bug logging the error.
+    // There must allways be a bag because if the ioboard is ignored I can't have a withdraw and placement date
+    // but I need a bug to relate the deposits.
     public static LgBag getCurrentBag() {
         LgBag currentBag;
         List<LgBag> bags = LgBag.find("select bg from LgBag bg where bg.withdrawDate is null order by bg.creationDate desc").fetch();
@@ -125,6 +127,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
             BagEvent.save(null, "There is no bag to deposit creating one");
             currentBag = new LgBag("AUTOMATIC_BY_APP");
             currentBag.save();
+            JPA.em().getTransaction().commit();
         } else {
             if (bags.size() > 1) {
                 Iterator<LgBag> i = bags.iterator();
@@ -146,15 +149,16 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         return currentBag;
     }
 
-    public static void rotateBag(boolean byIoBoard) {
+    synchronized public static void withdrawBag(boolean byIoBoard) {
 
         LgBag current = getCurrentBag();
+        // If the bug was not placed by the ioboard then it can be withdrawn by the ioboard.
+        if ( current.placementDate == null && byIoBoard) {
+            return;
+        }
         // last bag was removed and is still no placed;
         /*Logger.debug("--------------------------> rotate bag current %s placement %s withdraw %s",
          current.bagId.toString(), current.placementDate, current.withdrawDate);*/
-        if (current.placementDate == null) {
-            return;
-        }
         if (current.deposits.size() > 0 || byIoBoard) {
             current.withdrawDate = new Date();
             if (byIoBoard) {
@@ -174,7 +178,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         }
     }
 
-    public static void placeBag() {
+    synchronized public static void placeBag() {
         Date currDate = new Date();
         LgBag current = getCurrentBag();
         if (current.placementDate != null) {
@@ -183,8 +187,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
             return;
         }
         current.placementDate = currDate;
-        BagEvent.save(current, "Bag placed");
         current.save();
+        BagEvent.save(current, "Bag placed");
         JPA.em().getTransaction().commit();
         Logger.debug("BAG PLACED %d", current.bagId);
     }
