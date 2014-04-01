@@ -6,7 +6,6 @@ import models.Configuration;
 import models.EnvelopeDeposit;
 import models.ModelFacade;
 import models.actions.EnvelopeDepositAction;
-import models.db.LgDeposit.FinishCause;
 import models.db.LgEnvelope;
 import models.db.LgEnvelopeContent;
 import models.db.LgEnvelopeContent.EnvelopeContentType;

@@ -28,24 +28,35 @@ public class MenuController extends Controller {
             o[2] = isBagFull;
             renderJSON(o);
         }
-        String backAction = "MenuController.mainMenu";
-        String[] buttons = {"BillDepositController.start", "CountController.start", "EnvelopeDepositController.start", "FilterController.start"};
-        String[] extraButtons = {"MenuController.otherMenu"};
-        String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter"};
-        renderArgs.put("bagRemoved", (!Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk()));
+        boolean bagRemoved = !Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk();
+        renderArgs.put("bagRemoved", bagRemoved);
         renderArgs.put("bagTotals", iq);
         renderArgs.put("bagFreeSpace", bagFreeSpace);
         renderArgs.put("checkPrinter", ModelFacade.printerNeedCheck());
         // I need space for at least one envelope. see ModelFacade->isBagReady too.
         renderArgs.put("bagFull", isBagFull);
-        checkMenu(back, backAction, buttons, titles, 0, extraButtons);
+
+        String backAction = "MenuController.mainMenu";
+        String[] buttons = {"BillDepositController.start", "CountController.start", "EnvelopeDepositController.start", "FilterController.start"};
+        String[] extraButtons = {"MenuController.otherMenu"};
+        String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter"};
+        String nextStep = renderMenuButtons(buttons, titles, extraButtons);
+        if (nextStep == null || bagRemoved) {
+            render();
+        } else {
+            if (back != null) {
+                Secure.logout("Application.index");
+            } else {
+                redirect(Router.getFullUrl(nextStep));
+            }
+        }
     }
 
     public static void otherMenu(String back) {
         String backAction = "MenuController.mainMenu";
         String[] buttons = {"CRUD.index", "MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu"};
         String[] titles = {"other_menu.db_admin", "other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports"};
-        checkMenu(back, backAction, buttons, titles, 1);
+        renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
     public static void hardwareMenu(String back) {
@@ -56,7 +67,7 @@ public class MenuController extends Controller {
         String[] titles = {"other_menu.glory_cmd", "other_menu.glory_manager", "other_menu.ioboard_cmd", "other_menu.status",
             "other_menu.printer_list", "other_menu.config"};
 //            "other_menu.printer_list", "other_menu.printer_test"};
-        checkMenu(back, backAction, buttons, titles, 2);
+        renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
     public static void printTemplateMenu(String back) {
@@ -65,7 +76,7 @@ public class MenuController extends Controller {
             "PrinterController.envelopeDeposit_start", "PrinterController.test"};
         String[] titles = {"other_menu.print_billDeposit", "other_menu.print_envelopeDeposit_finish",
             "other_menu.print_envelopeDeposit_start", "print_other_menu.test"};
-        checkMenu(back, backAction, buttons, titles, 3);
+        renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
     public static void accountingMenu(String back) {
@@ -73,7 +84,7 @@ public class MenuController extends Controller {
         String[] buttons = {"ReportZController.print", "ReportZController.rotateZ", "ReportBagController.print", "ReportBagController.rotateBag"};
         String[] titles = {"other_menu.current_z_totals", "other_menu.rotate_z", "other_menu.current_bag_totals",
             "other_menu.rotate_bag"};
-        checkMenu(back, backAction, buttons, titles, 2);
+        renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
     public static void reportMenu(String back) {
@@ -82,7 +93,7 @@ public class MenuController extends Controller {
             "MenuController.unprocessedMenu"};
         String[] titles = {"other_menu.list_deposits", "other_menu.list_bags", "other_menu.list_zs", "other_menu.list_events",
             "other_menu.unprocessed_menu"};
-        checkMenu(back, backAction, buttons, titles, 2);
+        renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
     public static void unprocessedMenu(String back) {
@@ -93,19 +104,14 @@ public class MenuController extends Controller {
         String[] titles = {"other_menu.unprocessed_deposits", "other_menu.unprocessed_bags",
             "other_menu.unprocessed_zs", "other_menu.unprocessed_events"
         };
-        checkMenu(back, backAction, buttons, titles, 2);
+        renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
     @Util
-    static void checkMenu(String back, String backAction, String[] buttons, String[] titles, int level) {
-        checkMenu(back, backAction, buttons, titles, level, null);
-    }
-
-    @Util
-    static void checkMenu(String back, String backAction, String[] buttons, String[] titles, int level, String[] extraButtons) {
+    static String renderMenuButtons(String[] buttons, String[] titles, String[] extraButtons) {
+        int cnt = 0;
         Map<String, Boolean> perms = new HashMap<String, Boolean>();
         Map<String, String> ts = new HashMap<String, String>();
-        int cnt = 0;
         String r = null;
         renderArgs.put("buttons", buttons);
         for (int i = 0; i < buttons.length; i++) {
@@ -130,17 +136,21 @@ public class MenuController extends Controller {
         renderArgs.put("titles", ts);
         renderArgs.put("perms", perms);
         if (cnt == 1) {
-            if (back != null) {
-                if (level == 0) {
-                    Secure.logout("Application.index");
-                } else {
-                    redirect(Router.getFullUrl(backAction));
-                }
-            } else {
-                redirect(Router.getFullUrl(r));
-            }
-        } else {
-            render();
+            return r;
         }
+        return null;
+    }
+
+    @Util
+    static void renderMenuAndNavigate(String back, String backAction, String[] buttons, String[] titles, String[] extraButtons) {
+        String nextStep = renderMenuButtons(buttons, titles, extraButtons);
+        if (nextStep != null) {
+            if (back != null) {
+                redirect(Router.getFullUrl(backAction));
+            } else {
+                redirect(Router.getFullUrl(nextStep));
+            }
+        }
+        render();
     }
 }
