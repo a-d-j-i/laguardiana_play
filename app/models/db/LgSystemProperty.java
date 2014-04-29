@@ -10,13 +10,11 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
 
     public enum EditType {
 
-        NOT_EDITABLE(0),
-        STRING(1),
-        BOOLEAN(2),
-        INTEGER(3);
+        NOT_EDITABLE,
+        STRING,
+        BOOLEAN,
+        INTEGER;
 
-        EditType(int ordinalRef) {
-        }
     }
 
     @Id

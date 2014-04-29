@@ -44,9 +44,14 @@ public class BillDepositStoringEscrowFull extends BillDepositStoring {
              stateApi.cancelDeposit();
              break;*/
             case NEUTRAL:
+                //TODO: FIX THIS 
+                stateApi.addBatchToDeposit(null);
+
                 stateApi.setState(new BillDepositContinue(stateApi));
                 break;
             case COUNTING:
+                stateApi.addBatchToDeposit(null);
+
                 stateApi.closeBatch();
                 if (mustCancelBagRemoved) {
                     stateApi.setState(new Canceling(stateApi));

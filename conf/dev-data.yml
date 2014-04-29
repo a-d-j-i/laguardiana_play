@@ -21,3 +21,37 @@
 #    creationDate:   2012-01-02
 #       
 
+#
+#db.LgDevice(GloryDE50_1):
+#    machineId:     "P500"
+#    deviceType:    "GLORY_DE50"
+#       
+#db.LgDevice(GloryDE50_2):
+#    machineId:     "P500"
+#    deviceType:    "IO_BOARD_V4520_1_0"
+#       
+#db.LgDevice(GloryDE50_3):
+#    machineId:     "P500"
+#    deviceType:    "OS_PRINTER"
+#       
+#       
+#db.LgDevice(MEIDE50_1):
+#    machineId:     "P500_MEI"
+#    deviceType:    "MEI_EBDS"
+#
+#db.LgDeviceProperty( MEIDE50_1_PORT ):
+#    device: MEIDE50_1
+#    name:   "port"
+#    value:  "/dev/ttyS2"
+#    editType: STRING
+#        
+#        
+#db.LgDevice(MEIDE50_2):
+#    machineId:     "P500_MEI"
+#    deviceType:    "IO_BOARD_V4520_1_0"
+#    
+#db.LgDevice(MEIDE50_3):
+#    machineId:     "P500_MEI"
+#    deviceType:    "OS_PRINTER"
+
+

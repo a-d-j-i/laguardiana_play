@@ -54,18 +54,20 @@ public class MenuController extends Controller {
 
     public static void otherMenu(String back) {
         String backAction = "MenuController.mainMenu";
-        String[] buttons = {"CRUD.index", "MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu"};
-        String[] titles = {"other_menu.db_admin", "other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports"};
+        String[] buttons = {"MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu", "ConfigController.status",
+            "ConfigController.index"};
+        String[] titles = {"other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports", "other_menu.status",
+            "other_menu.config"};
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
     public static void hardwareMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"GloryController.index", "GloryManagerController.index", "IoBoardController.index",
-            "ConfigController.status", "PrinterController.listPrinters", "ConfigController.index"};
+        String[] buttons = {"DeviceController.list", "GloryController.index", "GloryManagerController.index", "IoBoardController.index",
+            "PrinterController.listPrinters",};
 //            "ConfigController.status", "PrinterController.listPrinters", "MenuController.printTemplateMenu"};
-        String[] titles = {"other_menu.glory_cmd", "other_menu.glory_manager", "other_menu.ioboard_cmd", "other_menu.status",
-            "other_menu.printer_list", "other_menu.config"};
+        String[] titles = {"other_menu.devices", "other_menu.glory_cmd", "other_menu.glory_manager", "other_menu.ioboard_cmd",
+            "other_menu.printer_list"};
 //            "other_menu.printer_list", "other_menu.printer_test"};
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }

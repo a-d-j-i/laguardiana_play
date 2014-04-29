@@ -1,0 +1,63 @@
+#{extends 'main.html' /}
+<section>
+    <header></header>
+    <a href="#" class="boton_top clickBack">◄ &{ 'application.back' }</a>
+    <article style="padding: 35px 1%; 0 1%;">
+        <div class="contenido_grande" style="overflow: auto;">
+            #{form @list(), 'id': 'mainForm', 'method' : 'GET' }
+            <input type="hidden" name="deviceId">
+            #{/form}
+
+            <table style="margin-left: auto; margin-right: auto; border: 1px solid; font-size: small;">
+                <thead>
+                <th>Id dispositivo</th>
+                <th>Id en la Maquina</th>
+                <th>Tipo de dispositivo</th>
+                <th>Creado</th>
+                <th>Propiedades</th>
+                <th>Comandos</th>
+                </thead>
+                <tbody>
+                    #{list items:data, as:'device' }
+                <td>${device.deviceId} </td>
+                <td>${device.machineDeviceId}</td>
+                <td>${device.deviceType}</td>
+                <td>${device.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
+                <td style="background-color: lightblue; border: 1px solid;">
+                    <a id="${ device.deviceId }" href="@{properties}" class="submitForm"><img src="../public/images/round_button.gif" border="0" alt="Propiedades"></a>
+                </td>
+                <td style="background-color: lightblue; border: 1px solid;">
+                    <a id="${ device.deviceId }" href="@{commands}" class="submitForm"><img src="../public/images/list_detail.png" border="0" alt="Comandos"></a>
+                </td>
+                </tr>
+                #{/list}
+                </tbody>
+            </table>
+
+
+
+
+
+        </div>
+    </article>
+</section>
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    $(function() {
+        $(".submitForm").click(function(event) {
+            $("[name = deviceId]").val($(this).attr("id"));
+            $("#mainForm").attr("action", $(this).attr("href")).submit();
+            event.preventDefault();
+        });
+
+        $(".clickBack").click(function(e) {
+            {
+                var defaultLocation = "@{MenuController.hardwareMenu(1)}";
+                window.location.href = defaultLocation;
+                //e.preventDefault();
+                return false; // stop event propagation and browser default event
+            }
+        });
+    });
+</script>
+#{/set}

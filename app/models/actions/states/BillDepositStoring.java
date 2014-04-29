@@ -38,6 +38,8 @@ public class BillDepositStoring extends ActionState {
                 stateApi.setState(new Jam(stateApi, this));
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
+                stateApi.addBatchToDeposit(null);
+
                 stateApi.closeDeposit(FinishCause.FINISH_CAUSE_OK);
                 if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new Finish(stateApi));
@@ -48,6 +50,8 @@ public class BillDepositStoring extends ActionState {
                 stateApi.cancelDeposit();
                 break;
             case COUNTING:
+                stateApi.addBatchToDeposit(null);
+
                 stateApi.closeBatch();
                 if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new BillDepositStart(stateApi));

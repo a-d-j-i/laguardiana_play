@@ -37,6 +37,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     public Date withdrawDate;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "bag")
     public Set<LgDeposit> deposits = new HashSet<LgDeposit>(0);
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "currentBag")
+    public Set<LgDevice> ioboards;
     @Transient
     transient public String withdrawUser;
 //    @Transient
@@ -116,7 +118,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     }
 
     // TODO: Search for the bag that has withdraw data null.
-    // Or add a new bug logging the error.
+    // Or add a new bag logging the error.
     // There must allways be a bag because if the ioboard is ignored I can't have a withdraw and placement date
     // but I need a bug to relate the deposits.
     public static LgBag getCurrentBag() {
@@ -153,7 +155,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
         LgBag current = getCurrentBag();
         // If the bug was not placed by the ioboard then it can be withdrawn by the ioboard.
-        if ( current.placementDate == null && byIoBoard) {
+        if (current.placementDate == null && byIoBoard) {
             return;
         }
         // last bag was removed and is still no placed;

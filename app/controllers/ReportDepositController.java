@@ -30,7 +30,7 @@ public class ReportDepositController extends Controller {
         int length = 3;
         long cnt = LgDeposit.count(startDate, endDate, bagId, zId);
         renderArgs.put("cnt", cnt);
-        Integer totalPage = (int) ((cnt / length) + 1);
+        Integer totalPage = (int) (((cnt - 1) / length) + 1);
         if (page > totalPage) {
             page = totalPage;
         }

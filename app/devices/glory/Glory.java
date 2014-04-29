@@ -1,6 +1,6 @@
 package devices.glory;
 
-import devices.SerialPortAdapterInterface;
+import devices.serial.SerialPortAdapterInterface;
 import devices.glory.command.GloryCommandAbstract;
 import java.io.IOException;
 import java.security.InvalidParameterException;

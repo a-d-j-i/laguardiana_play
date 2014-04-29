@@ -15,6 +15,11 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     @GeneratedValue(generator = "LgBatchGenerator")
     @SequenceGenerator(name = "LgBatchGenerator", sequenceName = "lg_batch_sequence")
     public Integer batchId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "device_id", nullable = false)
+    public LgDevice device;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
@@ -24,7 +29,8 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "batch")
     public Set<LgBill> bills = new HashSet<LgBill>(0);
 
-    public LgBatch() {
+    public LgBatch(LgDevice device) {
+//        this.device = device;
         this.creationDate = new Date();
     }
 
@@ -45,6 +51,7 @@ public class LgBatch extends GenericModel implements java.io.Serializable {
                 result += bill.toString();
             }
         }
+        //return "Device : " + device.deviceId.toString() + " " + result + " == " + Long.toString(sum) + "]" + " {" + depositId.toString() + "}";
         return result + " == " + Long.toString(sum) + "]" + " {" + depositId.toString() + "}";
     }
 }

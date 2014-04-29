@@ -7,6 +7,8 @@ import play.db.jpa.GenericModel;
 
 @Entity
 @Table(name = "lg_bill", schema = "public")
+//        uniqueConstraints = @UniqueConstraint(columnNames = {"deposit_id", "batch_id", "device_id", "bill_type_id"})
+//)
 public class LgBill extends GenericModel implements java.io.Serializable {
 
     @Id
@@ -20,11 +22,11 @@ public class LgBill extends GenericModel implements java.io.Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "batch_id", nullable = false)
     public LgBatch batch;
-    @Column(name = "quantity", nullable = false)
-    public Integer quantity;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bill_type_id", nullable = false)
     public LgBillType billType;
+    @Column(name = "quantity", nullable = false)
+    public Integer quantity;
 
     public LgBill(int quantity, LgBillType billType) {
         this.quantity = quantity;

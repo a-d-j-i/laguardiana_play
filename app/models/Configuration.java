@@ -97,6 +97,10 @@ public class Configuration {
         return getSystemProperty("application.machine_code");
     }
 
+    public static String getMachineType() {
+        return getSystemProperty("application.machine_type");
+    }
+
     public static String getMachineDescription() {
         return getSystemProperty("application.machine_description");
     }

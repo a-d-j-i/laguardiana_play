@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices.printHelper;
+package devices.printer.printHelper;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;

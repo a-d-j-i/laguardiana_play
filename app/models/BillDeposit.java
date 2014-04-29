@@ -4,14 +4,11 @@ import controllers.Secure;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Entity;
-import models.db.LgBill;
 import models.db.LgDeposit;
 import models.db.LgUser;
-import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 
 @Entity
@@ -19,15 +16,6 @@ public class BillDeposit extends LgDeposit {
 
     public BillDeposit(LgUser user, String userCode, DepositUserCodeReference userCodeData) {
         super(user, userCode, userCodeData);
-    }
-
-    public Currency getCurrency() {
-        Iterator<LgBill> i = bills.iterator();
-        if (i.hasNext()) {
-            LgBill b = i.next();
-            return b.billType.getCurrency();
-        }
-        return Currency.findByNumericId(Configuration.getDefaultCurrency());
     }
 
     public Long getTotal() {

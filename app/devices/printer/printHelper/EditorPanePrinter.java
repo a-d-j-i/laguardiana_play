@@ -2,7 +2,7 @@
  * SEE:Printing/Previewing of the JEditorPane/JTextPane content with any EditorKit set.
  By Stanislav Lapitsky
  */
-package devices.printHelper;
+package devices.printer.printHelper;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;

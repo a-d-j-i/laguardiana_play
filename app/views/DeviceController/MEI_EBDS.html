@@ -1,0 +1,133 @@
+#{set title:'IoBoard (Comandos)' /}
+#{extends 'main.html' /}
+
+#{set 'moreStyles'}
+<style>
+    .circle {
+        background: yellow;
+        border-radius: 100%;
+        font-size: x-large;
+    }
+</style>
+#{/set}
+
+<section id ="menu_principal">
+    <header></header>
+    <nav>
+        <a id ="backButton" href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    </nav>
+    <article>
+        <div class="botonera">
+            <ul class="on-2 unit">
+                <li class="column">
+                    <div style="margin:20px;">
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">status</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">openGate</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">closeGate</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">aproveBag</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">aproveBagConfirm</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">clearError</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna" style="height: 100%; padding: 20px;">
+                        <p>
+                            <span ID="sensorA" class="circle">&nbsp;A&nbsp;</span>
+                            &nbsp;
+                            <span ID="sensorB" class="circle">&nbsp;B&nbsp;</span>
+                            &nbsp;
+                            <span ID="sensorC" class="circle">&nbsp;C&nbsp;</span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <span ID="sensorD" class="circle">&nbsp;L&nbsp;</span>
+                        </p>
+                        <p>ERROR CODE: <span id="ERROR_CODE">error : ${status?.getError()}</span></p>
+                        <p>ERROR DETAIL: <span id="ERROR_DETAIL">error : ${status?.getError()}</span></p>
+                        <p>A : <span id ="A">${status?.reprA()}</span></p>
+                        <p>B : <span id ="B">${status?.reprB()}</span></p>
+                        <p>C : <span id ="C">${status?.reprC()}</span></p>
+                        <p>D : <span id ="D">${status?.reprD()}</span></p>
+                        <p>BAG_SENSOR : <span id ="BAG_SENSOR">${status?.reprBAG_SENSOR()}</span></p>
+                        <p>BAG_STATUS : <span id ="BAG_STATUS">${status?.reprBAG_STATUS()}</span></p>
+                        <p>BAG APROVE STATE: <span id ="BAG_APROVE_STATE">${status?.bagAproveState}</span></p>
+                        <p>BAG_STATE : <span id ="BAG_STATE">${status?.bagState?.name()}</span></p>
+                        <p>SHUTTER_STATE : <span id ="SHUTTER_STATE">${status?.shutterState?.name()}</span></p>
+                        <p>LOCK_STATE : 
+                            <span id ="LOCK_STATE">
+                                #{if (status?.lockState ) }Locked#{/if}
+                                #{else}UnLocked#{/else}
+                            </span>
+                        </p>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+    </article>
+</section>
+
+#{set 'moreScripts'}
+<script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script type="text/javascript" charset="${_response_encoding}">
+    function repr(number) {
+        if (number < 0) {
+            number = 0xFF + number + 1;
+        }
+        return "0x" + number.toString(16).toUpperCase() + " : { " + number.toString(2).toUpperCase() + " }";
+    }
+    doRefresh = function() {
+        $.getJSON('@{commands(deviceId)}', function(data) {
+
+            var error = data[ 0 ];
+            var status = data[ 1 ];
+            if (error) {
+                $("#ERROR").text(error);
+            }
+            if (status.error) {
+                $("#ERROR_CODE").text(status.error.errorCode);
+                $("#ERROR_DETAIL").text(status.error.detail);
+                $("#sensorA").css("background", "yellow");
+                $("#sensorB").css("background", "yellow");
+                $("#sensorC").css("background", "yellow");
+                $("#sensorD").css("background", "yellow");
+            } else {
+                $("#ERROR_CODE").text("");
+                $("#ERROR_DETAIL").text("");
+                // TODO: MOVE THIS TO THE MODEL!!!
+                if (status.D & 0x10) {
+                    $("#sensorA").css("background", "red");
+                } else {
+                    $("#sensorA").css("background", "green");
+                }
+                if (status.D & 0x08) {
+                    $("#sensorB").css("background", "red");
+                } else {
+                    $("#sensorB").css("background", "green");
+                }
+                if (status.D & 0x04) {
+                    $("#sensorC").css("background", "red");
+                } else {
+                    $("#sensorC").css("background", "green");
+                }
+                if (status.D & 0x20) {
+                    $("#sensorD").css("background", "red");
+                } else {
+                    $("#sensorD").css("background", "green");
+                }
+            }
+            $("#A").text(repr(status.A));
+            $("#B").text(repr(status.B));
+            $("#C").text(repr(status.C));
+            $("#D").text(repr(status.D));
+            $("#BAG_SENSOR").text(repr(status.BAG_SENSOR));
+            $("#BAG_STATUS").text(repr(status.BAG_STATUS));
+            $("#BAG_APROVE_STATE").text(status.bagAproveState);
+            $("#BAG_STATE").text(status.bagState);
+            $("#SHUTTER_STATE").text(status.shutterState);
+            $("#LOCK_STATE").text(status.lockState);
+
+            doneRefresh();
+        })
+    };
+
+</script>
+#{/set}

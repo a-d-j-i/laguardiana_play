@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package devices;
+package bootstrap;
 
-import static devices.DeviceFactory.eventExecutor;
+import static bootstrap.AppStart.eventExecutor;
 import java.util.concurrent.Callable;
 import play.jobs.Job;
 import play.libs.F;
@@ -14,14 +9,14 @@ import play.libs.F;
  *
  * @author adji
  */
-public class DeviceFactoryEventJob<V> extends Job<V> {
+public class BootstrapEventJob<V> extends Job<V> {
 
     @Override
     public F.Promise<V> now() {
         final F.Promise<V> smartFuture = new F.Promise<V>();
         eventExecutor.submit(new Callable<V>() {
             public V call() throws Exception {
-                V result = DeviceFactoryEventJob.this.call();
+                V result = BootstrapEventJob.this.call();
                 smartFuture.invoke(result);
                 return result;
             }

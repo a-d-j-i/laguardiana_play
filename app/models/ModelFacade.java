@@ -4,32 +4,39 @@
  */
 package models;
 
+import bootstrap.BootstrapEventJob;
 import controllers.Secure;
-import devices.DeviceFactoryEventJob;
-import devices.DeviceFactory;
+import devices.DeviceEvent;
+import devices.DeviceListener;
+import machines.Machine;
 import devices.glory.Glory;
-import devices.glory.manager.FakeGloryManager;
 import devices.glory.manager.ManagerInterface;
+import static devices.glory.manager.ManagerInterface.MANAGER_STATE.BAG_COLLECTED;
+import static devices.glory.manager.ManagerInterface.MANAGER_STATE.ERROR;
+import static devices.glory.manager.ManagerInterface.MANAGER_STATE.INITIALIZING;
+import static devices.glory.manager.ManagerInterface.MANAGER_STATE.NEUTRAL;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
+import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVED;
+import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVE_CONFIRM;
+import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVE_WAIT;
+import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_NOT_APROVED;
 import devices.printer.Printer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.print.PrintService;
 import models.actions.UserAction;
 import models.db.LgBag;
 import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
+import models.db.LgDevice;
 import models.db.LgUser;
 import models.events.ActionEvent;
 import models.events.GloryEvent;
@@ -37,53 +44,72 @@ import models.events.IoBoardEvent;
 import models.events.PrinterEvent;
 import play.Logger;
 import play.jobs.Job;
-import play.libs.F.Promise;
 
 /**
  * TODO: Review this with another thread/job that has a input queue for events
  * and react according to events from the glory and the electronics in the cage.
  * TODO: Save the state on the db so we react better on restart !!!!.
  *
- * @author aweil
+ * @author adji
  */
 public class ModelFacade {
 
-    final static private ManagerInterface manager;
-    final static private IoBoard ioBoard;
+    //final static private ManagerInterface manager;
+    //final static private IoBoard ioBoard;
+    //final static private AtomicReference<Printer> printer = new AtomicReference<Printer>();
     final static private ModelError modelError = new ModelError();
-    final static private AtomicReference<Printer> printer = new AtomicReference<Printer>();
     static private UserAction currentUserAction = null;
     static private LgUser currentUser = null;
+    /*
+     static {
+     if (Configuration.isIgnoreGlory()) {
+     manager = new FakeGloryManager();
+     } else {
+     manager = DeviceFactory.getGloryManager(Configuration.getGloryPort());
+     }
+     manager.addObserver(new Observer() {
+     public void update(Observable o, Object data) {
+     Promise now = new OnGloryEvent((ManagerStatus) data).now();
+     }
+     });
 
-    static {
-        if (Configuration.isIgnoreGlory()) {
-            manager = new FakeGloryManager();
-        } else {
-            manager = DeviceFactory.getGloryManager(Configuration.getGloryPort());
-        }
-        manager.addObserver(new Observer() {
-            public void update(Observable o, Object data) {
-                Promise now = new OnGloryEvent((ManagerStatus) data).now();
+     IoBoard.IOBOARD_VERSION ver = IoBoard.IOBOARD_VERSION.getVersion(Configuration.getIoBoardVersion());
+     ioBoard = DeviceFactory.getIoBoard(Configuration.getIoBoardPort(), ver);
+     ioBoard.addObserver(new Observer() {
+     public void update(Observable o, final Object data) {
+     Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
+     }
+     });
+
+     setCurrentPrinter(null);
+     }
+     */
+
+    public static DeviceListener getDeviceListener() {
+        return new DeviceListener() {
+
+            public void onDeviceEvent(DeviceEvent counterEvent) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
-        });
-
-        IoBoard.IOBOARD_VERSION ver = IoBoard.IOBOARD_VERSION.getVersion(Configuration.getIoBoardVersion());
-        ioBoard = DeviceFactory.getIoBoard(Configuration.getIoBoardPort(), ver);
-        ioBoard.addObserver(new Observer() {
-            public void update(Observable o, final Object data) {
-                Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
-            }
-        });
-
-        setCurrentPrinter(null);
+        };
     }
-    // TODO: Review
 
-    public static void initialize() {
+    private static Machine machine;
+
+    public static void start() throws Exception {
         // used to force the execution of the static code.
         // Close unifnished deposits.
         LgDeposit.closeUnfinished();
         Configuration.initCrapId();
+        machine = Machine.createMachine();
+    }
+
+    public static void stop() {
+        machine.stop();
+    }
+
+    public static List<LgDevice> getDevices() {
+        return machine.getDevices();
     }
 
     interface BillListVisitor {
@@ -93,6 +119,10 @@ public class ModelFacade {
 
     public static ModelError getError() {
         return modelError;
+    }
+
+    public void onDeviceEvent(DeviceEvent counterEvent) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     static class OnGloryEvent extends Job {
@@ -146,7 +176,7 @@ public class ModelFacade {
         }
     }
 
-    static class OnIoBoardEvent extends DeviceFactoryEventJob {
+    static class OnIoBoardEvent extends BootstrapEventJob {
 
         IoBoard.IoBoardStatus status;
 
@@ -192,7 +222,7 @@ public class ModelFacade {
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
                 switch (status.getBagAproveState()) {
                     case BAG_NOT_APROVED:
-                        ioBoard.aproveBag();
+////                        ioBoard.aproveBag();
                         /*if (!manager.collect()) {
                          modelError.setError(ModelError.ERROR_CODE.ERROR_TRYING_TO_COLLECT, "error trying to collect");
                          }*/
@@ -208,7 +238,7 @@ public class ModelFacade {
                         break;
                     case BAG_APROVE_CONFIRM:
                         LgBag.placeBag();
-                        ioBoard.aproveBagConfirm();
+////                        ioBoard.aproveBagConfirm();
                         break;
                 }
                 /*                if (u != null
@@ -263,9 +293,9 @@ public class ModelFacade {
                     setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "count currentAction is null");
                     return;
                 }
-                if (!manager.count(null, numericId)) {
-                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start count");
-                }
+////                if (!manager.count(null, numericId)) {
+////                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start count");
+////                }
             }
         }
 
@@ -273,17 +303,18 @@ public class ModelFacade {
             if (!isIoBoardOk()) {
                 return false;
             }
-            return manager.storeDeposit(depositId);
+////            return manager.storeDeposit(depositId);
+            return false;
         }
 
         public void withdraw() {
-            if (!manager.withdrawDeposit()) {
-                setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start withdraw");
-            }
+////            if (!manager.withdrawDeposit()) {
+////                setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start withdraw");
+////            }
         }
 
         public void cancelDeposit() {
-            manager.cancelCommand();
+////            manager.cancelCommand();
         }
 
         public void envelopeDeposit() {
@@ -292,14 +323,15 @@ public class ModelFacade {
                     setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "envelopeDeposit currentAction is null");
                     return;
                 }
-                if (!manager.envelopeDeposit()) {
-                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start envelope deposit");
-                }
+////                if (!manager.envelopeDeposit()) {
+////                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start envelope deposit");
+////                }
             }
         }
 
         public ManagerInterface.MANAGER_STATE getManagerState() {
-            return manager.getStatus().getState();
+////            return manager.getStatus().getState();
+            return null;
         }
 
         public void setError(ModelError.ERROR_CODE errorCode, String detail) {
@@ -308,11 +340,11 @@ public class ModelFacade {
         }
 
         public void openGate() {
-            ioBoard.openGate();
+////            ioBoard.openGate();
         }
 
         public void closeGate() {
-            ioBoard.closeGate();
+////            ioBoard.closeGate();
         }
 
         public boolean isIoBoardOk() {
@@ -338,19 +370,19 @@ public class ModelFacade {
     }
 
     synchronized public static void errorReset() {
-        if (manager.getStatus().getError() != null) {
-            manager.reset();
-        }
-        if (ioBoard.getStatus().getError() != null) {
-            ioBoard.reset();
-        }
+////        if (manager.getStatus().getError() != null) {
+////            manager.reset();
+////        }
+////        if (ioBoard.getStatus().getError() != null) {
+////            ioBoard.reset();
+////        }
         if (modelError.getErrorCode() != null) {
             modelError.clearErrorCodeError();
         }
     }
 
     synchronized public static void storingErrorReset() {
-        manager.storingErrorReset();
+////        manager.storingErrorReset();
     }
 
     synchronized static public void startAction(UserAction userAction) {
@@ -394,21 +426,20 @@ public class ModelFacade {
         if (isLocked()) {
             return null;
         }
-        ManagerStatus mstate = manager.getStatus();
-        if (mstate.getState() == ManagerInterface.MANAGER_STATE.ERROR) {
-            if (!Configuration.isIgnoreGlory()) {
-                modelError.setError(mstate.getError());
-            }
-        }
+////        ManagerStatus mstate = manager.getStatus();
+////        if (mstate.getState() == ManagerInterface.MANAGER_STATE.ERROR) {
+////            if (!Configuration.isIgnoreCounter()) {
+////                modelError.setError(mstate.getError());
+////            }
+////        }
 
-        IoBoard.IoBoardStatus status = ioBoard.getStatus();
-        if (status != null && status.getError() != null) {
-            if (!Configuration.isIgnoreIoBoard()) {
-                Logger.error("Setting ioboard error : %s", status.getError());
-                modelError.setError(status.getError());
-            }
-        }
-
+////        IoBoard.IoBoardStatus status = ioBoard.getStatus();
+////        if (status != null && status.getError() != null) {
+////            if (!Configuration.isIgnoreIoBoard()) {
+////                Logger.error("Setting ioboard error : %s", status.getError());
+////                modelError.setError(status.getError());
+////            }
+////        }
         if (modelError.isError()) {
             finishAction();
             return "ERROR";
@@ -473,44 +504,43 @@ public class ModelFacade {
     }
 
     private static void visitBillList(BillListVisitor visitor) {
-        Integer currency = manager.getCurrency();
-        if (currency == null) {
-            return;
-        }
+////        Integer currency = manager.getCurrency();
+////        if (currency == null) {
+////            return;
+////        }
 
-        List<LgBillType> billTypes = LgBillType.find(currency);
-
+////        List<LgBillType> billTypes = LgBillType.find(currency);
         Map<Integer, Integer> desiredQuantity = null;
         Map<Integer, Integer> currentQuantity = null;
-        if (manager != null) {
-            currentQuantity = manager.getCurrentQuantity();
-            desiredQuantity = manager.getDesiredQuantity();
-        }
+////        if (manager != null) {
+////            currentQuantity = manager.getCurrentQuantity();
+////            desiredQuantity = manager.getDesiredQuantity();
+////        }
         Set<Integer> slots = new HashSet();
         if (currentQuantity != null) {
             slots = new HashSet(currentQuantity.keySet());
         }
-        for (LgBillType billType : billTypes) {
-            Integer desired = 0;
-            Integer current = 0;
+////        for (LgBillType billType : billTypes) {
+////            Integer desired = 0;
+////            Integer current = 0;
 
-            if (currentQuantity != null && currentQuantity.containsKey(billType.slot)) {
-                slots.remove(billType.slot);
-                current = currentQuantity.get(billType.slot);
-            }
-            if (desiredQuantity != null && desiredQuantity.containsKey(billType.slot)) {
-                desired = desiredQuantity.get(billType.slot);
-            }
-            visitor.visit(billType, desired, current);
-        }
-        if (!slots.isEmpty()) {
-            for (Integer s : slots) {
-                if (currentQuantity != null && currentQuantity.get(s) > 0) {
-                    modelError.setError(ModelError.ERROR_CODE.APPLICATION_ERROR,
-                            String.format("The bill type slots must be configured correctly slot %d value %d", s, currentQuantity.get(s)));
-                }
-            }
-        }
+////            if (currentQuantity != null && currentQuantity.containsKey(billType.slot)) {
+////                slots.remove(billType.slot);
+////                current = currentQuantity.get(billType.slot);
+////            }
+////            if (desiredQuantity != null && desiredQuantity.containsKey(billType.slot)) {
+////                desired = desiredQuantity.get(billType.slot);
+////            }
+////            visitor.visit(billType, desired, current);
+////        }
+////        if (!slots.isEmpty()) {
+////            for (Integer s : slots) {
+////                if (currentQuantity != null && currentQuantity.get(s) > 0) {
+////                    modelError.setError(ModelError.ERROR_CODE.APPLICATION_ERROR,
+////                            String.format("The bill type slots must be configured correctly slot %d value %d", s, currentQuantity.get(s)));
+////                }
+////            }
+////        }
     }
 
     synchronized public static Object getFormData() {
@@ -568,32 +598,35 @@ public class ModelFacade {
     }
 
     public static ManagerInterface getGloryManager() {
-        return manager;
+////        return manager;
+        return null;
     }
 
     public static IoBoard getIoBoard() {
         //Play.configuration.getProperty("io_board.port")
-        return ioBoard;
+////        return ioBoard;
+        return null;
     }
 
     public static Glory getCounter() {
-        return manager.getCounter();
+////        return manager.getCounter();
+        return null;
     }
 
     public static boolean isIoBoardOk() {
-        IoBoard.IoBoardStatus status = ioBoard.getStatus();
+////        IoBoard.IoBoardStatus status = ioBoard.getStatus();
 
-        if (!Configuration.isIgnoreIoBoard() && status != null && status.getError() != null) {
-            Logger.error("Setting ioboard error : %s", status.getError());
-            modelError.setError(status.getError());
-            return false;
-        }
-        if (!Configuration.isIgnoreBag()
-                && status != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-            Logger.error("IoBoard bag not inplace can't store");
-            //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-            return false;
-        }
+////        if (!Configuration.isIgnoreIoBoard() && status != null && status.getError() != null) {
+////            Logger.error("Setting ioboard error : %s", status.getError());
+////            modelError.setError(status.getError());
+////            return false;
+////        }
+////        if (!Configuration.isIgnoreBag()
+////                && status != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+////            Logger.error("IoBoard bag not inplace can't store");
+        //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
+////            return false;
+////        }
         return true;
     }
 
@@ -636,17 +669,17 @@ public class ModelFacade {
             return;
         }
         Configuration.setDefaultPrinter(prt);
-        Printer currPrinter = DeviceFactory.getPrinter(prt);
-        currPrinter.addObserver(new Observer() {
-            public void update(Observable o, Object data) {
-                Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
-            }
-        });
+////        Printer currPrinter = DeviceFactory.getPrinter(prt);
+////        currPrinter.addObserver(new Observer() {
+////            public void update(Observable o, Object data) {
+////                Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
+////            }
+////        });
 
-        Printer oldPrinter = printer.getAndSet(currPrinter);
-        if (oldPrinter != null) {
-            //oldPrinter.close();
-        }
+////        Printer oldPrinter = printer.getAndSet(currPrinter);
+////        if (oldPrinter != null) {
+        //oldPrinter.close();
+////        }
     }
 
     public static Object getPrinters() {
@@ -654,7 +687,8 @@ public class ModelFacade {
     }
 
     public static boolean printerNeedCheck() {
-        return printer.get().needCheck();
+////        return printer.get().needCheck();
+        return false;
     }
 
     public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
@@ -675,15 +709,16 @@ public class ModelFacade {
             Logger.error("Wrong printer name %s", prt);
             return;
         }
-        Printer pp = DeviceFactory.getPrinter(prt);
-        pp.print(templateName, args, paperWidth, paperLen);
-        if (pp != printer.get()) {
-            //pp.close();
-        }
+////        Printer pp = DeviceFactory.getPrinter(prt);
+////        pp.print(templateName, args, paperWidth, paperLen);
+////        if (pp != printer.get()) {
+        //pp.close();
+////        }
     }
 
     public static Printer getCurrentPrinter() {
-        return printer.get();
+////        return printer.get();
+        return null;
     }
 
 }

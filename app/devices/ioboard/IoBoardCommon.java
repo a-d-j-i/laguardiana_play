@@ -1,5 +1,6 @@
 package devices.ioboard;
 
+import devices.DeviceClassIoBoard;
 import devices.serial.SerialPortAdapterAbstract.PORTSPEED;
 import devices.serial.SerialPortAdapterInterface;
 import java.io.IOException;
@@ -17,7 +18,8 @@ import play.Logger;
 /*
  * TODO: getCh, fifo, etc in other class.
  */
-public class IoBoard {
+public class IoBoardCommon implements DeviceClassIoBoard {
+
 
     public enum IOBOARD_VERSION {
 
@@ -453,7 +455,7 @@ public class IoBoard {
     private SerialPortAdapterInterface serialPort = null;
     private IOBOARD_VERSION version;
 
-    public IoBoard(SerialPortAdapterInterface serialPort, IOBOARD_VERSION version) {
+    public IoBoardCommon(SerialPortAdapterInterface serialPort, IOBOARD_VERSION version) {
         if (serialPort == null) {
             throw new InvalidParameterException("IoBoard invalid parameter serial port");
         }
@@ -535,7 +537,7 @@ public class IoBoard {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final IoBoard other = (IoBoard) obj;
+        final IoBoardCommon other = (IoBoardCommon) obj;
         if (this.serialPort != other.serialPort && (this.serialPort == null || !this.serialPort.equals(other.serialPort))) {
             return false;
         }

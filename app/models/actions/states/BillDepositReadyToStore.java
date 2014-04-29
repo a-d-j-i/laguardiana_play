@@ -40,7 +40,6 @@ public class BillDepositReadyToStore extends ActionState {
             return;
         }
         stateApi.cancelTimer();
-        stateApi.addBatchToDeposit();
         if (Configuration.isIgnoreShutter()) {
             if (!stateApi.store()) {
                 Logger.error("startBillDeposit can't deposit");

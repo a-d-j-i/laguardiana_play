@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices.printHelper;
+package devices.printer.printHelper;
 
 import javax.swing.text.Element;
 import javax.swing.text.FlowView;

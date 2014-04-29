@@ -1,4 +1,4 @@
-package devices;
+package devices.serial;
 
 import java.io.IOException;
 import java.io.InputStream;

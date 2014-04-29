@@ -63,6 +63,7 @@ other_menu.accounting=Contabilidade
 other_menu.reports=Relatórios
 other_menu.hardware_admin=Hardware Admin
 other_menu.config=Configuracion
+other_menu.devices=Dispositivos
 
 other_menu.db_admin=Administrar DB
 other_menu.glory_cmd=Glory Comandos

@@ -72,6 +72,7 @@ other_menu.ioboard_cmd=IoBoard
 other_menu.status=Status
 other_menu.printer_test=Test
 other_menu.printer_list=Impresoras
+other_menu.devices=Dispositivos
 
 other_menu.current_z_totals=Recaudacion actual
 other_menu.rotate_z=Cierre contable

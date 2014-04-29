@@ -1,4 +1,4 @@
-package devices;
+package devices.serial;
 
 import gnu.io.*;
 import java.io.File;

@@ -9,6 +9,7 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;
+import java.util.List;
 import models.ItemQuantity;
 import models.ModelError;
 import models.ModelFacade.UserActionApi;
@@ -18,6 +19,7 @@ import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgDeposit;
 import models.db.LgDeposit.FinishCause;
+import models.db.LgDevice;
 import models.db.LgUser;
 import models.events.TimeoutEvent;
 import models.lov.Currency;
@@ -74,7 +76,7 @@ abstract public class UserAction {
             userActionApi.withdraw();
         }
 
-        public Iterable<LgBill> getCurrentBillList() {
+        public List<LgBill> getCurrentBillList() {
             return userActionApi.getCurrentBillList();
         }
 
@@ -83,9 +85,9 @@ abstract public class UserAction {
             return currentBag.getItemQuantity(currentDepositId);
         }
 
-        public void addBatchToDeposit() {
+        public void addBatchToDeposit(LgDevice device) {
             LgDeposit deposit = LgDeposit.findById(currentDepositId);
-            LgBatch batch = new LgBatch();
+            LgBatch batch = new LgBatch(device);
             for (LgBill bill : userActionApi.getCurrentBillList()) {
                 Logger.debug(" -> quantity %d", bill.quantity);
                 batch.addBill(bill);

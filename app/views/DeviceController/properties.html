@@ -3,13 +3,15 @@
 <section>
     <header></header>
     <nav>
-        <a href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+        <a href="@{DeviceController.list()}" class="boton_top">◄ &{ 'application.back' }</a>
     </nav>
     <article>
         <h1 class="casa">&{'other_menu.config'}&nbsp;<span id="processing" style="text-align: right; height: 30px; color: red;"></span></h1>
         <div class="contenido">
             <div style="overflow:auto; height:  80%;">
-                #{form @index(), id:'configForm', style:'height:  100%;'}
+                #{form @list(), id:'configForm', style:'height:  100%;'}
+                <input type="hidden" id="deviceId" name="deviceId" value="${device.deviceId}">
+
                 <table style="background: #E8E8E8;" style="margin: 10px;">
                     #{list items:data, as:'b'}
                     <tr>
@@ -18,13 +20,13 @@
                         </td>
                         <td style="text-align: left; width: 70%;">
                             #{if b.editType.name() == 'INTEGER' }
-                            <input class="form_input propInput_integer" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="number" id="ID_${b.propertyId}" name="${b.name}" value="${b.value}">
+                            <input class="form_input propInput_integer" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="number" id="ID_${b.devicePropertyId}" name="${b.name}" value="${b.value}">
                             #{/if}
                             #{elseif b.editType.name() == 'BOOLEAN'}
-                            <input class="form_input propInput_boolean" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="checkbox" id="ID_${b.propertyId}" name="${b.name}" #{if b.value == 'true' }checked='checked'#{/}">
+                            <input class="form_input propInput_boolean" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="checkbox" id="ID_${b.devicePropertyId}" name="${b.name}" #{if b.value == 'true' }checked='checked'#{/}">
                                    #{/elseif}
                                    #{elseif b.editType.name() == 'STRING'}
-                                   <input class="form_input propInput_string" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="text" id="ID_${b.propertyId}" name="${b.name}" value="${b.value}">
+                                   <input class="form_input propInput_string" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="text" id="ID_${b.devicePropertyId}" name="${b.name}" value="${b.value}">
                             #{/elseif}
                             #{else}
                             <p style="width: 100%; margin-bottom: 0px; padding: 0px;">${b.value}</p>
@@ -60,10 +62,10 @@
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     var current_overlay;
-    function postToServer(event, property, value) {
+    function postToServer(event, deviceId, property, value) {
         $(".form_input").prop('disabled', true);
         $("#processing").html("&{ 'application.wait' }... ");
-        $.getJSON('@{setProperty}', {property: property, value: value},
+        $.getJSON('@{setProperty}', {deviceId: deviceId, property: property, value: value},
         function(data) {
             waiting = false;
             var propId = data[0];
@@ -102,13 +104,13 @@
             }
         });
         $(".propInput_integer").change(function(event) {
-            postToServer(event, $(this).attr('name'), $(this).val());
+            postToServer(event, $("#deviceId").val(), $(this).attr('name'), $(this).val());
         });
         $(".propInput_string").change(function(event) {
-            postToServer(event, $(this).attr('name'), $(this).val());
+            postToServer(event, $("#deviceId").val(), $(this).attr('name'), $(this).val());
         });
         $(".propInput_boolean").change(function(event) {
-            postToServer(event, $(this).attr('name'), $(this).is(':checked'));
+            postToServer(event, $("#deviceId").val(), $(this).attr('name'), $(this).is(':checked'));
         });
         $('#configForm').submit(function() {
             return false;
