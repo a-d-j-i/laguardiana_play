@@ -6,7 +6,7 @@ package devices.glory.command;
  * TM transmits.
  * (For SR4, refer to 3-3-5. Details of Responses.)
  */
-public class ResetDevice extends CommandWithAckResponse {
+public class ResetDevice extends OperationWithAckResponse {
 
     public ResetDevice() {
         super( ( byte ) 0x38, "Reset Device" );

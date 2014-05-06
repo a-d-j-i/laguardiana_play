@@ -407,12 +407,12 @@ public class IoBoard {
                         if (lastCmdSentTime != null && (currTime.getTime() - lastCmdSentTime.getTime()) > IOBOARD_READ_TIMEOUT) {
                             state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
                                     String.format("StatusThread timeout reading from port, exception %s", ex.getMessage())));
-                            try {
-                                Logger.debug("IOBOARD TRY TO RECONNECT");
-                                serialPort.reconect();
-                            } catch (IOException ex1) {
-                                state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT,
-                                        String.format("Error in reconection %s", ex1.getMessage())));
+                            Logger.debug("IOBOARD TRY TO RECONNECT");
+                            if (!serialPort.open()) {
+                                serialPort.close();
+                            }
+                            if (!serialPort.open()) {
+                                state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT, String.format("Error in reconection")));
                             }
                         }
                     }
@@ -426,25 +426,21 @@ public class IoBoard {
                 Logger.error("IoBoard Serial port closed");
                 return;
             }
-            try {
-                byte[] b = new byte[1];
-                b[0] = (byte) cmd;
-                if (cmd != 'S') {
-                    Logger.debug("IoBoard writting %c", cmd);
+            byte[] b = new byte[1];
+            b[0] = (byte) cmd;
+            if (cmd != 'S') {
+                Logger.debug("IoBoard writting %c", cmd);
+            }
+            if (!serialPort.write(b)) {
+                Logger.error("IoBoard Error writing to port %s", serialPort);
+                if (!serialPort.open()) {
+                    serialPort.close();
                 }
-                serialPort.write(b);
-                lastCmdSentTime = new Date();
-            } catch (IOException e) {
-                Logger.error("IoBoard Error writing to port %s", e.getMessage());
-                try {
-                    serialPort.reconect();
-                } catch (IOException ex1) {
-                    if (state.getError() == null) {
-                        state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_ERROR,
-                                String.format("Error in reconection %s", ex1.getMessage())));
-                    }
+                if (!serialPort.open()) {
+                    state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_COMMUNICATION_TIMEOUT, String.format("Error in reconection")));
                 }
             }
+            lastCmdSentTime = new Date();
         }
     }
     private Date lastCmdSentTime = null;
@@ -486,11 +482,7 @@ public class IoBoard {
             Logger.error("Error closing the ioboard status thread %s", ex.getMessage());
         }
         if (serialPort != null) {
-            try {
-                serialPort.close();
-            } catch (IOException ex) {
-                Logger.error("Error closing the ioboard serial port %s", ex.getMessage());
-            }
+            serialPort.close();
         }
         serialPort = null;
     }

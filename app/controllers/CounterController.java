@@ -5,8 +5,6 @@
 package controllers;
 
 import devices.ioboard.IoBoard;
-import devices.glory.manager.ManagerInterface;
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.printer.Printer.PrinterStatus;
 import models.Configuration;
 import models.ModelFacade;
@@ -48,17 +46,12 @@ public class CounterController extends Controller {
         }
     }
 
+    // TODO: Show machine status.
     public static void counterError(Integer cmd) {
-        ManagerStatus gstatus = null;
         String gerror = null;
         PrinterStatus pstatus = null;
         String ierror = null;
 
-        final ManagerInterface manager = ModelFacade.getGloryManager();
-        if (manager != null) {
-            gstatus = manager.getStatus();
-            gerror = manager.getStatus().toString();
-        }
         if (!Configuration.isIgnoreIoBoard()) {
             final IoBoard ioBoard = ModelFacade.getIoBoard();
             if (ioBoard != null && ioBoard.getError() != null) {

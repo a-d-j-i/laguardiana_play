@@ -7,15 +7,8 @@ package models;
 import bootstrap.BootstrapEventJob;
 import controllers.Secure;
 import devices.DeviceEvent;
-import devices.DeviceListener;
+import devices.DeviceEventListener;
 import machines.Machine;
-import devices.glory.Glory;
-import devices.glory.manager.ManagerInterface;
-import static devices.glory.manager.ManagerInterface.MANAGER_STATE.BAG_COLLECTED;
-import static devices.glory.manager.ManagerInterface.MANAGER_STATE.ERROR;
-import static devices.glory.manager.ManagerInterface.MANAGER_STATE.INITIALIZING;
-import static devices.glory.manager.ManagerInterface.MANAGER_STATE.NEUTRAL;
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVED;
 import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVE_CONFIRM;
@@ -36,10 +29,8 @@ import models.db.LgBag;
 import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
-import models.db.LgDevice;
 import models.db.LgUser;
 import models.events.ActionEvent;
-import models.events.GloryEvent;
 import models.events.IoBoardEvent;
 import models.events.PrinterEvent;
 import play.Logger;
@@ -85,8 +76,8 @@ public class ModelFacade {
      }
      */
 
-    public static DeviceListener getDeviceListener() {
-        return new DeviceListener() {
+    public static DeviceEventListener getDeviceListener() {
+        return new DeviceEventListener() {
 
             public void onDeviceEvent(DeviceEvent counterEvent) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -94,22 +85,16 @@ public class ModelFacade {
         };
     }
 
-    private static Machine machine;
-
     public static void start() throws Exception {
         // used to force the execution of the static code.
         // Close unifnished deposits.
         LgDeposit.closeUnfinished();
         Configuration.initCrapId();
-        machine = Machine.createMachine();
+        Machine.getInstance().start();
     }
 
     public static void stop() {
-        machine.stop();
-    }
-
-    public static List<LgDevice> getDevices() {
-        return machine.getDevices();
+        Machine.getInstance().stop();
     }
 
     interface BillListVisitor {
@@ -124,57 +109,58 @@ public class ModelFacade {
     public void onDeviceEvent(DeviceEvent counterEvent) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    /*
+     static class OnGloryEvent extends Job {
 
-    static class OnGloryEvent extends Job {
+     ManagerStatus status;
 
-        ManagerStatus status;
+     public OnGloryEvent(ManagerStatus status) {
+     this.status = status;
+     }
 
-        public OnGloryEvent(ManagerStatus status) {
-            this.status = status;
-        }
-
-        @Override
-        public void doJob() throws Exception {
-            UserAction u;
-            synchronized (ModelFacade.class) {
-                u = currentUserAction;
-            }
-            GloryEvent.save(u, status.toString());
-            Logger.debug("OnGloryEvent event %s", status.toString());
-            switch (status.getState()) {
-                //Could happen on startup
-                case NEUTRAL:
-                    if (modelError.getGloryError() != null) {
-                        modelError.clearGloryError();
-                    }
-                    if (u != null) {
-                        u.onGloryEvent(status);
-                    }
-                    break;
-                // Dont aprove the bag if not collected
-                case BAG_COLLECTED:
-                    Logger.debug("-------> BAG COLLECTED, aprove change");
-                    //ioBoard.aproveBag();
-                    break;
-                case ERROR:
-                    if (u != null) {
-                        u.cancel();
-                    }
-                    if (status.getError() != null) {
-                        modelError.setError(status.getError());
-                    }
-                    break;
-                case INITIALIZING:
-                default:
-                    if (u == null) {
-                        Logger.error(String.format("OnGloryEvent current user action is null : %s", status.name()));
-                    } else {
-                        u.onGloryEvent(status);
-                    }
-                    break;
-            }
-        }
-    }
+     @Override
+     public void doJob() throws Exception {
+     UserAction u;
+     synchronized (ModelFacade.class) {
+     u = currentUserAction;
+     }
+     GloryEvent.save(u, status.toString());
+     Logger.debug("OnGloryEvent event %s", status.toString());
+     switch (status.getState()) {
+     //Could happen on startup
+     case NEUTRAL:
+     if (modelError.getGloryError() != null) {
+     modelError.clearGloryError();
+     }
+     if (u != null) {
+     u.onGloryEvent(status);
+     }
+     break;
+     // Dont aprove the bag if not collected
+     case BAG_COLLECTED:
+     Logger.debug("-------> BAG COLLECTED, aprove change");
+     //ioBoard.aproveBag();
+     break;
+     case ERROR:
+     if (u != null) {
+     u.cancel();
+     }
+     if (status.getError() != null) {
+     modelError.setError(status.getError());
+     }
+     break;
+     case INITIALIZING:
+     default:
+     if (u == null) {
+     Logger.error(String.format("OnGloryEvent current user action is null : %s", status.name()));
+     } else {
+     u.onGloryEvent(status);
+     }
+     break;
+     }
+     }
+     }
+     */
 
     static class OnIoBoardEvent extends BootstrapEventJob {
 
@@ -327,11 +313,6 @@ public class ModelFacade {
 ////                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start envelope deposit");
 ////                }
             }
-        }
-
-        public ManagerInterface.MANAGER_STATE getManagerState() {
-////            return manager.getStatus().getState();
-            return null;
         }
 
         public void setError(ModelError.ERROR_CODE errorCode, String detail) {
@@ -597,19 +578,9 @@ public class ModelFacade {
         currentUserAction.suspendTimeout();
     }
 
-    public static ManagerInterface getGloryManager() {
-////        return manager;
-        return null;
-    }
-
     public static IoBoard getIoBoard() {
         //Play.configuration.getProperty("io_board.port")
 ////        return ioBoard;
-        return null;
-    }
-
-    public static Glory getCounter() {
-////        return manager.getCounter();
         return null;
     }
 

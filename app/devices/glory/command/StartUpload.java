@@ -6,7 +6,7 @@ package devices.glory.command;
  * NAK is returned when file access is failure. Refer to the Appendix 2 for the
  * file name.
  */
-public class StartUpload extends CommandWithDataResponse {
+public class StartUpload extends OperationdWithDataResponse {
 
     public enum Files {
 
@@ -43,32 +43,32 @@ public class StartUpload extends CommandWithDataResponse {
     int fileSize = -1;
 
     @Override
-    public CommandWithDataResponse setResult(byte[] dr) {
-        super.setResult(dr);
-        if (getError() != null) {
-            return this;
+    public void setResponse(byte[] dr) {
+        super.setResponse(dr);
+        if (response.getError() != null) {
+            return;
         }
-
-        if (getData() == null) {
-            setError("Data is null");
-            return this;
+        byte[] data = response.getData();
+        if (data == null) {
+            response.setError("Data is null");
+            return;
         }
-        if (getData().length != 8) {
-            setError(String.format("Invalid command (%s) response length %d expected 8 bytes hex number",
+        if (data.length != 8) {
+            response.setError(String.format("Invalid command (%s) response length %d expected 8 bytes hex number",
                     getDescription(), dr.length));
-            return this;
+            return;
         }
-        byte[] b = getData();
+        byte[] b = data;
         int l = 0;
         for (int i = 0; i < b.length; i++) {
             if (b[i] >= 0x30 && b[i] <= 0x3F) {
                 l += getHexDigit(b[i]) * Math.pow(16, b.length - i - 1);
             } else {
-                setError(String.format("Invalid digit %d == 0x%x", b[i], b[i]));
+                response.setError(String.format("Invalid digit %d == 0x%x", b[i], b[i]));
             }
         }
         fileSize = l;
-        return this;
+        return;
     }
 
     public int getFileSize() {

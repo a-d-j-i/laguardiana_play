@@ -4,8 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface;
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.EnumMap;
@@ -16,7 +14,6 @@ import models.ModelError;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction;
 import models.actions.UserAction.StateApi;
-import models.db.LgBag;
 import models.db.LgBill;
 import models.db.LgDeposit;
 import play.Logger;

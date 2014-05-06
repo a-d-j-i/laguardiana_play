@@ -1,19 +1,17 @@
 package devices.serial;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 public interface SerialPortAdapterInterface {
 
-    public void write(byte[] buffer) throws IOException;
+    public boolean write(byte[] buffer);
 
-    public byte read(int timeout) throws IOException;
+    public boolean open();
 
-    public String readLine(int timeout) throws IOException;
+    public void close();
 
-    public InputStream getInputStream();
+    public Byte read();
 
-    public void reconect() throws IOException;
+    public Byte read(int timeout);
 
-    public void close() throws IOException;
+    public String readLine(int timeout);
+
 }

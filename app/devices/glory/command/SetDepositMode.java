@@ -6,7 +6,7 @@ package devices.glory.command;
  *  The device will be occupied by TM, which will then wait for a
  *  processing start request from the device.
  */
-public class SetDepositMode extends CommandWithAckResponse {
+public class SetDepositMode extends OperationWithAckResponse {
 
     public SetDepositMode() {
         super( ( byte ) 0x31, "Mode Specification (deposit)" );

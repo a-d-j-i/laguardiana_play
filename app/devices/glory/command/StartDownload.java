@@ -9,12 +9,12 @@ import play.Logger;
  * DE have file with same name, DE delete it. NAK is returned when file access
  * is failure.
  */
-public class StartDownload extends CommandWithAckResponse {
+public class StartDownload extends OperationWithAckResponse {
 
     public StartDownload(int fileSize, String fileName) {
         super((byte) 0x47, "StartDownload");
         if (fileName.length() != 12) {
-            setError("The file name must be in 8.3 format");
+            response.setError("The file name must be in 8.3 format");
         }
         byte[] a, b;
         a = getXXFormat(fileSize, 0x30, 8);

@@ -6,7 +6,7 @@ package devices.glory.command;
  * Return NAK response during counting.
  * The command enables a mode change
  */
-public class RemoteCancel extends CommandWithAckResponse {
+public class RemoteCancel extends OperationWithAckResponse {
 
     public RemoteCancel() {
         super( ( byte ) 0x37, "Remote Cancel" );

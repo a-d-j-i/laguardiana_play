@@ -4,8 +4,6 @@
  */
 package models.actions;
 
-import devices.glory.manager.ManagerInterface;
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;

@@ -1,35 +1,25 @@
 package devices.glory.command;
 
-import java.util.ArrayList;
+import devices.glory.response.GloryDE50Response.Denomination;
 
 /*
  * This command is return Denomination Data.
  */
-public class DenominationDataRequest extends CommandWithDataResponse {
-
-    static public class Denomination {
-
-        public int idx;
-        public String currencyCode;
-        public boolean newVal;
-        public Integer denominationCode;
-        public Integer value;
-    }
-    private ArrayList<Denomination> denominationData = new ArrayList<Denomination>();
+public class DenominationDataRequest extends OperationdWithDataResponse {
 
     public DenominationDataRequest() {
         super((byte) 0x44, "DenominationDataRequest");
     }
 
     @Override
-    public CommandWithDataResponse setResult(byte[] dr) {
-        super.setResult(dr);
-        if (getError() != null) {
-            return this;
+    public void setResponse(byte[] dr) {
+        super.setResponse(dr);
+        if (response.getError() != null) {
+            return;
         }
-
+        byte[] data = response.getData();
         if (data == null || data.length == 0) {
-            return this;
+            return;
         }
         for (int i = 0; i < data.length; i += 10) {
             if (i + 10 <= data.length) {
@@ -46,14 +36,10 @@ public class DenominationDataRequest extends CommandWithDataResponse {
                 if (data[ i + 5] != 0x30) {
                     d.value = -d.value;
                 }
-                denominationData.add(d);
+                response.addToDenominationData(d);
             }
         }
         //data.length;
-        return this;
-    }
-
-    public ArrayList<Denomination> getDenominationData() {
-        return denominationData;
+        return;
     }
 }

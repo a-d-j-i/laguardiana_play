@@ -9,12 +9,12 @@ package devices.glory.command;
  * and 'End Download', before this command..
  * Refer to the Appendix 1 for the device setting data.
  */
-public class DeviceSettingDataLoad extends CommandWithAckResponse {
+public class DeviceSettingDataLoad extends OperationWithAckResponse {
 
     public DeviceSettingDataLoad( String fileName ) {
         super( ( byte ) 0x46, "DeviceSettingDataLoad" );
         if ( fileName.length() != 12 ) {
-            setError( "The filename must be in 8.3 format" );
+            response.setError( "The filename must be in 8.3 format" );
         }
         setCmdData( fileName.getBytes() );
     }

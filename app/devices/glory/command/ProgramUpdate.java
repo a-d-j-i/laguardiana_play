@@ -7,7 +7,7 @@ package devices.glory.command;
  * If the file is not found, NAK is returned.
  * During updating software, DE cannot return response.
  */
-public class ProgramUpdate extends CommandWithAckResponse {
+public class ProgramUpdate extends OperationWithAckResponse {
 
     public ProgramUpdate(String fileName) {
         super((byte) 0x50, "ProgramUpdate");

@@ -1,11 +1,9 @@
 package devices.serial;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import play.Logger;
 
 public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInterface {
 
@@ -112,24 +110,18 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
             this.parity = parity;
         }
     }
-    PortConfiguration conf;
-    String portName = null;
-    private ArrayBlockingQueue< Byte> fifo = new ArrayBlockingQueue< Byte>(1024);
+    protected PortConfiguration conf;
+    protected String portName = null;
 
     public SerialPortAdapterAbstract(PortConfiguration conf) {
         this.conf = conf;
     }
 
-    public void reconect() throws IOException {
-        close();
-        open();
-    }
+    abstract public boolean open();
 
-    abstract protected void open() throws IOException;
+    abstract public void close();
 
-    abstract public void close() throws IOException;
-
-    abstract public void write(byte[] buffer) throws IOException;
+    abstract public boolean write(byte[] buffer);
 
     enum State {
 
@@ -137,85 +129,7 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         CR_DETECTED,;
     }
 
-    protected void fifoAdd(byte b) {
-        fifo.add(b);
-    }
-
-    public byte read(int timeout) throws IOException {
-        Byte ch;
-        try {
-            ch = fifo.poll(timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new IOException("SerialAdapter Interrupt Exception");
-        }
-        if (ch == null) {
-            throw new IOException(new TimeoutException(String.format("timeout : %d", timeout)));
-        }
-        return ch;
-    }
-
-    // Not completly thread safe!!!, fails if used with read...
-    public String readLine(int timeout) throws IOException {
-        State state = State.START;
-        StringBuilder sb = new StringBuilder(1024);
-        boolean done = false;
-        while (!done) {
-            switch (state) {
-                case START:
-                    // remove from queue
-                    byte ch = read(timeout);
-                    if (ch == 0x0d) {
-                        state = State.CR_DETECTED;
-                    } else if (ch == 0x0a) {
-                        done = true;
-                    } else {
-                        sb.append((char) ch);
-                    }
-                    break;
-                case CR_DETECTED:
-                    done = true;
-                    Byte b = null;
-                    long startT = (new Date()).getTime();
-                    while (((new Date()).getTime() - startT) < timeout && b == null) {
-                        b = fifo.peek();
-                        if (b == null) {
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException ex) {
-                            }
-                        }
-                    }
-                    if (b == null) {
-                        // Timeout
-                        throw new IOException(new TimeoutException(String.format("timeout 2 : %d", timeout)));
-                    } else {
-                        if (b == 0x0a) {
-                            // remove from queue
-                            read(timeout);
-                        }
-                    }
-                    break;
-            }
-        }
-
-        return sb.toString();
-    }
-
-    public InputStream getInputStream() {
-        return new SerialInputStream();
-
-
-    }
-
-    class SerialInputStream extends InputStream {
-
-        final int SERIAL_INPUT_STREAM_TIMEOUT = 60000;
-
-        @Override
-        public int read() throws IOException {
-            return SerialPortAdapterAbstract.this.read(SERIAL_INPUT_STREAM_TIMEOUT);
-        }
-    }
+    private final BlockingQueue< Byte> fifo = new ArrayBlockingQueue< Byte>(1024);
 
     @Override
     public int hashCode() {
@@ -238,4 +152,53 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         }
         return true;
     }
+
+    protected void fifoAdd(byte b) {
+        fifo.add(b);
+    }
+
+    public Byte read() {
+        return fifo.poll();
+    }
+
+    public Byte read(int timeout) {
+        try {
+            return fifo.poll(timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ex) {
+            Logger.error("Interrupt exception reading from fifo %s", ex);
+            return null;
+        }
+    }
+
+    // Not completly thread safe!!!, fails if used with read...
+    public String readLine(int timeout) {
+        SerialPortAdapterAbstract.State state = SerialPortAdapterAbstract.State.START;
+        StringBuilder sb = new StringBuilder(1024);
+        boolean done = false;
+        while (!done) {
+            switch (state) {
+                case START:
+                    // remove from queue
+                    int ch = read(timeout);
+                    if (ch == 0x0d) {
+                        state = SerialPortAdapterAbstract.State.CR_DETECTED;
+                    } else if (ch == 0x0a) {
+                        done = true;
+                    } else {
+                        sb.append(ch);
+                    }
+                    break;
+                case CR_DETECTED:
+                    int b = read(timeout);
+                    if (b == 0x0a) {
+                        done = true;
+                    } else {
+                        Logger.error("Invalid character received %s", b);
+                    }
+                    break;
+            }
+        }
+        return sb.toString();
+    }
+
 }

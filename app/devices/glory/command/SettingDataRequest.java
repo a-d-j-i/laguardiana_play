@@ -6,7 +6,7 @@ package devices.glory.command;
  * Refer to the Appendix 1 for the device setting data.
  * This command is return Device Setting Data.
  */
-public class SettingDataRequest extends CommandWithDataResponse {
+public class SettingDataRequest extends OperationdWithDataResponse {
 
     public SettingDataRequest( String data ){
         super( ( byte ) 0x43, "SettingDataRequest" );

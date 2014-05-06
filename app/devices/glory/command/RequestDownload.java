@@ -2,8 +2,6 @@ package devices.glory.command;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /*
  * Packet No Offset number by 512 bytes from beginning-of-file.
@@ -14,12 +12,12 @@ import java.util.logging.Logger;
  * download by the command 'Start Download'. If Packet No is not sequence number
  * from the last command, NAK is returned.
  */
-public class RequestDownload extends CommandWithDataResponse {
+public class RequestDownload extends OperationdWithDataResponse {
 
     public RequestDownload(long packetNo, byte[] data) {
         super((byte) 0x49, "RequestDownload");
         if (data.length != 512) {
-            setError("Data must have 512 bytes");
+            response.setError("Data must have 512 bytes");
             return;
         }
         ByteArrayOutputStream os = null;
@@ -33,7 +31,7 @@ public class RequestDownload extends CommandWithDataResponse {
             }
             setCmdData(os.toByteArray());
         } catch (IOException e) {
-            setError("Generating buffer" + e.getMessage());
+            response.setError("Generating buffer" + e.getMessage());
             if (os != null) {
                 try {
                     os.close();

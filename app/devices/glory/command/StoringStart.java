@@ -11,7 +11,7 @@ import java.io.IOException;
  * You should attach the storing process's sequential
  * number. Because DE-50 can not be synchronized with TM.
  */
-public class StoringStart extends CommandWithAckResponse {
+public class StoringStart extends OperationWithAckResponse {
 
     public StoringStart( int sequenceNumber ) {
         super( ( byte ) 0x34, "Storing Start" );

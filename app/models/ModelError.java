@@ -4,7 +4,7 @@
  */
 package models;
 
-import devices.glory.manager.GloryManagerError;
+import devices.glory.status.GloryDE50DeviceErrorEvent;
 import devices.ioboard.IoBoardError;
 import devices.printer.PrinterError;
 import play.Logger;
@@ -19,7 +19,7 @@ public class ModelError {
 
         APPLICATION_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_CLOSED, SHUTTER_NOT_OPENING, ERROR_TRYING_TO_COLLECT, ESCROW_JAMED;
     }
-    private GloryManagerError gloryError = null;
+    private GloryDE50DeviceErrorEvent gloryError = null;
     private PrinterError printerError = null;
     private IoBoardError ioBoardError = null;
     private ERROR_CODE errorCode;
@@ -29,7 +29,7 @@ public class ModelError {
         return errorCode != null || gloryError != null || ioBoardError != null || printerError != null;
     }
 
-    synchronized public void setError(GloryManagerError error) {
+    synchronized public void setError(GloryDE50DeviceErrorEvent error) {
         Logger.debug("Error in gloryError %s", error);
         this.gloryError = error;
     }
@@ -50,7 +50,7 @@ public class ModelError {
         this.detail = detail;
     }
 
-    synchronized public GloryManagerError getGloryError() {
+    synchronized public GloryDE50DeviceErrorEvent getGloryError() {
         return gloryError;
     }
 

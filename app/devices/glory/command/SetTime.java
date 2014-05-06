@@ -8,7 +8,7 @@ import java.util.Date;
  * h: upper data, l: lower data
  * Update the time on DE.
  */
-public class SetTime extends CommandWithAckResponse {
+public class SetTime extends OperationWithAckResponse {
 
     public SetTime( Date time ) {
         super( ( byte ) 0x51, "SetTime" );

@@ -5,9 +5,10 @@
  */
 package models.db;
 
-import devices.Device.DeviceType;
+import devices.DeviceAbstract.DeviceType;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

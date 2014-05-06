@@ -33,7 +33,7 @@ public class LgDeviceProperty extends GenericModel implements java.io.Serializab
     @Enumerated(EnumType.ORDINAL)
     public LgDeviceProperty.EditType editType = LgDeviceProperty.EditType.NOT_EDITABLE;
 
-    static public void setOrCreateProperty(LgDevice device, String property, String value, LgDeviceProperty.EditType editType) {
+    static public LgDeviceProperty setOrCreateProperty(LgDevice device, String property, String value) {
         LgDeviceProperty l = getProperty(device, property);
         if (l == null) {
             l = new LgDeviceProperty();
@@ -42,6 +42,7 @@ public class LgDeviceProperty extends GenericModel implements java.io.Serializab
         }
         l.value = value;
         l.save();
+        return l;
     }
 
     public static LgDeviceProperty getOrCreateProperty(LgDevice device, String property, LgDeviceProperty.EditType editType) {

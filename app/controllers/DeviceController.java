@@ -1,8 +1,8 @@
 package controllers;
 
+import devices.DeviceInterface;
 import java.util.List;
-import models.ModelFacade;
-import models.db.LgDevice;
+import machines.Machine;
 import models.db.LgDeviceProperty;
 import play.Logger;
 import play.mvc.Controller;
@@ -12,7 +12,7 @@ import play.mvc.With;
 public class DeviceController extends Controller {
 
     public static void list() {
-        renderArgs.put("data", ModelFacade.getDevices());
+        renderArgs.put("data", Machine.getDevices());
         flash.put("backUrl", request.url);
         render();
     }
@@ -21,10 +21,10 @@ public class DeviceController extends Controller {
         if (deviceId == null) {
             list();
         }
-        LgDevice d = LgDevice.findById(deviceId);
+        DeviceInterface d = Machine.findDeviceById(deviceId);
         renderArgs.put("device", d);
         renderArgs.put("backUrl", flash.get("backUrl"));
-        render("DeviceController/" + d.deviceType.name() + ".html");
+        render("DeviceController/" + d.getName().toUpperCase() + "_OPERATIONS.html");
     }
 
     // TODO: Enforce security.
@@ -32,11 +32,11 @@ public class DeviceController extends Controller {
         if (deviceId == null) {
             list();
         }
-        LgDevice d = LgDevice.findById(deviceId);
+        DeviceInterface d = Machine.findDeviceById(deviceId);
         if (d == null) {
             list();
         }
-        List<LgDeviceProperty> data = LgDeviceProperty.getEditables(d);
+        List<LgDeviceProperty> data = d.getEditableProperties();
         /*for (LgDeviceProperty p : data) {
          //boolean perm = Secure.checkPermission(p.name, "GET");
          if (!perm) {
@@ -55,45 +55,33 @@ public class DeviceController extends Controller {
         }
         boolean perm = Secure.checkPermission(property, "SET");
         Object ret[] = new Object[3];
+        ret[0] = null;
+        ret[1] = null;
         if (!perm) {
-            ret[0] = null;
-            ret[1] = null;
             ret[2] = String.format("access denied for property %s", property);
             renderJSON(ret);
         }
-
-        Logger.debug("set system property %s to %s for deviceId", property, value, deviceId);
-        if (deviceId == null) {
-            ret[0] = null;
-            ret[1] = null;
-            ret[2] = String.format("invalid id %d", deviceId);
-            renderJSON(ret);
-        }
-        LgDevice d = LgDevice.findById(deviceId);
+        DeviceInterface d = Machine.findDeviceById(deviceId);
         if (d == null) {
-            ret[0] = null;
-            ret[1] = null;
-            ret[2] = String.format("device not found %d", deviceId);
+            ret[2] = String.format("invalid device Id");
             renderJSON(ret);
         }
-        LgDeviceProperty p = LgDeviceProperty.getProperty(d, property);
-        if (p == null) {
-            ret[0] = null;
-            ret[1] = null;
+        LgDeviceProperty newProp = d.setProperty(property, value);
+        if (newProp == null) {
             ret[2] = String.format("invalid property %s", property);
             renderJSON(ret);
         } else {
-            ret[0] = p.devicePropertyId;
-            ret[1] = p.value;
+            ret[0] = newProp.devicePropertyId;
+            ret[1] = newProp.value;
             ret[2] = false;
-            switch (p.editType) {
+            switch (newProp.editType) {
                 case BOOLEAN:
                     if (value.equalsIgnoreCase("off") || value.equalsIgnoreCase("false")) {
-                        p.value = "false";
-                        p.save();
+                        newProp.value = "false";
+                        newProp.save();
                     } else if (value.equalsIgnoreCase("on") || value.equalsIgnoreCase("true")) {
-                        p.value = "true";
-                        p.save();
+                        newProp.value = "true";
+                        newProp.save();
                     } else {
                         ret[2] = String.format("Invalid value '%s' for property %s", value, property);
                     }
@@ -101,15 +89,15 @@ public class DeviceController extends Controller {
                 case INTEGER:
                     try {
                         Integer i = Integer.parseInt(value);
-                        p.value = i.toString();
-                        p.save();
+                        newProp.value = i.toString();
+                        newProp.save();
                     } catch (NumberFormatException e) {
                         ret[2] = String.format("Invalid value '%s' for property %s", value, property);
                     }
                     break;
                 case STRING:
-                    p.value = value;
-                    p.save();
+                    newProp.value = value;
+                    newProp.save();
                     break;
                 case NOT_EDITABLE:
                 default:

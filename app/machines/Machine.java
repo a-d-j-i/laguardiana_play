@@ -1,24 +1,20 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package machines;
 
-import devices.Device;
-import devices.Device.DeviceDesc;
+import devices.DeviceAbstract.DeviceDesc;
+import devices.DeviceInterface;
+import devices.DeviceEventListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import models.Configuration;
-import models.ModelFacade;
-import models.db.LgDevice;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-abstract public class Machine {
+abstract public class Machine implements DeviceEventListener {
 
     public enum MachineType {
 
@@ -48,20 +44,25 @@ abstract public class Machine {
         }
     };
 
-    static public Machine createMachine() {
-        MachineType machineType = MachineType.getMachineType(Configuration.getMachineType());
-        Machine machine = machineType.getMachineInstance();
-        machine.start();
-        return machine;
+    static private Machine instance = null;
+
+    // TODO: Check singleton implementation.
+    static synchronized public Machine getInstance() {
+        if (instance == null) {
+            MachineType machineType = MachineType.getMachineType(Configuration.getMachineType());
+            instance = machineType.getMachineInstance();
+        }
+        return instance;
     }
 
-    public List<LgDevice> getDevices() {
-        List<LgDevice> ret = new ArrayList<LgDevice>();
-        for (Device d : devices) {
-            ret.add(d.getLgDevice());
-        }
-        return ret;
+    static public List<DeviceInterface> getDevices() {
+        return new ArrayList<DeviceInterface>(getInstance().devices.values());
     }
+
+    public static DeviceInterface findDeviceById(Integer deviceId) {
+        return getInstance().devices.get(deviceId);
+    }
+
 
     /*
      static HashMap<String, Glory> gloryDevices = new HashMap();
@@ -150,23 +151,23 @@ abstract public class Machine {
      }
      }
      */
-    private final List<Device> devices = new ArrayList<Device>();
+    private final Map<Integer, DeviceInterface> devices = new HashMap<Integer, DeviceInterface>();
 
     abstract protected DeviceDesc[] getDevicesDesc();
 
     public void start() {
         for (DeviceDesc desc : getDevicesDesc()) {
-            Device d = desc.CreateDevice();
+            DeviceInterface d = desc.createDevice();
             Logger.debug("Start device %s", d);
-            d.addListener(ModelFacade.getDeviceListener());
+            d.addEventListener(this);
             d.start();
-            devices.add(d);
+            devices.put(d.getDeviceId(), d);
             Logger.debug("Start device %s done", d);
         }
     }
 
     public void stop() {
-        for (Device d : devices) {
+        for (DeviceInterface d : devices.values()) {
             Logger.debug("Stop device %s", d.toString());
             d.stop();
             Logger.debug("Stop device %s done", d.toString());

@@ -4,7 +4,6 @@
  */
 package controllers;
 
-import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.List;
@@ -93,17 +92,12 @@ public class ConfigController extends Controller {
         }
     }
 
+    // TODO: Get machine status only.
     public static void status() {
-        ManagerInterface.ManagerStatus gstatus = null;
         String gerror = null;
         Printer.PrinterStatus pstatus = null;
         String ierror = null;
 
-        final ManagerInterface manager = ModelFacade.getGloryManager();
-        if (manager != null) {
-            gstatus = manager.getStatus();
-            gerror = manager.getStatus().toString();
-        }
         if (!Configuration.isIgnoreIoBoard()) {
             final IoBoard ioBoard = ModelFacade.getIoBoard();
             if (ioBoard != null && ioBoard.getError() != null) {
@@ -120,7 +114,6 @@ public class ConfigController extends Controller {
             renderArgs.put("mstatus", ModelFacade.getState());
             renderArgs.put("merror", ModelFacade.getError());
             renderArgs.put("pstatus", pstatus);
-            renderArgs.put("gstatus", gstatus);
             renderArgs.put("gerror", gerror);
             renderArgs.put("ierror", ierror);
             render();

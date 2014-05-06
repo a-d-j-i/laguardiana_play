@@ -7,7 +7,7 @@ package devices.glory.command;
  * fixed to normal end. However, after counting stops when a batch ends,
  * SR2 (batch end) shall also accompany.
  */
-public class CountingDataRequest extends CommandWithCountingDataResponse {
+public class CountingDataRequest extends OperationWithCountingDataResponse {
 
     public CountingDataRequest() {
         super( ( byte ) 0x41, "CountingDataRequest" );

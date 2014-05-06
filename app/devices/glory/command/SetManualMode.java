@@ -6,7 +6,7 @@ package devices.glory.command;
  *  The device will be occupied by TM, which will then wait for a
  *  processing start request from the device.
  */
-public class SetManualMode extends CommandWithAckResponse {
+public class SetManualMode extends OperationWithAckResponse {
 
     public SetManualMode() {
         super( ( byte ) 0x31, "Mode Specification (manual)" );

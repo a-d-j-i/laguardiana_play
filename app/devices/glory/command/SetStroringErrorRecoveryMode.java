@@ -6,7 +6,7 @@ package devices.glory.command;
  *  The device will be occupied by TM, which will then wait for a
  *  processing start request from the device.
  */
-public class SetStroringErrorRecoveryMode extends CommandWithAckResponse {
+public class SetStroringErrorRecoveryMode extends OperationWithAckResponse {
 
     public SetStroringErrorRecoveryMode() {
         super( ( byte ) 0x31, "Mode Specification (storing error recovery)" );

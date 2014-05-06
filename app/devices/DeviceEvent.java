@@ -8,14 +8,14 @@ import java.util.EventObject;
  */
 public class DeviceEvent extends EventObject {
 
-    private DeviceState state;
+    final private DeviceStatus state;
 
-    public DeviceEvent(Object source, DeviceState state) {
+    public DeviceEvent(Object source, DeviceStatus state) {
         super(source);
         this.state = state;
     }
 
-    public DeviceState getState() {
+    public DeviceStatus getState() {
         return state;
     }
 }

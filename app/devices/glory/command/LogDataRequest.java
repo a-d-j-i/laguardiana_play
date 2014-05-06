@@ -11,7 +11,7 @@ package devices.glory.command;
  * If Packet No is not sequence number from the last command,
  * NAK is returned.
  */
-public class LogDataRequest extends CommandWithDataResponse {
+public class LogDataRequest extends OperationdWithDataResponse {
 
     public LogDataRequest(long packetNo) {
         super((byte) 0x45, "LogDataRequest");

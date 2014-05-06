@@ -5,7 +5,7 @@
  */
 package devices.printer;
 
-import devices.DeviceState;
+import devices.DeviceStatus;
 import devices.printer.Printer.PRINTER_STATE;
 import devices.printer.Printer.PrinterStatus;
 import play.Logger;
@@ -14,7 +14,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class PrinterState extends DeviceState {
+public class PrinterState extends DeviceStatus {
 
     private PRINTER_STATE printerState = null;
     private String stateDesc;
