@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.UserAction.StateApi;
 import models.db.LgDeposit.FinishCause;
 import play.Logger;
@@ -31,7 +30,7 @@ public class IdleCounting extends ActionState {
         stateApi.cancelDeposit();
         stateApi.setState(new Canceling(stateApi));
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerStatus m) {
         switch (m.getState()) {
@@ -56,4 +55,5 @@ public class IdleCounting extends ActionState {
                 break;
         }
     }
+    */
 }

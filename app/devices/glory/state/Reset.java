@@ -5,7 +5,7 @@
 package devices.glory.state;
 
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50OperationResponse;
 
 /**
  *
@@ -22,11 +22,11 @@ public class Reset extends GloryDE50StatePoll {
 
     @Override
     public GloryDE50StateAbstract init() {
-        return sendGloryOperation(new devices.glory.command.ResetDevice());
+        return sendGloryOperation(new devices.glory.operation.ResetDevice());
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50Response lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
         switch (lastResponse.getSr1Mode()) {
             case being_reset:
             case being_restoration:

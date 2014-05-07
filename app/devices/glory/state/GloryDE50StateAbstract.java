@@ -4,12 +4,15 @@
  */
 package devices.glory.state;
 
+import devices.DeviceClassCounterIntreface;
 import devices.glory.GloryDE50Device;
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import devices.glory.command.GloryOperationAbstract;
-import devices.glory.response.GloryDE50Response;
+import devices.glory.operation.GloryOperationAbstract;
+import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.status.GloryDE50DeviceErrorEvent;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 import play.Logger;
 
 /**
@@ -17,7 +20,7 @@ import play.Logger;
  *
  * @author adji
  */
-abstract public class GloryDE50StateAbstract {
+abstract public class GloryDE50StateAbstract implements DeviceClassCounterIntreface {
 
     final GloryDE50StateMachineApi api;
 
@@ -33,7 +36,7 @@ abstract public class GloryDE50StateAbstract {
 
     GloryDE50StateAbstract sendGloryOperation(GloryOperationAbstract cmd) {
         if (cmd != null) {
-            GloryDE50Response response = api.sendGloryOperation(cmd);
+            GloryDE50OperationResponse response = api.sendGloryDE50Operation(cmd);
             if (response.isError()) {
                 String error = response.getError();
                 Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
@@ -48,47 +51,63 @@ abstract public class GloryDE50StateAbstract {
     }
 
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     public boolean envelopeDeposit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     public boolean collect() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public boolean storingErrorReset() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     public boolean reset() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
+    }
+
+    public boolean storingErrorReset() {
+        return false;
     }
 
     public boolean cancelDeposit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     public boolean storeDeposit(Integer sequenceNumber) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     public boolean withdrawDeposit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     public Integer getCurrency() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 
     public Map<Integer, Integer> getCurrentQuantity() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 
     public Map<Integer, Integer> getDesiredQuantity() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return null;
     }
 
+    public boolean openPort(final String pvalue, boolean wait) {
+        return false;
+    }
+
+    public boolean clearError() {
+        return false;
+    }
+
+    public String getError() {
+        return null;
+    }
+
+
+    public boolean sendOperation(FutureTask<GloryDE50OperationResponse> t) {
+        return false;
+    }
 }

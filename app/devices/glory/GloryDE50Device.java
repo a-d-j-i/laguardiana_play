@@ -4,12 +4,18 @@ import devices.DeviceAbstract;
 import devices.DeviceAbstract.DeviceType;
 import devices.DeviceClassCounterIntreface;
 import devices.DeviceStatus;
-import devices.glory.command.GloryOperationAbstract;
-import devices.glory.response.GloryDE50Response;
+import devices.glory.operation.GloryOperationAbstract;
+import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50StateAbstract;
 import devices.glory.state.OpenPort;
+import devices.serial.SerialPortAdapterAbstract;
+import devices.serial.SerialPortAdapterInterface;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
+import models.Configuration;
 import models.db.LgDeviceProperty;
 import play.Logger;
 
@@ -19,8 +25,6 @@ import play.Logger;
  */
 public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounterIntreface {
 
-
-    /* FROM GLORY !!! */
     static public enum STATUS {
 
         NEUTRAL,
@@ -42,12 +46,18 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
 
     public class GloryDE50StateMachineApi {
 
-        public boolean open() {
-            return gl.open();
+        final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7, SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
+        final private static int GLORY_READ_TIMEOUT = 5000;
+        final private GloryDE50 gl = new GloryDE50(GLORY_READ_TIMEOUT);
+
+        boolean closing = false;
+
+        public GloryDE50OperationResponse sendGloryDE50Operation(GloryOperationAbstract operation) {
+            return gl.sendOperation(operation);
         }
 
-        public GloryDE50Response sendGloryOperation(GloryOperationAbstract cmd) {
-            return gl.sendCommand(cmd);
+        public GloryDE50OperationResponse sendGloryDE50Operation(GloryOperationAbstract operation, boolean debug) {
+            return gl.sendOperation(operation, debug);
         }
 
         public void notifyListeners(String details) {
@@ -64,36 +74,48 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
             closing = b;
         }
 
-    }
-    boolean closing = false;
-    final public static int GLORY_READ_TIMEOUT = 5000;
-    private final AtomicReference<GloryDE50StateAbstract> currentState = new AtomicReference<GloryDE50StateAbstract>();
-    private GloryDE50 gl = null;
-    LgDeviceProperty lgSerialPort;
+        private boolean portOpen = false;
 
-//    public GloryManager(GloryDE50 device) {
+        public boolean open(String value) {
+            Logger.debug("api open");
+            portOpen = false;
+            SerialPortAdapterInterface serialPort = Configuration.getSerialPort(value, portConf);
+            Logger.info(String.format("Configuring serial port %s", serialPort));
+            gl.close();
+            Logger.debug("Glory port open try");
+            boolean ret = gl.open(serialPort);
+            Logger.debug("Glory port open : %s", ret ? "success" : "fails");
+            if (ret) {
+                portOpen = true;
+            }
+            return ret;
+        }
+
+        public boolean isPortOpen() {
+            return portOpen;
+        }
+
+    }
+    final private GloryDE50StateMachineApi api = new GloryDE50StateMachineApi();
+    final private AtomicReference<GloryDE50StateAbstract> currentState = new AtomicReference<GloryDE50StateAbstract>(new OpenPort(api));
+
     public GloryDE50Device(DeviceType deviceType, String machineDeviceId) {
         super(deviceType, machineDeviceId);
     }
 
     @Override
-    public DeviceStatus getStatus() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     protected void initDeviceProperties() {
-        lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
+        LgDeviceProperty lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
+        currentState.get().openPort(lgSerialPort.value, false);
     }
 
     @Override
     public void assemble() {
-        currentState.set(new OpenPort(new GloryDE50StateMachineApi()));
     }
 
     @Override
     public void mainLoop() {
-        Logger.debug(String.format("Glory executing current step: %s", currentState.getClass().getSimpleName()));
+        Logger.debug(String.format("Glory executing current step: %s", currentState.get().getClass().getSimpleName()));
         GloryDE50StateAbstract oldState = currentState.get();
         GloryDE50StateAbstract newState = oldState.step();
         if (newState != null && oldState != newState) {
@@ -108,16 +130,41 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
     @Override
     public void disassemble() {
         Logger.debug("Executing GotoNeutral command on Stop");
+        api.gl.close();
         //   currentCommand = new GotoNeutral(threadCommandApi);
     }
 
     @Override
-    protected void changeProperty(LgDeviceProperty lgdp) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    protected boolean changeProperty(String property, final String value) {
+        // TODO: enum
+        if (property.compareToIgnoreCase("port") == 0) {
+            return currentState.get().openPort(value, true);
+        }
+        return false;
     }
 
-    // The trick to avoid race conditions here is that count only change a variable in the state or fails
-    // the outside thread is not able to change the state.
+    // Pass it to the device thread and wait for a result only if the device thread is ready for it.
+    // Neve use it as a functional stuff, just for testing.
+    public GloryDE50OperationResponse sendGloryDE50Operation(final GloryOperationAbstract operation) {
+        return sendGloryDE50Operation(operation, false);
+    }
+
+    public GloryDE50OperationResponse sendGloryDE50Operation(final GloryOperationAbstract operation, final boolean debug) {
+        final FutureTask<GloryDE50OperationResponse> t = new FutureTask<GloryDE50OperationResponse>(new Callable<GloryDE50OperationResponse>() {
+            public GloryDE50OperationResponse call() throws Exception {
+                return api.sendGloryDE50Operation(operation, debug);
+            }
+        });
+        if (currentState.get().sendOperation(t)) {
+            try {
+                return t.get();
+            } catch (InterruptedException ex) {
+            } catch (ExecutionException ex) {
+            }
+        }
+        return null;
+    }
+
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
         return currentState.get().count(desiredQuantity, currency);
     }
@@ -136,7 +183,6 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
 
     public boolean storingErrorReset() {
         return currentState.get().storingErrorReset();
-        // syncronous cancel and storingErrorReset.
     }
 
     public boolean cancelDeposit() {
@@ -161,5 +207,15 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
 
     public Map<Integer, Integer> getDesiredQuantity() {
         return currentState.get().getDesiredQuantity();
+    }
+
+    public boolean clearError() {
+        return currentState.get().clearError();
+    }
+
+    @Override
+    public DeviceStatus getStatus() {
+        GloryDE50StateAbstract st = currentState.get();
+        return new DeviceStatus(st.getError());
     }
 }

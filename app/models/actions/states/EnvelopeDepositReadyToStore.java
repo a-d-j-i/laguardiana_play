@@ -4,8 +4,6 @@
  */
 package models.actions.states;
 
-import static devices.glory.manager.ManagerInterface.MANAGER_STATE.JAM;
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.actions.UserAction;
@@ -34,7 +32,7 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
     public String getMessage(UserAction userAction) {
         return "envelope_deposit.put_the_envelope_in_the_escrow";
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
@@ -54,15 +52,15 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
                 stateApi.setState(new Jam(stateApi, this));
                 //stateApi.setError(ModelError.ERROR_CODE.ESCROW_JAMED, "Escrow jamed");
                 break;
-            /*            case STORING:
-             stateApi.setState(new StoringEnvelopeDeposit(stateApi));
-             break;*/
+//                        case STORING:
+//             stateApi.setState(new StoringEnvelopeDeposit(stateApi));
+//             break;
             default:
                 Logger.debug("EnvelopeDepositReadyToStore onGloryEvent invalid state %s %s", m.name(), name());
                 break;
         }
     }
-
+*/
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("ReadyToStoreEnvelopeDeposit onIoBoardEvent %s", status.toString());

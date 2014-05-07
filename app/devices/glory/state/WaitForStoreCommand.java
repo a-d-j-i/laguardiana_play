@@ -27,7 +27,7 @@ public class WaitForStoreCommand extends GloryDE50StateAbstract {
         Logger.debug("ReadyForCommand");
 //        if (commandData.needToStoreDeposit()) {
 
-        GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.command.StoringStart(0));
+        GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.operation.StoringStart(0));
         if (sret != null) {
             return sret;
         }

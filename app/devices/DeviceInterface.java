@@ -38,5 +38,8 @@ public interface DeviceInterface {
     public List<LgDeviceProperty> getEditableProperties();
 
     public LgDeviceProperty setProperty(String property, String value);
-    
+
+    public DeviceStatus getStatus();
+
+    public boolean clearError();
 }

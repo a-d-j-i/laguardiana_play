@@ -24,19 +24,20 @@ import play.Logger;
  */
 abstract public class ActionState {
 
-    final static protected Map<ManagerInterface.MANAGER_STATE, String> managerMessages = new EnumMap<ManagerInterface.MANAGER_STATE, String>(ManagerInterface.MANAGER_STATE.class);
+//    final static protected Map<ManagerInterface.MANAGER_STATE, String> managerMessages = new EnumMap<ManagerInterface.MANAGER_STATE, String>(ManagerInterface.MANAGER_STATE.class);
     final protected StateApi stateApi;
-
-    static {
-        managerMessages.put(ManagerInterface.MANAGER_STATE.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
-        managerMessages.put(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
-        managerMessages.put(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
-        managerMessages.put(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
-        managerMessages.put(ManagerInterface.MANAGER_STATE.CANCELING, "application.canceling");
-        //messages.put(ManagerInterface.Status.CANCELED, "counting_page.deposit_canceled");
-        managerMessages.put(ManagerInterface.MANAGER_STATE.ERROR, "application.error");
-        managerMessages.put(ManagerInterface.MANAGER_STATE.JAM, "application.jam");
-    }
+    /*
+     static {
+     managerMessages.put(ManagerInterface.MANAGER_STATE.PUT_THE_BILLS_ON_THE_HOPER, "counting_page.put_the_bills_on_the_hoper");
+     managerMessages.put(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_ESCROW, "counting_page.remove_the_bills_from_escrow");
+     managerMessages.put(ManagerInterface.MANAGER_STATE.REMOVE_REJECTED_BILLS, "counting_page.remove_rejected_bills");
+     managerMessages.put(ManagerInterface.MANAGER_STATE.REMOVE_THE_BILLS_FROM_HOPER, "counting_page.remove_the_bills_from_hoper");
+     managerMessages.put(ManagerInterface.MANAGER_STATE.CANCELING, "application.canceling");
+     //messages.put(ManagerInterface.Status.CANCELED, "counting_page.deposit_canceled");
+     managerMessages.put(ManagerInterface.MANAGER_STATE.ERROR, "application.error");
+     managerMessages.put(ManagerInterface.MANAGER_STATE.JAM, "application.jam");
+     }
+     */
 
     public ActionState(StateApi stateApi) {
         this.stateApi = stateApi;
@@ -92,8 +93,7 @@ abstract public class ActionState {
         return true;
     }
 
-    abstract public void onGloryEvent(ManagerStatus m);
-
+//    abstract public void onGloryEvent(ManagerStatus m);
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("ActionState onIoBoardEvent %s", status.toString());
         if (!Configuration.isIgnoreShutter() && status.getShutterState() != IoBoard.SHUTTER_STATE.SHUTTER_CLOSED) {
@@ -120,7 +120,8 @@ abstract public class ActionState {
     }
 
     public String getMessage(UserAction userAction) {
-        return managerMessages.get(stateApi.getManagerState());
+        return null;
+        //return managerMessages.get(stateApi.getManagerState());
     }
 
     @Override

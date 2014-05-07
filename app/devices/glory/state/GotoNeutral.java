@@ -7,29 +7,29 @@ package devices.glory.state;
 import devices.glory.GloryDE50Device;
 import static devices.glory.GloryDE50Device.STATUS.*;
 import devices.glory.status.GloryDE50DeviceErrorEvent;
-import devices.glory.response.GloryDE50Response;
-import static devices.glory.response.GloryDE50Response.D1Mode.collect_mode;
-import static devices.glory.response.GloryDE50Response.D1Mode.deposit;
-import static devices.glory.response.GloryDE50Response.D1Mode.initial;
-import static devices.glory.response.GloryDE50Response.D1Mode.manual;
-import static devices.glory.response.GloryDE50Response.D1Mode.neutral;
-import static devices.glory.response.GloryDE50Response.D1Mode.normal_error_recovery_mode;
-import static devices.glory.response.GloryDE50Response.D1Mode.storing_error_recovery_mode;
-import static devices.glory.response.GloryDE50Response.SR1Mode.abnormal_device;
-import static devices.glory.response.GloryDE50Response.SR1Mode.being_exchange_the_cassette;
-import static devices.glory.response.GloryDE50Response.SR1Mode.being_recover_from_storing_error;
-import static devices.glory.response.GloryDE50Response.SR1Mode.being_reset;
-import static devices.glory.response.GloryDE50Response.SR1Mode.being_restoration;
-import static devices.glory.response.GloryDE50Response.SR1Mode.counting;
-import static devices.glory.response.GloryDE50Response.SR1Mode.counting_start_request;
-import static devices.glory.response.GloryDE50Response.SR1Mode.escrow_close;
-import static devices.glory.response.GloryDE50Response.SR1Mode.escrow_close_request;
-import static devices.glory.response.GloryDE50Response.SR1Mode.escrow_open;
-import static devices.glory.response.GloryDE50Response.SR1Mode.escrow_open_request;
-import static devices.glory.response.GloryDE50Response.SR1Mode.storing_error;
-import static devices.glory.response.GloryDE50Response.SR1Mode.storing_start_request;
-import static devices.glory.response.GloryDE50Response.SR1Mode.waiting;
-import static devices.glory.response.GloryDE50Response.SR1Mode.waiting_for_an_envelope_to_set;
+import devices.glory.response.GloryDE50OperationResponse;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.deposit;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.initial;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.manual;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.neutral;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.abnormal_device;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.being_exchange_the_cassette;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.being_recover_from_storing_error;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.being_reset;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.being_restoration;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.counting;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.counting_start_request;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.escrow_close;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.escrow_close_request;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.escrow_open;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.escrow_open_request;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_error;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_start_request;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
 import java.util.Date;
 import play.Logger;
 
@@ -47,7 +47,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
 
     public GotoNeutral(GloryDE50Device.GloryDE50StateMachineApi api) {
         super(api);
-        this.prevState = new ReadyForCommand(api);
+        this.prevState = new WaitForOperation(api);
     }
 
     public GotoNeutral(GloryDE50Device.GloryDE50StateMachineApi api, GloryDE50StateAbstract prevState, boolean canOpenEscrow, boolean forceEmptyHoper) {
@@ -58,7 +58,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50Response lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
         GloryDE50StateAbstract sret;
         Logger.debug("GOTO NEUTRAL %s %s",
                 (canOpenEscrow ? "OPEN ESCROW" : ""),
@@ -93,15 +93,15 @@ public class GotoNeutral extends GloryDE50StatePoll {
                          return false;
                          }*/
                         api.setClosing(false);
-                        sendGloryOperation(new devices.glory.command.OpenEscrow());
+                        sendGloryOperation(new devices.glory.operation.OpenEscrow());
                         break;
                     case abnormal_device:
                         api.setClosing(false);
                         api.notifyListeners(JAM);
-                        if (lastResponse.getD1Mode() == GloryDE50Response.D1Mode.normal_error_recovery_mode) {
+                        if (lastResponse.getD1Mode() == GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode) {
                             return new Reset(api, this);
                         } else {
-                            sret = sendGloryOperation(new devices.glory.command.RemoteCancel());
+                            sret = sendGloryOperation(new devices.glory.operation.RemoteCancel());
                             if (sret != null) {
                                 return sret;
                             }
@@ -122,7 +122,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         }
                     // don't break
                     case waiting_for_an_envelope_to_set:
-                        sret = sendGloryOperation(new devices.glory.command.CloseEscrow());
+                        sret = sendGloryOperation(new devices.glory.operation.CloseEscrow());
                         if (sret != null) {
                             // ignore ? 
                             //return this;
@@ -151,7 +151,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                             return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 2");
                         }
                         api.setClosing(false);
-                        sendGloryOperation(new devices.glory.command.OpenEscrow());
+                        sendGloryOperation(new devices.glory.operation.OpenEscrow());
                         break;
                     case counting_start_request:
                     case being_exchange_the_cassette:
@@ -164,7 +164,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                             api.notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
                             break;
                         }
-                        sret = sendGloryOperation(new devices.glory.command.RemoteCancel());
+                        sret = sendGloryOperation(new devices.glory.operation.RemoteCancel());
                         if (sret != null) {
                             remoteCancelRetries--;
                             if (remoteCancelRetries <= 0) {
@@ -178,7 +178,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                 }
                 break;
             case initial:
-                sret = sendGloryOperation(new devices.glory.command.RemoteCancel());
+                sret = sendGloryOperation(new devices.glory.operation.RemoteCancel());
                 if (sret != null) {
                     return sret;
                 }
@@ -187,7 +187,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                 switch (lastResponse.getSr1Mode()) {
                     case abnormal_device:
                         notifyListeners(JAM);
-                        sret = sendGloryOperation(new devices.glory.command.SetErrorRecoveryMode());
+                        sret = sendGloryOperation(new devices.glory.operation.SetErrorRecoveryMode());
                         if (sret != null) {
                             return sret;
                         }
@@ -207,7 +207,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                                 return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 3");
                             }
                             api.setClosing(false);
-                            sret = sendGloryOperation(new devices.glory.command.OpenEscrow());
+                            sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
                             if (sret != null) {
                                 break;
                             }
@@ -216,14 +216,14 @@ public class GotoNeutral extends GloryDE50StatePoll {
                             // Rotate the bag once to fix the glory proble.
                             bagRotated = true;
                             // set the time if possible, some times it fails, ignroe this
-                            sret = sendGloryOperation(new devices.glory.command.SetTime(new Date()));
+                            sret = sendGloryOperation(new devices.glory.operation.SetTime(new Date()));
                             if (sret != null) {
                                 String error = lastResponse.getError();
                                 Logger.error("Error %s sending cmd SetTime", error);
                                 break;
                             }
                             // Rotate if possible, some time it fails, ignore this
-                            sret = sendGloryOperation(new devices.glory.command.SetCollectMode());
+                            sret = sendGloryOperation(new devices.glory.operation.SetCollectMode());
                             if (sret != null) {
                                 String error = lastResponse.getError();
                                 Logger.error("Error %s sending cmd SetCollectMode", error);

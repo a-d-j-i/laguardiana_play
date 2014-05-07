@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.ModelError;
@@ -26,7 +25,7 @@ class EnvelopeDepositStoring extends ActionState {
     public String name() {
         return "STORING";
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
@@ -48,7 +47,7 @@ class EnvelopeDepositStoring extends ActionState {
                 break;
         }
     }
-
+*/
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         if (!Configuration.isIgnoreShutter()) {

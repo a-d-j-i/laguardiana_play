@@ -5,6 +5,7 @@
  */
 package devices;
 
+import devices.glory.GloryDE50Device;
 import devices.mei.MeiEbds;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +60,7 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
                     public DeviceAbstract createDevice(String machineDeviceId) {
                         //return new OsPrinter(lgd);
                         //throw new InvalidParameterException();
-                        return new MeiEbds(this, machineDeviceId);
+                        return new GloryDE50Device(this, machineDeviceId);
                     }
                 },
         MEI_EBDS() {
@@ -185,21 +186,23 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         return LgDeviceProperty.getEditables(lgd);
     }
 
-    protected abstract void changeProperty(LgDeviceProperty lgdp);
+    protected abstract boolean changeProperty(String property, String value);
 
     abstract protected void initDeviceProperties();
 
     public LgDeviceProperty setProperty(String property, String value) {
-        LgDeviceProperty l = LgDeviceProperty.setOrCreateProperty(lgd, property, value);
+        LgDeviceProperty l = LgDeviceProperty.getProperty(lgd, property);
         if (l != null) {
-            changeProperty(l);
-
+            if (changeProperty(property, value)) {
+                l.value = value;
+                l.save();
+            }
         }
         return l;
     }
 
     @Override
     public String toString() {
-        return "Device{" + "deviceType=" + deviceType + ", machineDeviceId=" + machineDeviceId + '}';
+        return "Device{ deviceID = " + getDeviceId() + " deviceType=" + deviceType + ", machineDeviceId=" + machineDeviceId + '}';
     }
 }

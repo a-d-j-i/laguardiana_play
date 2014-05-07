@@ -6,7 +6,7 @@ package devices.glory.state;
 
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
 import static devices.glory.GloryDE50Device.STATUS.CANCELING;
-import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.status.GloryDE50DeviceErrorEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 import play.Logger;
@@ -23,17 +23,29 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
         super(api);
     }
 
-    abstract public GloryDE50StateAbstract poll(GloryDE50Response lastResponse);
+    abstract public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse);
+
     abstract public GloryDE50StateAbstract doCancel();
+
+    @Override
+    public boolean cancelDeposit() {
+        mustCancel.set(true);
+        return true;
+    }
 
     @Override
     public GloryDE50StateAbstract step() {
         if (mustCancel.get()) {
             notifyListeners(CANCELING);
-            return doCancel();
+            Logger.debug("doCancel");
+            GloryDE50StateAbstract ret = doCancel();
+            if (ret != null) {
+                return ret;
+            }
+            return new GotoNeutral(api);
         }
 
-        GloryDE50Response response = api.sendGloryOperation(new devices.glory.command.Sense());
+        GloryDE50OperationResponse response = api.sendGloryDE50Operation(new devices.glory.operation.Sense());
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : SENSE", error);

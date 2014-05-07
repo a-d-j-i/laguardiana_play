@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.ModelError;
@@ -35,11 +34,12 @@ public class BagRemoved extends ActionState {
         //stateApi.setState(prevState);
         prevState.cancel();
     }
-
-    @Override
-    public void onGloryEvent(ManagerStatus m) {
-        prevState.onGloryEvent(m);
-    }
+    /*
+     @Override
+     public void onGloryEvent(ManagerStatus m) {
+     prevState.onGloryEvent(m);
+     }
+     */
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {

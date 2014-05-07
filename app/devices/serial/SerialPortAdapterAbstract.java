@@ -201,4 +201,9 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         return sb.toString();
     }
 
+    @Override
+    public String toString() {
+        return "Serial port : " + portName;
+    }
+
 }

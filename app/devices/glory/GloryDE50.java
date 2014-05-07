@@ -1,7 +1,7 @@
 package devices.glory;
 
-import devices.glory.response.GloryDE50Response;
-import devices.glory.command.GloryOperationAbstract;
+import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.operation.GloryOperationAbstract;
 import devices.serial.SerialPortAdapterInterface;
 import java.security.InvalidParameterException;
 import play.Logger;
@@ -9,45 +9,48 @@ import play.Logger;
 public class GloryDE50 {
 
     private final int readTimeout;
-    private final SerialPortAdapterInterface serialPort;
+    private SerialPortAdapterInterface serialPort = null;
 
-    public GloryDE50(SerialPortAdapterInterface serialPort, int readTimeout) {
-        if (serialPort == null) {
-            throw new InvalidParameterException("Glory invalid parameter serial port");
-        }
-        this.serialPort = serialPort;
+    public GloryDE50(int readTimeout) {
         this.readTimeout = readTimeout;
     }
 
-    public synchronized boolean open() {
-        Logger.info("Opening glory serial port ");
+    public synchronized boolean open(SerialPortAdapterInterface serialPort) {
+        Logger.info("Opening glory serial port %s", serialPort);
+        if (serialPort == null || this.serialPort != null) {
+            return false;
+        }
+        this.serialPort = serialPort;
         return serialPort.open();
     }
 
     public synchronized void close() {
         Logger.info("Closing glory serial port ");
-        serialPort.close();
+        if (serialPort != null) {
+            serialPort.close();
+        }
+        serialPort = null;
     }
 
-    public synchronized GloryDE50Response sendCommand(GloryOperationAbstract cmd) {
-        return sendCommand(cmd, null, false);
+    public synchronized GloryDE50OperationResponse sendOperation(GloryOperationAbstract cmd) {
+        return sendOperation(cmd, null, false);
     }
 
-    public synchronized GloryDE50Response sendCommand(GloryOperationAbstract cmd, boolean debug) {
-        return sendCommand(cmd, null, debug);
+    public synchronized GloryDE50OperationResponse sendOperation(GloryOperationAbstract cmd, boolean debug) {
+        return sendOperation(cmd, null, debug);
     }
 
-    public synchronized GloryDE50Response sendCommand(GloryOperationAbstract cmd, String data, boolean debug) {
+    public synchronized GloryDE50OperationResponse sendOperation(GloryOperationAbstract cmd, String data, boolean debug) {
         if (cmd == null) {
             throw new InvalidParameterException("Glory unknown command");
         }
         if (serialPort == null) {
-            return new GloryDE50Response("Glory Serial port closed");
+            return new GloryDE50OperationResponse("Glory Serial port closed");
         }
         byte[] d = cmd.getCmdStr();
         if (!serialPort.write(d)) {
             Logger.debug("Error writting to port: %s", serialPort);
-            return new GloryDE50Response("Error writting from port");
+            return new GloryDE50OperationResponse("Error writting from port");
         };
 
         if (debug) {
@@ -64,7 +67,7 @@ public class GloryDE50 {
             Byte r = read();
             if (r == null) {
                 Logger.debug("Error reading from port: %s", serialPort);
-                return new GloryDE50Response("Error reading from port");
+                return new GloryDE50OperationResponse("Error reading from port");
             } else {
                 switch (r) {
                     case 0x02:
@@ -97,7 +100,7 @@ public class GloryDE50 {
             }
         }
         if (b == null) {
-            return new GloryDE50Response("Glory: response not found");
+            return new GloryDE50OperationResponse("Glory: response not found");
         }
         if (debug) {
             StringBuilder h = new StringBuilder("Readed ");

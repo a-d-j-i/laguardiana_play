@@ -4,8 +4,8 @@ import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
 import static devices.glory.GloryDE50Device.STATUS.JAM;
 import static devices.glory.GloryDE50Device.STATUS.PUT_THE_ENVELOPE_IN_THE_ESCROW;
 import static devices.glory.GloryDE50Device.STATUS.READY_TO_STORE;
-import devices.glory.response.GloryDE50Response;
-import static devices.glory.response.GloryDE50Response.SR1Mode.waiting_for_an_envelope_to_set;
+import devices.glory.response.GloryDE50OperationResponse;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
 import devices.glory.status.GloryDE50DeviceErrorEvent;
 import play.Logger;
 
@@ -21,7 +21,7 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
 
     @Override
     public GloryDE50StateAbstract init() {
-        GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.command.SetManualMode());
+        GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.operation.SetManualMode());
         if (sret != null) {
             return sret;
         }
@@ -32,10 +32,10 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
     int waitForEscrow = 0;
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50Response lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
         GloryDE50StateAbstract sret;
         if (waitForEscrow == 0) {
-            sret = sendGloryOperation(new devices.glory.command.CloseEscrow());
+            sret = sendGloryOperation(new devices.glory.operation.CloseEscrow());
             if (sret != null) {
                 return sret;
             }
@@ -71,7 +71,7 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
                 }
                 if (!lastResponse.isEscrowBillPresent()) {
                     api.setClosing(false);
-                    sret = sendGloryOperation(new devices.glory.command.OpenEscrow());
+                    sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
                     if (sret != null) {
                         // sret ?
                         return this;
@@ -96,7 +96,7 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
                 /*if (!gotoNeutral(true, true)) {
                  return;
                  }*/
-                sret = sendGloryOperation(new devices.glory.command.SetManualMode());
+                sret = sendGloryOperation(new devices.glory.operation.SetManualMode());
                 if (sret != null) {
                     return sret;
                 }

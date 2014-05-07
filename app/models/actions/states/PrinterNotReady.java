@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import models.actions.UserAction.StateApi;
@@ -26,12 +25,12 @@ public class PrinterNotReady extends ActionState {
     public String name() {
         return "PRINTER_NOT_READY";
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerStatus m) {
         prevState.onGloryEvent(m);
     }
-
+*/
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         prevState.onIoBoardEvent(status);

@@ -145,10 +145,9 @@ abstract public class UserAction {
             userActionApi.closeGate();
         }
 
-        public ManagerInterface.MANAGER_STATE getManagerState() {
-            return userActionApi.getManagerState();
-        }
-
+//        public ManagerInterface.MANAGER_STATE getManagerState() {
+//            return userActionApi.getManagerState();
+//        }
     }
 
     public void start(LgUser currentUser, UserActionApi userActionApi) {
@@ -189,15 +188,15 @@ abstract public class UserAction {
 
     abstract public void finish();
 
-    public void onGloryEvent(ManagerStatus m) {
-        ActionState currState = state;
-        do {
-            Logger.debug("Action : OnGloryEvent state %s currState %s event %s",
-                    state.getClass().getSimpleName(), currState.getClass().getSimpleName(), m.toString());
-            currState = state;
-            currState.onGloryEvent(m);
-        } while (!state.equals(currState));
-    }
+//    public void onGloryEvent(ManagerStatus m) {
+//        ActionState currState = state;
+//        do {
+//            Logger.debug("Action : OnGloryEvent state %s currState %s event %s",
+//                    state.getClass().getSimpleName(), currState.getClass().getSimpleName(), m.toString());
+//            currState = state;
+//            currState.onGloryEvent(m);
+//        } while (!state.equals(currState));
+//    }
 
     public void onIoBoardEvent(IoBoard.IoBoardStatus s) {
         ActionState currState = state;

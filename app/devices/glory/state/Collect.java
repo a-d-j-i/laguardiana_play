@@ -9,15 +9,15 @@ import static devices.glory.GloryDE50Device.STATUS.BAG_COLLECTED;
 import static devices.glory.GloryDE50Device.STATUS.REMOVE_REJECTED_BILLS;
 import static devices.glory.GloryDE50Device.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
 import devices.glory.status.GloryDE50DeviceErrorEvent;
-import devices.glory.response.GloryDE50Response;
-import static devices.glory.response.GloryDE50Response.D1Mode.collect_mode;
-import static devices.glory.response.GloryDE50Response.D1Mode.deposit;
-import static devices.glory.response.GloryDE50Response.D1Mode.initial;
-import static devices.glory.response.GloryDE50Response.D1Mode.manual;
-import static devices.glory.response.GloryDE50Response.D1Mode.neutral;
-import static devices.glory.response.GloryDE50Response.D1Mode.normal_error_recovery_mode;
-import static devices.glory.response.GloryDE50Response.D1Mode.storing_error_recovery_mode;
-import static devices.glory.response.GloryDE50Response.SR1Mode.storing_error;
+import devices.glory.response.GloryDE50OperationResponse;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.deposit;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.initial;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.manual;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.neutral;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode;
+import static devices.glory.response.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
+import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_error;
 import java.util.Date;
 import play.Logger;
 
@@ -37,12 +37,12 @@ public class Collect extends GloryDE50StatePoll {
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50Response lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
         GloryDE50StateAbstract sret;
         Logger.debug("COLLECT_COMMAND");
 
         if (!lastResponse.isCassetteFullCounter()) {
-            sret = sendGloryOperation(new devices.glory.command.SetTime(new Date()));
+            sret = sendGloryOperation(new devices.glory.operation.SetTime(new Date()));
             if (sret != null) {
                 return sret;
             }
@@ -69,7 +69,7 @@ public class Collect extends GloryDE50StatePoll {
                     notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
                     break;
                 }
-                sret = sendGloryOperation(new devices.glory.command.RemoteCancel());
+                sret = sendGloryOperation(new devices.glory.operation.RemoteCancel());
                 if (sret != null) {
                     return sret;
                 }

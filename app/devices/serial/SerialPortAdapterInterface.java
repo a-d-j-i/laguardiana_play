@@ -13,5 +13,4 @@ public interface SerialPortAdapterInterface {
     public Byte read(int timeout);
 
     public String readLine(int timeout);
-
 }

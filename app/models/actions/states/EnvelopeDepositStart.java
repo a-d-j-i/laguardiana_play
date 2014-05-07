@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.ModelError;
@@ -32,7 +31,7 @@ public class EnvelopeDepositStart extends ActionState {
     public void cancel() {
         cancelWithCause(FinishCause.FINISH_CAUSE_CANCEL);
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
@@ -55,7 +54,7 @@ public class EnvelopeDepositStart extends ActionState {
                 break;
         }
     }
-
+*/
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {

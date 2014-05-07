@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.actions.UserAction.StateApi;
@@ -27,12 +26,12 @@ public class WaitForClosedGate extends ActionState {
     public String name() {
         return "STORING";
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerInterface.ManagerStatus m) {
         Logger.error("ActionState invalid onGloryEvent %s", m.toString());
     }
-
+*/
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         if (!Configuration.isIgnoreShutter()) {

@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -22,7 +21,7 @@ public class BillDepositWithdraw extends ActionState {
     public String name() {
         return "REMOVE_THE_BILLS_FROM_ESCROW";
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerStatus m) {
         Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
@@ -42,4 +41,5 @@ public class BillDepositWithdraw extends ActionState {
                 break;
         }
     }
+    */
 }

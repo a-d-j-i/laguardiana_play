@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.UserAction.StateApi;
 import play.Logger;
 
@@ -25,7 +24,7 @@ public class Jam extends ActionState {
     public String name() {
         return "JAM";
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerStatus m) {
         switch (m.getState()) {
@@ -42,4 +41,5 @@ public class Jam extends ActionState {
                 break;
         }
     }
+    */
 }

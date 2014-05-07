@@ -1,7 +1,7 @@
 package devices.glory.state;
 
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50OperationResponse;
 
 /**
  *
@@ -22,7 +22,7 @@ public class RotateCassete extends GloryDE50StatePoll {
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50Response lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
         return prevStep;
     }
 

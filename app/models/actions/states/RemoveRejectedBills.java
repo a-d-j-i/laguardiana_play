@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import models.actions.UserAction.StateApi;
 
 /**
@@ -24,7 +23,7 @@ public class RemoveRejectedBills extends ActionState {
     public String name() {
         return "REMOVE_REJECTED_BILLS";
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerStatus m) {
         switch (m.getState()) {
@@ -39,4 +38,5 @@ public class RemoveRejectedBills extends ActionState {
                 break;
         }
     }
+    */
 }

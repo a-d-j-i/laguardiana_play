@@ -4,6 +4,13 @@
  */
 package models;
 
+import devices.serial.SerialPortAdapterAbstract.PORTBITS;
+import devices.serial.SerialPortAdapterAbstract.PORTPARITY;
+import devices.serial.SerialPortAdapterAbstract.PORTSPEED;
+import devices.serial.SerialPortAdapterAbstract.PORTSTOPBITS;
+import devices.serial.SerialPortAdapterAbstract.PortConfiguration;
+import devices.serial.SerialPortAdapterInterface;
+import devices.serial.implementations.SerialPortAdapterRxTx;
 import java.security.SecureRandom;
 import models.db.LgSystemProperty;
 import static models.db.LgSystemProperty.setOrCreateProperty;
@@ -282,5 +289,10 @@ public class Configuration {
             }
         }
         return false;
+    }
+
+    public static SerialPortAdapterInterface getSerialPort(String port, PortConfiguration conf) {
+        //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
+        return new SerialPortAdapterRxTx(port, conf);
     }
 }

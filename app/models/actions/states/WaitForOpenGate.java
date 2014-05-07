@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.ModelError;
@@ -24,12 +23,12 @@ public class WaitForOpenGate extends ActionState {
         super(stateApi);
         this.nextAction = nextAction;
     }
-
+/*
     @Override
     public void onGloryEvent(ManagerInterface.ManagerStatus m) {
         Logger.error("ActionState invalid onGloryEvent %s", m.toString());
     }
-
+*/
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("WaitForOpenGate onIoBoardEvent %s", status.toString());

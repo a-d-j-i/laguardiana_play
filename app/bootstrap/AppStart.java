@@ -69,7 +69,7 @@ public class AppStart extends Job {
                 LgRole envelope = loadRolsResourcesAndAcls(controllers.EnvelopeDepositController.class);
                 LgRole filter = loadRolsResourcesAndAcls(controllers.FilterController.class);
                 LgRole glory = loadRolsResourcesAndAcls(controllers.GloryDE50Controller.class);
-                LgRole manager = loadRolsResourcesAndAcls(controllers.GloryManagerController.class);
+                //LgRole manager = loadRolsResourcesAndAcls(controllers.DeviceCounterClassController.class);
                 LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
                 LgRole counter = loadRolsResourcesAndAcls(controllers.CounterController.class);
                 LgRole report = loadRolsResourcesAndAcls(controllers.ReportController.class);

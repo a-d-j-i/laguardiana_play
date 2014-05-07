@@ -6,7 +6,7 @@ package devices.glory.state;
 
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
 import static devices.glory.GloryDE50Device.STATUS.JAM;
-import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.status.GloryDE50DeviceErrorEvent;
 import play.Logger;
 
@@ -24,7 +24,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50Response lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
         Logger.debug("STORING_ERROR_RESET_COMMAND");
 
         switch (lastResponse.getD1Mode()) {
@@ -43,7 +43,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                             break;
                         }
                         api.setClosing(false);
-                        return sendGloryOperation(new devices.glory.command.OpenEscrow());
+                        return sendGloryOperation(new devices.glory.operation.OpenEscrow());
                     case escrow_open:
                         api.setClosing(false);
                         break;
@@ -55,7 +55,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                             api.notifyListeners(JAM);
                             break;
                         }
-                        return sendGloryOperation(new devices.glory.command.ResetDevice());
+                        return sendGloryOperation(new devices.glory.operation.ResetDevice());
                     case being_reset:
                         break;
                     case escrow_close_request:
@@ -66,7 +66,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                             api.notifyListeners(JAM);
                             break;
                         }
-                        GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.command.CloseEscrow());
+                        GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.operation.CloseEscrow());
                         if (sret != null) {
                             return sret;
                         }
@@ -76,11 +76,11 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                         api.setClosing(true);
                         break;
                     case storing_start_request:
-                        return sendGloryOperation(new devices.glory.command.StoringStart(0));
+                        return sendGloryOperation(new devices.glory.operation.StoringStart(0));
                     case being_store:
                         break;
                     case waiting:
-                        return sendGloryOperation(new devices.glory.command.RemoteCancel());
+                        return sendGloryOperation(new devices.glory.operation.RemoteCancel());
                     default:
                         return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,
                                 String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
@@ -89,7 +89,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
             case neutral:
                 switch (lastResponse.getSr1Mode()) {
                     case storing_error:
-                        return sendGloryOperation(new devices.glory.command.SetStroringErrorRecoveryMode());
+                        return sendGloryOperation(new devices.glory.operation.SetStroringErrorRecoveryMode());
                     case waiting:
                         return this;
                     default:
@@ -102,9 +102,9 @@ public class StoringErrorReset extends GloryDE50StatePoll {
             case initial:
                 switch (lastResponse.getSr1Mode()) {
                     case storing_start_request:
-                        return sendGloryOperation(new devices.glory.command.OpenEscrow());
+                        return sendGloryOperation(new devices.glory.operation.OpenEscrow());
                     default:
-                        return sendGloryOperation(new devices.glory.command.RemoteCancel());
+                        return sendGloryOperation(new devices.glory.operation.RemoteCancel());
                 }
             default:
                 return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,

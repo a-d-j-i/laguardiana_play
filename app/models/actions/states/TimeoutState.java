@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
@@ -26,13 +25,13 @@ public class TimeoutState extends ActionState {
     public String name() {
         return "TIMEOUT_WARNING";
     }
-
+/*
     @Override
         public void onGloryEvent(ManagerStatus m) {
         suspendTimeout();
         returnState.onGloryEvent(m);
     }
-
+*/
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         returnState.onIoBoardEvent(status);

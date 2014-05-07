@@ -94,14 +94,6 @@ class MeiEbdsMessageAbstract {
         return this.error.getMessage();
     }
 
-    public DebugLevel getDebug() {
-        return debug;
-    }
-
-    public void setDebug(DebugLevel debug) {
-        this.debug = debug;
-    }
-
     public byte getId() {
         return cmdId;
     }

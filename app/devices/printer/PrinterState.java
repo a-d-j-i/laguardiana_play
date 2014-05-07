@@ -7,8 +7,6 @@ package devices.printer;
 
 import devices.DeviceStatus;
 import devices.printer.Printer.PRINTER_STATE;
-import devices.printer.Printer.PrinterStatus;
-import play.Logger;
 
 /**
  *
@@ -52,4 +50,8 @@ public class PrinterState extends DeviceStatus {
         }
     }
     */
+
+    public PrinterState(String error) {
+        super(error);
+    }
 }

@@ -1,0 +1,24 @@
+#{extends 'main.html' /}
+#{set title:'Glory (Comandos)' /}
+<section>
+    <header>
+    </header>
+    <nav>
+        <a id ="backButton" href="@{list()}" class="boton_top">◄ &{ 'application.back' }</a>
+    </nav>
+    <article>
+        <div>
+            <p>DeviceId : ${deviceId}</p>
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{operations(deviceId)}">Operations</a>
+            #{if classIoBoard}
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{ioBoardClassCommands(deviceId)}">IoBoardClass Commands</a>
+            #{/if}
+            #{if classPrinter}
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{printerClassCommands(deviceId)}">PrinterClass Commands</a>
+            #{/if}
+            #{if classCounter}
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterClassCommands(deviceId)}">CounterClass Commands</a>
+            #{/if}
+        </div>
+    </article>
+</section>

@@ -4,7 +4,6 @@
  */
 package models.actions.states;
 
-import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import models.Configuration;
 import models.actions.UserAction.StateApi;
@@ -51,32 +50,33 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
             stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
         }
     }
-
-    @Override
-    public void onGloryEvent(ManagerStatus m) {
-        Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
-        switch (m.getState()) {
-            case REMOVE_REJECTED_BILLS:
-                break;
-            case JAM:
-                break;
-            case ESCROW_FULL:
-                if (delayedStore) {
-                    Logger.error("BillDepositReadyToStoreEscrowFull DELAYED STORE!!!");
-                    accept();
-                }
-                break;
-            case CANCELING:
-                stateApi.setState(new Canceling(stateApi));
-                break;
-            case REMOVE_THE_BILLS_FROM_ESCROW:
-                stateApi.setState(new BillDepositWithdraw(stateApi));
-                break;
-            default:
-                Logger.debug("BillDepositReadyEscrowFull onGloryEvent invalid state %s %s", m.name(), name());
-                break;
-        }
-    }
+    /*
+     @Override
+     public void onGloryEvent(ManagerStatus m) {
+     Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
+     switch (m.getState()) {
+     case REMOVE_REJECTED_BILLS:
+     break;
+     case JAM:
+     break;
+     case ESCROW_FULL:
+     if (delayedStore) {
+     Logger.error("BillDepositReadyToStoreEscrowFull DELAYED STORE!!!");
+     accept();
+     }
+     break;
+     case CANCELING:
+     stateApi.setState(new Canceling(stateApi));
+     break;
+     case REMOVE_THE_BILLS_FROM_ESCROW:
+     stateApi.setState(new BillDepositWithdraw(stateApi));
+     break;
+     default:
+     Logger.debug("BillDepositReadyEscrowFull onGloryEvent invalid state %s %s", m.name(), name());
+     break;
+     }
+     }
+     */
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {

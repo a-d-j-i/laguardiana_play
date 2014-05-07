@@ -30,6 +30,5 @@ public class AppStop extends Job {
         } catch (InterruptedException ex) {
         }
         eventExecutor.shutdownNow();
-        Logger.debug("onApplicationStop stop execution service DONE");
     }
 }
