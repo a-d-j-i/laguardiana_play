@@ -9,9 +9,8 @@ import devices.glory.GloryDE50Device;
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
 import devices.glory.operation.GloryOperationAbstract;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.status.GloryDE50DeviceErrorEvent;
+import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import play.Logger;
 
@@ -40,7 +39,7 @@ abstract public class GloryDE50StateAbstract implements DeviceClassCounterIntref
             if (response.isError()) {
                 String error = response.getError();
                 Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, error);
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
             }
         }
         return null;

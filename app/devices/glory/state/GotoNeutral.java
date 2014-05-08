@@ -6,7 +6,6 @@ package devices.glory.state;
 
 import devices.glory.GloryDE50Device;
 import static devices.glory.GloryDE50Device.STATUS.*;
-import devices.glory.status.GloryDE50DeviceErrorEvent;
 import devices.glory.response.GloryDE50OperationResponse;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.deposit;
@@ -30,6 +29,7 @@ import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_start_request;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
+import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
 import java.util.Date;
 import play.Logger;
 
@@ -66,10 +66,10 @@ public class GotoNeutral extends GloryDE50StatePoll {
 
         switch (lastResponse.getSr1Mode()) {
             case storing_error:
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
         }
         if (lastResponse.isCassetteFullCounter()) {
-            return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.CASSETE_FULL, "Cassete Full");
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.CASSETE_FULL, "Cassete Full");
         }
         switch (lastResponse.getD1Mode()) {
             case normal_error_recovery_mode:
@@ -145,10 +145,10 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         api.setClosing(false);
                         break;
                     case storing_error:
-                        return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags");
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags");
                     case storing_start_request:
                         if (!canOpenEscrow) {
-                            return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 2");
+                            return new Error(api, COUNTER_CLASS_ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 2");
                         }
                         api.setClosing(false);
                         sendGloryOperation(new devices.glory.operation.OpenEscrow());
@@ -173,7 +173,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         }
                         break;
                     default:
-                        return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
                                 String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
@@ -204,7 +204,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         }
                         if (lastResponse.isEscrowBillPresent()) {
                             if (!canOpenEscrow) {
-                                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 3");
+                                return new Error(api, COUNTER_CLASS_ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 3");
                             }
                             api.setClosing(false);
                             sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
@@ -235,12 +235,12 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         Logger.debug("GOTO NEUTRAL DONE");
                         return prevState;
                     default:
-                        return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
                                 String.format("gotoNeutral Abnormal device Invalid SR1-2 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
             default:
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
                         String.format("gotoNeutralInvalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
         Logger.debug("GOTO NEUTRAL DONE");

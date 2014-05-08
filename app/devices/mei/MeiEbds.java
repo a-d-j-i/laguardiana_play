@@ -7,7 +7,6 @@ package devices.mei;
 
 import devices.DeviceAbstract;
 import devices.DeviceClassCounterIntreface;
-import devices.DeviceEventListener;
 import devices.DeviceStatus;
 import devices.serial.SerialPortAdapterInterface;
 import java.io.IOException;
@@ -15,6 +14,7 @@ import java.security.InvalidParameterException;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import machines.Machine;
 import models.db.LgDeviceProperty;
 import play.Logger;
 
@@ -26,8 +26,8 @@ public class MeiEbds extends DeviceAbstract implements DeviceClassCounterIntrefa
 
     final private int READ_TIMEOUT = 1000;
 
-    public MeiEbds(DeviceType deviceType, String machineDeviceId) {
-        super(deviceType, machineDeviceId);
+    public MeiEbds(Machine.DeviceDescription deviceDesc) {
+        super(deviceDesc);
     }
 
     @Override

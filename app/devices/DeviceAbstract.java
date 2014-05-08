@@ -5,12 +5,11 @@
  */
 package devices;
 
-import devices.glory.GloryDE50Device;
-import devices.mei.MeiEbds;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import machines.Machine.DeviceDescription;
 import models.db.LgDevice;
 import models.db.LgDeviceProperty;
 import play.Logger;
@@ -21,110 +20,20 @@ import play.Logger;
  */
 public abstract class DeviceAbstract implements DeviceInterface, Runnable {
 
-    public enum DeviceType {
-
-        OS_PRINTER() {
-                    @Override
-                    public DeviceAbstract createDevice(String machineDeviceId) {
-                        //return new OsPrinter(lgd);
-                        //throw new InvalidParameterException();
-                        return new MeiEbds(this, machineDeviceId);
-                    }
-                },
-        IO_BOARD_V4520_1_0() {
-                    @Override
-                    public DeviceAbstract createDevice(String machineDeviceId) {
-                        //return new OsPrinter(lgd);
-                        //throw new InvalidParameterException();
-                        return new MeiEbds(this, machineDeviceId);
-                    }
-                },
-        IO_BOARD_V4520_1_2() {
-                    @Override
-                    public DeviceAbstract createDevice(String machineDeviceId) {
-                        //return new OsPrinter(lgd);
-                        //throw new InvalidParameterException();
-                        return new MeiEbds(this, machineDeviceId);
-                    }
-                },
-        IO_BOARD_MX220_1_0() {
-                    @Override
-                    public DeviceAbstract createDevice(String machineDeviceId) {
-                        //return new OsPrinter(lgd);
-                        //throw new InvalidParameterException();
-                        return new MeiEbds(this, machineDeviceId);
-                    }
-                },
-        GLORY_DE50() {
-                    @Override
-                    public DeviceAbstract createDevice(String machineDeviceId) {
-                        //return new OsPrinter(lgd);
-                        //throw new InvalidParameterException();
-                        return new GloryDE50Device(this, machineDeviceId);
-                    }
-                },
-        MEI_EBDS() {
-                    @Override
-                    public DeviceAbstract createDevice(String machineDeviceId) {
-                        //return new OsPrinter(lgd);
-                        //throw new InvalidParameterException();
-                        return new MeiEbds(this, machineDeviceId);
-                    }
-                };
-
-        public enum DeviceClass {
-
-            DEVICE_CLASS_PRINTER,
-            DEVICE_CLASS_COUNTER,
-            DEVICE_CLASS_IOBOARD,
-        };
-
-        abstract public DeviceAbstract createDevice(String machineDeviceId);
-
-        @Override
-        public String toString() {
-            return name();
-        }
-
-    };
-
-    static public class DeviceDesc {
-
-        DeviceType deviceType;
-        String machineDeviceId;
-
-        public DeviceDesc(DeviceType deviceType, String machineDeviceId) {
-            this.deviceType = deviceType;
-            this.machineDeviceId = machineDeviceId;
-        }
-
-        @Override
-        public String toString() {
-            return "deviceType=" + deviceType + ", machineDeviceId=" + machineDeviceId;
-        }
-
-        public DeviceAbstract createDevice() {
-            DeviceAbstract ret = deviceType.createDevice(machineDeviceId);
-            ret.initDeviceProperties();
-            return ret;
-        }
-    };
-
-    protected final DeviceType deviceType;
-    protected final String machineDeviceId;
+    protected final DeviceDescription deviceDescription;
     protected final LgDevice lgd;
 
     protected final Thread thread;
     protected final AtomicBoolean mustStop = new AtomicBoolean(false);
 
-    public DeviceAbstract(DeviceType deviceType, String machineDeviceId) {
-        lgd = LgDevice.getOrCreateByMachineId(deviceType, machineDeviceId);
-        this.deviceType = deviceType;
-        this.machineDeviceId = machineDeviceId;
+    public DeviceAbstract(DeviceDescription deviceDescription) {
+        this.deviceDescription = deviceDescription;
+        lgd = LgDevice.getOrCreateByMachineId(deviceDescription.getType(), deviceDescription.getMachineId());
         this.thread = new Thread(this);
     }
 
     public void start() {
+        initDeviceProperties();
         thread.start();
     }
 
@@ -138,13 +47,13 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
     }
 
     public void run() {
-        Logger.debug("Device %s thread started", machineDeviceId);
+        Logger.debug("Device %s thread started", deviceDescription);
         assemble();
         while (!mustStop.get()) {
             mainLoop();
         }
         disassemble();
-        Logger.debug("Device %s thread done", machineDeviceId);
+        Logger.debug("Device %s thread done", deviceDescription);
     }
 
     abstract public void mainLoop();
@@ -172,6 +81,10 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         for (DeviceEventListener counterListener : listeners) {
             counterListener.onDeviceEvent(new DeviceEvent(this, state));
         }
+    }
+
+    public DeviceDescription getDeviceDesc() {
+        return deviceDescription;
     }
 
     public String getName() {
@@ -203,6 +116,6 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
 
     @Override
     public String toString() {
-        return "Device{ deviceID = " + getDeviceId() + " deviceType=" + deviceType + ", machineDeviceId=" + machineDeviceId + '}';
+        return "Device{ deviceID = " + getDeviceId() + ", deviceDesc=" + deviceDescription + '}';
     }
 }

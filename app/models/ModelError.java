@@ -4,7 +4,6 @@
  */
 package models;
 
-import devices.glory.status.GloryDE50DeviceErrorEvent;
 import devices.ioboard.IoBoardError;
 import devices.printer.PrinterError;
 import play.Logger;
@@ -19,21 +18,21 @@ public class ModelError {
 
         APPLICATION_ERROR, BAG_NOT_INPLACE, SHUTTER_NOT_CLOSED, SHUTTER_NOT_OPENING, ERROR_TRYING_TO_COLLECT, ESCROW_JAMED;
     }
-    private GloryDE50DeviceErrorEvent gloryError = null;
+//    private GloryDE50DeviceErrorEvent gloryError = null;
     private PrinterError printerError = null;
     private IoBoardError ioBoardError = null;
     private ERROR_CODE errorCode;
     private String detail;
 
     synchronized public boolean isError() {
-        return errorCode != null || gloryError != null || ioBoardError != null || printerError != null;
+        return errorCode != null || ioBoardError != null || printerError != null;
     }
-
+/*
     synchronized public void setError(GloryDE50DeviceErrorEvent error) {
         Logger.debug("Error in gloryError %s", error);
         this.gloryError = error;
     }
-
+*/
     synchronized public void setError(PrinterError error) {
         Logger.debug("Error in printerError %s", error);
         this.printerError = error;
@@ -49,11 +48,11 @@ public class ModelError {
         this.errorCode = errorCode;
         this.detail = detail;
     }
-
+/*
     synchronized public GloryDE50DeviceErrorEvent getGloryError() {
         return gloryError;
     }
-
+*/
     synchronized public PrinterError getPrinterError() {
         return printerError;
     }
@@ -74,7 +73,7 @@ public class ModelError {
         Logger.debug("--> Model ioboard error cleared");
         this.ioBoardError = null;
     }
-
+/*
     synchronized void clearGloryError() {
         Logger.debug("--> Model glory error cleared");
         this.gloryError = null;
@@ -84,7 +83,7 @@ public class ModelError {
         Logger.debug("--> Model printer error cleared");
         this.gloryError = null;
     }
-
+*/
     synchronized void clearErrorCodeError() {
         Logger.debug("--> Model errorCode error cleared");
         this.errorCode = null;
@@ -93,6 +92,6 @@ public class ModelError {
 
     @Override
     public String toString() {
-        return "gloryError = { " + gloryError + " }, printerError = { " + printerError + " }, ioBoardError = { " + ioBoardError + "}, errorCode = { " + errorCode + " }, detail = { " + detail + " }";
+        return "printerError = { " + printerError + " }, ioBoardError = { " + ioBoardError + "}, errorCode = { " + errorCode + " }, detail = { " + detail + " }";
     }
 }

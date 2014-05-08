@@ -7,7 +7,7 @@ package devices.glory.state;
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
 import static devices.glory.GloryDE50Device.STATUS.CANCELING;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.status.GloryDE50DeviceErrorEvent;
+import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
 import java.util.concurrent.atomic.AtomicBoolean;
 import play.Logger;
 
@@ -49,7 +49,7 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : SENSE", error);
-            return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, error);
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
         }
         Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", response.getD1Mode().name(), response.getSr1Mode().name()));
         GloryDE50StateAbstract ret = poll(response);

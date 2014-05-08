@@ -6,7 +6,7 @@ import static devices.glory.GloryDE50Device.STATUS.PUT_THE_ENVELOPE_IN_THE_ESCRO
 import static devices.glory.GloryDE50Device.STATUS.READY_TO_STORE;
 import devices.glory.response.GloryDE50OperationResponse;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
-import devices.glory.status.GloryDE50DeviceErrorEvent;
+import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
 import play.Logger;
 
 /**
@@ -102,10 +102,10 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
                 }
                 break;
             case storing_error:
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN,
                         String.format("EnvelopeDeposit Storing error, todo: get the flags"));
             default:
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
                         String.format("EnvelopeDeposit invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
         }
         return this;

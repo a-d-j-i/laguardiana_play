@@ -11,7 +11,7 @@ import static devices.glory.GloryDE50Device.STATUS.REMOVE_THE_BILLS_FROM_ESCROW;
 import static devices.glory.GloryDE50Device.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
 import static devices.glory.GloryDE50Device.STATUS.STORING;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.status.GloryDE50DeviceErrorEvent;
+import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,7 +98,7 @@ public class Count extends GloryDE50StatePoll {
                         }
                         String error = response.getError();
                         Logger.error("Error %s sending cmd : SetDepositMode", error);
-                        return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, error);
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
                     }
                 }
                 return this;
@@ -247,9 +247,9 @@ public class Count extends GloryDE50StatePoll {
                 notifyListeners(JAM);
                 return new GotoNeutral(api, this, true, true);
             case storing_error:
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.STORING_ERROR_CALL_ADMIN, String.format("Count Storing error, todo: get the flags"));
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, String.format("Count Storing error, todo: get the flags"));
             default:
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, String.format("Count invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, String.format("Count invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
         }
         return this;
     }
@@ -281,13 +281,13 @@ public class Count extends GloryDE50StatePoll {
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, error);
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
         }
         Map<Integer, Integer> currentQuantity = response.getBills();
         if (currentQuantity == null) {
             String error = String.format("Error getting current count");
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, error);
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
         }
 
         while (currentSlot < 32) {
@@ -299,7 +299,7 @@ public class Count extends GloryDE50StatePoll {
             if (current > desired) {
                 String error = String.format("Invalid bill value %d %d %d", currentSlot, current, desired);
                 Logger.error("Error %s sending cmd : CountingDataRequest", error);
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, error);
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
             }
             bills[ currentSlot] = desired - current;
             Logger.debug("---------- slot %d batch billls : %d desired %d value %d", currentSlot, bills[ currentSlot], desired, current);
@@ -327,7 +327,7 @@ public class Count extends GloryDE50StatePoll {
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, error);
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
         }
         currentQuantity.set(response.getBills());
 //        for (Integer k : bills.keySet()) {

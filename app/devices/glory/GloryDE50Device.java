@@ -1,7 +1,6 @@
 package devices.glory;
 
 import devices.DeviceAbstract;
-import devices.DeviceAbstract.DeviceType;
 import devices.DeviceClassCounterIntreface;
 import devices.DeviceStatus;
 import devices.glory.operation.GloryOperationAbstract;
@@ -15,6 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
+import machines.Machine;
 import models.Configuration;
 import models.db.LgDeviceProperty;
 import play.Logger;
@@ -42,6 +42,7 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         CANCELING, BAG_COLLECTED,
         JAM,
         ERROR;
+
     };
 
     public class GloryDE50StateMachineApi {
@@ -99,8 +100,8 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
     final private GloryDE50StateMachineApi api = new GloryDE50StateMachineApi();
     final private AtomicReference<GloryDE50StateAbstract> currentState = new AtomicReference<GloryDE50StateAbstract>(new OpenPort(api));
 
-    public GloryDE50Device(DeviceType deviceType, String machineDeviceId) {
-        super(deviceType, machineDeviceId);
+    public GloryDE50Device(Machine.DeviceDescription deviceDesc) {
+        super(deviceDesc);
     }
 
     @Override

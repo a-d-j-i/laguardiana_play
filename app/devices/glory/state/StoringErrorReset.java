@@ -7,7 +7,7 @@ package devices.glory.state;
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
 import static devices.glory.GloryDE50Device.STATUS.JAM;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.status.GloryDE50DeviceErrorEvent;
+import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
 import play.Logger;
 
 /**
@@ -82,7 +82,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                     case waiting:
                         return sendGloryOperation(new devices.glory.operation.RemoteCancel());
                     default:
-                        return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
                                 String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
@@ -93,7 +93,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                     case waiting:
                         return this;
                     default:
-                        return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
                                 String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
             case deposit:
@@ -107,7 +107,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                         return sendGloryOperation(new devices.glory.operation.RemoteCancel());
                 }
             default:
-                return new Error(api, GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR,
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
                         String.format("StoringErrorResetCommand Invalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
         return this;

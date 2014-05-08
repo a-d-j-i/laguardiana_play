@@ -5,7 +5,6 @@
 package devices.glory.state;
 
 import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import devices.glory.status.GloryDE50DeviceErrorEvent;
 import java.util.concurrent.Callable;
 import play.Logger;
 
@@ -15,9 +14,14 @@ import play.Logger;
  */
 public class Error extends GloryDE50StateOperation {
 
+    public enum COUNTER_CLASS_ERROR_CODE {
+
+        GLORY_MANAGER_ERROR, STORING_ERROR_CALL_ADMIN, BILLS_IN_ESCROW_CALL_ADMIN, CASSETE_FULL;
+    }
+
     private final String error;
 
-    Error(GloryDE50StateMachineApi api, GloryDE50DeviceErrorEvent.ERROR_CODE error_code, String error) {
+    Error(GloryDE50StateMachineApi api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
         super(api);
         this.error = error;
         Logger.error(error);

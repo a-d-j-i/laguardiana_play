@@ -1,8 +1,10 @@
 package machines;
 
-import devices.DeviceAbstract.DeviceDesc;
+import devices.DeviceAbstract;
 import devices.DeviceInterface;
 import devices.DeviceEventListener;
+import devices.glory.GloryDE50Device;
+import devices.mei.MeiEbds;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +44,61 @@ abstract public class Machine implements DeviceEventListener {
         static public MachineType getMachineType(String machineType) throws IllegalArgumentException {
             return MachineType.valueOf(machineType.toUpperCase());
         }
+    };
+
+    public enum DeviceType {
+
+        OS_PRINTER() {
+                    @Override
+                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
+                        return null;
+                    }
+                },
+        IO_BOARD_V4520_1_0() {
+                    @Override
+                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
+                        return null;
+                    }
+                },
+        IO_BOARD_V4520_1_2() {
+                    @Override
+                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
+                        return null;
+                    }
+                },
+        IO_BOARD_MX220_1_0() {
+                    @Override
+                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
+                        return null;
+                    }
+                },
+        GLORY_DE50() {
+                    @Override
+                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
+                        return new GloryDE50Device(deviceDesc);
+                    }
+                },
+        MEI_EBDS() {
+                    @Override
+                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
+                        return new MeiEbds(deviceDesc);
+                    }
+                };
+
+        public enum DeviceClass {
+
+            DEVICE_CLASS_PRINTER,
+            DEVICE_CLASS_COUNTER,
+            DEVICE_CLASS_IOBOARD,
+        };
+
+        abstract public DeviceAbstract createDevice(DeviceDescription deviceDesc);
+
+        @Override
+        public String toString() {
+            return name();
+        }
+
     };
 
     static private Machine instance = null;
@@ -151,13 +208,20 @@ abstract public class Machine implements DeviceEventListener {
      }
      }
      */
+    public interface DeviceDescription {
+
+        public DeviceType getType();
+
+        public String getMachineId();
+
+    }
     private final Map<Integer, DeviceInterface> devices = new HashMap<Integer, DeviceInterface>();
 
-    abstract protected DeviceDesc[] getDevicesDesc();
+    abstract protected DeviceDescription[] getDevicesDesc();
 
     public void start() {
-        for (DeviceDesc desc : getDevicesDesc()) {
-            DeviceInterface d = desc.createDevice();
+        for (DeviceDescription desc : getDevicesDesc()) {
+            DeviceInterface d = desc.getType().createDevice(desc);
             Logger.debug("Start device %s", d);
             d.addEventListener(this);
             d.start();

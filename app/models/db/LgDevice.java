@@ -1,11 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package models.db;
 
-import devices.DeviceAbstract.DeviceType;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +18,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import machines.Machine.DeviceType;
 import play.db.jpa.GenericModel;
 
 @Entity
