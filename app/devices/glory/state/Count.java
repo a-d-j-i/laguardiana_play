@@ -98,7 +98,7 @@ public class Count extends GloryDE50StatePoll {
                         }
                         String error = response.getError();
                         Logger.error("Error %s sending cmd : SetDepositMode", error);
-                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
                     }
                 }
                 return this;
@@ -249,7 +249,7 @@ public class Count extends GloryDE50StatePoll {
             case storing_error:
                 return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, String.format("Count Storing error, todo: get the flags"));
             default:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, String.format("Count invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, String.format("Count invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
         }
         return this;
     }
@@ -281,13 +281,13 @@ public class Count extends GloryDE50StatePoll {
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         Map<Integer, Integer> currentQuantity = response.getBills();
         if (currentQuantity == null) {
             String error = String.format("Error getting current count");
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
 
         while (currentSlot < 32) {
@@ -299,7 +299,7 @@ public class Count extends GloryDE50StatePoll {
             if (current > desired) {
                 String error = String.format("Invalid bill value %d %d %d", currentSlot, current, desired);
                 Logger.error("Error %s sending cmd : CountingDataRequest", error);
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
             }
             bills[ currentSlot] = desired - current;
             Logger.debug("---------- slot %d batch billls : %d desired %d value %d", currentSlot, bills[ currentSlot], desired, current);
@@ -327,7 +327,7 @@ public class Count extends GloryDE50StatePoll {
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         currentQuantity.set(response.getBills());
 //        for (Integer k : bills.keySet()) {

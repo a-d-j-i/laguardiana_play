@@ -49,7 +49,7 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : SENSE", error);
-            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
+            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", response.getD1Mode().name(), response.getSr1Mode().name()));
         GloryDE50StateAbstract ret = poll(response);

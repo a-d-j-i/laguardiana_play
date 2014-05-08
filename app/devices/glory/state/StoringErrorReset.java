@@ -82,7 +82,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                     case waiting:
                         return sendGloryOperation(new devices.glory.operation.RemoteCancel());
                     default:
-                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                                 String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
@@ -93,7 +93,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                     case waiting:
                         return this;
                     default:
-                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                                 String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
             case deposit:
@@ -107,7 +107,7 @@ public class StoringErrorReset extends GloryDE50StatePoll {
                         return sendGloryOperation(new devices.glory.operation.RemoteCancel());
                 }
             default:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("StoringErrorResetCommand Invalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
         return this;

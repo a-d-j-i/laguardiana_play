@@ -3,7 +3,7 @@ package models;
 import bootstrap.BootstrapEventJob;
 import controllers.Secure;
 import devices.DeviceEvent;
-import devices.DeviceEventListener;
+import devices.events.DeviceEventListener;
 import machines.Machine;
 import devices.ioboard.IoBoard;
 import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVED;

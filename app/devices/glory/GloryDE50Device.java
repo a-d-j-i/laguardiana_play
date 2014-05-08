@@ -39,7 +39,8 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
-        CANCELING, BAG_COLLECTED,
+        CANCELING, 
+        BAG_COLLECTED,
         JAM,
         ERROR;
 

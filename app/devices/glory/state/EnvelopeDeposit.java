@@ -105,7 +105,7 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
                 return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN,
                         String.format("EnvelopeDeposit Storing error, todo: get the flags"));
             default:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("EnvelopeDeposit invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
         }
         return this;

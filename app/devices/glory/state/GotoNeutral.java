@@ -173,7 +173,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         }
                         break;
                     default:
-                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                                 String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
@@ -235,12 +235,12 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         Logger.debug("GOTO NEUTRAL DONE");
                         return prevState;
                     default:
-                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
+                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                                 String.format("gotoNeutral Abnormal device Invalid SR1-2 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
             default:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR,
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("gotoNeutralInvalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
         Logger.debug("GOTO NEUTRAL DONE");

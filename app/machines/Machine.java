@@ -2,7 +2,7 @@ package machines;
 
 import devices.DeviceAbstract;
 import devices.DeviceInterface;
-import devices.DeviceEventListener;
+import devices.events.DeviceEventListener;
 import devices.glory.GloryDE50Device;
 import devices.mei.MeiEbds;
 import java.util.ArrayList;

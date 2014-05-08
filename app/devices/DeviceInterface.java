@@ -5,6 +5,7 @@
  */
 package devices;
 
+import devices.events.DeviceEventListener;
 import java.util.List;
 import models.db.LgDeviceProperty;
 

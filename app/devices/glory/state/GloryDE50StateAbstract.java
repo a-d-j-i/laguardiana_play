@@ -39,7 +39,7 @@ abstract public class GloryDE50StateAbstract implements DeviceClassCounterIntref
             if (response.isError()) {
                 String error = response.getError();
                 Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_MANAGER_ERROR, error);
+                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
             }
         }
         return null;
