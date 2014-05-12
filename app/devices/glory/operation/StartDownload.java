@@ -1,5 +1,6 @@
 package devices.glory.operation;
 
+import devices.glory.response.GloryDE50OperationResponse;
 import play.Logger;
 
 
@@ -11,10 +12,19 @@ import play.Logger;
  */
 public class StartDownload extends OperationWithAckResponse {
 
+    final int fileSize;
+    final String fileName;
+
     public StartDownload(int fileSize, String fileName) {
-        super((byte) 0x47, "StartDownload");
+        super(0x47);
+        this.fileSize = fileSize;
+        this.fileName = fileName;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
         if (fileName.length() != 12) {
-            response.setError("The file name must be in 8.3 format");
+            throw new IllegalArgumentException("The file name must be in 8.3 format");
         }
         byte[] a, b;
         a = getXXFormat(fileSize, 0x30, 8);
@@ -23,6 +33,6 @@ public class StartDownload extends OperationWithAckResponse {
         System.arraycopy(a, 0, c, 0, a.length);
         System.arraycopy(b, 0, c, a.length, b.length);
         Logger.debug("File size : %d, string %s", fileSize, c.toString());
-        setCmdData(c);
+        return getCmdStrFromData(c);
     }
 }

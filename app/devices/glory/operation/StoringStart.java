@@ -1,7 +1,5 @@
 package devices.glory.operation;
 
-import java.io.IOException;
-
 /*
  * This command starts storage.
  * Upon SR1/ Storing start request from the device, TM transmits.
@@ -13,8 +11,15 @@ import java.io.IOException;
  */
 public class StoringStart extends OperationWithAckResponse {
 
-    public StoringStart( int sequenceNumber ) {
-        super( ( byte ) 0x34, "Storing Start" );
-        setCmdData( String.format( "%03d", sequenceNumber ).getBytes() );
+    final int sequenceNumber;
+
+    public StoringStart(int sequenceNumber) {
+        super(0x34);
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(String.format("%03d", sequenceNumber).getBytes());
     }
 }

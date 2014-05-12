@@ -10,16 +10,22 @@ package devices.glory.operation;
  */
 public class SwitchCurrency extends OperationWithAckResponse {
 
-    public SwitchCurrency( byte c ) {
-        super( ( byte ) 0x39, "Switch Currency" );
-        if ( c < 8 ) {
-            c = ( byte ) ( 0x30 + c );
+    final byte currency;
+
+    public SwitchCurrency(byte currency) {
+        super(0x39);
+        this.currency = currency;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        byte c = currency;
+        if (c < 8) {
+            c = (byte) (0x30 + c);
         }
-        if ( c < 0x30 && c > 0x37 ) {
-            response.setError( String.format( "Invlid currency 0x%x in command %s", c, getDescription() ) );
-            return;
+        if (c < 0x30 && c > 0x37) {
+            throw new IllegalArgumentException(String.format("Invlid currency 0x%x in command %s", c, getDescription()));
         }
-        byte[] b = { c };
-        setCmdData( b );
+        return getCmdStrFromData(new byte[]{c});
     }
 }

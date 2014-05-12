@@ -1,12 +1,10 @@
 package controllers;
 
-import devices.glory.operation.OperationWithAckResponse;
 import devices.glory.operation.EndUpload;
-import devices.glory.operation.GetFileInformation;
 import devices.glory.operation.LogDataRequest;
 import devices.glory.operation.StartUpload;
 import devices.glory.operation.Sense;
-import devices.DeviceInterface;
+import devices.device.DeviceInterface;
 import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import java.io.BufferedWriter;
@@ -50,67 +48,55 @@ public class GloryDE50Controller extends Application {
     }
 
     public static void sense(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new Sense()));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new Sense(), false));
     }
 
     public static void remoteCancel(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.RemoteCancel();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.RemoteCancel(), true));
     }
 
     public static void setDepositMode(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.SetDepositMode();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetDepositMode(), true));
     }
 
     public static void setManualMode(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.SetManualMode();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetManualMode(), true));
     }
 
     public static void setErrorRecoveryMode(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.SetErrorRecoveryMode();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetErrorRecoveryMode(), true));
     }
 
     public static void setStroringErrorRecoveryMode(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.SetStroringErrorRecoveryMode();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetStroringErrorRecoveryMode(), true));
     }
 
     public static void setCollectMode(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.SetCollectMode();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetCollectMode(), true));
     }
 
     public static void openEscrow(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.OpenEscrow();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.OpenEscrow(), true));
     }
 
     public static void closeEscrow(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.CloseEscrow();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.CloseEscrow(), true));
     }
 
     public static void storingStart(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.StoringStart(0);
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.StoringStart(0), true));
     }
 
     public static void stopCounting(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.StopCounting();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.StopCounting(), true));
     }
 
     public static void resetDevice(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.ResetDevice();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.ResetDevice(), true));
     }
 
     public static void switchCurrency(Integer deviceId, Long cu) {
-        OperationWithAckResponse c = new devices.glory.operation.SwitchCurrency(cu.byteValue());
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SwitchCurrency(cu.byteValue()), true));
     }
 
     public static void batchDataTransmition(Integer deviceId) {
@@ -120,49 +106,40 @@ public class GloryDE50Controller extends Application {
         }
         bills[ 27] = 0;
         bills[ 26] = 0;
-
-        OperationWithAckResponse c = new devices.glory.operation.BatchDataTransmition(bills);
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills), true));
     }
 
     public static void countingDataRequest(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.CountingDataRequest();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), true));
     }
 
     public static void amountRequest(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.AmountRequest();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.AmountRequest(), true));
     }
 
     public static void denominationDataRequest(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.DenominationDataRequest();
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.DenominationDataRequest(), true));
     }
 
     public static void settingDataRequestEscrow(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.SettingDataRequest("ESCROW_SET");
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("ESCROW_SET"), true));
     }
 
     public static void settingDataRequestCassete(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.SettingDataRequest("CASSETE_SET");
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("CASSETE_SET"), true));
     }
 
     public static void settingDataRequestReject(Integer deviceId) {
-        OperationWithAckResponse c = new devices.glory.operation.SettingDataRequest("REJECT_SET");
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("REJECT_SET"), true));
     }
 
     public static void logDataRequest(Integer deviceId) throws IOException, InterruptedException {
-        StartUpload c = new devices.glory.operation.StartUpload(StartUpload.Files.COUNTER_INFO);
-        GloryDE50OperationResponse st = glory.sendGloryDE50Operation(c, true);
+        GloryDE50OperationResponse st = glory.sendGloryDE50Operation(new devices.glory.operation.StartUpload(StartUpload.Files.COUNTER_INFO), true);
         if (st.isError()) {
             setStatusAndRedirect(deviceId, st);
             return;
         }
-        int fileSize = c.getFileSize();
+        int fileSize = st.getFileSize();
         Logger.debug("Filesize : %d", fileSize);
         int block;
         FileWriter fstream = null;
@@ -226,8 +203,7 @@ public class GloryDE50Controller extends Application {
             setStatusAndRedirect(deviceId, st);
             return;
         }
-        OperationWithAckResponse c = new devices.glory.operation.DeviceSettingDataLoad("settings.txt");
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.DeviceSettingDataLoad("settings.txt"), true));
     }
 
     public static void programUpdate(Integer deviceId) {
@@ -245,21 +221,18 @@ public class GloryDE50Controller extends Application {
                 setStatusAndRedirect(deviceId, st);
                 return;
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             renderArgs.put("error", "Reading file");
             setStatusAndRedirect(deviceId, null);
         }
-
-        OperationWithAckResponse c = new devices.glory.operation.ProgramUpdate(gFileName);
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.ProgramUpdate(gFileName), true));
     }
 
     public static void getFileInformation(Integer deviceId) {
         String gFileName = "UPGRADES.TXT";
-        GetFileInformation c = new devices.glory.operation.GetFileInformation(gFileName);
-        GloryDE50OperationResponse response = glory.sendGloryDE50Operation(c, true);
-        if (c.getFileSize() > 0 && c.getDate() != null) {
-            Logger.debug("Filesize : %d, Date : %s", c.getFileSize(), c.getDate().toString());
+        GloryDE50OperationResponse response = glory.sendGloryDE50Operation(new devices.glory.operation.GetFileInformation(gFileName), true);
+        if (response.getFileSize() > 0 && response.getDate() != null) {
+            Logger.debug("Filesize : %d, Date : %s", response.getFileSize(), response.getDate().toString());
         } else {
             Logger.debug("File not");
         }
@@ -270,13 +243,11 @@ public class GloryDE50Controller extends Application {
         Date now = new Date();
         //Calendar calendar = new GregorianCalendar(2007, Calendar.JANUARY, 1);
         //GregorianCalendar.getInstance().getTime()
-        OperationWithAckResponse c = new devices.glory.operation.SetTime(now);
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(c, true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetTime(now), true));
     }
 
     static private GloryDE50OperationResponse UploadData(int fileSize, String fileName, byte[] data) {
-        OperationWithAckResponse c = new devices.glory.operation.StartDownload(fileSize, fileName);
-        GloryDE50OperationResponse st = glory.sendGloryDE50Operation(c, true);
+        GloryDE50OperationResponse st = glory.sendGloryDE50Operation(new devices.glory.operation.StartDownload(fileSize, fileName), true);
         if (st.isError()) {
             return st;
         }
@@ -292,14 +263,12 @@ public class GloryDE50Controller extends Application {
                 }
             }
             Logger.debug("Packet no %d", j);
-            c = new devices.glory.operation.RequestDownload(j, b);
-            st = glory.sendGloryDE50Operation(c, true);
+            st = glory.sendGloryDE50Operation(new devices.glory.operation.RequestDownload(j, b), true);
             if (st.isError()) {
                 return st;
             }
         }
-        c = new devices.glory.operation.EndDownload();
-        st = glory.sendGloryDE50Operation(c, true);
+        st = glory.sendGloryDE50Operation(new devices.glory.operation.EndDownload(), true);
         if (st.isError()) {
             return st;
         }
@@ -307,8 +276,7 @@ public class GloryDE50Controller extends Application {
     }
 //    static private GloryReturnParser DownloadData(String fileName) {
 //
-//        CommandWithFileLongResponse c = new devices.glory.command.StartUpload(fileName);
-//        GloryReturnParser st = new GloryReturnParser(glory.sendCommand(c, true));
+//        GloryReturnParser st = new GloryReturnParser(glory.sendCommand(new devices.glory.command.StartUpload(fileName), true));
 //        if (st.isError()) {
 //            st.setMsg("Error in StartDownload");
 //            return st;

@@ -5,11 +5,8 @@
  */
 package machines;
 
-import devices.DeviceEvent;
+import devices.device.DeviceEvent;
 import machines.Machine.DeviceDescription;
-import static machines.Machine.DeviceType.GLORY_DE50;
-import static machines.Machine.DeviceType.IO_BOARD_MX220_1_0;
-import static machines.Machine.DeviceType.OS_PRINTER;
 import static machines.P500.P500_DEVICES.P500_DEVICE_OS_PRINTER;
 
 /**
@@ -20,9 +17,9 @@ public class P500 extends Machine {
 
     enum P500_DEVICES implements DeviceDescription {
 
-        P500_DEVICE_OS_PRINTER(OS_PRINTER),
-        P500_DEVICE_IO_BOARD_MX220_1_0(IO_BOARD_MX220_1_0),
-        P500_DEVICE_GLORY_DE50(GLORY_DE50);
+        P500_DEVICE_OS_PRINTER(DeviceType.OS_PRINTER),
+        P500_DEVICE_IO_BOARD_MX220_1_0(DeviceType.IO_BOARD_MX220_1_0),
+        P500_DEVICE_GLORY_DE50(DeviceType.GLORY_DE50);
 
         private final DeviceType type;
 

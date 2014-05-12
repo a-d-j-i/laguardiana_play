@@ -5,7 +5,7 @@
 package models.actions.states;
 
 import devices.ioboard.IoBoard;
-import devices.printer.Printer;
+import devices.printer.OSPrinter;
 import java.util.EnumMap;
 import java.util.Map;
 import models.Configuration;
@@ -102,7 +102,7 @@ abstract public class ActionState {
         }
     }
 
-    public void onPrinterEvent(Printer.PrinterStatus status) {
+    public void onPrinterEvent(OSPrinter.PrinterStatus status) {
         Logger.error("ActionState invalid onPrinterEvent %s", status.toString());
     }
 

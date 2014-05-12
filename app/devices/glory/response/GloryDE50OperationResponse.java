@@ -1,8 +1,10 @@
 package devices.glory.response;
 
+import devices.device.response.DeviceResponseInterface;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +15,7 @@ import java.util.Map;
  *
  * @author adji
  */
-public class GloryDE50OperationResponse implements Serializable {
+public class GloryDE50OperationResponse implements Serializable, DeviceResponseInterface {
 
     static public class Denomination {
 
@@ -485,8 +487,8 @@ public class GloryDE50OperationResponse implements Serializable {
         return bills;
     }
 
-    public void setBills(Map<Integer, Integer> bills) {
-        this.bills = bills;
+    public void setBill(int slot, Integer value) {
+        this.bills.put(slot, value);
     }
 
     public String getError() {
@@ -518,6 +520,24 @@ public class GloryDE50OperationResponse implements Serializable {
 
     public GloryDE50OperationResponseParser getRepr() {
         return new GloryDE50OperationResponseParser(this);
+    }
+    int fileSize = -1;
+
+    public void setFileSize(int l) {
+        fileSize = l;
+    }
+
+    public int getFileSize() {
+        return fileSize;
+    }
+    Date date;
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public Date getDate() {
+        return date;
     }
 
 }

@@ -5,7 +5,7 @@
 package controllers;
 
 import devices.ioboard.IoBoard;
-import devices.printer.Printer;
+import devices.printer.OSPrinter;
 import java.util.List;
 import models.Configuration;
 import models.ModelFacade;
@@ -95,7 +95,7 @@ public class ConfigController extends Controller {
     // TODO: Get machine status only.
     public static void status() {
         String gerror = null;
-        Printer.PrinterStatus pstatus = null;
+        OSPrinter.PrinterStatus pstatus = null;
         String ierror = null;
 
         if (!Configuration.isIgnoreIoBoard()) {

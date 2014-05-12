@@ -9,8 +9,11 @@ package devices.glory.operation;
 public class SetCollectMode extends OperationWithAckResponse {
 
     public SetCollectMode() {
-        super( ( byte ) 0x31, "Mode Specification (collect)" );
-        byte[] b = { 0x34 };
-        setCmdData( b );
+        super(0x31);
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(new byte[]{0x34});
     }
 }

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices.events;
+package devices.device.events;
 
-import devices.DeviceEvent;
+import devices.device.DeviceEvent;
 import java.util.EventListener;
 
 /**
@@ -14,7 +14,5 @@ import java.util.EventListener;
  */
 public interface DeviceEventListener extends EventListener {
 
-    public void onErrorEvent(ErrorEvent counterEvent);
-    public void onCounterEvent(CounterEvent counterEvent);
     public void onDeviceEvent(DeviceEvent counterEvent);
 }

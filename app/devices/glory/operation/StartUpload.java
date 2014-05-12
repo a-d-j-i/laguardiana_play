@@ -1,5 +1,7 @@
 package devices.glory.operation;
 
+import devices.glory.response.GloryDE50OperationResponse;
+
 
 /*
  * Upload a file from DE to TM. If DE have file with same name, DE delete it.
@@ -36,27 +38,31 @@ public class StartUpload extends OperationdWithDataResponse {
         }
     }
 
+    final Files fileName;
+
     public StartUpload(Files fileName) {
-        super((byte) 0x52, "StartUpload");
-        setCmdData(fileName.name().getBytes());
+        super(0x52);
+        this.fileName = fileName;
     }
-    int fileSize = -1;
 
     @Override
-    public void setResponse(byte[] dr) {
-        super.setResponse(dr);
-        if (response.getError() != null) {
-            return;
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(fileName.name().getBytes());
+    }
+
+    @Override
+    public GloryDE50OperationResponse getResponse(byte[] dr) {
+        GloryDE50OperationResponse response = super.getResponse(dr);
+        if (response.isError()) {
+            return response;
         }
         byte[] data = response.getData();
         if (data == null) {
-            response.setError("Data is null");
-            return;
+            return new GloryDE50OperationResponse("Data is null");
         }
         if (data.length != 8) {
-            response.setError(String.format("Invalid command (%s) response length %d expected 8 bytes hex number",
+            return new GloryDE50OperationResponse(String.format("Invalid command (%s) response length %d expected 8 bytes hex number",
                     getDescription(), dr.length));
-            return;
         }
         byte[] b = data;
         int l = 0;
@@ -64,14 +70,11 @@ public class StartUpload extends OperationdWithDataResponse {
             if (b[i] >= 0x30 && b[i] <= 0x3F) {
                 l += getHexDigit(b[i]) * Math.pow(16, b.length - i - 1);
             } else {
-                response.setError(String.format("Invalid digit %d == 0x%x", b[i], b[i]));
+                return new GloryDE50OperationResponse(String.format("Invalid digit %d == 0x%x", b[i], b[i]));
             }
         }
-        fileSize = l;
-        return;
+        response.setFileSize( l );
+        return response;
     }
 
-    public int getFileSize() {
-        return fileSize;
-    }
 }

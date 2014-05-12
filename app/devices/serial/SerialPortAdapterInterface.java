@@ -10,7 +10,7 @@ public interface SerialPortAdapterInterface {
 
     public Byte read();
 
-    public Byte read(int timeout);
+    public Byte read(int timeoutMS);
 
     public String readLine(int timeout);
 }

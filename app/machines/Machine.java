@@ -1,8 +1,8 @@
 package machines;
 
-import devices.DeviceAbstract;
-import devices.DeviceInterface;
-import devices.events.DeviceEventListener;
+import devices.device.DeviceAbstract;
+import devices.device.DeviceInterface;
+import devices.device.events.DeviceEventListener;
 import devices.glory.GloryDE50Device;
 import devices.mei.MeiEbds;
 import java.util.ArrayList;
@@ -222,6 +222,9 @@ abstract public class Machine implements DeviceEventListener {
     public void start() {
         for (DeviceDescription desc : getDevicesDesc()) {
             DeviceInterface d = desc.getType().createDevice(desc);
+            if (d == null) {
+                throw new IllegalArgumentException("Machine must be reconfigured correctly");
+            }
             Logger.debug("Start device %s", d);
             d.addEventListener(this);
             d.start();

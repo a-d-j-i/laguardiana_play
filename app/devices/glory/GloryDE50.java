@@ -1,7 +1,7 @@
 package devices.glory;
 
+import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.operation.GloryOperationAbstract;
 import devices.serial.SerialPortAdapterInterface;
 import java.security.InvalidParameterException;
 import play.Logger;
@@ -32,15 +32,7 @@ public class GloryDE50 {
         serialPort = null;
     }
 
-    public synchronized GloryDE50OperationResponse sendOperation(GloryOperationAbstract cmd) {
-        return sendOperation(cmd, null, false);
-    }
-
-    public synchronized GloryDE50OperationResponse sendOperation(GloryOperationAbstract cmd, boolean debug) {
-        return sendOperation(cmd, null, debug);
-    }
-
-    public synchronized GloryDE50OperationResponse sendOperation(GloryOperationAbstract cmd, String data, boolean debug) {
+    public synchronized GloryDE50OperationResponse sendOperation(GloryDE50OperationInterface cmd, boolean debug) {
         if (cmd == null) {
             throw new InvalidParameterException("Glory unknown command");
         }
@@ -60,7 +52,7 @@ public class GloryDE50 {
             }
             Logger.debug(h.toString());
         }
-        cmd.printCmd();
+        Logger.debug("CMD : %s", cmd.toString());
 
         byte[] b = null;
         for (int i = 0; i < 512; i++) {
@@ -109,8 +101,8 @@ public class GloryDE50 {
             }
             Logger.debug(h.toString());
         }
-        cmd.setResponse(b);
-        return cmd.getResponse();
+//        cmd.setResponse(b);
+        return cmd.getResponse(b);
     }
 
     private Integer getXXVal(byte[] b) {

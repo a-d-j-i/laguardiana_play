@@ -2,11 +2,10 @@ package controllers;
 
 import controllers.serializers.BillQuantitySerializer;
 import controllers.serializers.BillValueSerializer;
-import devices.DeviceClassCounterIntreface;
-import devices.DeviceClassIoBoardInterface;
-import devices.DeviceClassPrinterInterface;
-import devices.DeviceInterface;
-import devices.DeviceStatus;
+import devices.device.DeviceClassCounterIntreface;
+import devices.device.DeviceClassIoBoardInterface;
+import devices.device.DeviceClassPrinterInterface;
+import devices.device.DeviceInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

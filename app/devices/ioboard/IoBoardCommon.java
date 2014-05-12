@@ -1,6 +1,6 @@
 package devices.ioboard;
 
-import devices.DeviceClassIoBoardInterface;
+import devices.device.DeviceClassIoBoardInterface;
 import devices.serial.SerialPortAdapterAbstract.PORTSPEED;
 import devices.serial.SerialPortAdapterInterface;
 import java.io.IOException;

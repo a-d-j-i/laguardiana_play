@@ -5,8 +5,8 @@
  */
 package devices.printer;
 
-import devices.DeviceStatus;
-import devices.printer.Printer.PRINTER_STATE;
+import devices.device.DeviceStatus;
+import devices.printer.OSPrinter.PRINTER_STATE;
 
 /**
  *

@@ -5,7 +5,7 @@
 package models.actions;
 
 import devices.ioboard.IoBoard;
-import devices.printer.Printer;
+import devices.printer.OSPrinter;
 import java.util.Date;
 import java.util.List;
 import models.ItemQuantity;
@@ -208,7 +208,7 @@ abstract public class UserAction {
         } while (!state.equals(currState));
     }
 
-    public void onPrinterEvent(Printer.PrinterStatus p) {
+    public void onPrinterEvent(OSPrinter.PrinterStatus p) {
         ActionState currState = state;
         do {
             Logger.debug("Action : onPrinterEvent state %s currState %s event %s",

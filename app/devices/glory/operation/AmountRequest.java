@@ -9,6 +9,6 @@ package devices.glory.operation;
 public class AmountRequest extends OperationWithCountingDataResponse {
 
     public AmountRequest() {
-        super( ( byte ) 0x42, "AmountRequest" );
+        super(0x42);
     }
 }

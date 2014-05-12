@@ -2,12 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices.glory.state;
+package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import static devices.glory.GloryDE50Device.STATUS.CANCELING;
+import static devices.device.DeviceStatus.STATUS.CANCELING;
+import devices.glory.GloryDE50Device.GloryDE50StateApi;
+import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.state.Error;
 import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.state.GloryDE50StateAbstract;
 import java.util.concurrent.atomic.AtomicBoolean;
 import play.Logger;
 
@@ -19,7 +22,7 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
 
     final AtomicBoolean mustCancel = new AtomicBoolean(false);
 
-    public GloryDE50StatePoll(GloryDE50StateMachineApi api) {
+    public GloryDE50StatePoll(GloryDE50StateApi api) {
         super(api);
     }
 
@@ -27,10 +30,16 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
 
     abstract public GloryDE50StateAbstract doCancel();
 
-    @Override
-    public boolean cancelDeposit() {
-        mustCancel.set(true);
-        return true;
+    GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface op) {
+        if (op != null) {
+            GloryDE50OperationResponse response = getApi().sendGloryDE50Operation(op, false);
+            if (response.isError()) {
+                String error = response.getError();
+                Logger.error("Error %s sending cmd : %s", error, op.getDescription());
+                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -42,14 +51,14 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
             if (ret != null) {
                 return ret;
             }
-            return new GotoNeutral(api);
+            return new GotoNeutral(getApi());
         }
 
-        GloryDE50OperationResponse response = api.sendGloryDE50Operation(new devices.glory.operation.Sense());
+        GloryDE50OperationResponse response = getApi().sendGloryDE50Operation(new devices.glory.operation.Sense());
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : SENSE", error);
-            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+            return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", response.getD1Mode().name(), response.getSr1Mode().name()));
         GloryDE50StateAbstract ret = poll(response);
@@ -61,6 +70,12 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
         } catch (InterruptedException ex) {
         }
         return null;
+    }
+
+    @Override
+    public boolean cancelDeposit() {
+        mustCancel.set(true);
+        return true;
     }
 
     /*

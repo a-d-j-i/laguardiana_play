@@ -14,11 +14,19 @@ import java.io.IOException;
  */
 public class RequestDownload extends OperationdWithDataResponse {
 
+    final long packetNo;
+    final byte[] data;
+
     public RequestDownload(long packetNo, byte[] data) {
-        super((byte) 0x49, "RequestDownload");
+        super(0x49);
+        this.packetNo = packetNo;
+        this.data = data;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
         if (data.length != 512) {
-            response.setError("Data must have 512 bytes");
-            return;
+            throw new IllegalArgumentException("Data must have 512 bytes");
         }
         ByteArrayOutputStream os = null;
         try {
@@ -29,15 +37,15 @@ public class RequestDownload extends OperationdWithDataResponse {
                 os.write((byte) ((b & 0xF0) >> 4) + 0x30);
                 os.write((byte) (b & 0x0F) + 0x30);
             }
-            setCmdData(os.toByteArray());
+            return getCmdStrFromData(os.toByteArray());
         } catch (IOException e) {
-            response.setError("Generating buffer" + e.getMessage());
             if (os != null) {
                 try {
                     os.close();
                 } catch (IOException ex) {
                 }
             }
-        }
+            throw new IllegalArgumentException("Generating buffer" + e.getMessage());
+        } 
     }
 }

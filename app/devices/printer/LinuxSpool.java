@@ -151,27 +151,27 @@ public class LinuxSpool {
         return LinuxSpoolPrinterStatus.ATTRIBUTE_NOT_FOUND;
     }
 
-    static void refreshState(String name, Printer.State state) {
+    static void refreshState(String name, OSPrinter.State state) {
         LinuxSpoolPrinterStatus st = getPrinterStatus(name);
         switch (st) {
             case ATTRIBUTE_NOT_FOUND:
-                state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "Attribute Not Found");
+                state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "Attribute Not Found");
                 state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "Attribute not found"));
                 break;
             case IPP_PRINTER_IDLE:
-                state.setState(Printer.PRINTER_STATE.PRINTER_READY, "Ready");
+                state.setState(OSPrinter.PRINTER_STATE.PRINTER_READY, "Ready");
                 state.clearError();
                 break;
             case IPP_PRINTER_PROCESSING:
-                state.setState(Printer.PRINTER_STATE.PRINTER_PRINTING, "Printing");
+                state.setState(OSPrinter.PRINTER_STATE.PRINTER_PRINTING, "Printing");
                 state.clearError();
                 break;
             case IPP_PRINTER_STOPPED:
-                state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "Printer Stopped");
+                state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "Printer Stopped");
                 state.clearError();
                 break;
             case PRINTER_NOT_FOUND:
-                state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "Printer Not Found");
+                state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "Printer Not Found");
                 state.setError(new PrinterError(PrinterError.ERROR_CODE.PRINTER_NOT_FOUND, "Printer Not Found"));
                 break;
             default:

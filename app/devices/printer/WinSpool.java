@@ -184,7 +184,7 @@ public class WinSpool {
         int PRINTER_ENUM_HIDE = 0x01000000;
     }
 
-    static void refreshState(String name, Printer.State state) {
+    static void refreshState(String name, OSPrinter.State state) {
         PRINTER_INFO_2 pi;
         IntByReference pcbNeeded = new IntByReference();
         IntByReference pcReturned = new IntByReference();
@@ -192,7 +192,7 @@ public class WinSpool {
 
         if (!WinspoolLib.INSTANCE.OpenPrinter(name, pHandle, null)) {
             WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
-            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling OpenPrinter");
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling OpenPrinter");
             state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "WinspoolLib Error calling OpenPrinter"));
             return;
         }
@@ -200,7 +200,7 @@ public class WinSpool {
         WinspoolLib.INSTANCE.GetPrinter(pHandle.getValue(), 2, null, 0, pcbNeeded);
         if (pcbNeeded.getValue() <= 0) {
             WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
-            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling GetPrinter pcbNedeed <= 0");
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling GetPrinter pcbNedeed <= 0");
             state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "WinspoolLib Error calling GetPrinter pcbNedeed <= 0"));
             return;
         }
@@ -209,7 +209,7 @@ public class WinSpool {
         PRINTER_INFO_2 pinfo2 = new PRINTER_INFO_2(pcbNeeded.getValue());
         if (!WinspoolLib.INSTANCE.GetPrinter(pHandle.getValue(), 2, pinfo2.getPointer(), pcbNeeded.getValue(), pcReturned)) {
             WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
-            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling GetPrinter");
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib Error calling GetPrinter");
             state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "WinspoolLib Error calling GetPrinter"));
             return;
         }
@@ -218,7 +218,7 @@ public class WinSpool {
         pi = (PRINTER_INFO_2) pinfo2;
         if (pi == null) {
             WinspoolLib.INSTANCE.ClosePrinter(pHandle.getValue());
-            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib pi is null");
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, "WinspoolLib pi is null");
             state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "WinspoolLib pi is null"));
             return;
         }
@@ -226,7 +226,7 @@ public class WinSpool {
 
         Set hat = WinSpoolPrinterAttributes.getAttributesBits(pi.Attributes);
         if (hat.contains(WinSpoolPrinterAttributes.PRINTER_ATTRIBUTE_WORK_OFFLINE)) {
-            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hat.toString());
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hat.toString());
             return;
         }
 
@@ -234,7 +234,7 @@ public class WinSpool {
         if (hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_SERVER_UNKNOWN)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PENDING_DELETION)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_NOT_AVAILABLE)) {
-            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hs.toString());
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hs.toString());
             state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, hs.toString()));
             return;
         }
@@ -256,7 +256,7 @@ public class WinSpool {
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_USER_INTERVENTION)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_OUTPUT_BIN_FULL)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PAGE_PUNT)) {
-            state.setState(Printer.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hs.toString());
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_SPOOL_PROBLEM, hs.toString());
         } else if (hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_BUSY)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_WARMING_UP)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_INITIALIZING)
@@ -264,10 +264,10 @@ public class WinSpool {
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_MANUAL_FEED)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PRINTING)
                 || hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_PROCESSING)) {
-            state.setState(Printer.PRINTER_STATE.PRINTER_PRINTING, "Printing " + hs.toString());
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_PRINTING, "Printing " + hs.toString());
         } else {
             //if (hs.contains(WinSpoolPrinterStatus.PRINTER_STATUS_WAITING)) {
-            state.setState(Printer.PRINTER_STATE.PRINTER_READY, "Ready");
+            state.setState(OSPrinter.PRINTER_STATE.PRINTER_READY, "Ready");
         }
     }
 }

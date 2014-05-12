@@ -5,7 +5,7 @@
 package models.actions.states;
 
 import devices.ioboard.IoBoard;
-import devices.printer.Printer;
+import devices.printer.OSPrinter;
 import models.actions.UserAction.StateApi;
 
 /**
@@ -37,7 +37,7 @@ public class PrinterNotReady extends ActionState {
     }
 
     @Override
-    public void onPrinterEvent(Printer.PrinterStatus status) {
+    public void onPrinterEvent(OSPrinter.PrinterStatus status) {
         switch (status.getPrinterState()) {
             case PRINTER_READY:
                 stateApi.setState(prevState);

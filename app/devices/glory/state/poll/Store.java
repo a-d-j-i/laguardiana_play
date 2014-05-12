@@ -2,22 +2,20 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices.glory.state;
+package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
+import devices.glory.GloryDE50Device.GloryDE50StateApi;
 import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.state.GloryDE50StateAbstract;
 
 /**
  *
  * @author adji
  */
-public class Reset extends GloryDE50StatePoll {
+public class Store extends GloryDE50StatePoll {
 
-    final GloryDE50StateAbstract prevStep;
-
-    public Reset(GloryDE50StateMachineApi api, GloryDE50StateAbstract prevStep) {
+    public Store(GloryDE50StateApi api) {
         super(api);
-        this.prevStep = prevStep;
     }
 
     @Override
@@ -32,7 +30,7 @@ public class Reset extends GloryDE50StatePoll {
             case being_restoration:
                 return this;
             default:
-                return prevStep;
+                return this;
         }
     }
 

@@ -1,4 +1,4 @@
-package devices;
+package devices.device;
 
 import java.util.Map;
 

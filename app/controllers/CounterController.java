@@ -5,7 +5,7 @@
 package controllers;
 
 import devices.ioboard.IoBoard;
-import devices.printer.Printer.PrinterStatus;
+import devices.printer.OSPrinter.PrinterStatus;
 import models.Configuration;
 import models.ModelFacade;
 import play.Logger;

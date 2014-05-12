@@ -1,12 +1,15 @@
-package devices.glory.state;
+package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import static devices.glory.GloryDE50Device.STATUS.JAM;
-import static devices.glory.GloryDE50Device.STATUS.PUT_THE_ENVELOPE_IN_THE_ESCROW;
-import static devices.glory.GloryDE50Device.STATUS.READY_TO_STORE;
+import static devices.device.DeviceStatus.STATUS.JAM;
+import static devices.device.DeviceStatus.STATUS.PUT_THE_ENVELOPE_IN_THE_ESCROW;
+import static devices.device.DeviceStatus.STATUS.READY_TO_STORE;
+import devices.glory.GloryDE50Device.GloryDE50StateApi;
 import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.state.Error;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
 import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.state.GloryDE50StateAbstract;
+import devices.glory.state.ReadyToStore;
 import play.Logger;
 
 /**
@@ -15,7 +18,7 @@ import play.Logger;
  */
 public class EnvelopeDeposit extends GloryDE50StatePoll {
 
-    public EnvelopeDeposit(GloryDE50StateMachineApi api) {
+    public EnvelopeDeposit(GloryDE50StateApi api) {
         super(api);
     }
 
@@ -39,7 +42,7 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
             if (sret != null) {
                 return sret;
             }
-            api.setClosing(true);
+            getApi().setClosing(true);
         }
         if (waitForEscrow-- > 0) {
             return this;
@@ -48,12 +51,12 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
         switch (lastResponse.getSr1Mode()) {
             case escrow_open:
                 notifyListeners(PUT_THE_ENVELOPE_IN_THE_ESCROW);
-                api.setClosing(false);
+                getApi().setClosing(false);
                 break;
             case waiting_for_an_envelope_to_set:
                 break;
             case escrow_close:
-                api.setClosing(true);
+                getApi().setClosing(true);
                 break;
             case escrow_close_request:
                 if (lastResponse.isEscrowBillPresent()) {
@@ -61,16 +64,16 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
                 }
                 break;
             case storing_start_request:
-                api.notifyListeners(READY_TO_STORE);
-                return new WaitForStoreCommand(api, this);
+                getApi().notifyListeners(READY_TO_STORE);
+                return new ReadyToStore(getApi(), this);
 
             case waiting:
                 // The second time after storing.
                 if (storeTry) {
-                    //return new GotoNeutral(api, this);
+                    //return new GotoNeutral(getApi(), this);
                 }
                 if (!lastResponse.isEscrowBillPresent()) {
-                    api.setClosing(false);
+                    getApi().setClosing(false);
                     sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
                     if (sret != null) {
                         // sret ?
@@ -84,7 +87,7 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
                 storeTry = true;
                 break;
             case abnormal_device:
-                if (api.isClosing()) {
+                if (getApi().isClosing()) {
                     /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
                      "Escrow door jamed"));*/
                     //return;
@@ -102,10 +105,10 @@ public class EnvelopeDeposit extends GloryDE50StatePoll {
                 }
                 break;
             case storing_error:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN,
+                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN,
                         String.format("EnvelopeDeposit Storing error, todo: get the flags"));
             default:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("EnvelopeDeposit invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
         }
         return this;

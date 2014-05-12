@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices;
+package devices.device;
 
-import devices.events.DeviceEventListener;
+import devices.device.events.DeviceEventListener;
 import java.util.List;
 import models.db.LgDeviceProperty;
 
@@ -14,15 +14,6 @@ import models.db.LgDeviceProperty;
  * @author adji
  */
 public interface DeviceInterface {
-
-    public class DeviceCommandAbstract {
-
-        final DeviceAbstract device;
-
-        public DeviceCommandAbstract(DeviceAbstract device) {
-            this.device = device;
-        }
-    }
 
     public void start();
 

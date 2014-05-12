@@ -5,14 +5,7 @@
  */
 package machines;
 
-import devices.DeviceEvent;
-import static machines.Machine.DeviceType.GLORY_DE50;
-import static machines.Machine.DeviceType.IO_BOARD_MX220_1_0;
-import static machines.Machine.DeviceType.OS_PRINTER;
-import machines.P500.P500_DEVICES;
-import static machines.P500.P500_DEVICES.P500_DEVICE_GLORY_DE50;
-import static machines.P500.P500_DEVICES.P500_DEVICE_IO_BOARD_MX220_1_0;
-import static machines.P500.P500_DEVICES.P500_DEVICE_OS_PRINTER;
+import devices.device.DeviceEvent;
 
 /**
  *
@@ -22,9 +15,9 @@ public class P500_MEI extends Machine {
 
     enum P500_MEI_DEVICES implements DeviceDescription {
 
-        P500_MEI_DEVICE_OS_PRINTER(OS_PRINTER),
-        P500_MEI_DEVICE_IO_BOARD_MX220_1_0(IO_BOARD_MX220_1_0),
-        P500_MEI_DEVICE_GLORY_DE50(GLORY_DE50);
+        P500_MEI_DEVICE_OS_PRINTER(DeviceType.OS_PRINTER),
+        P500_MEI_DEVICE_IO_BOARD_MX220_1_0(DeviceType.IO_BOARD_MX220_1_0),
+        P500_MEI_DEVICE_MEI_EBDS(DeviceType.MEI_EBDS);
 
         private final DeviceType type;
 
@@ -53,7 +46,7 @@ public class P500_MEI extends Machine {
                 break;
             case P500_MEI_DEVICE_IO_BOARD_MX220_1_0:
                 break;
-            case P500_MEI_DEVICE_GLORY_DE50:
+            case P500_MEI_DEVICE_MEI_EBDS:
                 break;
             default:
                 throw new UnsupportedOperationException("Not supported yet.");

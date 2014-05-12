@@ -3,13 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices;
+package devices.device;
 
-import devices.events.DeviceEventListener;
+import devices.device.events.DeviceEventListener;
+import devices.device.operation.DeviceOperationInterface;
+import devices.device.response.DeviceResponseInterface;
+import devices.device.state.DeviceStateAbstract;
+import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskInterface;
+import devices.device.task.DeviceTaskOperation;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import machines.Machine.DeviceDescription;
 import models.db.LgDevice;
 import models.db.LgDeviceProperty;
@@ -21,18 +29,27 @@ import play.Logger;
  */
 public abstract class DeviceAbstract implements DeviceInterface, Runnable {
 
-    protected final DeviceDescription deviceDescription;
+    public class DeviceStateApi {
+
+        public BlockingQueue<DeviceTaskInterface> getOperationQueue() {
+            return operationQueue;
+        }
+    }
+    public final DeviceDescription deviceDescription;
     protected final LgDevice lgd;
 
-    protected final Thread thread;
-    protected final AtomicBoolean mustStop = new AtomicBoolean(false);
+    private final Thread thread;
+    private final AtomicBoolean mustStop = new AtomicBoolean(false);
+    private final BlockingQueue<DeviceTaskInterface> operationQueue;
 
-    public DeviceAbstract(DeviceDescription deviceDescription) {
+    public DeviceAbstract(DeviceDescription deviceDescription, BlockingQueue<DeviceTaskInterface> operationQueue) {
+        this.operationQueue = operationQueue;
         this.deviceDescription = deviceDescription;
         lgd = LgDevice.getOrCreateByMachineId(deviceDescription.getType(), deviceDescription.getMachineId());
         this.thread = new Thread(this);
     }
 
+    // Every device must have at least a port.
     public void start() {
         initDeviceProperties();
         thread.start();
@@ -43,31 +60,46 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         try {
             thread.join(10000);
         } catch (InterruptedException ex) {
-            // ignore
+            Logger.error("Timeout waiting for thread : %s", ex);
         }
     }
+
+    // Must be touched only by the inner thread !!!
+    private AtomicReference<DeviceStateInterface> currentState;
+
+    abstract public DeviceStateAbstract init();
 
     public void run() {
         Logger.debug("Device %s thread started", deviceDescription);
-        assemble();
+        currentState.set(init());
         while (!mustStop.get()) {
-            mainLoop();
+            DeviceStateInterface oldState = currentState.get();
+
+            Logger.debug(String.format("%s executing current step: %s", getClass().getSimpleName(), oldState.getClass().getSimpleName()));
+            DeviceStateInterface newState = oldState.step();
+
+            if (newState != null && oldState != newState) {
+                DeviceStateInterface initStateRet = newState.init();
+                if (initStateRet != null) {
+                    newState = initStateRet;
+                }
+                currentState.set(newState);
+            }
         }
-        disassemble();
+        finish();
         Logger.debug("Device %s thread done", deviceDescription);
     }
 
-    abstract public void mainLoop();
-
-    public void assemble() {
+    public void finish() {
     }
 
-    public void disassemble() {
+    public DeviceStateInterface getCurrentState() {
+        return currentState.get();
     }
 
     abstract public DeviceStatus getStatus();
 
-    private Set<DeviceEventListener> listeners = new HashSet<DeviceEventListener>();
+    private final Set<DeviceEventListener> listeners = new HashSet<DeviceEventListener>();
     //Queue<DeviceEvent> events = new LinkedList<CounterEscrowFullEvent>();
 
     public void addEventListener(DeviceEventListener listener) {
@@ -115,8 +147,21 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         return l;
     }
 
+    synchronized protected boolean submit(DeviceTaskInterface deviceTask) {
+        return operationQueue.offer(deviceTask);
+    }
+
+    public DeviceResponseInterface sendOperation(final DeviceOperationInterface operation, final boolean debug) {
+        DeviceTaskInterface<DeviceResponseInterface> deviceTask = new DeviceTaskOperation(operation, debug);
+        if (submit(deviceTask)) {
+            return deviceTask.get();
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "Device{ deviceID = " + getDeviceId() + ", deviceDesc=" + deviceDescription + '}';
     }
+
 }

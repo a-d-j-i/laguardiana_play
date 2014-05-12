@@ -9,6 +9,6 @@ package devices.glory.operation;
 public class ResetDevice extends OperationWithAckResponse {
 
     public ResetDevice() {
-        super( ( byte ) 0x38, "Reset Device" );
+        super(0x38);
     }
 }

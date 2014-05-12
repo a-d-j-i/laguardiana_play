@@ -52,7 +52,7 @@ import play.templates.TemplateLoader;
  *
  * @author adji
  */
-public class Printer extends Observable {
+public class OSPrinter extends Observable {
 
     class MyPrintJobAttributeListener implements PrintJobAttributeListener {
 
@@ -282,7 +282,7 @@ public class Printer extends Observable {
         }
     }
 
-    public Printer(String port) {
+    public OSPrinter(String port) {
         this.port = port;
         statusThread = new StatusThread();
     }
@@ -345,7 +345,7 @@ public class Printer extends Observable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Printer other = (Printer) obj;
+        final OSPrinter other = (OSPrinter) obj;
         if ((this.port == null) ? (other.port != null) : !this.port.equals(other.port)) {
             return false;
         }

@@ -4,15 +4,14 @@
  */
 package devices.glory.state;
 
-import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import java.util.concurrent.Callable;
+import devices.glory.GloryDE50Device.GloryDE50StateApi;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class Error extends GloryDE50StateOperation {
+public class Error extends GloryDE50StateAbstract {
 
     public enum COUNTER_CLASS_ERROR_CODE {
 
@@ -21,42 +20,43 @@ public class Error extends GloryDE50StateOperation {
 
     private final String error;
 
-    Error(GloryDE50StateMachineApi api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
+    public Error(GloryDE50StateApi api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
         super(api);
         this.error = error;
         Logger.error(error);
-        api.notifyListeners(error);
+        getApi().notifyListeners(error);
     }
+    /*
+     @Override
+     public boolean reset() {
+     return comunicate(new Callable< GloryDE50StateAbstract>() {
+     public GloryDE50StateAbstract call() throws Exception {
+     return new Reset(getApi(), new GotoNeutral(getApi()));
+     }
+     });
+     }
 
-    @Override
-    public boolean reset() {
-        return comunicate(new Callable< GloryDE50StateAbstract>() {
-            public GloryDE50StateAbstract call() throws Exception {
-                return new Reset(api, new GotoNeutral(api));
-            }
-        });
-    }
+     @Override
+     public boolean storingErrorReset() {
+     return comunicate(new Callable< GloryDE50StateAbstract>() {
+     public GloryDE50StateAbstract call() throws Exception {
+     return new StoringErrorReset(api);
+     }
+     });
+     }
 
-    @Override
-    public boolean storingErrorReset() {
-        return comunicate(new Callable< GloryDE50StateAbstract>() {
-            public GloryDE50StateAbstract call() throws Exception {
-                return new StoringErrorReset(api);
-            }
-        });
-    }
+     @Override
+     public boolean clearError() {
+     return comunicate(new Callable< GloryDE50StateAbstract>() {
+     public GloryDE50StateAbstract call() throws Exception {
+     return new OpenPort(api);
+     }
+     });
+     }
 
-    @Override
-    public boolean clearError() {
-        return comunicate(new Callable< GloryDE50StateAbstract>() {
-            public GloryDE50StateAbstract call() throws Exception {
-                return new OpenPort(api);
-            }
-        });
-    }
-
-    @Override
-    public String getError() {
-        return error;
-    }
+     @Override
+     public String getError() {
+     return error;
+     }
+     */
 }

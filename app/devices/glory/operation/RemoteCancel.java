@@ -9,6 +9,6 @@ package devices.glory.operation;
 public class RemoteCancel extends OperationWithAckResponse {
 
     public RemoteCancel() {
-        super( ( byte ) 0x37, "Remote Cancel" );
+        super(0x37);
     }
 }

@@ -1,64 +1,46 @@
 package devices.glory.operation;
 
+import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.response.GloryDE50OperationResponse.D1Mode;
 import devices.glory.response.GloryDE50OperationResponse.SR1Mode;
-import devices.glory.response.GloryDE50OperationResponseParser;
-import play.Logger;
 
 public class OperationdWithDataResponse extends OperationWithAckResponse {
 
-    OperationdWithDataResponse(byte cmdId, String description) {
-        this(cmdId, description, null, DebugLevel.NONE);
-    }
-
-    OperationdWithDataResponse(byte cmdId, String description, byte[] cmdData) {
-        this(cmdId, description, cmdData, DebugLevel.NONE);
-    }
-
-    OperationdWithDataResponse(byte cmdId, String description, byte[] cmdData, DebugLevel debug) {
-        super(cmdId, description, cmdData, debug);
+    public OperationdWithDataResponse(int cmdId) {
+        super(cmdId);
     }
 
     @Override
-    public void setResponse(byte[] dr) {
+    public GloryDE50OperationResponse getResponse(byte[] dr) {
         if (dr == null) {
-            response.setError("Invalid argument dr == null");
-            return;
+            return new GloryDE50OperationResponse("Invalid argument dr == null");
         }
         int l = dr.length;
 
         if (l == 1) {
-            super.setResponse(dr);
-            return;
-        } else {
-            byte[] sdr = new byte[1];
-            sdr[ 0] = 0x6;
-            super.setResponse(sdr);
-        }
-        if (response.getError() != null) {
-            return;
+            return super.getResponse(dr);
         }
         if (dr.length < 21) {
-            response.setError(String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(),
-                    dr.length));
-            return;
+            return new GloryDE50OperationResponse(String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), dr.length));
         }
 
         if (dr[ l - 2] != 3) {
-            response.setError(String.format("Invalid command (%s) message end not found", getDescription()));
-            return;
+            return new GloryDE50OperationResponse(String.format("Invalid command (%s) message end not found", getDescription()));
         }
 
-        byte retCs = 0;
+        byte checksum = 0;
         for (int i = 0; i < l - 1; i++) {
-            retCs = (byte) (retCs ^ dr[ i]);
+            checksum = (byte) (checksum ^ dr[ i]);
         }
 
-        if (dr[ l - 1] != (byte) retCs) {
-            response.setError(String.format("CHECKSUM don't match 0x%x != 0x%x", dr[ l - 1], retCs));
-            return;
+        if (dr[ l - 1] != (byte) checksum) {
+            return new GloryDE50OperationResponse(String.format("CHECKSUM don't match 0x%x != 0x%x", dr[ l - 1], checksum));
         }
 
+        GloryDE50OperationResponse response = super.getResponse(dr);
+        if (response.isError()) {
+            return response;
+        }
         response.setSr1Mode(SR1Mode.getMode(dr[ 3] & 0x3F));
         response.setSr2((byte) (dr[ 4] & 0x3F));
         response.setSr3((byte) (dr[ 5] & 0x3F));
@@ -82,23 +64,22 @@ public class OperationdWithDataResponse extends OperationWithAckResponse {
         response.setD10((byte) (dr[ l - 5] & 0x7F));
         response.setD11((byte) (dr[ l - 4] & 0x7F));
         response.setD12((byte) (dr[ l - 3] & 0x7F));
-
-        if (debug.isGratherThan(DebugLevel.NONE)) {
-            GloryDE50OperationResponseParser s = response.getRepr();
-            Logger.debug(s.getSRMode());
-            for (String ss : s.getSrBits()) {
-                Logger.debug(ss);
-            }
-            //Logger.debug(s.getD1Mode());
-            if (debug.isGratherThan(DebugLevel.DEBUG)) {
-                for (String ss : s.getD2Bits()) {
-                    Logger.debug(ss);
-                }
-                for (String ss : s.getInfo()) {
-                    Logger.debug(ss);
-                }
-            }
-        }
-        return;
+        return response;
     }
+
+    protected byte getDecDigit(byte l) {
+        if (l >= 0x30 && l <= 0x39) {
+            return (byte) (l - 0x30);
+        }
+        throw new NumberFormatException(String.format("invalid digit 0x%x", l));
+
+    }
+
+    protected byte getHexDigit(byte l) {
+        if (l >= 0x30 && l <= 0x3F) {
+            return (byte) (l - 0x30);
+        }
+        throw new NumberFormatException(String.format("invalid digit 0x%x", l));
+    }
+
 }

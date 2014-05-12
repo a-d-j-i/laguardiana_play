@@ -1,7 +1,9 @@
-package devices.glory.state;
+package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
+import devices.glory.state.poll.GloryDE50StatePoll;
+import devices.glory.GloryDE50Device.GloryDE50StateApi;
 import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.state.GloryDE50StateAbstract;
 
 /**
  *
@@ -11,7 +13,7 @@ public class RotateCassete extends GloryDE50StatePoll {
 
     final GloryDE50StateAbstract prevStep;
 
-    public RotateCassete(GloryDE50StateMachineApi api, GloryDE50StateAbstract prevStep) {
+    public RotateCassete(GloryDE50StateApi api, GloryDE50StateAbstract prevStep) {
         super(api);
         this.prevStep = prevStep;
     }

@@ -214,6 +214,20 @@ public class GloryDE50OperationResponseParser implements Serializable {
 
     @Override
     public String toString() {
+        /*
+         GloryDE50OperationResponseParser s = response.getRepr();
+         Logger.debug(s.getSRMode());
+         for (String ss : s.getSrBits()) {
+         Logger.debug(ss);
+         }
+         for (String ss : s.getD2Bits()) {
+         Logger.debug(ss);
+         }
+         for (String ss : s.getInfo()) {
+         Logger.debug(ss);
+         }
+         }
+         */
         return "GloryResponseParser{" + "error=" + error + ", msg=" + msg + ", SR1Mode=" + SR1Mode + ", D1Mode=" + D1Mode + ", srBits=" + srBits + ", d2Bits=" + d2Bits + ", info=" + info + ", data=" + data + ", bills=" + bills + ", haveData=" + haveData + ", denominationData=" + denominationData + '}';
     }
 

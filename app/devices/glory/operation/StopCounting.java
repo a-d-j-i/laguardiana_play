@@ -10,6 +10,7 @@ package devices.glory.operation;
 public class StopCounting extends OperationWithAckResponse {
 
     public StopCounting() {
-        super( ( byte ) 0x33, "Counting Stop" );
+        super(0x33);
     }
+
 }

@@ -9,8 +9,15 @@ package devices.glory.operation;
  */
 public class ProgramUpdate extends OperationWithAckResponse {
 
+    final String fileName;
+
     public ProgramUpdate(String fileName) {
-        super((byte) 0x50, "ProgramUpdate");
-        setCmdData(fileName.getBytes());
+        super(0x50);
+        this.fileName = fileName;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(fileName.getBytes());
     }
 }

@@ -13,27 +13,32 @@ import java.io.IOException;
  */
 public class BatchDataTransmition extends OperationWithAckResponse {
 
-    public BatchDataTransmition(int bills[]) {
-        super((byte) 0x32, "Batch Data Transmission");
+    final int[] bills;
+
+    public BatchDataTransmition(int[] bills) {
+        super(0x32);
+        this.bills = bills;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
         if (bills.length != 32) {
-            response.setError("Need 32 integers describing the batch");
-            return;
+            throw new IllegalArgumentException("Need 32 integers describing the batch");
         }
         try {
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
             for (int i : bills) {
                 if (i < 0 || i > 999) {
-                    response.setError(String.format("Error setting bill batch %d", i));
-                    i = 0;
+                    throw new IllegalArgumentException(String.format("Error setting bill batch %d", i));
                 }
                 bo.write(String.format("%03d", i).getBytes());
             }
             bo.close();
 
-            setCmdData(bo.toByteArray());
+            return getCmdStrFromData(bo.toByteArray());
 
         } catch (IOException e) {
-            response.setError(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
 
     }

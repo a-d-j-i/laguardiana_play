@@ -6,8 +6,8 @@ package devices.glory.operation;
  */
 public class GetFileInfo extends OperationdWithDataResponse {
 
-    GetFileInfo( String fileName ) {
-        super( ( byte ) 0x54, "GetFileInfo" );
-        response.setError( "Must finish GetFileInfo" );
+    GetFileInfo(String fileName) {
+        super(0x54);
+        throw new IllegalArgumentException("Must be implemented GetFileInfo");
     }
 }

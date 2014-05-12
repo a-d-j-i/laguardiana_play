@@ -9,8 +9,11 @@ package devices.glory.operation;
 public class SetManualMode extends OperationWithAckResponse {
 
     public SetManualMode() {
-        super( ( byte ) 0x31, "Mode Specification (manual)" );
-        byte[] b = { 0x31 };
-        setCmdData( b );
+        super(0x31);
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(new byte[]{0x31});
     }
 }

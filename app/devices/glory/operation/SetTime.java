@@ -10,10 +10,17 @@ import java.util.Date;
  */
 public class SetTime extends OperationWithAckResponse {
 
-    public SetTime( Date time ) {
-        super( ( byte ) 0x51, "SetTime" );
+    final Date time;
+
+    public SetTime(Date time) {
+        super(0x51);
+        this.time = time;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
         SimpleDateFormat df = new SimpleDateFormat();
         df.applyPattern("yyyyMMddhhmmss");
-        setCmdData( df.format( time ).getBytes() );
+        return getCmdStrFromData(df.format(time).getBytes());
     }
 }

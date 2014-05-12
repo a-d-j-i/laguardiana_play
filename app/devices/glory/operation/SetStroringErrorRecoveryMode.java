@@ -9,8 +9,11 @@ package devices.glory.operation;
 public class SetStroringErrorRecoveryMode extends OperationWithAckResponse {
 
     public SetStroringErrorRecoveryMode() {
-        super( ( byte ) 0x31, "Mode Specification (storing error recovery)" );
-        byte[] b = { 0x33 };
-        setCmdData( b );
+        super(0x31);
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(new byte[]{0x33});
     }
 }

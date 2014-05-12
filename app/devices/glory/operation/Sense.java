@@ -10,6 +10,6 @@ package devices.glory.operation;
 public class Sense extends OperationdWithDataResponse {
 
     public Sense() {
-        super( ( byte ) 0x40, "Sense" );
+        super(0x40);
     }
 }

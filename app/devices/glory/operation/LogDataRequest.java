@@ -13,9 +13,15 @@ package devices.glory.operation;
  */
 public class LogDataRequest extends OperationdWithDataResponse {
 
-    public LogDataRequest(long packetNo) {
-        super((byte) 0x45, "LogDataRequest");
+    final long packetNo;
 
-        setCmdData(getXXFormat(packetNo, 0x30, 8));
+    public LogDataRequest(long packetNo) {
+        super(0x45);
+        this.packetNo = packetNo;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(getXXFormat(packetNo, 0x30, 8));
     }
 }

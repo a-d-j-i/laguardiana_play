@@ -1,5 +1,6 @@
 package devices.glory.operation;
 
+import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.response.GloryDE50OperationResponse.Denomination;
 
 /*
@@ -8,18 +9,18 @@ import devices.glory.response.GloryDE50OperationResponse.Denomination;
 public class DenominationDataRequest extends OperationdWithDataResponse {
 
     public DenominationDataRequest() {
-        super((byte) 0x44, "DenominationDataRequest");
+        super(0x44);
     }
 
     @Override
-    public void setResponse(byte[] dr) {
-        super.setResponse(dr);
-        if (response.getError() != null) {
-            return;
+    public GloryDE50OperationResponse getResponse(byte[] dr) {
+        GloryDE50OperationResponse response = super.getResponse(dr);
+        if (response.isError()) {
+            return response;
         }
         byte[] data = response.getData();
         if (data == null || data.length == 0) {
-            return;
+            return new GloryDE50OperationResponse("data is null");
         }
         for (int i = 0; i < data.length; i += 10) {
             if (i + 10 <= data.length) {
@@ -40,6 +41,6 @@ public class DenominationDataRequest extends OperationdWithDataResponse {
             }
         }
         //data.length;
-        return;
+        return response;
     }
 }

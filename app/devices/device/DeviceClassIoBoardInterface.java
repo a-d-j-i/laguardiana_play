@@ -1,4 +1,4 @@
-package devices;
+package devices.device;
 
 public interface DeviceClassIoBoardInterface {
 

@@ -1,20 +1,18 @@
-package devices.glory.state;
+package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import static devices.glory.GloryDE50Device.STATUS.COUNTING;
-import static devices.glory.GloryDE50Device.STATUS.ESCROW_FULL;
-import static devices.glory.GloryDE50Device.STATUS.JAM;
-import static devices.glory.GloryDE50Device.STATUS.PUT_THE_BILLS_ON_THE_HOPER;
-import static devices.glory.GloryDE50Device.STATUS.READY_TO_STORE;
-import static devices.glory.GloryDE50Device.STATUS.REMOVE_REJECTED_BILLS;
-import static devices.glory.GloryDE50Device.STATUS.REMOVE_THE_BILLS_FROM_ESCROW;
-import static devices.glory.GloryDE50Device.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
-import static devices.glory.GloryDE50Device.STATUS.STORING;
+import static devices.device.DeviceStatus.STATUS.COUNTING;
+import static devices.device.DeviceStatus.STATUS.JAM;
+import static devices.device.DeviceStatus.STATUS.PUT_THE_BILLS_ON_THE_HOPER;
+import static devices.device.DeviceStatus.STATUS.REMOVE_REJECTED_BILLS;
+import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_ESCROW;
+import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
+import devices.glory.GloryDE50Device.GloryDE50StateApi;
 import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.state.Error;
 import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.state.GloryDE50StateAbstract;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import play.Logger;
 
@@ -23,11 +21,13 @@ import play.Logger;
  * @author adji
  */
 public class Count extends GloryDE50StatePoll {
+    /* Those must be treated as different states because there can be a race condition.
+     private final AtomicBoolean needToStoreDeposit = new AtomicBoolean(false);
+     private final AtomicBoolean needToWithdrawDeposit = new AtomicBoolean(false);
+     private final AtomicBoolean storeDepositDone = new AtomicBoolean(false);
+     private final AtomicBoolean withdrawDepositDone = new AtomicBoolean(false);
+     */
 
-    private final AtomicBoolean needToStoreDeposit = new AtomicBoolean(false);
-    private final AtomicBoolean needToWithdrawDeposit = new AtomicBoolean(false);
-    private final AtomicBoolean storeDepositDone = new AtomicBoolean(false);
-    private final AtomicBoolean withdrawDepositDone = new AtomicBoolean(false);
     private final AtomicReference<Map<Integer, Integer>> currentQuantity = new AtomicReference<Map<Integer, Integer>>();
 
     final private Map<Integer, Integer> desiredQuantity;
@@ -40,7 +40,7 @@ public class Count extends GloryDE50StatePoll {
     int count_retries = 0;
     boolean batchEnd = false;
 
-    public Count(GloryDE50StateMachineApi api, Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public Count(GloryDE50StateApi api, Map<Integer, Integer> desiredQuantity, Integer currency) {
         super(api);
         this.desiredQuantity = desiredQuantity;
         if (currency == null) {
@@ -76,7 +76,7 @@ public class Count extends GloryDE50StatePoll {
         GloryDE50StateAbstract sret;
         Logger.debug("COUNT_COMMAND");
         if (lastResponse.isCassetteFullCounter()) {
-            return new RotateCassete(api, this);
+            return new RotateCassete(getApi(), this);
         }
         // If I'm not in deposit mode try to get there once
         switch (lastResponse.getD1Mode()) {
@@ -91,14 +91,14 @@ public class Count extends GloryDE50StatePoll {
                     if (sret != null) {
                         return sret;
                     }
-                    GloryDE50OperationResponse response = api.sendGloryDE50Operation(new devices.glory.operation.SetDepositMode());
+                    GloryDE50OperationResponse response = getApi().sendGloryDE50Operation(new devices.glory.operation.SetDepositMode());
                     if (response.isError()) {
                         if (response.isCassetteFullCounter()) {
-                            return new RotateCassete(api, this);
+                            return new RotateCassete(getApi(), this);
                         }
                         String error = response.getError();
                         Logger.error("Error %s sending cmd : SetDepositMode", error);
-                        return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+                        return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
                     }
                 }
                 return this;
@@ -117,48 +117,50 @@ public class Count extends GloryDE50StatePoll {
                     notifyListeners(REMOVE_REJECTED_BILLS);
                     break;
                 }
-                if (needToStoreDeposit.get()) {
-                    // We clear the counter because they are invalid now
-                    clearQuantity();
-                    sret = sendGloryOperation(new devices.glory.operation.StoringStart(0));
-                    if (sret != null) {
-                        return sret;
-                    }
-                    notifyListeners(STORING);
-                    break;
-                } else if (needToWithdrawDeposit.get()) {
-                    api.setClosing(false);
-                    sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
-                    if (sret != null) {
-                        return sret;
-                    }
-//                        countData.withdrawDepositDone();
-                    break;
-                } else {
-                    if (isBatch && batchEnd) {
-                        return this;
-                    }
-                    // We need a valid counters before generating the events.
-                    sret = refreshQuantity();
-                    if (sret != null) {
-                        return sret;
-                    }
-                    if (lastResponse.isEscrowFull()) {
-                        notifyListeners(ESCROW_FULL);
-                        break;
-                    }
-                    if (lastResponse.isHopperBillPresent()) {
-                        sret = batchCountStart();
-                        break;
-                    }
-                    notifyListeners(READY_TO_STORE);
-                }
+                /*  REVIEW
+                 if (needToStoreDeposit.get()) {
+                 // We clear the counter because they are invalid now
+                 clearQuantity();
+                 sret = sendGloryOperation(new devices.glory.operation.StoringStart(0));
+                 if (sret != null) {
+                 return sret;
+                 }
+                 notifyListeners(STORING);
+                 break;
+                 } else if (needToWithdrawDeposit.get()) {
+                 getApi().setClosing(false);
+                 sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
+                 if (sret != null) {
+                 return sret;
+                 }
+                 //                        countData.withdrawDepositDone();
+                 break;
+                 } else {
+                 if (isBatch && batchEnd) {
+                 return this;
+                 }
+                 // We need a valid counters before generating the events.
+                 sret = refreshQuantity();
+                 if (sret != null) {
+                 return sret;
+                 }
+                 if (lastResponse.isEscrowFull()) {
+                 notifyListeners(ESCROW_FULL);
+                 break;
+                 }
+                 if (lastResponse.isHopperBillPresent()) {
+                 sret = batchCountStart();
+                 break;
+                 }
+                 notifyListeners(READY_TO_STORE);
+                 }
+                 */
                 break;
             case escrow_open:
                 notifyListeners(REMOVE_THE_BILLS_FROM_ESCROW);
                 break;
             case escrow_close: // The escrow is closing... wait.
-                api.setClosing(true);
+                getApi().setClosing(true);
                 break;
             case being_restoration:
                 break;
@@ -173,7 +175,7 @@ public class Count extends GloryDE50StatePoll {
                 if (sret != null) {
                     return sret;
                 }
-                api.setClosing(true);
+                getApi().setClosing(true);
                 break;
 
             case counting:
@@ -196,7 +198,7 @@ public class Count extends GloryDE50StatePoll {
                 break;
             case being_store:
                 fakeCount = true;
-                storeDepositDone.set(true);
+//                storeDepositDone.set(true);
                 break;
             case counting_start_request:
                 sret = refreshQuantity();
@@ -222,34 +224,35 @@ public class Count extends GloryDE50StatePoll {
                 }
 
                 fakeCount = false;
-                withdrawDepositDone.set(true);
-                if (!needToStoreDeposit.get()) {
-                    // If there are bills in the hoper then it comes here after storing a full escrow
-                    if (isBatch && batchEnd) { //BATCH END
-                        api.setClosing(false);
-                        sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
-                        if (sret != null) {
-                            return sret;
-                        }
-                        return new GotoNeutral(api, this, true, true);
-                    }
-                    if (lastResponse.isRejectBillPresent()) {
-                        notifyListeners(REMOVE_REJECTED_BILLS);
-                        break;
-                    }
-                    sret = batchCountStart();
-                    if (sret != null) { // batch end
-                        return sret;
-                    }
-                }
+                /*                withdrawDepositDone.set(true);
+                 if (!needToStoreDeposit.get()) {
+                 // If there are bills in the hoper then it comes here after storing a full escrow
+                 if (isBatch && batchEnd) { //BATCH END
+                 getApi().setClosing(false);
+                 sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
+                 if (sret != null) {
+                 return sret;
+                 }
+                 return new GotoNeutral(getApi(), this, true, true);
+                 }
+                 if (lastResponse.isRejectBillPresent()) {
+                 notifyListeners(REMOVE_REJECTED_BILLS);
+                 break;
+                 }
+                 sret = batchCountStart();
+                 if (sret != null) { // batch end
+                 return sret;
+                 }
+                 }
+                 */
                 break;
             case abnormal_device:
                 notifyListeners(JAM);
-                return new GotoNeutral(api, this, true, true);
+                return new GotoNeutral(getApi(), this, true, true);
             case storing_error:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, String.format("Count Storing error, todo: get the flags"));
+                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, String.format("Count Storing error, todo: get the flags"));
             default:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, String.format("Count invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
+                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, String.format("Count invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
         }
         return this;
     }
@@ -266,7 +269,7 @@ public class Count extends GloryDE50StatePoll {
              return false;
              }*/
             // Sometimes the BatchDataTransmition fails, trying randomly to see what can be.
-            GloryDE50OperationResponse response = api.sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills));
+            GloryDE50OperationResponse response = getApi().sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills));
             if (!response.isError()) {
                 notifyListeners(COUNTING);
                 return this;
@@ -277,17 +280,17 @@ public class Count extends GloryDE50StatePoll {
         }
 
         Logger.debug("ISBATCH");
-        GloryDE50OperationResponse response = api.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest());
+        GloryDE50OperationResponse response = getApi().sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest());
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+            return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         Map<Integer, Integer> currentQuantity = response.getBills();
         if (currentQuantity == null) {
             String error = String.format("Error getting current count");
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+            return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
 
         while (currentSlot < 32) {
@@ -299,7 +302,7 @@ public class Count extends GloryDE50StatePoll {
             if (current > desired) {
                 String error = String.format("Invalid bill value %d %d %d", currentSlot, current, desired);
                 Logger.error("Error %s sending cmd : CountingDataRequest", error);
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
             }
             bills[ currentSlot] = desired - current;
             Logger.debug("---------- slot %d batch billls : %d desired %d value %d", currentSlot, bills[ currentSlot], desired, current);
@@ -323,11 +326,11 @@ public class Count extends GloryDE50StatePoll {
     }
 
     private GloryDE50StateAbstract refreshQuantity() {
-        GloryDE50OperationResponse response = api.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest());
+        GloryDE50OperationResponse response = getApi().sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest());
         if (response.isError()) {
             String error = response.getError();
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+            return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         currentQuantity.set(response.getBills());
 //        for (Integer k : bills.keySet()) {
@@ -351,17 +354,14 @@ public class Count extends GloryDE50StatePoll {
         return true;
     }
 
-    @Override
     public Integer getCurrency() {
         return currency;
     }
 
-    @Override
     public Map<Integer, Integer> getCurrentQuantity() {
         return currentQuantity.get();
     }
 
-    @Override
     public Map<Integer, Integer> getDesiredQuantity() {
         return desiredQuantity;
     }
@@ -371,9 +371,8 @@ public class Count extends GloryDE50StatePoll {
         return sendGloryOperation(new devices.glory.operation.StopCounting());
     }
 
-    @Override
     public boolean storeDeposit(Integer sequenceNumber) {
-        needToStoreDeposit.set(true);
+//        needToStoreDeposit.set(true);
         return true;
     }
 

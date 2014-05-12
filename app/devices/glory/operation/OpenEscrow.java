@@ -7,6 +7,6 @@ package devices.glory.operation;
 public class OpenEscrow extends OperationWithAckResponse {
 
     public OpenEscrow() {
-        super( ( byte ) 0x35, "Open Escrow" );
+        super(0x35);
     }
 }

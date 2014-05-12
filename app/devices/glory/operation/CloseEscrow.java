@@ -8,6 +8,6 @@ package devices.glory.operation;
 public class CloseEscrow extends OperationWithAckResponse {
 
     public CloseEscrow() {
-        super( ( byte ) 0x36, "Close Escrow" );
+        super(0x36);
     }
 }

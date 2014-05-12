@@ -2,13 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package devices.glory.state;
+package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import static devices.glory.GloryDE50Device.STATUS.BAG_COLLECTED;
-import static devices.glory.GloryDE50Device.STATUS.REMOVE_REJECTED_BILLS;
-import static devices.glory.GloryDE50Device.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
+import static devices.device.DeviceStatus.STATUS.BAG_COLLECTED;
+import static devices.device.DeviceStatus.STATUS.REMOVE_REJECTED_BILLS;
+import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
+import devices.glory.GloryDE50Device.GloryDE50StateApi;
 import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.state.Error;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.deposit;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.initial;
@@ -18,6 +19,7 @@ import static devices.glory.response.GloryDE50OperationResponse.D1Mode.normal_er
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_error;
 import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.state.GloryDE50StateAbstract;
 import java.util.Date;
 import play.Logger;
 
@@ -27,7 +29,7 @@ import play.Logger;
  */
 public class Collect extends GloryDE50StatePoll {
 
-    public Collect(GloryDE50StateMachineApi api) {
+    public Collect(GloryDE50StateApi api) {
         super(api);
     }
 
@@ -48,11 +50,11 @@ public class Collect extends GloryDE50StatePoll {
             }
             notifyListeners(BAG_COLLECTED);
             Logger.debug("COLLECT DONE");
-            return new GotoNeutral(api);
+            return new GotoNeutral(getApi());
         }
         switch (lastResponse.getSr1Mode()) {
             case storing_error:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
+                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
         }
         switch (lastResponse.getD1Mode()) {
             case collect_mode:
@@ -76,11 +78,11 @@ public class Collect extends GloryDE50StatePoll {
                 break;
             case neutral:
                 if (lastResponse.isCassetteFullCounter()) {
-                    return new RotateCassete(api, this);
+                    return new RotateCassete(getApi(), this);
                 }
                 break;
             default:
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("gotoNeutralInvalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
 
@@ -97,4 +99,5 @@ public class Collect extends GloryDE50StatePoll {
     public GloryDE50StateAbstract doCancel() {
         return null;
     }
+
 }

@@ -161,9 +161,9 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         return fifo.poll();
     }
 
-    public Byte read(int timeout) {
+    public Byte read(int timeoutMS) {
         try {
-            return fifo.poll(timeout, TimeUnit.MILLISECONDS);
+            return fifo.poll(timeoutMS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ex) {
             Logger.error("Interrupt exception reading from fifo %s", ex);
             return null;
@@ -171,7 +171,7 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
     }
 
     // Not completly thread safe!!!, fails if used with read...
-    public String readLine(int timeout) {
+    public String readLine(int timeoutMS) {
         SerialPortAdapterAbstract.State state = SerialPortAdapterAbstract.State.START;
         StringBuilder sb = new StringBuilder(1024);
         boolean done = false;
@@ -179,7 +179,7 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
             switch (state) {
                 case START:
                     // remove from queue
-                    int ch = read(timeout);
+                    int ch = read(timeoutMS);
                     if (ch == 0x0d) {
                         state = SerialPortAdapterAbstract.State.CR_DETECTED;
                     } else if (ch == 0x0a) {
@@ -189,7 +189,7 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
                     }
                     break;
                 case CR_DETECTED:
-                    int b = read(timeout);
+                    int b = read(timeoutMS);
                     if (b == 0x0a) {
                         done = true;
                     } else {

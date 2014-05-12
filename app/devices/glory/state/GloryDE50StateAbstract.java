@@ -1,83 +1,60 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.state;
 
-import devices.DeviceClassCounterIntreface;
-import devices.glory.GloryDE50Device;
-import devices.glory.GloryDE50Device.GloryDE50StateMachineApi;
-import devices.glory.operation.GloryOperationAbstract;
-import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
+import devices.device.DeviceStatus;
+import devices.device.state.DeviceStateInterface;
+import devices.device.state.DeviceStateOperation;
+import devices.glory.GloryDE50Device.GloryDE50StateApi;
 import java.util.Map;
-import java.util.concurrent.FutureTask;
-import play.Logger;
 
 /**
  * TODO: Use play jobs for this.
  *
  * @author adji
  */
-abstract public class GloryDE50StateAbstract implements DeviceClassCounterIntreface {
+abstract public class GloryDE50StateAbstract extends DeviceStateOperation implements DeviceStateInterface {
 
-    final GloryDE50StateMachineApi api;
-
-    public GloryDE50StateAbstract(GloryDE50StateMachineApi api) {
-        this.api = api;
+    public GloryDE50StateAbstract(GloryDE50StateApi api) {
+        super(api);
     }
 
-    public GloryDE50StateAbstract init() {
-        return this;
+    @Override
+    public GloryDE50StateApi getApi() {
+        return (GloryDE50StateApi) super.getApi();
     }
 
-    abstract public GloryDE50StateAbstract step();
-
-    GloryDE50StateAbstract sendGloryOperation(GloryOperationAbstract cmd) {
-        if (cmd != null) {
-            GloryDE50OperationResponse response = api.sendGloryDE50Operation(cmd);
-            if (response.isError()) {
-                String error = response.getError();
-                Logger.error("Error %s sending cmd : %s", error, cmd.getDescription());
-                return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
-            }
-        }
-        return null;
-    }
-
-    protected void notifyListeners(GloryDE50Device.STATUS status) {
-        api.notifyListeners(status);
-    }
-
-    public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public boolean acceptCollect() {
         return false;
     }
 
-    public boolean envelopeDeposit() {
+    public boolean acceptCount() {
         return false;
     }
 
-    public boolean collect() {
+    public boolean acceptEnvelopeDeposit() {
         return false;
     }
 
-    public boolean reset() {
+    public boolean acceptReset() {
         return false;
     }
 
-    public boolean storingErrorReset() {
+    public boolean acceptStoringReset() {
+        return false;
+    }
+
+    public boolean acceptOpenPort() {
+        return false;
+    }
+
+    public boolean acceptStore() {
+        return false;
+    }
+
+    public boolean acceptWithdraw() {
         return false;
     }
 
     public boolean cancelDeposit() {
-        return false;
-    }
-
-    public boolean storeDeposit(Integer sequenceNumber) {
-        return false;
-    }
-
-    public boolean withdrawDeposit() {
         return false;
     }
 
@@ -93,8 +70,8 @@ abstract public class GloryDE50StateAbstract implements DeviceClassCounterIntref
         return null;
     }
 
-    public boolean openPort(final String pvalue, boolean wait) {
-        return false;
+    protected void notifyListeners(DeviceStatus.STATUS status) {
+        getApi().notifyListeners(status);
     }
 
     public boolean clearError() {
@@ -105,8 +82,4 @@ abstract public class GloryDE50StateAbstract implements DeviceClassCounterIntref
         return null;
     }
 
-
-    public boolean sendOperation(FutureTask<GloryDE50OperationResponse> t) {
-        return false;
-    }
 }

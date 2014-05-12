@@ -8,8 +8,15 @@ package devices.glory.operation;
  */
 public class SettingDataRequest extends OperationdWithDataResponse {
 
-    public SettingDataRequest( String data ){
-        super( ( byte ) 0x43, "SettingDataRequest" );
-        setCmdData( data.getBytes() );
+    final String data;
+
+    public SettingDataRequest(String data) {
+        super(0x43);
+        this.data = data;
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(data.getBytes());
     }
 }

@@ -7,6 +7,6 @@ package devices.glory.operation;
 public class EndUpload extends OperationWithAckResponse {
 
     public EndUpload() {
-        super( ( byte ) 0x53, "EndUpload" );
+        super(0x53);
     }
 }

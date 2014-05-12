@@ -9,8 +9,11 @@ package devices.glory.operation;
 public class SetDepositMode extends OperationWithAckResponse {
 
     public SetDepositMode() {
-        super( ( byte ) 0x31, "Mode Specification (deposit)" );
-        byte[] b = { 0x30 };
-        setCmdData( b );
+        super(0x31);
+    }
+
+    @Override
+    public byte[] getCmdStr() {
+        return getCmdStrFromData(new byte[]{0x30});
     }
 }

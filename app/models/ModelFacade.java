@@ -2,15 +2,15 @@ package models;
 
 import bootstrap.BootstrapEventJob;
 import controllers.Secure;
-import devices.DeviceEvent;
-import devices.events.DeviceEventListener;
+import devices.device.DeviceEvent;
+import devices.device.events.DeviceEventListener;
 import machines.Machine;
 import devices.ioboard.IoBoard;
 import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVED;
 import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVE_CONFIRM;
 import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVE_WAIT;
 import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_NOT_APROVED;
-import devices.printer.Printer;
+import devices.printer.OSPrinter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -237,9 +237,9 @@ public class ModelFacade {
 
     static class OnPrinterEvent extends Job {
 
-        Printer.PrinterStatus status;
+        OSPrinter.PrinterStatus status;
 
-        private OnPrinterEvent(Printer.PrinterStatus status) {
+        private OnPrinterEvent(OSPrinter.PrinterStatus status) {
             this.status = status;
         }
 
@@ -627,7 +627,7 @@ public class ModelFacade {
             }
         }
 
-        PrintService p = (PrintService) Printer.printers.get(prt);
+        PrintService p = (PrintService) OSPrinter.printers.get(prt);
         if (p == null) {
             Logger.error("Wrong printer name %s", prt);
             return;
@@ -647,7 +647,7 @@ public class ModelFacade {
     }
 
     public static Object getPrinters() {
-        return Printer.printers.values();
+        return OSPrinter.printers.values();
     }
 
     public static boolean printerNeedCheck() {
@@ -668,7 +668,7 @@ public class ModelFacade {
             }
         }
 
-        PrintService p = (PrintService) Printer.printers.get(prt);
+        PrintService p = (PrintService) OSPrinter.printers.get(prt);
         if (p == null) {
             Logger.error("Wrong printer name %s", prt);
             return;
@@ -680,7 +680,7 @@ public class ModelFacade {
 ////        }
     }
 
-    public static Printer getCurrentPrinter() {
+    public static OSPrinter getCurrentPrinter() {
 ////        return printer.get();
         return null;
     }

@@ -11,11 +11,20 @@ package devices.glory.operation;
  */
 public class DeviceSettingDataLoad extends OperationWithAckResponse {
 
-    public DeviceSettingDataLoad( String fileName ) {
-        super( ( byte ) 0x46, "DeviceSettingDataLoad" );
-        if ( fileName.length() != 12 ) {
-            response.setError( "The filename must be in 8.3 format" );
-        }
-        setCmdData( fileName.getBytes() );
+    final String fileName;
+
+    public DeviceSettingDataLoad(String fileName) {
+        super(0x46);
+        this.fileName = fileName;
     }
+
+    @Override
+    public byte[] getCmdStr() {
+
+        if (fileName.length() != 12) {
+            throw new IllegalArgumentException("The filename must be in 8.3 format");
+        }
+        return getCmdStrFromData(fileName.getBytes());
+    }
+
 }

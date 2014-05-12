@@ -1,5 +1,6 @@
-package devices;
+package devices.device;
 
+import devices.device.DeviceAbstract;
 import java.util.EventObject;
 import machines.Machine;
 

@@ -7,6 +7,6 @@ package devices.glory.operation;
 public class EndDownload extends OperationWithAckResponse {
 
     public EndDownload() {
-        super( ( byte ) 0x48, "EndDownload" );
+        super(0x48);
     }
 }
