@@ -7,9 +7,10 @@ package devices.glory.state.poll;
 import static devices.device.DeviceStatus.STATUS.BAG_COLLECTED;
 import static devices.device.DeviceStatus.STATUS.REMOVE_REJECTED_BILLS;
 import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
-import devices.glory.GloryDE50Device.GloryDE50StateApi;
+import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskInterface;
+import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.state.Error;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.deposit;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.initial;
@@ -18,7 +19,8 @@ import static devices.glory.response.GloryDE50OperationResponse.D1Mode.neutral;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_error;
-import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.state.GloryDE50Error;
+import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import java.util.Date;
 import play.Logger;
@@ -27,9 +29,9 @@ import play.Logger;
  *
  * @author adji
  */
-public class Collect extends GloryDE50StatePoll {
+public class GloryDE50Collect extends GloryDE50StatePoll {
 
-    public Collect(GloryDE50StateApi api) {
+    public GloryDE50Collect(GloryDE50DeviceStateApi api) {
         super(api);
     }
 
@@ -48,13 +50,13 @@ public class Collect extends GloryDE50StatePoll {
             if (sret != null) {
                 return sret;
             }
-            notifyListeners(BAG_COLLECTED);
+            api.notifyListeners(BAG_COLLECTED);
             Logger.debug("COLLECT DONE");
-            return new GotoNeutral(getApi());
+            return new GloryDE50GotoNeutral(api);
         }
         switch (lastResponse.getSr1Mode()) {
             case storing_error:
-                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
+                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
         }
         switch (lastResponse.getD1Mode()) {
             case collect_mode:
@@ -64,11 +66,11 @@ public class Collect extends GloryDE50StatePoll {
             case manual:
             case initial:
                 if (lastResponse.isRejectBillPresent()) {
-                    notifyListeners(REMOVE_REJECTED_BILLS);
+                    api.notifyListeners(REMOVE_REJECTED_BILLS);
                     break;
                 }
                 if (lastResponse.isHopperBillPresent()) {
-                    notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
+                    api.notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
                     break;
                 }
                 sret = sendGloryOperation(new devices.glory.operation.RemoteCancel());
@@ -78,16 +80,16 @@ public class Collect extends GloryDE50StatePoll {
                 break;
             case neutral:
                 if (lastResponse.isCassetteFullCounter()) {
-                    return new RotateCassete(getApi(), this);
+                    return new GloryDE50RotateCassete(api, this);
                 }
                 break;
             default:
-                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("gotoNeutralInvalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
 
         /*        if (!mustCancel()) {
-         setError(new GloryDE50DeviceErrorEvent(GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, "COLLECT TIMEOUT"));
+         setGloryDE50Error(new GloryDE50DeviceErrorEvent(GloryDE50DeviceErrorEvent.ERROR_CODE.GLORY_MANAGER_ERROR, "COLLECT TIMEOUT"));
          Logger.debug("COLLECT TIMEOUT!!!");
          }
          */

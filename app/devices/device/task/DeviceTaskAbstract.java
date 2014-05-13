@@ -8,32 +8,31 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  *
  * @author adji
- * @param <T>
  */
-abstract public class DeviceTaskAbstract<T> implements DeviceTaskInterface<T> {
+abstract public class DeviceTaskAbstract implements DeviceTaskInterface {
 
     final Lock lock = new ReentrantLock();
     final Condition done = lock.newCondition();
-    private T returnValue = null;
+    boolean returnValue = false;
 
     // Executed by the outher thread.
-    public T get() {
+    public boolean get() {
         lock.lock();
         try {
             done.await();
             return returnValue;
         } catch (InterruptedException ex) {
-            return null;
         } finally {
             lock.unlock();
         }
+        return false;
     }
 
     // Executed by the inner thread.
     public DeviceStateInterface execute(DeviceStateInterface currentState) {
         lock.lock();
         try {
-            DeviceStateInterface ret = call(currentState);
+            DeviceStateInterface ret = currentState.call(this);
             done.signalAll();
             return ret;
         } finally {
@@ -41,10 +40,13 @@ abstract public class DeviceTaskAbstract<T> implements DeviceTaskInterface<T> {
         }
     }
 
-    public void setReturnValue(T returnValue) {
+    public void setReturnValue(boolean returnValue) {
         this.returnValue = returnValue;
     }
 
-    abstract protected DeviceStateInterface call(DeviceStateInterface currentState);
+    @Override
+    public String toString() {
+        return "DeviceTaskAbstract";
+    }
 
 }

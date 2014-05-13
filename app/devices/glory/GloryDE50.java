@@ -32,17 +32,16 @@ public class GloryDE50 {
         serialPort = null;
     }
 
-    public synchronized GloryDE50OperationResponse sendOperation(GloryDE50OperationInterface cmd, boolean debug) {
+    public synchronized String sendOperation(GloryDE50OperationInterface cmd, boolean debug, final GloryDE50OperationResponse response) {
         if (cmd == null) {
             throw new InvalidParameterException("Glory unknown command");
         }
         if (serialPort == null) {
-            return new GloryDE50OperationResponse("Glory Serial port closed");
+            return String.format("Error serial port: %s closed", serialPort);
         }
         byte[] d = cmd.getCmdStr();
         if (!serialPort.write(d)) {
-            Logger.debug("Error writting to port: %s", serialPort);
-            return new GloryDE50OperationResponse("Error writting from port");
+            return String.format("Error writting to port: %s", serialPort);
         };
 
         if (debug) {
@@ -58,8 +57,7 @@ public class GloryDE50 {
         for (int i = 0; i < 512; i++) {
             Byte r = read();
             if (r == null) {
-                Logger.debug("Error reading from port: %s", serialPort);
-                return new GloryDE50OperationResponse("Error reading from port");
+                return String.format("Error reading from port: %s", serialPort);
             } else {
                 switch (r) {
                     case 0x02:
@@ -92,7 +90,7 @@ public class GloryDE50 {
             }
         }
         if (b == null) {
-            return new GloryDE50OperationResponse("Glory: response not found");
+            return "Error parsing bytes";
         }
         if (debug) {
             StringBuilder h = new StringBuilder("Readed ");
@@ -101,8 +99,7 @@ public class GloryDE50 {
             }
             Logger.debug(h.toString());
         }
-//        cmd.setResponse(b);
-        return cmd.getResponse(b);
+        return cmd.fillResponse(b, response);
     }
 
     private Integer getXXVal(byte[] b) {

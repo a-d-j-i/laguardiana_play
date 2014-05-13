@@ -9,14 +9,14 @@ import static devices.device.DeviceStatus.STATUS.NEUTRAL;
 import static devices.device.DeviceStatus.STATUS.REMOVE_REJECTED_BILLS;
 import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_ESCROW;
 import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
-import devices.glory.GloryDE50Device;
+import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.state.Error;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.*;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.*;
-import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.state.GloryDE50Error;
+import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
-import devices.glory.state.WaitForOperation;
+import devices.glory.state.GloryDE50WaitForOperation;
 import java.util.Date;
 import play.Logger;
 
@@ -24,7 +24,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class GotoNeutral extends GloryDE50StatePoll {
+public class GloryDE50GotoNeutral extends GloryDE50StatePoll {
 
     boolean bagRotated = false;
     int remoteCancelRetries = 5;
@@ -32,12 +32,12 @@ public class GotoNeutral extends GloryDE50StatePoll {
     boolean forceEmptyHoper = false;
     final GloryDE50StateAbstract prevState;
 
-    public GotoNeutral(GloryDE50Device.GloryDE50StateApi api) {
+    public GloryDE50GotoNeutral(GloryDE50DeviceStateApi api) {
         super(api);
-        this.prevState = new WaitForOperation(api);
+        this.prevState = new GloryDE50WaitForOperation(api);
     }
 
-    public GotoNeutral(GloryDE50Device.GloryDE50StateApi api, GloryDE50StateAbstract prevState, boolean canOpenEscrow, boolean forceEmptyHoper) {
+    public GloryDE50GotoNeutral(GloryDE50DeviceStateApi api, GloryDE50StateAbstract prevState, boolean canOpenEscrow, boolean forceEmptyHoper) {
         super(api);
         this.prevState = prevState;
         this.canOpenEscrow = canOpenEscrow;
@@ -53,10 +53,10 @@ public class GotoNeutral extends GloryDE50StatePoll {
 
         switch (lastResponse.getSr1Mode()) {
             case storing_error:
-                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
+                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
         }
         if (lastResponse.isCassetteFullCounter()) {
-            return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.CASSETE_FULL, "Cassete Full");
+            return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.CASSETE_FULL, "Cassete Full");
         }
         switch (lastResponse.getD1Mode()) {
             case normal_error_recovery_mode:
@@ -66,27 +66,27 @@ public class GotoNeutral extends GloryDE50StatePoll {
             case manual:
                 switch (lastResponse.getSr1Mode()) {
                     case escrow_open_request:
-                        if (getApi().isClosing()) {
-                            /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                        if (api.isClosing()) {
+                            /*setGloryDE50Error(new GloryManagerGloryDE50Error(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
                              "Escrow door jamed"));
                              return false;*/
-                            getApi().setClosing(false);
-                            getApi().notifyListeners(JAM);
+                            api.setClosing(false);
+                            api.notifyListeners(JAM);
                             break;
                         }
                         /*                            if (!canOpenEscrow) {
-                         setError(new GloryManagerError(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
+                         setGloryDE50Error(new GloryManagerGloryDE50Error(GloryManagerError.ERROR_CODE.STORING_ERROR_CALL_ADMIN,
                          "There are bills in the escrow call an admin 1"));
                          return false;
                          }*/
-                        getApi().setClosing(false);
+                        api.setClosing(false);
                         sendGloryOperation(new devices.glory.operation.OpenEscrow());
                         break;
                     case abnormal_device:
-                        getApi().setClosing(false);
-                        getApi().notifyListeners(JAM);
+                        api.setClosing(false);
+                        api.notifyListeners(JAM);
                         if (lastResponse.getD1Mode() == GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode) {
-                            return new Reset(getApi(), this);
+                            return new GloryDE50Reset(api, this);
                         } else {
                             sret = sendGloryOperation(new devices.glory.operation.RemoteCancel());
                             if (sret != null) {
@@ -96,12 +96,12 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         break;
                     case escrow_close_request:
                     case being_recover_from_storing_error:
-                        if (getApi().isClosing()) {
-                            /*setError(new GloryManagerError(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
+                        if (api.isClosing()) {
+                            /*setGloryDE50Error(new GloryManagerGloryDE50Error(GloryManagerError.ERROR_CODE.ESCROW_DOOR_JAMED,
                              "Escrow door jamed"));
                              return false;*/
-                            getApi().setClosing(false);
-                            getApi().notifyListeners(JAM);
+                            api.setClosing(false);
+                            api.notifyListeners(JAM);
                             break;
                         }
                         if (lastResponse.isEscrowBillPresent()) {
@@ -115,40 +115,40 @@ public class GotoNeutral extends GloryDE50StatePoll {
                             //return this;
                             return sret;
                         }
-                        getApi().setClosing(true);
+                        api.setClosing(true);
                         break;
                     case being_reset:
                         break;
                     case escrow_close: // The escrow is closing... wait.
-                        getApi().setClosing(true);
+                        api.setClosing(true);
                         break;
                     case counting: // Japaneese hack...
                         break;
                     case being_restoration:
-                        getApi().notifyListeners(REMOVE_THE_BILLS_FROM_ESCROW);
+                        api.notifyListeners(REMOVE_THE_BILLS_FROM_ESCROW);
                         break;
                     case escrow_open:
-                        getApi().notifyListeners(REMOVE_THE_BILLS_FROM_ESCROW);
-                        getApi().setClosing(false);
+                        api.notifyListeners(REMOVE_THE_BILLS_FROM_ESCROW);
+                        api.setClosing(false);
                         break;
                     case storing_error:
-                        return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags");
+                        return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error, todo: get the flags");
                     case storing_start_request:
                         if (!canOpenEscrow) {
-                            return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 2");
+                            return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 2");
                         }
-                        getApi().setClosing(false);
+                        api.setClosing(false);
                         sendGloryOperation(new devices.glory.operation.OpenEscrow());
                         break;
                     case counting_start_request:
                     case being_exchange_the_cassette:
                     case waiting:
                         if (lastResponse.isRejectBillPresent()) {
-                            getApi().notifyListeners(REMOVE_REJECTED_BILLS);
+                            api.notifyListeners(REMOVE_REJECTED_BILLS);
                             break;
                         }
                         if (lastResponse.isHopperBillPresent()) {
-                            getApi().notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
+                            api.notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
                             break;
                         }
                         sret = sendGloryOperation(new devices.glory.operation.RemoteCancel());
@@ -160,7 +160,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
                         }
                         break;
                     default:
-                        return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                        return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                                 String.format("gotoNeutral Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
@@ -173,7 +173,7 @@ public class GotoNeutral extends GloryDE50StatePoll {
             case neutral:
                 switch (lastResponse.getSr1Mode()) {
                     case abnormal_device:
-                        notifyListeners(JAM);
+                        api.notifyListeners(JAM);
                         sret = sendGloryOperation(new devices.glory.operation.SetErrorRecoveryMode());
                         if (sret != null) {
                             return sret;
@@ -182,18 +182,18 @@ public class GotoNeutral extends GloryDE50StatePoll {
                     case waiting:
                         if (forceEmptyHoper) {
                             if (lastResponse.isRejectBillPresent()) {
-                                getApi().notifyListeners(REMOVE_REJECTED_BILLS);
+                                api.notifyListeners(REMOVE_REJECTED_BILLS);
                                 break;
                             } else if (lastResponse.isHopperBillPresent()) {
-                                getApi().notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
+                                api.notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
                                 break;
                             }
                         }
                         if (lastResponse.isEscrowBillPresent()) {
                             if (!canOpenEscrow) {
-                                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 3");
+                                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.BILLS_IN_ESCROW_CALL_ADMIN, "There are bills in the escrow call an admin 3");
                             }
-                            getApi().setClosing(false);
+                            api.setClosing(false);
                             sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
                             if (sret != null) {
                                 break;
@@ -204,30 +204,30 @@ public class GotoNeutral extends GloryDE50StatePoll {
                             bagRotated = true;
                             // set the time if possible, some times it fails, ignroe this
                             sret = sendGloryOperation(new devices.glory.operation.SetTime(new Date()));
-                            if (sret != null) {
-                                String error = lastResponse.getError();
+                            if (sret.isError()) {
+                                String error = sret.getError();
                                 Logger.error("Error %s sending cmd SetTime", error);
                                 break;
                             }
                             // Rotate if possible, some time it fails, ignore this
                             sret = sendGloryOperation(new devices.glory.operation.SetCollectMode());
-                            if (sret != null) {
-                                String error = lastResponse.getError();
+                            if (sret.isError()) {
+                                String error = sret.getError();
                                 Logger.error("Error %s sending cmd SetCollectMode", error);
                                 break;
                             }
                             break;
                         }
-                        notifyListeners(NEUTRAL);
+                        api.notifyListeners(NEUTRAL);
                         Logger.debug("GOTO NEUTRAL DONE");
                         return prevState;
                     default:
-                        return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                        return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                                 String.format("gotoNeutral Abnormal device Invalid SR1-2 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
             default:
-                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("gotoNeutralInvalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
         Logger.debug("GOTO NEUTRAL DONE");

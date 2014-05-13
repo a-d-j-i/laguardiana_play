@@ -4,7 +4,7 @@
  */
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50StateApi;
+import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50StateAbstract;
 
@@ -12,10 +12,13 @@ import devices.glory.state.GloryDE50StateAbstract;
  *
  * @author adji
  */
-public class Store extends GloryDE50StatePoll {
+public class GloryDE50Reset extends GloryDE50StatePoll {
 
-    public Store(GloryDE50StateApi api) {
+    final GloryDE50StateAbstract prevStep;
+
+    public GloryDE50Reset(GloryDE50DeviceStateApi api, GloryDE50StateAbstract prevStep) {
         super(api);
+        this.prevStep = prevStep;
     }
 
     @Override
@@ -30,7 +33,7 @@ public class Store extends GloryDE50StatePoll {
             case being_restoration:
                 return this;
             default:
-                return this;
+                return prevStep;
         }
     }
 

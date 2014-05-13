@@ -13,16 +13,14 @@
                 <th>Id dispositivo</th>
                 <th>Id en la Maquina</th>
                 <th>Tipo de dispositivo</th>
-                <th>Creado</th>
                 <th>Propiedades</th>
                 <th>Operaciones</th>
                 </thead>
                 <tbody>
                     #{list items:data, as:'device' }
                 <td>${device.deviceId} </td>
-                <td>${device.machineDeviceId}</td>
-                <td>${device.deviceType}</td>
-                <td>${device.lgd.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
+                <td>${device.getDeviceDesc().getMachineId()}</td>
+                <td>${device.getDeviceDesc().getType()}</td>
                 <td style="background-color: lightblue; border: 1px solid;">
                     <a id="${ device.deviceId }" href="@{properties}" class="submitForm"><img src="../public/images/round_button.gif" border="0" alt="Propiedades"></a>
                 </td>

@@ -6,12 +6,8 @@
 package devices.device;
 
 import devices.device.events.DeviceEventListener;
-import devices.device.operation.DeviceOperationInterface;
-import devices.device.response.DeviceResponseInterface;
-import devices.device.state.DeviceStateAbstract;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskInterface;
-import devices.device.task.DeviceTaskOperation;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,12 +25,6 @@ import play.Logger;
  */
 public abstract class DeviceAbstract implements DeviceInterface, Runnable {
 
-    public class DeviceStateApi {
-
-        public BlockingQueue<DeviceTaskInterface> getOperationQueue() {
-            return operationQueue;
-        }
-    }
     public final DeviceDescription deviceDescription;
     protected final LgDevice lgd;
 
@@ -49,7 +39,6 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         this.thread = new Thread(this);
     }
 
-    // Every device must have at least a port.
     public void start() {
         initDeviceProperties();
         thread.start();
@@ -65,9 +54,9 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
     }
 
     // Must be touched only by the inner thread !!!
-    private AtomicReference<DeviceStateInterface> currentState;
+    final private AtomicReference<DeviceStateInterface> currentState = new AtomicReference<DeviceStateInterface>();
 
-    abstract public DeviceStateAbstract init();
+    abstract public DeviceStateInterface init();
 
     public void run() {
         Logger.debug("Device %s thread started", deviceDescription);
@@ -91,6 +80,10 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
     }
 
     public void finish() {
+    }
+
+    public BlockingQueue<DeviceTaskInterface> getOperationQueue() {
+        return operationQueue;
     }
 
     public DeviceStateInterface getCurrentState() {
@@ -149,14 +142,6 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
 
     synchronized protected boolean submit(DeviceTaskInterface deviceTask) {
         return operationQueue.offer(deviceTask);
-    }
-
-    public DeviceResponseInterface sendOperation(final DeviceOperationInterface operation, final boolean debug) {
-        DeviceTaskInterface<DeviceResponseInterface> deviceTask = new DeviceTaskOperation(operation, debug);
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return null;
     }
 
     @Override

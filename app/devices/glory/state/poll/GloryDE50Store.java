@@ -4,7 +4,7 @@
  */
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50StateApi;
+import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50StateAbstract;
 
@@ -12,9 +12,9 @@ import devices.glory.state.GloryDE50StateAbstract;
  *
  * @author adji
  */
-public class Withdraw extends GloryDE50StatePoll {
+public class GloryDE50Store extends GloryDE50StatePoll {
 
-    public Withdraw(GloryDE50StateApi api) {
+    public GloryDE50Store(GloryDE50DeviceStateApi api) {
         super(api);
     }
 

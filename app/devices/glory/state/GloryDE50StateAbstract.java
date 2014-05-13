@@ -1,9 +1,8 @@
 package devices.glory.state;
 
-import devices.device.DeviceStatus;
 import devices.device.state.DeviceStateInterface;
-import devices.device.state.DeviceStateOperation;
-import devices.glory.GloryDE50Device.GloryDE50StateApi;
+import devices.device.task.DeviceTaskInterface;
+import devices.glory.GloryDE50DeviceStateApi;
 import java.util.Map;
 
 /**
@@ -11,46 +10,19 @@ import java.util.Map;
  *
  * @author adji
  */
-abstract public class GloryDE50StateAbstract extends DeviceStateOperation implements DeviceStateInterface {
+abstract public class GloryDE50StateAbstract implements DeviceStateInterface {
 
-    public GloryDE50StateAbstract(GloryDE50StateApi api) {
-        super(api);
+    protected final GloryDE50DeviceStateApi api;
+
+    public GloryDE50StateAbstract(GloryDE50DeviceStateApi api) {
+        this.api = api;
     }
 
-    @Override
-    public GloryDE50StateApi getApi() {
-        return (GloryDE50StateApi) super.getApi();
+    public DeviceStateInterface init() {
+        return this;
     }
 
-    public boolean acceptCollect() {
-        return false;
-    }
-
-    public boolean acceptCount() {
-        return false;
-    }
-
-    public boolean acceptEnvelopeDeposit() {
-        return false;
-    }
-
-    public boolean acceptReset() {
-        return false;
-    }
-
-    public boolean acceptStoringReset() {
-        return false;
-    }
-
-    public boolean acceptOpenPort() {
-        return false;
-    }
-
-    public boolean acceptStore() {
-        return false;
-    }
-
-    public boolean acceptWithdraw() {
+    public boolean isError() {
         return false;
     }
 
@@ -70,10 +42,6 @@ abstract public class GloryDE50StateAbstract extends DeviceStateOperation implem
         return null;
     }
 
-    protected void notifyListeners(DeviceStatus.STATUS status) {
-        getApi().notifyListeners(status);
-    }
-
     public boolean clearError() {
         return false;
     }
@@ -82,4 +50,11 @@ abstract public class GloryDE50StateAbstract extends DeviceStateOperation implem
         return null;
     }
 
+    public GloryDE50StateAbstract getCollectState() {
+        return null;
+    }
+
+    public DeviceStateInterface call(DeviceTaskInterface task) {
+        return null;
+    }
 }

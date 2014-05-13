@@ -5,11 +5,11 @@
 package devices.glory.state.poll;
 
 import static devices.device.DeviceStatus.STATUS.CANCELING;
-import devices.glory.GloryDE50Device.GloryDE50StateApi;
+import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.state.Error;
-import devices.glory.state.Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.state.GloryDE50Error;
+import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import java.util.concurrent.atomic.AtomicBoolean;
 import play.Logger;
@@ -22,7 +22,7 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
 
     final AtomicBoolean mustCancel = new AtomicBoolean(false);
 
-    public GloryDE50StatePoll(GloryDE50StateApi api) {
+    public GloryDE50StatePoll(GloryDE50DeviceStateApi api) {
         super(api);
     }
 
@@ -32,11 +32,11 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
 
     GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface op) {
         if (op != null) {
-            GloryDE50OperationResponse response = getApi().sendGloryDE50Operation(op, false);
-            if (response.isError()) {
-                String error = response.getError();
+            GloryDE50OperationResponse response = new GloryDE50OperationResponse();
+            String error = api.sendGloryDE50Operation(op, false, response);
+            if (error != null) {
                 Logger.error("Error %s sending cmd : %s", error, op.getDescription());
-                return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
             }
         }
         return null;
@@ -45,20 +45,20 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
     @Override
     public GloryDE50StateAbstract step() {
         if (mustCancel.get()) {
-            notifyListeners(CANCELING);
+            api.notifyListeners(CANCELING);
             Logger.debug("doCancel");
             GloryDE50StateAbstract ret = doCancel();
             if (ret != null) {
                 return ret;
             }
-            return new GotoNeutral(getApi());
+            return new GloryDE50GotoNeutral(api);
         }
 
-        GloryDE50OperationResponse response = getApi().sendGloryDE50Operation(new devices.glory.operation.Sense());
-        if (response.isError()) {
-            String error = response.getError();
+        GloryDE50OperationResponse response = new GloryDE50OperationResponse();
+        String error = api.sendGloryDE50Operation(new devices.glory.operation.Sense(), false, response);
+        if (error != null) {
             Logger.error("Error %s sending cmd : SENSE", error);
-            return new Error(getApi(), COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+            return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", response.getD1Mode().name(), response.getSr1Mode().name()));
         GloryDE50StateAbstract ret = poll(response);
@@ -95,7 +95,7 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
      return false;
      default:
      if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
-     Logger.error("Error %s sending cmd : RemoteCancel", gloryStatus.getLastError());
+     Logger.error("Error %s sending cmd : RemoteCancel", gloryStatus.getLastGloryDE50Error());
      return false;
      }
      return sense();

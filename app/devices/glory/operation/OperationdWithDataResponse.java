@@ -11,21 +11,21 @@ public class OperationdWithDataResponse extends OperationWithAckResponse {
     }
 
     @Override
-    public GloryDE50OperationResponse getResponse(byte[] dr) {
+    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
         if (dr == null) {
-            return new GloryDE50OperationResponse("Invalid argument dr == null");
+            return "Invalid argument dr == null";
         }
         int l = dr.length;
 
         if (l == 1) {
-            return super.getResponse(dr);
+            return super.fillResponse(dr, response);
         }
         if (dr.length < 21) {
-            return new GloryDE50OperationResponse(String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), dr.length));
+            return String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), dr.length);
         }
 
         if (dr[ l - 2] != 3) {
-            return new GloryDE50OperationResponse(String.format("Invalid command (%s) message end not found", getDescription()));
+            return String.format("Invalid command (%s) message end not found", getDescription());
         }
 
         byte checksum = 0;
@@ -34,12 +34,12 @@ public class OperationdWithDataResponse extends OperationWithAckResponse {
         }
 
         if (dr[ l - 1] != (byte) checksum) {
-            return new GloryDE50OperationResponse(String.format("CHECKSUM don't match 0x%x != 0x%x", dr[ l - 1], checksum));
+            return String.format("CHECKSUM don't match 0x%x != 0x%x", dr[ l - 1], checksum);
         }
 
-        GloryDE50OperationResponse response = super.getResponse(dr);
-        if (response.isError()) {
-            return response;
+        String err = super.fillResponse(dr, response);
+        if (err != null) {
+            return err;
         }
         response.setSr1Mode(SR1Mode.getMode(dr[ 3] & 0x3F));
         response.setSr2((byte) (dr[ 4] & 0x3F));
@@ -64,7 +64,7 @@ public class OperationdWithDataResponse extends OperationWithAckResponse {
         response.setD10((byte) (dr[ l - 5] & 0x7F));
         response.setD11((byte) (dr[ l - 4] & 0x7F));
         response.setD12((byte) (dr[ l - 3] & 0x7F));
-        return response;
+        return null;
     }
 
     protected byte getDecDigit(byte l) {

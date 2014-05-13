@@ -4,8 +4,7 @@
  */
 package devices.glory.state.poll;
 
-import devices.glory.state.poll.GloryDE50StatePoll;
-import devices.glory.GloryDE50Device.GloryDE50StateApi;
+import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50StateAbstract;
 
@@ -13,13 +12,10 @@ import devices.glory.state.GloryDE50StateAbstract;
  *
  * @author adji
  */
-public class Reset extends GloryDE50StatePoll {
+public class GloryDE50Withdraw extends GloryDE50StatePoll {
 
-    final GloryDE50StateAbstract prevStep;
-
-    public Reset(GloryDE50StateApi api, GloryDE50StateAbstract prevStep) {
+    public GloryDE50Withdraw(GloryDE50DeviceStateApi api) {
         super(api);
-        this.prevStep = prevStep;
     }
 
     @Override
@@ -34,7 +30,7 @@ public class Reset extends GloryDE50StatePoll {
             case being_restoration:
                 return this;
             default:
-                return prevStep;
+                return this;
         }
     }
 

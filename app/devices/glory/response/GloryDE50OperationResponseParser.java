@@ -92,10 +92,11 @@ public class GloryDE50OperationResponseParser implements Serializable {
     boolean haveData = false;
     ArrayList<Denomination> denominationData = null;
 
-    public GloryDE50OperationResponseParser(GloryDE50OperationResponse response) {
-        if (response == null) {
+    public GloryDE50OperationResponseParser(GloryDE50OperationResponse r) {
+        if (r == null) {
             return;
         }
+        GloryDE50OperationResponse response = (GloryDE50OperationResponse) r;
         denominationData = response.getDenominationData();
         bills = response.getBills();
         SR1Mode = String.format("Sr1 mode 0x%x %s", response.getSr1Mode().getByte(), response.getSr1Mode().name());
@@ -134,10 +135,6 @@ public class GloryDE50OperationResponseParser implements Serializable {
             data = hexString.toString();
         }
         haveData = true;
-        if (response.getError()
-                != null && !response.getError().isEmpty()) {
-            error = response.getError();
-        }
     }
 
     private ArrayList<String> getBits(byte data, HashMap<Byte, String> bits) {

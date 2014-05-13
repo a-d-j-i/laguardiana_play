@@ -22,17 +22,17 @@ public class OperationWithAckResponse implements GloryDE50OperationInterface {
         return this.getClass().getSimpleName();
     }
 
-    public GloryDE50OperationResponse getResponse(byte[] dr) {
+    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
         if (dr.length != 1) {
-            return new GloryDE50OperationResponse(String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), dr.length));
+            return String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), dr.length);
         }
         if (dr[ 0] == 0x6) {
             Logger.debug(String.format("Command %s ack", getDescription()));
-            return new GloryDE50OperationResponse();
+            return null;
         } else if (dr[ 0] == 0x15) {
-            return new GloryDE50OperationResponse(String.format("Command %s not acknowledged", getDescription()));
+            return String.format("Command %s not acknowledged", getDescription());
         }
-        return new GloryDE50OperationResponse(String.format("Invalid command (%s) response expected ack/noack 0x%x", getDescription(), dr[ 0]));
+        return String.format("Invalid command (%s) response expected ack/noack 0x%x", getDescription(), dr[ 0]);
     }
 
     public byte[] getCmdStr() {

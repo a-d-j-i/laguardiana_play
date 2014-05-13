@@ -5,9 +5,7 @@
  */
 package devices.device.state;
 
-import devices.device.DeviceAbstract.DeviceStateApi;
-import devices.device.operation.DeviceOperationInterface;
-import devices.device.response.DeviceResponseInterface;
+import devices.device.task.DeviceTaskInterface;
 
 /**
  *
@@ -15,12 +13,10 @@ import devices.device.response.DeviceResponseInterface;
  */
 public interface DeviceStateInterface {
 
-    public DeviceStateApi getApi();
-
     public DeviceStateInterface init();
 
     public DeviceStateInterface step();
 
-    // Executed by the inner thread, return null if not ready
-    public DeviceResponseInterface sendDeviceOperation(DeviceOperationInterface operation, boolean debug);
+    public DeviceStateInterface call(DeviceTaskInterface task);
+
 }

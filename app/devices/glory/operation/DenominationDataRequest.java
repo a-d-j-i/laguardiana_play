@@ -13,14 +13,14 @@ public class DenominationDataRequest extends OperationdWithDataResponse {
     }
 
     @Override
-    public GloryDE50OperationResponse getResponse(byte[] dr) {
-        GloryDE50OperationResponse response = super.getResponse(dr);
-        if (response.isError()) {
-            return response;
+    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
+        String err = super.fillResponse(dr, response);
+        if (err != null) {
+            return err;
         }
         byte[] data = response.getData();
         if (data == null || data.length == 0) {
-            return new GloryDE50OperationResponse("data is null");
+            return "data is null";
         }
         for (int i = 0; i < data.length; i += 10) {
             if (i + 10 <= data.length) {
@@ -30,7 +30,7 @@ public class DenominationDataRequest extends OperationdWithDataResponse {
                 d.currencyCode = new String(b);
                 d.newVal = (data[ i + 3] != 0x30);
                 // TODO: Check for 0x4X
-                d.denominationCode = 32 - new Integer(data[ i + 4] & 0x0F);
+                d.denominationCode = 32 - (data[ i + 4] & 0x0F);
 
                 Double dd = (Math.pow(10, getDecDigit(data[i + 6])) * (getDecDigit(data[i + 7]) * 100 + getDecDigit(data[i + 8]) * 10 + getDecDigit(data[i + 9]) * 1));
                 d.value = dd.intValue();
@@ -41,6 +41,6 @@ public class DenominationDataRequest extends OperationdWithDataResponse {
             }
         }
         //data.length;
-        return response;
+        return null;
     }
 }

@@ -6,7 +6,7 @@ import devices.glory.operation.StartUpload;
 import devices.glory.operation.Sense;
 import devices.device.DeviceInterface;
 import devices.glory.GloryDE50Device;
-import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.task.GloryDE50TaskOperation;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,10 +35,11 @@ public class GloryDE50Controller extends Application {
         }
     }
 
-    private static void setStatusAndRedirect(Integer deviceId, GloryDE50OperationResponse st) {
-        if (st != null) {
-            Logger.debug("STATUS : %s", st.toString());
-            renderArgs.put("status", st.getRepr());
+    private static void setStatusAndRedirect(Integer deviceId, GloryDE50TaskOperation op) {
+        // TODO: op.isError();
+        if (op.getResponse() != null) {
+            Logger.debug("STATUS : %s", op.getResponse().toString());
+            renderArgs.put("status", op.getResponse().getRepr());
         }
         DeviceInterface d = Machine.findDeviceById(deviceId);
         renderArgs.put("deviceId", deviceId);
@@ -134,12 +135,12 @@ public class GloryDE50Controller extends Application {
     }
 
     public static void logDataRequest(Integer deviceId) throws IOException, InterruptedException {
-        GloryDE50OperationResponse st = glory.sendGloryDE50Operation(new devices.glory.operation.StartUpload(StartUpload.Files.COUNTER_INFO), true);
+        GloryDE50TaskOperation st = glory.sendGloryDE50Operation(new devices.glory.operation.StartUpload(StartUpload.Files.COUNTER_INFO), true);
         if (st.isError()) {
             setStatusAndRedirect(deviceId, st);
             return;
         }
-        int fileSize = st.getFileSize();
+        int fileSize = st.getResponse().getFileSize();
         Logger.debug("Filesize : %d", fileSize);
         int block;
         FileWriter fstream = null;
@@ -154,7 +155,7 @@ public class GloryDE50Controller extends Application {
                     setStatusAndRedirect(deviceId, st);
                     return;
                 }
-                byte[] b = st.getData();
+                byte[] b = st.getResponse().getData();
                 int i;
                 for (i = 0; i < (b.length - 8) / 2 && (block * 512 + i) < fileSize; i++) {
                     char ch = (char) (16 * (b[2 * i + 8] - 0x30) + ((b[ 2 * i + 9] - 0x30)));
@@ -198,7 +199,7 @@ public class GloryDE50Controller extends Application {
     public static void deviceSettingDataLoad(Integer deviceId) {
         //String s = "ESCROW_SET=100,\r\nREJECT_SET=1001111111111111111111111111111110000000000000000000000000000000,\r\n";
         String s = "ESCROW_SET=100,\r\nREJECT_SET=0000000000000000000000000000000000000000000000000000000000000000,\r\n";
-        GloryDE50OperationResponse st = UploadData(s.length(), "settings.txt", s.getBytes());
+        GloryDE50TaskOperation st = UploadData(s.length(), "settings.txt", s.getBytes());
         if (st != null) {
             setStatusAndRedirect(deviceId, st);
             return;
@@ -216,7 +217,7 @@ public class GloryDE50Controller extends Application {
         try {
             FileInputStream fis = new FileInputStream(f);
             int readed = fis.read(b);
-            GloryDE50OperationResponse st = UploadData(readed, gFileName, b);
+            GloryDE50TaskOperation st = UploadData(readed, gFileName, b);
             if (st != null) {
                 setStatusAndRedirect(deviceId, st);
                 return;
@@ -230,13 +231,13 @@ public class GloryDE50Controller extends Application {
 
     public static void getFileInformation(Integer deviceId) {
         String gFileName = "UPGRADES.TXT";
-        GloryDE50OperationResponse response = glory.sendGloryDE50Operation(new devices.glory.operation.GetFileInformation(gFileName), true);
-        if (response.getFileSize() > 0 && response.getDate() != null) {
-            Logger.debug("Filesize : %d, Date : %s", response.getFileSize(), response.getDate().toString());
+        GloryDE50TaskOperation op = glory.sendGloryDE50Operation(new devices.glory.operation.GetFileInformation(gFileName), true);
+        if (op.getResponse().getFileSize() > 0 && op.getResponse().getDate() != null) {
+            Logger.debug("Filesize : %d, Date : %s", op.getResponse().getFileSize(), op.getResponse().getDate().toString());
         } else {
             Logger.debug("File not");
         }
-        setStatusAndRedirect(deviceId, response);
+        setStatusAndRedirect(deviceId, op);
     }
 
     public static void setTime(Integer deviceId) {
@@ -246,8 +247,8 @@ public class GloryDE50Controller extends Application {
         setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetTime(now), true));
     }
 
-    static private GloryDE50OperationResponse UploadData(int fileSize, String fileName, byte[] data) {
-        GloryDE50OperationResponse st = glory.sendGloryDE50Operation(new devices.glory.operation.StartDownload(fileSize, fileName), true);
+    static private GloryDE50TaskOperation UploadData(int fileSize, String fileName, byte[] data) {
+        GloryDE50TaskOperation st = glory.sendGloryDE50Operation(new devices.glory.operation.StartDownload(fileSize, fileName), true);
         if (st.isError()) {
             return st;
         }

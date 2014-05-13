@@ -1,17 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.state;
 
-import devices.glory.GloryDE50Device.GloryDE50StateApi;
+import devices.glory.GloryDE50DeviceStateApi;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class Error extends GloryDE50StateAbstract {
+public class GloryDE50Error extends GloryDE50StateOperation {
 
     public enum COUNTER_CLASS_ERROR_CODE {
 
@@ -20,11 +16,11 @@ public class Error extends GloryDE50StateAbstract {
 
     private final String error;
 
-    public Error(GloryDE50StateApi api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
+    public GloryDE50Error(GloryDE50DeviceStateApi api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
         super(api);
         this.error = error;
         Logger.error(error);
-        getApi().notifyListeners(error);
+        api.notifyListeners(error);
     }
     /*
      @Override

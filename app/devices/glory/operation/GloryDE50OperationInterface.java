@@ -1,11 +1,12 @@
 package devices.glory.operation;
 
-import devices.device.operation.DeviceOperationInterface;
 import devices.glory.response.GloryDE50OperationResponse;
 
-public interface GloryDE50OperationInterface extends DeviceOperationInterface {
+public interface GloryDE50OperationInterface {
 
     public String getDescription();
 
-    public GloryDE50OperationResponse getResponse(byte[] dr);
+    public byte[] getCmdStr();
+
+    public String fillResponse(byte[] b, GloryDE50OperationResponse response);
 }

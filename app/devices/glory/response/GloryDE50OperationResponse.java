@@ -1,6 +1,5 @@
 package devices.glory.response;
 
-import devices.device.response.DeviceResponseInterface;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +14,8 @@ import java.util.Map;
  *
  * @author adji
  */
-public class GloryDE50OperationResponse implements Serializable, DeviceResponseInterface {
+public class GloryDE50OperationResponse implements Serializable {
+
 
     static public class Denomination {
 
@@ -24,13 +24,6 @@ public class GloryDE50OperationResponse implements Serializable, DeviceResponseI
         public boolean newVal;
         public Integer denominationCode;
         public Integer value;
-    }
-
-    public GloryDE50OperationResponse(String error) {
-        this.error = error;
-    }
-
-    public GloryDE50OperationResponse() {
     }
 
     public void putInBills(int slot, Integer value) {
@@ -145,7 +138,6 @@ public class GloryDE50OperationResponse implements Serializable, DeviceResponseI
 
     byte[] data = null;
     Map<Integer, Integer> bills = new HashMap<Integer, Integer>();
-    String error = null;
 
     public SR1Mode getSr1Mode() {
         return sr1Mode;
@@ -491,21 +483,9 @@ public class GloryDE50OperationResponse implements Serializable, DeviceResponseI
         this.bills.put(slot, value);
     }
 
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public boolean isError() {
-        return error != null;
-    }
-
     @Override
     public String toString() {
-        return "GloryDE50OperationResponse{" + "sr1Mode=" + sr1Mode + ", d1Mode=" + d1Mode + ", collectionEnd=" + collectionEnd + ", storeEnd=" + storeEnd + ", restorationEnd=" + restorationEnd + ", batchEnd=" + batchEnd + ", abnoramalEnd=" + abnoramalEnd + ", countEnd=" + countEnd + ", rejectFull=" + rejectFull + ", escrowFull=" + escrowFull + ", dischargingFailure=" + dischargingFailure + ", rejectBillPresent=" + rejectBillPresent + ", escrowBillPresent=" + escrowBillPresent + ", hopperBillPresent=" + hopperBillPresent + ", abnormalStorage=" + abnormalStorage + ", abnormalDevice=" + abnormalDevice + ", countingError=" + countingError + ", jamming=" + jamming + ", doorEscrow=" + doorEscrow + ", doorEscrowShutter=" + doorEscrowShutter + ", cassetteFullSensor=" + cassetteFullSensor + ", cassetteFullCounter=" + cassetteFullCounter + ", cassete=" + cassete + ", currency=" + currency + ", manualDepositNumber=" + manualDepositNumber + ", codeOutline=" + codeOutline + ", codeDetail=" + codeDetail + ", d9=" + d9 + ", d10=" + d10 + ", d11=" + d11 + ", d12=" + d12 + ", sr2=" + sr2 + ", sr3=" + sr3 + ", sr4=" + sr4 + ", d2=" + d2 + ", d3=" + d3 + ", d4=" + d4 + ", d5=" + d5 + ", d6=" + d6 + ", d7=" + d7 + ", d8=" + d8 + ", data=" + Arrays.toString(data) + ", bills=" + bills + ", error=" + error + '}';
+        return "GloryDE50OperationResponse{" + "sr1Mode=" + sr1Mode + ", d1Mode=" + d1Mode + ", collectionEnd=" + collectionEnd + ", storeEnd=" + storeEnd + ", restorationEnd=" + restorationEnd + ", batchEnd=" + batchEnd + ", abnoramalEnd=" + abnoramalEnd + ", countEnd=" + countEnd + ", rejectFull=" + rejectFull + ", escrowFull=" + escrowFull + ", dischargingFailure=" + dischargingFailure + ", rejectBillPresent=" + rejectBillPresent + ", escrowBillPresent=" + escrowBillPresent + ", hopperBillPresent=" + hopperBillPresent + ", abnormalStorage=" + abnormalStorage + ", abnormalDevice=" + abnormalDevice + ", countingError=" + countingError + ", jamming=" + jamming + ", doorEscrow=" + doorEscrow + ", doorEscrowShutter=" + doorEscrowShutter + ", cassetteFullSensor=" + cassetteFullSensor + ", cassetteFullCounter=" + cassetteFullCounter + ", cassete=" + cassete + ", currency=" + currency + ", manualDepositNumber=" + manualDepositNumber + ", codeOutline=" + codeOutline + ", codeDetail=" + codeDetail + ", d9=" + d9 + ", d10=" + d10 + ", d11=" + d11 + ", d12=" + d12 + ", sr2=" + sr2 + ", sr3=" + sr3 + ", sr4=" + sr4 + ", d2=" + d2 + ", d3=" + d3 + ", d4=" + d4 + ", d5=" + d5 + ", d6=" + d6 + ", d7=" + d7 + ", d8=" + d8 + ", data=" + Arrays.toString(data) + ", bills=" + bills + '}';
     }
 
     public ArrayList<Denomination> denominationData = null;

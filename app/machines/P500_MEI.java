@@ -15,8 +15,8 @@ public class P500_MEI extends Machine {
 
     enum P500_MEI_DEVICES implements DeviceDescription {
 
-        P500_MEI_DEVICE_OS_PRINTER(DeviceType.OS_PRINTER),
-        P500_MEI_DEVICE_IO_BOARD_MX220_1_0(DeviceType.IO_BOARD_MX220_1_0),
+        //P500_MEI_DEVICE_OS_PRINTER(DeviceType.OS_PRINTER),
+        //P500_MEI_DEVICE_IO_BOARD_MX220_1_0(DeviceType.IO_BOARD_MX220_1_0),
         P500_MEI_DEVICE_MEI_EBDS(DeviceType.MEI_EBDS);
 
         private final DeviceType type;
@@ -42,10 +42,10 @@ public class P500_MEI extends Machine {
     public void onDeviceEvent(DeviceEvent deviceEvent) {
         // Switch by device.
         switch ((P500_MEI_DEVICES) deviceEvent.getSourceDevice()) {
-            case P500_MEI_DEVICE_OS_PRINTER:
+/*            case P500_MEI_DEVICE_OS_PRINTER:
                 break;
             case P500_MEI_DEVICE_IO_BOARD_MX220_1_0:
-                break;
+                break;*/
             case P500_MEI_DEVICE_MEI_EBDS:
                 break;
             default:

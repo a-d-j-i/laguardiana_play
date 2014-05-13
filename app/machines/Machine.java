@@ -4,7 +4,7 @@ import devices.device.DeviceAbstract;
 import devices.device.DeviceInterface;
 import devices.device.events.DeviceEventListener;
 import devices.glory.GloryDE50Device;
-import devices.mei.MeiEbds;
+import devices.mei.MeiEbdsDevice;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +81,7 @@ abstract public class Machine implements DeviceEventListener {
         MEI_EBDS() {
                     @Override
                     public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
-                        return new MeiEbds(deviceDesc);
+                        return new MeiEbdsDevice(deviceDesc);
                     }
                 };
 

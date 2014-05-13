@@ -51,18 +51,17 @@ public class StartUpload extends OperationdWithDataResponse {
     }
 
     @Override
-    public GloryDE50OperationResponse getResponse(byte[] dr) {
-        GloryDE50OperationResponse response = super.getResponse(dr);
-        if (response.isError()) {
-            return response;
+    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
+        String err = super.fillResponse(dr, response);
+        if (err != null) {
+            return err;
         }
         byte[] data = response.getData();
         if (data == null) {
-            return new GloryDE50OperationResponse("Data is null");
+            return "Data is null";
         }
         if (data.length != 8) {
-            return new GloryDE50OperationResponse(String.format("Invalid command (%s) response length %d expected 8 bytes hex number",
-                    getDescription(), dr.length));
+            return String.format("Invalid command (%s) response length %d expected 8 bytes hex number", getDescription(), dr.length);
         }
         byte[] b = data;
         int l = 0;
@@ -70,11 +69,11 @@ public class StartUpload extends OperationdWithDataResponse {
             if (b[i] >= 0x30 && b[i] <= 0x3F) {
                 l += getHexDigit(b[i]) * Math.pow(16, b.length - i - 1);
             } else {
-                return new GloryDE50OperationResponse(String.format("Invalid digit %d == 0x%x", b[i], b[i]));
+                return String.format("Invalid digit %d == 0x%x", b[i], b[i]);
             }
         }
-        response.setFileSize( l );
-        return response;
+        response.setFileSize(l);
+        return null;
     }
 
 }

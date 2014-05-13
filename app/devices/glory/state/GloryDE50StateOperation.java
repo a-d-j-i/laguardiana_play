@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package devices.device.state;
+package devices.glory.state;
 
-import devices.device.DeviceAbstract;
+import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskInterface;
+import devices.glory.GloryDE50DeviceStateApi;
 import java.util.concurrent.TimeUnit;
 import play.Logger;
 
@@ -13,16 +10,20 @@ import play.Logger;
  *
  * @author adji
  */
-abstract public class DeviceStateOperation extends DeviceStateAbstract {
+abstract public class GloryDE50StateOperation extends GloryDE50StateAbstract {
 
-    public DeviceStateOperation(DeviceAbstract.DeviceStateApi api) {
+    public GloryDE50StateOperation(GloryDE50DeviceStateApi api) {
         super(api);
     }
 
     @Override
     public DeviceStateInterface step() {
+        return step(1000);
+    }
+
+    public DeviceStateInterface step(int timeoutMS) {
         try {
-            DeviceTaskInterface deviceTask = getApi().getOperationQueue().poll(1000, TimeUnit.MILLISECONDS);
+            DeviceTaskInterface deviceTask = api.poll(timeoutMS, TimeUnit.MILLISECONDS);
             if (deviceTask != null) {
                 return deviceTask.execute(this);
             }

@@ -21,12 +21,8 @@
             <ul class="on-2 unit">
                 <li class="column">
                     <div style="margin:20px;">
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">status</a>
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">openGate</a>
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">closeGate</a>
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">aproveBag</a>
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">aproveBagConfirm</a>
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{commands(deviceId)}">clearError</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.resetDevice(deviceId)}">reset</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.startCounting(deviceId)}">startCounting</a>
                     </div>
                 </li>
                 <li class="column">
@@ -75,7 +71,7 @@
         return "0x" + number.toString(16).toUpperCase() + " : { " + number.toString(2).toUpperCase() + " }";
     }
     doRefresh = function() {
-        $.getJSON('@{commands(deviceId)}', function(data) {
+        $.getJSON('@{getStatus(deviceId)}', function(data) {
 
             var error = data[ 0 ];
             var status = data[ 1 ];
