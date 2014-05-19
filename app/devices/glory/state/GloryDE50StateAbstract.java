@@ -1,7 +1,7 @@
 package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
-import devices.device.task.DeviceTaskInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.glory.GloryDE50DeviceStateApi;
 import java.util.Map;
 
@@ -54,7 +54,7 @@ abstract public class GloryDE50StateAbstract implements DeviceStateInterface {
         return null;
     }
 
-    public DeviceStateInterface call(DeviceTaskInterface task) {
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
         return null;
     }
 }

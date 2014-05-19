@@ -9,11 +9,16 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author adji
  */
-abstract public class DeviceTaskAbstract implements DeviceTaskInterface {
+public class DeviceTaskAbstract {
 
+    final Enum type;
     final Lock lock = new ReentrantLock();
     final Condition done = lock.newCondition();
     boolean returnValue = false;
+
+    public DeviceTaskAbstract(Enum type) {
+        this.type = type;
+    }
 
     // Executed by the outher thread.
     public boolean get() {
@@ -47,6 +52,10 @@ abstract public class DeviceTaskAbstract implements DeviceTaskInterface {
     @Override
     public String toString() {
         return "DeviceTaskAbstract";
+    }
+
+    public Enum getType() {
+        return type;
     }
 
 }

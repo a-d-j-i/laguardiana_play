@@ -2,22 +2,17 @@ package devices.glory;
 
 import devices.device.DeviceAbstract;
 import devices.device.DeviceClassCounterIntreface;
-import devices.device.DeviceCommandInterface;
 import devices.device.DeviceStatus;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.device.task.DeviceTaskInterface;
+import devices.glory.task.GloryDE50TaskCount;
 import devices.glory.operation.OperationWithAckResponse;
 import devices.glory.state.GloryDE50OpenPort;
 import devices.glory.state.GloryDE50StateAbstract;
-import devices.glory.task.GloryDE50TaskCollect;
-import devices.glory.task.GloryDE50TaskCount;
-import devices.glory.task.GloryDE50TaskEnvelopeDeposit;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.glory.task.GloryDE50TaskOperation;
-import devices.glory.task.GloryDE50TaskReset;
 import devices.glory.task.GloryDE50TaskStoreDeposit;
-import devices.glory.task.GloryDE50TaskWithdraw;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.SynchronousQueue;
 import machines.Machine;
@@ -30,17 +25,29 @@ import play.Logger;
  */
 public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounterIntreface {
 
+    public enum GloryDE50TaskType {
+
+        TASK_OPEN_PORT,
+        TASK_COUNT,
+        TASK_COLLECT,
+        TASK_ENVELOPE_DEPOSIT,
+        TASK_RESET,
+        TASK_STORING_ERROR_RESET,
+        TASK_STORE_DEPOSIT,
+        TASK_WITHDRAW_DEPOSIT,
+        TASK_OPERATION;
+    }
     final GloryDE50DeviceStateApi api;
 
     public GloryDE50Device(Machine.DeviceDescription deviceDesc) {
-        super(deviceDesc, new SynchronousQueue<DeviceTaskInterface>());
-        api = new GloryDE50DeviceStateApi(getOperationQueue());
+        super(deviceDesc, new SynchronousQueue<DeviceTaskAbstract>());
+        api = new GloryDE50DeviceStateApi(operationQueue);
     }
 
     @Override
     protected boolean changeProperty(String property, String value) {
         if (property.compareToIgnoreCase("port") == 0) {
-            DeviceTaskInterface deviceTask = new DeviceTaskOpenPort(value);
+            DeviceTaskAbstract deviceTask = new DeviceTaskOpenPort(GloryDE50TaskType.TASK_OPEN_PORT, value);
             if (submit(deviceTask)) {
                 return deviceTask.get();
             }
@@ -69,36 +76,20 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         //   currentCommand = new GotoNeutral(threadCommandApi);
     }
 
-    enum GloryDE50SimpleTask implements DeviceCommandInterface {
-
-        TASK_COLLECT {
-                    @Override
-                    public DeviceTaskAbstract getTask() {
-                        return new DeviceTaskAbstract() {
-                        };
-                    }
-
-                },
-        TASK_ENVELOPE_DEPOSIT {
-                    @Override
-                    public DeviceTaskAbstract getTask() {
-                        return new DeviceTaskAbstract() {
-                        };
-                    }
-
-                },
-        TASK_STORE_DEPOSIT {
-                    @Override
-                    public DeviceTaskAbstract getTask() {
-                        return new DeviceTaskAbstract() {
-                        };
-                    }
-
-                };
+    private boolean runSimpleTask(GloryDE50TaskType st) {
+        DeviceTaskAbstract deviceTask = new DeviceTaskAbstract(st);
+        if (submit(deviceTask)) {
+            return deviceTask.get();
+        }
+        return false;
     }
 
-    public boolean count(final Map<Integer, Integer> desiredQuantity, final Integer currency) {
-        DeviceTaskInterface deviceTask = new GloryDE50TaskCount(desiredQuantity, currency);
+    public boolean count(List<Integer> slotList) {
+        return false;
+    }
+
+    public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
+        DeviceTaskAbstract deviceTask = new GloryDE50TaskCount(GloryDE50TaskType.TASK_COUNT, desiredQuantity, currency);
         if (submit(deviceTask)) {
             return deviceTask.get();
         }
@@ -106,39 +97,23 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
     }
 
     public boolean envelopeDeposit() {
-        DeviceTaskInterface deviceTask = new GloryDE50TaskEnvelopeDeposit();
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
+        return runSimpleTask(GloryDE50TaskType.TASK_ENVELOPE_DEPOSIT);
     }
 
     public boolean collect() {
-        DeviceTaskInterface deviceTask = new GloryDE50TaskCollect();
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
+        return runSimpleTask(GloryDE50TaskType.TASK_COLLECT);
     }
 
     public boolean reset() {
-        DeviceTaskInterface deviceTask = new GloryDE50TaskReset();
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
+        return runSimpleTask(GloryDE50TaskType.TASK_RESET);
     }
 
     public boolean storingErrorReset() {
-        DeviceTaskInterface deviceTask = new GloryDE50TaskReset();
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
+        return runSimpleTask(GloryDE50TaskType.TASK_STORING_ERROR_RESET);
     }
 
     public boolean storeDeposit(Integer sequenceNumber) {
-        DeviceTaskInterface deviceTask = new GloryDE50TaskStoreDeposit();
+        DeviceTaskAbstract deviceTask = new GloryDE50TaskStoreDeposit(GloryDE50TaskType.TASK_COUNT, sequenceNumber);
         if (submit(deviceTask)) {
             return deviceTask.get();
         }
@@ -146,15 +121,11 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
     }
 
     public boolean withdrawDeposit() {
-        DeviceTaskInterface deviceTask = new GloryDE50TaskWithdraw();
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
+        return runSimpleTask(GloryDE50TaskType.TASK_WITHDRAW_DEPOSIT);
     }
 
     public GloryDE50TaskOperation sendGloryDE50Operation(OperationWithAckResponse c, boolean b) {
-        GloryDE50TaskOperation deviceTask = new GloryDE50TaskOperation(c, b);
+        GloryDE50TaskOperation deviceTask = new GloryDE50TaskOperation(GloryDE50TaskType.TASK_OPERATION, c, b);
         if (submit(deviceTask)) {
             if (deviceTask.get()) {
                 return deviceTask;

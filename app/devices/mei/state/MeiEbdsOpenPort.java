@@ -5,9 +5,9 @@
 package devices.mei.state;
 
 import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
-import devices.glory.state.GloryDE50OpenPort;
-import devices.glory.state.poll.GloryDE50GotoNeutral;
+import static devices.mei.MeiEbdsDevice.MeiEbdsTaskType.TASK_OPEN_PORT;
 import devices.mei.MeiEbdsDeviceStateApi;
 import play.Logger;
 
@@ -15,7 +15,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class MeiEbdsOpenPort extends MeiEbdsStateOperation {
+public class MeiEbdsOpenPort extends MeiEbdsStateAbstract {
 
     final String port;
 
@@ -26,7 +26,7 @@ public class MeiEbdsOpenPort extends MeiEbdsStateOperation {
 
     @Override
     public DeviceStateInterface step() {
-        super.step(3000);
+        super.step();
         if (api.open(port)) {
             Logger.debug("Port open success");
             return new MeiEbdsStateMain(api);
@@ -35,7 +35,13 @@ public class MeiEbdsOpenPort extends MeiEbdsStateOperation {
         return this;
     }
 
-    public DeviceStateInterface call(DeviceTaskOpenPort task) {
-        return new MeiEbdsOpenPort(api, task.getPort());
+    @Override
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
+        if (task.getType() == TASK_OPEN_PORT) {
+            DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
+            task.setReturnValue(true);
+            return new MeiEbdsOpenPort(api, open.getPort());
+        }
+        return null;
     }
 }

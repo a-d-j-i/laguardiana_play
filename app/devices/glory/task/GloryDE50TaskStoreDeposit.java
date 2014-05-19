@@ -8,4 +8,11 @@ import devices.device.task.DeviceTaskAbstract;
  */
 public class GloryDE50TaskStoreDeposit extends DeviceTaskAbstract {
 
+    final Integer sequenceNumber;
+
+    public GloryDE50TaskStoreDeposit(Enum type, Integer sequenceNumber) {
+        super(type);
+        this.sequenceNumber = sequenceNumber;
+    }
+
 }

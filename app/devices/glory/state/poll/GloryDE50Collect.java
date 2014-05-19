@@ -8,7 +8,7 @@ import static devices.device.DeviceStatus.STATUS.BAG_COLLECTED;
 import static devices.device.DeviceStatus.STATUS.REMOVE_REJECTED_BILLS;
 import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
 import devices.device.state.DeviceStateInterface;
-import devices.device.task.DeviceTaskInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;

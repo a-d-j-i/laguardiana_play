@@ -1,7 +1,7 @@
 package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
-import devices.device.task.DeviceTaskInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.glory.GloryDE50DeviceStateApi;
 import java.util.concurrent.TimeUnit;
 import play.Logger;
@@ -23,7 +23,7 @@ abstract public class GloryDE50StateOperation extends GloryDE50StateAbstract {
 
     public DeviceStateInterface step(int timeoutMS) {
         try {
-            DeviceTaskInterface deviceTask = api.poll(timeoutMS, TimeUnit.MILLISECONDS);
+            DeviceTaskAbstract deviceTask = api.poll(timeoutMS, TimeUnit.MILLISECONDS);
             if (deviceTask != null) {
                 return deviceTask.execute(this);
             }

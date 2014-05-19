@@ -1,10 +1,13 @@
 package devices.device;
 
+import java.util.List;
 import java.util.Map;
 
 public interface DeviceClassCounterIntreface {
 
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency);
+
+    public boolean count(List<Integer> slotList);
 
     public boolean envelopeDeposit();
 

@@ -1,4 +1,4 @@
-#{set title:'IoBoard (Comandos)' /}
+#{set title:'MeiEbds (Comandos)' /}
 #{extends 'main.html' /}
 
 #{set 'moreStyles'}
@@ -22,7 +22,7 @@
                 <li class="column">
                     <div style="margin:20px;">
                         <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.resetDevice(deviceId)}">reset</a>
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.startCounting(deviceId)}">startCounting</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.store(deviceId)}">store</a>
                     </div>
                 </li>
                 <li class="column">

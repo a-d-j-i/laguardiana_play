@@ -1,17 +1,18 @@
 package devices.mei.state;
 
 import devices.device.state.DeviceStateInterface;
-import devices.glory.state.poll.GloryDE50GotoNeutral;
+import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskOpenPort;
+import devices.mei.MeiEbdsDevice.MeiEbdsTaskType;
 import devices.mei.MeiEbdsDeviceStateApi;
 import devices.mei.state.MeiEbdsError.COUNTER_CLASS_ERROR_CODE;
-import devices.mei.task.MeiEbdsTaskReset;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class MeiEbdsError extends MeiEbdsStateOperation {
+public class MeiEbdsError extends MeiEbdsStateAbstract {
 
     public enum COUNTER_CLASS_ERROR_CODE {
 
@@ -28,16 +29,21 @@ public class MeiEbdsError extends MeiEbdsStateOperation {
     }
 
     @Override
-    boolean isError() {
-        return false;
+    public DeviceStateInterface call(DeviceTaskAbstract t) {
+        DeviceTaskAbstract task = (DeviceTaskAbstract) t;
+        switch ((MeiEbdsTaskType) task.getType()) {
+            case TASK_RESET:
+                Logger.debug("executing reset task %s", task.toString());
+                task.setReturnValue(true);
+                return new MeiEbdsStateMain(api);
+            case TASK_OPEN_PORT:
+                DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
+                task.setReturnValue(true);
+                Logger.debug("executing open task %s", open.toString());
+                return new MeiEbdsOpenPort(api, open.getPort());
+        }
+        return null;
     }
-
-    public DeviceStateInterface call(MeiEbdsTaskReset task) {
-        task.setReturnValue(true);
-        return new MeiEbdsReset(api, this);
-    }
-
-
     /*
      @Override
      public boolean reset() {

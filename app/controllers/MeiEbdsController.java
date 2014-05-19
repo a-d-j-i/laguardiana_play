@@ -22,15 +22,11 @@ public class MeiEbdsController extends Application {
             meiDevice = (MeiEbdsDevice) d;
         } else {
             renderArgs.put("error", "invalid device id");
-            setStatusAndRedirect(deviceId, null, true);
+            setStatusAndRedirect(deviceId, true);
         }
     }
 
-    private static void setStatusAndRedirect(Integer deviceId, MeiEbdsAcceptorMsg st, boolean retVal) {
-        if (st != null) {
-            Logger.debug("STATUS : %s", st.toString());
-            renderArgs.put("status", st);
-        }
+    private static void setStatusAndRedirect(Integer deviceId, boolean retVal) {
         DeviceInterface d = Machine.findDeviceById(deviceId);
         renderArgs.put("deviceId", deviceId);
         renderArgs.put("lastCmdRetVal", retVal);
@@ -39,12 +35,12 @@ public class MeiEbdsController extends Application {
         render("DeviceController/" + d.getName().toUpperCase() + "_OPERATIONS.html");
     }
 
-    public static void startCounting(Integer deviceId) {
-        //setStatusAndRedirect(deviceId, (MeiEbdsAcceptorMsg) meiDevice.sendOperation(new MeiEbdsHostMsg(), false), true);
+    public static void store(Integer deviceId) {
+        setStatusAndRedirect(deviceId, meiDevice.store());
     }
 
     public static void resetDevice(Integer deviceId) {
-        setStatusAndRedirect(deviceId, null, meiDevice.reset());
+        setStatusAndRedirect(deviceId, meiDevice.reset());
     }
 
     public static void getStatus(Integer deviceId) {

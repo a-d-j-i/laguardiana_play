@@ -6,7 +6,7 @@
 package devices.glory;
 
 import devices.device.DeviceStatus;
-import devices.device.task.DeviceTaskInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.serial.SerialPortAdapterAbstract;
@@ -26,9 +26,9 @@ public class GloryDE50DeviceStateApi {
     boolean closing = false;
     final private int GLORY_READ_TIMEOUT = 5000;
     final private GloryDE50 gl = new GloryDE50(GLORY_READ_TIMEOUT);
-    final BlockingQueue<DeviceTaskInterface> queue;
+    final BlockingQueue<DeviceTaskAbstract> queue;
 
-    GloryDE50DeviceStateApi(BlockingQueue<DeviceTaskInterface> operationQueue) {
+    GloryDE50DeviceStateApi(BlockingQueue<DeviceTaskAbstract> operationQueue) {
         this.queue = operationQueue;
     }
 
@@ -69,7 +69,7 @@ public class GloryDE50DeviceStateApi {
         gl.close();
     }
 
-    public DeviceTaskInterface poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
+    public DeviceTaskAbstract poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
         return queue.poll(timeoutMS, timeUnit);
     }
 

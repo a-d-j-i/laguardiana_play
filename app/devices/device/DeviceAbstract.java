@@ -7,7 +7,9 @@ package devices.device;
 
 import devices.device.events.DeviceEventListener;
 import devices.device.state.DeviceStateInterface;
-import devices.device.task.DeviceTaskInterface;
+import devices.device.task.DeviceTaskAbstract;
+import devices.glory.task.GloryDE50TaskCount;
+import devices.mei.MeiEbdsDevice;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,9 +32,9 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
 
     private final Thread thread;
     private final AtomicBoolean mustStop = new AtomicBoolean(false);
-    private final BlockingQueue<DeviceTaskInterface> operationQueue;
+    protected final BlockingQueue<DeviceTaskAbstract> operationQueue;
 
-    public DeviceAbstract(DeviceDescription deviceDescription, BlockingQueue<DeviceTaskInterface> operationQueue) {
+    public DeviceAbstract(DeviceDescription deviceDescription, BlockingQueue<DeviceTaskAbstract> operationQueue) {
         this.operationQueue = operationQueue;
         this.deviceDescription = deviceDescription;
         lgd = LgDevice.getOrCreateByMachineId(deviceDescription.getType(), deviceDescription.getMachineId());
@@ -80,10 +82,6 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
     }
 
     public void finish() {
-    }
-
-    public BlockingQueue<DeviceTaskInterface> getOperationQueue() {
-        return operationQueue;
     }
 
     public DeviceStateInterface getCurrentState() {
@@ -140,7 +138,7 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         return l;
     }
 
-    synchronized protected boolean submit(DeviceTaskInterface deviceTask) {
+    synchronized protected boolean submit(DeviceTaskAbstract deviceTask) {
         return operationQueue.offer(deviceTask);
     }
 

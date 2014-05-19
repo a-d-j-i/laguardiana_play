@@ -1,9 +1,11 @@
 package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.state.poll.GloryDE50GotoNeutral;
 import devices.device.task.DeviceTaskOpenPort;
+import static devices.glory.GloryDE50Device.GloryDE50TaskType.TASK_OPEN_PORT;
 import play.Logger;
 
 /**
@@ -31,8 +33,14 @@ public class GloryDE50OpenPort extends GloryDE50StateOperation {
         return this;
     }
 
-    public DeviceStateInterface call(DeviceTaskOpenPort task) {
-        return new GloryDE50OpenPort(api, task.getPort());
+    @Override
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
+            if ( task.getType() == TASK_OPEN_PORT ) {
+                DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
+                task.setReturnValue(true);
+                return new GloryDE50OpenPort(api, open.getPort());
+            }
+            return null;
     }
 
 }

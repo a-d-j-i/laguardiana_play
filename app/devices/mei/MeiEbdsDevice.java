@@ -4,10 +4,11 @@ import devices.device.DeviceAbstract;
 import devices.device.DeviceClassCounterIntreface;
 import devices.device.DeviceStatus;
 import devices.device.state.DeviceStateInterface;
-import devices.device.task.DeviceTaskInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.mei.state.MeiEbdsOpenPort;
-import devices.mei.task.MeiEbdsTaskReset;
+import devices.mei.task.MeiEbdsTaskCount;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import machines.Machine;
@@ -19,6 +20,15 @@ import play.Logger;
  * @author adji
  */
 public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterIntreface {
+
+    public enum MeiEbdsTaskType {
+
+        TASK_OPEN_PORT,
+        TASK_RESET,
+        TASK_COUNT,
+        TASK_STORE,
+        TASK_CANCEL;
+    }
 
     public enum MessageType {
 
@@ -44,14 +54,14 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
     final MeiEbdsDeviceStateApi api;
 
     public MeiEbdsDevice(Machine.DeviceDescription deviceDesc) {
-        super(deviceDesc, new ArrayBlockingQueue<DeviceTaskInterface>(1));
-        api = new MeiEbdsDeviceStateApi(getOperationQueue());
+        super(deviceDesc, new ArrayBlockingQueue<DeviceTaskAbstract>(1));
+        api = new MeiEbdsDeviceStateApi(operationQueue);
     }
 
     @Override
     protected boolean changeProperty(String property, String value) {
         if (property.compareToIgnoreCase("port") == 0) {
-            DeviceTaskInterface deviceTask = new DeviceTaskOpenPort(value);
+            DeviceTaskAbstract deviceTask = new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, value);
             if (submit(deviceTask)) {
                 return deviceTask.get();
             }
@@ -81,11 +91,19 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         api.close();
     }
 
-    public boolean reset() {
-        DeviceTaskInterface deviceTask = new MeiEbdsTaskReset();
+    private boolean runSimpleTask(MeiEbdsTaskType st) {
+        DeviceTaskAbstract deviceTask = new DeviceTaskAbstract(st);
         if (submit(deviceTask)) {
             return deviceTask.get();
         }
+        return false;
+    }
+
+    public boolean reset() {
+        return runSimpleTask(MeiEbdsTaskType.TASK_RESET);
+    }
+
+    public boolean store() {
         return false;
     }
 
@@ -98,8 +116,16 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public boolean count(List<Integer> slotInfo) {
+        DeviceTaskAbstract deviceTask = new MeiEbdsTaskCount(MeiEbdsTaskType.TASK_COUNT, slotInfo);
+        if (submit(deviceTask)) {
+            return deviceTask.get();
+        }
+        return false;
+    }
+
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     public boolean envelopeDeposit() {

@@ -4,116 +4,103 @@
  */
 package devices.mei.state;
 
-import devices.device.DeviceStatus;
 import static devices.device.DeviceStatus.STATUS.CANCELING;
-import devices.device.task.DeviceTaskInterface;
+import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskOpenPort;
+import devices.mei.MeiEbdsDevice.MeiEbdsTaskType;
 import devices.mei.MeiEbdsDeviceStateApi;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsg;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeoutException;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class MeiEbdsStateMain extends MeiEbdsStateOperation {
-
-    final AtomicBoolean mustCancel = new AtomicBoolean(false);
+public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
 
     public MeiEbdsStateMain(MeiEbdsDeviceStateApi api) {
         super(api);
     }
 
-    public MeiEbdsStateOperation poll(MeiEbdsAcceptorMsg lastResponse) {
-        return this;
-    }
-
-    public MeiEbdsStateOperation doCancel() {
-        return this;
-    }
-
-    protected void notifyListeners(DeviceStatus.STATUS status) {
-        api.notifyListeners(status);
-    }
-
+    final boolean mustCancel = false;
+    private boolean mustCount = false;
     private final MeiEbdsAcceptorMsg result = new MeiEbdsAcceptorMsg();
-    private final MeiEbdsHostMsg msg = new MeiEbdsHostMsg();
+
+    private final MeiEbdsHostMsg currMsg = new MeiEbdsHostMsg();
+    int retries = 0;
 
     @Override
-    public MeiEbdsStateOperation step() {
-        // execute tasks. TODO: Not allways.
-        DeviceTaskInterface deviceTask = api.peek();
-        if (deviceTask != null) {
-            Logger.debug("Got task : %s, executing", deviceTask);
-            return (MeiEbdsStateOperation) deviceTask.execute(this);
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
+        switch ((MeiEbdsTaskType) task.getType()) {
+            case TASK_OPEN_PORT:
+                DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
+                task.setReturnValue(true);
+                return new MeiEbdsOpenPort(api, open.getPort());
+            case TASK_RESET:
+                break;
+            case TASK_STORE:
+                break;
         }
-        msg.enableAllDenominations();
-        MeiEbdsStateOperation nextStep = api.exchangeMessage(msg, result);
-        if (nextStep == null) {
-            Logger.debug("MEI received msg : %s", result.toString());
-            return this;
-        }
-        if (nextStep.isError()) {
-            return nextStep;
-        }
-        if (mustCancel.get()) {
-            notifyListeners(CANCELING);
-            Logger.debug("doCancel");
-            MeiEbdsStateOperation ret = doCancel();
-            if (ret != null) {
-                return ret;
-            }
-            // TODO: Right state
-            return this;
-        }
-
-        /*        MeiEbdsOperationResponse response = api.sendOperation();
-         if (response.isError()) {
-         String error = response.getError();
-         Logger.error("Error %s sending cmd : SENSE", error);
-         return new Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
-         }
-         Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", response.getD1Mode().name(), response.getSr1Mode().name()));
-         MeiEbdsStateAbstract ret = poll(response);
-         if (ret != this) {
-         return ret;
-         }
-         try {
-         Thread.sleep(1000);
-         } catch (InterruptedException ex) {
-         }*/
+        Logger.debug("ignoring task %s", task.toString());
         return null;
     }
 
     @Override
-    public boolean cancelDeposit() {
-        mustCancel.set(true);
-        return true;
+    public DeviceStateInterface step() {
+        // execute tasks. TODO: Not allways.
+        DeviceTaskAbstract deviceTask = api.poll();
+        if (deviceTask != null) {
+            Logger.debug("Got task : %s, executing", deviceTask);
+            return deviceTask.execute(this);
+        }
+        // TODO: Must wait for message ack.
+        if (mustCancel) {
+            api.notifyListeners(CANCELING);
+            Logger.debug("doCancel");
+            mustCount = false;
+            return this;
+        }
+
+        String err;
+        try {
+            err = api.getMessage(result);
+            if (err != null) {
+                return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
+            }
+            return processAcceptorMessage();
+        } catch (TimeoutException ex) { //pool the machine.
+            Logger.debug("Timeout waiting for device, retry");
+            if (retries++ > 100) {
+                return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "Timeout reading from port");
+            }
+            if (mustCount) {
+                currMsg.enableAllDenominations();
+            } else {
+                currMsg.disableAllDenominations();
+            }
+            err = api.sendMessage(currMsg);
+            if (err != null) {
+                return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
+            }
+        }
+        return this;
     }
 
-    /*
-     protected boolean sendRemoteCancel() {
-     // Under this conditions the remoteCancel command fails.
-     if (gloryStatus.isRejectBillPresent()) {
-     setState(ManagerInterface.State.REMOVE_REJECTED_BILLS);
-     return false;
-     }
-     if (gloryStatus.isHopperBillPresent()) {
-     setState(ManagerInterface.State.REMOVE_THE_BILLS_FROM_HOPER);
-     return false;
-     }
-     switch (gloryStatus.getSr1Mode()) {
-     case counting:
-     case storing_start_request:
-     return false;
-     default:
-     if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
-     Logger.error("Error %s sending cmd : RemoteCancel", gloryStatus.getLastError());
-     return false;
-     }
-     return sense();
-     }
-     }
-     */
+    private DeviceStateInterface processAcceptorMessage() {
+        switch (result.getMessageType()) {
+            case HostToAcceptor:
+                return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "got host to acceptor message type from acceptor");
+            default:
+                return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR,
+                        String.format("unsupported message type %s", result.getMessageType().name()));
+            case AcceptorToHost:
+                Logger.debug("Received msg : %s", result.toString());
+                break;
+        }
+        return null;
+    }
+
 }

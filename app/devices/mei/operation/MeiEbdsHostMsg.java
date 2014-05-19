@@ -30,6 +30,7 @@ public class MeiEbdsHostMsg {
         //BYTE3
         PUSH_MODE(3, 0x01, 0x01),
         BARCODE_ENABLE(3, 0x02, 0x02),
+        POWER_UP_A_MODE(3, 0x04 + 0x08, 0x00),
         POWER_UP_B_MODE(3, 0x04, 0x04),
         POWER_UP_C_MODE(3, 0x08, 0x08),
         EXTENDED_NOTE_REPORTING(3, 0x10, 0x10);
@@ -46,6 +47,10 @@ public class MeiEbdsHostMsg {
 
         private void setBits(byte[] data) {
             data[ byteNum] = (byte) ((data[ byteNum] & ~mask) | (fixedValue & mask));
+        }
+
+        private void flipBits(byte[] data) {
+            data[ byteNum] = (byte) ((data[ byteNum] & ~mask) | (~data[ byteNum] & mask));
         }
 
         private void setBit(byte[] data, int bitNum) {
@@ -75,6 +80,7 @@ public class MeiEbdsHostMsg {
         private boolean isCleared(byte[] data) {
             return ((data[ byteNum] & mask) == 0);
         }
+
     }
 
     final byte[] data = new byte[8];
@@ -92,6 +98,7 @@ public class MeiEbdsHostMsg {
         MEI_EBDS_MSG_BYTE_DESC.ESCROW.setBits(data);
         // push cheated notes and continue (without issuing any credit)!!!
         MEI_EBDS_MSG_BYTE_DESC.PUSH_MODE.setBits(data);
+        //TODO: Implement that : MEI_EBDS_MSG_BYTE_DESC.EXTENDED_NOTE_REPORTING.setBits(data);
         // power sequence must be choosed
     }
 
@@ -127,6 +134,10 @@ public class MeiEbdsHostMsg {
 
     public void setAck() {
         MEI_EBDS_MSG_BYTE_DESC.ACK.setBits(data);
+    }
+
+    public void flipAck() {
+        MEI_EBDS_MSG_BYTE_DESC.ACK.flipBits(data);
     }
 
     public void clearAck() {

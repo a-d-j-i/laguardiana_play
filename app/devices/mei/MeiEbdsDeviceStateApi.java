@@ -6,16 +6,15 @@
 package devices.mei;
 
 import devices.device.DeviceStatus;
-import devices.device.task.DeviceTaskInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsg;
-import devices.mei.state.MeiEbdsError;
-import devices.mei.state.MeiEbdsStateOperation;
 import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import models.Configuration;
 import play.Logger;
 
@@ -26,11 +25,11 @@ import play.Logger;
 public class MeiEbdsDeviceStateApi {
 
     final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7, SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
-    final BlockingQueue<DeviceTaskInterface> queue;
+    final BlockingQueue<DeviceTaskAbstract> queue;
     final private static int MEI_EBDS_READ_TIMEOUT = 35; //35ms
     private SerialPortAdapterInterface serialPort = null;
 
-    MeiEbdsDeviceStateApi(BlockingQueue<DeviceTaskInterface> operationQueue) {
+    MeiEbdsDeviceStateApi(BlockingQueue<DeviceTaskAbstract> operationQueue) {
         this.queue = operationQueue;
     }
 
@@ -61,72 +60,65 @@ public class MeiEbdsDeviceStateApi {
         }
     }
 
-    public DeviceTaskInterface poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
+    public DeviceTaskAbstract poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
         return queue.poll(timeoutMS, timeUnit);
     }
 
-    public DeviceTaskInterface peek() {
-        return queue.peek();
+    public DeviceTaskAbstract poll() {
+        return queue.poll();
     }
 
-    public boolean write(MeiEbdsHostMsg operation, boolean debug) {
+    public boolean write(MeiEbdsHostMsg operation) {
         if (serialPort == null) {
             throw new IllegalArgumentException("Serial port closed");
         }
         return serialPort.write(operation.getCmdStr());
     }
 
-    public Byte read(int timeout) {
+    public Byte read(int timeout) throws TimeoutException {
         if (serialPort == null) {
             throw new IllegalArgumentException("Serial port closed");
         }
         Byte ch = serialPort.read(timeout);
-//        Logger.debug("readed ch : 0x%x", ch);
+        if (ch == null) {
+            Logger.debug("ch is null");
+            throw new TimeoutException("timeout reading from port");
+        }
+        Logger.debug("readed ch : 0x%x", ch);
         return ch;
     }
 
-    public MeiEbdsStateOperation exchangeMessage(final MeiEbdsHostMsg msg, final MeiEbdsAcceptorMsg result) {
-        if (!write(msg, true)) {
-            return new MeiEbdsError(this, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "Error writting to the port");
+    public String sendMessage(final MeiEbdsHostMsg msg) {
+        if (!write(msg)) {
+            return "Error writting to the port";
         }
         Logger.debug("MEI sent msg : %s", msg.toString());
+        return null;
+    }
 
+    public String getMessage(final MeiEbdsAcceptorMsg result) throws TimeoutException {
         byte buffer[] = new byte[11];
         while (true) {
-            Byte ch = read(120);
-            if (ch == null) {
-                Logger.debug("timeout reading from port");
-                return null;
-            } else if (ch != 0x02) {
-                Logger.debug("mei invalid stx 0x%x  ", ch);
-                return null;
+            Byte ch = read(1200);
+            if (ch != 0x02) {
+                return String.format("mei invalid stx 0x%x  ", ch);
             }
             buffer[ 0] = ch;
-            ch = read(30);
-            if (ch == null) {
-                return new MeiEbdsError(this, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "error reading from port");
-            }
+            ch = read(120);
             byte length = ch;
             if (ch != 0x0b) {
-                Logger.debug("mei invalid len %d", length);
-                continue;
+                return String.format("mei invalid len %d", length);
             }
             buffer[ 1] = length;
             for (int i = 0; i < length - 2; i++) {
                 ch = read(120);
-                if (ch == null) {
-                    return new MeiEbdsError(this, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "error reading from port");
-                }
                 buffer[ i + 2] = ch;
             }
             if (!result.setData(buffer)) {
-                Logger.debug("mei invalid buffer data");
-                continue;
+                return String.format("mei invalid buffer data %s", Arrays.toString(buffer));
             }
 //            Logger.debug("readed data : %s == %s", Arrays.toString(buffer), result.toString());
-            break;
+            return null;
         }
-        return null;
     }
-
 }

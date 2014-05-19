@@ -1,11 +1,11 @@
 package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskAbstract;
+import devices.glory.GloryDE50Device.GloryDE50TaskType;
 import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.state.poll.GloryDE50Store;
 import devices.glory.state.poll.GloryDE50Withdraw;
-import devices.glory.task.GloryDE50TaskStoreDeposit;
-import devices.glory.task.GloryDE50TaskWithdraw;
 
 /**
  *
@@ -21,13 +21,17 @@ public class GloryDE50ReadyToStore extends GloryDE50StateOperation {
         this.prevStep = prevStep;
     }
 
-    public DeviceStateInterface call(GloryDE50TaskStoreDeposit task) {
-        task.setReturnValue(true);
-        return new GloryDE50Store(api);
-    }
-
-    public DeviceStateInterface call(GloryDE50TaskWithdraw task) {
-        task.setReturnValue(true);
-        return new GloryDE50Withdraw(api);
+    @Override
+    public DeviceStateInterface call(DeviceTaskAbstract t) {
+        DeviceTaskAbstract task = (DeviceTaskAbstract) t;
+        switch ((GloryDE50TaskType) task.getType()) {
+            case TASK_STORE_DEPOSIT:
+                task.setReturnValue(true);
+                return new GloryDE50Store(api);
+            case TASK_WITHDRAW_DEPOSIT:
+                task.setReturnValue(true);
+                return new GloryDE50Withdraw(api);
+        }
+        return null;
     }
 }
