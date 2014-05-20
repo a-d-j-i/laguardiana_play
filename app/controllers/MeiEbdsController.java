@@ -2,16 +2,14 @@ package controllers;
 
 import devices.device.DeviceInterface;
 import devices.mei.MeiEbdsDevice;
-import devices.mei.operation.MeiEbdsHostMsg;
-import devices.mei.response.MeiEbdsAcceptorMsg;
+import java.util.Arrays;
 import machines.Machine;
-import play.Logger;
 import play.mvc.Before;
 
 public class MeiEbdsController extends Application {
-
+    
     static MeiEbdsDevice meiDevice;
-
+    
     @Before
     static void getCounter(Integer deviceId) throws Throwable {
         if (deviceId == null) {
@@ -25,7 +23,7 @@ public class MeiEbdsController extends Application {
             setStatusAndRedirect(deviceId, true);
         }
     }
-
+    
     private static void setStatusAndRedirect(Integer deviceId, boolean retVal) {
         DeviceInterface d = Machine.findDeviceById(deviceId);
         renderArgs.put("deviceId", deviceId);
@@ -34,16 +32,29 @@ public class MeiEbdsController extends Application {
         renderArgs.put("backUrl", flash.get("backUrl"));
         render("DeviceController/" + d.getName().toUpperCase() + "_OPERATIONS.html");
     }
-
-    public static void store(Integer deviceId) {
-        setStatusAndRedirect(deviceId, meiDevice.store());
+    
+    public static void count(Integer deviceId) {
+        Integer[] slotInfo = {1, 1, 1, 1, 1, 1, 1, 1};
+        setStatusAndRedirect(deviceId, meiDevice.count(Arrays.asList(slotInfo)));
     }
-
+    
+    public static void store(Integer deviceId) {
+        setStatusAndRedirect(deviceId, meiDevice.storeDeposit(1));
+    }
+    
+    public static void reject(Integer deviceId) {
+        setStatusAndRedirect(deviceId, meiDevice.reject());
+    }
+    
+    public static void cancel(Integer deviceId) {
+        setStatusAndRedirect(deviceId, meiDevice.cancelDeposit());
+    }
+    
     public static void resetDevice(Integer deviceId) {
         setStatusAndRedirect(deviceId, meiDevice.reset());
     }
-
+    
     public static void getStatus(Integer deviceId) {
     }
-
+    
 }

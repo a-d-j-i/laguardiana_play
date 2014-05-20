@@ -8,8 +8,6 @@ package devices.device;
 import devices.device.events.DeviceEventListener;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.glory.task.GloryDE50TaskCount;
-import devices.mei.MeiEbdsDevice;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,10 +68,12 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
             DeviceStateInterface newState = oldState.step();
 
             if (newState != null && oldState != newState) {
+                Logger.debug("Changing state old %s, new %s", oldState.getClass().getSimpleName(), newState.getClass().getSimpleName());
                 DeviceStateInterface initStateRet = newState.init();
                 if (initStateRet != null) {
                     newState = initStateRet;
                 }
+                Logger.debug("setting state to new %s", newState.getClass().getSimpleName());
                 currentState.set(newState);
             }
         }

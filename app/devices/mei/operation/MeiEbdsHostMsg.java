@@ -53,8 +53,12 @@ public class MeiEbdsHostMsg {
             data[ byteNum] = (byte) ((data[ byteNum] & ~mask) | (~data[ byteNum] & mask));
         }
 
+        private void flipBits(byte[] data, int bitNum) {
+            data[ byteNum] = (byte) (data[ byteNum] ^ ((1 << bitNum) & mask));
+        }
+
         private void setBit(byte[] data, int bitNum) {
-            data[ byteNum] = (byte) (data[ byteNum] | (1 << bitNum));
+            data[ byteNum] = (byte) (data[ byteNum] | ((1 << bitNum) & mask));
         }
 
         private void setValue(byte[] data, int value) {
@@ -87,6 +91,8 @@ public class MeiEbdsHostMsg {
 
     // Reasonble defaults. TODO: Implement all methods.
     public MeiEbdsHostMsg() {
+        data[0] = 0x02;
+        data[1] = (byte) data.length;
         // Disable all denominations.
         // Standard Host to Acceptor messages
         MEI_EBDS_MSG_BYTE_DESC.MESSAGE_TYPE.setValue(data, 0x10);
@@ -128,16 +134,24 @@ public class MeiEbdsHostMsg {
         MEI_EBDS_MSG_BYTE_DESC.STACK.setBits(data);
     }
 
+    public void clearStackNote() {
+        MEI_EBDS_MSG_BYTE_DESC.STACK.clearBits(data);
+    }
+
     public void setReturnNote() {
-        MEI_EBDS_MSG_BYTE_DESC.STACK.setBits(data);
+        MEI_EBDS_MSG_BYTE_DESC.RETURN.setBits(data);
+    }
+
+    public void clearReturnNote() {
+        MEI_EBDS_MSG_BYTE_DESC.RETURN.clearBits(data);
     }
 
     public void setAck() {
         MEI_EBDS_MSG_BYTE_DESC.ACK.setBits(data);
     }
 
-    public void flipAck() {
-        MEI_EBDS_MSG_BYTE_DESC.ACK.flipBits(data);
+    public void incAck() {
+        MEI_EBDS_MSG_BYTE_DESC.ACK.flipBits(data, 0);
     }
 
     public void clearAck() {
@@ -148,9 +162,11 @@ public class MeiEbdsHostMsg {
         MEI_EBDS_MSG_BYTE_DESC.MESSAGE_TYPE.setValue(data, msgType.getId());
     }
 
+    public int getAck() {
+        return MEI_EBDS_MSG_BYTE_DESC.ACK.getValue(data);
+    }
+
     public byte[] getCmdStr() {
-        data[0] = 0x02;
-        data[1] = (byte) data.length;
         data[data.length - 2] = 0x03;
         int checksum = 0;
         for (int i = 1; i < data.length - 2; i++) {

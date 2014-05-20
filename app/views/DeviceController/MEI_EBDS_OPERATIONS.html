@@ -21,8 +21,11 @@
             <ul class="on-2 unit">
                 <li class="column">
                     <div style="margin:20px;">
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.resetDevice(deviceId)}">reset</a>
-                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.store(deviceId)}">store</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.resetDevice(deviceId)}">Reset</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.count(deviceId)}">Count</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.cancel(deviceId)}">Cancel</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.store(deviceId)}">Store</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{MeiEbdsController.reject(deviceId)}">Reject</a>
                     </div>
                 </li>
                 <li class="column">
@@ -71,7 +74,7 @@
         return "0x" + number.toString(16).toUpperCase() + " : { " + number.toString(2).toUpperCase() + " }";
     }
     doRefresh = function() {
-        $.getJSON('@{getStatus(deviceId)}', function(data) {
+        $.getJSON('@{MeiEbdsController.getStatus(deviceId)}', function(data) {
 
             var error = data[ 0 ];
             var status = data[ 1 ];

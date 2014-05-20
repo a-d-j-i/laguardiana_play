@@ -26,7 +26,7 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         TASK_OPEN_PORT,
         TASK_RESET,
         TASK_COUNT,
-        TASK_STORE,
+        TASK_STORE, TASK_REJECT,
         TASK_CANCEL;
     }
 
@@ -38,7 +38,8 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         CalibrateMode(0x40),
         FlashDownload(0x50),
         Request(0x60),
-        Extended(0x70);
+        Extended(0x70),
+        ENQ(0x100), ERROR(0x1000);
         private final int id;
 
         private MessageType(int id) {
@@ -103,8 +104,16 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         return runSimpleTask(MeiEbdsTaskType.TASK_RESET);
     }
 
-    public boolean store() {
-        return false;
+    public boolean cancelDeposit() {
+        return runSimpleTask(MeiEbdsTaskType.TASK_CANCEL);
+    }
+
+    public boolean storeDeposit(Integer sequenceNumber) {
+        return runSimpleTask(MeiEbdsTaskType.TASK_STORE);
+    }
+
+    public boolean reject() {
+        return runSimpleTask(MeiEbdsTaskType.TASK_REJECT);
     }
 
     @Override
@@ -137,14 +146,6 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
     }
 
     public boolean storingErrorReset() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public boolean cancelDeposit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public boolean storeDeposit(Integer sequenceNumber) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

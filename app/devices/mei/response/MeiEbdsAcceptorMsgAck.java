@@ -8,7 +8,7 @@ import java.util.Map;
  *
  * @author adji
  */
-public class MeiEbdsAcceptorMsg {
+public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
 
     static final int PAYLOAD_OFFSET = 2;
 
@@ -72,7 +72,7 @@ public class MeiEbdsAcceptorMsg {
 
     byte[] data;
 
-    public MeiEbdsAcceptorMsg() {
+    public MeiEbdsAcceptorMsgAck() {
     }
 
     public boolean setData(byte[] data) {
