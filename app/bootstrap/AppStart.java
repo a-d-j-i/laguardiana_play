@@ -33,13 +33,14 @@ public class AppStart extends Job {
 
     @Override
     public void doJob() throws Exception {
+        Logger.debug("onApplicationStart populate roles");
+        populateRoles();
         Logger.debug("onApplicationStart start execution service");
         eventExecutor = Executors.newSingleThreadExecutor();
         Logger.debug("onApplicationStart start execution service DONE");
         Logger.debug("onApplicationStart open all devices");
         ModelFacade.start();
         Logger.debug("onApplicationStart open all devices DONE");
-        populateRoles();
     }
 
     @Util
@@ -146,8 +147,8 @@ public class AppStart extends Job {
                 Fixtures.loadModels("lov-data.yml");
                 Logger.info("loading sys-props-data.yml");
                 Fixtures.loadModels("sys-props-data.yml");
+                Logger.info("loading dev-data.yml");
                 Fixtures.loadModels("dev-data.yml");
-                Logger.info(String.format("Glory port : %s", Play.configuration.getProperty("glory.port")));
             }
         }
     }

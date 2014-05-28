@@ -2,7 +2,7 @@ package devices.mei.state;
 
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.mei.MeiEbdsDeviceStateApi;
+import devices.mei.MeiEbdsDevice.MeiEbdsDeviceStateApi;
 import java.util.concurrent.TimeUnit;
 import play.Logger;
 
@@ -10,7 +10,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class MeiEbdsStateAbstract implements DeviceStateInterface {
+abstract public class MeiEbdsStateAbstract implements DeviceStateInterface {
 
     protected final MeiEbdsDeviceStateApi api;
 
@@ -27,14 +27,25 @@ public class MeiEbdsStateAbstract implements DeviceStateInterface {
     }
 
     public DeviceStateInterface step() {
+        return step(200);
+    }
+
+    public DeviceStateInterface step(int timeout) {
         try {
-            DeviceTaskAbstract deviceTask = api.poll(200, TimeUnit.MILLISECONDS);
+            DeviceTaskAbstract deviceTask = api.poll(timeout, TimeUnit.MILLISECONDS);
             if (deviceTask != null) {
-                return deviceTask.execute(this);
+                DeviceStateInterface ret = deviceTask.execute(this);
+                return ret;
             }
         } catch (InterruptedException ex) {
             Logger.debug("MeiEbdsStateAbstract exception : %s", ex.toString());
         }
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "MeiEbdsStateAbstract";
+    }
+
 }

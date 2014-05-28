@@ -1,6 +1,6 @@
 package devices.glory.state;
 
-import devices.glory.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import play.Logger;
 
 /**

@@ -1,15 +1,15 @@
 package devices.glory.state.poll;
 
-import static devices.device.DeviceStatus.STATUS.JAM;
-import static devices.device.DeviceStatus.STATUS.PUT_THE_ENVELOPE_IN_THE_ESCROW;
-import static devices.device.DeviceStatus.STATUS.READY_TO_STORE;
-import devices.glory.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import devices.glory.state.GloryDE50ReadyToStore;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.PUT_THE_ENVELOPE_IN_THE_ESCROW;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.READY_TO_STORE;
 import play.Logger;
 
 /**

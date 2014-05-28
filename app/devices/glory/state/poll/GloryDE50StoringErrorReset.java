@@ -4,12 +4,12 @@
  */
 package devices.glory.state.poll;
 
-import static devices.device.DeviceStatus.STATUS.JAM;
-import devices.glory.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
 import play.Logger;
 
 /**

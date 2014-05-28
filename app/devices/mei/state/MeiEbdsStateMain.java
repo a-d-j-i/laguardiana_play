@@ -4,17 +4,18 @@
  */
 package devices.mei.state;
 
-import static devices.device.DeviceStatus.STATUS.CANCELING;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.mei.MeiEbdsDevice;
+import devices.mei.MeiEbdsDevice.MeiEbdsDeviceStateApi;
 import devices.mei.MeiEbdsDevice.MeiEbdsTaskType;
-import devices.mei.MeiEbdsDeviceStateApi;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
 import devices.mei.response.MeiEbdsAcceptorMsgError;
 import devices.mei.response.MeiEbdsAcceptorMsgInterface;
+import devices.mei.status.MeiEbdsStatus;
+import devices.mei.status.MeiEbdsStatus.MeiEbdsStatusType;
 import java.util.concurrent.TimeoutException;
 import play.Logger;
 
@@ -28,7 +29,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         super(api);
     }
 
-    final boolean mustCancel = false;
+    private boolean mustCancel = false;
     private boolean mustCount = false;
     private boolean mustStore = false;
     private boolean mustReject = false;
@@ -56,6 +57,9 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
             case TASK_REJECT:
                 mustReject = true;
                 break;
+            case TASK_CANCEL:
+                mustCancel = true;
+                break;
         }
         Logger.debug("ignoring task %s", task.toString());
         return null;
@@ -79,9 +83,10 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
             Logger.debug("Got task : %s, executing", deviceTask);
             return deviceTask.execute(this);
         }
+
         // TODO: Must wait for message ack.
         if (mustCancel) {
-            api.notifyListeners(CANCELING);
+            api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.CANCELING));
             Logger.debug("doCancel");
             mustCount = false;
             return this;
@@ -117,10 +122,10 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         Logger.debug("Received msg : %s == %s", msg.getMessageType().name(), msg.toString());
         switch (msg.getMessageType()) {
             case HostToAcceptor:
-                return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "got host to acceptor message type from acceptor");
             default:
                 return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR,
-                        String.format("unsupported message type %s", msg.getMessageType().name()));
+                        String.format("got unexpected message type %s", msg.getMessageType().name()));
+
             case ENQ: // poll
                 String err = sendMessage(hostPollMsg);
                 if (err != null) {
@@ -128,28 +133,30 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                 }
                 break;
             case AcceptorToHost:
-                if (currMsg == hostPollMsg) {
-                    MeiEbdsAcceptorMsgAck ack = (MeiEbdsAcceptorMsgAck) msg;
-                    if (result.getAck() == currMsg.getAck()) {
-                        Logger.debug("GOT AN ACK FOR HOSTPOOL, flipping ack");
-                        hostPollMsg.incAck();
-                        currMsg = null;
-                        if (mustStore) {
-                            mustStore = false;
-                            mustReject = false;
-                            hostPollMsg.setStackNote();
-                            sendMessage(hostPollMsg);
-                            hostPollMsg.clearStackNote();
-                        } else if (mustReject) {
-                            mustStore = false;
-                            mustReject = false;
-                            hostPollMsg.setReturnNote();
-                            sendMessage(hostPollMsg);
-                            hostPollMsg.clearReturnNote();
-                        }
-
-                    }
+                if (currMsg != hostPollMsg) {
+                    Logger.error("recived an unexpecteed message %s", msg);
+                    break;
                 }
+                if (result.getAck() == currMsg.getAck()) {
+                    Logger.debug("GOT AN ACK FOR HOSTPOOL, flipping ack");
+                    hostPollMsg.incAck();
+                    currMsg = null;
+                    if (mustStore) {
+                        mustStore = false;
+                        mustReject = false;
+                        hostPollMsg.setStackNote();
+                        sendMessage(hostPollMsg);
+                        hostPollMsg.clearStackNote();
+                    } else if (mustReject) {
+                        mustStore = false;
+                        mustReject = false;
+                        hostPollMsg.setReturnNote();
+                        sendMessage(hostPollMsg);
+                        hostPollMsg.clearReturnNote();
+                    }
+
+                }
+
                 break;
         }
         return null;

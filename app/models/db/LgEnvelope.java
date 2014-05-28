@@ -1,3 +1,6 @@
+/*
+ I'm assuming that each machine has only one way of taking envelopes, so there is no device <-> envelope relation
+*/
 package models.db;
 
 import java.util.ArrayList;

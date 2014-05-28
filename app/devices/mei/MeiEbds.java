@@ -1,74 +1,39 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.mei;
 
-import devices.device.DeviceStatus;
-import devices.device.task.DeviceTaskAbstract;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
 import devices.mei.response.MeiEbdsAcceptorMsgError;
 import devices.mei.response.MeiEbdsAcceptorMsgInterface;
-import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
 import java.util.Arrays;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import models.Configuration;
 import play.Logger;
 
-/**
- *
- * @author adji
- */
-public class MeiEbdsDeviceStateApi {
+public class MeiEbds {
 
-    final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7, SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
-    final BlockingQueue<DeviceTaskAbstract> queue;
-    final private static int MEI_EBDS_READ_TIMEOUT = 35; //35ms
+    private final int readTimeout;
     private SerialPortAdapterInterface serialPort = null;
 
-    MeiEbdsDeviceStateApi(BlockingQueue<DeviceTaskAbstract> operationQueue) {
-        this.queue = operationQueue;
+    public MeiEbds(int readTimeout) {
+        this.readTimeout = readTimeout;
     }
 
-    boolean closing = false;
-
-    public void notifyListeners(String details) {
-    }
-
-    public void notifyListeners(DeviceStatus.STATUS status) {
-    }
-
-    public boolean open(String value) {
-        if (serialPort != null) {
-            Logger.debug("close port %s", serialPort);
-            serialPort.close();
-            Logger.info(String.format("Configuring serial port %s", serialPort));
+    public synchronized boolean open(SerialPortAdapterInterface serialPort) {
+        Logger.info("Opening glory serial port %s", serialPort);
+        if (serialPort == null || this.serialPort != null) {
+            return false;
         }
-        serialPort = Configuration.getSerialPort(value, portConf);
-        Logger.debug("Mei port open try for %s == %s", value, serialPort);
-        boolean ret = serialPort.open();
-        Logger.debug("Mei port open : %s", ret ? "success" : "fails");
-        return ret;
+        this.serialPort = serialPort;
+        return serialPort.open();
     }
 
-    void close() {
+    public synchronized void close() {
+        Logger.info("Closing glory serial port ");
         if (serialPort != null) {
             serialPort.close();
         }
-    }
-
-    public DeviceTaskAbstract poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
-        return queue.poll(timeoutMS, timeUnit);
-    }
-
-    public DeviceTaskAbstract poll() {
-        return queue.poll();
+        serialPort = null;
     }
 
     public boolean write(MeiEbdsHostMsg operation) {
@@ -129,4 +94,5 @@ public class MeiEbdsDeviceStateApi {
             return result;
         }
     }
+
 }

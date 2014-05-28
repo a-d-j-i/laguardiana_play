@@ -1,17 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package machines;
 
 import devices.device.DeviceEvent;
+import models.db.LgDevice.DeviceType;
 
 /**
  *
  * @author adji
  */
-public class P500_MEI extends Machine {
+public class MachineP500MEI extends Machine {
 
     enum P500_MEI_DEVICES implements DeviceDescription {
 
@@ -29,8 +25,8 @@ public class P500_MEI extends Machine {
             return type;
         }
 
-        public String getMachineId() {
-            return name();
+        public Enum getMachineId() {
+            return this;
         }
     };
 
@@ -42,10 +38,10 @@ public class P500_MEI extends Machine {
     public void onDeviceEvent(DeviceEvent deviceEvent) {
         // Switch by device.
         switch ((P500_MEI_DEVICES) deviceEvent.getSourceDevice()) {
-/*            case P500_MEI_DEVICE_OS_PRINTER:
-                break;
-            case P500_MEI_DEVICE_IO_BOARD_MX220_1_0:
-                break;*/
+            /*            case P500_MEI_DEVICE_OS_PRINTER:
+             break;
+             case P500_MEI_DEVICE_IO_BOARD_MX220_1_0:
+             break;*/
             case P500_MEI_DEVICE_MEI_EBDS:
                 break;
             default:

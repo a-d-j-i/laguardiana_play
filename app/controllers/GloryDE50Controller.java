@@ -45,7 +45,7 @@ public class GloryDE50Controller extends Application {
         renderArgs.put("deviceId", deviceId);
         renderArgs.put("device", d);
         renderArgs.put("backUrl", flash.get("backUrl"));
-        render("DeviceController/" + d.getName().toUpperCase() + "_OPERATIONS.html");
+        render("DeviceController/" + d.getType().name().toUpperCase() + "_OPERATIONS.html");
     }
 
     public static void sense(Integer deviceId) {

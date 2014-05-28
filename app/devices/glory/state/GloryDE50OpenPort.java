@@ -2,9 +2,9 @@ package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.state.poll.GloryDE50GotoNeutral;
 import devices.device.task.DeviceTaskOpenPort;
+import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import static devices.glory.GloryDE50Device.GloryDE50TaskType.TASK_OPEN_PORT;
 import play.Logger;
 

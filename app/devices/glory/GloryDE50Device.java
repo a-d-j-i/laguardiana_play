@@ -2,20 +2,27 @@ package devices.glory;
 
 import devices.device.DeviceAbstract;
 import devices.device.DeviceClassCounterIntreface;
-import devices.device.DeviceStatus;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.glory.task.GloryDE50TaskCount;
 import devices.glory.operation.OperationWithAckResponse;
 import devices.glory.state.GloryDE50OpenPort;
-import devices.glory.state.GloryDE50StateAbstract;
 import devices.device.task.DeviceTaskOpenPort;
+import devices.glory.operation.GloryDE50OperationInterface;
+import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.state.GloryDE50StateAbstract;
+import devices.glory.status.GloryDE50Status;
 import devices.glory.task.GloryDE50TaskOperation;
 import devices.glory.task.GloryDE50TaskStoreDeposit;
+import devices.serial.SerialPortAdapterAbstract;
+import devices.serial.SerialPortAdapterInterface;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.SynchronousQueue;
-import machines.Machine;
+import java.util.concurrent.TimeUnit;
+import models.Configuration;
+import models.db.LgDevice;
+import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
 import play.Logger;
 
@@ -35,13 +42,63 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         TASK_STORING_ERROR_RESET,
         TASK_STORE_DEPOSIT,
         TASK_WITHDRAW_DEPOSIT,
-        TASK_OPERATION;
+        TASK_OPERATION, TASK_CLEAR_ERROR, TASK_CANCEL;
     }
-    final GloryDE50DeviceStateApi api;
 
-    public GloryDE50Device(Machine.DeviceDescription deviceDesc) {
-        super(deviceDesc, new SynchronousQueue<DeviceTaskAbstract>());
-        api = new GloryDE50DeviceStateApi(operationQueue);
+    public class GloryDE50DeviceStateApi {
+
+        final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7, SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
+        boolean closing = false;
+        final private int GLORY_READ_TIMEOUT = 5000;
+        final private GloryDE50 gl = new GloryDE50(GLORY_READ_TIMEOUT);
+
+        public String sendGloryDE50Operation(GloryDE50OperationInterface operation, final GloryDE50OperationResponse response) {
+            return sendGloryDE50Operation(operation, false, response);
+        }
+
+        public String sendGloryDE50Operation(GloryDE50OperationInterface operation, boolean debug, final GloryDE50OperationResponse response) {
+            return gl.sendOperation(operation, debug, response);
+        }
+
+        public void notifyListeners(String details) {
+        }
+
+        public void notifyListeners(GloryDE50Status.GloryDE50StatusType status) {
+        }
+
+        public boolean isClosing() {
+            return closing;
+        }
+
+        public void setClosing(boolean b) {
+            closing = b;
+        }
+
+        public boolean open(String value) {
+            Logger.debug("api open");
+            SerialPortAdapterInterface serialPort = Configuration.getSerialPort(value, portConf);
+            Logger.info(String.format("Configuring serial port %s", serialPort));
+            gl.close();
+            Logger.debug("Glory port open try");
+            boolean ret = gl.open(serialPort);
+            Logger.debug("Glory port open : %s", ret ? "success" : "fails");
+            return ret;
+        }
+
+        void close() {
+            gl.close();
+        }
+
+        public DeviceTaskAbstract poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
+            return operationQueue.poll(timeoutMS, timeUnit);
+        }
+
+    }
+
+    final GloryDE50DeviceStateApi api = new GloryDE50DeviceStateApi();
+
+    public GloryDE50Device(Enum machineDeviceId, DeviceType deviceType) {
+        super(machineDeviceId, deviceType, new SynchronousQueue<DeviceTaskAbstract>());
     }
 
     @Override
@@ -59,9 +116,10 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
     private String initialPortValue;
 
     @Override
-    protected void initDeviceProperties() {
+    protected void initDeviceProperties(LgDevice lgd) {
         LgDeviceProperty lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
         initialPortValue = lgSerialPort.value;
+        lgSerialPort.save();
     }
 
     @Override
@@ -108,6 +166,10 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         return runSimpleTask(GloryDE50TaskType.TASK_RESET);
     }
 
+    public boolean clearError() {
+        return runSimpleTask(GloryDE50TaskType.TASK_CLEAR_ERROR);
+    }
+
     public boolean storingErrorReset() {
         return runSimpleTask(GloryDE50TaskType.TASK_STORING_ERROR_RESET);
     }
@@ -134,35 +196,9 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         return null;
     }
 
-    @Override
-    public GloryDE50StateAbstract getCurrentState() {
-        return (GloryDE50StateAbstract) super.getCurrentState();
-    }
-
+    // normally currentState must not be used outside DeviceAbstract, this is a special exception.
     public boolean cancelDeposit() {
-        return getCurrentState().cancelDeposit();
+        GloryDE50StateAbstract cs = (GloryDE50StateAbstract) currentState.get();
+        return cs.cancelDeposit();
     }
-
-    public Integer getCurrency() {
-        return getCurrentState().getCurrency();
-    }
-
-    public Map<Integer, Integer> getCurrentQuantity() {
-        return getCurrentState().getCurrentQuantity();
-    }
-
-    public Map<Integer, Integer> getDesiredQuantity() {
-        return getCurrentState().getDesiredQuantity();
-    }
-
-    public boolean clearError() {
-        return getCurrentState().clearError();
-    }
-
-    @Override
-    public DeviceStatus getStatus() {
-        GloryDE50StateAbstract st = getCurrentState();
-        return new DeviceStatus(st.getError());
-    }
-
 }

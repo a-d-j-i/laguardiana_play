@@ -5,7 +5,10 @@ import controllers.serializers.BillValueSerializer;
 import devices.device.DeviceClassCounterIntreface;
 import devices.device.DeviceClassIoBoardInterface;
 import devices.device.DeviceClassPrinterInterface;
+import devices.device.DeviceEvent;
 import devices.device.DeviceInterface;
+import devices.device.DeviceStatusClassCounterIntreface;
+import devices.device.DeviceStatusInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +72,7 @@ public class DeviceController extends Controller {
 
     public static void operations(Integer deviceId) {
         getDeviceArgs();
-        render("DeviceController/" + device.getName().toUpperCase() + "_OPERATIONS.html");
+        render("DeviceController/" + device.getType().name().toUpperCase() + "_OPERATIONS.html");
     }
 
     public static void printerClassCommands(Integer deviceId) {
@@ -179,22 +182,24 @@ public class DeviceController extends Controller {
     // Counter Class
     public static void counterClassCommands(Integer deviceId, Integer currency) {
         getDeviceArgs();
-        String status = device.getStatus().getError();
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
+        Map<Integer, Integer> current = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> desired = new HashMap<Integer, Integer>();
+        DeviceStatusInterface st = null;
+        DeviceEvent event = device.getLastEvent();
+        if (event != null) {
+            st = event.getStatus();
+            if (st instanceof DeviceStatusClassCounterIntreface) {
+                DeviceStatusClassCounterIntreface status = (DeviceStatusClassCounterIntreface) st;
+                current = status.getCurrentQuantity();
+                desired = status.getDesiredQuantity();
+            }
+        }
 
         if (currency == null) {
             currency = 1;
         }
 
-        Map<Integer, Integer> current = counter.getCurrentQuantity();
-        Map<Integer, Integer> desired = counter.getDesiredQuantity();
         List<Integer> slots = new ArrayList<Integer>();
-        if (current == null) {
-            current = new HashMap<Integer, Integer>();
-        }
-        if (desired == null) {
-            desired = new HashMap<Integer, Integer>();
-        }
         slots.addAll(current.keySet());
         slots.addAll(desired.keySet());
         for (int i = 0; i < 32; i++) {
@@ -209,7 +214,7 @@ public class DeviceController extends Controller {
         if (request.isAjax()) {
             Object[] o = new Object[10];
             o[0] = error;
-            o[1] = status;
+            o[1] = st;
             o[2] = currency;
             o[3] = slots.toArray();
             o[4] = current;
@@ -217,7 +222,7 @@ public class DeviceController extends Controller {
             renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         }
 
-        renderArgs.put("status", status);
+        renderArgs.put("status", st);
         renderArgs.put("error", error);
 
         renderArgs.put("slots", slots);

@@ -4,12 +4,7 @@
  */
 package devices.glory.state.poll;
 
-import static devices.device.DeviceStatus.STATUS.BAG_COLLECTED;
-import static devices.device.DeviceStatus.STATUS.REMOVE_REJECTED_BILLS;
-import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
-import devices.device.state.DeviceStateInterface;
-import devices.device.task.DeviceTaskAbstract;
-import devices.glory.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.deposit;
@@ -22,6 +17,9 @@ import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.BAG_COLLECTED;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_HOPER;
 import java.util.Date;
 import play.Logger;
 

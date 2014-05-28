@@ -1,7 +1,6 @@
 package devices.device;
 
 import java.util.EventObject;
-import machines.Machine;
 
 /**
  *
@@ -9,15 +8,15 @@ import machines.Machine;
  */
 public class DeviceEvent extends EventObject {
 
-    final private DeviceStatus state;
+    final private DeviceStatusInterface status;
 
-    public DeviceEvent(DeviceAbstract source, DeviceStatus state) {
+    public DeviceEvent(DeviceAbstract source, DeviceStatusInterface status) {
         super(source);
-        this.state = state;
+        this.status = status;
     }
 
-    public DeviceStatus getState() {
-        return state;
+    public DeviceStatusInterface getStatus() {
+        return status;
     }
 
     @Override
@@ -25,7 +24,8 @@ public class DeviceEvent extends EventObject {
         return (DeviceAbstract) source;
     }
 
-    public Machine.DeviceDescription getSourceDevice() {
-        return getSource().deviceDescription;
+    public Enum getSourceDevice() {
+        return getSource().machineDeviceId;
     }
+    
 }

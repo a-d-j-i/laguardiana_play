@@ -25,6 +25,7 @@ public class AppStop extends Job {
         ModelFacade.stop();
         Logger.debug("onApplicationStop close all devices DONE");
         Logger.debug("onApplicationStop stop execution service");
+        eventExecutor.shutdown();
         try {
             eventExecutor.awaitTermination(3, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {

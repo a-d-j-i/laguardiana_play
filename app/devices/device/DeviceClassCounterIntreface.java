@@ -23,10 +23,4 @@ public interface DeviceClassCounterIntreface {
 
     public boolean withdrawDeposit();
 
-    public Integer getCurrency();
-
-    public Map<Integer, Integer> getCurrentQuantity();
-
-    public Map<Integer, Integer> getDesiredQuantity();
-
 }

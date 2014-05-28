@@ -1,19 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package machines;
 
 import devices.device.DeviceEvent;
-import machines.Machine.DeviceDescription;
-import static machines.P500.P500_DEVICES.P500_DEVICE_OS_PRINTER;
+import models.db.LgDevice.DeviceType;
 
 /**
  *
  * @author adji
  */
-public class P500 extends Machine {
+public class MachineP500 extends Machine {
 
     enum P500_DEVICES implements DeviceDescription {
 
@@ -31,8 +25,8 @@ public class P500 extends Machine {
             return type;
         }
 
-        public String getMachineId() {
-            return name();
+        public Enum getMachineId() {
+            return this;
         }
     };
 

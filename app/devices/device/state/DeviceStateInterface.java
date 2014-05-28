@@ -14,4 +14,7 @@ public interface DeviceStateInterface {
 
     public DeviceStateInterface call(DeviceTaskAbstract task);
 
+    @Override
+    public String toString();
+
 }

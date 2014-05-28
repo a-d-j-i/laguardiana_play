@@ -23,15 +23,15 @@ public interface DeviceInterface {
 
     public void removeEventListener(DeviceEventListener listener);
 
-    public String getName();
-
     public Integer getDeviceId();
 
     public List<LgDeviceProperty> getEditableProperties();
 
     public LgDeviceProperty setProperty(String property, String value);
 
-    public DeviceStatus getStatus();
-
     public boolean clearError();
+
+    public DeviceEvent getLastEvent();
+    
+    public Enum getType();
 }

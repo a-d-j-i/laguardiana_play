@@ -55,3 +55,16 @@
 #    deviceType:    "OS_PRINTER"
 
 
+
+db.LgDevice(P500_MEI_DEVICE_MEI_EBDS):
+    machineDeviceId:     "P500_MEI_DEVICE_MEI_EBDS"
+    deviceType:          "MEI_EBDS"
+    creationDate:        2012-01-01
+    
+    
+
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT1):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           2pesos
+    slot:               "2"
+    creationDate:       2012-01-01

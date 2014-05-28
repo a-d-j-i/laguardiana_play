@@ -1,15 +1,13 @@
 package machines;
 
-import devices.device.DeviceAbstract;
 import devices.device.DeviceInterface;
 import devices.device.events.DeviceEventListener;
-import devices.glory.GloryDE50Device;
-import devices.mei.MeiEbdsDevice;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import models.Configuration;
+import models.db.LgDevice;
 import play.Logger;
 
 /**
@@ -23,14 +21,14 @@ abstract public class Machine implements DeviceEventListener {
         P500() {
                     @Override
                     Machine getMachineInstance() {
-                        return new P500();
+                        return new MachineP500();
                     }
                 },
         P500_MEI {
 
                     @Override
                     Machine getMachineInstance() {
-                        return new P500_MEI();
+                        return new MachineP500MEI();
                     }
                 },;
 
@@ -44,61 +42,6 @@ abstract public class Machine implements DeviceEventListener {
         static public MachineType getMachineType(String machineType) throws IllegalArgumentException {
             return MachineType.valueOf(machineType.toUpperCase());
         }
-    };
-
-    public enum DeviceType {
-
-        OS_PRINTER() {
-                    @Override
-                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
-                        return null;
-                    }
-                },
-        IO_BOARD_V4520_1_0() {
-                    @Override
-                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
-                        return null;
-                    }
-                },
-        IO_BOARD_V4520_1_2() {
-                    @Override
-                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
-                        return null;
-                    }
-                },
-        IO_BOARD_MX220_1_0() {
-                    @Override
-                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
-                        return null;
-                    }
-                },
-        GLORY_DE50() {
-                    @Override
-                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
-                        return new GloryDE50Device(deviceDesc);
-                    }
-                },
-        MEI_EBDS() {
-                    @Override
-                    public DeviceAbstract createDevice(DeviceDescription deviceDesc) {
-                        return new MeiEbdsDevice(deviceDesc);
-                    }
-                };
-
-        public enum DeviceClass {
-
-            DEVICE_CLASS_PRINTER,
-            DEVICE_CLASS_COUNTER,
-            DEVICE_CLASS_IOBOARD,
-        };
-
-        abstract public DeviceAbstract createDevice(DeviceDescription deviceDesc);
-
-        @Override
-        public String toString() {
-            return name();
-        }
-
     };
 
     static private Machine instance = null;
@@ -210,18 +153,18 @@ abstract public class Machine implements DeviceEventListener {
      */
     public interface DeviceDescription {
 
-        public DeviceType getType();
+        public LgDevice.DeviceType getType();
 
-        public String getMachineId();
-
+        public Enum getMachineId();
     }
+
     private final Map<Integer, DeviceInterface> devices = new HashMap<Integer, DeviceInterface>();
 
     abstract protected DeviceDescription[] getDevicesDesc();
 
     public void start() {
         for (DeviceDescription desc : getDevicesDesc()) {
-            DeviceInterface d = desc.getType().createDevice(desc);
+            DeviceInterface d = desc.getType().createDevice(desc.getMachineId());
             if (d == null) {
                 throw new IllegalArgumentException("Machine must be reconfigured correctly");
             }

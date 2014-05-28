@@ -8,7 +8,7 @@ import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.glory.task.GloryDE50TaskCount;
 import devices.device.task.DeviceTaskOpenPort;
-import devices.glory.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.poll.GloryDE50Collect;
 import devices.glory.state.poll.GloryDE50Count;

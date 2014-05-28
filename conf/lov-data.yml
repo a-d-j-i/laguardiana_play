@@ -1,182 +1,161 @@
 #
 # Predefined User Reference Code for deposits
 #
-  lov.EnvelopeType(EnvelopeType_CHEQUE):
-    numericId:      1
-    textId:         Cheque
-    description:    User Cheque
-    
-  lov.EnvelopeType(EnvelopeType_PLATA):
-    numericId:      2
-    textId:         Plata
-    description:    User Plata
-    
+lov.EnvelopeType(EnvelopeType_CHEQUE):
+  numericId:      1
+  textId:         Cheque
+  description:    User Cheque
 
-  
-  lov.DepositUserCodeReference(Reference_Enero):
-    numericId:      1
-    textId:         ENERO
-    description:    Enero
-    endDate:        2999-12-31
-    
-  lov.DepositUserCodeReference(Reference_Febrero):
-    numericId:      2
-    textId:         FEBRERO
-    description:    Febrero
-    endDate:        2999-12-31
-    
-    
-  db.LgSystemProperty( DEFAULT_CURRENCY ):
-    name:           default_currency
-    value:          1
-    
-  lov.Currency(Reference_ARS_BILL):
-    numericId:      1
-    textId:         ARS
-    description:    Pesos Argentinos
-    endDate:        2999-12-31
+lov.EnvelopeType(EnvelopeType_PLATA):
+  numericId:      2
+  textId:         Plata
+  description:    User Plata
 
-  lov.Currency(Reference_USD_BILL):
-    numericId:      2
-    textId:         USD
-    description:    Dolares
-    endDate:        2999-12-31
 
-  lov.Currency(Reference_EUR_BILL):
-    numericId:      3
-    textId:         EUR
-    description:    Euros
-    endDate:        2999-12-31
 
-  db.LgBillType(2pesos):
-    denomination:   2
-    unitLov:        1
-    slot:           24
-    currency:       1
+lov.DepositUserCodeReference(Reference_Enero):
+  numericId:      1
+  textId:         ENERO
+  description:    Enero
+  endDate:        2999-12-31
 
-  db.LgBillType(5pesos):
-    denomination:   5
-    unitLov:        1
-    slot:           25
-    currency:       1
+lov.DepositUserCodeReference(Reference_Febrero):
+  numericId:      2
+  textId:         FEBRERO
+  description:    Febrero
+  endDate:        2999-12-31
 
-  db.LgBillType(10pesos):
-    denomination:   10
-    unitLov:        1
-    slot:           26
-    currency:       1
 
-  db.LgBillType(20pesos):
-    denomination:   20
-    unitLov:        1
-    slot:           27
-    currency:       1
+db.LgSystemProperty( DEFAULT_CURRENCY ):
+  name:           default_currency
+  value:          1
 
-  db.LgBillType(50pesos):
-    denomination:   50
-    unitLov:        1
-    slot:           28
-    currency:       1
+lov.Currency(Reference_ARS_BILL):
+  numericId:      1
+  textId:         ARS
+  description:    Pesos Argentinos
+  endDate:        2999-12-31
 
-  db.LgBillType(100pesos):
-    denomination:   100
-    unitLov:        1
-    slot:           29
-    currency:       1
+lov.Currency(Reference_USD_BILL):
+  numericId:      2
+  textId:         USD
+  description:    Dolares
+  endDate:        2999-12-31
 
-  db.LgBillType(100pesos):
-    denomination:   100
-    unitLov:        1
-    slot:           30
-    currency:       1
+lov.Currency(Reference_EUR_BILL):
+  numericId:      3
+  textId:         EUR
+  description:    Euros
+  endDate:        2999-12-31
 
-  db.LgBillType(100pesos):
-    denomination:   100
-    unitLov:        1
-    slot:           31
-    currency:       1
+db.LgBillType(2pesos):
+  denomination:   2
+  unitLov:        1
+  currency:       1
 
-  db.LgBillType(1dolar):
-    denomination:   1
-    unitLov:        2
-    slot:           25
-    currency:       2
+db.LgBillType(5pesos):
+  denomination:   5
+  unitLov:        1
+  currency:       1
 
-  db.LgBillType(2dolar):
-    denomination:   2
-    unitLov:        2
-    slot:           26
-    currency:       2
+db.LgBillType(10pesos):
+  denomination:   10
+  unitLov:        1
+  currency:       1
 
-  db.LgBillType(5dolar):
-    denomination:   5
-    unitLov:        2
-    slot:           27
-    currency:       2
+db.LgBillType(20pesos):
+  denomination:   20
+  unitLov:        1
+  currency:       1
 
-  db.LgBillType(10dolar):
-    denomination:   10
-    unitLov:        2
-    slot:           28
-    currency:       2
+db.LgBillType(50pesos):
+  denomination:   50
+  unitLov:        1
+  currency:       1
 
-  db.LgBillType(20dolar):
-    denomination:   20
-    unitLov:        2
-    slot:           29
-    currency:       2
+db.LgBillType(100pesos):
+  denomination:   100
+  unitLov:        1
+  currency:       1
 
-  db.LgBillType(50dolar):
-    denomination:   50
-    unitLov:        2
-    slot:           30
-    currency:       2
-    
-  db.LgBillType(100dolar):
-    denomination:   100
-    unitLov:        2
-    slot:           31
-    currency:       2
-    
-  db.LgBillType(5euro):
-    denomination:   5
-    unitLov:        3
-    slot:           25
-    currency:       3
-    
-  db.LgBillType(10euro):
-    denomination:   10
-    unitLov:        3
-    slot:           26
-    currency:       3
-    
-  db.LgBillType(20euro):
-    denomination:   20
-    unitLov:        3
-    slot:           27
-    currency:       3
-    
-  db.LgBillType(50euro):
-    denomination:   50
-    unitLov:        3
-    slot:           28
-    currency:       3
-    
-  db.LgBillType(100euro):
-    denomination:   100
-    unitLov:        3
-    slot:           29
-    currency:       3
-    
-  db.LgBillType(200euro):
-    denomination:   200
-    unitLov:        3
-    slot:           30
-    currency:       3
-   
-  db.LgBillType(500euro):
-    denomination:   500
-    unitLov:        3
-    slot:           31
-    currency:       3
-      
+db.LgBillType(100pesos):
+  denomination:   100
+  unitLov:        1
+  currency:       1
+
+db.LgBillType(100pesos):
+  denomination:   100
+  unitLov:        1
+  currency:       1
+
+db.LgBillType(1dolar):
+  denomination:   1
+  unitLov:        2
+  currency:       2
+
+db.LgBillType(2dolar):
+  denomination:   2
+  unitLov:        2
+  currency:       2
+
+db.LgBillType(5dolar):
+  denomination:   5
+  unitLov:        2
+  currency:       2
+
+db.LgBillType(10dolar):
+  denomination:   10
+  unitLov:        2
+  currency:       2
+
+db.LgBillType(20dolar):
+  denomination:   20
+  unitLov:        2
+  currency:       2
+
+db.LgBillType(50dolar):
+  denomination:   50
+  unitLov:        2
+  currency:       2
+
+db.LgBillType(100dolar):
+  denomination:   100
+  unitLov:        2
+  currency:       2
+
+db.LgBillType(5euro):
+  denomination:   5
+  unitLov:        3
+  currency:       3
+
+db.LgBillType(10euro):
+  denomination:   10
+  unitLov:        3
+  currency:       3
+
+db.LgBillType(20euro):
+  denomination:   20
+  unitLov:        3
+  currency:       3
+
+db.LgBillType(50euro):
+  denomination:   50
+  unitLov:        3
+  currency:       3
+
+db.LgBillType(100euro):
+  denomination:   100
+  unitLov:        3
+  currency:       3
+
+db.LgBillType(200euro):
+  denomination:   200
+  unitLov:        3
+  currency:       3
+
+db.LgBillType(500euro):
+  denomination:   500
+  unitLov:        3
+  currency:       3
+
+

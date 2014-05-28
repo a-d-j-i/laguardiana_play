@@ -16,7 +16,8 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
 
         //BYTE -1 
 //BYTE -1 
-        ACK(0, 0x0F),
+        ACK(0, 0x01),
+        DEVICE_TYPE(0, 0x0E),
         MESSAGE_TYPE(0, 0xF0),
         // THE ONLY CONFIABLE STATED IN BYTE 0: ESCROWED, RETURNED, STACKED
         IDLING(1, 0x01),

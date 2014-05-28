@@ -2,16 +2,25 @@ package devices.mei;
 
 import devices.device.DeviceAbstract;
 import devices.device.DeviceClassCounterIntreface;
-import devices.device.DeviceStatus;
+import devices.device.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
+import devices.mei.operation.MeiEbdsHostMsg;
+import devices.mei.response.MeiEbdsAcceptorMsgAck;
+import devices.mei.response.MeiEbdsAcceptorMsgInterface;
 import devices.mei.state.MeiEbdsOpenPort;
 import devices.mei.task.MeiEbdsTaskCount;
+import devices.serial.SerialPortAdapterAbstract;
+import devices.serial.SerialPortAdapterInterface;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import machines.Machine;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import models.Configuration;
+import models.db.LgDevice;
+import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
 import play.Logger;
 
@@ -52,11 +61,52 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
 
     };
 
-    final MeiEbdsDeviceStateApi api;
+    public class MeiEbdsDeviceStateApi {
 
-    public MeiEbdsDevice(Machine.DeviceDescription deviceDesc) {
-        super(deviceDesc, new ArrayBlockingQueue<DeviceTaskAbstract>(1));
-        api = new MeiEbdsDeviceStateApi(operationQueue);
+        final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7, SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
+        final private static int MEI_EBDS_READ_TIMEOUT = 35; //35ms
+        final private MeiEbds mei = new MeiEbds(MEI_EBDS_READ_TIMEOUT);
+
+        public void notifyListeners(DeviceStatusInterface status) {
+            MeiEbdsDevice.this.notifyListeners(status);
+        }
+
+        public boolean open(String value) {
+            Logger.debug("api open");
+            SerialPortAdapterInterface serialPort = Configuration.getSerialPort(value, portConf);
+            Logger.info(String.format("MEI Configuring serial port %s == %s", serialPort.toString(), value));
+            mei.close();
+            Logger.debug("Mei port open try %s", serialPort.toString());
+            boolean ret = mei.open(serialPort);
+            Logger.debug("Mei port open : %s", ret ? "success" : "fails");
+            return ret;
+        }
+
+        void close() {
+            mei.close();
+        }
+
+        public DeviceTaskAbstract poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
+            return operationQueue.poll(timeoutMS, timeUnit);
+        }
+
+        public DeviceTaskAbstract poll() {
+            return operationQueue.poll();
+        }
+
+        public MeiEbdsAcceptorMsgInterface getMessage(MeiEbdsAcceptorMsgAck result) throws TimeoutException {
+            return mei.getMessage(result);
+        }
+
+        public String sendMessage(MeiEbdsHostMsg currMsg) {
+            return mei.sendMessage(currMsg);
+        }
+    }
+
+    final MeiEbdsDeviceStateApi api = new MeiEbdsDeviceStateApi();
+
+    public MeiEbdsDevice(Enum machineDeviceId, DeviceType deviceType) {
+        super(machineDeviceId, deviceType, new ArrayBlockingQueue<DeviceTaskAbstract>(1));
     }
 
     @Override
@@ -64,7 +114,9 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         if (property.compareToIgnoreCase("port") == 0) {
             DeviceTaskAbstract deviceTask = new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, value);
             if (submit(deviceTask)) {
-                return deviceTask.get();
+                boolean ret = deviceTask.get();
+                Logger.debug("changing port to %s %s", value, ret ? "SUCCESS" : "FAIL");
+                return ret;
             }
             return false;
         }
@@ -74,9 +126,13 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
     private String initialPortValue;
 
     @Override
-    protected void initDeviceProperties() {
+    protected void initDeviceProperties(LgDevice lgd) {
         LgDeviceProperty lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
         initialPortValue = lgSerialPort.value;
+        /*        if (lgd.slots == null || lgd.slots.isEmpty()) {
+         lgd.slots.add(new LgDeviceSlot());
+         }
+         */
     }
 
     @Override
@@ -92,33 +148,20 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         api.close();
     }
 
-    private boolean runSimpleTask(MeiEbdsTaskType st) {
-        DeviceTaskAbstract deviceTask = new DeviceTaskAbstract(st);
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
-    }
-
     public boolean reset() {
-        return runSimpleTask(MeiEbdsTaskType.TASK_RESET);
+        return submitSimpleTask(MeiEbdsTaskType.TASK_RESET);
     }
 
     public boolean cancelDeposit() {
-        return runSimpleTask(MeiEbdsTaskType.TASK_CANCEL);
+        return submitSimpleTask(MeiEbdsTaskType.TASK_CANCEL);
     }
 
     public boolean storeDeposit(Integer sequenceNumber) {
-        return runSimpleTask(MeiEbdsTaskType.TASK_STORE);
+        return submitSimpleTask(MeiEbdsTaskType.TASK_STORE);
     }
 
-    public boolean reject() {
-        return runSimpleTask(MeiEbdsTaskType.TASK_REJECT);
-    }
-
-    @Override
-    public DeviceStatus getStatus() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public boolean withdrawDeposit() {
+        return submitSimpleTask(MeiEbdsTaskType.TASK_REJECT);
     }
 
     public boolean clearError() {
@@ -146,22 +189,6 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
     }
 
     public boolean storingErrorReset() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public boolean withdrawDeposit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public Integer getCurrency() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public Map<Integer, Integer> getCurrentQuantity() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public Map<Integer, Integer> getDesiredQuantity() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

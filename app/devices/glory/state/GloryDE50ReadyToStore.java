@@ -2,8 +2,8 @@ package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
+import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.GloryDE50Device.GloryDE50TaskType;
-import devices.glory.GloryDE50DeviceStateApi;
 import devices.glory.state.poll.GloryDE50Store;
 import devices.glory.state.poll.GloryDE50Withdraw;
 

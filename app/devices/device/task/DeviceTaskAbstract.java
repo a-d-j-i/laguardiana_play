@@ -4,6 +4,7 @@ import devices.device.state.DeviceStateInterface;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import play.Logger;
 
 /**
  *
@@ -13,7 +14,8 @@ public class DeviceTaskAbstract {
 
     final Enum type;
     final Lock lock = new ReentrantLock();
-    final Condition done = lock.newCondition();
+    boolean done = false;
+    final Condition cdone = lock.newCondition();
     boolean returnValue = false;
 
     public DeviceTaskAbstract(Enum type) {
@@ -24,7 +26,9 @@ public class DeviceTaskAbstract {
     public boolean get() {
         lock.lock();
         try {
-            done.await();
+            if (!done) {
+                cdone.await();
+            }
             return returnValue;
         } catch (InterruptedException ex) {
         } finally {
@@ -38,7 +42,8 @@ public class DeviceTaskAbstract {
         lock.lock();
         try {
             DeviceStateInterface ret = currentState.call(this);
-            done.signalAll();
+            done = true;
+            cdone.signalAll();
             return ret;
         } finally {
             lock.unlock();

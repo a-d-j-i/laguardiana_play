@@ -20,9 +20,6 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     public Integer denomination;
     @Column(name = "unit_lov", nullable = false)
     public Integer unitLov;
-    // TODO: Put in some place in glory configuration.
-    @Column(name = "slot", nullable = false)
-    public Integer slot;
     @Column(name = "currency", nullable = false)
     public Integer currency;
     @Temporal(TemporalType.TIMESTAMP)

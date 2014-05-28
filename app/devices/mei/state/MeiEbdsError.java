@@ -1,11 +1,13 @@
 package devices.mei.state;
 
+import devices.device.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
+import devices.mei.MeiEbdsDevice.MeiEbdsDeviceStateApi;
 import devices.mei.MeiEbdsDevice.MeiEbdsTaskType;
-import devices.mei.MeiEbdsDeviceStateApi;
 import devices.mei.state.MeiEbdsError.COUNTER_CLASS_ERROR_CODE;
+import devices.mei.status.MeiEbdsStatusError;
 import play.Logger;
 
 /**
@@ -25,7 +27,7 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
         super(api);
         this.error = error;
         Logger.error(error);
-        api.notifyListeners(error);
+        api.notifyListeners(new MeiEbdsStatusError(error));
     }
 
     @Override
@@ -43,6 +45,10 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
                 return new MeiEbdsOpenPort(api, open.getPort());
         }
         return null;
+    }
+
+    public DeviceStatusInterface getStatus() {
+        return new MeiEbdsStatusError(error);
     }
     /*
      @Override

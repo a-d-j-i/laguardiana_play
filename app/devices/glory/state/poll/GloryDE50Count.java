@@ -1,16 +1,16 @@
 package devices.glory.state.poll;
 
-import static devices.device.DeviceStatus.STATUS.COUNTING;
-import static devices.device.DeviceStatus.STATUS.JAM;
-import static devices.device.DeviceStatus.STATUS.PUT_THE_BILLS_ON_THE_HOPER;
-import static devices.device.DeviceStatus.STATUS.REMOVE_REJECTED_BILLS;
-import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_ESCROW;
-import static devices.device.DeviceStatus.STATUS.REMOVE_THE_BILLS_FROM_HOPER;
-import devices.glory.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.COUNTING;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.PUT_THE_BILLS_ON_THE_HOPER;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_ESCROW;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_HOPER;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;

@@ -14,7 +14,12 @@
 <section id ="menu_principal">
     <header></header>
     <nav>
-        <a id ="backButton" href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+        #{if hasClass}
+        <a id ="backButton" href="@{DeviceController.commands(deviceId)}" class="boton_top">◄ &{ 'application.back' }</a>
+        #{/if}
+        #{else}
+        <a id ="backButton" href="@{DeviceController.list()}" class="boton_top">◄ &{ 'application.back' }</a>
+        #{/else}
     </nav>
     <article>
         <div class="botonera">
@@ -30,32 +35,7 @@
                 </li>
                 <li class="column">
                     <div class="columna" style="height: 100%; padding: 20px;">
-                        <p>
-                            <span ID="sensorA" class="circle">&nbsp;A&nbsp;</span>
-                            &nbsp;
-                            <span ID="sensorB" class="circle">&nbsp;B&nbsp;</span>
-                            &nbsp;
-                            <span ID="sensorC" class="circle">&nbsp;C&nbsp;</span>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <span ID="sensorD" class="circle">&nbsp;L&nbsp;</span>
-                        </p>
-                        <p>ERROR CODE: <span id="ERROR_CODE">error : ${status?.getError()}</span></p>
-                        <p>ERROR DETAIL: <span id="ERROR_DETAIL">error : ${status?.getError()}</span></p>
-                        <p>A : <span id ="A">${status?.reprA()}</span></p>
-                        <p>B : <span id ="B">${status?.reprB()}</span></p>
-                        <p>C : <span id ="C">${status?.reprC()}</span></p>
-                        <p>D : <span id ="D">${status?.reprD()}</span></p>
-                        <p>BAG_SENSOR : <span id ="BAG_SENSOR">${status?.reprBAG_SENSOR()}</span></p>
-                        <p>BAG_STATUS : <span id ="BAG_STATUS">${status?.reprBAG_STATUS()}</span></p>
-                        <p>BAG APROVE STATE: <span id ="BAG_APROVE_STATE">${status?.bagAproveState}</span></p>
-                        <p>BAG_STATE : <span id ="BAG_STATE">${status?.bagState?.name()}</span></p>
-                        <p>SHUTTER_STATE : <span id ="SHUTTER_STATE">${status?.shutterState?.name()}</span></p>
-                        <p>LOCK_STATE : 
-                            <span id ="LOCK_STATE">
-                                #{if (status?.lockState ) }Locked#{/if}
-                                #{else}UnLocked#{/else}
-                            </span>
-                        </p>
+                        <p>LAST EVENT:<span id="last_event">${lastEvent}</span></p>
                     </div>
                 </li>
             </ul>
@@ -75,55 +55,8 @@
     }
     doRefresh = function() {
         $.getJSON('@{MeiEbdsController.getStatus(deviceId)}', function(data) {
-
-            var error = data[ 0 ];
-            var status = data[ 1 ];
-            if (error) {
-                $("#ERROR").text(error);
-            }
-            if (status.error) {
-                $("#ERROR_CODE").text(status.error.errorCode);
-                $("#ERROR_DETAIL").text(status.error.detail);
-                $("#sensorA").css("background", "yellow");
-                $("#sensorB").css("background", "yellow");
-                $("#sensorC").css("background", "yellow");
-                $("#sensorD").css("background", "yellow");
-            } else {
-                $("#ERROR_CODE").text("");
-                $("#ERROR_DETAIL").text("");
-                // TODO: MOVE THIS TO THE MODEL!!!
-                if (status.D & 0x10) {
-                    $("#sensorA").css("background", "red");
-                } else {
-                    $("#sensorA").css("background", "green");
-                }
-                if (status.D & 0x08) {
-                    $("#sensorB").css("background", "red");
-                } else {
-                    $("#sensorB").css("background", "green");
-                }
-                if (status.D & 0x04) {
-                    $("#sensorC").css("background", "red");
-                } else {
-                    $("#sensorC").css("background", "green");
-                }
-                if (status.D & 0x20) {
-                    $("#sensorD").css("background", "red");
-                } else {
-                    $("#sensorD").css("background", "green");
-                }
-            }
-            $("#A").text(repr(status.A));
-            $("#B").text(repr(status.B));
-            $("#C").text(repr(status.C));
-            $("#D").text(repr(status.D));
-            $("#BAG_SENSOR").text(repr(status.BAG_SENSOR));
-            $("#BAG_STATUS").text(repr(status.BAG_STATUS));
-            $("#BAG_APROVE_STATE").text(status.bagAproveState);
-            $("#BAG_STATE").text(status.bagState);
-            $("#SHUTTER_STATE").text(status.shutterState);
-            $("#LOCK_STATE").text(status.lockState);
-
+            var lastEvent = data[ 0 ];
+            $("#last_event").text(repr(lastEvent));
             doneRefresh();
         })
     };

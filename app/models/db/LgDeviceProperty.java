@@ -2,6 +2,7 @@ package models.db;
 
 import java.util.List;
 import javax.persistence.*;
+import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
@@ -27,7 +28,7 @@ public class LgDeviceProperty extends GenericModel implements java.io.Serializab
     public LgDevice device;
     @Column(name = "name", nullable = false, length = 64)
     public String name;
-    @Column(name = "value", nullable = false, length = 128)
+    @Column(name = "value", nullable = true, length = 128)
     public String value;
     @Column(name = "edit_type", nullable = false)
     @Enumerated(EnumType.ORDINAL)
@@ -47,14 +48,18 @@ public class LgDeviceProperty extends GenericModel implements java.io.Serializab
 
     public static LgDeviceProperty getOrCreateProperty(LgDevice device, String property, LgDeviceProperty.EditType editType) {
         LgDeviceProperty l = getProperty(device, property);
-        if (l == null) {
-            l = new LgDeviceProperty();
-            l.name = property;
-            l.device = device;
-            l.editType = editType;
-            l.value = "";
-            l.save();
+        if (l != null) {
+            Logger.debug("GetOrCreate device %d, %s property %s", l.device.deviceId, l.device.machineDeviceId, l.name);
+            return l;
         }
+        l = new LgDeviceProperty();
+        l.name = property;
+        l.device = device;
+        l.editType = editType;
+        l.value = "";
+        device.deviceProperties.add(l);
+        l.save();
+        Logger.debug("Creating device %d, %s property %s", l.device.deviceId, l.device.machineDeviceId, l.name);
         return l;
     }
 
