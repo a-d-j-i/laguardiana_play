@@ -16,4 +16,10 @@ public class MeiEbdsStatusError extends DeviceStatusError {
     public MeiEbdsStatusType getType() {
         return MeiEbdsStatusType.ERROR;
     }
+
+    @Override
+    public String toString() {
+        return "MeiEbdsStatusError : " + getError();
+    }
+
 }

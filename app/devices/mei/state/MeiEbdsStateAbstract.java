@@ -18,7 +18,8 @@ abstract public class MeiEbdsStateAbstract implements DeviceStateInterface {
         this.api = api;
     }
 
-    public DeviceStateInterface call(DeviceTaskAbstract t) {
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
+        task.setReturnValue(false);
         return null;
     }
 

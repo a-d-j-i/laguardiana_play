@@ -35,7 +35,13 @@
                 </li>
                 <li class="column">
                     <div class="columna" style="height: 100%; padding: 20px;">
-                        <p>LAST EVENT:<span id="last_event">${lastEvent}</span></p>
+                        <div>
+                            <p>LAST CMD:<span id="last_cmd">${lastCmd}</span></p>
+                            <p>LAST RESULT:<span id="last_result">${lastResult}</span></p>
+                        </div>
+                        <div style="overflow-y: scroll; height: 400px;">
+                            <p>LAST EVENTS:<br/><span id="last_event">${lastEvent}</span></p>
+                        </div>
                     </div>
                 </li>
             </ul>
@@ -47,16 +53,11 @@
 #{set 'moreScripts'}
 <script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
-    function repr(number) {
-        if (number < 0) {
-            number = 0xFF + number + 1;
-        }
-        return "0x" + number.toString(16).toUpperCase() + " : { " + number.toString(2).toUpperCase() + " }";
-    }
     doRefresh = function() {
         $.getJSON('@{MeiEbdsController.getStatus(deviceId)}', function(data) {
             var lastEvent = data[ 0 ];
-            $("#last_event").text(repr(lastEvent));
+            lastEvent = lastEvent + "\n" + $("#last_event").text();
+            $("#last_event").text(lastEvent);
             doneRefresh();
         })
     };

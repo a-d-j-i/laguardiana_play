@@ -15,7 +15,8 @@ public class GloryDE50Status implements DeviceStatusInterface {
 
     static public enum GloryDE50StatusType {
 
-        ERROR, OPEN_PORT,
+        ERROR,
+        OPEN_PORT,
         NEUTRAL,
         READY_TO_STORE,
         STORING,

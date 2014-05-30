@@ -6,9 +6,6 @@ import devices.device.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
-import devices.mei.operation.MeiEbdsHostMsg;
-import devices.mei.response.MeiEbdsAcceptorMsgAck;
-import devices.mei.response.MeiEbdsAcceptorMsgInterface;
 import devices.mei.state.MeiEbdsOpenPort;
 import devices.mei.task.MeiEbdsTaskCount;
 import devices.serial.SerialPortAdapterAbstract;
@@ -17,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import models.Configuration;
 import models.db.LgDevice;
 import models.db.LgDevice.DeviceType;
@@ -48,7 +44,7 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         FlashDownload(0x50),
         Request(0x60),
         Extended(0x70),
-        ENQ(0x100), ERROR(0x1000);
+        ENQ(0x100), Error(0x1000);
         private final int id;
 
         private MessageType(int id) {
@@ -63,13 +59,11 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
 
     public class MeiEbdsDeviceStateApi {
 
-        final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7, SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
-        final private static int MEI_EBDS_READ_TIMEOUT = 35; //35ms
+        final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(
+                SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7,
+                SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
+        final private static int MEI_EBDS_READ_TIMEOUT = 10000; //35ms
         final private MeiEbds mei = new MeiEbds(MEI_EBDS_READ_TIMEOUT);
-
-        public void notifyListeners(DeviceStatusInterface status) {
-            MeiEbdsDevice.this.notifyListeners(status);
-        }
 
         public boolean open(String value) {
             Logger.debug("api open");
@@ -94,13 +88,14 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
             return operationQueue.poll();
         }
 
-        public MeiEbdsAcceptorMsgInterface getMessage(MeiEbdsAcceptorMsgAck result) throws TimeoutException {
-            return mei.getMessage(result);
+        public void notifyListeners(DeviceStatusInterface status) {
+            MeiEbdsDevice.this.notifyListeners(status);
         }
 
-        public String sendMessage(MeiEbdsHostMsg currMsg) {
-            return mei.sendMessage(currMsg);
+        public MeiEbds getMei() {
+            return mei;
         }
+
     }
 
     final MeiEbdsDeviceStateApi api = new MeiEbdsDeviceStateApi();
@@ -146,6 +141,20 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         Logger.debug("MeiEbds Executing finish");
         Logger.info("MeiEbds Closing mei serial port ");
         api.close();
+    }
+
+    @Override
+    protected boolean submitSimpleTask(Enum st) {
+        boolean ret = super.submitSimpleTask(st);
+        interruptThread();
+        return ret;
+    }
+
+    @Override
+    protected synchronized boolean submit(DeviceTaskAbstract deviceTask) {
+        boolean ret = super.submit(deviceTask);
+        interruptThread();
+        return ret;
     }
 
     public boolean reset() {

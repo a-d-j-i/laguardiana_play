@@ -161,17 +161,12 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
         return fifo.poll();
     }
 
-    public Byte read(int timeoutMS) {
-        try {
-            return fifo.poll(timeoutMS, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
-            Logger.error("Interrupt exception reading from fifo %s", ex);
-            return null;
-        }
+    public Byte read(int timeoutMS) throws InterruptedException {
+        return fifo.poll(timeoutMS, TimeUnit.MILLISECONDS);
     }
 
     // Not completly thread safe!!!, fails if used with read...
-    public String readLine(int timeoutMS) {
+    public String readLine(int timeoutMS) throws InterruptedException {
         SerialPortAdapterAbstract.State state = SerialPortAdapterAbstract.State.START;
         StringBuilder sb = new StringBuilder(1024);
         boolean done = false;

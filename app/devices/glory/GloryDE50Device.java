@@ -57,7 +57,11 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         }
 
         public String sendGloryDE50Operation(GloryDE50OperationInterface operation, boolean debug, final GloryDE50OperationResponse response) {
-            return gl.sendOperation(operation, debug, response);
+            try {
+                return gl.sendOperation(operation, debug, response);
+            } catch (InterruptedException ex) {
+                return "Unexpected interrupt exception in sendGloryDE50Operation";
+            }
         }
 
         public void notifyListeners(String details) {

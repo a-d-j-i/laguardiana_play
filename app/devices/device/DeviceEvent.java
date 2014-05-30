@@ -27,5 +27,10 @@ public class DeviceEvent extends EventObject {
     public Enum getSourceDevice() {
         return getSource().machineDeviceId;
     }
-    
+
+    @Override
+    public String toString() {
+        return "DeviceEvent{" + "status=" + status + '}';
+    }
+
 }

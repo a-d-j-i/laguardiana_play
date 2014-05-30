@@ -11,6 +11,7 @@ import devices.device.task.DeviceTaskAbstract;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -103,18 +104,19 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         this.listeners.remove(listener);
     }
 
-    final private AtomicReference<DeviceEvent> lastEvent = new AtomicReference<DeviceEvent>();
+    // Just for logging proposes.
+    final private BlockingQueue<DeviceEvent> eventHistory = new ArrayBlockingQueue<DeviceEvent>(10);
 
     protected void notifyListeners(DeviceStatusInterface state) {
         final DeviceEvent le = new DeviceEvent(this, state);
-        lastEvent.set(le);
+        eventHistory.offer(le);
         for (DeviceEventListener counterListener : listeners) {
             counterListener.onDeviceEvent(le);
         }
     }
 
     public DeviceEvent getLastEvent() {
-        return lastEvent.get();
+        return eventHistory.poll();
     }
 
     public Integer getDeviceId() {
@@ -150,6 +152,10 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
 
     synchronized protected boolean submit(DeviceTaskAbstract deviceTask) {
         return operationQueue.offer(deviceTask);
+    }
+
+    synchronized protected void interruptThread() {
+        thread.interrupt();
     }
 
     protected boolean submitSimpleTask(Enum st) {

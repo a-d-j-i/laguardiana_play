@@ -12,10 +12,11 @@ public class MeiEbdsStatus implements DeviceStatusInterface {
 
         ERROR,
         OPEN_PORT,
-        RUNNING,
-        CANCELING,
-        CURRENT_STATUS,
-        
+        CANCELING, CANCELED,
+        READY_TO_STORE,
+        REJECTING, RETURNED,
+        STORING, STORED, NEUTRAL, COUNTING,
+
     };
     final MeiEbdsStatusType type;
 

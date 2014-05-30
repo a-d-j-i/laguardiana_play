@@ -102,6 +102,8 @@ public class MeiEbdsHostMsg {
         MEI_EBDS_MSG_BYTE_DESC.FOUR_WAY_ALL_DIRECTIONS.setBits(data);
         // Wait for RETURN or STACK bit in the escrow state.
         MEI_EBDS_MSG_BYTE_DESC.ESCROW.setBits(data);
+        MEI_EBDS_MSG_BYTE_DESC.STACK.clearBits(data);
+        MEI_EBDS_MSG_BYTE_DESC.RETURN.clearBits(data);
         // push cheated notes and continue (without issuing any credit)!!!
         MEI_EBDS_MSG_BYTE_DESC.PUSH_MODE.setBits(data);
         //TODO: Implement that : MEI_EBDS_MSG_BYTE_DESC.EXTENDED_NOTE_REPORTING.setBits(data);
@@ -150,7 +152,7 @@ public class MeiEbdsHostMsg {
         MEI_EBDS_MSG_BYTE_DESC.ACK.setBits(data);
     }
 
-    public void incAck() {
+    public void flipAck() {
         MEI_EBDS_MSG_BYTE_DESC.ACK.flipBits(data, 0);
     }
 

@@ -10,9 +10,9 @@ public interface SerialPortAdapterInterface {
 
     public Byte read();
 
-    public Byte read(int timeoutMS);
+    public Byte read(int timeoutMS) throws InterruptedException;
 
-    public String readLine(int timeout);
+    public String readLine(int timeout) throws InterruptedException;
 
     @Override
     public String toString();

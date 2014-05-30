@@ -32,7 +32,7 @@ public class GloryDE50 {
         serialPort = null;
     }
 
-    public synchronized String sendOperation(GloryDE50OperationInterface cmd, boolean debug, final GloryDE50OperationResponse response) {
+    public synchronized String sendOperation(GloryDE50OperationInterface cmd, boolean debug, final GloryDE50OperationResponse response) throws InterruptedException {
         if (cmd == null) {
             throw new InvalidParameterException("Glory unknown command");
         }
@@ -128,7 +128,7 @@ public class GloryDE50 {
      }
      */
 
-    private Byte read() {
+    private Byte read() throws InterruptedException {
         return serialPort.read(readTimeout);
     }
 }

@@ -15,7 +15,7 @@ public class MeiEbdsAcceptorMsgError implements MeiEbdsAcceptorMsgInterface {
     }
 
     public MessageType getMessageType() {
-        return MessageType.ERROR;
+        return MessageType.Error;
     }
 
     public String getError() {

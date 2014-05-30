@@ -50,6 +50,7 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
     public DeviceStatusInterface getStatus() {
         return new MeiEbdsStatusError(error);
     }
+
     /*
      @Override
      public boolean reset() {
@@ -83,4 +84,8 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
      return error;
      }
      */
+    @Override
+    public String toString() {
+        return "MeiEbdsError{" + "error=" + error + '}';
+    }
 }

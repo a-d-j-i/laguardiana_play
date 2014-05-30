@@ -118,6 +118,10 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
         return MEI_EBDS_RESPONSE_BYTE_DESC.ESCROWED.isSet(data);
     }
 
+    public boolean isIdling() {
+        return MEI_EBDS_RESPONSE_BYTE_DESC.IDLING.isSet(data);
+    }
+
     public boolean isReturned() {
         return MEI_EBDS_RESPONSE_BYTE_DESC.RETURNED.isSet(data);
     }
@@ -184,6 +188,9 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
 
     @Override
     public String toString() {
+        if (data == null || data.length == 0) {
+            return "Empty data";
+        }
         StringBuilder hexString = new StringBuilder();
         hexString.append("\n---------------\n");
         for (byte b : data) {

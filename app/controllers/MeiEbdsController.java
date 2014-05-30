@@ -1,10 +1,12 @@
 package controllers;
 
+import devices.device.DeviceEvent;
 import devices.device.DeviceInterface;
 import devices.mei.MeiEbdsDevice;
 import java.util.Arrays;
 import machines.Machine;
 import play.mvc.Before;
+import play.mvc.Util;
 
 public class MeiEbdsController extends Application {
 
@@ -20,49 +22,60 @@ public class MeiEbdsController extends Application {
             meiDevice = (MeiEbdsDevice) d;
         } else {
             renderArgs.put("error", "invalid device id");
-            setStatusAndRedirect(deviceId, true);
+            getStatus(deviceId, true);
         }
     }
 
     public static void count(Integer deviceId) {
+        flash.put("lastCmd", "count");
         Integer[] slotInfo = {1, 1, 1, 1, 1, 1, 1, 1};
-        setStatusAndRedirect(deviceId, meiDevice.count(Arrays.asList(slotInfo)));
+        getStatus(deviceId, meiDevice.count(Arrays.asList(slotInfo)));
     }
 
     public static void store(Integer deviceId) {
-        setStatusAndRedirect(deviceId, meiDevice.storeDeposit(1));
+        flash.put("lastCmd", "store");
+        getStatus(deviceId, meiDevice.storeDeposit(1));
     }
 
     public static void reject(Integer deviceId) {
-        setStatusAndRedirect(deviceId, meiDevice.withdrawDeposit());
+        flash.put("lastCmd", "reject");
+        getStatus(deviceId, meiDevice.withdrawDeposit());
     }
 
     public static void cancel(Integer deviceId) {
-        setStatusAndRedirect(deviceId, meiDevice.cancelDeposit());
+        flash.put("lastCmd", "cancel");
+        getStatus(deviceId, meiDevice.cancelDeposit());
     }
 
     public static void resetDevice(Integer deviceId) {
-        setStatusAndRedirect(deviceId, meiDevice.reset());
+        flash.put("lastCmd", "resetDevice");
+        getStatus(deviceId, meiDevice.reset());
     }
 
     public static void getStatus(Integer deviceId) {
+        getStatus(deviceId, true);
+    }
+
+    public static void getStatus(Integer deviceId, boolean retval) {
+        renderArgs.put("lastCmd", flash.get("lastCmd"));
+        renderArgs.put("lastResult", retval ? "SUCCESS" : "FAIL");
         DeviceInterface d = Machine.findDeviceById(deviceId);
+        DeviceEvent de = d.getLastEvent();
+        String lastEvent = "";
+        if (de != null) {
+            lastEvent = de.toString();
+        }
         if (request.isAjax()) {
-            Object ret[] = new Object[3];
-            ret[ 0] = d.getLastEvent();
+            Object ret[] = new Object[1];
+            ret[ 0] = lastEvent;
             renderJSON(ret);
         } else {
             renderArgs.put("deviceId", deviceId);
             renderArgs.put("device", d);
-            renderArgs.put("lastEvent", d.getLastEvent());
+            renderArgs.put("lastEvent", lastEvent);
             //renderArgs.put("backUrl", flash.get("backUrl"));
             render("DeviceController/" + d.getType().name().toUpperCase() + "_OPERATIONS.html");
         }
-    }
-
-    private static void setStatusAndRedirect(Integer deviceId, boolean retVal) {
-        renderArgs.put("lastCmdRetVal", retVal);
-        getStatus(deviceId);
     }
 
 }
