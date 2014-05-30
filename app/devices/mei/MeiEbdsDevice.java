@@ -10,6 +10,7 @@ import devices.mei.state.MeiEbdsOpenPort;
 import devices.mei.task.MeiEbdsTaskCount;
 import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -35,6 +36,30 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         TASK_CANCEL;
     }
 
+    public interface MessageSubType {
+
+        public int getId();
+
+    };
+
+    public enum ExtendedMessageSubType implements MessageSubType {
+
+        BarcodeData(0x01),
+        RequestSupportedNoteSet(0x02),
+        SetExtendedNoteInhibits(0x03),
+        SetEscrowTimeouts(0x04);
+
+        private final int id;
+
+        private ExtendedMessageSubType(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+    };
+
     public enum MessageType {
 
         HostToAcceptor(0x10),
@@ -44,11 +69,24 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         FlashDownload(0x50),
         Request(0x60),
         Extended(0x70),
-        ENQ(0x100), Error(0x1000);
-        private final int id;
+        ENQ(0x100),
+        Error(0x1000);
+
+        static {
+            for (MessageSubType mt : ExtendedMessageSubType.values()) {
+                Extended.msgSubTypeMap.put(mt.getId(), mt);
+            }
+        }
+
+        final private Map<Integer, MessageSubType> msgSubTypeMap = new HashMap<Integer, MessageSubType>();
+        final private int id;
 
         private MessageType(int id) {
             this.id = id;
+        }
+
+        public MessageSubType getSubType(int subtypeId) {
+            return msgSubTypeMap.get(subtypeId);
         }
 
         public int getId() {

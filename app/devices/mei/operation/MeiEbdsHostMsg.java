@@ -108,6 +108,9 @@ public class MeiEbdsHostMsg {
         MEI_EBDS_MSG_BYTE_DESC.PUSH_MODE.setBits(data);
         //TODO: Implement that : MEI_EBDS_MSG_BYTE_DESC.EXTENDED_NOTE_REPORTING.setBits(data);
         // power sequence must be choosed
+
+        // EXTENDED NOTE REPORTING (optional)
+        MEI_EBDS_MSG_BYTE_DESC.EXTENDED_NOTE_REPORTING.setBits(data);
     }
 
     public void enableAllDenominations() {

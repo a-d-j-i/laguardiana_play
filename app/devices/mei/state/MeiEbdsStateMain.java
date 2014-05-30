@@ -16,6 +16,7 @@ import devices.mei.response.MeiEbdsAcceptorMsgInterface;
 import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatus.MeiEbdsStatusType;
 import devices.mei.status.MeiEbdsStatusStored;
+import devices.mei.task.MeiEbdsTaskCount;
 import play.Logger;
 
 /**
@@ -30,7 +31,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
 
     private boolean skipEscrowed = false;
     private boolean mustCount = false;
-    private int lastNoteValue = 0;
+    private String lastNoteValue = "";
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
@@ -52,7 +53,8 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                 task.setReturnValue(false);
                 return null;
             case TASK_COUNT:
-                ret = api.getMei().count();
+                MeiEbdsTaskCount cnt = (MeiEbdsTaskCount) task;
+                ret = api.getMei().count(cnt.getSlotList());
                 if (ret) {
                     mustCount = true;
                 }
@@ -98,9 +100,9 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
             return deviceTask.execute(this);
         }
         try {
-            String err = null;
             MeiEbdsAcceptorMsgInterface msg = api.getMei().getMessage();
             if (msg != null) { // retry
+                String err;
                 switch (msg.getMessageType()) {
                     case Error:
                         MeiEbdsAcceptorMsgError e = (MeiEbdsAcceptorMsgError) msg;
@@ -113,43 +115,14 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                     case ENQ: // poll
                         err = api.getMei().sendPollMessage();
                         break;
+                    case Extended: // TODO: check if a different treatment is needed
                     case AcceptorToHost:
-                        MeiEbdsAcceptorMsgAck lastMsg = (MeiEbdsAcceptorMsgAck) msg;
-                        err = api.getMei().checkAck(lastMsg);
+                        MeiEbdsAcceptorMsgAck lastMessage = (MeiEbdsAcceptorMsgAck) msg;
+                        err = api.getMei().checkAck(lastMessage);
                         if (err == null) {
-                            if (lastMsg.isEscrowed()) {
-                                Logger.debug("Is escrowed");
-                                // skip the first escrowed after store.
-                                if (!skipEscrowed) {
-                                    api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.READY_TO_STORE));
-                                }
-                                lastNoteValue = lastMsg.getNoteValue();
-                            } else if (lastMsg.isReturned()) {
-                                Logger.debug("Is returned");
-                                api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.RETURNED));
-                                lastNoteValue = 0;
-                                err = api.getMei().sendPollMessage();
-                            } else if (lastMsg.isStacked()) {
-                                Logger.debug("Is stacked");
-                                api.notifyListeners(new MeiEbdsStatusStored(lastNoteValue));
-                                lastNoteValue = 0;
-                                err = api.getMei().sendPollMessage();
-                            } else {
-                                Logger.debug("Is None");
-                                if (lastMsg.isIdling()) {
-                                    if (mustCount) {
-                                        api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.COUNTING));
-                                    } else {
-                                        api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.NEUTRAL));
-                                    }
-                                }
-                                lastNoteValue = 0;
-                            }
+                            return processAcceptorToHostMsg(lastMessage);
                         }
-                        break;
                 }
-                mustCount = false;
-                skipEscrowed = false;
                 if (err != null) {
                     return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
                 }
@@ -164,4 +137,45 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         return "MeiEbdsStateMain";
     }
 
+    protected DeviceStateInterface processAcceptorToHostMsg(MeiEbdsAcceptorMsgAck lastMsg) {
+        if (lastMsg.isJammed()) {
+            api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.JAM));
+            return null;
+        }
+        String err = null;
+        if (lastMsg.isEscrowed()) {
+            Logger.debug("Is escrowed");
+            // skip the first escrowed after store.
+            if (!skipEscrowed) {
+                api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.READY_TO_STORE));
+            }
+            lastNoteValue = lastMsg.getNoteSlot();
+        } else if (lastMsg.isReturned()) {
+            Logger.debug("Is returned");
+            api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.RETURNED));
+            lastNoteValue = "";
+            err = api.getMei().sendPollMessage();
+        } else if (lastMsg.isStacked()) {
+            Logger.debug("Is stacked");
+            api.notifyListeners(new MeiEbdsStatusStored(lastNoteValue));
+            lastNoteValue = "";
+            err = api.getMei().sendPollMessage();
+        } else {
+            Logger.debug("Is None");
+            if (lastMsg.isIdling()) {
+                if (mustCount) {
+                    api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.COUNTING));
+                } else {
+                    api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.NEUTRAL));
+                }
+            }
+            lastNoteValue = "";
+        }
+        mustCount = false;
+        skipEscrowed = false;
+        if (err != null) {
+            return new MeiEbdsError(api, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
+        }
+        return null;
+    }
 }

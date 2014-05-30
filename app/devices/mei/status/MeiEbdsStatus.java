@@ -15,7 +15,7 @@ public class MeiEbdsStatus implements DeviceStatusInterface {
         CANCELING, CANCELED,
         READY_TO_STORE,
         REJECTING, RETURNED,
-        STORING, STORED, NEUTRAL, COUNTING,
+        STORING, STORED, NEUTRAL, COUNTING, JAM,
 
     };
     final MeiEbdsStatusType type;

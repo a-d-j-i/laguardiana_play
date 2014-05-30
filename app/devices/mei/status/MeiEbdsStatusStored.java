@@ -8,9 +8,9 @@ import devices.device.DeviceStatusInterface;
  */
 public class MeiEbdsStatusStored extends MeiEbdsStatus implements DeviceStatusInterface {
 
-    final Integer slot;
+    final String slot;
 
-    public MeiEbdsStatusStored(Integer slot) {
+    public MeiEbdsStatusStored(String slot) {
         super(MeiEbdsStatusType.STORED);
         this.slot = slot;
     }
