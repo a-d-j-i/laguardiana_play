@@ -28,7 +28,7 @@ abstract public class MeiEbdsStateAbstract implements DeviceStateInterface {
     }
 
     public DeviceStateInterface step() {
-        return step(200);
+        return step(3000);
     }
 
     public DeviceStateInterface step(int timeout) {
@@ -39,7 +39,7 @@ abstract public class MeiEbdsStateAbstract implements DeviceStateInterface {
                 return ret;
             }
         } catch (InterruptedException ex) {
-            Logger.debug("MeiEbdsStateAbstract exception : %s", ex.toString());
+            // command sent.
         }
         return this;
     }

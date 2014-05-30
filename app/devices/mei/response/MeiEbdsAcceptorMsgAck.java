@@ -16,10 +16,13 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
 
     enum MEI_EBDS_CMD_DATA_DESC {
 
-        ACK(0, 0x01),
-        DEVICE_TYPE(0, 0x0E),
-        MESSAGE_TYPE(0, 0xF0),
-        MESSAGE_SUB_TYPE(0, 0xFF),
+        // allways base 0
+        ACK(2, 0x01),
+        DEVICE_TYPE(2, 0x0E),
+        MESSAGE_TYPE(2, 0xF0),
+        // allways base 0
+        MESSAGE_SUB_TYPE(3, 0xFF),
+        // this depends on the 
         // THE ONLY CONFIABLE STATED IN BYTE 0: ESCROWED, RETURNED, STACKED
         IDLING(1, 0x01),
         ACECPTING(1, 0x02),
@@ -69,6 +72,10 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
 
         private boolean isCleared(byte[] data, int payloadOffset) {
             return ((data[ cmdByte + payloadOffset] & mask) == 0);
+        }
+
+        private int getValue(byte[] data) {
+            return getValue(data, 0);
         }
 
     }
@@ -123,7 +130,7 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
 
     public MessageType getMessageType() {
         // fixed payload offset
-        int d = MEI_EBDS_CMD_DATA_DESC.MESSAGE_TYPE.getValue(data, 2);
+        int d = MEI_EBDS_CMD_DATA_DESC.MESSAGE_TYPE.getValue(data);
         return msgTypeMap.get(d);
     }
 
@@ -133,12 +140,12 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
             return null;
         }
         // fixed payload offset
-        return t.getSubType(MEI_EBDS_CMD_DATA_DESC.MESSAGE_SUB_TYPE.getValue(data, 3));
+        return t.getSubType(MEI_EBDS_CMD_DATA_DESC.MESSAGE_SUB_TYPE.getValue(data, 0));
     }
 
     public int getAck() {
         // fixed payload offset
-        return MEI_EBDS_CMD_DATA_DESC.ACK.getValue(data, 2);
+        return MEI_EBDS_CMD_DATA_DESC.ACK.getValue(data, 0);
     }
 
     public boolean isEscrowed() {
@@ -241,10 +248,21 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
         }
         hexString.append("\n---------------\n");
         for (MEI_EBDS_CMD_DATA_DESC m : MEI_EBDS_CMD_DATA_DESC.values()) {
-            if (m.isSet(data, cdataOffset)) {
-                hexString.append(m.name()).append(" : ");
-                hexString.append(String.format("0x%x == %d", m.getValue(data, cdataOffset), m.getValue(data, cdataOffset)));
-                hexString.append("\n");
+            switch (m) {
+                case ACK:
+                case DEVICE_TYPE:
+                case MESSAGE_TYPE:
+                case MESSAGE_SUB_TYPE:
+                    hexString.append(m.name()).append(" : ");
+                    hexString.append(String.format("0x%x == %d", m.getValue(data), m.getValue(data)));
+                    hexString.append("\n");
+                    break;
+                default:
+                    if (m.isSet(data, cdataOffset)) {
+                        hexString.append(m.name()).append(" : ");
+                        hexString.append(String.format("0x%x == %d", m.getValue(data, cdataOffset), m.getValue(data, cdataOffset)));
+                        hexString.append("\n");
+                    }
             }
         }
         return "MeiEbdsAcceptorMsg " + hexString.toString();

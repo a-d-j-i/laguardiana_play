@@ -102,7 +102,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         try {
             MeiEbdsAcceptorMsgInterface msg = api.getMei().getMessage();
             if (msg != null) { // retry
-                String err;
+                String err = null;
                 switch (msg.getMessageType()) {
                     case Error:
                         MeiEbdsAcceptorMsgError e = (MeiEbdsAcceptorMsgError) msg;
@@ -118,9 +118,12 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                     case Extended: // TODO: check if a different treatment is needed
                     case AcceptorToHost:
                         MeiEbdsAcceptorMsgAck lastMessage = (MeiEbdsAcceptorMsgAck) msg;
-                        err = api.getMei().checkAck(lastMessage);
-                        if (err == null) {
-                            return processAcceptorToHostMsg(lastMessage);
+                        if (!api.getMei().isMessageOk(msg)) {
+                            err = "Error the only valid message is lastResult";
+                        } else {
+                            if (api.getMei().isAckOk(lastMessage)) { // if ack is not ok, just ignore
+                                return processAcceptorToHostMsg(lastMessage);
+                            }
                         }
                 }
                 if (err != null) {
@@ -138,9 +141,13 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     }
 
     protected DeviceStateInterface processAcceptorToHostMsg(MeiEbdsAcceptorMsgAck lastMsg) {
-        if (lastMsg.isJammed()) {
+        if (lastMsg.isJammed() || lastMsg.isFailure()) {
             api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.JAM));
             return null;
+        } else {
+            if (lastMsg.isPowerUp()) {
+                api.notifyListeners(new MeiEbdsStatus(MeiEbdsStatusType.NEUTRAL));
+            }
         }
         String err = null;
         if (lastMsg.isEscrowed()) {
@@ -157,7 +164,9 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
             err = api.getMei().sendPollMessage();
         } else if (lastMsg.isStacked()) {
             Logger.debug("Is stacked");
-            api.notifyListeners(new MeiEbdsStatusStored(lastNoteValue));
+            if (!lastNoteValue.isEmpty()) {
+                api.notifyListeners(new MeiEbdsStatusStored(lastNoteValue));
+            }
             lastNoteValue = "";
             err = api.getMei().sendPollMessage();
         } else {

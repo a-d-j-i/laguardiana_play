@@ -107,14 +107,19 @@ public class MeiEbds {
             switch (length) {
                 case 0x0b: // normal message
                 case 30: // extendend message
+                    // TODO: I must check the checksum first and retry.
                     if (!lastResult.setData(length, buffer)) {
                         return new MeiEbdsAcceptorMsgError(String.format("mei invalid buffer data %s", Arrays.toString(buffer)));
                     }
                     return lastResult;
+                case 8: // echo of my messages, retry.
+                    return new MeiEbdsAcceptorMsgEnq();
                 default:
                     String err = String.format("mei invalid buffer len %d data %s", length, Arrays.toString(buffer));
                     Logger.error(err);
-                    return new MeiEbdsAcceptorMsgError(err);
+                    //return new MeiEbdsAcceptorMsgError(err);
+                    // with mei shit happens, retry.
+                    return new MeiEbdsAcceptorMsgEnq();
             }
         }
     }
@@ -163,16 +168,17 @@ public class MeiEbds {
         return err;
     }
 
-    public String checkAck(MeiEbdsAcceptorMsgAck msg) {
-        if (msg != lastResult) {
-            return "Error the only valid message is lastResutl";
-        }
-        if (msg.getAck() != hostMsg.getAck()) {
-            return String.format("recived an nak message %s", msg);
+    public boolean isAckOk(MeiEbdsAcceptorMsgAck msg) {
+        if (msg.getAck() != hostMsg.getAck()) { // repeated message, ignore
+            //return String.format("recived an nak message %s", msg);
+            return false;
         }
         Logger.debug("GOT AN ACK FOR HOSTPOOL, flipping ack");
         hostMsg.flipAck();
-        return null;
+        return true;
     }
 
+    public boolean isMessageOk(MeiEbdsAcceptorMsgInterface msg) {
+        return (msg == lastResult);
+    }
 }
