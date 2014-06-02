@@ -1,20 +1,24 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.device;
 
 import devices.device.events.DeviceEventListener;
+import devices.device.state.DeviceStateAbstract;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskOpenPort;
+import devices.mei.task.MeiEbdsTaskCount;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 import models.db.LgDevice;
 import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
@@ -24,70 +28,46 @@ import play.Logger;
  *
  * @author adji
  */
-public abstract class DeviceAbstract implements DeviceInterface, Runnable {
+public abstract class DeviceAbstract implements DeviceInterface {
 
-    public final Enum machineDeviceId;
-//    public final DeviceDescription deviceDescription;
-    private final LgDevice lgd;
+    final public Enum machineDeviceId;
+    final protected LgDevice lgd;
+    final private ExecutorService taskExecutor;
 
-    private final Thread thread;
-    private final AtomicBoolean mustStop = new AtomicBoolean(false);
-    protected final BlockingQueue<DeviceTaskAbstract> operationQueue;
-
-    public DeviceAbstract(Enum machineDeviceId, DeviceType deviceType, BlockingQueue<DeviceTaskAbstract> operationQueue) {
-        this.operationQueue = operationQueue;
-//        this.deviceDescription = deviceDescription;
+    public DeviceAbstract(final Enum machineDeviceId, DeviceType deviceType) {
         this.machineDeviceId = machineDeviceId;
         lgd = LgDevice.getOrCreateByMachineId(machineDeviceId, deviceType);
-        this.thread = new Thread(this);
+        this.taskExecutor = Executors.newSingleThreadExecutor();
     }
 
+    // TODO: possible race condition on start.
     public void start() {
         Logger.debug("Device %s start", machineDeviceId.name());
-        initDeviceProperties(lgd);
-        lgd.save();
-        Logger.debug("Device %s thread start", machineDeviceId.name());
-        thread.start();
+        currentState = initState();
         Logger.debug("Device %s start done", machineDeviceId.name());
+        init();
     }
+
+    abstract public DeviceStateInterface initState();
+
+    abstract public void init();
 
     public void stop() {
-        Logger.debug("Device %s stop", machineDeviceId.name());
-        mustStop.set(true);
-        thread.interrupt();
+        Logger.debug("Device %s stop task thread", machineDeviceId.name());
+        taskExecutor.shutdown();
         try {
-            thread.join(20000);
+            /*        taskThread.interrupt();
+             try {
+             taskThread.join(20000);
+             } catch (InterruptedException ex) {
+             Logger.error("Timeout waiting for task thread : %s", ex);
+             }*/
+            taskExecutor.awaitTermination(20, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
-            Logger.error("Timeout waiting for thread : %s", ex);
-        }
-        Logger.debug("Device %s stop done", machineDeviceId.name());
-    }
-
-    // Must be touched only by the inner thread !!!
-    final protected AtomicReference<DeviceStateInterface> currentState = new AtomicReference<DeviceStateInterface>();
-
-    abstract public DeviceStateInterface init();
-
-    public void run() {
-        Logger.debug("Device %s thread started", machineDeviceId.name());
-        currentState.set(init());
-        while (!mustStop.get()) {
-            DeviceStateInterface oldState = currentState.get();
-
-            Logger.debug(String.format("%s executing current step: %s", getClass().getSimpleName(), oldState.toString()));
-            DeviceStateInterface newState = oldState.step();
-            if (newState != null && oldState != newState) {
-                Logger.debug("Changing state old %s, new %s", oldState.toString(), newState.toString());
-                DeviceStateInterface initStateRet = newState.init();
-                if (initStateRet != null) {
-                    newState = initStateRet;
-                }
-                Logger.debug("setting state to new %s", newState.toString());
-                currentState.set(newState);
-            }
+            Logger.error("Timeout waiting for task thread : %s", ex);
         }
         finish();
-        Logger.debug("Device %s thread done", machineDeviceId.name());
+        Logger.debug("Device %s stop done", machineDeviceId.name());
     }
 
     public void finish() {
@@ -135,11 +115,9 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         return LgDeviceProperty.getEditables(lgd);
     }
 
-    protected abstract boolean changeProperty(String property, String value);
+    protected abstract boolean changeProperty(String property, String value) throws InterruptedException, ExecutionException;
 
-    abstract protected void initDeviceProperties(LgDevice lgd);
-
-    public LgDeviceProperty setProperty(String property, String value) {
+    public LgDeviceProperty setProperty(String property, String value) throws InterruptedException, ExecutionException {
         LgDeviceProperty l = LgDeviceProperty.getProperty(lgd, property);
         if (l != null) {
             if (changeProperty(property, value)) {
@@ -150,18 +128,38 @@ public abstract class DeviceAbstract implements DeviceInterface, Runnable {
         return l;
     }
 
-    synchronized protected boolean submit(DeviceTaskAbstract deviceTask) {
-        return operationQueue.offer(deviceTask);
-    }
+    protected DeviceStateInterface currentState;
 
-    synchronized protected void interruptThread() {
-        thread.interrupt();
+    synchronized protected Future<Boolean> submit(final DeviceTaskAbstract deviceTask) {
+        return taskExecutor.submit(new Callable<Boolean>() {
+
+            public Boolean call() throws Exception {
+                Logger.debug(String.format("%s executing current step: %s", machineDeviceId.name(), currentState));
+                DeviceStateInterface newState = deviceTask.execute(currentState);
+                if (newState != null && currentState != newState) {
+                    Logger.debug("Changing state old %s, new %s", currentState, newState.toString());
+                    DeviceStateInterface initStateRet = newState.init();
+                    if (initStateRet != null) {
+                        newState = initStateRet;
+                    }
+                    Logger.debug("setting state to new %s", newState.toString());
+                    currentState = newState;
+                }
+                Logger.debug("Device %s thread done", machineDeviceId.name());
+                return true;
+            }
+        }
+        );
     }
 
     protected boolean submitSimpleTask(Enum st) {
         DeviceTaskAbstract deviceTask = new DeviceTaskAbstract(st);
-        if (submit(deviceTask)) {
-            return deviceTask.get();
+        try {
+            return submit(deviceTask).get();
+        } catch (InterruptedException ex) {
+            Logger.error("exception in change property %s", ex.toString());
+        } catch (ExecutionException ex) {
+            Logger.error("exception in change property %s", ex.toString());
         }
         return false;
     }

@@ -1,47 +1,18 @@
 package devices.mei.state;
 
-import devices.device.state.DeviceStateInterface;
-import devices.device.task.DeviceTaskAbstract;
-import devices.mei.MeiEbdsDevice.MeiEbdsDeviceStateApi;
-import java.util.concurrent.TimeUnit;
-import play.Logger;
+import devices.device.state.*;
+import devices.mei.MeiEbds;
 
 /**
  *
  * @author adji
  */
-abstract public class MeiEbdsStateAbstract implements DeviceStateInterface {
+abstract public class MeiEbdsStateAbstract extends DeviceStateAbstract implements DeviceStateInterface {
 
-    protected final MeiEbdsDeviceStateApi api;
+    final protected MeiEbds mei;
 
-    public MeiEbdsStateAbstract(MeiEbdsDeviceStateApi api) {
-        this.api = api;
-    }
-
-    public DeviceStateInterface call(DeviceTaskAbstract task) {
-        task.setReturnValue(false);
-        return null;
-    }
-
-    public DeviceStateInterface init() {
-        return this;
-    }
-
-    public DeviceStateInterface step() {
-        return step(3000);
-    }
-
-    public DeviceStateInterface step(int timeout) {
-        try {
-            DeviceTaskAbstract deviceTask = api.poll(timeout, TimeUnit.MILLISECONDS);
-            if (deviceTask != null) {
-                DeviceStateInterface ret = deviceTask.execute(this);
-                return ret;
-            }
-        } catch (InterruptedException ex) {
-            // command sent.
-        }
-        return this;
+    public MeiEbdsStateAbstract(MeiEbds mei) {
+        this.mei = mei;
     }
 
     @Override

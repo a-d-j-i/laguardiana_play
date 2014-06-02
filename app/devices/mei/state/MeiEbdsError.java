@@ -4,7 +4,7 @@ import devices.device.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
-import devices.mei.MeiEbdsDevice.MeiEbdsDeviceStateApi;
+import devices.mei.MeiEbds;
 import devices.mei.MeiEbdsDevice.MeiEbdsTaskType;
 import devices.mei.state.MeiEbdsError.COUNTER_CLASS_ERROR_CODE;
 import devices.mei.status.MeiEbdsStatusError;
@@ -23,11 +23,11 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
 
     private final String error;
 
-    public MeiEbdsError(MeiEbdsDeviceStateApi api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
-        super(api);
+    public MeiEbdsError(MeiEbds mei, COUNTER_CLASS_ERROR_CODE error_code, String error) {
+        super(mei);
         this.error = error;
         Logger.error(error);
-        api.notifyListeners(new MeiEbdsStatusError(error));
+        mei.notifyListeners(new MeiEbdsStatusError(error));
     }
 
     @Override
@@ -37,12 +37,18 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
             case TASK_RESET:
                 Logger.debug("executing reset task %s", task.toString());
                 task.setReturnValue(true);
-                return new MeiEbdsStateMain(api);
+                return new MeiEbdsStateMain(mei);
             case TASK_OPEN_PORT:
                 DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
-                task.setReturnValue(true);
-                Logger.debug("executing open task %s", open.toString());
-                return new MeiEbdsOpenPort(api, open.getPort());
+                if (mei.open(open.getPort())) {
+                    Logger.debug("MeiEbdsError new port %s", open.getPort());
+                    task.setReturnValue(true);
+                    return this;
+                } else {
+                    Logger.debug("MeiEbdsError new port %s failed to open", open.getPort());
+                    task.setReturnValue(false);
+                    return new MeiEbdsOpenPort(mei);
+                }
         }
         return null;
     }
@@ -56,7 +62,7 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
      public boolean reset() {
      return comunicate(new Callable< MeiEbdsStateAbstract>() {
      public MeiEbdsStateAbstract call() throws Exception {
-     return new Reset(api, new GotoNeutral(api));
+     return new Reset(mei, new GotoNeutral(mei));
      }
      });
      }
@@ -65,7 +71,7 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
      public boolean storingErrorReset() {
      return comunicate(new Callable< MeiEbdsStateAbstract>() {
      public MeiEbdsStateAbstract call() throws Exception {
-     return new StoringErrorReset(api);
+     return new StoringErrorReset(mei);
      }
      });
      }
@@ -74,7 +80,7 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
      public boolean clearError() {
      return comunicate(new Callable< MeiEbdsStateAbstract>() {
      public MeiEbdsStateAbstract call() throws Exception {
-     return new OpenPort(api);
+     return new OpenPort(mei);
      }
      });
      }

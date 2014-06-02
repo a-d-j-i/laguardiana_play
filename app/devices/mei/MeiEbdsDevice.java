@@ -2,21 +2,19 @@ package devices.mei;
 
 import devices.device.DeviceAbstract;
 import devices.device.DeviceClassCounterIntreface;
+import devices.device.DeviceMessageInterface;
 import devices.device.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceMessageTask;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.mei.state.MeiEbdsOpenPort;
 import devices.mei.task.MeiEbdsTaskCount;
-import devices.serial.SerialPortAdapterAbstract;
-import devices.serial.SerialPortAdapterInterface;
+import devices.serial.SerialPortReader.DeviceMessageListenerInterface;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import models.Configuration;
-import models.db.LgDevice;
+import java.util.concurrent.ExecutionException;
 import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
 import play.Logger;
@@ -27,8 +25,15 @@ import play.Logger;
  */
 public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterIntreface {
 
+    public interface MeiApi extends DeviceMessageListenerInterface {
+
+        public void notifyListeners(DeviceStatusInterface status);
+
+    }
+
     public enum MeiEbdsTaskType {
 
+        TASK_MESSAGE,
         TASK_OPEN_PORT,
         TASK_RESET,
         TASK_COUNT,
@@ -94,105 +99,51 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         }
 
     };
+    private final MeiEbds mei = new MeiEbds(new MeiApi() {
 
-    public class MeiEbdsDeviceStateApi {
-
-        final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(
-                SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7,
-                SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
-        final private static int MEI_EBDS_READ_TIMEOUT = 10000; //35ms
-        final private MeiEbds mei = new MeiEbds(MEI_EBDS_READ_TIMEOUT);
-
-        public boolean open(String value) {
-            Logger.debug("api open");
-            SerialPortAdapterInterface serialPort = Configuration.getSerialPort(value, portConf);
-            Logger.info(String.format("MEI Configuring serial port %s == %s", serialPort.toString(), value));
-            mei.close();
-            Logger.debug("Mei port open try %s", serialPort.toString());
-            boolean ret = mei.open(serialPort);
-            Logger.debug("Mei port open : %s", ret ? "success" : "fails");
-            return ret;
-        }
-
-        void close() {
-            mei.close();
-        }
-
-        public DeviceTaskAbstract poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
-            return operationQueue.poll(timeoutMS, timeUnit);
-        }
-
-        public DeviceTaskAbstract poll() {
-            return operationQueue.poll();
+        public void deviceMessageEvent(DeviceMessageInterface msg) {
+            MeiEbdsDevice.this.submit(new DeviceMessageTask(MeiEbdsTaskType.TASK_MESSAGE, msg));
         }
 
         public void notifyListeners(DeviceStatusInterface status) {
             MeiEbdsDevice.this.notifyListeners(status);
         }
 
-        public MeiEbds getMei() {
-            return mei;
-        }
-
-    }
-
-    final MeiEbdsDeviceStateApi api = new MeiEbdsDeviceStateApi();
-
-    public MeiEbdsDevice(Enum machineDeviceId, DeviceType deviceType) {
-        super(machineDeviceId, deviceType, new ArrayBlockingQueue<DeviceTaskAbstract>(1));
-    }
-
-    @Override
-    protected boolean changeProperty(String property, String value) {
-        if (property.compareToIgnoreCase("port") == 0) {
-            DeviceTaskAbstract deviceTask = new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, value);
-            if (submit(deviceTask)) {
-                boolean ret = deviceTask.get();
-                Logger.debug("changing port to %s %s", value, ret ? "SUCCESS" : "FAIL");
-                return ret;
-            }
-            return false;
-        }
-        return false;
-    }
-
-    private String initialPortValue;
-
-    @Override
-    protected void initDeviceProperties(LgDevice lgd) {
-        LgDeviceProperty lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
-        initialPortValue = lgSerialPort.value;
-        /*        if (lgd.slots == null || lgd.slots.isEmpty()) {
-         lgd.slots.add(new LgDeviceSlot());
-         }
-         */
-    }
-
-    @Override
-    public DeviceStateInterface init() {
-        Logger.debug("MeiEbds Executing init");
-        return new MeiEbdsOpenPort(api, initialPortValue);
-    }
+    });
 
     @Override
     public void finish() {
         Logger.debug("MeiEbds Executing finish");
         Logger.info("MeiEbds Closing mei serial port ");
-        api.close();
+        mei.close();
+    }
+
+    public MeiEbdsDevice(Enum machineDeviceId, DeviceType deviceType) {
+        super(machineDeviceId, deviceType);
     }
 
     @Override
-    protected boolean submitSimpleTask(Enum st) {
-        boolean ret = super.submitSimpleTask(st);
-        interruptThread();
-        return ret;
+    protected boolean changeProperty(String property, String value) throws InterruptedException, ExecutionException {
+        if (property.compareToIgnoreCase("port") == 0) {
+            DeviceTaskAbstract deviceTask = new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, value);
+            boolean ret = submit(deviceTask).get();
+            Logger.debug("changing port to %s %s", value, ret ? "SUCCESS" : "FAIL");
+            return ret;
+        }
+        return false;
     }
 
     @Override
-    protected synchronized boolean submit(DeviceTaskAbstract deviceTask) {
-        boolean ret = super.submit(deviceTask);
-        interruptThread();
-        return ret;
+    public DeviceStateInterface initState() {
+        return new MeiEbdsOpenPort(mei);
+    }
+
+    public void init() {
+        String initialPortValue;
+        LgDeviceProperty lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
+        initialPortValue = lgSerialPort.value;
+        Logger.debug("MeiEbds Executing init");
+        submit(new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, initialPortValue));
     }
 
     public boolean reset() {
@@ -215,12 +166,9 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public boolean count(List<Integer> slotInfo) {
+    public boolean count(List<Integer> slotInfo) throws InterruptedException, ExecutionException {
         DeviceTaskAbstract deviceTask = new MeiEbdsTaskCount(MeiEbdsTaskType.TASK_COUNT, slotInfo);
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
+        return submit(deviceTask).get();
     }
 
     public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {

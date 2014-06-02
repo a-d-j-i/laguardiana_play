@@ -4,24 +4,21 @@ import devices.device.DeviceAbstract;
 import devices.device.DeviceClassCounterIntreface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.glory.task.GloryDE50TaskCount;
-import devices.glory.operation.OperationWithAckResponse;
-import devices.glory.state.GloryDE50OpenPort;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.glory.operation.GloryDE50OperationInterface;
+import devices.glory.operation.OperationWithAckResponse;
 import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.state.GloryDE50StateAbstract;
+import devices.glory.state.GloryDE50OpenPort;
 import devices.glory.status.GloryDE50Status;
+import devices.glory.task.GloryDE50TaskCount;
 import devices.glory.task.GloryDE50TaskOperation;
 import devices.glory.task.GloryDE50TaskStoreDeposit;
 import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 import models.Configuration;
-import models.db.LgDevice;
 import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
 import play.Logger;
@@ -93,42 +90,34 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
             gl.close();
         }
 
-        public DeviceTaskAbstract poll(int timeoutMS, TimeUnit timeUnit) throws InterruptedException {
-            return operationQueue.poll(timeoutMS, timeUnit);
-        }
-
     }
 
     final GloryDE50DeviceStateApi api = new GloryDE50DeviceStateApi();
 
     public GloryDE50Device(Enum machineDeviceId, DeviceType deviceType) {
-        super(machineDeviceId, deviceType, new SynchronousQueue<DeviceTaskAbstract>());
+        super(machineDeviceId, deviceType);
     }
 
     @Override
-    protected boolean changeProperty(String property, String value) {
+    protected boolean changeProperty(String property, String value) throws InterruptedException, ExecutionException {
         if (property.compareToIgnoreCase("port") == 0) {
             DeviceTaskAbstract deviceTask = new DeviceTaskOpenPort(GloryDE50TaskType.TASK_OPEN_PORT, value);
-            if (submit(deviceTask)) {
-                return deviceTask.get();
-            }
-            return false;
+            return submit(deviceTask).get();
         }
         return false;
     }
 
-    private String initialPortValue;
-
     @Override
-    protected void initDeviceProperties(LgDevice lgd) {
-        LgDeviceProperty lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
-        initialPortValue = lgSerialPort.value;
-        lgSerialPort.save();
+    public DeviceStateInterface initState() {
+        return new GloryDE50OpenPort(api);
     }
 
-    @Override
-    public DeviceStateInterface init() {
-        return new GloryDE50OpenPort(api, initialPortValue);
+    public void init() {
+        String initialPortValue;
+        LgDeviceProperty lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
+        initialPortValue = lgSerialPort.value;
+        Logger.debug("MeiEbds Executing init");
+        submit(new DeviceTaskOpenPort(GloryDE50TaskType.TASK_OPEN_PORT, initialPortValue));
     }
 
     @Override
@@ -138,71 +127,60 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         //   currentCommand = new GotoNeutral(threadCommandApi);
     }
 
-    private boolean runSimpleTask(GloryDE50TaskType st) {
-        DeviceTaskAbstract deviceTask = new DeviceTaskAbstract(st);
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
-    }
-
     public boolean count(List<Integer> slotList) {
         return false;
     }
 
-    public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) throws InterruptedException, ExecutionException {
         DeviceTaskAbstract deviceTask = new GloryDE50TaskCount(GloryDE50TaskType.TASK_COUNT, desiredQuantity, currency);
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
+        return submit(deviceTask).get();
     }
 
-    public boolean envelopeDeposit() {
-        return runSimpleTask(GloryDE50TaskType.TASK_ENVELOPE_DEPOSIT);
+    public boolean envelopeDeposit() throws InterruptedException, ExecutionException {
+        return submitSimpleTask(GloryDE50TaskType.TASK_ENVELOPE_DEPOSIT);
     }
 
     public boolean collect() {
-        return runSimpleTask(GloryDE50TaskType.TASK_COLLECT);
+        return submitSimpleTask(GloryDE50TaskType.TASK_COLLECT);
     }
 
     public boolean reset() {
-        return runSimpleTask(GloryDE50TaskType.TASK_RESET);
+        return submitSimpleTask(GloryDE50TaskType.TASK_RESET);
     }
 
     public boolean clearError() {
-        return runSimpleTask(GloryDE50TaskType.TASK_CLEAR_ERROR);
+        return submitSimpleTask(GloryDE50TaskType.TASK_CLEAR_ERROR);
     }
 
     public boolean storingErrorReset() {
-        return runSimpleTask(GloryDE50TaskType.TASK_STORING_ERROR_RESET);
+        return submitSimpleTask(GloryDE50TaskType.TASK_STORING_ERROR_RESET);
     }
 
-    public boolean storeDeposit(Integer sequenceNumber) {
+    public boolean storeDeposit(Integer sequenceNumber) throws InterruptedException, ExecutionException {
         DeviceTaskAbstract deviceTask = new GloryDE50TaskStoreDeposit(GloryDE50TaskType.TASK_COUNT, sequenceNumber);
-        if (submit(deviceTask)) {
-            return deviceTask.get();
-        }
-        return false;
+        return submit(deviceTask).get();
     }
 
     public boolean withdrawDeposit() {
-        return runSimpleTask(GloryDE50TaskType.TASK_WITHDRAW_DEPOSIT);
+        return submitSimpleTask(GloryDE50TaskType.TASK_WITHDRAW_DEPOSIT);
+    }
+
+    public boolean cancelDeposit() {
+        return submitSimpleTask(GloryDE50TaskType.TASK_CANCEL);
     }
 
     public GloryDE50TaskOperation sendGloryDE50Operation(OperationWithAckResponse c, boolean b) {
         GloryDE50TaskOperation deviceTask = new GloryDE50TaskOperation(GloryDE50TaskType.TASK_OPERATION, c, b);
-        if (submit(deviceTask)) {
-            if (deviceTask.get()) {
+        try {
+            if (submit(deviceTask).get()) {
                 return deviceTask;
             }
+        } catch (InterruptedException ex) {
+            Logger.error("exeption in sendGloryDE50Operation %s", ex);
+        } catch (ExecutionException ex) {
+            Logger.error("exeption in sendGloryDE50Operation %s", ex);
         }
         return null;
     }
 
-    // normally currentState must not be used outside DeviceAbstract, this is a special exception.
-    public boolean cancelDeposit() {
-        GloryDE50StateAbstract cs = (GloryDE50StateAbstract) currentState.get();
-        return cs.cancelDeposit();
-    }
 }

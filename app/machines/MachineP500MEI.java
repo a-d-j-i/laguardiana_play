@@ -2,6 +2,7 @@ package machines;
 
 import devices.device.DeviceEvent;
 import models.db.LgDevice.DeviceType;
+import play.Logger;
 
 /**
  *
@@ -43,6 +44,7 @@ public class MachineP500MEI extends Machine {
              case P500_MEI_DEVICE_IO_BOARD_MX220_1_0:
              break;*/
             case P500_MEI_DEVICE_MEI_EBDS:
+                Logger.debug("MACHINE GOT EVENT : %s", deviceEvent);
                 break;
             default:
                 throw new UnsupportedOperationException("Not supported yet.");

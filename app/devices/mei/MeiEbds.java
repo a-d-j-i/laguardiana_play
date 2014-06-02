@@ -1,66 +1,62 @@
 package devices.mei;
 
-import devices.device.state.DeviceStateInterface;
+import devices.device.DeviceMessageInterface;
+import devices.device.DeviceStatusInterface;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
 import devices.mei.response.MeiEbdsAcceptorMsgError;
-import devices.mei.response.MeiEbdsAcceptorMsgInterface;
+import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
+import devices.serial.SerialPortMessageParserInterface;
+import devices.serial.SerialPortReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import models.Configuration;
 import play.Logger;
 
-public class MeiEbds {
+public class MeiEbds implements SerialPortMessageParserInterface {
 
-    private final int readTimeout;
-    private SerialPortAdapterInterface serialPort = null;
+    final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(
+            SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7,
+            SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
+    final private static int MEI_EBDS_READ_TIMEOUT = 10000; //35ms
+
+    private SerialPortReader serialPortReader = null;
+    final MeiEbdsDevice.MeiApi api;
     int retries = 0;
 
-    MeiEbds(int readTimeout) {
-        this.readTimeout = readTimeout;
+    MeiEbds(MeiEbdsDevice.MeiApi api) {
+        this.api = api;
     }
 
-    public synchronized boolean open(SerialPortAdapterInterface serialPort) {
-        Logger.info("Opening mei serial port %s", serialPort);
-        if (serialPort == null || this.serialPort != null) {
+    public void notifyListeners(DeviceStatusInterface status) {
+        api.notifyListeners(status);
+    }
+
+    public synchronized boolean open(String port) {
+        Logger.debug("api open");
+        close();
+        SerialPortAdapterInterface serialPort = Configuration.getSerialPort(port, portConf);
+        if (serialPort == null || this.serialPortReader != null) {
+            Logger.info("Error opening mei serial port %s %s", serialPort, this.serialPortReader);
             return false;
         }
-        this.serialPort = serialPort;
-        return serialPort.open();
+        this.serialPortReader = new SerialPortReader(serialPort, this, api);
+        return serialPortReader.open();
     }
 
     public synchronized void close() {
-        Logger.info("Closing mei serial port ");
-        if (serialPort != null) {
-            serialPort.close();
+        if (serialPortReader != null) {
+            Logger.info("Closing mei serial port ");
+            serialPortReader.close();
+            serialPortReader = null;
         }
-        serialPort = null;
     }
 
-    public boolean write(MeiEbdsHostMsg operation) {
-        if (serialPort == null) {
-            throw new IllegalArgumentException("Serial port closed");
-        }
-        Logger.debug("Writting : %s", Arrays.toString(operation.getCmdStr()));
-        return serialPort.write(operation.getCmdStr());
-    }
-
-    public Byte read(int timeout) throws TimeoutException, InterruptedException {
-        if (serialPort == null) {
-            throw new IllegalArgumentException("Serial port closed");
-        }
-        Byte ch = serialPort.read(timeout);
-        if (ch == null) {
-            throw new TimeoutException("timeout reading from port");
-        }
-//        Logger.debug("readed ch : 0x%x", ch);
-        return ch;
-    }
-
-    public MeiEbdsAcceptorMsgInterface getMessage() throws InterruptedException {
-        MeiEbdsAcceptorMsgInterface ret;
+    public DeviceMessageInterface getMessage(SerialPortAdapterInterface serialPort) throws InterruptedException {
+        DeviceMessageInterface ret;
         try {
             ret = getMessageInt();
         } catch (TimeoutException ex) {
@@ -76,14 +72,14 @@ public class MeiEbds {
             return null;
         }
         retries = 0;
-        Logger.debug("Received msg : %s == %s", ret.getMessageType().name(), ret.toString());
+        Logger.debug("Received msg : %s == %s", ret.getType().name(), ret.toString());
         return ret;
     }
 
-    private MeiEbdsAcceptorMsgInterface getMessageInt() throws TimeoutException, InterruptedException {
+    private DeviceMessageInterface getMessageInt() throws TimeoutException, InterruptedException {
         byte buffer[] = new byte[40];
         while (true) {
-            Byte ch = read(readTimeout);
+            Byte ch = read(MEI_EBDS_READ_TIMEOUT);
             switch (ch) {
                 case 0x02: // stx
                     break;
@@ -148,10 +144,6 @@ public class MeiEbds {
         return true;
     }
 
-    public DeviceStateInterface processMessageForCancel() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public String cancelCount() {
         hostMsg.disableAllDenominations();
         return sendPollMessage();
@@ -160,7 +152,11 @@ public class MeiEbds {
     public String sendPollMessage() {
         String err = null;
         Logger.debug("MEI sending msg : %s", hostMsg.toString());
-        if (!write(hostMsg)) {
+        if (serialPortReader == null) {
+            throw new IllegalArgumentException("Serial port closed");
+        }
+        Logger.debug("Writting : %s", Arrays.toString(hostMsg.getCmdStr()));
+        if (!serialPortReader.write(hostMsg.getCmdStr())) {
             err = "Error writting to the port";
         }
         hostMsg.clearStackNote();
@@ -178,7 +174,20 @@ public class MeiEbds {
         return true;
     }
 
-    public boolean isMessageOk(MeiEbdsAcceptorMsgInterface msg) {
+    public boolean isMessageOk(DeviceMessageInterface msg) {
         return (msg == lastResult);
     }
+
+    private Byte read(int timeout) throws TimeoutException, InterruptedException {
+        if (serialPortReader == null) {
+            throw new IllegalArgumentException("Serial port closed");
+        }
+        Byte ch = serialPortReader.read(timeout);
+        if (ch == null) {
+            throw new TimeoutException("timeout reading from port");
+        }
+//        Logger.debug("readed ch : 0x%x", ch);
+        return ch;
+    }
+
 }

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import machines.Machine;
 import models.db.LgDeviceProperty;
 import play.Logger;
@@ -108,7 +109,7 @@ public class DeviceController extends Controller {
         render();
     }
 
-    public static void setProperty(Integer deviceId, String property, String value) {
+    public static void setProperty(Integer deviceId, String property, String value) throws InterruptedException, ExecutionException {
         if (!request.isAjax()) {
             list();
         }
@@ -238,7 +239,7 @@ public class DeviceController extends Controller {
         render();
     }
 
-    public static void count(Integer deviceId, Map<String, String> slotsIds, Integer currency) {
+    public static void count(Integer deviceId, Map<String, String> slotsIds, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
         getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
@@ -274,7 +275,7 @@ public class DeviceController extends Controller {
         counterClassCommands(deviceId, currency);
     }
 
-    public static void storeDeposit(Integer deviceId, Integer currency) {
+    public static void storeDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
         getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
@@ -323,7 +324,7 @@ public class DeviceController extends Controller {
         counterClassCommands(deviceId, currency);
     }
 
-    public static void envelopeDeposit(Integer deviceId, Integer currency) {
+    public static void envelopeDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
         getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;

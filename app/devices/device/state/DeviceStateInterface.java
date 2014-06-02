@@ -10,8 +10,6 @@ public interface DeviceStateInterface {
 
     public DeviceStateInterface init();
 
-    public DeviceStateInterface step();
-
     public DeviceStateInterface call(DeviceTaskAbstract task);
 
     @Override

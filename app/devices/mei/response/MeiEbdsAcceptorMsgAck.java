@@ -1,5 +1,6 @@
 package devices.mei.response;
 
+import devices.device.DeviceMessageInterface;
 import devices.mei.MeiEbdsDevice.ExtendedMessageSubType;
 import devices.mei.MeiEbdsDevice.MessageSubType;
 import devices.mei.MeiEbdsDevice.MessageType;
@@ -12,7 +13,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
+public class MeiEbdsAcceptorMsgAck implements DeviceMessageInterface {
 
     enum MEI_EBDS_CMD_DATA_DESC {
 
@@ -128,14 +129,14 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
         }
     }
 
-    public MessageType getMessageType() {
+    public MessageType getType() {
         // fixed payload offset
         int d = MEI_EBDS_CMD_DATA_DESC.MESSAGE_TYPE.getValue(data);
         return msgTypeMap.get(d);
     }
 
     public MessageSubType getMessageSubType() {
-        MessageType t = getMessageType();
+        MessageType t = getType();
         if (t == null) {
             return null;
         }
@@ -205,7 +206,7 @@ public class MeiEbdsAcceptorMsgAck implements MeiEbdsAcceptorMsgInterface {
     }
 
     public String getNoteSlot() {
-        MessageType t = getMessageType();
+        MessageType t = getType();
         if (t != null && t == MessageType.Extended) {
             MessageSubType st = getMessageSubType();
             if (st != null && st == ExtendedMessageSubType.RequestSupportedNoteSet) {

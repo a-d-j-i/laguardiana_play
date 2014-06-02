@@ -1,16 +1,19 @@
 package devices.device.task;
 
 import devices.device.state.DeviceStateInterface;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class DeviceTaskAbstract {
+public class DeviceTaskAbstract implements Future<Boolean> {
 
     final Enum type;
     final Lock lock = new ReentrantLock();
@@ -22,19 +25,28 @@ public class DeviceTaskAbstract {
         this.type = type;
     }
 
-    // Executed by the outher thread.
-    public boolean get() {
+    public Boolean get() throws InterruptedException, ExecutionException {
         lock.lock();
         try {
             if (!done) {
                 cdone.await();
             }
             return returnValue;
-        } catch (InterruptedException ex) {
         } finally {
             lock.unlock();
         }
-        return false;
+    }
+
+    public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        lock.lock();
+        try {
+            if (!done) {
+                cdone.await(timeout, unit);
+            }
+            return returnValue;
+        } finally {
+            lock.unlock();
+        }
     }
 
     // Executed by the inner thread.
@@ -61,6 +73,23 @@ public class DeviceTaskAbstract {
 
     public Enum getType() {
         return type;
+    }
+
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean isCancelled() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean isDone() {
+        lock.lock();
+        try {
+            return done;
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

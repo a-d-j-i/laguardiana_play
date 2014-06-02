@@ -7,6 +7,7 @@ package devices.device;
 
 import devices.device.events.DeviceEventListener;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import models.db.LgDeviceProperty;
 
 /**
@@ -27,11 +28,11 @@ public interface DeviceInterface {
 
     public List<LgDeviceProperty> getEditableProperties();
 
-    public LgDeviceProperty setProperty(String property, String value);
+    public LgDeviceProperty setProperty(String property, String value) throws InterruptedException, ExecutionException;
 
     public boolean clearError();
 
     public DeviceEvent getLastEvent();
-    
+
     public Enum getType();
 }

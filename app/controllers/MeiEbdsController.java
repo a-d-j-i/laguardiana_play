@@ -4,9 +4,9 @@ import devices.device.DeviceEvent;
 import devices.device.DeviceInterface;
 import devices.mei.MeiEbdsDevice;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 import machines.Machine;
 import play.mvc.Before;
-import play.mvc.Util;
 
 public class MeiEbdsController extends Application {
 
@@ -26,7 +26,7 @@ public class MeiEbdsController extends Application {
         }
     }
 
-    public static void count(Integer deviceId) {
+    public static void count(Integer deviceId) throws InterruptedException, ExecutionException {
         flash.put("lastCmd", "count");
         Integer[] slotInfo = {1, 1, 1, 1, 1, 1, 1, 1};
         getStatus(deviceId, meiDevice.count(Arrays.asList(slotInfo)));

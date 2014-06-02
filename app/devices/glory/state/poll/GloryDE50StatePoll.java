@@ -4,6 +4,8 @@
  */
 package devices.glory.state.poll;
 
+import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50OperationResponse;
@@ -43,7 +45,8 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
     }
 
     @Override
-    public GloryDE50StateAbstract step() {
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
+
         if (mustCancel.get()) {
             api.notifyListeners(CANCELING);
             Logger.debug("doCancel");

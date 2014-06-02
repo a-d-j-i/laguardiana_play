@@ -6,8 +6,8 @@ package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.glory.task.GloryDE50TaskCount;
 import devices.device.task.DeviceTaskOpenPort;
+import devices.glory.task.GloryDE50TaskCount;
 import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.poll.GloryDE50Collect;
@@ -18,6 +18,7 @@ import devices.glory.state.poll.GloryDE50Reset;
 import devices.glory.state.poll.GloryDE50StoringErrorReset;
 import devices.glory.GloryDE50Device.GloryDE50TaskType;
 import devices.glory.task.GloryDE50TaskOperation;
+import play.Logger;
 
 /**
  *
@@ -62,8 +63,15 @@ public class GloryDE50WaitForOperation extends GloryDE50StateOperation {
                 }
             case TASK_OPEN_PORT:
                 DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
-                task.setReturnValue(true);
-                return new GloryDE50OpenPort(api, open.getPort());
+                if (api.open(open.getPort())) {
+                    Logger.debug("GloryDE50WaitForOperation new port %s", open.getPort());
+                    task.setReturnValue(true);
+                    return this;
+                } else {
+                    Logger.debug("GloryDE50WaitForOperation new port %s failed to open", open.getPort());
+                    task.setReturnValue(false);
+                    return new GloryDE50OpenPort(api);
+                }
             case TASK_WITHDRAW_DEPOSIT:
             case TASK_STORE_DEPOSIT:
             default:
