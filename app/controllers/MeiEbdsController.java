@@ -14,12 +14,9 @@ public class MeiEbdsController extends Application {
 
     @Before
     static void getCounter(Integer deviceId) throws Throwable {
-        if (deviceId == null) {
-            DeviceController.list();
-        }
-        DeviceInterface d = Machine.findDeviceById(deviceId);
-        if (d instanceof MeiEbdsDevice) {
-            meiDevice = (MeiEbdsDevice) d;
+        DeviceController.getCounter(deviceId);
+        if (DeviceController.device instanceof MeiEbdsDevice) {
+            meiDevice = (MeiEbdsDevice) DeviceController.device;
         } else {
             renderArgs.put("error", "invalid device id");
             getStatus(deviceId, true);
@@ -52,6 +49,7 @@ public class MeiEbdsController extends Application {
         getStatus(deviceId, meiDevice.reset());
     }
 
+    // Counter Class end
     public static void getStatus(Integer deviceId) {
         getStatus(deviceId, true);
     }

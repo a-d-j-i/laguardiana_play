@@ -13,8 +13,8 @@ public class DenominationDataRequest extends OperationdWithDataResponse {
     }
 
     @Override
-    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
-        String err = super.fillResponse(dr, response);
+    public String fillResponse(int len, byte[] dr, final GloryDE50OperationResponse response) {
+        String err = super.fillResponse(len, dr, response);
         if (err != null) {
             return err;
         }

@@ -31,6 +31,7 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
 
     public void setResponse(GloryDE50OperationResponse response) {
         this.response = response;
+        setReturnValue(response != null);
     }
 
     public GloryDE50OperationResponse getResponse() {
@@ -47,6 +48,11 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
 
     public String getError() {
         return error;
+    }
+
+    @Override
+    public String toString() {
+        return "GloryDE50TaskOperation{" + "operation=" + operation + ", debug=" + debug + ", error=" + error + ", response=" + response + '}';
     }
 
 }

@@ -39,6 +39,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
     boolean fakeCount = false;
     int count_retries = 0;
     boolean batchEnd = false;
+    boolean debug = true;
 
     public GloryDE50Count(GloryDE50DeviceStateApi api, Map<Integer, Integer> desiredQuantity, Integer currency) {
         super(api);
@@ -92,7 +93,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
                         return sret;
                     }
                     GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-                    String error = api.sendGloryDE50Operation(new devices.glory.operation.SetDepositMode(), response);
+                    String error = api.sendGloryDE50Operation(new devices.glory.operation.SetDepositMode(), debug, response);
                     if (error == null) {
                         Logger.error("Error %s sending cmd : SetDepositMode", error);
                         return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
@@ -270,7 +271,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
              }*/
             // Sometimes the BatchDataTransmition fails, trying randomly to see what can be.
             GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-            String error = api.sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills), response);
+            String error = api.sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills), debug, response);
             if (error == null) {
                 api.notifyListeners(COUNTING);
             } else {
@@ -281,7 +282,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
 
         Logger.debug("ISBATCH");
         GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-        String error = api.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), response);
+        String error = api.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), debug, response);
         if (error != null) {
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
             return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
@@ -327,7 +328,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
 
     private GloryDE50StateAbstract refreshQuantity() {
         GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-        String error = api.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), response);
+        String error = api.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), debug, response);
         if (error != null) {
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
             return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);

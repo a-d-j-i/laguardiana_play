@@ -1,8 +1,17 @@
-#{extends 'main.html' /}
 #{set title:'Glory (Comandos)' /}
-<section>
-    <header>
-    </header>
+#{extends 'main.html' /}
+#{set 'moreStyles'}
+<style>
+    .circle {
+        background: yellow;
+        border-radius: 100%;
+        font-size: x-large;
+    }
+</style>
+#{/set}
+
+<section id ="menu_principal">
+    <header></header>
     <nav>
         #{if hasClass}
         <a id ="backButton" href="@{DeviceController.commands(deviceId)}" class="boton_top">◄ &{ 'application.back' }</a>
@@ -12,108 +21,138 @@
         #{/else}
     </nav>
     <article>
-        <div>
-            <ul class="columns">
-                <li class="fixed column" style="width: 50%">
-                    <p>DeviceId : ${deviceId}</p>
-                    <p>${status?.getError()}
-                    </p>
-                    #{if (status?.haveData() ) }
-                    <p style="word-wrap: break-word;"> 
-                        Registers<br/>
-                        ${status?.getSRMode()}<br/>
-                        ${status?.getD1Mode()}<br/>
-                        #{list items:status?.getSrBits(), as:'p'}${p}<br/>
-                        #{/list}
-                        #{list items:status?.getD2Bits(), as:'p'}${p}<br/>
-                        #{/list}
-                        #{list items:status?.getInfo(), as:'p'}${p}<br/>
-                        #{/list}
-                    </p>
+        <div class="botonera">
+            <ul class="on-2 unit">
+                <li class="column">
+                    <div style="margin:20px;">
+                        <div>
+                            <ul class="columns">
+                                <li class="fixed column" style="width: 30%">
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.sense(deviceId)}">Sense</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.remoteCancel(deviceId)}">remoteCancel</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setDepositMode(deviceId)}">setDepositMode</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.batchDataTransmition(deviceId)}">batchDataTransmition</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.stopCounting(deviceId)}">stopCounting</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.countingDataRequest(deviceId)}">countingDataRequest</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.amountRequest(deviceId)}">amountRequest</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setManualMode(deviceId)}">setManualMode</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setCollectMode(deviceId)}">setCollectMode</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setErrorRecoveryMode(deviceId)}">setErrorRecoveryMode</a>
+                                </li>
+                                <li class="fixed column" style="width: 30%">
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.resetDevice(deviceId)}">resetDevice</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setStroringErrorRecoveryMode(deviceId)}">StroringErrorRecovery</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.openEscrow(deviceId)}">openEscrow</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.closeEscrow(deviceId)}">closeEscrow</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.storingStart(deviceId)}">storingStart</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.denominationDataRequest(deviceId)}">denominationData</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,1)}">switchCurrent1</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,2)}">switchCurrent2</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,3)}">switchCurrent3</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,4)}">switchCurrent4</a>
+                                </li>
+                                <li class="fixed column" style="width: 30%">
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,5)}">switchCurrent5</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,6)}">switchCurrent6</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,7)}">switchCurrent7</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.settingDataRequestEscrow(deviceId)}">settingDataRequestEscrow</a>
+
+                                    <!--            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.settingDataRequestCassete(deviceId)}">settingDataRequestCassete</a>-->
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.settingDataRequestReject(deviceId)}">settingDataRequestReject</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.deviceSettingDataLoad(deviceId)}">deviceSettingDataLoad</a><br/>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.logDataRequest(deviceId)}">logDataRequest</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.programUpdate(deviceId)}">programUpdate</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setTime(deviceId)}">setTime</a>
+                                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.getFileInformation(deviceId)}">getFileInformation</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </li>
                 <li class="fixed column" style="width: 50%">
-                    <p style="word-wrap: break-word;"> Data: ${status?.getData()}</p>
-                    #{/if}
-                    #{if (status?.haveData() ) }
-                    #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
-                    <p style="word-wrap: break-word;"> 
-                        Denomination Data
-                    <table>
-                        <thead></thead>
-                        <tbody>
-                            #{list items:status?.getDenominationData(), as:'p'}    
-                            #{if ( p_index - 1 ) % 2 == 0}<tr>#{/if}
-                                <td>Denomination ( ${p.idx}, ${p.denominationCode} ): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if}</td>
-                                #{if ( p_index -1 ) % 2 == 1}</tr>#{/if}
+                    <div class="columna" style="height: 100%; padding: 20px;">
+                        <div>
+                            <p>LAST CMD:<span id="last_cmd">${lastCmd}</span></p>
+                            <p>LAST RESULT:<span id="last_result">${lastResult}</span></p>
+                        </div>
+                        <div style="overflow-y: scroll; height: 50px;">
+                            <p>LAST EVENTS:<br/><span id="last_event">${lastEvent}</span></p>
+                        </div>
+                    </div>
+                    <div>
+
+                        <p>DeviceId : ${deviceId}</p>
+                        <p>${status?.getError()}
+                        </p>
+                        #{if (status?.haveData() ) }
+                        <p style="word-wrap: break-word;"> 
+                            Registers<br/>
+                            ${status?.getSRMode()}<br/>
+                            ${status?.getD1Mode()}<br/>
+                            #{list items:status?.getSrBits(), as:'p'}${p}<br/>
                             #{/list}
-                        </tbody>
-                    </table>
-                    </p>
-                    #{/if}
-                    #{else}
-                    <p style="word-wrap: break-word;"> 
-                        Bills Data:
-                    <table>
-                        <thead></thead>
-                        <tbody>
-                            #{list items:status?.getBills(), as:'p'} 
-                            #{if ( p_index - 1 ) % 4 == 0}<tr>#{/if}
-                                <td>Bill ${p}</td>
-                                #{if ( p_index -1 ) % 4 == 3}</tr>#{/if}
+                            #{list items:status?.getD2Bits(), as:'p'}${p}<br/>
                             #{/list}
-                        </tbody>
-                    </table>
-                    #{else}
-                    No bill information
-                    #{/else}
-                    </p>
-                    #{/else}
-                    #{/if}
+                            #{list items:status?.getInfo(), as:'p'}${p}<br/>
+                            #{/list}
+                        </p>
+                        <p style="word-wrap: break-word;"> Data: ${status?.getData()}</p>
+                        #{/if}
+                        #{if (status?.haveData() ) }
+                        #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
+                        <p style="word-wrap: break-word;"> 
+                            Denomination Data
+                        <table>
+                            <thead></thead>
+                            <tbody>
+                                #{list items:status?.getDenominationData(), as:'p'}    
+                                #{if ( p_index - 1 ) % 2 == 0}<tr>#{/if}
+                                    <td>Denomination ( ${p.idx}, ${p.denominationCode} ): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if}</td>
+                                    #{if ( p_index -1 ) % 2 == 1}</tr>#{/if}
+                                #{/list}
+                            </tbody>
+                        </table>
+                        </p>
+                        #{/if}
+                        #{else}
+                        <p style="word-wrap: break-word;"> 
+                            Bills Data:
+                        <table>
+                            <thead></thead>
+                            <tbody>
+                                #{list items:status?.getBills(), as:'p'} 
+                                #{if ( p_index - 1 ) % 4 == 0}<tr>#{/if}
+                                    <td>Bill ${p}</td>
+                                    #{if ( p_index -1 ) % 4 == 3}</tr>#{/if}
+                                #{/list}
+                            </tbody>
+                        </table>
+                        #{else}
+                        No bill information
+                        #{/else}
+                        </p>
+                        #{/else}
+                        #{/if}
+                    </div>
                 </li>
             </ul>
         </div>
 
-        <div>
-            <ul class="columns">
-                <li class="fixed column" style="width: 30%">
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.sense(deviceId)}">Sense</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.remoteCancel(deviceId)}">remoteCancel</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setDepositMode(deviceId)}">setDepositMode</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.batchDataTransmition(deviceId)}">batchDataTransmition</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.stopCounting(deviceId)}">stopCounting</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.countingDataRequest(deviceId)}">countingDataRequest</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.amountRequest(deviceId)}">amountRequest</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setManualMode(deviceId)}">setManualMode</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setCollectMode(deviceId)}">setCollectMode</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setErrorRecoveryMode(deviceId)}">setErrorRecoveryMode</a>
-                </li>
-                <li class="fixed column" style="width: 30%">
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.resetDevice(deviceId)}">resetDevice</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setStroringErrorRecoveryMode(deviceId)}">StroringErrorRecovery</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.openEscrow(deviceId)}">openEscrow</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.closeEscrow(deviceId)}">closeEscrow</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.storingStart(deviceId)}">storingStart</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.denominationDataRequest(deviceId)}">denominationData</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,1)}">switchCurrent1</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,2)}">switchCurrent2</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,3)}">switchCurrent3</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,4)}">switchCurrent4</a>
-                </li>
-                <li class="fixed column" style="width: 30%">
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,5)}">switchCurrent5</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,6)}">switchCurrent6</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,7)}">switchCurrent7</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.settingDataRequestEscrow(deviceId)}">settingDataRequestEscrow</a>
 
-                    <!--            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.settingDataRequestCassete(deviceId)}">settingDataRequestCassete</a>-->
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.settingDataRequestReject(deviceId)}">settingDataRequestReject</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.deviceSettingDataLoad(deviceId)}">deviceSettingDataLoad</a><br/>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.logDataRequest(deviceId)}">logDataRequest</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.programUpdate(deviceId)}">programUpdate</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setTime(deviceId)}">setTime</a>
-                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.getFileInformation(deviceId)}">getFileInformation</a>
-                </li>
-            </ul>
-        </div>
     </article>
 </section>
+
+#{set 'moreScripts'}
+<script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script type="text/javascript" charset="${_response_encoding}">
+    doRefresh = function() {
+        $.getJSON('@{GloryDE50Controller.getStatus(deviceId)}', function(data) {
+            var lastEvent = data[ 0 ];
+            lastEvent = lastEvent + "\n" + $("#last_event").text();
+            $("#last_event").text(lastEvent);
+            doneRefresh();
+        })
+    };
+
+</script>
+#{/set}

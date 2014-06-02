@@ -8,5 +8,5 @@ public interface GloryDE50OperationInterface {
 
     public byte[] getCmdStr();
 
-    public String fillResponse(byte[] b, GloryDE50OperationResponse response);
+    public String fillResponse(int len, byte[] b, GloryDE50OperationResponse response);
 }

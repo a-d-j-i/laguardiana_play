@@ -99,7 +99,7 @@ public class GloryDE50 {
             }
             Logger.debug(h.toString());
         }
-        return cmd.fillResponse(b, response);
+        return cmd.fillResponse(b.length, b, response);
     }
 
     private Integer getXXVal(byte[] b) {

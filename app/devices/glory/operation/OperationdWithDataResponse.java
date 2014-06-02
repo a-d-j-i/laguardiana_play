@@ -11,17 +11,17 @@ public class OperationdWithDataResponse extends OperationWithAckResponse {
     }
 
     @Override
-    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
+    public String fillResponse(int len, byte[] dr, final GloryDE50OperationResponse response) {
         if (dr == null) {
             return "Invalid argument dr == null";
         }
-        int l = dr.length;
+        int l = len;
 
         if (l == 1) {
-            return super.fillResponse(dr, response);
+            return super.fillResponse(len, dr, response);
         }
-        if (dr.length < 21) {
-            return String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), dr.length);
+        if (len < 2) {
+            return String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), len);
         }
 
         if (dr[ l - 2] != 3) {
@@ -37,10 +37,10 @@ public class OperationdWithDataResponse extends OperationWithAckResponse {
             return String.format("CHECKSUM don't match 0x%x != 0x%x", dr[ l - 1], checksum);
         }
 
-        String err = super.fillResponse(dr, response);
-        if (err != null) {
-            return err;
-        }
+//        String err = super.fillResponse(1, dr, response);
+//        if (err != null) {
+//            return err;
+//        }
         response.setSr1Mode(SR1Mode.getMode(dr[ 3] & 0x3F));
         response.setSr2((byte) (dr[ 4] & 0x3F));
         response.setSr3((byte) (dr[ 5] & 0x3F));

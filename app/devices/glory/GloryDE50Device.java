@@ -49,10 +49,6 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         final private int GLORY_READ_TIMEOUT = 5000;
         final private GloryDE50 gl = new GloryDE50(GLORY_READ_TIMEOUT);
 
-        public String sendGloryDE50Operation(GloryDE50OperationInterface operation, final GloryDE50OperationResponse response) {
-            return sendGloryDE50Operation(operation, false, response);
-        }
-
         public String sendGloryDE50Operation(GloryDE50OperationInterface operation, boolean debug, final GloryDE50OperationResponse response) {
             try {
                 return gl.sendOperation(operation, debug, response);
@@ -169,16 +165,16 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         return submitSimpleTask(GloryDE50TaskType.TASK_CANCEL);
     }
 
-    public GloryDE50TaskOperation sendGloryDE50Operation(OperationWithAckResponse c, boolean b) {
-        GloryDE50TaskOperation deviceTask = new GloryDE50TaskOperation(GloryDE50TaskType.TASK_OPERATION, c, b);
+    public GloryDE50TaskOperation sendGloryDE50Operation(OperationWithAckResponse c) {
+        GloryDE50TaskOperation deviceTask = new GloryDE50TaskOperation(GloryDE50TaskType.TASK_OPERATION, c, true);
         try {
-            if (submit(deviceTask).get()) {
-                return deviceTask;
-            }
+            submit(deviceTask).get();
+            return deviceTask;
         } catch (InterruptedException ex) {
             Logger.error("exeption in sendGloryDE50Operation %s", ex);
         } catch (ExecutionException ex) {
             Logger.error("exeption in sendGloryDE50Operation %s", ex);
+            ex.printStackTrace();
         }
         return null;
     }

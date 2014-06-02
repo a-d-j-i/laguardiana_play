@@ -10,8 +10,8 @@ public class OperationWithCountingDataResponse extends OperationdWithDataRespons
     }
 
     @Override
-    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
-        String err = super.fillResponse(dr, response);
+    public String fillResponse(int len, byte[] dr, final GloryDE50OperationResponse response) {
+        String err = super.fillResponse(len, dr, response);
         if (err != null) {
             return err;
         }
@@ -41,7 +41,7 @@ public class OperationWithCountingDataResponse extends OperationdWithDataRespons
                 Logger.debug(String.format("Bill %d: quantity %d", slot, value));
             }
         } else {
-            return String.format("Invalid command (%s) response length %d expected", getDescription(), dr.length);
+            return String.format("Invalid command (%s) response length %d expected", getDescription(), len);
         }
         return null;
     }

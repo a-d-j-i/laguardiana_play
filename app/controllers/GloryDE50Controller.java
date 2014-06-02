@@ -1,11 +1,14 @@
 package controllers;
 
-import devices.glory.operation.EndUpload;
-import devices.glory.operation.LogDataRequest;
-import devices.glory.operation.StartUpload;
-import devices.glory.operation.Sense;
+import com.google.gson.Gson;
+import devices.device.DeviceEvent;
 import devices.device.DeviceInterface;
 import devices.glory.GloryDE50Device;
+import devices.glory.operation.EndUpload;
+import devices.glory.operation.LogDataRequest;
+import devices.glory.operation.Sense;
+import devices.glory.operation.StartUpload;
+import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.task.GloryDE50TaskOperation;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +19,7 @@ import java.util.Date;
 import machines.Machine;
 import play.Logger;
 import play.mvc.Before;
+import play.mvc.Util;
 
 public class GloryDE50Controller extends Application {
 
@@ -23,119 +27,160 @@ public class GloryDE50Controller extends Application {
 
     @Before
     static void getCounter(Integer deviceId) throws Throwable {
-        if (deviceId == null) {
-            DeviceController.list();
-        }
-        DeviceInterface d = Machine.findDeviceById(deviceId);
-        if (d instanceof GloryDE50Device) {
-            glory = (GloryDE50Device) d;
+        DeviceController.getCounter(deviceId);
+        if (DeviceController.device instanceof GloryDE50Device) {
+            glory = (GloryDE50Device) DeviceController.device;
         } else {
             renderArgs.put("error", "invalid device id");
-            setStatusAndRedirect(deviceId, null);
+            getStatus(deviceId, true);
         }
     }
 
+    @Util
     private static void setStatusAndRedirect(Integer deviceId, GloryDE50TaskOperation op) {
         // TODO: op.isError();
         if (op.getResponse() != null) {
-            Logger.debug("STATUS : %s", op.getResponse().toString());
-            renderArgs.put("status", op.getResponse().getRepr());
+            flash.put("status", new Gson().toJson(op.getResponse()));
         }
+        getStatus(deviceId, !op.isError());
+    }
+
+    // Counter Class end
+    public static void getStatus(Integer deviceId, boolean retval) {
+        GloryDE50OperationResponse response = new Gson().fromJson(flash.get("status"), GloryDE50OperationResponse.class);
+        if (response != null) {
+            Logger.debug("STATUS : %s", response.toString());
+            renderArgs.put("status", response.getRepr());
+        }
+        renderArgs.put("lastCmd", flash.get("lastCmd"));
+        renderArgs.put("lastResult", retval ? "SUCCESS" : "FAIL");
         DeviceInterface d = Machine.findDeviceById(deviceId);
-        renderArgs.put("deviceId", deviceId);
-        renderArgs.put("device", d);
-        renderArgs.put("backUrl", flash.get("backUrl"));
-        render("DeviceController/" + d.getType().name().toUpperCase() + "_OPERATIONS.html");
+        DeviceEvent de = d.getLastEvent();
+        String lastEvent = "";
+        if (de != null) {
+            lastEvent = de.toString();
+        }
+        if (request.isAjax()) {
+            Object ret[] = new Object[1];
+            ret[ 0] = lastEvent;
+            renderJSON(ret);
+        } else {
+            renderArgs.put("deviceId", deviceId);
+            renderArgs.put("device", d);
+            renderArgs.put("lastEvent", lastEvent);
+            render("DeviceController/" + d.getType().name().toUpperCase() + "_OPERATIONS.html");
+        }
     }
 
     public static void sense(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new Sense(), false));
+        flash.put("lastCmd", "sense");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new Sense()));
     }
 
     public static void remoteCancel(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.RemoteCancel(), true));
+        flash.put("lastCmd", "remoteCancel");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.RemoteCancel()));
     }
 
     public static void setDepositMode(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetDepositMode(), true));
+        flash.put("lastCmd", "setDepositMode");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetDepositMode()));
     }
 
     public static void setManualMode(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetManualMode(), true));
+        flash.put("lastCmd", "setManualMode");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetManualMode()));
     }
 
     public static void setErrorRecoveryMode(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetErrorRecoveryMode(), true));
+        flash.put("lastCmd", "setErrorRecoveryMode");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetErrorRecoveryMode()));
     }
 
     public static void setStroringErrorRecoveryMode(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetStroringErrorRecoveryMode(), true));
+        flash.put("lastCmd", "setStroringErrorRecoveryMode");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetStroringErrorRecoveryMode()));
     }
 
     public static void setCollectMode(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetCollectMode(), true));
+        flash.put("lastCmd", "setCollectMode");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetCollectMode()));
     }
 
     public static void openEscrow(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.OpenEscrow(), true));
+        flash.put("lastCmd", "openEscrow");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.OpenEscrow()));
     }
 
     public static void closeEscrow(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.CloseEscrow(), true));
+        flash.put("lastCmd", "closeEscrow");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.CloseEscrow()));
     }
 
     public static void storingStart(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.StoringStart(0), true));
+        flash.put("lastCmd", "storingStart");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.StoringStart(0)));
     }
 
     public static void stopCounting(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.StopCounting(), true));
+        flash.put("lastCmd", "stopCounting");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.StopCounting()));
     }
 
     public static void resetDevice(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.ResetDevice(), true));
+        flash.put("lastCmd", "resetDevice");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.ResetDevice()));
     }
 
     public static void switchCurrency(Integer deviceId, Long cu) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SwitchCurrency(cu.byteValue()), true));
+        flash.put("lastCmd", "switchCurrency");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SwitchCurrency(cu.byteValue())));
     }
 
     public static void batchDataTransmition(Integer deviceId) {
+        flash.put("lastCmd", "batchDataTransmition");
         int[] bills = new int[32];
         for (int i = 0; i < bills.length; i++) {
             bills[ i] = 0;
         }
         bills[ 27] = 0;
         bills[ 26] = 0;
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills), true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills)));
     }
 
     public static void countingDataRequest(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), true));
+        flash.put("lastCmd", "countingDataRequest");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest()));
     }
 
     public static void amountRequest(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.AmountRequest(), true));
+        flash.put("lastCmd", "amountRequest");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.AmountRequest()));
     }
 
     public static void denominationDataRequest(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.DenominationDataRequest(), true));
+        flash.put("lastCmd", "denominationDataRequest");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.DenominationDataRequest()));
     }
 
     public static void settingDataRequestEscrow(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("ESCROW_SET"), true));
+        flash.put("lastCmd", "settingDataRequestEscrow");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("ESCROW_SET")));
     }
 
     public static void settingDataRequestCassete(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("CASSETE_SET"), true));
+        flash.put("lastCmd", "settingDataRequestCassete");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("CASSETE_SET")));
     }
 
     public static void settingDataRequestReject(Integer deviceId) {
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("REJECT_SET"), true));
+        flash.put("lastCmd", "settingDataRequestReject");
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SettingDataRequest("REJECT_SET")));
     }
 
     public static void logDataRequest(Integer deviceId) throws IOException, InterruptedException {
-        GloryDE50TaskOperation st = glory.sendGloryDE50Operation(new devices.glory.operation.StartUpload(StartUpload.Files.COUNTER_INFO), true);
+        flash.put("lastCmd", "logDataRequest");
+        GloryDE50TaskOperation st = glory.sendGloryDE50Operation(new devices.glory.operation.StartUpload(StartUpload.Files.COUNTER_INFO));
         if (st.isError()) {
             setStatusAndRedirect(deviceId, st);
             return;
@@ -150,7 +195,7 @@ public class GloryDE50Controller extends Application {
             out = new BufferedWriter(fstream);
             for (block = 0; (block * 512) < fileSize; block++) {
                 LogDataRequest l = new devices.glory.operation.LogDataRequest(block);
-                st = glory.sendGloryDE50Operation(l, true);
+                st = glory.sendGloryDE50Operation(l);
                 if (st.isError()) {
                     setStatusAndRedirect(deviceId, st);
                     return;
@@ -174,7 +219,7 @@ public class GloryDE50Controller extends Application {
         }
 
         EndUpload c1 = new devices.glory.operation.EndUpload();
-        st = glory.sendGloryDE50Operation(c1, true);
+        st = glory.sendGloryDE50Operation(c1);
         if (st.isError()) {
             setStatusAndRedirect(deviceId, st);
             return;
@@ -197,6 +242,7 @@ public class GloryDE50Controller extends Application {
      */
 
     public static void deviceSettingDataLoad(Integer deviceId) {
+        flash.put("lastCmd", "deviceSettingDataLoad");
         //String s = "ESCROW_SET=100,\r\nREJECT_SET=1001111111111111111111111111111110000000000000000000000000000000,\r\n";
         String s = "ESCROW_SET=100,\r\nREJECT_SET=0000000000000000000000000000000000000000000000000000000000000000,\r\n";
         GloryDE50TaskOperation st = UploadData(s.length(), "settings.txt", s.getBytes());
@@ -204,10 +250,11 @@ public class GloryDE50Controller extends Application {
             setStatusAndRedirect(deviceId, st);
             return;
         }
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.DeviceSettingDataLoad("settings.txt"), true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.DeviceSettingDataLoad("settings.txt")));
     }
 
     public static void programUpdate(Integer deviceId) {
+        flash.put("lastCmd", "programUpdate");
         // For templates C*******.DLF, for firmware A0******.MOT, for font A1******.DLF
         String gFileName = "CUPGRADE.DLF";
         //String filename = "/home/adji/Desktop/work/laguardiana/permaquim/last_sep_07_2012/DE-50/A0v0196.mot";
@@ -226,12 +273,13 @@ public class GloryDE50Controller extends Application {
             renderArgs.put("error", "Reading file");
             setStatusAndRedirect(deviceId, null);
         }
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.ProgramUpdate(gFileName), true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.ProgramUpdate(gFileName)));
     }
 
     public static void getFileInformation(Integer deviceId) {
+        flash.put("lastCmd", "getFileInformation");
         String gFileName = "UPGRADES.TXT";
-        GloryDE50TaskOperation op = glory.sendGloryDE50Operation(new devices.glory.operation.GetFileInformation(gFileName), true);
+        GloryDE50TaskOperation op = glory.sendGloryDE50Operation(new devices.glory.operation.GetFileInformation(gFileName));
         if (op.getResponse().getFileSize() > 0 && op.getResponse().getDate() != null) {
             Logger.debug("Filesize : %d, Date : %s", op.getResponse().getFileSize(), op.getResponse().getDate().toString());
         } else {
@@ -241,14 +289,16 @@ public class GloryDE50Controller extends Application {
     }
 
     public static void setTime(Integer deviceId) {
+        flash.put("lastCmd", "setTime");
         Date now = new Date();
         //Calendar calendar = new GregorianCalendar(2007, Calendar.JANUARY, 1);
         //GregorianCalendar.getInstance().getTime()
-        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetTime(now), true));
+        setStatusAndRedirect(deviceId, glory.sendGloryDE50Operation(new devices.glory.operation.SetTime(now)));
     }
 
     static private GloryDE50TaskOperation UploadData(int fileSize, String fileName, byte[] data) {
-        GloryDE50TaskOperation st = glory.sendGloryDE50Operation(new devices.glory.operation.StartDownload(fileSize, fileName), true);
+        flash.put("lastCmd", "UploadData");
+        GloryDE50TaskOperation st = glory.sendGloryDE50Operation(new devices.glory.operation.StartDownload(fileSize, fileName));
         if (st.isError()) {
             return st;
         }
@@ -264,12 +314,12 @@ public class GloryDE50Controller extends Application {
                 }
             }
             Logger.debug("Packet no %d", j);
-            st = glory.sendGloryDE50Operation(new devices.glory.operation.RequestDownload(j, b), true);
+            st = glory.sendGloryDE50Operation(new devices.glory.operation.RequestDownload(j, b));
             if (st.isError()) {
                 return st;
             }
         }
-        st = glory.sendGloryDE50Operation(new devices.glory.operation.EndDownload(), true);
+        st = glory.sendGloryDE50Operation(new devices.glory.operation.EndDownload());
         if (st.isError()) {
             return st;
         }
@@ -277,7 +327,7 @@ public class GloryDE50Controller extends Application {
     }
 //    static private GloryReturnParser DownloadData(String fileName) {
 //
-//        GloryReturnParser st = new GloryReturnParser(glory.sendCommand(new devices.glory.command.StartUpload(fileName), true));
+//        GloryReturnParser st = new GloryReturnParser(glory.sendCommand(new devices.glory.command.StartUpload(fileName)));
 //        if (st.isError()) {
 //            st.setMsg("Error in StartDownload");
 //            return st;
@@ -294,7 +344,7 @@ public class GloryDE50Controller extends Application {
 //        }
 //
 //        EndUpload c1 = new devices.glory.command.EndUpload();
-//        st = new GloryReturnParser(glory.sendCommand(c, true));
+//        st = new GloryReturnParser(glory.sendCommand(c));
 //        if (st.isError()) {
 //            st.setMsg("Error in EndDownload");
 //            return st;
@@ -302,4 +352,5 @@ public class GloryDE50Controller extends Application {
 //        st.setMsg(String.format("Readed %d bytes", data.length));
 //        return st;
 //    }
+
 }

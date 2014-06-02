@@ -24,8 +24,8 @@ public class GetFileInformation extends OperationdWithDataResponse {
     }
 
     @Override
-    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
-        String err = super.fillResponse(dr, response);
+    public String fillResponse(int len, byte[] dr, final GloryDE50OperationResponse response) {
+        String err = super.fillResponse(len, dr, response);
         if (err != null) {
             return err;
         }
@@ -35,7 +35,7 @@ public class GetFileInformation extends OperationdWithDataResponse {
             return "Data is null";
         }
         if (data.length != 16) {
-            return String.format("Invalid command (%s) response length %d expected 8 bytes hex number", getDescription(), dr.length);
+            return String.format("Invalid command (%s) response length %d expected 8 bytes hex number", getDescription(), len);
         }
         byte[] b = data;
         int l = 0;

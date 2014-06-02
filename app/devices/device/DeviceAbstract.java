@@ -1,11 +1,8 @@
 package devices.device;
 
 import devices.device.events.DeviceEventListener;
-import devices.device.state.DeviceStateAbstract;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.device.task.DeviceTaskOpenPort;
-import devices.mei.task.MeiEbdsTaskCount;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,8 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
 import models.db.LgDevice;
 import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
@@ -146,7 +141,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
                     currentState = newState;
                 }
                 Logger.debug("Device %s thread done", machineDeviceId.name());
-                return true;
+                return deviceTask.get();
             }
         }
         );

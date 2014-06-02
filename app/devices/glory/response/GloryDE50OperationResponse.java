@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +16,6 @@ import java.util.Map;
  * @author adji
  */
 public class GloryDE50OperationResponse implements Serializable {
-
 
     static public class Denomination {
 
@@ -488,9 +488,9 @@ public class GloryDE50OperationResponse implements Serializable {
         return "GloryDE50OperationResponse{" + "sr1Mode=" + sr1Mode + ", d1Mode=" + d1Mode + ", collectionEnd=" + collectionEnd + ", storeEnd=" + storeEnd + ", restorationEnd=" + restorationEnd + ", batchEnd=" + batchEnd + ", abnoramalEnd=" + abnoramalEnd + ", countEnd=" + countEnd + ", rejectFull=" + rejectFull + ", escrowFull=" + escrowFull + ", dischargingFailure=" + dischargingFailure + ", rejectBillPresent=" + rejectBillPresent + ", escrowBillPresent=" + escrowBillPresent + ", hopperBillPresent=" + hopperBillPresent + ", abnormalStorage=" + abnormalStorage + ", abnormalDevice=" + abnormalDevice + ", countingError=" + countingError + ", jamming=" + jamming + ", doorEscrow=" + doorEscrow + ", doorEscrowShutter=" + doorEscrowShutter + ", cassetteFullSensor=" + cassetteFullSensor + ", cassetteFullCounter=" + cassetteFullCounter + ", cassete=" + cassete + ", currency=" + currency + ", manualDepositNumber=" + manualDepositNumber + ", codeOutline=" + codeOutline + ", codeDetail=" + codeDetail + ", d9=" + d9 + ", d10=" + d10 + ", d11=" + d11 + ", d12=" + d12 + ", sr2=" + sr2 + ", sr3=" + sr3 + ", sr4=" + sr4 + ", d2=" + d2 + ", d3=" + d3 + ", d4=" + d4 + ", d5=" + d5 + ", d6=" + d6 + ", d7=" + d7 + ", d8=" + d8 + ", data=" + Arrays.toString(data) + ", bills=" + bills + '}';
     }
 
-    public ArrayList<Denomination> denominationData = null;
+    final public List<Denomination> denominationData = new ArrayList<Denomination>();
 
-    public ArrayList<Denomination> getDenominationData() {
+    public List<Denomination> getDenominationData() {
         return denominationData;
     }
 

@@ -22,9 +22,9 @@ public class OperationWithAckResponse implements GloryDE50OperationInterface {
         return this.getClass().getSimpleName();
     }
 
-    public String fillResponse(byte[] dr, final GloryDE50OperationResponse response) {
-        if (dr.length != 1) {
-            return String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), dr.length);
+    public String fillResponse(int len, byte[] dr, final GloryDE50OperationResponse response) {
+        if (len != 1) {
+            return String.format("Invalid command (%s) response length %d expected ack/noack", getDescription(), len);
         }
         if (dr[ 0] == 0x6) {
             Logger.debug(String.format("Command %s ack", getDescription()));

@@ -61,6 +61,7 @@ public class GloryDE50WaitForOperation extends GloryDE50StateOperation {
                     op.setError(err);
                     op.setResponse(null);
                 }
+                return null;
             case TASK_OPEN_PORT:
                 DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
                 if (api.open(open.getPort())) {

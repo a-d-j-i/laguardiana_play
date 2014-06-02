@@ -4,6 +4,7 @@ import devices.glory.response.GloryDE50OperationResponse.Denomination;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -90,7 +91,7 @@ public class GloryDE50OperationResponseParser implements Serializable {
     String data = null;
     Map<Integer, Integer> bills = null;
     boolean haveData = false;
-    ArrayList<Denomination> denominationData = null;
+    List<Denomination> denominationData = null;
 
     public GloryDE50OperationResponseParser(GloryDE50OperationResponse r) {
         if (r == null) {
@@ -205,7 +206,7 @@ public class GloryDE50OperationResponseParser implements Serializable {
         return haveData;
     }
 
-    public ArrayList<Denomination> getDenominationData() {
+    public List<Denomination> getDenominationData() {
         return denominationData;
     }
 

@@ -21,7 +21,7 @@ public class MeiEbds implements SerialPortMessageParserInterface {
     final private SerialPortAdapterAbstract.PortConfiguration portConf = new SerialPortAdapterAbstract.PortConfiguration(
             SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7,
             SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
-    final private static int MEI_EBDS_READ_TIMEOUT = 10000; //35ms
+    final private static int MEI_EBDS_READ_TIMEOUT = 30000; //35ms
 
     private SerialPortReader serialPortReader = null;
     final MeiEbdsDevice.MeiApi api;

@@ -19,18 +19,37 @@ import models.db.LgDeviceProperty;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
-import play.mvc.Util;
 import play.mvc.With;
 
 @With({Secure.class})
 public class DeviceController extends Controller {
 
-    static DeviceInterface device = null;
+    static DeviceInterface device;
+    static boolean hasClass = false;
+    static String deviceName;
 
     @Before
     static void getCounter(Integer deviceId) throws Throwable {
         if (deviceId != null) {
             device = Machine.findDeviceById(deviceId);
+            if (device == null) {
+                list();
+            }
+            deviceName = device.getType().name();
+            if (device instanceof DeviceClassIoBoardInterface) {
+                hasClass = true;
+                renderArgs.put("classIoBoard", true);
+            }
+            if (device instanceof DeviceClassPrinterInterface) {
+                hasClass = true;
+                renderArgs.put("classPrinter", true);
+            }
+            if (device instanceof DeviceClassCounterIntreface) {
+                hasClass = true;
+                renderArgs.put("classCounter", true);
+            }
+            renderArgs.put("device", device);
+            renderArgs.put("hasClass", hasClass);
             renderArgs.put("deviceId", deviceId);
         }
     }
@@ -40,31 +59,8 @@ public class DeviceController extends Controller {
         render();
     }
 
-    @Util
-    static public boolean getDeviceArgs() {
-        if (device == null) {
-            list();
-        }
-        boolean hasClass = false;
-        if (device instanceof DeviceClassIoBoardInterface) {
-            hasClass = true;
-            renderArgs.put("classIoBoard", true);
-        }
-        if (device instanceof DeviceClassPrinterInterface) {
-            hasClass = true;
-            renderArgs.put("classPrinter", true);
-        }
-        if (device instanceof DeviceClassCounterIntreface) {
-            hasClass = true;
-            renderArgs.put("classCounter", true);
-        }
-        renderArgs.put("device", device);
-        renderArgs.put("hasClass", hasClass);
-        return hasClass;
-    }
-
     public static void commands(Integer deviceId) {
-        if (getDeviceArgs()) {
+        if (hasClass) {
             render("DeviceController/deviceClass.html");
         } else {
             operations(deviceId);
@@ -72,40 +68,31 @@ public class DeviceController extends Controller {
     }
 
     public static void operations(Integer deviceId) {
-        getDeviceArgs();
-        render("DeviceController/" + device.getType().name().toUpperCase() + "_OPERATIONS.html");
+        render("DeviceController/" + deviceName.toUpperCase() + "_OPERATIONS.html"
+        );
     }
 
     public static void printerClassCommands(Integer deviceId) {
-        getDeviceArgs();
         render("DeviceController/printerClass.html");
     }
 
     public static void ioBoardClassCommands(Integer deviceId) {
-        getDeviceArgs();
         render("DeviceController/ioBoardClass.html");
     }
 
     // TODO: Enforce security.
     public static void properties(Integer deviceId) {
-        if (deviceId == null) {
-            list();
-        }
-        DeviceInterface d = Machine.findDeviceById(deviceId);
-        if (d == null) {
-            list();
-        }
-        List<LgDeviceProperty> data = d.getEditableProperties();
+        List<LgDeviceProperty> data = device.getEditableProperties();
         /*for (LgDeviceProperty p : data) {
          //boolean perm = Secure.checkPermission(p.name, "GET");
          if (!perm) {
          data.remove(p);
          }
          }*/
-        Logger.debug("data %s -> %s", d, data);
+        Logger.debug("data %s -> %s", device, data);
         renderArgs.put("deviceId", deviceId);
         renderArgs.put("data", data);
-        renderArgs.put("device", d);
+        renderArgs.put("device", device);
         render();
     }
 
@@ -171,7 +158,6 @@ public class DeviceController extends Controller {
 
     public static void clearError(Integer deviceId) {
         error = null;
-        getDeviceArgs();
         if (!device.clearError()) {
             error = "can't clear error now";
         }
@@ -182,7 +168,6 @@ public class DeviceController extends Controller {
 
     // Counter Class
     public static void counterClassCommands(Integer deviceId, Integer currency) {
-        getDeviceArgs();
         Map<Integer, Integer> current = new HashMap<Integer, Integer>();
         Map<Integer, Integer> desired = new HashMap<Integer, Integer>();
         DeviceStatusInterface st = null;
@@ -241,7 +226,6 @@ public class DeviceController extends Controller {
 
     public static void count(Integer deviceId, Map<String, String> slotsIds, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         if (currency == null || currency == 0) {
             currency = 1;
@@ -267,7 +251,6 @@ public class DeviceController extends Controller {
 
     public static void cancelDeposit(Integer deviceId, Integer currency) {
         error = null;
-        getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         if (!counter.cancelDeposit()) {
             error = "Cant cancel";
@@ -277,7 +260,6 @@ public class DeviceController extends Controller {
 
     public static void storeDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         int sequenceNumber = 1;
         if (!counter.storeDeposit(sequenceNumber)) {
@@ -288,7 +270,6 @@ public class DeviceController extends Controller {
 
     public static void withdrawDeposit(Integer deviceId, Integer currency) {
         error = null;
-        getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         if (!counter.withdrawDeposit()) {
             error = "Not counting cant store";
@@ -298,7 +279,6 @@ public class DeviceController extends Controller {
 
     public static void reset(Integer deviceId, Integer currency) {
         error = null;
-        getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         if (!counter.reset()) {
             error = "Executing another command";
@@ -308,7 +288,6 @@ public class DeviceController extends Controller {
 
     public static void storingErrorReset(Integer deviceId, Integer currency) {
         error = null;
-        getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         if (!counter.storingErrorReset()) {
             error = "Executing another command";
@@ -318,7 +297,6 @@ public class DeviceController extends Controller {
 
     public static void collectBag(Integer deviceId, Integer currency) {
         error = null;
-        getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         counter.collect();
         counterClassCommands(deviceId, currency);
@@ -326,13 +304,11 @@ public class DeviceController extends Controller {
 
     public static void envelopeDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        getDeviceArgs();
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         if (!counter.envelopeDeposit()) {
             error = "Executing another command";
         }
         counterClassCommands(deviceId, currency);
     }
-    // Counter Class end
 
 }
