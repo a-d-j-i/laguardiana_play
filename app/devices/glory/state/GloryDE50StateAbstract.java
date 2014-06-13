@@ -1,6 +1,6 @@
 package devices.glory.state;
 
-import devices.device.DeviceStatusInterface;
+import devices.device.status.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
@@ -39,7 +39,7 @@ abstract public class GloryDE50StateAbstract implements DeviceStateInterface {
         return null;
     }
 
-    public Map<Integer, Integer> getDesiredQuantity() {
+    public Map<String, Integer> getDesiredQuantity() {
         return null;
     }
 

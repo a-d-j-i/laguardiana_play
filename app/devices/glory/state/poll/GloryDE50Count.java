@@ -30,7 +30,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
 
     private final AtomicReference<Map<Integer, Integer>> currentQuantity = new AtomicReference<Map<Integer, Integer>>();
 
-    final private Map<Integer, Integer> desiredQuantity;
+    final private Map<String, Integer> desiredQuantity;
     final private Integer currency;
 
     private final int MAX_COUNT_RETRIES = 10;
@@ -41,7 +41,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
     boolean batchEnd = false;
     boolean debug = true;
 
-    public GloryDE50Count(GloryDE50DeviceStateApi api, Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public GloryDE50Count(GloryDE50DeviceStateApi api, Map<String, Integer> desiredQuantity, Integer currency) {
         super(api);
         this.desiredQuantity = desiredQuantity;
         if (currency == null) {
@@ -54,7 +54,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
             isBatch = false;
             currentSlot = 0;
         } else {
-            for (Integer k : desiredQuantity.keySet()) {
+            for (String k : desiredQuantity.keySet()) {
                 Integer v = desiredQuantity.get(k);
                 this.desiredQuantity.put(k, v);
                 if (v == 0) {
@@ -287,8 +287,8 @@ public class GloryDE50Count extends GloryDE50StatePoll {
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
             return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
-        Map<Integer, Integer> currentQuantity = response.getBills();
-        if (currentQuantity == null) {
+        Map<Integer, Integer> currentQ = response.getBills();
+        if (currentQ == null) {
             String err = String.format("Error getting current count");
             Logger.error("Error %s sending cmd : CountingDataRequest", err);
             return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err);
@@ -296,17 +296,17 @@ public class GloryDE50Count extends GloryDE50StatePoll {
 
         while (currentSlot < 32) {
             int desired = 0;
-            if (desiredQuantity.get(currentSlot) != null) {
-                desired = desiredQuantity.get(currentSlot).intValue();
+            if (desiredQuantity.get(Integer.toString(currentSlot)) != null) {
+                desired = desiredQuantity.get(Integer.toString(currentSlot));
             }
-            int current = currentQuantity.get(currentSlot);
+            int current = currentQ.get(currentSlot);
             if (current > desired) {
                 String err = String.format("Invalid bill value %d %d %d", currentSlot, current, desired);
                 Logger.error("Error %s sending cmd : CountingDataRequest", err);
                 return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err);
             }
             bills[ currentSlot] = desired - current;
-            Logger.debug("---------- slot %d batch billls : %d desired %d value %d", currentSlot, bills[ currentSlot], desired, current);
+            Logger.debug("---------- slot %s batch billls : %d desired %d value %d", currentSlot, bills[ currentSlot], desired, current);
             if (bills[ currentSlot] != 0) {
                 break;
             } else {
@@ -355,15 +355,18 @@ public class GloryDE50Count extends GloryDE50StatePoll {
         return true;
     }
 
+    @Override
     public Integer getCurrency() {
         return currency;
     }
 
+    @Override
     public Map<Integer, Integer> getCurrentQuantity() {
         return currentQuantity.get();
     }
 
-    public Map<Integer, Integer> getDesiredQuantity() {
+    @Override
+    public Map<String, Integer> getDesiredQuantity() {
         return desiredQuantity;
     }
 

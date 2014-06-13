@@ -16,7 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
-import machines.Machine;
+import models.ModelFacade;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Util;
@@ -54,7 +54,7 @@ public class GloryDE50Controller extends Application {
         }
         renderArgs.put("lastCmd", flash.get("lastCmd"));
         renderArgs.put("lastResult", retval ? "SUCCESS" : "FAIL");
-        DeviceInterface d = Machine.findDeviceById(deviceId);
+        DeviceInterface d = ModelFacade.findDeviceById(deviceId);
         DeviceEvent de = d.getLastEvent();
         String lastEvent = "";
         if (de != null) {

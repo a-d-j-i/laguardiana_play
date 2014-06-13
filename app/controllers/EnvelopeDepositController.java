@@ -5,10 +5,8 @@ import java.util.Set;
 import models.Configuration;
 import models.EnvelopeDeposit;
 import models.ModelFacade;
-import models.actions.EnvelopeDepositAction;
 import models.db.LgEnvelope;
-import models.db.LgEnvelopeContent;
-import models.db.LgEnvelopeContent.EnvelopeContentType;
+import models.db.LgUser;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
@@ -25,7 +23,7 @@ import validation.FormCurrency;
 import validation.FormDepositUserCodeEnvelopeReference;
 
 @With(Secure.class)
-public class EnvelopeDepositController extends CounterController {
+public class EnvelopeDepositController extends ErrorController {
 
     @Before
     // currentAction allways valid
@@ -33,10 +31,12 @@ public class EnvelopeDepositController extends CounterController {
         if (request.isAjax()) {
             return;
         }
-        String neededAction = ModelFacade.getNeededAction();
-        String neededController = ModelFacade.getNeededController();
+        status = ModelFacade.getStateStatus();
+        String neededAction = status.getNeededAction();
+        String neededController = status.getNeededController();
         if (neededAction == null || neededController == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
+            EvenlopeDepositData data = (EvenlopeDepositData) status.getFormData();
+            if (!request.actionMethod.equalsIgnoreCase("start") || data.currentUser != Secure.getCurrentUser()) {
                 Logger.debug("wizardFixPage Redirect Application.index");
                 Application.index();
             }
@@ -75,7 +75,9 @@ public class EnvelopeDepositController extends CounterController {
         }
     }
 
-    static public class FormData {
+    static public class EvenlopeDepositData {
+
+        transient public LgUser currentUser = Secure.getCurrentUser();
 
         final public Boolean showReference1 = Configuration.mustShowEnvelopeDepositReference1();
         final public Boolean showReference2 = Configuration.mustShowEnvelopeDepositReference2();
@@ -95,13 +97,17 @@ public class EnvelopeDepositController extends CounterController {
         @CheckWith(FormDataContent.Validate.class)
         public FormDataContent ticketData = new FormDataContent();
 
+        public Currency getCurrency() {
+            return null;
+        }
+
         @Override
         public String toString() {
             return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + ", envelopeCode=" + envelopeCode + ", hasDocuments=" + hasDocuments + ", hasOther=" + hasOthers + ", cashData=" + cashData + ", checkData=" + checkData + ", ticketData=" + ticketData + '}';
         }
     }
 
-    public static void start(@Valid FormData formData) {
+    public static void start(@Valid EvenlopeDepositData formData) {
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
@@ -109,30 +115,17 @@ public class EnvelopeDepositController extends CounterController {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                LgEnvelope e = new LgEnvelope(0, formData.envelopeCode);
-                if (formData.cashData.amount > 0) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.CASH, formData.cashData.amount, formData.cashData.currency.numericId));
+                if (ModelFacade.startEnvelopeDepositAction(formData)) {
+                    mainLoop();
+                    return;
+                } else {
+                    Application.index();
                 }
-                if (formData.checkData.amount > 0) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.CHECKS, formData.checkData.amount, formData.checkData.currency.numericId));
-                }
-                if (formData.ticketData.amount > 0) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.TICKETS, formData.ticketData.amount, formData.ticketData.currency.numericId));
-                }
-                if (formData.hasDocuments != null && formData.hasDocuments) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.DOCUMENTS, null, null));
-                }
-                if (formData.hasOthers != null && formData.hasOthers) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
-                }
-
-                EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
-                ModelFacade.startAction(currentAction);
-                mainLoop();
+                return;
             }
         }
         if (formData == null) {
-            formData = new FormData();
+            formData = new EvenlopeDepositData();
             formData.cashData.value = Configuration.getDefaultCurrency();
             formData.checkData.value = Configuration.getDefaultCurrency();
             formData.ticketData.value = Configuration.getDefaultCurrency();
@@ -153,15 +146,15 @@ public class EnvelopeDepositController extends CounterController {
     public static void mainLoop() {
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = ModelFacade.getState();
+            o[0] = status.getState();
             o[1] = null;
-            o[2] = Messages.get(ModelFacade.getActionMessage());
+            o[2] = Messages.get(status.getActionMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("user", Secure.getCurrentUser());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
-            renderArgs.put("formData", ModelFacade.getFormData());
+            renderArgs.put("formData", status.getFormData());
             render();
         }
     }
@@ -177,8 +170,8 @@ public class EnvelopeDepositController extends CounterController {
     }
 
     public static void finish() {
-        EnvelopeDeposit deposit = (EnvelopeDeposit) ModelFacade.getDeposit();
-        FormData formData = (FormData) ModelFacade.getFormData();
+        EnvelopeDeposit deposit = (EnvelopeDeposit) status.getDeposit();
+        EvenlopeDepositData formData = (EvenlopeDepositData) status.getFormData();
         if (deposit != null) {
             Set<LgEnvelope> envelopes = deposit.envelopes;
             renderArgs.put("envelopes", envelopes);

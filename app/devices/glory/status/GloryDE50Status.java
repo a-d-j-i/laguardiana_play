@@ -5,7 +5,7 @@
  */
 package devices.glory.status;
 
-import devices.device.DeviceStatusInterface;
+import devices.device.status.DeviceStatusInterface;
 
 /**
  *

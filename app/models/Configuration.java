@@ -4,10 +4,6 @@
  */
 package models;
 
-import devices.serial.SerialPortAdapterAbstract.PORTBITS;
-import devices.serial.SerialPortAdapterAbstract.PORTPARITY;
-import devices.serial.SerialPortAdapterAbstract.PORTSPEED;
-import devices.serial.SerialPortAdapterAbstract.PORTSTOPBITS;
 import devices.serial.SerialPortAdapterAbstract.PortConfiguration;
 import devices.serial.SerialPortAdapterInterface;
 import devices.serial.implementations.SerialPortAdapterRxTx;

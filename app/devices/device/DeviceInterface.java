@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.device;
 
 import devices.device.events.DeviceEventListener;
@@ -35,4 +30,8 @@ public interface DeviceInterface {
     public DeviceEvent getLastEvent();
 
     public Enum getType();
+
+    @Override
+    public String toString();
+
 }

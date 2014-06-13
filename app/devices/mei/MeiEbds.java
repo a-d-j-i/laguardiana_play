@@ -1,7 +1,7 @@
 package devices.mei;
 
 import devices.device.DeviceMessageInterface;
-import devices.device.DeviceStatusInterface;
+import devices.device.status.DeviceStatusInterface;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;

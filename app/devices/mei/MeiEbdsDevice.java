@@ -3,7 +3,7 @@ package devices.mei;
 import devices.device.DeviceAbstract;
 import devices.device.DeviceClassCounterIntreface;
 import devices.device.DeviceMessageInterface;
-import devices.device.DeviceStatusInterface;
+import devices.device.status.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceMessageTask;
 import devices.device.task.DeviceTaskAbstract;
@@ -11,11 +11,11 @@ import devices.device.task.DeviceTaskOpenPort;
 import devices.mei.state.MeiEbdsOpenPort;
 import devices.mei.task.MeiEbdsTaskCount;
 import devices.serial.SerialPortReader.DeviceMessageListenerInterface;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import models.db.LgDevice.DeviceType;
+import models.db.LgDevice;
 import models.db.LgDeviceProperty;
 import play.Logger;
 
@@ -118,7 +118,7 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         mei.close();
     }
 
-    public MeiEbdsDevice(Enum machineDeviceId, DeviceType deviceType) {
+    public MeiEbdsDevice(String machineDeviceId, LgDevice.DeviceType deviceType) {
         super(machineDeviceId, deviceType);
     }
 
@@ -146,7 +146,7 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         submit(new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, initialPortValue));
     }
 
-    public boolean reset() {
+    public boolean errorReset() {
         return submitSimpleTask(MeiEbdsTaskType.TASK_RESET);
     }
 
@@ -166,25 +166,33 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public boolean count(List<Integer> slotInfo) throws InterruptedException, ExecutionException {
-        DeviceTaskAbstract deviceTask = new MeiEbdsTaskCount(MeiEbdsTaskType.TASK_COUNT, slotInfo);
-        return submit(deviceTask).get();
-    }
-
-    public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public boolean count(Integer currency, Map<String, Integer> desiredQuantity) {
+        // this device can't limit the quantity, but I can choose the valid slots.
+        // TODO: Implement.
+        Integer[] slotInfo = {1, 1, 1, 1, 1, 1, 1, 1};
+        try {
+            return submit(new MeiEbdsTaskCount(MeiEbdsTaskType.TASK_COUNT, Arrays.asList(slotInfo))).get();
+        } catch (InterruptedException ex) {
+            Logger.error("Error in mei count %s", ex);
+        } catch (ExecutionException ex) {
+            Logger.error("Error in mei count %s", ex);
+        }
         return false;
     }
 
     public boolean envelopeDeposit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Logger.error("Mei don't support envelopeDeposit");
+        return false;
     }
 
     public boolean collect() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Logger.error("Mei don't support collect");
+        return false;
     }
 
     public boolean storingErrorReset() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Logger.error("Mei don't support storingErrorReset");
+        return false;
     }
 
 }

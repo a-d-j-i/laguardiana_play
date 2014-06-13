@@ -1,7 +1,5 @@
 package devices.device.status;
 
-import devices.device.DeviceStatusInterface;
-
 /**
  *
  * @author adji

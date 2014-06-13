@@ -5,16 +5,16 @@ import controllers.serializers.BillValueSerializer;
 import devices.device.DeviceClassCounterIntreface;
 import devices.device.DeviceClassIoBoardInterface;
 import devices.device.DeviceClassPrinterInterface;
-import devices.device.DeviceEvent;
 import devices.device.DeviceInterface;
-import devices.device.DeviceStatusClassCounterIntreface;
-import devices.device.DeviceStatusInterface;
+import devices.device.DeviceEvent;
+import devices.device.status.DeviceStatusClassCounterIntreface;
+import devices.device.status.DeviceStatusInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import machines.Machine;
+import models.ModelFacade;
 import models.db.LgDeviceProperty;
 import play.Logger;
 import play.mvc.Before;
@@ -31,7 +31,7 @@ public class DeviceController extends Controller {
     @Before
     static void getCounter(Integer deviceId) throws Throwable {
         if (deviceId != null) {
-            device = Machine.findDeviceById(deviceId);
+            device = ModelFacade.findDeviceById(deviceId);
             if (device == null) {
                 list();
             }
@@ -55,7 +55,7 @@ public class DeviceController extends Controller {
     }
 
     public static void list() {
-        renderArgs.put("data", Machine.getDevices());
+        renderArgs.put("data", ModelFacade.getDevices());
         render();
     }
 
@@ -108,7 +108,7 @@ public class DeviceController extends Controller {
             ret[2] = String.format("access denied for property %s", property);
             renderJSON(ret);
         }
-        DeviceInterface d = Machine.findDeviceById(deviceId);
+        DeviceInterface d = ModelFacade.findDeviceById(deviceId);
         if (d == null) {
             ret[2] = String.format("invalid device Id");
             renderJSON(ret);
@@ -230,20 +230,15 @@ public class DeviceController extends Controller {
         if (currency == null || currency == 0) {
             currency = 1;
         }
-        Map<Integer, Integer> desiredQuantity = new HashMap< Integer, Integer>();
+        Map<String, Integer> desiredQuantity = new HashMap< String, Integer>();
 
         if (slotsIds != null) {
             for (String k : slotsIds.keySet()) {
-                Integer slot = Integer.parseInt(k);
-                if (slot != null && slot >= 32) {
-                    Logger.error(String.format("getSlotArray Invalid slot %d", slot));
-                } else {
-                    desiredQuantity.put(slot, Integer.parseInt(slotsIds.get(k)));
-                }
+                desiredQuantity.put(k, Integer.parseInt(slotsIds.get(k)));
             }
         }
         Logger.debug("--------> %s", desiredQuantity);
-        if (!counter.count(desiredQuantity, currency)) {
+        if (!counter.count(currency, desiredQuantity)) {
             error = "Still executing another command";
         }
         counterClassCommands(deviceId, currency);
@@ -280,7 +275,7 @@ public class DeviceController extends Controller {
     public static void reset(Integer deviceId, Integer currency) {
         error = null;
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.reset()) {
+        if (!counter.errorReset()) {
             error = "Executing another command";
         }
         counterClassCommands(deviceId, currency);

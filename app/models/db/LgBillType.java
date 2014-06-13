@@ -1,7 +1,9 @@
 package models.db;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 import models.BillValue;
 import models.lov.Currency;
@@ -21,13 +23,15 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     @Column(name = "unit_lov", nullable = false)
     public Integer unitLov;
     @Column(name = "currency", nullable = false)
-    public Integer currency;
+    public Integer currencyId;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date", nullable = true, length = 13)
     public Date endDate;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "slot")
+    public Set<LgDeviceSlot> slots = new HashSet<LgDeviceSlot>(0);
 
     LgBillType(int denomination, int unitLov) {
         this.denomination = denomination;
@@ -39,8 +43,8 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
                 denomination, unitLov).first();
     }
 
-    public static List< LgBillType> find(int currency) {
-        return LgBillType.find("select l from LgBillType l where currency = ? order by denomination desc", currency).fetch();
+    public static List< LgBillType> find(int currencyId) {
+        return LgBillType.find("select l from LgBillType l where currency = ? order by denomination desc", currencyId).fetch();
     }
 
     @PrePersist

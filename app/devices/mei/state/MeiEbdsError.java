@@ -1,6 +1,6 @@
 package devices.mei.state;
 
-import devices.device.DeviceStatusInterface;
+import devices.device.status.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;

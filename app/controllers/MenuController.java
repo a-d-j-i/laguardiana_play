@@ -20,19 +20,19 @@ public class MenuController extends Controller {
             bagFreeSpace = (long) 0;
         }
         boolean isBagFull = Configuration.isBagFull(iq.bills - 1, iq.envelopes + 1);
+        boolean isBagRemoved = !Configuration.isIgnoreBag() && !ModelFacade.isBagInplace();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = ModelFacade.printerNeedCheck();
-            o[1] = (!Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk());
+            o[0] = ModelFacade.isReadyToPrint();
+            o[1] = isBagRemoved;
             // I need space for at least one envelope. see ModelFacade->isBagReady too.
             o[2] = isBagFull;
             renderJSON(o);
         }
-        boolean bagRemoved = !Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk();
-        renderArgs.put("bagRemoved", bagRemoved);
+        renderArgs.put("bagRemoved", isBagRemoved);
         renderArgs.put("bagTotals", iq);
         renderArgs.put("bagFreeSpace", bagFreeSpace);
-        renderArgs.put("checkPrinter", ModelFacade.printerNeedCheck());
+        renderArgs.put("checkPrinter", ModelFacade.isReadyToPrint());
         // I need space for at least one envelope. see ModelFacade->isBagReady too.
         renderArgs.put("bagFull", isBagFull);
 
@@ -41,7 +41,7 @@ public class MenuController extends Controller {
         String[] extraButtons = {"MenuController.otherMenu"};
         String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter"};
         String nextStep = renderMenuButtons(buttons, titles, extraButtons);
-        if (nextStep == null || bagRemoved) {
+        if (nextStep == null || isBagRemoved) {
             render();
         } else {
             if (back != null) {

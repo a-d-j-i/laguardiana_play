@@ -1,604 +1,213 @@
 package models;
 
-import bootstrap.BootstrapEventJob;
-import controllers.Secure;
-import devices.device.DeviceEvent;
-import devices.device.events.DeviceEventListener;
-import machines.Machine;
-import devices.ioboard.IoBoard;
-import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVED;
-import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVE_CONFIRM;
-import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_APROVE_WAIT;
-import static devices.ioboard.IoBoard.BAG_APROVE_STATE.BAG_NOT_APROVED;
+import models.facade.status.ModelFacadeStateStatus;
+import models.facade.FacadeJob;
+import controllers.BillDepositController;
+import controllers.CountController;
+import controllers.EnvelopeDepositController;
+import controllers.FilterController;
+import devices.device.DeviceInterface;
 import devices.printer.OSPrinter;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import javax.print.PrintService;
-import models.actions.UserAction;
+import machines.Machine;
+import machines.MachineP500_GLORY;
+import machines.MachineP500MEI;
+import machines.events.MachineEvent;
+import machines.events.MachineEventListener;
 import models.db.LgBag;
-import models.db.LgBill;
 import models.db.LgBillType;
 import models.db.LgDeposit;
-import models.db.LgUser;
-import models.events.ActionEvent;
-import models.events.IoBoardEvent;
-import models.events.PrinterEvent;
+import models.db.LgDeviceSlot;
+import models.facade.state.ModelFacadeStateAbstract;
+import models.facade.state.ModelFacadeStateDepositBill;
+import models.facade.state.ModelFacadeStateCount;
+import models.facade.state.ModelFacadeStateDepositEnvelope;
+import models.facade.state.ModelFacadeStateFilter;
+import models.facade.state.ModelFacadeStateWaiting;
 import play.Logger;
-import play.jobs.Job;
 
 /**
- * TODO: Review this with another thread/job that has a input queue for events
- * and react according to events from the glory and the electronics in the cage.
- * TODO: Save the state on the db so we react better on restart !!!!.
- *
  * @author adji
  */
 public class ModelFacade {
 
-    //final static private ManagerInterface manager;
-    //final static private IoBoard ioBoard;
-    //final static private AtomicReference<Printer> printer = new AtomicReference<Printer>();
-    final static private ModelError modelError = new ModelError();
-    static private UserAction currentUserAction = null;
-    static private LgUser currentUser = null;
-    /*
-     static {
-     if (Configuration.isIgnoreGlory()) {
-     manager = new FakeGloryManager();
-     } else {
-     manager = DeviceFactory.getGloryManager(Configuration.getGloryPort());
-     }
-     manager.addObserver(new Observer() {
-     public void update(Observable o, Object data) {
-     Promise now = new OnGloryEvent((ManagerStatus) data).now();
-     }
-     });
+    private enum MachineType {
 
-     IoBoard.IOBOARD_VERSION ver = IoBoard.IOBOARD_VERSION.getVersion(Configuration.getIoBoardVersion());
-     ioBoard = DeviceFactory.getIoBoard(Configuration.getIoBoardPort(), ver);
-     ioBoard.addObserver(new Observer() {
-     public void update(Observable o, final Object data) {
-     Promise now = new OnIoBoardEvent((IoBoard.IoBoardStatus) data).now();
-     }
-     });
+        P500() {
+                    @Override
+                    Machine getMachineInstance() {
+                        return new MachineP500_GLORY();
+                    }
+                },
+        P500_MEI {
 
-     setCurrentPrinter(null);
-     }
-     */
+                    @Override
+                    Machine getMachineInstance() {
+                        return new MachineP500MEI();
+                    }
+                },;
 
-    public static DeviceEventListener getDeviceListener() {
-        return new DeviceEventListener() {
+        @Override
+        public String toString() {
+            return name();
+        }
 
-            public void onDeviceEvent(DeviceEvent counterEvent) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
+        abstract Machine getMachineInstance();
+
+        static public MachineType getMachineType(String machineType) throws IllegalArgumentException {
+            return MachineType.valueOf(machineType.toUpperCase());
+        }
+    };
+
+    static public class ModelFacadeStateApi {
+
+        final private Machine machine;
+        private ModelFacadeStateAbstract currentState = new ModelFacadeStateWaiting(this);
+
+        public ModelFacadeStateApi() {
+            MachineType machineType = MachineType.getMachineType(Configuration.getMachineType());
+            machine = machineType.getMachineInstance();
+            machine.addEventListener(new MachineEventListener() {
+                public void onMachineEvent(final MachineEvent evt) {
+                    new FacadeJob<Boolean>() {
+
+                        @Override
+                        public void doJob() {
+                            currentState.onMachineEvent(evt);
+                        }
+                    }.now();
+                }
+            });
+        }
+
+        public Machine getMachine() {
+            return machine;
+        }
+
+        // called by inner thread.
+        public boolean setCurrentState(ModelFacadeStateAbstract state) {
+            // give it an oportunity to initialize itself.
+            currentState = state.init();
+            return currentState == state;
+        }
+
+        private ModelFacadeStateStatus getStatus() {
+            return new FacadeJob<ModelFacadeStateStatus>() {
+
+                @Override
+                public ModelFacadeStateStatus doJobWithResult() {
+                    return api.currentState.getStatus();
+                }
+            }.runNow();
+        }
+
     }
+    final private static ModelFacadeStateApi api = new ModelFacadeStateApi();
 
     public static void start() throws Exception {
-        // used to force the execution of the static code.
-        // Close unifnished deposits.
         LgDeposit.closeUnfinished();
         Configuration.initCrapId();
-        Machine.getInstance().start();
+        api.getMachine().start();
     }
 
     public static void stop() {
-        Machine.getInstance().stop();
+        api.getMachine().stop();
     }
 
-    interface BillListVisitor {
-
-        public void visit(LgBillType billType, Integer desired, Integer current);
-    }
-
-    public static ModelError getError() {
-        return modelError;
-    }
-
-    /*
-     static class OnGloryEvent extends Job {
-
-     ManagerStatus status;
-
-     public OnGloryEvent(ManagerStatus status) {
-     this.status = status;
-     }
-
-     @Override
-     public void doJob() throws Exception {
-     UserAction u;
-     synchronized (ModelFacade.class) {
-     u = currentUserAction;
-     }
-     GloryEvent.save(u, status.toString());
-     Logger.debug("OnGloryEvent event %s", status.toString());
-     switch (status.getState()) {
-     //Could happen on startup
-     case NEUTRAL:
-     if (modelError.getGloryError() != null) {
-     modelError.clearGloryError();
-     }
-     if (u != null) {
-     u.onGloryEvent(status);
-     }
-     break;
-     // Dont aprove the bag if not collected
-     case BAG_COLLECTED:
-     Logger.debug("-------> BAG COLLECTED, aprove change");
-     //ioBoard.aproveBag();
-     break;
-     case ERROR:
-     if (u != null) {
-     u.cancel();
-     }
-     if (status.getError() != null) {
-     modelError.setError(status.getError());
-     }
-     break;
-     case INITIALIZING:
-     default:
-     if (u == null) {
-     Logger.error(String.format("OnGloryEvent current user action is null : %s", status.name()));
-     } else {
-     u.onGloryEvent(status);
-     }
-     break;
-     }
-     }
-     }
-     */
-
-    static class OnIoBoardEvent extends BootstrapEventJob {
-
-        IoBoard.IoBoardStatus status;
-
-        public OnIoBoardEvent(IoBoard.IoBoardStatus status) {
-            this.status = status;
-        }
-
-        @Override
-        public void doJob() throws Exception {
-            if (Configuration.isIgnoreIoBoard()) {
-                return;
-            }
-            if (status == null) {
-                Logger.debug("doJob status is null");
-                return;
-            }
-            UserAction u;
-            synchronized (ModelFacade.class) {
-                u = currentUserAction;
-            }
-            IoBoardEvent.save(u, status.toString());
-            Logger.debug("OnIoBoardEvent event %s", status.toString());
-
-            if (status.getCriticalEvent() != null) {
-                IoBoardEvent.save(u, status.getCriticalEvent());
-            }
-
-            if (status.getError() != null) {
-                if (u != null) {
-                    u.cancel();
-                }
-                modelError.setError(status.getError());
-                return;
-            } else {
-                modelError.clearIoBoardError();
-            }
-            Logger.debug("BAG STATUS : %s", status.toString());
-            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE || status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-                // if bag not in place rotate current bag.
-                LgBag.withdrawBag(true);
-            }
-            // Bag change.
-            if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
-                switch (status.getBagAproveState()) {
-                    case BAG_NOT_APROVED:
-////                        ioBoard.aproveBag();
-                        /*if (!manager.collect()) {
-                         modelError.setError(ModelError.ERROR_CODE.ERROR_TRYING_TO_COLLECT, "error trying to collect");
-                         }*/
-                        break;
-                    case BAG_APROVE_WAIT:
-                        break;
-                    case BAG_APROVED:
-                        // Bag aproved, recover from error.
-                        if (modelError.getErrorCode() == ModelError.ERROR_CODE.BAG_NOT_INPLACE) {
-                            errorReset();
-                            //clearError();
-                        }
-                        break;
-                    case BAG_APROVE_CONFIRM:
-                        LgBag.placeBag();
-////                        ioBoard.aproveBagConfirm();
-                        break;
-                }
-                /*                if (u != null
-                 && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED
-                 && !Configuration.isIgnoreBag()) {
-                 modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag rotated during deposit");
-                 }*/
-            }
-
-            if (u == null) {
-                Logger.error(String.format("OnIoBoardEvent current user action is null : %s", status));
-            } else {
-                u.onIoBoardEvent(status);
-            }
-        }
-    }
-
-    static class OnPrinterEvent extends Job {
-
-        OSPrinter.PrinterStatus status;
-
-        private OnPrinterEvent(OSPrinter.PrinterStatus status) {
-            this.status = status;
-        }
-
-        @Override
-        public void doJob() throws Exception {
-            UserAction u;
-            synchronized (ModelFacade.class) {
-                u = currentUserAction;
-            }
-            PrinterEvent.save(u, status.toString());
-            Logger.debug("OnPrinterEvent event %s", status.toString());
-            if (status.getError() != null) {
-                if (!Configuration.isIgnorePrinter()) {
-                    Logger.error("Setting printer error : %s", status.toString());
-                    modelError.setError(status.getError());
-                }
-                return;
-            }
-            if (u != null) {
-                u.onPrinterEvent(status);
-            }
-        }
-    }
-
-    static public class UserActionApi {
-
-        public void count(Integer numericId) {
-            synchronized (ModelFacade.class) {
-                if (ModelFacade.currentUserAction == null) {
-                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "count currentAction is null");
-                    return;
-                }
-////                if (!manager.count(null, numericId)) {
-////                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start count");
-////                }
-            }
-        }
-
-        public boolean store(Integer depositId) {
-            if (!isIoBoardOk()) {
-                return false;
-            }
-////            return manager.storeDeposit(depositId);
-            return false;
-        }
-
-        public void withdraw() {
-////            if (!manager.withdrawDeposit()) {
-////                setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start withdraw");
-////            }
-        }
-
-        public void cancelDeposit() {
-////            manager.cancelCommand();
-        }
-
-        public void envelopeDeposit() {
-            synchronized (ModelFacade.class) {
-                if (ModelFacade.currentUserAction == null) {
-                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "envelopeDeposit currentAction is null");
-                    return;
-                }
-////                if (!manager.envelopeDeposit()) {
-////                    setError(ModelError.ERROR_CODE.APPLICATION_ERROR, "cant start envelope deposit");
-////                }
-            }
-        }
-
-        public void setError(ModelError.ERROR_CODE errorCode, String detail) {
-            modelError.setError(errorCode, detail);
-            finishAction();
-        }
-
-        public void openGate() {
-////            ioBoard.openGate();
-        }
-
-        public void closeGate() {
-////            ioBoard.closeGate();
-        }
-
-        public boolean isIoBoardOk() {
-            return ModelFacade.isIoBoardOk();
-        }
-
-        public List<LgBill> getCurrentBillList() {
-            synchronized (ModelFacade.class) {
-                final List<LgBill> ret = new ArrayList<LgBill>();
-                visitBillList(new BillListVisitor() {
-                    public void visit(LgBillType billType, Integer desired, Integer current) {
-                        LgBill b = new LgBill(current, billType);
-                        ret.add(b);
-                    }
-                });
-                return ret;
-            }
-        }
-    }
-
-    synchronized public static boolean isError() {
-        return modelError.isError();
-    }
-
-    synchronized public static void errorReset() {
-////        if (manager.getStatus().getError() != null) {
-////            manager.reset();
-////        }
-////        if (ioBoard.getStatus().getError() != null) {
-////            ioBoard.reset();
-////        }
-        if (modelError.getErrorCode() != null) {
-            modelError.clearErrorCodeError();
-        }
-    }
-
-    synchronized public static void storingErrorReset() {
-////        manager.storingErrorReset();
-    }
-
-    synchronized static public void startAction(UserAction userAction) {
-        ActionEvent.save(userAction, "Start try", getNeededController());
-        if (currentUserAction != null || currentUser != null) {
-            Logger.error("startAction currentAction is not null");
-            return;
-        }
-
-//        if (!isIoBoardOk(ioBoard.getStatus())) {
-//            modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "Bag not in place");
-//            return;
-//        }
-        if (modelError.isError()) {
-            Logger.info("Can't start an action when on error");
-            return;
-        }
+    public static boolean startBillDepositAction(BillDepositController.BillDepositData data) {
+        // Can be put into machine, but till now every machine has it own bag.
         if (!Configuration.isIgnoreBag() && !isBagReady(false)) {
             Logger.info("Can't start bag not ready");
-            return;
+            return false;
         }
-        currentUser = Secure.getCurrentUser();
-        currentUserAction = userAction;
-        ActionEvent.save(currentUserAction, "Start", getNeededController());
-        currentUserAction.start(currentUser, new UserActionApi());
+        ModelFacadeStateDepositBill depositAction = new ModelFacadeStateDepositBill(api, data);
+        return startAction(depositAction);
     }
 
-    synchronized public static void finishAction() {
-        if (currentUserAction != null && currentUser != null) {
-            ActionEvent.save(currentUserAction, "Finish", getNeededController());
+    public static boolean startCountingAction(CountController.CountData data) {
+        ModelFacadeStateCount countingAction = new ModelFacadeStateCount(api, data);
+        return startAction(countingAction);
+    }
 
-            if (currentUserAction.canFinishAction() || modelError.isError()) {
-                currentUserAction.finish();
-                currentUserAction = null;
-                currentUser = null;
+    public static boolean startFilterAction(FilterController.FilterData data) {
+        ModelFacadeStateFilter filteringAction = new ModelFacadeStateFilter(api, data);
+        return startAction(filteringAction);
+    }
+
+    public static boolean startEnvelopeDepositAction(EnvelopeDepositController.EvenlopeDepositData data) {
+        // Can be put into machine, but till now every machine has it own bag.
+        if (!Configuration.isIgnoreBag() && !isBagReady(false)) {
+            Logger.info("Can't start bag not ready");
+            return false;
+        }
+        ModelFacadeStateDepositEnvelope envelopeDepositAction = new ModelFacadeStateDepositEnvelope(api, data);
+        return startAction(envelopeDepositAction);
+    }
+
+    static private boolean startAction(final ModelFacadeStateAbstract userAction) {
+        return new FacadeJob<Boolean>() {
+
+            @Override
+            public Boolean doJobWithResult() {
+                return api.currentState.startAction(userAction);
             }
-        }
+        }.runNow();
     }
 
-    synchronized static public String getState() {
-        if (isLocked()) {
-            return null;
-        }
-////        ManagerStatus mstate = manager.getStatus();
-////        if (mstate.getState() == ManagerInterface.MANAGER_STATE.ERROR) {
-////            if (!Configuration.isIgnoreCounter()) {
-////                modelError.setError(mstate.getError());
-////            }
-////        }
+    public static boolean finishAction() {
+        return new FacadeJob<Boolean>() {
 
-////        IoBoard.IoBoardStatus status = ioBoard.getStatus();
-////        if (status != null && status.getError() != null) {
-////            if (!Configuration.isIgnoreIoBoard()) {
-////                Logger.error("Setting ioboard error : %s", status.getError());
-////                modelError.setError(status.getError());
-////            }
-////        }
-        if (modelError.isError()) {
-            finishAction();
-            return "ERROR";
-        }
-        if (currentUserAction
-                != null) {
-            return currentUserAction.getStateName();
-        }
-
-        return "IDLE";
-    }
-
-    synchronized static public String getNeededController() {
-        if (isLocked()) {
-            return null;
-        }
-        if (modelError.isError()) {
-            return "CounterController";
-        }
-        if (currentUserAction != null) {
-            return currentUserAction.getNeededController();
-        }
-        return null;
-    }
-
-    synchronized static public String getNeededAction() {
-        if (isLocked()) {
-            return null;
-        }
-        if (modelError.isError()) {
-            return "counterError";
-        }
-        if (currentUserAction != null) {
-            return currentUserAction.getNeededAction();
-        }
-        return null;
-    }
-
-    synchronized public static boolean isLocked() {
-        if (currentUser != null && !currentUser.equals(Secure.getCurrentUser())) {
-            return true;
-        }
-        return false;
-    }
-
-    synchronized public static Collection<BillQuantity> getBillQuantities() {
-        final SortedMap<BillValue, BillQuantity> ret = new TreeMap<BillValue, BillQuantity>();
-        visitBillList(new BillListVisitor() {
-            public void visit(LgBillType billType, Integer desired, Integer current) {
-                BillValue bv = billType.getValue();
-                BillQuantity billQuantity = ret.get(bv);
-                if (billQuantity == null) {
-                    billQuantity = new BillQuantity(bv);
-                }
-                billQuantity.quantity += current;
-                billQuantity.desiredQuantity += desired;
-                ret.put(bv, billQuantity);
-
+            @Override
+            public Boolean doJobWithResult() {
+                return api.currentState.finish();
             }
-        });
-        return ret.values();
+        }.runNow();
     }
 
-    private static void visitBillList(BillListVisitor visitor) {
-////        Integer currency = manager.getCurrency();
-////        if (currency == null) {
-////            return;
-////        }
-
-////        List<LgBillType> billTypes = LgBillType.find(currency);
-        Map<Integer, Integer> desiredQuantity = null;
-        Map<Integer, Integer> currentQuantity = null;
-////        if (manager != null) {
-////            currentQuantity = manager.getCurrentQuantity();
-////            desiredQuantity = manager.getDesiredQuantity();
-////        }
-        Set<Integer> slots = new HashSet();
-        if (currentQuantity != null) {
-            slots = new HashSet(currentQuantity.keySet());
-        }
-////        for (LgBillType billType : billTypes) {
-////            Integer desired = 0;
-////            Integer current = 0;
-
-////            if (currentQuantity != null && currentQuantity.containsKey(billType.slot)) {
-////                slots.remove(billType.slot);
-////                current = currentQuantity.get(billType.slot);
-////            }
-////            if (desiredQuantity != null && desiredQuantity.containsKey(billType.slot)) {
-////                desired = desiredQuantity.get(billType.slot);
-////            }
-////            visitor.visit(billType, desired, current);
-////        }
-////        if (!slots.isEmpty()) {
-////            for (Integer s : slots) {
-////                if (currentQuantity != null && currentQuantity.get(s) > 0) {
-////                    modelError.setError(ModelError.ERROR_CODE.APPLICATION_ERROR,
-////                            String.format("The bill type slots must be configured correctly slot %d value %d", s, currentQuantity.get(s)));
-////                }
-////            }
-////        }
+    static public ModelFacadeStateStatus getStateStatus() {
+        return api.getStatus();
     }
 
-    synchronized public static Object getFormData() {
-        if (currentUserAction == null) {
-            Logger.error("getFormData invalid current User Action");
-            return null;
-        }
-        return currentUserAction.getFormData();
+    public static boolean cancel() {
+        return new FacadeJob<Boolean>() {
+
+            @Override
+            public Boolean doJobWithResult() {
+                return api.currentState.cancel();
+            }
+        }.runNow();
     }
 
-    synchronized public static String getActionMessage() {
-        if (currentUserAction == null) {
-            Logger.error("getActionMessage invalid current User Action");
-            return null;
-        }
-        return currentUserAction.getMessage();
+    public static boolean accept() {
+        return new FacadeJob<Boolean>() {
+
+            @Override
+            public Boolean doJobWithResult() {
+                return api.currentState.accept();
+            }
+        }.runNow();
     }
 
-    public static LgDeposit getDeposit() {
-        if (currentUserAction == null) {
-            Logger.error("getDeposit invalid current User Action");
-            return null;
-        }
-        if (currentUserAction.getDepositId() == null) {
-            Logger.error("getDeposit invalid depositId %d", currentUserAction.getDepositId());
-            return null;
-        }
-        return LgDeposit.findById(currentUserAction.getDepositId());
-    }
+    public static boolean canceTimeout() {
+        return new FacadeJob<Boolean>() {
 
-    public static void cancel() {
-        if (currentUserAction == null) {
-            Logger.error("cancel invalid current User Action");
-            return;
-        }
-        Logger.debug("MODELFACADE: cancel");
-        currentUserAction.cancel();
-    }
-
-    public static void accept() {
-        if (currentUserAction == null) {
-            Logger.error("accept invalid current User Action");
-            return;
-        }
-        Logger.debug("MODELFACADE: accept");
-        currentUserAction.accept();
-    }
-
-    public static void suspendTimeout() {
-        if (currentUserAction == null) {
-            Logger.error("cancelTimeout invalid current User Action");
-            return;
-        }
-        currentUserAction.suspendTimeout();
-    }
-
-    public static IoBoard getIoBoard() {
-        //Play.configuration.getProperty("io_board.port")
-////        return ioBoard;
-        return null;
-    }
-
-    public static boolean isIoBoardOk() {
-////        IoBoard.IoBoardStatus status = ioBoard.getStatus();
-
-////        if (!Configuration.isIgnoreIoBoard() && status != null && status.getError() != null) {
-////            Logger.error("Setting ioboard error : %s", status.getError());
-////            modelError.setError(status.getError());
-////            return false;
-////        }
-////        if (!Configuration.isIgnoreBag()
-////                && status != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-////            Logger.error("IoBoard bag not inplace can't store");
-        //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-////            return false;
-////        }
-        return true;
+            @Override
+            public Boolean doJobWithResult() {
+                return api.currentState.suspendTimeout();
+            }
+        }.runNow();
     }
 
     public static boolean isBagReady(boolean envelope) {
         if (Configuration.isIgnoreBag()) {
             return true;
         }
-        if (!ModelFacade.isIoBoardOk()) {
+        if (!isBagInplace()) {
             Logger.info("Can't start bag removed");
             return false;
         }
@@ -646,11 +255,7 @@ public class ModelFacade {
 ////        }
     }
 
-    public static Object getPrinters() {
-        return OSPrinter.printers.values();
-    }
-
-    public static boolean printerNeedCheck() {
+    public static boolean isReadyToPrint() {
 ////        return printer.get().needCheck();
         return false;
     }
@@ -671,7 +276,7 @@ public class ModelFacade {
         PrintService p = (PrintService) OSPrinter.printers.get(prt);
         if (p == null) {
             Logger.error("Wrong printer name %s", prt);
-            return;
+            //return;
         }
 ////        Printer pp = DeviceFactory.getPrinter(prt);
 ////        pp.print(templateName, args, paperWidth, paperLen);
@@ -679,10 +284,71 @@ public class ModelFacade {
         //pp.close();
 ////        }
     }
+    /*
+     public static Object getPrinters() {
+     return OSPrinter.printers.values();
+     }
+     */
 
     public static OSPrinter getCurrentPrinter() {
 ////        return printer.get();
         return null;
     }
 
+    public static DeviceInterface findDeviceById(Integer deviceId) {
+        return api.getMachine().findDeviceById(deviceId);
+    }
+
+    public static boolean isBagInplace() {
+        return api.getMachine().isBagInplace();
+    }
+
+    public static Object getDevices() {
+        return api.getMachine().getDevices();
+    }
+
+    private interface BillListVisitor {
+
+        public void visit(LgBillType billType, Integer desired, Integer current);
+    }
+
+    public static Collection<BillQuantity> getBillQuantities(int currencyId) {
+        final SortedMap<BillValue, BillQuantity> ret = new TreeMap<BillValue, BillQuantity>();
+        visitBillList(currencyId, new BillListVisitor() {
+            public void visit(LgBillType billType, Integer desired, Integer current) {
+                BillValue bv = billType.getValue();
+                BillQuantity billQuantity = ret.get(bv);
+                if (billQuantity == null) {
+                    billQuantity = new BillQuantity(bv);
+                }
+                billQuantity.quantity += current;
+                billQuantity.desiredQuantity += desired;
+                ret.put(bv, billQuantity);
+
+            }
+        });
+        return ret.values();
+    }
+
+    private static void visitBillList(int currencyId, BillListVisitor visitor) {
+        List<LgBillType> billTypes = LgBillType.find(currencyId);
+        Map<LgDeviceSlot, Integer> desiredQuantity = api.getMachine().getCurrentQuantity();
+        Map<LgDeviceSlot, Integer> currentQuantity = api.getMachine().getDesiredQuantity();
+
+        // Sum over all bill types ignoring the device and slot they came from.
+        // Plan B: separate the slots by device.
+        for (LgBillType billType : billTypes) {
+            Integer desired = 0;
+            Integer current = 0;
+            for (LgDeviceSlot s : billType.slots) {
+                if (currentQuantity.containsKey(s)) {
+                    current = currentQuantity.get(s);
+                }
+                if (desiredQuantity.containsKey(s)) {
+                    desired = desiredQuantity.get(s);
+                }
+                visitor.visit(billType, desired, current);
+            }
+        }
+    }
 }

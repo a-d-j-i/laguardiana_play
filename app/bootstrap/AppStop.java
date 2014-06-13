@@ -5,7 +5,7 @@
  */
 package bootstrap;
 
-import static bootstrap.AppStart.eventExecutor;
+import static bootstrap.AppStart.singleThreadExecutor;
 import java.util.concurrent.TimeUnit;
 import models.ModelFacade;
 import play.Logger;
@@ -25,11 +25,11 @@ public class AppStop extends Job {
         ModelFacade.stop();
         Logger.debug("onApplicationStop close all devices DONE");
         Logger.debug("onApplicationStop stop execution service");
-        eventExecutor.shutdown();
+        singleThreadExecutor.shutdown();
         try {
-            eventExecutor.awaitTermination(3, TimeUnit.SECONDS);
+            singleThreadExecutor.awaitTermination(3, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
         }
-        eventExecutor.shutdownNow();
+        singleThreadExecutor.shutdownNow();
     }
 }

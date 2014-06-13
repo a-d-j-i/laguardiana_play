@@ -16,11 +16,11 @@ public class LgDeviceSlot extends GenericModel implements java.io.Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "device_id", nullable = false)
     public LgDevice device;
+    @Column(name = "slot", nullable = false)
+    public String slot;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bill_type_id", nullable = false)
     public LgBillType billType;
-    @Column(name = "slot", nullable = false)
-    public String slot;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
@@ -36,6 +36,28 @@ public class LgDeviceSlot extends GenericModel implements java.io.Serializable {
     @Override
     public String toString() {
         return "LgDeviceSlot{" + "deviceSlotId=" + deviceSlotId + ", device=" + device + ", slot=" + slot + ", creationDate=" + creationDate + ", endDate=" + endDate + '}';
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 79 * hash + (this.deviceSlotId != null ? this.deviceSlotId.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final LgDeviceSlot other = (LgDeviceSlot) obj;
+        if (this.deviceSlotId != other.deviceSlotId && (this.deviceSlotId == null || !this.deviceSlotId.equals(other.deviceSlotId))) {
+            return false;
+        }
+        return true;
     }
 
 }

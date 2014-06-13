@@ -5,7 +5,7 @@ import controllers.serializers.BillValueSerializer;
 import java.util.List;
 import models.Configuration;
 import models.ModelFacade;
-import models.actions.CountingAction;
+import models.db.LgUser;
 import models.lov.Currency;
 import play.Logger;
 import play.data.validation.CheckWith;
@@ -16,7 +16,7 @@ import play.mvc.Before;
 import play.mvc.Router;
 import validation.FormCurrency;
 
-public class FilterController extends CounterController {
+public class FilterController extends ErrorController {
 
     @Before
     // currentAction allways valid
@@ -24,10 +24,12 @@ public class FilterController extends CounterController {
         if (request.isAjax()) {
             return;
         }
-        String neededAction = ModelFacade.getNeededAction();
-        String neededController = ModelFacade.getNeededController();
+        status = ModelFacade.getStateStatus();
+        String neededAction = status.getNeededAction();
+        String neededController = status.getNeededController();
         if (neededAction == null || neededController == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start") || ModelFacade.isLocked()) {
+            FilterData data = (FilterData) status.getFormData();
+            if (!request.actionMethod.equalsIgnoreCase("start") || data.currentUser != Secure.getCurrentUser()) {
                 Logger.debug("wizardFixPage Redirect Application.index");
                 Application.index();
             }
@@ -39,7 +41,9 @@ public class FilterController extends CounterController {
         }
     }
 
-    static public class FormData {
+    static public class FilterData {
+
+        transient public LgUser currentUser = Secure.getCurrentUser();
 
         @CheckWith(FormCurrency.Validate.class)
         public FormCurrency currency = null;
@@ -48,9 +52,13 @@ public class FilterController extends CounterController {
         public String toString() {
             return "FormData{" + "currency=" + currency + '}';
         }
+
+        public Currency getCurrency() {
+            return currency.currency;
+        }
     }
 
-    public static void start(@Valid FormData formData)
+    public static void start(@Valid FilterData formData)
             throws Throwable {
         Logger.debug("start data %s", formData);
         if (Validation.hasErrors()) {
@@ -60,14 +68,16 @@ public class FilterController extends CounterController {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                CountingAction currentAction = new CountingAction(formData.currency.currency, formData);
-                ModelFacade.startAction(currentAction);
-                mainLoop();
+                if (ModelFacade.startFilterAction(formData)) {
+                    mainLoop();
+                } else {
+                    Application.index();
+                }
                 return;
             }
         }
         if (formData == null) {
-            formData = new FormData();
+            formData = new FilterData();
         }
         List<Currency> currencies = Currency.findAll();
         renderArgs.put("formData", formData);
@@ -76,18 +86,19 @@ public class FilterController extends CounterController {
     }
 
     public static void mainLoop() {
+        FilterData data = (FilterData) status.getFormData();
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = ModelFacade.getState();
-            o[1] = ModelFacade.getBillQuantities();
-            o[2] = Messages.get(ModelFacade.getActionMessage());
+            o[0] = status.getState();
+            o[1] = ModelFacade.getBillQuantities(data.currency.value);
+            o[2] = Messages.get(status.getActionMessage());
             renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("user", Secure.getCurrentUser());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
-            renderArgs.put("billData", ModelFacade.getBillQuantities());
-            renderArgs.put("formData", ModelFacade.getFormData());
+            renderArgs.put("billData", ModelFacade.getBillQuantities(data.currency.value));
+            renderArgs.put("formData", status.getFormData());
             render();
         }
     }

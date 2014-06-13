@@ -487,28 +487,33 @@ public class IoBoard {
         serialPort = null;
     }
 
-    public void openGate() {
+    public boolean openGate() {
         Logger.debug("openGate");
         statusThread.sendCmd('O');
+        return true;
     }
 
-    public void closeGate() {
+    public boolean closeGate() {
         Logger.debug("closeGate");
         statusThread.sendCmd('C');
+        return true;
     }
 
-    public void aproveBag() {
+    public boolean aproveBag() {
         state.setAproveBagState(BAG_APROVE_STATE.BAG_APROVE_WAIT);
         Logger.debug("aproveBag");
         statusThread.sendCmd('A');
+        return true;
     }
 
-    public void aproveBagConfirm() {
+    public boolean aproveBagConfirm() {
         state.setAproveBagState(BAG_APROVE_STATE.BAG_APROVED);
+        return true;
     }
 
-    public void reset() {
+    public boolean reset() {
         state.reset();
+        return true;
     }
 
     public IoBoardError getError() {

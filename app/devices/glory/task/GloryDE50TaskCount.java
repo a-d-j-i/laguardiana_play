@@ -9,10 +9,10 @@ import java.util.Map;
  */
 public class GloryDE50TaskCount extends DeviceTaskAbstract {
 
-    final private Map<Integer, Integer> desiredQuantity;
+    final private Map<String, Integer> desiredQuantity;
     final private Integer currency;
 
-    public GloryDE50TaskCount(Enum type, Map<Integer, Integer> desiredQuantity, Integer currency) {
+    public GloryDE50TaskCount(Enum type, Map<String, Integer> desiredQuantity, Integer currency) {
         super(type);
         this.desiredQuantity = desiredQuantity;
         this.currency = currency;
@@ -22,7 +22,7 @@ public class GloryDE50TaskCount extends DeviceTaskAbstract {
         return currency;
     }
 
-    public Map<Integer, Integer> getDesiredQuantity() {
+    public Map<String, Integer> getDesiredQuantity() {
         return desiredQuantity;
     }
 

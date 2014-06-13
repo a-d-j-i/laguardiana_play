@@ -4,10 +4,16 @@ import devices.device.DeviceInterface;
 import devices.device.events.DeviceEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import models.Configuration;
-import models.db.LgDevice;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import machines.events.MachineEvent;
+import machines.events.MachineEventListener;
+import machines.status.MachineStatus;
+import models.db.LgDeviceSlot;
 import play.Logger;
 
 /**
@@ -16,171 +22,125 @@ import play.Logger;
  */
 abstract public class Machine implements DeviceEventListener {
 
-    public enum MachineType {
+    public DeviceInterface findDeviceById(Integer deviceId) {
+        return deviceMap.get(deviceId);
+    }
 
-        P500() {
-                    @Override
-                    Machine getMachineInstance() {
-                        return new MachineP500();
-                    }
-                },
-        P500_MEI {
+    public List<DeviceInterface> getDevices() {
+        return new ArrayList<DeviceInterface>(deviceMap.values());
+    }
+    private final Set<MachineEventListener> listeners = new HashSet<MachineEventListener>();
+    //Queue<MachineEvent> events = new LinkedList<CounterEscrowFullEvent>();
 
-                    @Override
-                    Machine getMachineInstance() {
-                        return new MachineP500MEI();
-                    }
-                },;
+    synchronized public void addEventListener(MachineEventListener listener) {
+        this.listeners.add(listener);
+    }
 
-        @Override
-        public String toString() {
-            return name();
+    synchronized public void removeEventListener(MachineEventListener listener) {
+        this.listeners.remove(listener);
+    }
+
+    // Just for logging proposes.
+    final private BlockingQueue<MachineEvent> eventHistory = new ArrayBlockingQueue<MachineEvent>(10);
+
+    synchronized protected void notifyListeners(MachineStatus status) {
+        final MachineEvent le = new MachineEvent(this, status);
+        eventHistory.offer(le);
+        for (MachineEventListener counterListener : listeners) {
+            counterListener.onMachineEvent(le);
         }
-
-        abstract Machine getMachineInstance();
-
-        static public MachineType getMachineType(String machineType) throws IllegalArgumentException {
-            return MachineType.valueOf(machineType.toUpperCase());
-        }
-    };
-
-    static private Machine instance = null;
-
-    // TODO: Check singleton implementation.
-    static synchronized public Machine getInstance() {
-        if (instance == null) {
-            MachineType machineType = MachineType.getMachineType(Configuration.getMachineType());
-            instance = machineType.getMachineInstance();
-        }
-        return instance;
     }
 
-    static public List<DeviceInterface> getDevices() {
-        return new ArrayList<DeviceInterface>(getInstance().devices.values());
+    public MachineEvent getLastEvent() {
+        return eventHistory.poll();
     }
 
-    public static DeviceInterface findDeviceById(Integer deviceId) {
-        return getInstance().devices.get(deviceId);
-    }
+    private final Map<Integer, DeviceInterface> deviceMap = new HashMap<Integer, DeviceInterface>();
 
-
-    /*
-     static HashMap<String, Glory> gloryDevices = new HashMap();
-     static HashMap<Glory, GloryManager.CounterFactoryApi> gloryManagers = new HashMap();
-     static HashMap<String, IoBoard> ioBoardDevices = new HashMap();
-     static HashMap<String, Printer> openPrinters = new HashMap();
-
-     public static Printer getPrinter(String port) {
-
-     if (openPrinters.containsKey(port)) {
-     return openPrinters.get(port);
-     }
-     Printer printer = new Printer(port);
-     openPrinters.put(port, printer);
-     printer.startStatusThread();
-     return printer;
-     }
-
-     public static ManagerInterface getGloryManager(String port) {
-     Glory glory = getCounter(port);
-
-     if (glory == null) {
-     return null;
-     }
-     if (gloryManagers.containsKey(glory)) {
-     return gloryManagers.get(glory).getControllerApi();
-     }
-     GloryManager m = new GloryManager(glory);
-     GloryManager.CounterFactoryApi mcf = m.getCounterFactoryApi();
-     mcf.startThread();
-     gloryManagers.put(glory, mcf);
-     return mcf.getControllerApi();
-     }
-
-     synchronized public static Glory getCounter(String port) {
-     if (port == null) {
-     port = "0";
-     }
-     if (gloryDevices.containsKey(port)) {
-     return gloryDevices.get(port);
-     }
-     Logger.info(String.format("Configuring glory on serial port %s", port));
-     //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
-     PortConfiguration gloryPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_9600, PORTBITS.BITS_7, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_EVEN);
-     SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, gloryPortConf);
-     Logger.info(String.format("Configuring glory"));
-     Glory device = new Glory(serialPort);
-     gloryDevices.put(port, device);
-     return device;
-     }
-
-     synchronized public static IoBoard getIoBoard(String port, IOBOARD_VERSION version) {
-     if (port == null) {
-     port = "0";
-     }
-     if (ioBoardDevices.containsKey(port)) {
-     return ioBoardDevices.get(port);
-     }
-     Logger.info(String.format("Configuring ioboard on serial port %s", port));
-     //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
-     PortConfiguration iBoardPortConf = new PortConfiguration(version.getBaudRate(), PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
-     SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, iBoardPortConf);
-     Logger.info(String.format("Configuring glory"));
-     IoBoard device = new IoBoard(serialPort, version);
-     device.startStatusThread();
-     ioBoardDevices.put(port, device);
-     return device;
-     }
-
-     static synchronized public void closeAll() {
-     for (GloryManager.CounterFactoryApi m : gloryManagers.values()) {
-     Logger.debug("Closing Manager");
-     m.close();
-     }
-     for (Glory g : gloryDevices.values()) {
-     Logger.debug("Closing glory Device");
-     g.close();
-     }
-     for (IoBoard b : ioBoardDevices.values()) {
-     Logger.debug("Closing ioBoard Device");
-     b.close();
-     }
-     for (Printer p : openPrinters.values()) {
-     Logger.debug("Closing printer %s", p.getPort());
-     p.close();
-     }
-     }
-     */
-    public interface DeviceDescription {
-
-        public LgDevice.DeviceType getType();
-
-        public Enum getMachineId();
-    }
-
-    private final Map<Integer, DeviceInterface> devices = new HashMap<Integer, DeviceInterface>();
-
-    abstract protected DeviceDescription[] getDevicesDesc();
+    abstract protected List<DeviceInterface> getDeviceList();
 
     public void start() {
-        for (DeviceDescription desc : getDevicesDesc()) {
-            DeviceInterface d = desc.getType().createDevice(desc.getMachineId());
-            if (d == null) {
+        List<DeviceInterface> devices = getDeviceList();
+        if (devices == null) {
+            throw new IllegalArgumentException("Machine must be reconfigured correctly");
+        }
+        for (DeviceInterface dev : devices) {
+            if (dev == null) {
                 throw new IllegalArgumentException("Machine must be reconfigured correctly");
             }
-            Logger.debug("Start device %s", d);
-            d.addEventListener(this);
-            d.start();
-            devices.put(d.getDeviceId(), d);
-            Logger.debug("Start device %s done", d);
+            Logger.debug("Start device %s", dev);
+            dev.addEventListener(this);
+            dev.start();
+            deviceMap.put(dev.getDeviceId(), dev);
+            Logger.debug("Start device %s done", dev);
         }
     }
 
     public void stop() {
-        for (DeviceInterface d : devices.values()) {
+        for (DeviceInterface d : deviceMap.values()) {
             Logger.debug("Stop device %s", d.toString());
             d.stop();
             Logger.debug("Stop device %s done", d.toString());
         }
     }
+
+    abstract public boolean isBagInplace();
+
+    abstract public Map<LgDeviceSlot, Integer> getCurrentQuantity();
+
+    abstract public Map<LgDeviceSlot, Integer> getDesiredQuantity();
+
+    abstract public boolean errorReset();
+
+    abstract public boolean storingErrorReset();
+//    public void onGloryEvent(ManagerStatus m) {
+//        ActionState currState = state;
+//        do {
+//            Logger.debug("Action : OnGloryEvent state %s currState %s event %s",
+//                    state.getClass().getSimpleName(), currState.getClass().getSimpleName(), m.toString());
+//            currState = state;
+//            currState.onGloryEvent(m);
+//        } while (!state.equals(currState));
+//    }
+
+//    public void onIoBoardEvent(IoBoard.IoBoardStatus s) {
+//        ActionState currState = state;
+//        do {
+//            Logger.debug("Action : onIoBoardEvent state %s currState %s event %s",
+//                    state.getClass().getSimpleName(), currState.getClass().getSimpleName(), s.toString());
+//            currState = state;
+//            currState.onIoBoardEvent(s);
+//        } while (!state.equals(currState));
+//    }
+//
+//    public void onPrinterEvent(OSPrinter.PrinterStatus p) {
+//        ActionState currState = state;
+//        do {
+//            Logger.debug("Action : onPrinterEvent state %s currState %s event %s",
+//                    state.getClass().getSimpleName(), currState.getClass().getSimpleName(), p.toString());
+//            currState = state;
+//            state.onPrinterEvent(p);
+//        } while (!state.equals(currState));
+//    }
+//
+//    public void onTimeoutEvent(TimeoutTimer timer) {
+//        Date currentDate = new Date();
+//        TimeoutEvent.save(this, currentDate.toString());
+//        state.onTimeoutEvent(timer);
+//    }
+    public boolean cancel() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
+
+    public void startEnvelopeDeposit() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    abstract public boolean count(Integer currency, Map<String, Integer> desiredQuantity);
+
 }

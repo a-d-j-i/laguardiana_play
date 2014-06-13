@@ -21,7 +21,7 @@ public class PrinterController extends Controller {
             o[1] = ModelFacade.getCurrentPrinter().getInternalState().toString();
             renderJSON(o);
         }
-        renderArgs.put("printers", ModelFacade.getPrinters());
+//        renderArgs.put("printers", ModelFacade.getPrinters());
         renderArgs.put("printerStatus", ModelFacade.getCurrentPrinter().getInternalState());
         renderArgs.put("currentPrinter", ModelFacade.getCurrentPrinter().getPort());
 

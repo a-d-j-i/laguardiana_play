@@ -91,33 +91,4 @@ public class ConfigController extends Controller {
             renderJSON(ret);
         }
     }
-
-    // TODO: Get machine status only.
-    public static void status() {
-        String gerror = null;
-        OSPrinter.PrinterStatus pstatus = null;
-        String ierror = null;
-
-        if (!Configuration.isIgnoreIoBoard()) {
-            final IoBoard ioBoard = ModelFacade.getIoBoard();
-            if (ioBoard != null && ioBoard.getError() != null) {
-                ierror = ioBoard.getError().toString();
-            }
-        }
-        if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
-            pstatus = ModelFacade.getCurrentPrinter().getInternalState();
-        }
-        if (request.isAjax()) {
-            renderJSON(ModelFacade.isError());
-        } else {
-            renderArgs.put("isError", ModelFacade.isError());
-            renderArgs.put("mstatus", ModelFacade.getState());
-            renderArgs.put("merror", ModelFacade.getError());
-            renderArgs.put("pstatus", pstatus);
-            renderArgs.put("gerror", gerror);
-            renderArgs.put("ierror", ierror);
-            render();
-        }
-    }
-
 }

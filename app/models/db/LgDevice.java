@@ -3,9 +3,6 @@
  */
 package models.db;
 
-import devices.device.DeviceAbstract;
-import devices.glory.GloryDE50Device;
-import devices.mei.MeiEbdsDevice;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,59 +28,21 @@ import play.db.jpa.GenericModel;
 @Table(name = "lg_device", schema = "public")
 public class LgDevice extends GenericModel implements java.io.Serializable {
 
+    public enum DeviceClass {
+
+        DEVICE_CLASS_PRINTER,
+        DEVICE_CLASS_COUNTER,
+        DEVICE_CLASS_IOBOARD,
+    };
+
     public enum DeviceType {
 
-        OS_PRINTER() {
-                    @Override
-                    public DeviceAbstract createDevice(Enum machineDeviceId) {
-                        return null;
-                    }
-                },
-        IO_BOARD_V4520_1_0() {
-                    @Override
-                    public DeviceAbstract createDevice(Enum machineDeviceId) {
-                        return null;
-                    }
-                },
-        IO_BOARD_V4520_1_2() {
-                    @Override
-                    public DeviceAbstract createDevice(Enum machineDeviceId) {
-                        return null;
-                    }
-                },
-        IO_BOARD_MX220_1_0() {
-                    @Override
-                    public DeviceAbstract createDevice(Enum machineDeviceId) {
-                        return null;
-                    }
-                },
-        GLORY_DE50() {
-                    @Override
-                    public DeviceAbstract createDevice(Enum machineDeviceId) {
-                        return new GloryDE50Device(machineDeviceId, this);
-                    }
-                },
-        MEI_EBDS() {
-                    @Override
-                    public DeviceAbstract createDevice(Enum machineDeviceId) {
-                        return new MeiEbdsDevice(machineDeviceId, this);
-                    }
-                };
-
-        public enum DeviceClass {
-
-            DEVICE_CLASS_PRINTER,
-            DEVICE_CLASS_COUNTER,
-            DEVICE_CLASS_IOBOARD,
-        };
-
-        abstract public DeviceAbstract createDevice(Enum machineDeviceId);
-
-        @Override
-        public String toString() {
-            return name();
-        }
-
+        OS_PRINTER,
+        IO_BOARD_V4520_1_0,
+        IO_BOARD_V4520_1_2,
+        IO_BOARD_MX220_1_0,
+        GLORY_DE50,
+        MEI_EBDS;
     };
     @Id
     @Column(name = "device_id", unique = true, nullable = false)
@@ -94,15 +53,16 @@ public class LgDevice extends GenericModel implements java.io.Serializable {
     @Column(name = "machine_device_id", unique = true, nullable = false)
     public String machineDeviceId;
 
+    @Column(name = "device_type", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    public DeviceType deviceType;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date", nullable = true, length = 13)
     public Date endDate;
-    @Column(name = "device_type", nullable = false)
-    @Enumerated(EnumType.ORDINAL)
-    public DeviceType deviceType;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "device")
     public Set<LgDeviceProperty> deviceProperties = new HashSet<LgDeviceProperty>(0);
@@ -118,14 +78,14 @@ public class LgDevice extends GenericModel implements java.io.Serializable {
     @JoinColumn(name = "bag_id", nullable = true)
     public LgBag currentBag;
 
-    public LgDevice(Enum machineDeviceId, DeviceType deviceType) {
+    public LgDevice(String machineDeviceId, DeviceType deviceType) {
         this.deviceType = deviceType;
-        this.machineDeviceId = machineDeviceId.name();
+        this.machineDeviceId = machineDeviceId;
         creationDate = new Date();
     }
 
-    public static LgDevice getOrCreateByMachineId(Enum machineDeviceId, DeviceType deviceType) {
-        LgDevice ret = find("select d from LgDevice d where machineDeviceId = ?", machineDeviceId.name()).first();
+    public static LgDevice getOrCreateByMachineId(String machineDeviceId, DeviceType deviceType) {
+        LgDevice ret = find("select d from LgDevice d where machineDeviceId = ?", machineDeviceId).first();
         if (ret != null) {
             Logger.debug("Found a device : %s %s", ret.machineDeviceId, ret.deviceType.name());
             return ret;

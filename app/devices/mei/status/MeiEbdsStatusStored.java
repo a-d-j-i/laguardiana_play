@@ -1,6 +1,6 @@
 package devices.mei.status;
 
-import devices.device.DeviceStatusInterface;
+import devices.device.status.DeviceStatusInterface;
 
 /**
  *

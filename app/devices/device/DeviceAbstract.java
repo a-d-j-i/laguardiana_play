@@ -1,5 +1,6 @@
 package devices.device;
 
+import devices.device.status.DeviceStatusInterface;
 import devices.device.events.DeviceEventListener;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
@@ -15,7 +16,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import models.db.LgDevice;
-import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
 import play.Logger;
 
@@ -25,11 +25,11 @@ import play.Logger;
  */
 public abstract class DeviceAbstract implements DeviceInterface {
 
-    final public Enum machineDeviceId;
+    final public String machineDeviceId;
     final protected LgDevice lgd;
     final private ExecutorService taskExecutor;
 
-    public DeviceAbstract(final Enum machineDeviceId, DeviceType deviceType) {
+    public DeviceAbstract(final String machineDeviceId, LgDevice.DeviceType deviceType) {
         this.machineDeviceId = machineDeviceId;
         lgd = LgDevice.getOrCreateByMachineId(machineDeviceId, deviceType);
         this.taskExecutor = Executors.newSingleThreadExecutor();
@@ -37,9 +37,9 @@ public abstract class DeviceAbstract implements DeviceInterface {
 
     // TODO: possible race condition on start.
     public void start() {
-        Logger.debug("Device %s start", machineDeviceId.name());
+        Logger.debug("Device %s start", machineDeviceId);
         currentState = initState();
-        Logger.debug("Device %s start done", machineDeviceId.name());
+        Logger.debug("Device %s start done", machineDeviceId);
         init();
     }
 
@@ -48,7 +48,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
     abstract public void init();
 
     public void stop() {
-        Logger.debug("Device %s stop task thread", machineDeviceId.name());
+        Logger.debug("Device %s stop task thread", machineDeviceId);
         taskExecutor.shutdown();
         try {
             /*        taskThread.interrupt();
@@ -62,7 +62,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
             Logger.error("Timeout waiting for task thread : %s", ex);
         }
         finish();
-        Logger.debug("Device %s stop done", machineDeviceId.name());
+        Logger.debug("Device %s stop done", machineDeviceId);
     }
 
     public void finish() {
@@ -98,12 +98,12 @@ public abstract class DeviceAbstract implements DeviceInterface {
         return lgd.deviceId;
     }
 
-    public DeviceType getType() {
-        return lgd.deviceType;
+    public String getMachineDeviceId() {
+        return machineDeviceId;
     }
 
-    public Enum getMachineDeviceId() {
-        return machineDeviceId;
+    public Enum getType() {
+        return lgd.deviceType;
     }
 
     public List<LgDeviceProperty> getEditableProperties() {
@@ -129,7 +129,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
         return taskExecutor.submit(new Callable<Boolean>() {
 
             public Boolean call() throws Exception {
-                Logger.debug(String.format("%s executing current step: %s", machineDeviceId.name(), currentState));
+                Logger.debug(String.format("%s executing current step: %s", machineDeviceId, currentState));
                 DeviceStateInterface newState = deviceTask.execute(currentState);
                 if (newState != null && currentState != newState) {
                     Logger.debug("Changing state old %s, new %s", currentState, newState.toString());
@@ -140,7 +140,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
                     Logger.debug("setting state to new %s", newState.toString());
                     currentState = newState;
                 }
-                Logger.debug("Device %s thread done", machineDeviceId.name());
+                Logger.debug("Device %s thread done", machineDeviceId);
                 return deviceTask.get();
             }
         }
@@ -161,7 +161,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
 
     @Override
     public String toString() {
-        return "Device{ deviceID = " + getDeviceId() + ", machineDeviceId=" + machineDeviceId.name() + '}';
+        return "Device{ deviceID = " + getDeviceId() + ", machineDeviceId=" + machineDeviceId + '}';
     }
 
 }

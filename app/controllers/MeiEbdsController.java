@@ -3,9 +3,8 @@ package controllers;
 import devices.device.DeviceEvent;
 import devices.device.DeviceInterface;
 import devices.mei.MeiEbdsDevice;
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
-import machines.Machine;
+import models.ModelFacade;
 import play.mvc.Before;
 
 public class MeiEbdsController extends Application {
@@ -25,8 +24,7 @@ public class MeiEbdsController extends Application {
 
     public static void count(Integer deviceId) throws InterruptedException, ExecutionException {
         flash.put("lastCmd", "count");
-        Integer[] slotInfo = {1, 1, 1, 1, 1, 1, 1, 1};
-        getStatus(deviceId, meiDevice.count(Arrays.asList(slotInfo)));
+        getStatus(deviceId, meiDevice.count(0, null));
     }
 
     public static void store(Integer deviceId) {
@@ -46,7 +44,7 @@ public class MeiEbdsController extends Application {
 
     public static void resetDevice(Integer deviceId) {
         flash.put("lastCmd", "resetDevice");
-        getStatus(deviceId, meiDevice.reset());
+        getStatus(deviceId, meiDevice.errorReset());
     }
 
     // Counter Class end
@@ -57,7 +55,7 @@ public class MeiEbdsController extends Application {
     public static void getStatus(Integer deviceId, boolean retval) {
         renderArgs.put("lastCmd", flash.get("lastCmd"));
         renderArgs.put("lastResult", retval ? "SUCCESS" : "FAIL");
-        DeviceInterface d = Machine.findDeviceById(deviceId);
+        DeviceInterface d = ModelFacade.findDeviceById(deviceId);
         DeviceEvent de = d.getLastEvent();
         String lastEvent = "";
         if (de != null) {

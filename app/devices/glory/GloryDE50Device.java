@@ -15,11 +15,10 @@ import devices.glory.task.GloryDE50TaskOperation;
 import devices.glory.task.GloryDE50TaskStoreDeposit;
 import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import models.Configuration;
-import models.db.LgDevice.DeviceType;
+import models.db.LgDevice;
 import models.db.LgDeviceProperty;
 import play.Logger;
 
@@ -90,7 +89,7 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
 
     final GloryDE50DeviceStateApi api = new GloryDE50DeviceStateApi();
 
-    public GloryDE50Device(Enum machineDeviceId, DeviceType deviceType) {
+    public GloryDE50Device(String machineDeviceId, LgDevice.DeviceType deviceType) {
         super(machineDeviceId, deviceType);
     }
 
@@ -123,16 +122,19 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         //   currentCommand = new GotoNeutral(threadCommandApi);
     }
 
-    public boolean count(List<Integer> slotList) {
+    public boolean count(Integer currency, Map<String, Integer> desiredQuantity) {
+        DeviceTaskAbstract deviceTask = new GloryDE50TaskCount(GloryDE50TaskType.TASK_COUNT, desiredQuantity, currency);
+        try {
+            return submit(deviceTask).get();
+        } catch (InterruptedException ex) {
+            Logger.error("Exception in count %s", ex);
+        } catch (ExecutionException ex) {
+            Logger.error("Exception in count %s", ex);
+        }
         return false;
     }
 
-    public boolean count(Map<Integer, Integer> desiredQuantity, Integer currency) throws InterruptedException, ExecutionException {
-        DeviceTaskAbstract deviceTask = new GloryDE50TaskCount(GloryDE50TaskType.TASK_COUNT, desiredQuantity, currency);
-        return submit(deviceTask).get();
-    }
-
-    public boolean envelopeDeposit() throws InterruptedException, ExecutionException {
+    public boolean envelopeDeposit() {
         return submitSimpleTask(GloryDE50TaskType.TASK_ENVELOPE_DEPOSIT);
     }
 
@@ -140,7 +142,7 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         return submitSimpleTask(GloryDE50TaskType.TASK_COLLECT);
     }
 
-    public boolean reset() {
+    public boolean errorReset() {
         return submitSimpleTask(GloryDE50TaskType.TASK_RESET);
     }
 
@@ -152,9 +154,16 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         return submitSimpleTask(GloryDE50TaskType.TASK_STORING_ERROR_RESET);
     }
 
-    public boolean storeDeposit(Integer sequenceNumber) throws InterruptedException, ExecutionException {
+    public boolean storeDeposit(Integer sequenceNumber) {
         DeviceTaskAbstract deviceTask = new GloryDE50TaskStoreDeposit(GloryDE50TaskType.TASK_COUNT, sequenceNumber);
-        return submit(deviceTask).get();
+        try {
+            return submit(deviceTask).get();
+        } catch (InterruptedException ex) {
+            Logger.error("Exception in storeDeposit %s", ex);
+        } catch (ExecutionException ex) {
+            Logger.error("Exception in storeDeposit %s", ex);
+        }
+        return false;
     }
 
     public boolean withdrawDeposit() {
@@ -174,7 +183,6 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
             Logger.error("exeption in sendGloryDE50Operation %s", ex);
         } catch (ExecutionException ex) {
             Logger.error("exeption in sendGloryDE50Operation %s", ex);
-            ex.printStackTrace();
         }
         return null;
     }

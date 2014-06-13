@@ -29,14 +29,14 @@ import play.test.Fixtures;
 @OnApplicationStart
 public class AppStart extends Job {
 
-    public static ExecutorService eventExecutor = null;
+    public static ExecutorService singleThreadExecutor = null;
 
     @Override
     public void doJob() throws Exception {
         Logger.debug("onApplicationStart populate roles");
         populateRoles();
         Logger.debug("onApplicationStart start execution service");
-        eventExecutor = Executors.newSingleThreadExecutor();
+        singleThreadExecutor = Executors.newSingleThreadExecutor();
         Logger.debug("onApplicationStart start execution service DONE");
         Logger.debug("onApplicationStart open all devices");
         ModelFacade.start();
@@ -72,7 +72,7 @@ public class AppStart extends Job {
                 LgRole glory = loadRolsResourcesAndAcls(controllers.GloryDE50Controller.class);
                 //LgRole manager = loadRolsResourcesAndAcls(controllers.DeviceCounterClassController.class);
                 LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
-                LgRole counter = loadRolsResourcesAndAcls(controllers.CounterController.class);
+                LgRole counter = loadRolsResourcesAndAcls(controllers.ErrorController.class);
                 LgRole report = loadRolsResourcesAndAcls(controllers.ReportController.class);
                 LgRole reportDesposit = loadRolsResourcesAndAcls(controllers.ReportDepositController.class);
                 LgRole reportZ = loadRolsResourcesAndAcls(controllers.ReportZController.class);
