@@ -3,8 +3,6 @@ package machines;
 import devices.device.DeviceInterface;
 import devices.device.DeviceEvent;
 import devices.device.status.DeviceStatusInterface;
-import devices.glory.GloryDE50Device;
-import devices.glory.status.GloryDE50Status;
 import devices.mei.MeiEbdsDevice;
 import devices.mei.status.MeiEbdsStatus;
 import java.util.Arrays;
@@ -19,7 +17,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class MachineP500MEI extends Machine {
+public class MachineP500_MEI extends Machine {
 
     MeiEbdsDevice mei = new MeiEbdsDevice("P500_MEI_DEVICE_MEI_EBDS", DeviceType.MEI_EBDS);
 
@@ -35,6 +33,9 @@ public class MachineP500MEI extends Machine {
             switch ((MeiEbdsStatus.MeiEbdsStatusType) status.getType()) {
                 case COUNTING:
                     break;
+                case READY_TO_STORE:
+                    mei.storeDeposit(1);
+                    break;
             }
         } else {
             throw new UnsupportedOperationException("Not supported yet.");
@@ -42,7 +43,7 @@ public class MachineP500MEI extends Machine {
         Logger.error("Invalid event: %s", deviceEvent);
     }
 
-    public boolean envelopeDeposit() throws InterruptedException, ExecutionException {
+    public boolean envelopeDeposit() {
         return false;
     }
 
@@ -51,17 +52,29 @@ public class MachineP500MEI extends Machine {
     }
 
     public boolean cancelDeposit() {
-        boolean ret = true;
-        if (!mei.cancelDeposit()) {
-            Logger.error("Cant cancel mei deposit!!!");
-            ret = false;
+        try {
+            if (mei.cancelDeposit().get()) {
+                return true;
+            }
+        } catch (InterruptedException ex) {
+            Logger.debug("Exception on Machine cancelDeposit ", ex);
+        } catch (ExecutionException ex) {
+            Logger.debug("Exception on Machine cancelDeposit ", ex);
         }
-        return ret;
+        Logger.error("Cant cancel mei deposit!!!");
+        return false;
     }
 
     public boolean storeDeposit(DeviceInterface device, Integer sequenceNumber) {
         if (device == mei) {
-            return mei.storeDeposit(sequenceNumber);
+            try {
+                return mei.storeDeposit(sequenceNumber).get();
+            } catch (InterruptedException ex) {
+                Logger.debug("Exception on Machine cancelDeposit ", ex);
+            } catch (ExecutionException ex) {
+                Logger.debug("Exception on Machine cancelDeposit ", ex);
+            }
+            return false;
         } else {
             throw new UnsupportedOperationException("invalid device");
         }
@@ -69,24 +82,40 @@ public class MachineP500MEI extends Machine {
 
     public boolean withdrawDeposit(DeviceInterface device) {
         if (device == mei) {
-            return mei.withdrawDeposit();
+            try {
+                return mei.withdrawDeposit().get();
+            } catch (InterruptedException ex) {
+                Logger.debug("Exception on Machine cancelDeposit ", ex);
+            } catch (ExecutionException ex) {
+                Logger.debug("Exception on Machine cancelDeposit ", ex);
+            }
+            return false;
+
         } else {
             throw new UnsupportedOperationException("invalid device");
         }
     }
 
     public boolean count(Integer currency, Map<String, Integer> desiredQuantity) {
-        if (mei.count(currency, desiredQuantity)) {
-            if (!mei.cancelDeposit()) {
+        try {
+            if (mei.count(currency, desiredQuantity).get()) {
+                return true;
+            }
+            if (!mei.cancelDeposit().get()) {
                 Logger.error("Cant cancel mei deposit!!!");
             }
+        } catch (InterruptedException ex) {
+            Logger.debug("Exception on Machine cancelDeposit ", ex);
+        } catch (ExecutionException ex) {
+            Logger.debug("Exception on Machine cancelDeposit ", ex);
         }
         return false;
+
     }
 
     @Override
     public boolean isBagInplace() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return false;
     }
 
     @Override

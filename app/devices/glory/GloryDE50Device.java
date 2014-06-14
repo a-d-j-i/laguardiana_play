@@ -17,6 +17,8 @@ import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
 import models.Configuration;
 import models.db.LgDevice;
 import models.db.LgDeviceProperty;
@@ -122,55 +124,48 @@ public class GloryDE50Device extends DeviceAbstract implements DeviceClassCounte
         //   currentCommand = new GotoNeutral(threadCommandApi);
     }
 
-    public boolean count(Integer currency, Map<String, Integer> desiredQuantity) {
+    public Future<Boolean> count(Integer currency, Map<String, Integer> desiredQuantity) {
         DeviceTaskAbstract deviceTask = new GloryDE50TaskCount(GloryDE50TaskType.TASK_COUNT, desiredQuantity, currency);
-        try {
-            return submit(deviceTask).get();
-        } catch (InterruptedException ex) {
-            Logger.error("Exception in count %s", ex);
-        } catch (ExecutionException ex) {
-            Logger.error("Exception in count %s", ex);
-        }
-        return false;
+        return submit(deviceTask);
     }
 
-    public boolean envelopeDeposit() {
+    public Future<Boolean> envelopeDeposit() {
         return submitSimpleTask(GloryDE50TaskType.TASK_ENVELOPE_DEPOSIT);
     }
 
-    public boolean collect() {
+    public Future<Boolean> collect() {
         return submitSimpleTask(GloryDE50TaskType.TASK_COLLECT);
     }
 
-    public boolean errorReset() {
+    public Future<Boolean> errorReset() {
         return submitSimpleTask(GloryDE50TaskType.TASK_RESET);
     }
 
     public boolean clearError() {
-        return submitSimpleTask(GloryDE50TaskType.TASK_CLEAR_ERROR);
-    }
-
-    public boolean storingErrorReset() {
-        return submitSimpleTask(GloryDE50TaskType.TASK_STORING_ERROR_RESET);
-    }
-
-    public boolean storeDeposit(Integer sequenceNumber) {
-        DeviceTaskAbstract deviceTask = new GloryDE50TaskStoreDeposit(GloryDE50TaskType.TASK_COUNT, sequenceNumber);
         try {
-            return submit(deviceTask).get();
+            return submitSimpleTask(GloryDE50TaskType.TASK_CLEAR_ERROR).get();
         } catch (InterruptedException ex) {
-            Logger.error("Exception in storeDeposit %s", ex);
+            Logger.error("Exception in clearError %s", ex);
         } catch (ExecutionException ex) {
-            Logger.error("Exception in storeDeposit %s", ex);
+            Logger.error("Exception in clearError %s", ex);
         }
         return false;
     }
 
-    public boolean withdrawDeposit() {
+    public Future<Boolean> storingErrorReset() {
+        return submitSimpleTask(GloryDE50TaskType.TASK_STORING_ERROR_RESET);
+    }
+
+    public Future<Boolean> storeDeposit(Integer sequenceNumber) {
+        DeviceTaskAbstract deviceTask = new GloryDE50TaskStoreDeposit(GloryDE50TaskType.TASK_COUNT, sequenceNumber);
+        return submit(deviceTask);
+    }
+
+    public Future<Boolean> withdrawDeposit() {
         return submitSimpleTask(GloryDE50TaskType.TASK_WITHDRAW_DEPOSIT);
     }
 
-    public boolean cancelDeposit() {
+    public Future<Boolean> cancelDeposit() {
         return submitSimpleTask(GloryDE50TaskType.TASK_CANCEL);
     }
 

@@ -54,10 +54,8 @@ public class MenuController extends Controller {
 
     public static void otherMenu(String back) {
         String backAction = "MenuController.mainMenu";
-        String[] buttons = {"MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu", "ConfigController.status",
-            "ConfigController.index"};
-        String[] titles = {"other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports", "other_menu.status",
-            "other_menu.config"};
+        String[] buttons = {"MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu", "ConfigController.index"};
+        String[] titles = {"other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports", "other_menu.config"};
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 

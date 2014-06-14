@@ -4,11 +4,7 @@
  */
 package controllers;
 
-import devices.ioboard.IoBoard;
-import devices.printer.OSPrinter;
 import java.util.List;
-import models.Configuration;
-import models.ModelFacade;
 import models.db.LgSystemProperty;
 import play.Logger;
 import play.mvc.Controller;

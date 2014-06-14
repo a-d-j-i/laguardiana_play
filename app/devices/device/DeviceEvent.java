@@ -1,7 +1,5 @@
 package devices.device;
 
-import devices.device.DeviceAbstract;
-import devices.device.DeviceInterface;
 import devices.device.status.DeviceStatusInterface;
 import java.util.EventObject;
 

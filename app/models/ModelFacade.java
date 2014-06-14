@@ -16,7 +16,7 @@ import java.util.TreeMap;
 import javax.print.PrintService;
 import machines.Machine;
 import machines.MachineP500_GLORY;
-import machines.MachineP500MEI;
+import machines.MachineP500_MEI;
 import machines.events.MachineEvent;
 import machines.events.MachineEventListener;
 import models.db.LgBag;
@@ -48,7 +48,7 @@ public class ModelFacade {
 
                     @Override
                     Machine getMachineInstance() {
-                        return new MachineP500MEI();
+                        return new MachineP500_MEI();
                     }
                 },;
 

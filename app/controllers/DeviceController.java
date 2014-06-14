@@ -238,16 +238,16 @@ public class DeviceController extends Controller {
             }
         }
         Logger.debug("--------> %s", desiredQuantity);
-        if (!counter.count(currency, desiredQuantity)) {
+        if (!counter.count(currency, desiredQuantity).get()) {
             error = "Still executing another command";
         }
         counterClassCommands(deviceId, currency);
     }
 
-    public static void cancelDeposit(Integer deviceId, Integer currency) {
+    public static void cancelDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.cancelDeposit()) {
+        if (!counter.cancelDeposit().get()) {
             error = "Cant cancel";
         }
         counterClassCommands(deviceId, currency);
@@ -257,34 +257,34 @@ public class DeviceController extends Controller {
         error = null;
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         int sequenceNumber = 1;
-        if (!counter.storeDeposit(sequenceNumber)) {
+        if (!counter.storeDeposit(sequenceNumber).get()) {
             error = "Not counting cant store";
         }
         counterClassCommands(deviceId, currency);
     }
 
-    public static void withdrawDeposit(Integer deviceId, Integer currency) {
+    public static void withdrawDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.withdrawDeposit()) {
+        if (!counter.withdrawDeposit().get()) {
             error = "Not counting cant store";
         }
         counterClassCommands(deviceId, currency);
     }
 
-    public static void reset(Integer deviceId, Integer currency) {
+    public static void reset(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.errorReset()) {
+        if (!counter.errorReset().get()) {
             error = "Executing another command";
         }
         counterClassCommands(deviceId, currency);
     }
 
-    public static void storingErrorReset(Integer deviceId, Integer currency) {
+    public static void storingErrorReset(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.storingErrorReset()) {
+        if (!counter.storingErrorReset().get()) {
             error = "Executing another command";
         }
         counterClassCommands(deviceId, currency);
@@ -300,7 +300,7 @@ public class DeviceController extends Controller {
     public static void envelopeDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
         DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.envelopeDeposit()) {
+        if (!counter.envelopeDeposit().get()) {
             error = "Executing another command";
         }
         counterClassCommands(deviceId, currency);

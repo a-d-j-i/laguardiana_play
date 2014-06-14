@@ -1,6 +1,7 @@
 package models.facade.state.substate;
 
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import models.ModelFacade;
 import models.db.LgDeposit;
 import play.Logger;

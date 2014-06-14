@@ -1,24 +1,24 @@
 package devices.device;
 
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public interface DeviceClassCounterIntreface {
 
-    public boolean count(Integer currency, Map<String, Integer> desiredQuantity);
+    public Future<Boolean> count(Integer currency, Map<String, Integer> desiredQuantity);
 
-    public boolean envelopeDeposit();
+    public Future<Boolean> envelopeDeposit();
 
-    public boolean collect();
+    public Future<Boolean> collect();
 
-    public boolean errorReset();
+    public Future<Boolean> errorReset();
 
-    public boolean storingErrorReset();
+    public Future<Boolean> storingErrorReset();
 
-    public boolean cancelDeposit();
+    public Future<Boolean> cancelDeposit();
 
-    public boolean storeDeposit(Integer sequenceNumber);
+    public Future<Boolean> storeDeposit(Integer sequenceNumber);
 
-    public boolean withdrawDeposit();
+    public Future<Boolean> withdrawDeposit();
 
 }

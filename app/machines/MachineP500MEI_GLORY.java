@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceSlot;
 import play.Logger;
@@ -50,54 +51,53 @@ public class MachineP500MEI_GLORY extends Machine {
     }
 
     public boolean envelopeDeposit() throws InterruptedException, ExecutionException {
-        return glory.envelopeDeposit();
+        return glory.envelopeDeposit().get();
     }
 
-    public boolean collect() {
-        return glory.collect();
+    public boolean collect() throws InterruptedException, ExecutionException {
+        return glory.collect().get();
     }
 
-    public boolean cancelDeposit() {
-        boolean ret = true;
-        if (!mei.cancelDeposit()) {
-            Logger.error("Cant cancel mei deposit!!!");
-            ret = false;
-        }
-        if (!glory.cancelDeposit()) {
-            Logger.error("Cant cancel glory deposit!!!");
-            ret = false;
-        }
-        return ret;
+    public boolean cancelDeposit() throws InterruptedException, ExecutionException {
+        Future<Boolean> f = glory.cancelDeposit();
+        Future<Boolean> f1 = mei.cancelDeposit();
+        return (f.get() && f1.get());
     }
 
-    public boolean storeDeposit(DeviceInterface device, Integer sequenceNumber) {
+    public boolean storeDeposit(DeviceInterface device, Integer sequenceNumber) throws InterruptedException, ExecutionException {
         if (device == mei) {
-            return mei.storeDeposit(sequenceNumber);
+            return mei.storeDeposit(sequenceNumber).get();
         } else if (device == glory) {
-            return glory.storeDeposit(sequenceNumber);
+            return glory.storeDeposit(sequenceNumber).get();
         } else {
             throw new UnsupportedOperationException("invalid device");
         }
     }
 
-    public boolean withdrawDeposit(DeviceInterface device) {
+    public boolean withdrawDeposit(DeviceInterface device) throws InterruptedException, ExecutionException {
         if (device == mei) {
-            return mei.withdrawDeposit();
+            return mei.withdrawDeposit().get();
         } else if (device == glory) {
-            return glory.withdrawDeposit();
+            return glory.withdrawDeposit().get();
         } else {
             throw new UnsupportedOperationException("invalid device");
         }
     }
 
     public boolean count(Integer currency, Map<String, Integer> desiredQuantity) {
-        if (mei.count(currency, desiredQuantity)) {
-            if (glory.count(currency, desiredQuantity)) {
-                return true;
+        try {
+            if (mei.count(currency, desiredQuantity).get()) {
+                if (glory.count(currency, desiredQuantity).get()) {
+                    return true;
+                }
+                if (!mei.cancelDeposit().get()) {
+                    Logger.error("Cant cancel mei deposit!!!");
+                }
             }
-            if (!mei.cancelDeposit()) {
-                Logger.error("Cant cancel mei deposit!!!");
-            }
+        } catch (InterruptedException ex) {
+            Logger.debug("Exception on Machine count ", ex);
+        } catch (ExecutionException ex) {
+            Logger.debug("Exception on Machine count ", ex);
         }
         return false;
     }

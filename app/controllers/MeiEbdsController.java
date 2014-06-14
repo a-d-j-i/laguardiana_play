@@ -4,7 +4,9 @@ import devices.device.DeviceEvent;
 import devices.device.DeviceInterface;
 import devices.mei.MeiEbdsDevice;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import models.ModelFacade;
+import play.Logger;
 import play.mvc.Before;
 
 public class MeiEbdsController extends Application {
@@ -18,11 +20,11 @@ public class MeiEbdsController extends Application {
             meiDevice = (MeiEbdsDevice) DeviceController.device;
         } else {
             renderArgs.put("error", "invalid device id");
-            getStatus(deviceId, true);
+            getStatus(deviceId, null);
         }
     }
 
-    public static void count(Integer deviceId) throws InterruptedException, ExecutionException {
+    public static void count(Integer deviceId) {
         flash.put("lastCmd", "count");
         getStatus(deviceId, meiDevice.count(0, null));
     }
@@ -49,11 +51,21 @@ public class MeiEbdsController extends Application {
 
     // Counter Class end
     public static void getStatus(Integer deviceId) {
-        getStatus(deviceId, true);
+        getStatus(deviceId, null);
     }
 
-    public static void getStatus(Integer deviceId, boolean retval) {
+    public static void getStatus(Integer deviceId, Future<Boolean> fut) {
         renderArgs.put("lastCmd", flash.get("lastCmd"));
+        boolean retval = true;
+        if (fut != null) {
+            try {
+                retval = fut.get();
+            } catch (InterruptedException ex) {
+                Logger.error("Exception : ", ex);
+            } catch (ExecutionException ex) {
+                Logger.error("Exception : ", ex);
+            }
+        }
         renderArgs.put("lastResult", retval ? "SUCCESS" : "FAIL");
         DeviceInterface d = ModelFacade.findDeviceById(deviceId);
         DeviceEvent de = d.getLastEvent();

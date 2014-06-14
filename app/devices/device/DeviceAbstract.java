@@ -1,8 +1,8 @@
 package devices.device;
 
-import devices.device.status.DeviceStatusInterface;
 import devices.device.events.DeviceEventListener;
 import devices.device.state.DeviceStateInterface;
+import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskAbstract;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import models.db.LgDevice;
 import models.db.LgDeviceProperty;
 import play.Logger;
@@ -126,6 +127,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
     protected DeviceStateInterface currentState;
 
     synchronized protected Future<Boolean> submit(final DeviceTaskAbstract deviceTask) {
+        Logger.debug("---> Submitting task : " + deviceTask.toString());
         return taskExecutor.submit(new Callable<Boolean>() {
 
             public Boolean call() throws Exception {
@@ -147,16 +149,33 @@ public abstract class DeviceAbstract implements DeviceInterface {
         );
     }
 
-    protected boolean submitSimpleTask(Enum st) {
-        DeviceTaskAbstract deviceTask = new DeviceTaskAbstract(st);
-        try {
-            return submit(deviceTask).get();
-        } catch (InterruptedException ex) {
-            Logger.error("exception in change property %s", ex.toString());
-        } catch (ExecutionException ex) {
-            Logger.error("exception in change property %s", ex.toString());
-        }
-        return false;
+    protected Future<Boolean> submitSimpleTask(Enum st) {
+        return submit(new DeviceTaskAbstract(st));
+    }
+
+    protected Future<Boolean> falseFuture(final boolean ret) {
+        return new Future<Boolean>() {
+
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            public boolean isCancelled() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            public boolean isDone() {
+                return true;
+            }
+
+            public Boolean get() throws InterruptedException, ExecutionException {
+                return ret;
+            }
+
+            public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                return ret;
+            }
+        };
     }
 
     @Override

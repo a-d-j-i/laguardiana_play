@@ -15,6 +15,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import models.db.LgDevice;
 import models.db.LgDeviceProperty;
 import play.Logger;
@@ -146,19 +149,19 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         submit(new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, initialPortValue));
     }
 
-    public boolean errorReset() {
+    public Future<Boolean> errorReset() {
         return submitSimpleTask(MeiEbdsTaskType.TASK_RESET);
     }
 
-    public boolean cancelDeposit() {
+    public Future<Boolean> cancelDeposit() {
         return submitSimpleTask(MeiEbdsTaskType.TASK_CANCEL);
     }
 
-    public boolean storeDeposit(Integer sequenceNumber) {
+    public Future<Boolean> storeDeposit(Integer sequenceNumber) {
         return submitSimpleTask(MeiEbdsTaskType.TASK_STORE);
     }
 
-    public boolean withdrawDeposit() {
+    public Future<Boolean> withdrawDeposit() {
         return submitSimpleTask(MeiEbdsTaskType.TASK_REJECT);
     }
 
@@ -166,33 +169,26 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public boolean count(Integer currency, Map<String, Integer> desiredQuantity) {
+    public Future<Boolean> count(Integer currency, Map<String, Integer> desiredQuantity) {
         // this device can't limit the quantity, but I can choose the valid slots.
         // TODO: Implement.
         Integer[] slotInfo = {1, 1, 1, 1, 1, 1, 1, 1};
-        try {
-            return submit(new MeiEbdsTaskCount(MeiEbdsTaskType.TASK_COUNT, Arrays.asList(slotInfo))).get();
-        } catch (InterruptedException ex) {
-            Logger.error("Error in mei count %s", ex);
-        } catch (ExecutionException ex) {
-            Logger.error("Error in mei count %s", ex);
-        }
-        return false;
+        return submit(new MeiEbdsTaskCount(MeiEbdsTaskType.TASK_COUNT, Arrays.asList(slotInfo)));
     }
 
-    public boolean envelopeDeposit() {
+    public Future<Boolean> envelopeDeposit() {
         Logger.error("Mei don't support envelopeDeposit");
-        return false;
+        return falseFuture(false);
     }
 
-    public boolean collect() {
+    public Future<Boolean> collect() {
         Logger.error("Mei don't support collect");
-        return false;
+        return falseFuture(false);
     }
 
-    public boolean storingErrorReset() {
+    public Future<Boolean> storingErrorReset() {
         Logger.error("Mei don't support storingErrorReset");
-        return false;
+        return falseFuture(false);
     }
 
 }

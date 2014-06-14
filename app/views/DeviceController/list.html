@@ -19,7 +19,7 @@
                 <tbody>
                     #{list items:data, as:'device' }
                 <td>${device.deviceId} </td>
-                <td>${device.getMachineDeviceId().name()}</td>
+                <td>${device.getMachineDeviceId()}</td>
                 <td>${device.getType().name()}</td>
                 <td style="background-color: lightblue; border: 1px solid;">
                     <a id="${ device.deviceId }" href="@{properties}" class="submitForm"><img src="../public/images/round_button.gif" border="0" alt="Propiedades"></a>
