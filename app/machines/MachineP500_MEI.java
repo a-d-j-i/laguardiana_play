@@ -67,13 +67,14 @@ public class MachineP500_MEI extends Machine {
 
     public boolean storeDeposit(DeviceInterface device, Integer sequenceNumber) {
         if (device == mei) {
-            try {
-                return mei.storeDeposit(sequenceNumber).get();
-            } catch (InterruptedException ex) {
-                Logger.debug("Exception on Machine cancelDeposit ", ex);
-            } catch (ExecutionException ex) {
-                Logger.debug("Exception on Machine cancelDeposit ", ex);
-            }
+            /*            try {
+             return mei.storeDeposit(sequenceNumber).get();
+             } catch (InterruptedException ex) {
+             Logger.debug("Exception on Machine cancelDeposit ", ex);
+             } catch (ExecutionException ex) {
+             Logger.debug("Exception on Machine cancelDeposit ", ex);
+             }
+             */
             return false;
         } else {
             throw new UnsupportedOperationException("invalid device");
