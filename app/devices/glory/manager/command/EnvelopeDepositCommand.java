@@ -12,11 +12,43 @@ import play.Logger;
  */
 public class EnvelopeDepositCommand extends ManagerCommandAbstract {
 
-    private final CommandData commandData;
+    static public class EnvelopeData extends CommandData {
+
+        private boolean storeDeposit = false;
+
+        private boolean needToStoreDeposit() {
+            rlock();
+            try {
+                return storeDeposit;
+            } finally {
+                runlock();
+            }
+        }
+
+        private void storeDeposit() {
+            wlock();
+            try {
+                this.storeDeposit = true;
+            } finally {
+                wunlock();
+            }
+        }
+
+        private void storeDepositDone() {
+            wlock();
+            try {
+                this.storeDeposit = false;
+            } finally {
+                wunlock();
+            }
+        }
+
+    }
+    private final EnvelopeData commandData;
 
     public EnvelopeDepositCommand(ThreadCommandApi threadCommandApi) {
         super(threadCommandApi);
-        commandData = new CommandData();
+        commandData = new EnvelopeData();
     }
 
     public void storeDeposit(Integer sequenceNumber) {
@@ -25,7 +57,7 @@ public class EnvelopeDepositCommand extends ManagerCommandAbstract {
 
     @Override
     public void run() {
-        
+
         if (!gotoNeutral(false, true)) {
             return;
         }

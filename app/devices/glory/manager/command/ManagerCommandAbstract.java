@@ -30,34 +30,6 @@ abstract public class ManagerCommandAbstract implements Runnable {
         private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
         private final Lock r = rwl.readLock();
         private final Lock w = rwl.writeLock();
-        private boolean storeDeposit = false;
-
-        protected boolean needToStoreDeposit() {
-            rlock();
-            try {
-                return storeDeposit;
-            } finally {
-                runlock();
-            }
-        }
-
-        protected void storeDeposit() {
-            wlock();
-            try {
-                this.storeDeposit = true;
-            } finally {
-                wunlock();
-            }
-        }
-
-        protected void storeDepositDone() {
-            wlock();
-            try {
-                this.storeDeposit = false;
-            } finally {
-                wunlock();
-            }
-        }
 
         final protected void rlock() {
             r.lock();

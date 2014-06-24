@@ -24,9 +24,16 @@ public class CountCommand extends ManagerCommandAbstract {
 
     static public class CountData extends CommandData {
 
+        enum STORE_ACTION {
+
+            STORE_ACTION_NONE,
+            STORE_ACTION_STORE,
+            STORE_ACTION_WITHDRAW
+
+        };
         private Map< Integer, Integer> currentQuantity = new HashMap<Integer, Integer>();
         private final Integer currency;
-        private boolean withdrawDeposit = false;
+        private STORE_ACTION storeAction = STORE_ACTION.STORE_ACTION_NONE;
         private final Map<Integer, Integer> desiredQuantity = new HashMap<Integer, Integer>();
         private int currentSlot = 0;
         private final boolean isBatch;
@@ -88,10 +95,45 @@ public class CountCommand extends ManagerCommandAbstract {
             }
         }
 
+        private boolean needToStoreDeposit() {
+            rlock();
+            try {
+                return storeAction == STORE_ACTION.STORE_ACTION_STORE;
+            } finally {
+                runlock();
+            }
+        }
+
+        private void storeDeposit() {
+            wlock();
+            try {
+                if (storeAction == STORE_ACTION.STORE_ACTION_NONE) {
+                    storeAction = STORE_ACTION.STORE_ACTION_STORE;
+                } else {
+                    Logger.debug("Count command storeDeposit invalid store action %s", storeAction.name());
+                }
+            } finally {
+                wunlock();
+            }
+        }
+
+        private void storeDepositDone() {
+            wlock();
+            try {
+                if (storeAction == STORE_ACTION.STORE_ACTION_STORE) {
+                    storeAction = STORE_ACTION.STORE_ACTION_NONE;
+                } else {
+                    Logger.debug("Count command storeDepositDone invalid store action %s", storeAction.name());
+                }
+            } finally {
+                wunlock();
+            }
+        }
+
         private boolean needToWithdrawDeposit() {
             rlock();
             try {
-                return withdrawDeposit;
+                return storeAction == STORE_ACTION.STORE_ACTION_WITHDRAW;
             } finally {
                 runlock();
             }
@@ -100,7 +142,11 @@ public class CountCommand extends ManagerCommandAbstract {
         private void withdrawDeposit() {
             wlock();
             try {
-                this.withdrawDeposit = true;
+                if (storeAction == STORE_ACTION.STORE_ACTION_NONE) {
+                    storeAction = STORE_ACTION.STORE_ACTION_WITHDRAW;
+                } else {
+                    Logger.debug("Count command storeDeposit invalid store action %s", storeAction.name());
+                }
             } finally {
                 wunlock();
             }
@@ -109,7 +155,11 @@ public class CountCommand extends ManagerCommandAbstract {
         private void withdrawDepositDone() {
             wlock();
             try {
-                this.withdrawDeposit = false;
+                if (storeAction == STORE_ACTION.STORE_ACTION_WITHDRAW) {
+                    storeAction = STORE_ACTION.STORE_ACTION_NONE;
+                } else {
+                    Logger.debug("Count command storeDepositDone invalid store action %s", storeAction.name());
+                }
             } finally {
                 wunlock();
             }
