@@ -120,7 +120,7 @@ public class CountCommand extends ManagerCommandAbstract {
         private void storeDepositDone() {
             wlock();
             try {
-                if (storeAction == STORE_ACTION.STORE_ACTION_STORE) {
+                if (storeAction == STORE_ACTION.STORE_ACTION_STORE || storeAction == STORE_ACTION.STORE_ACTION_NONE) {
                     storeAction = STORE_ACTION.STORE_ACTION_NONE;
                 } else {
                     Logger.debug("Count command storeDepositDone invalid store action %s", storeAction.name());

@@ -6,6 +6,7 @@ package models.actions.states;
 
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
+import java.util.concurrent.atomic.AtomicBoolean;
 import models.Configuration;
 import models.actions.UserAction.StateApi;
 import models.db.LgDeposit;
@@ -27,29 +28,38 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
     public String name() {
         return "ESCROW_FULL";
     }
+    final private AtomicBoolean imDone = new AtomicBoolean(false);
 
     @Override
     public void cancel() {
-        stateApi.cancelTimer();
-        // Change to cancel to cancel the whole deposit
-        stateApi.withdraw();
+        if (imDone.compareAndSet(false, true)) {
+            stateApi.cancelTimer();
+            // Change to cancel to cancel the whole deposit
+            stateApi.withdraw();
+        } else {
+            Logger.debug("BillDepositReadyToStoreEscrowFull accept imDone");
+        }
     }
 
     @Override
     public void accept() {
-        if (!isReadyToAccept(false)) {
-            return;
-        }
-        stateApi.cancelTimer();
-        stateApi.addBatchToDeposit();
-        if (Configuration.isIgnoreShutter()) {
-            if (!stateApi.store()) {
-                Logger.error("startBillDeposit can't cancel glory");
+        if (imDone.compareAndSet(false, true)) {
+            if (!isReadyToAccept(false)) {
+                return;
             }
-            stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
+            stateApi.cancelTimer();
+            stateApi.addBatchToDeposit();
+            if (Configuration.isIgnoreShutter()) {
+                if (!stateApi.store()) {
+                    Logger.error("startBillDeposit can't cancel glory");
+                }
+                stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
+            } else {
+                stateApi.openGate();
+                stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
+            }
         } else {
-            stateApi.openGate();
-            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
+            Logger.debug("BillDepositReadyToStoreEscrowFull accept imDone");
         }
     }
 
