@@ -153,7 +153,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
 
         LgBag current = getCurrentBag();
         // If the bug was not placed by the ioboard then it can be withdrawn by the ioboard.
-        if ( current.placementDate == null && byIoBoard) {
+        if (current.placementDate == null && byIoBoard) {
             return;
         }
         // last bag was removed and is still no placed;
@@ -182,8 +182,10 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         Date currDate = new Date();
         LgBag current = getCurrentBag();
         if (current.placementDate != null) {
-            Logger.warn("Cant place a bag (%s) now %s that was allready put in date %s",
+            String msg = String.format("Cant place a bag (%s) now %s that was allready put in date %s",
                     current.bagId.toString(), currDate.toString(), current.placementDate.toString());
+            BagEvent.save(current, msg);
+            Logger.warn(msg);
             return;
         }
         current.placementDate = currDate;

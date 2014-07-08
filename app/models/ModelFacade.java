@@ -184,7 +184,8 @@ public class ModelFacade {
                 modelError.clearIoBoardError();
             }
             Logger.debug("BAG STATUS : %s", status.toString());
-            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE || status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+//            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE || status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
                 // if bag not in place rotate current bag.
                 LgBag.withdrawBag(true);
             }
