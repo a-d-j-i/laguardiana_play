@@ -413,8 +413,7 @@ public class ModelFacade {
             finishAction();
             return "ERROR";
         }
-        if (currentUserAction
-                != null) {
+        if (currentUserAction != null) {
             return currentUserAction.getStateName();
         }
 

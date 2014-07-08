@@ -28,38 +28,29 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
     public String name() {
         return "ESCROW_FULL";
     }
-    final private AtomicBoolean imDone = new AtomicBoolean(false);
 
     @Override
     public void cancel() {
-        if (imDone.compareAndSet(false, true)) {
-            stateApi.cancelTimer();
-            // Change to cancel to cancel the whole deposit
-            stateApi.withdraw();
-        } else {
-            Logger.debug("BillDepositReadyToStoreEscrowFull accept imDone");
-        }
+        stateApi.cancelTimer();
+        // Change to cancel to cancel the whole deposit
+        stateApi.withdraw();
     }
 
     @Override
     public void accept() {
-        if (imDone.compareAndSet(false, true)) {
-            if (!isReadyToAccept(false)) {
-                return;
+        if (!isReadyToAccept(false)) {
+            return;
+        }
+        stateApi.cancelTimer();
+        stateApi.addBatchToDeposit();
+        if (Configuration.isIgnoreShutter()) {
+            if (!stateApi.store()) {
+                Logger.error("startBillDeposit can't cancel glory");
             }
-            stateApi.cancelTimer();
-            stateApi.addBatchToDeposit();
-            if (Configuration.isIgnoreShutter()) {
-                if (!stateApi.store()) {
-                    Logger.error("startBillDeposit can't cancel glory");
-                }
-                stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
-            } else {
-                stateApi.openGate();
-                stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
-            }
+            stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
         } else {
-            Logger.debug("BillDepositReadyToStoreEscrowFull accept imDone");
+            stateApi.openGate();
+            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
         }
     }
 

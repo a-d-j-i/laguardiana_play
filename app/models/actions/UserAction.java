@@ -9,6 +9,7 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 import models.ItemQuantity;
 import models.ModelError;
 import models.ModelFacade.UserActionApi;
@@ -51,6 +52,8 @@ abstract public class UserAction {
         }
 
         public void setState(ActionState state) {
+            Logger.debug("Setting imDone to false, state transition to %s", state.toString());
+            imDone.set(false);
             UserAction.this.state = state;
         }
 
@@ -167,13 +170,24 @@ abstract public class UserAction {
     public Object getFormData() {
         return actionData;
     }
+    // There is a race condition when in the same state they press accept and cancel at the same time
+    // this is to avoid that.
+    final private AtomicBoolean imDone = new AtomicBoolean(false);
 
     public void accept() {
-        state.accept();
+        if (imDone.compareAndSet(false, true)) {
+            state.accept();
+        } else {
+            Logger.debug("UserAction accept imDone");
+        }
     }
 
     public void cancel() {
-        state.cancel();
+        if (imDone.compareAndSet(false, true)) {
+            state.cancel();
+        } else {
+            Logger.debug("UserAction accept imDone");
+        }
     }
 
     public boolean canFinishAction() {
