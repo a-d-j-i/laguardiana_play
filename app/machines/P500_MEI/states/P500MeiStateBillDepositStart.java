@@ -1,13 +1,6 @@
 package machines.P500_MEI.states;
 
-import devices.device.status.DeviceStatusInterface;
-import devices.device.task.DeviceTaskStore;
-import devices.mei.status.MeiEbdsStatus;
-import devices.mei.status.MeiEbdsStatusStored;
-import machines.MachineDeviceDecorator;
 import machines.states.MachineStateApiInterface;
-import machines.states.MachineStateError;
-import machines.states.MachineStateJam;
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
 import models.BillQuantity;
@@ -34,27 +27,6 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
     }
 
     @Override
-    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        if (st.is(MeiEbdsStatus.READY_TO_STORE)) {
-            if (!dev.submitSynchronous(new DeviceTaskStore(1))) {
-                machine.setCurrentState(new MachineStateError(machine, "Error submitting store"));
-            }
-            return;
-        } else if (st.is(MeiEbdsStatus.JAM)) {
-            machine.setCurrentState(new MachineStateJam(machine, this, currentUserId, "BillDepositController"));
-            return;
-        } else if (st.is(MeiEbdsStatusStored.class)) {
-            MeiEbdsStatusStored stored = (MeiEbdsStatusStored) st;
-            if (!addBillToDeposit(dev, stored.getSlot())) {
-                machine.setCurrentState(new MachineStateError(machine, "Error adding slot %s to batch", stored.getSlot()));
-            }
-            machine.setCurrentState(new P500MeiStateBillDepositContinue(machine, currentUserId, billDepositId, batchId));
-            return;
-        }
-        super.onDeviceEvent(dev, st);
-    }
-
-    @Override
     public MachineBillDepositStatus getStatus() {
         BillDeposit billDeposit = BillDeposit.findById(billDepositId);
         Long currentSum = billDeposit.getTotal();
@@ -70,7 +42,7 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
     @Override
     public boolean onCancelDepositEvent() {
         closeBatch();
-        return machine.setCurrentState(new P500MeiStateCanceling(machine, currentUserId, billDepositId));
+        return machine.setCurrentState(new P500MeiStateCanceling(machine, currentUserId, billDepositId, batchId));
     }
 
     @Override

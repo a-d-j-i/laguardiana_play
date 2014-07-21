@@ -1,10 +1,11 @@
 package machines.P500_MEI.states;
 
 import devices.device.status.DeviceStatusInterface;
+import devices.device.task.DeviceTaskWithdraw;
 import devices.mei.status.MeiEbdsStatus;
 import machines.MachineDeviceDecorator;
-import machines.states.MachineStateAbstract;
 import machines.states.MachineStateApiInterface;
+import machines.states.MachineStateError;
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
 import models.BillQuantity;
@@ -15,15 +16,10 @@ import play.Logger;
  *
  * @author adji
  */
-public class P500MeiStateCanceling extends MachineStateAbstract {
+public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
 
-    private final Integer currentUserId;
-    private final Integer billDepositId;
-
-    P500MeiStateCanceling(MachineStateApiInterface machine, Integer currentUserId, Integer billDepositId) {
-        super(machine);
-        this.currentUserId = currentUserId;
-        this.billDepositId = billDepositId;
+    public P500MeiStateCanceling(MachineStateApiInterface machine, Integer currentUserId, Integer billDepositId, Integer batchId) {
+        super(machine, currentUserId, billDepositId, batchId);
     }
 
     @Override
@@ -37,10 +33,17 @@ public class P500MeiStateCanceling extends MachineStateAbstract {
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        if (st.is(MeiEbdsStatus.CANCELED)) {
-            machine.setCurrentState(new P500MeiStateFinish(machine, currentUserId, billDepositId, FinishCause.FINISH_CAUSE_CANCEL));
+        if (st.is(MeiEbdsStatus.READY_TO_STORE)) {
+            if (!dev.submitSynchronous(new DeviceTaskWithdraw())) {
+                machine.setCurrentState(new MachineStateError(machine, "Error submitting withdraw"));
+            }
             return;
-        } else if (st.is(MeiEbdsStatus.NEUTRAL)) {
+        } else if (st.is(MeiEbdsStatus.COUNTING)) {
+            if (!machine.cancel()) {
+                Logger.error("Error calling machine.cancel");
+            }
+        } else if (st.is(MeiEbdsStatus.CANCELED)) {
+            machine.setCurrentState(new P500MeiStateFinish(machine, currentUserId, billDepositId, FinishCause.FINISH_CAUSE_CANCEL));
             return;
         }
         super.onDeviceEvent(dev, st);
@@ -56,7 +59,7 @@ public class P500MeiStateCanceling extends MachineStateAbstract {
 
     @Override
     public String toString() {
-        return "P500MeiStateCanceling{" + ", billDepositId=" + billDepositId + ", currentUserId=" + currentUserId + '}';
+        return "P500MeiStateCanceling{" + super.toString() + '}';
     }
 
 }

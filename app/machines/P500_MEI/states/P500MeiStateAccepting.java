@@ -4,9 +4,6 @@ import devices.device.status.DeviceStatusInterface;
 import devices.mei.status.MeiEbdsStatus;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateApiInterface;
-import machines.status.MachineBillDepositStatus;
-import models.BillDeposit;
-import models.BillQuantity;
 import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
