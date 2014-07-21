@@ -3,6 +3,7 @@ package controllers;
 import controllers.serializers.BillQuantitySerializer;
 import controllers.serializers.BillValueSerializer;
 import java.util.List;
+import machines.status.MachineCountStatus;
 import models.Configuration;
 import models.ModelFacade;
 import models.db.LgUser;
@@ -21,22 +22,22 @@ public class FilterController extends ErrorController {
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
+        status = ModelFacade.getCurrentStatus();
         if (request.isAjax()) {
             return;
         }
-        status = ModelFacade.getStateStatus();
+
         String neededAction = status.getNeededAction();
-        String neededController = status.getNeededController();
-        if (neededAction == null || neededController == null) {
-            FilterData data = (FilterData) status.getFormData();
-            if (!request.actionMethod.equalsIgnoreCase("start") || data.currentUser != Secure.getCurrentUser()) {
-                Logger.debug("wizardFixPage Redirect Application.index");
+        if (neededAction == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start") || (status.getCurrentUserId() == null || !status.getCurrentUserId().equals(Secure.getCurrentUserId()))) {
+                Logger.debug("wizardFixPage Redirect Application.index, requested %s, currentUser %s, statusUser %s",
+                        request.actionMethod, Secure.getCurrentUser(), status.getCurrentUserId());
                 Application.index();
             }
         } else {
-            if (!(request.controller.equalsIgnoreCase(neededController))) {
-                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
-                redirect(Router.getFullUrl(neededController + "." + neededAction));
+            if (!(request.action.equalsIgnoreCase(neededAction))) {
+                Logger.debug("wizardFixPage REDIRECT Action %s TO NeededAction %s", request.action, neededAction);
+                redirect(Router.getFullUrl(neededAction));
             }
         }
     }
@@ -53,9 +54,6 @@ public class FilterController extends ErrorController {
             return "FormData{" + "currency=" + currency + '}';
         }
 
-        public Currency getCurrency() {
-            return currency.currency;
-        }
     }
 
     public static void start(@Valid FilterData formData)
@@ -86,19 +84,19 @@ public class FilterController extends ErrorController {
     }
 
     public static void mainLoop() {
-        FilterData data = (FilterData) status.getFormData();
+        MachineCountStatus countStatus = (MachineCountStatus) status;
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = status.getState();
-            o[1] = ModelFacade.getBillQuantities(data.currency.value);
-            o[2] = Messages.get(status.getActionMessage());
+            o[0] = countStatus.getStateName();
+            o[1] = countStatus.getBillQuantities();
+            o[2] = Messages.get(countStatus.getMessage());
             renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("user", Secure.getCurrentUser());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
-            renderArgs.put("billData", ModelFacade.getBillQuantities(data.currency.value));
-            renderArgs.put("formData", status.getFormData());
+            renderArgs.put("billData", countStatus.getBillQuantities());
+            //renderArgs.put("currentDeposit", countStatus.getCurrentDeposit());
             render();
         }
     }
@@ -114,7 +112,7 @@ public class FilterController extends ErrorController {
     }
 
     public static void finish() {
-        ModelFacade.finishAction();
+        ModelFacade.confirmAction();
         Application.index();
     }
 }

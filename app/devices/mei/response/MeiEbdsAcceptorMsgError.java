@@ -1,7 +1,7 @@
 package devices.mei.response;
 
 import devices.device.DeviceMessageInterface;
-import devices.mei.MeiEbdsDevice.MessageType;
+import devices.mei.task.MeiEbdsTaskMessage.ResponseType;
 
 /**
  *
@@ -15,8 +15,8 @@ public class MeiEbdsAcceptorMsgError implements DeviceMessageInterface {
         this.error = error;
     }
 
-    public MessageType getType() {
-        return MessageType.Error;
+    public ResponseType getType() {
+        return ResponseType.Error;
     }
 
     public String getError() {

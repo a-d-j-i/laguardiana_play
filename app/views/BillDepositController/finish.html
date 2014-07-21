@@ -9,13 +9,7 @@
             #{if ( finishCause?.name() == 'FINISH_CAUSE_OK' ) }
                 <div class="mensaje"><span>&{ 'summary.ticket' }</span></div>
                 <h2>&{ 'application.thanks', providerCode }</h2>
-                #{if ( formData.showReference1 ) }
-                    <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
-                #{/if}
-                #{if ( formData.showReference2 && formData.reference2 != "" ) }
-                    <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
-                #{/if}
-                <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.description}</p>
+                <p>&{ 'summary.total' }: ${depositTotal} ${currentDeposit.currency.description}</p>
             #{/if}
             #{elseif ( finishCause?.name() == 'FINISH_CAUSE_BAG_REMOVED' ) }
                 <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled_bag_removed' }</span></div>
@@ -33,6 +27,12 @@
                 &{ 'counting_page.deposit_canceled' }
             #{/else}
             <!-- /datos del deposito -->
+            #{if ( showReference1 ) }
+                <p>&{ 'counting_page.reference1_title' }: ${currentDeposit.findUserCode()}</p>
+            #{/if}
+            #{if ( showReference2 && reference2 != "" ) }
+                <p>&{ 'counting_page.reference2_title' }: ${currentDeposit.userCode}</p>
+            #{/if}
         </div>
         <hr />
         <div class="botonera">

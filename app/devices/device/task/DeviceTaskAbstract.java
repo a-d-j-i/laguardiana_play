@@ -15,15 +15,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DeviceTaskAbstract implements Future<Boolean> {
 
-    final Enum type;
     final Lock lock = new ReentrantLock();
     boolean done = false;
     final Condition cdone = lock.newCondition();
     boolean returnValue = false;
-
-    public DeviceTaskAbstract(Enum type) {
-        this.type = type;
-    }
 
     public Boolean get() throws InterruptedException, ExecutionException {
         lock.lock();
@@ -68,11 +63,7 @@ public class DeviceTaskAbstract implements Future<Boolean> {
 
     @Override
     public String toString() {
-        return "DeviceTaskAbstract : " + type.name();
-    }
-
-    public Enum getType() {
-        return type;
+        return "DeviceTaskAbstract";
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {

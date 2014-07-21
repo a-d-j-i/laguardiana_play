@@ -1,6 +1,5 @@
 package bootstrap;
 
-import java.util.concurrent.ExecutorService;
 import play.PlayPlugin;
 /*
  @OnApplicationStart

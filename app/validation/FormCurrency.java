@@ -39,9 +39,8 @@ public class FormCurrency {
         }
     }
 
-    public FormCurrency(Currency currency) {
-        this.currency = currency;
-        this.value = currency.numericId;
+    public FormCurrency(Integer value) {
+        this.value = value;
     }
 
     public FormCurrency() {
@@ -51,6 +50,6 @@ public class FormCurrency {
 
     @Override
     public String toString() {
-        return "FormCurrency{" + "currency=" + currency + ", value=" + value + '}';
+        return "FormCurrency{" + ", value=" + value + '}';
     }
 }

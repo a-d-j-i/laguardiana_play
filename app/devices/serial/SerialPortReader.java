@@ -1,25 +1,21 @@
 package devices.serial;
 
+import devices.device.DeviceMessageListenerInterface;
 import devices.device.DeviceMessageInterface;
 import java.security.InvalidParameterException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import play.Logger;
 
 /**
- *
+ * Device Adaptor
  * @author adji
  */
 public class SerialPortReader implements Runnable, SerialPortAdapterInterface {
 
-    private Exception InvalidParameterException(String port_is_null) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private static void debug(String message, Object... args) {
+        //Logger.debug(message, args);
     }
 
-    public interface DeviceMessageListenerInterface {
-
-        public void deviceMessageEvent(DeviceMessageInterface msg);
-
-    }
     final private Thread readerThread;
     final private AtomicBoolean mustStop = new AtomicBoolean(false);
     final SerialPortAdapterInterface serialPort;
@@ -38,16 +34,20 @@ public class SerialPortReader implements Runnable, SerialPortAdapterInterface {
     }
 
     public void run() {
+        debug("SerialPort Reader start");
         while (!mustStop.get()) {
             try {
+                debug("Calling getMessage");
                 DeviceMessageInterface msg = parser.getMessage(serialPort);
                 if (msg != null) {
-                    listener.deviceMessageEvent(msg);
+                    debug("Calling getMessage return %s", msg.toString());
+                    listener.onDeviceMessageEvent(msg);
                 }
             } catch (InterruptedException ex) {
                 // do nothing
             }
         }
+        debug("SerialPort Reader done");
     }
 
     public boolean open() {

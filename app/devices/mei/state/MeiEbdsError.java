@@ -2,12 +2,12 @@ package devices.mei.state;
 
 import devices.device.status.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
+import devices.device.status.DeviceStatusError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
+import devices.device.task.DeviceTaskReset;
 import devices.mei.MeiEbds;
-import devices.mei.MeiEbdsDevice.MeiEbdsTaskType;
 import devices.mei.state.MeiEbdsError.COUNTER_CLASS_ERROR_CODE;
-import devices.mei.status.MeiEbdsStatusError;
 import play.Logger;
 
 /**
@@ -27,34 +27,32 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
         super(mei);
         this.error = error;
         Logger.error(error);
-        mei.notifyListeners(new MeiEbdsStatusError(error));
+        mei.notifyListeners(new DeviceStatusError(error));
     }
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract t) {
-        DeviceTaskAbstract task = (DeviceTaskAbstract) t;
-        switch ((MeiEbdsTaskType) task.getType()) {
-            case TASK_RESET:
-                Logger.debug("executing reset task %s", task.toString());
-                task.setReturnValue(true);
-                return new MeiEbdsStateMain(mei);
-            case TASK_OPEN_PORT:
-                DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
-                if (mei.open(open.getPort())) {
-                    Logger.debug("MeiEbdsError new port %s", open.getPort());
-                    task.setReturnValue(true);
-                    return this;
-                } else {
-                    Logger.debug("MeiEbdsError new port %s failed to open", open.getPort());
-                    task.setReturnValue(false);
-                    return new MeiEbdsOpenPort(mei);
-                }
+        if (t instanceof DeviceTaskOpenPort) {
+            DeviceTaskOpenPort open = (DeviceTaskOpenPort) t;
+            if (mei.open(open.getPort())) {
+                Logger.debug("MeiEbdsError new port %s", open.getPort());
+                open.setReturnValue(true);
+                return this;
+            } else {
+                Logger.debug("MeiEbdsError new port %s failed to open", open.getPort());
+                open.setReturnValue(false);
+                return new MeiEbdsOpenPort(mei);
+            }
+        } else if (t instanceof DeviceTaskReset) {
+            Logger.debug("executing reset task %s", t.toString());
+            t.setReturnValue(true);
+            return new MeiEbdsStateMain(mei);
         }
         return null;
     }
 
     public DeviceStatusInterface getStatus() {
-        return new MeiEbdsStatusError(error);
+        return new DeviceStatusError(error);
     }
 
     /*

@@ -1,14 +1,10 @@
 package devices.device;
 
-import devices.device.events.DeviceEventListener;
 import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskAbstract;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -16,8 +12,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import models.db.LgDevice;
-import models.db.LgDeviceProperty;
 import play.Logger;
 
 /**
@@ -26,30 +20,24 @@ import play.Logger;
  */
 public abstract class DeviceAbstract implements DeviceInterface {
 
-    final public String machineDeviceId;
-    final protected LgDevice lgd;
+    private void debug(String message, Object... args) {
+        //Logger.debug(message, args);
+    }
     final private ExecutorService taskExecutor;
+    protected DeviceStateInterface currentState;
 
-    public DeviceAbstract(final String machineDeviceId, LgDevice.DeviceType deviceType) {
-        this.machineDeviceId = machineDeviceId;
-        lgd = LgDevice.getOrCreateByMachineId(machineDeviceId, deviceType);
+    public DeviceAbstract() {
         this.taskExecutor = Executors.newSingleThreadExecutor();
     }
 
-    // TODO: possible race condition on start.
     public void start() {
-        Logger.debug("Device %s start", machineDeviceId);
         currentState = initState();
-        Logger.debug("Device %s start done", machineDeviceId);
-        init();
     }
 
     abstract public DeviceStateInterface initState();
 
-    abstract public void init();
-
     public void stop() {
-        Logger.debug("Device %s stop task thread", machineDeviceId);
+        debug("Device %s stop task thread", this.toString());
         taskExecutor.shutdown();
         try {
             /*        taskThread.interrupt();
@@ -63,7 +51,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
             Logger.error("Timeout waiting for task thread : %s", ex);
         }
         finish();
-        Logger.debug("Device %s stop done", machineDeviceId);
+        debug("Device %s stop done", this.toString());
     }
 
     public void finish() {
@@ -80,77 +68,56 @@ public abstract class DeviceAbstract implements DeviceInterface {
         this.listeners.remove(listener);
     }
 
-    // Just for logging proposes.
-    final private BlockingQueue<DeviceEvent> eventHistory = new ArrayBlockingQueue<DeviceEvent>(10);
-
     protected void notifyListeners(DeviceStatusInterface state) {
         final DeviceEvent le = new DeviceEvent(this, state);
-        eventHistory.offer(le);
         for (DeviceEventListener counterListener : listeners) {
             counterListener.onDeviceEvent(le);
         }
     }
 
-    public DeviceEvent getLastEvent() {
-        return eventHistory.poll();
-    }
-
-    public Integer getDeviceId() {
-        return lgd.deviceId;
-    }
-
-    public String getMachineDeviceId() {
-        return machineDeviceId;
-    }
-
-    public Enum getType() {
-        return lgd.deviceType;
-    }
-
-    public List<LgDeviceProperty> getEditableProperties() {
-        return LgDeviceProperty.getEditables(lgd);
-    }
-
-    protected abstract boolean changeProperty(String property, String value) throws InterruptedException, ExecutionException;
-
-    public LgDeviceProperty setProperty(String property, String value) throws InterruptedException, ExecutionException {
-        LgDeviceProperty l = LgDeviceProperty.getProperty(lgd, property);
-        if (l != null) {
-            if (changeProperty(property, value)) {
-                l.value = value;
-                l.save();
-            }
-        }
-        return l;
-    }
-
-    protected DeviceStateInterface currentState;
-
-    synchronized protected Future<Boolean> submit(final DeviceTaskAbstract deviceTask) {
-        Logger.debug("---> Submitting task : " + deviceTask.toString());
+    synchronized public Future<Boolean> submit(final DeviceTaskAbstract deviceTask) {
+        debug("%s ---> Submitting task : %s", this.toString(), deviceTask.toString());
         return taskExecutor.submit(new Callable<Boolean>() {
 
-            public Boolean call() throws Exception {
-                Logger.debug(String.format("%s executing current step: %s", machineDeviceId, currentState));
+            public Boolean call() {
+                debug(String.format("%s executing current step: %s", DeviceAbstract.this.toString(), currentState));
                 DeviceStateInterface newState = deviceTask.execute(currentState);
                 if (newState != null && currentState != newState) {
-                    Logger.debug("Changing state old %s, new %s", currentState, newState.toString());
+                    debug("Changing state old %s, new %s", currentState, newState.toString());
                     DeviceStateInterface initStateRet = newState.init();
                     if (initStateRet != null) {
                         newState = initStateRet;
                     }
-                    Logger.debug("setting state to new %s", newState.toString());
+                    debug("setting state to new %s", newState.toString());
                     currentState = newState;
                 }
-                Logger.debug("Device %s thread done", machineDeviceId);
-                return deviceTask.get();
+                debug("Device %s thread done", DeviceAbstract.this.toString());
+                try {
+                    boolean ret = deviceTask.get();
+                    debug("Device %s thread got %s", DeviceAbstract.this.toString(), ret ? "TRUE" : "FALSE");
+                    return ret;
+                } catch (InterruptedException ex) {
+                    Logger.error("InterruptedException %s on %s ", ex, DeviceAbstract.this.toString());
+                } catch (ExecutionException ex) {
+                    Logger.error("InterruptedException %s on %s ", ex, DeviceAbstract.this.toString());
+                }
+                return false;
             }
         }
         );
     }
 
-    protected Future<Boolean> submitSimpleTask(Enum st) {
-        return submit(new DeviceTaskAbstract(st));
+    public boolean submitSynchronous(final DeviceTaskAbstract deviceTask) {
+        try {
+            return submit(deviceTask).get();
+        } catch (InterruptedException ex) {
+            Logger.error("exception in submitSynchronous", ex.toString());
+            ex.printStackTrace();
+        } catch (ExecutionException ex) {
+            Logger.error("exception in submitSynchronous", ex.toString());
+            ex.printStackTrace();
+        }
+        return false;
     }
 
     protected Future<Boolean> falseFuture(final boolean ret) {
@@ -180,7 +147,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
 
     @Override
     public String toString() {
-        return "Device{ deviceID = " + getDeviceId() + ", machineDeviceId=" + machineDeviceId + '}';
+        return "DeviceAbstract";
     }
 
 }

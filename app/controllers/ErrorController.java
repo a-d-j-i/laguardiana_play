@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package controllers;
 
 import devices.printer.OSPrinter.PrinterStatus;
+import machines.status.MachineStatus;
 import models.Configuration;
 import models.ModelFacade;
-import models.facade.status.ModelFacadeStateStatus;
 import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -22,34 +18,25 @@ import play.mvc.With;
 @With({Secure.class})
 public class ErrorController extends Controller {
 
-    static ModelFacadeStateStatus status;
+    static MachineStatus status;
 
     @Before
     static void basicPropertiesAndFixWizard() throws Throwable {
+        status = ModelFacade.getCurrentStatus();
         if (request.isAjax()) {
             return;
         }
-        status = ModelFacade.getStateStatus();
-        String neededController = status.getNeededController();
-        if (neededController == null) {
-            return;
-        }
         String neededAction = status.getNeededAction();
-        Logger.debug("Needed action : %s  Needed controller : %s", neededAction, neededController);
+        Logger.debug("Needed action : %s", neededAction);
         if (neededAction == null) {
             return;
         }
-        if (neededAction.equalsIgnoreCase("onError")) {
-            neededController = "CounterController";
-        }
-        if (!request.controller.equalsIgnoreCase(neededController)
-                || !request.actionMethod.equalsIgnoreCase(neededAction)) {
-            Logger.debug("basicPropertiesAndFixWizard REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
-            redirect(Router.getFullUrl(neededController + "." + neededAction));
+        if (!request.action.equalsIgnoreCase(neededAction)) {
+            Logger.debug("basicPropertiesAndFixWizard REDIRECT TO neededAction %s", neededAction);
+            redirect(Router.getFullUrl(neededAction));
         }
     }
 
-    // TODO: Show machine status.
     public static void onError(Integer cmd) {
         String gerror = null;
         PrinterStatus pstatus = null;
@@ -65,18 +52,18 @@ public class ErrorController extends Controller {
             pstatus = ModelFacade.getCurrentPrinter().getInternalState();
         }
         if (cmd != null) {
-            ModelFacade.finishAction();
+            ModelFacade.confirmAction();
         }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-            ret[ 0] = status.isError();
+//            ret[ 0] = status.isError();
             ret[ 1] = Configuration.getErrorStr();
-            ret[2] = status.getState();
+            ret[2] = status.getStateName();
             renderJSON(ret);
         } else {
-            renderArgs.put("isError", status.isError());
+//            renderArgs.put("isError", status.isError());
             renderArgs.put("errorStr", Configuration.getErrorStr());
-            renderArgs.put("errorCode", status.getState());
+            renderArgs.put("errorCode", status.getStateName());
             render();
         }
     }
@@ -97,18 +84,18 @@ public class ErrorController extends Controller {
             pstatus = ModelFacade.getCurrentPrinter().getInternalState();
         }
         if (cmd != null) {
-            ModelFacade.finishAction();
+            ModelFacade.confirmAction();
         }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-            ret[ 0] = status.isError();
+//            ret[ 0] = status.isError();
             ret[ 1] = Configuration.getErrorStr();
-            ret[2] = status.getState();
+            ret[2] = status.getStateName();
             renderJSON(ret);
         } else {
-            renderArgs.put("isError", status.isError());
+//            renderArgs.put("isError", status.isError());
             renderArgs.put("errorStr", Configuration.getErrorStr());
-            renderArgs.put("errorCode", status.getState());
+            renderArgs.put("errorCode", status.getStateName());
             render();
         }
     }

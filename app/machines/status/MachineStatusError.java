@@ -8,8 +8,8 @@ public class MachineStatusError extends MachineStatus {
 
     private final String error;
 
-    public MachineStatusError(String error) {
-        super(MachineStatusType.ERROR);
+    public MachineStatusError(Integer currentUserId, String neededController, String neededAction, String stateName, String message, String error) {
+        super(currentUserId, neededAction, stateName, message);
         this.error = error;
     }
 

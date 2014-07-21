@@ -1,48 +1,43 @@
 package machines.status;
 
-import devices.device.status.DeviceStatusInterface;
+import play.i18n.Messages;
 
 /**
  *
  * @author adji
  */
-public class MachineStatus implements DeviceStatusInterface {
+public class MachineStatus {
 
-    public static enum MachineStatusType {
+    private final Integer currentUserId;
+    private final String neededAction;
+    private final String stateName;
+    private final String message;
 
-        ERROR,
-        INITIALIZING,
-        NEUTRAL,
-        WAITING_FOR_ENVELOPE,
-        COUNTING,
-        READY_TO_STORE,
-        STORING,
-        STORED,
-        CANCELING,
-        CANCELED,
-        REJECTING,
-        RETURNED,
-        JAM,
-        // ioboard
-        BAG_REMOVED,
-        BAG_INPLACE,
-        // printer
-        PRINTER_NOT_READY,
-        PRINTER_READY
-    };
-    final MachineStatusType type;
-
-    public MachineStatus(MachineStatusType type) {
-        this.type = type;
+    public MachineStatus(Integer currentUserId, String neededAction, String stateName, String message) {
+        this.currentUserId = currentUserId;
+        this.neededAction = neededAction;
+        this.stateName = stateName;
+        this.message = message;
     }
 
-    public MachineStatusType getType() {
-        return type;
+    public String getNeededAction() {
+        return neededAction;
+    }
+
+    public String getStateName() {
+        return stateName;
+    }
+
+    public String getMessage() {
+        return Messages.get(message);
+    }
+
+    public Integer getCurrentUserId() {
+        return currentUserId;
     }
 
     @Override
     public String toString() {
-        return "MachineStatus " + "type = " + type;
+        return "MachineStatus{" + "currentUser=" + currentUserId + ", neededAction=" + neededAction + ", stateName=" + stateName + ", message=" + message + '}';
     }
-
 }

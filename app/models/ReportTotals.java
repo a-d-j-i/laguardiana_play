@@ -62,7 +62,7 @@ public class ReportTotals {
         deposits++;
         for (LgBill b : item.bills) {
             bills += b.quantity;
-            Currency c = b.billType.getCurrency();
+            Currency c = b.billType.currency;
 
             Total at = byCurrencyTotal.get(c);
             if (at == null) {

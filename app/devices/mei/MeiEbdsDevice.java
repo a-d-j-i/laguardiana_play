@@ -1,111 +1,39 @@
 package devices.mei;
 
 import devices.device.DeviceAbstract;
-import devices.device.DeviceClassCounterIntreface;
 import devices.device.DeviceMessageInterface;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
-import devices.device.task.DeviceMessageTask;
-import devices.device.task.DeviceTaskAbstract;
-import devices.device.task.DeviceTaskOpenPort;
+import devices.mei.task.MeiEbdsTaskMessage;
 import devices.mei.state.MeiEbdsOpenPort;
-import devices.mei.task.MeiEbdsTaskCount;
-import devices.serial.SerialPortReader.DeviceMessageListenerInterface;
+import devices.device.task.DeviceTaskOpenPort;
+import devices.mei.operation.MeiEbdsHostMsg;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import models.db.LgDevice;
-import models.db.LgDeviceProperty;
+import java.util.List;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterIntreface {
+public class MeiEbdsDevice extends DeviceAbstract {
 
-    public interface MeiApi extends DeviceMessageListenerInterface {
+    private void debug(String message, Object... args) {
+        // Logger.debug(message, args);
+    }
+
+    public interface MeiApi {
 
         public void notifyListeners(DeviceStatusInterface status);
 
+        public void onDeviceMessageEvent(MeiEbdsHostMsg hostMsg, DeviceMessageInterface msg);
+
     }
 
-    public enum MeiEbdsTaskType {
-
-        TASK_MESSAGE,
-        TASK_OPEN_PORT,
-        TASK_RESET,
-        TASK_COUNT,
-        TASK_STORE, TASK_REJECT,
-        TASK_CANCEL;
-    }
-
-    public interface MessageSubType {
-
-        public int getId();
-
-    };
-
-    public enum ExtendedMessageSubType implements MessageSubType {
-
-        BarcodeData(0x01),
-        RequestSupportedNoteSet(0x02),
-        SetExtendedNoteInhibits(0x03),
-        SetEscrowTimeouts(0x04);
-
-        private final int id;
-
-        private ExtendedMessageSubType(int id) {
-            this.id = id;
-        }
-
-        public int getId() {
-            return id;
-        }
-    };
-
-    public enum MessageType {
-
-        HostToAcceptor(0x10),
-        AcceptorToHost(0x20),
-        BookmarkSelected(0x30),
-        CalibrateMode(0x40),
-        FlashDownload(0x50),
-        Request(0x60),
-        Extended(0x70),
-        ENQ(0x100),
-        Error(0x1000);
-
-        static {
-            for (MessageSubType mt : ExtendedMessageSubType.values()) {
-                Extended.msgSubTypeMap.put(mt.getId(), mt);
-            }
-        }
-
-        final private Map<Integer, MessageSubType> msgSubTypeMap = new HashMap<Integer, MessageSubType>();
-        final private int id;
-
-        private MessageType(int id) {
-            this.id = id;
-        }
-
-        public MessageSubType getSubType(int subtypeId) {
-            return msgSubTypeMap.get(subtypeId);
-        }
-
-        public int getId() {
-            return id;
-        }
-
-    };
     private final MeiEbds mei = new MeiEbds(new MeiApi() {
 
-        public void deviceMessageEvent(DeviceMessageInterface msg) {
-            MeiEbdsDevice.this.submit(new DeviceMessageTask(MeiEbdsTaskType.TASK_MESSAGE, msg));
+        public void onDeviceMessageEvent(MeiEbdsHostMsg msg, DeviceMessageInterface response) {
+            MeiEbdsDevice.this.submit(new MeiEbdsTaskMessage(msg, response));
         }
 
         public void notifyListeners(DeviceStatusInterface status) {
@@ -116,21 +44,22 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
 
     @Override
     public void finish() {
-        Logger.debug("MeiEbds Executing finish");
+        debug("MeiEbds Executing finish");
         Logger.info("MeiEbds Closing mei serial port ");
         mei.close();
     }
 
-    public MeiEbdsDevice(String machineDeviceId, LgDevice.DeviceType deviceType) {
-        super(machineDeviceId, deviceType);
+    @Override
+    public List<String> getNeededProperties() {
+        return Arrays.asList(new String[]{"port"});
     }
 
     @Override
-    protected boolean changeProperty(String property, String value) throws InterruptedException, ExecutionException {
+    public boolean setProperty(String property, String value) {
+        debug("trying to set property %s to %s", property, value);
         if (property.compareToIgnoreCase("port") == 0) {
-            DeviceTaskAbstract deviceTask = new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, value);
-            boolean ret = submit(deviceTask).get();
-            Logger.debug("changing port to %s %s", value, ret ? "SUCCESS" : "FAIL");
+            boolean ret = submitSynchronous(new DeviceTaskOpenPort(value));
+            debug("changing port to %s %s", value, ret ? "SUCCESS" : "FAIL");
             return ret;
         }
         return false;
@@ -141,54 +70,9 @@ public class MeiEbdsDevice extends DeviceAbstract implements DeviceClassCounterI
         return new MeiEbdsOpenPort(mei);
     }
 
-    public void init() {
-        String initialPortValue;
-        LgDeviceProperty lgSerialPort = LgDeviceProperty.getOrCreateProperty(lgd, "port", LgDeviceProperty.EditType.STRING);
-        initialPortValue = lgSerialPort.value;
-        Logger.debug("MeiEbds Executing init");
-        submit(new DeviceTaskOpenPort(MeiEbdsTaskType.TASK_OPEN_PORT, initialPortValue));
-    }
-
-    public Future<Boolean> errorReset() {
-        return submitSimpleTask(MeiEbdsTaskType.TASK_RESET);
-    }
-
-    public Future<Boolean> cancelDeposit() {
-        return submitSimpleTask(MeiEbdsTaskType.TASK_CANCEL);
-    }
-
-    public Future<Boolean> storeDeposit(Integer sequenceNumber) {
-        return submitSimpleTask(MeiEbdsTaskType.TASK_STORE);
-    }
-
-    public Future<Boolean> withdrawDeposit() {
-        return submitSimpleTask(MeiEbdsTaskType.TASK_REJECT);
-    }
-
-    public boolean clearError() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public Future<Boolean> count(Integer currency, Map<String, Integer> desiredQuantity) {
-        // this device can't limit the quantity, but I can choose the valid slots.
-        // TODO: Implement.
-        Integer[] slotInfo = {1, 1, 1, 1, 1, 1, 1, 1};
-        return submit(new MeiEbdsTaskCount(MeiEbdsTaskType.TASK_COUNT, Arrays.asList(slotInfo)));
-    }
-
-    public Future<Boolean> envelopeDeposit() {
-        Logger.error("Mei don't support envelopeDeposit");
-        return falseFuture(false);
-    }
-
-    public Future<Boolean> collect() {
-        Logger.error("Mei don't support collect");
-        return falseFuture(false);
-    }
-
-    public Future<Boolean> storingErrorReset() {
-        Logger.error("Mei don't support storingErrorReset");
-        return falseFuture(false);
+    @Override
+    public String toString() {
+        return mei.toString();
     }
 
 }

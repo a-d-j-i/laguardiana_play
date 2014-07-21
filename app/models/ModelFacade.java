@@ -1,34 +1,28 @@
 package models;
 
-import models.facade.status.ModelFacadeStateStatus;
-import models.facade.FacadeJob;
-import controllers.BillDepositController;
 import controllers.CountController;
-import controllers.EnvelopeDepositController;
 import controllers.FilterController;
-import devices.device.DeviceInterface;
 import devices.printer.OSPrinter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import javax.print.PrintService;
-import machines.Machine;
-import machines.MachineP500_GLORY;
-import machines.MachineP500_MEI;
-import machines.events.MachineEvent;
-import machines.events.MachineEventListener;
-import models.db.LgBag;
-import models.db.LgBillType;
-import models.db.LgDeposit;
-import models.db.LgDeviceSlot;
-import models.facade.state.ModelFacadeStateAbstract;
-import models.facade.state.ModelFacadeStateDepositBill;
-import models.facade.state.ModelFacadeStateCount;
-import models.facade.state.ModelFacadeStateDepositEnvelope;
-import models.facade.state.ModelFacadeStateFilter;
-import models.facade.state.ModelFacadeStateWaiting;
+import machines.MachineAbstract;
+import machines.MachineDeviceDecorator;
+import machines.MachineInterface;
+import machines.P500_MEI.MachineP500_MEI;
+import machines.jobs.MachineJobAcceptDeposit;
+import machines.jobs.MachineJobCancelDeposit;
+import machines.jobs.MachineJobConfirmDeposit;
+import machines.jobs.MachineJobGetCurrentStatus;
+import machines.jobs.MachineJobIsBagFull;
+import machines.jobs.MachineJobIsBagReady;
+import machines.jobs.MachineJobStartBillDepositAction;
+import machines.jobs.MachineJobStartCountingAction;
+import machines.jobs.MachineJobStartEnvelopeDepositAction;
+import machines.jobs.MachineJobStartFilterAction;
+import machines.status.MachineStatus;
+import models.db.LgUser;
+import models.lov.Currency;
 import play.Logger;
 
 /**
@@ -40,14 +34,28 @@ public class ModelFacade {
 
         P500() {
                     @Override
-                    Machine getMachineInstance() {
-                        return new MachineP500_GLORY();
+                    MachineAbstract getMachineInstance() {
+                        return new MachineP500_MEI();
                     }
                 },
         P500_MEI {
 
                     @Override
-                    Machine getMachineInstance() {
+                    MachineAbstract getMachineInstance() {
+                        return new MachineP500_MEI();
+                    }
+                },
+        P500_MEI_X2 {
+
+                    @Override
+                    MachineAbstract getMachineInstance() {
+                        return new MachineP500_MEI();
+                    }
+                },
+        P500_MEI_GLORY {
+
+                    @Override
+                    MachineAbstract getMachineInstance() {
                         return new MachineP500_MEI();
                     }
                 },;
@@ -57,176 +65,75 @@ public class ModelFacade {
             return name();
         }
 
-        abstract Machine getMachineInstance();
+        abstract MachineInterface getMachineInstance();
 
         static public MachineType getMachineType(String machineType) throws IllegalArgumentException {
             return MachineType.valueOf(machineType.toUpperCase());
         }
     };
 
-    static public class ModelFacadeStateApi {
+    static private MachineInterface machine = null;
 
-        final private Machine machine;
-        private ModelFacadeStateAbstract currentState = new ModelFacadeStateWaiting(this);
-
-        public ModelFacadeStateApi() {
-            MachineType machineType = MachineType.getMachineType(Configuration.getMachineType());
-            machine = machineType.getMachineInstance();
-            machine.addEventListener(new MachineEventListener() {
-                public void onMachineEvent(final MachineEvent evt) {
-                    new FacadeJob<Boolean>() {
-
-                        @Override
-                        public void doJob() {
-                            currentState.onMachineEvent(evt);
-                        }
-                    }.now();
-                }
-            });
-        }
-
-        public Machine getMachine() {
-            return machine;
-        }
-
-        // called by inner thread.
-        public boolean setCurrentState(ModelFacadeStateAbstract state) {
-            // give it an oportunity to initialize itself.
-            currentState = state.init();
-            return currentState == state;
-        }
-
-        private ModelFacadeStateStatus getStatus() {
-            return new FacadeJob<ModelFacadeStateStatus>() {
-
-                @Override
-                public ModelFacadeStateStatus doJobWithResult() {
-                    return api.currentState.getStatus();
-                }
-            }.runNow();
-        }
-
-    }
-    final private static ModelFacadeStateApi api = new ModelFacadeStateApi();
-
-    public static void start() throws Exception {
-        LgDeposit.closeUnfinished();
+    synchronized public static void start() throws Exception {
         Configuration.initCrapId();
-        api.getMachine().start();
+        MachineType machineType = MachineType.getMachineType(Configuration.getMachineType());
+        machine = machineType.getMachineInstance();
+        Logger.debug("Executing machine start job");
+        machine.start();
     }
 
-    public static void stop() {
-        api.getMachine().stop();
-    }
-
-    public static boolean startBillDepositAction(BillDepositController.BillDepositData data) {
-        // Can be put into machine, but till now every machine has it own bag.
-        if (!Configuration.isIgnoreBag() && !isBagReady(false)) {
-            Logger.info("Can't start bag not ready");
-            return false;
+    synchronized public static void stop() {
+        if (machine != null) {
+            machine.stop();
         }
-        ModelFacadeStateDepositBill depositAction = new ModelFacadeStateDepositBill(api, data);
-        return startAction(depositAction);
     }
 
-    public static boolean startCountingAction(CountController.CountData data) {
-        ModelFacadeStateCount countingAction = new ModelFacadeStateCount(api, data);
-        return startAction(countingAction);
+    static public boolean startBillDepositAction(LgUser user, Currency currency, String userCode, Integer userCodeLovId) {
+        return machine.execute(new MachineJobStartBillDepositAction(machine, user, currency, userCode, userCodeLovId)
+        );
     }
 
-    public static boolean startFilterAction(FilterController.FilterData data) {
-        ModelFacadeStateFilter filteringAction = new ModelFacadeStateFilter(api, data);
-        return startAction(filteringAction);
+    static public boolean startCountingAction(CountController.CountData data) {
+        return machine.execute(new MachineJobStartCountingAction(machine, data));
     }
 
-    public static boolean startEnvelopeDepositAction(EnvelopeDepositController.EvenlopeDepositData data) {
-        // Can be put into machine, but till now every machine has it own bag.
-        if (!Configuration.isIgnoreBag() && !isBagReady(false)) {
-            Logger.info("Can't start bag not ready");
-            return false;
-        }
-        ModelFacadeStateDepositEnvelope envelopeDepositAction = new ModelFacadeStateDepositEnvelope(api, data);
-        return startAction(envelopeDepositAction);
+    static public boolean startFilterAction(FilterController.FilterData data) {
+        return machine.execute(new MachineJobStartFilterAction(machine, data));
     }
 
-    static private boolean startAction(final ModelFacadeStateAbstract userAction) {
-        return new FacadeJob<Boolean>() {
-
-            @Override
-            public Boolean doJobWithResult() {
-                return api.currentState.startAction(userAction);
-            }
-        }.runNow();
+    static public boolean startEnvelopeDepositAction(LgUser user, String userCode, Integer userCodeLovId) {
+        return machine.execute(new MachineJobStartEnvelopeDepositAction(machine, user, userCode, userCodeLovId));
     }
 
-    public static boolean finishAction() {
-        return new FacadeJob<Boolean>() {
-
-            @Override
-            public Boolean doJobWithResult() {
-                return api.currentState.finish();
-            }
-        }.runNow();
+    static public boolean accept() {
+        return machine.execute(new MachineJobAcceptDeposit(machine));
     }
 
-    static public ModelFacadeStateStatus getStateStatus() {
-        return api.getStatus();
+    static public boolean cancel() {
+        return machine.execute(new MachineJobCancelDeposit(machine));
     }
 
-    public static boolean cancel() {
-        return new FacadeJob<Boolean>() {
-
-            @Override
-            public Boolean doJobWithResult() {
-                return api.currentState.cancel();
-            }
-        }.runNow();
+    static public boolean confirmAction() {
+        return machine.execute(new MachineJobConfirmDeposit(machine));
     }
 
-    public static boolean accept() {
-        return new FacadeJob<Boolean>() {
-
-            @Override
-            public Boolean doJobWithResult() {
-                return api.currentState.accept();
-            }
-        }.runNow();
+    static public boolean canceTimeout() {
+        return false;
     }
 
-    public static boolean canceTimeout() {
-        return new FacadeJob<Boolean>() {
-
-            @Override
-            public Boolean doJobWithResult() {
-                return api.currentState.suspendTimeout();
-            }
-        }.runNow();
+    static public MachineStatus getCurrentStatus() {
+        return machine.execute(new MachineJobGetCurrentStatus(machine));
     }
 
-    public static boolean isBagReady(boolean envelope) {
-        if (Configuration.isIgnoreBag()) {
-            return true;
-        }
-        if (!isBagInplace()) {
-            Logger.info("Can't start bag removed");
-            return false;
-        }
-        LgBag currentBag = LgBag.getCurrentBag();
-        ItemQuantity iq = currentBag.getItemQuantity();
-        // for an envelope deposit I neet at least space for one envelope more.
-        if (envelope) {
-            iq.envelopes++;
-            iq.bills--;
-        }
-        Logger.debug("isBagReady quantity : %s", iq);
-        if (Configuration.isBagFull(iq.bills, iq.envelopes)) {
-            Logger.info("Can't start bag full");
-            //modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
-            return false;
-        }
-        return true;
+    static public boolean isBagFull(final boolean envelope) {
+        return machine.execute(new MachineJobIsBagReady(machine));
     }
 
+    public static boolean isBagReady() {
+        return machine.execute(new MachineJobIsBagFull(machine));
+    }
+
+    // TODO: Consider adding this to machine !!!.
     public static void setCurrentPrinter(String prt) {
         if (prt == null) {
             prt = Configuration.getDefaultPrinter();
@@ -247,7 +154,7 @@ public class ModelFacade {
 ////            public void update(Observable o, Object data) {
 ////                Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
 ////            }
-////        });
+////        });Map<LgDeviceSlot, Integer> 
 
 ////        Printer oldPrinter = printer.getAndSet(currPrinter);
 ////        if (oldPrinter != null) {
@@ -295,60 +202,11 @@ public class ModelFacade {
         return null;
     }
 
-    public static DeviceInterface findDeviceById(Integer deviceId) {
-        return api.getMachine().findDeviceById(deviceId);
+    public static MachineDeviceDecorator findDeviceById(Integer deviceId) {
+        return machine.findDeviceById(deviceId);
     }
 
-    public static boolean isBagInplace() {
-        return api.getMachine().isBagInplace();
-    }
-
-    public static Object getDevices() {
-        return api.getMachine().getDevices();
-    }
-
-    private interface BillListVisitor {
-
-        public void visit(LgBillType billType, Integer desired, Integer current);
-    }
-
-    public static Collection<BillQuantity> getBillQuantities(int currencyId) {
-        final SortedMap<BillValue, BillQuantity> ret = new TreeMap<BillValue, BillQuantity>();
-        visitBillList(currencyId, new BillListVisitor() {
-            public void visit(LgBillType billType, Integer desired, Integer current) {
-                BillValue bv = billType.getValue();
-                BillQuantity billQuantity = ret.get(bv);
-                if (billQuantity == null) {
-                    billQuantity = new BillQuantity(bv);
-                }
-                billQuantity.quantity += current;
-                billQuantity.desiredQuantity += desired;
-                ret.put(bv, billQuantity);
-
-            }
-        });
-        return ret.values();
-    }
-
-    private static void visitBillList(int currencyId, BillListVisitor visitor) {
-        List<LgBillType> billTypes = LgBillType.find(currencyId);
-        Map<LgDeviceSlot, Integer> desiredQuantity = api.getMachine().getCurrentQuantity();
-        Map<LgDeviceSlot, Integer> currentQuantity = api.getMachine().getDesiredQuantity();
-
-        // Sum over all bill types ignoring the device and slot they came from.
-        // Plan B: separate the slots by device.
-        for (LgBillType billType : billTypes) {
-            Integer desired = 0;
-            Integer current = 0;
-            for (LgDeviceSlot s : billType.slots) {
-                if (currentQuantity.containsKey(s)) {
-                    current = currentQuantity.get(s);
-                }
-                if (desiredQuantity.containsKey(s)) {
-                    desired = desiredQuantity.get(s);
-                }
-                visitor.visit(billType, desired, current);
-            }
-        }
+    public static List<MachineDeviceDecorator> getDevices() {
+        return machine.getDevices();
     }
 }

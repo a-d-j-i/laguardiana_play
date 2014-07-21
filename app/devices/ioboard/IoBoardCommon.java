@@ -1,6 +1,5 @@
 package devices.ioboard;
 
-import devices.device.DeviceClassIoBoardInterface;
 import devices.serial.SerialPortAdapterAbstract.PORTSPEED;
 import devices.serial.SerialPortAdapterInterface;
 import java.io.IOException;
@@ -18,7 +17,7 @@ import play.Logger;
 /*
  * TODO: getCh, fifo, etc in other class.
  */
-public class IoBoardCommon implements DeviceClassIoBoardInterface {
+public class IoBoardCommon {
 
     public enum IOBOARD_VERSION {
 

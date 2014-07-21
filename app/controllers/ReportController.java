@@ -113,8 +113,7 @@ public class ReportController extends Controller {
                 Long quantity = (Long) a[ 1];
 
                 LgBillType bt = (LgBillType) a[0];
-                BillContentData bdc = new BillContentData(Currency.findByNumericId(bt.unitLov).textId,
-                        bt.denomination.intValue(), quantity.intValue());
+                BillContentData bdc = new BillContentData(bt.currency.textId, bt.denomination.intValue(), quantity.intValue());
                 contents.add(bdc);
             }
         }

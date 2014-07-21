@@ -6,31 +6,23 @@ import devices.device.status.DeviceStatusInterface;
  *
  * @author adji
  */
-public class MeiEbdsStatus implements DeviceStatusInterface {
+public enum MeiEbdsStatus implements DeviceStatusInterface {
 
-    public static enum MeiEbdsStatusType {
+    CANCELED,
+    CANCELING,
+    STORING,
+    REJECTING,
+    READY_TO_STORE,
+    RETURNED,
+    COUNTING,
+    NEUTRAL,
+    JAM,;
 
-        ERROR,
-        OPEN_PORT,
-        CANCELING, CANCELED,
-        READY_TO_STORE,
-        REJECTING, RETURNED,
-        STORING, STORED, NEUTRAL, COUNTING, JAM,
-
-    };
-    final MeiEbdsStatusType type;
-
-    public MeiEbdsStatus(MeiEbdsStatusType type) {
-        this.type = type;
+    public boolean is(Enum type) {
+        return (type == this);
     }
 
-    public MeiEbdsStatusType getType() {
-        return type;
+    public boolean is(Class type) {
+        return false;
     }
-
-    @Override
-    public String toString() {
-        return "MeiEbdsStatus{" + "type=" + type + '}';
-    }
-
 }

@@ -10,8 +10,7 @@ public class GloryDE50TaskStoreDeposit extends DeviceTaskAbstract {
 
     final Integer sequenceNumber;
 
-    public GloryDE50TaskStoreDeposit(Enum type, Integer sequenceNumber) {
-        super(type);
+    public GloryDE50TaskStoreDeposit(Integer sequenceNumber) {
         this.sequenceNumber = sequenceNumber;
     }
 

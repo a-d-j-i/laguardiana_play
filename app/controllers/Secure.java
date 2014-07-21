@@ -81,7 +81,6 @@ public class Secure extends Controller {
         // TODO: Put in some other place.
         Logger.error("URL %s", url);
 
-
         flash.keep("url");
         flash.keep("lastUrl");
         renderArgs.put("crapId", Configuration.getCrapAuthId());
@@ -224,5 +223,13 @@ public class Secure extends Controller {
             }
         }
         return user;
+    }
+
+    static Integer getCurrentUserId() {
+        LgUser u = getCurrentUser();
+        if (u == null) {
+            return null;
+        }
+        return u.userId;
     }
 }

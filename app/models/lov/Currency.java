@@ -1,6 +1,13 @@
 package models.lov;
 
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import models.db.LgBillType;
+import models.db.LgDeposit;
 import models.db.LgLov;
 
 /**
@@ -9,6 +16,11 @@ import models.db.LgLov;
  */
 @Entity
 public class Currency extends LgLov implements Comparable {
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "currency")
+    public Set<LgBillType> billTypes = new HashSet<LgBillType>(0);
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "currency")
+    public Set<LgDeposit> deposits = new HashSet<LgDeposit>(0);
 
     public static Currency findByTextId(String textId) {
         return (Currency) LgLov.findByTextId(Currency.class.getSimpleName(), textId);

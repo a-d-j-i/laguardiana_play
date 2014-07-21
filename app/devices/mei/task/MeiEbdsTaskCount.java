@@ -1,23 +1,28 @@
 package devices.mei.task;
 
-import devices.device.task.DeviceTaskAbstract;
-import java.util.List;
+import devices.device.task.DeviceTaskCount;
+import java.util.Map;
 
 /**
  *
  * @author adji
  */
-public class MeiEbdsTaskCount extends DeviceTaskAbstract {
+public class MeiEbdsTaskCount extends DeviceTaskCount {
 
-    final private List<Integer> slotList;
+    final private Map<String, Integer> desiredQuantity;
 
-    public MeiEbdsTaskCount(Enum type, List<Integer> slotList) {
-        super(type);
-        this.slotList = slotList;
+    public MeiEbdsTaskCount(Map<String, Integer> desiredQuantity) {
+        super();
+        this.desiredQuantity = desiredQuantity;
     }
 
-    public List<Integer> getSlotList() {
-        return slotList;
+    public Map<String, Integer> getDesiredQuantity() {
+        return desiredQuantity;
+    }
+
+    @Override
+    public String toString() {
+        return "DeviceTaskCount{" + "desiredQuantity=" + desiredQuantity + '}';
     }
 
 }

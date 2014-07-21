@@ -1,7 +1,7 @@
 package devices.mei.response;
 
 import devices.device.DeviceMessageInterface;
-import devices.mei.MeiEbdsDevice.MessageType;
+import devices.mei.task.MeiEbdsTaskMessage.ResponseType;
 
 /**
  *
@@ -12,8 +12,8 @@ public class MeiEbdsAcceptorMsgEnq implements DeviceMessageInterface {
     public MeiEbdsAcceptorMsgEnq() {
     }
 
-    public MessageType getType() {
-        return MessageType.ENQ;
+    public ResponseType getType() {
+        return ResponseType.ENQ;
     }
 
     @Override

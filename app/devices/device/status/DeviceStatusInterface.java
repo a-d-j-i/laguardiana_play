@@ -1,10 +1,13 @@
 package devices.device.status;
 
 /**
- * TODO: Check if class/subclass is needed in the place of type.
+ *
  * @author adji
  */
 public interface DeviceStatusInterface {
 
-    public Enum getType();
+    public boolean is(Enum type);
+
+    public boolean is(Class type);
+
 }

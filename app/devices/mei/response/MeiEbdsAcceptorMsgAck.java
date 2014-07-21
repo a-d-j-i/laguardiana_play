@@ -1,9 +1,9 @@
 package devices.mei.response;
 
 import devices.device.DeviceMessageInterface;
-import devices.mei.MeiEbdsDevice.ExtendedMessageSubType;
-import devices.mei.MeiEbdsDevice.MessageSubType;
-import devices.mei.MeiEbdsDevice.MessageType;
+import devices.mei.task.MeiEbdsTaskMessage.ExtendedResponseSubType;
+import devices.mei.task.MeiEbdsTaskMessage.ResponseSubType;
+import devices.mei.task.MeiEbdsTaskMessage.ResponseType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,22 +121,22 @@ public class MeiEbdsAcceptorMsgAck implements DeviceMessageInterface {
         return true;
     }
 
-    private static final Map<Integer, MessageType> msgTypeMap = new HashMap<Integer, MessageType>();
+    private static final Map<Integer, ResponseType> msgTypeMap = new HashMap<Integer, ResponseType>();
 
     static {
-        for (MessageType mt : MessageType.values()) {
+        for (ResponseType mt : ResponseType.values()) {
             msgTypeMap.put(mt.getId(), mt);
         }
     }
 
-    public MessageType getType() {
+    public ResponseType getType() {
         // fixed payload offset
         int d = MEI_EBDS_CMD_DATA_DESC.MESSAGE_TYPE.getValue(data);
         return msgTypeMap.get(d);
     }
 
-    public MessageSubType getMessageSubType() {
-        MessageType t = getType();
+    public ResponseSubType getMessageSubType() {
+        ResponseType t = getType();
         if (t == null) {
             return null;
         }
@@ -206,10 +206,10 @@ public class MeiEbdsAcceptorMsgAck implements DeviceMessageInterface {
     }
 
     public String getNoteSlot() {
-        MessageType t = getType();
-        if (t != null && t == MessageType.Extended) {
-            MessageSubType st = getMessageSubType();
-            if (st != null && st == ExtendedMessageSubType.RequestSupportedNoteSet) {
+        ResponseType t = getType();
+        if (t != null && t == ResponseType.Extended) {
+            ResponseSubType st = getMessageSubType();
+            if (st != null && st == ExtendedResponseSubType.RequestSupportedNoteSet) {
                 return new String(Arrays.copyOfRange(data, 11, 20));
             }
         }
@@ -266,7 +266,7 @@ public class MeiEbdsAcceptorMsgAck implements DeviceMessageInterface {
                     }
             }
         }
-        return "MeiEbdsAcceptorMsg " + hexString.toString();
+        return "MeiEbdsAcceptorMsgAck " + hexString.toString();
     }
 
 }

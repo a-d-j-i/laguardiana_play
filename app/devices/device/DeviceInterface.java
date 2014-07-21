@@ -1,9 +1,8 @@
 package devices.device;
 
-import devices.device.events.DeviceEventListener;
+import devices.device.task.DeviceTaskAbstract;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import models.db.LgDeviceProperty;
+import java.util.concurrent.Future;
 
 /**
  *
@@ -19,17 +18,13 @@ public interface DeviceInterface {
 
     public void removeEventListener(DeviceEventListener listener);
 
-    public Integer getDeviceId();
+    public Future<Boolean> submit(final DeviceTaskAbstract deviceTask);
 
-    public List<LgDeviceProperty> getEditableProperties();
+    public boolean submitSynchronous(final DeviceTaskAbstract deviceTask);
 
-    public LgDeviceProperty setProperty(String property, String value) throws InterruptedException, ExecutionException;
+    public boolean setProperty(String property, String value);
 
-    public boolean clearError();
-
-    public DeviceEvent getLastEvent();
-
-    public Enum getType();
+    public List<String> getNeededProperties();
 
     @Override
     public String toString();

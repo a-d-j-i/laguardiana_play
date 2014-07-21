@@ -8,8 +8,7 @@ public class DeviceTaskOpenPort extends DeviceTaskAbstract {
 
     private final String port;
 
-    public DeviceTaskOpenPort(Enum type, String port) {
-        super(type);
+    public DeviceTaskOpenPort(String port) {
         this.port = port;
     }
 

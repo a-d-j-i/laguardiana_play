@@ -1,19 +1,19 @@
 package devices.glory.task;
 
-import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskCount;
 import java.util.Map;
 
 /**
  *
  * @author adji
  */
-public class GloryDE50TaskCount extends DeviceTaskAbstract {
+public class GloryDE50TaskCount extends DeviceTaskCount {
 
     final private Map<String, Integer> desiredQuantity;
-    final private Integer currency;
+    private final Integer currency;
 
-    public GloryDE50TaskCount(Enum type, Map<String, Integer> desiredQuantity, Integer currency) {
-        super(type);
+    public GloryDE50TaskCount(Integer currency, Map<String, Integer> desiredQuantity) {
+        super();
         this.desiredQuantity = desiredQuantity;
         this.currency = currency;
     }
@@ -24,6 +24,11 @@ public class GloryDE50TaskCount extends DeviceTaskAbstract {
 
     public Map<String, Integer> getDesiredQuantity() {
         return desiredQuantity;
+    }
+
+    @Override
+    public String toString() {
+        return "DeviceTaskCount{" + "desiredQuantity=" + desiredQuantity + ", currency=" + currency + '}';
     }
 
 }

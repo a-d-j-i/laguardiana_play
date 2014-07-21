@@ -11,11 +11,8 @@ public class BillValue implements Comparable {
     final public Currency currency;
     final public Integer denomination;
 
-    public BillValue(Integer unit_lov, Integer denomination) {
-        currency = Currency.findByNumericId(unit_lov);
-        if (currency == null) {
-            throw new RuntimeException("Invalid unit_lov");
-        }
+    public BillValue(Currency currency, Integer denomination) {
+        this.currency = currency;
         this.denomination = denomination;
     }
 

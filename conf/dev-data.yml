@@ -66,5 +66,5 @@ db.LgDevice(P500_MEI_DEVICE_MEI_EBDS):
 db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT1):
     device:             P500_MEI_DEVICE_MEI_EBDS
     billType:           2pesos
-    slot:               "2"
+    slot:               "ARS002+00"
     creationDate:       2012-01-01

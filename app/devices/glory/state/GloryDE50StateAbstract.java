@@ -1,6 +1,5 @@
 package devices.glory.state;
 
-import devices.device.status.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
@@ -56,10 +55,6 @@ abstract public class GloryDE50StateAbstract implements DeviceStateInterface {
     }
 
     public DeviceStateInterface call(DeviceTaskAbstract task) {
-        return null;
-    }
-
-    public DeviceStatusInterface getStatus() {
         return null;
     }
 

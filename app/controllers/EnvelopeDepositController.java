@@ -1,7 +1,10 @@
 package controllers;
 
+import static controllers.BillDepositController.status;
 import java.util.List;
 import java.util.Set;
+import machines.status.MachineEnvelopeDepositStatus;
+import machines.status.MachineStatus;
 import models.Configuration;
 import models.EnvelopeDeposit;
 import models.ModelFacade;
@@ -17,33 +20,34 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
+import play.mvc.Controller;
 import play.mvc.Router;
 import play.mvc.With;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeEnvelopeReference;
 
 @With(Secure.class)
-public class EnvelopeDepositController extends ErrorController {
+public class EnvelopeDepositController extends Controller {
 
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
+        MachineStatus status = ModelFacade.getCurrentStatus();
         if (request.isAjax()) {
             return;
         }
-        status = ModelFacade.getStateStatus();
+
         String neededAction = status.getNeededAction();
-        String neededController = status.getNeededController();
-        if (neededAction == null || neededController == null) {
-            EvenlopeDepositData data = (EvenlopeDepositData) status.getFormData();
-            if (!request.actionMethod.equalsIgnoreCase("start") || data.currentUser != Secure.getCurrentUser()) {
-                Logger.debug("wizardFixPage Redirect Application.index");
+        if (neededAction == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start") || (status.getCurrentUserId() == null || !status.getCurrentUserId().equals(Secure.getCurrentUserId()))) {
+                Logger.debug("wizardFixPage Redirect Application.index, requested %s, currentUser %s, statusUser %s",
+                        request.actionMethod, Secure.getCurrentUser(), status.getCurrentUserId());
                 Application.index();
             }
         } else {
-            if (!(request.controller.equalsIgnoreCase(neededController))) {
-                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
-                redirect(Router.getFullUrl(neededController + "." + neededAction));
+            if (!(request.action.equalsIgnoreCase(neededAction))) {
+                Logger.debug("wizardFixPage REDIRECT Action %s TO NeededAction %s", request.action, neededAction);
+                redirect(Router.getFullUrl(neededAction));
             }
         }
     }
@@ -115,7 +119,8 @@ public class EnvelopeDepositController extends ErrorController {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                if (ModelFacade.startEnvelopeDepositAction(formData)) {
+                Integer reference1 = (formData.reference1.lov == null ? null : formData.reference1.lov.lovId);
+                if (ModelFacade.startEnvelopeDepositAction(formData.currentUser, formData.reference2, reference1)) {
                     mainLoop();
                     return;
                 } else {
@@ -131,7 +136,7 @@ public class EnvelopeDepositController extends ErrorController {
             formData.ticketData.value = Configuration.getDefaultCurrency();
 
         }
-        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagReady(true)) {
+        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagFull(true)) {
             Application.index();
         }
 
@@ -144,17 +149,18 @@ public class EnvelopeDepositController extends ErrorController {
     }
 
     public static void mainLoop() {
+        MachineEnvelopeDepositStatus envStatus = (MachineEnvelopeDepositStatus) status;
         if (request.isAjax()) {
             Object[] o = new Object[3];
-            o[0] = status.getState();
+            o[0] = envStatus.getStateName();
             o[1] = null;
-            o[2] = Messages.get(status.getActionMessage());
+            o[2] = Messages.get(envStatus.getMessage());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("user", Secure.getCurrentUser());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
-            renderArgs.put("formData", status.getFormData());
+            renderArgs.put("currentDeposit", envStatus.getCurrentDeposit());
             render();
         }
     }
@@ -170,16 +176,16 @@ public class EnvelopeDepositController extends ErrorController {
     }
 
     public static void finish() {
-        EnvelopeDeposit deposit = (EnvelopeDeposit) status.getDeposit();
-        EvenlopeDepositData formData = (EvenlopeDepositData) status.getFormData();
+        MachineEnvelopeDepositStatus envStatus = (MachineEnvelopeDepositStatus) status;
+        EnvelopeDeposit deposit = envStatus.getCurrentDeposit();
         if (deposit != null) {
             Set<LgEnvelope> envelopes = deposit.envelopes;
             renderArgs.put("envelopes", envelopes);
             renderArgs.put("finishCause", deposit.finishCause);
             renderArgs.put("truncated", deposit.closeDate == null);
         }
-        if (formData != null) {
-            ModelFacade.finishAction();
+        if (deposit.isFinished()) {
+            ModelFacade.confirmAction();
         } else {
             Application.index();
             return;
@@ -189,4 +195,5 @@ public class EnvelopeDepositController extends ErrorController {
         renderArgs.put("providerCode", Configuration.getProviderDescription());
         render();
     }
+
 }

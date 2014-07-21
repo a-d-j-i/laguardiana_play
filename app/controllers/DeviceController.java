@@ -2,19 +2,25 @@ package controllers;
 
 import controllers.serializers.BillQuantitySerializer;
 import controllers.serializers.BillValueSerializer;
-import devices.device.DeviceClassCounterIntreface;
-import devices.device.DeviceClassIoBoardInterface;
-import devices.device.DeviceClassPrinterInterface;
-import devices.device.DeviceInterface;
 import devices.device.DeviceEvent;
 import devices.device.status.DeviceStatusClassCounterIntreface;
 import devices.device.status.DeviceStatusInterface;
+import devices.device.task.DeviceTaskCancel;
+import devices.device.task.DeviceTaskCollect;
+import devices.device.task.DeviceTaskCount;
+import devices.device.task.DeviceTaskEnvelopeDeposit;
+import devices.device.task.DeviceTaskReset;
+import devices.device.task.DeviceTaskStore;
+import devices.device.task.DeviceTaskStoringErrorReset;
+import devices.device.task.DeviceTaskWithdraw;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import machines.MachineDeviceDecorator;
 import models.ModelFacade;
+import models.db.LgDevice;
 import models.db.LgDeviceProperty;
 import play.Logger;
 import play.mvc.Before;
@@ -24,7 +30,7 @@ import play.mvc.With;
 @With({Secure.class})
 public class DeviceController extends Controller {
 
-    static DeviceInterface device;
+    static MachineDeviceDecorator device;
     static boolean hasClass = false;
     static String deviceName;
 
@@ -36,17 +42,24 @@ public class DeviceController extends Controller {
                 list();
             }
             deviceName = device.getType().name();
-            if (device instanceof DeviceClassIoBoardInterface) {
-                hasClass = true;
-                renderArgs.put("classIoBoard", true);
-            }
-            if (device instanceof DeviceClassPrinterInterface) {
-                hasClass = true;
-                renderArgs.put("classPrinter", true);
-            }
-            if (device instanceof DeviceClassCounterIntreface) {
-                hasClass = true;
-                renderArgs.put("classCounter", true);
+            hasClass = true;
+            switch ((LgDevice.DeviceType) device.getType()) {
+                case GLORY_DE50:
+                case MEI_EBDS:
+                    renderArgs.put("classCounter", true);
+                    break;
+                case IO_BOARD_MX220_1_0:
+                case IO_BOARD_V4520_1_0:
+                case IO_BOARD_V4520_1_2:
+                    renderArgs.put("classIoBoard", true);
+                    break;
+                case OS_PRINTER:
+                    renderArgs.put("classPrinter", true);
+                    break;
+                default:
+                    hasClass = false;
+                    break;
+
             }
             renderArgs.put("device", device);
             renderArgs.put("hasClass", hasClass);
@@ -108,13 +121,8 @@ public class DeviceController extends Controller {
             ret[2] = String.format("access denied for property %s", property);
             renderJSON(ret);
         }
-        DeviceInterface d = ModelFacade.findDeviceById(deviceId);
-        if (d == null) {
-            ret[2] = String.format("invalid device Id");
-            renderJSON(ret);
-        }
-        Logger.debug("data %s : %s -> %s", d, property, value);
-        LgDeviceProperty newProp = d.setProperty(property, value);
+        Logger.debug("data %s : %s -> %s", device, property, value);
+        LgDeviceProperty newProp = device.getProperty(property);
         if (newProp == null) {
             ret[2] = String.format("invalid property %s", property);
             renderJSON(ret);
@@ -125,11 +133,9 @@ public class DeviceController extends Controller {
             switch (newProp.editType) {
                 case BOOLEAN:
                     if (value.equalsIgnoreCase("off") || value.equalsIgnoreCase("false")) {
-                        newProp.value = "false";
-                        newProp.save();
+                        device.setProperty(property, "false");
                     } else if (value.equalsIgnoreCase("on") || value.equalsIgnoreCase("true")) {
-                        newProp.value = "true";
-                        newProp.save();
+                        device.setProperty(property, "true");
                     } else {
                         ret[2] = String.format("Invalid value '%s' for property %s", value, property);
                     }
@@ -137,15 +143,13 @@ public class DeviceController extends Controller {
                 case INTEGER:
                     try {
                         Integer i = Integer.parseInt(value);
-                        newProp.value = i.toString();
-                        newProp.save();
+                        device.setProperty(property, i.toString());
                     } catch (NumberFormatException e) {
                         ret[2] = String.format("Invalid value '%s' for property %s", value, property);
                     }
                     break;
                 case STRING:
-                    newProp.value = value;
-                    newProp.save();
+                    device.setProperty(property, value);
                     break;
                 case NOT_EDITABLE:
                 default:
@@ -154,14 +158,6 @@ public class DeviceController extends Controller {
             }
             renderJSON(ret);
         }
-    }
-
-    public static void clearError(Integer deviceId) {
-        error = null;
-        if (!device.clearError()) {
-            error = "can't clear error now";
-        }
-        counterClassCommands(deviceId, null);
     }
 
     static String error = null;
@@ -226,7 +222,6 @@ public class DeviceController extends Controller {
 
     public static void count(Integer deviceId, Map<String, String> slotsIds, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         if (currency == null || currency == 0) {
             currency = 1;
         }
@@ -238,7 +233,7 @@ public class DeviceController extends Controller {
             }
         }
         Logger.debug("--------> %s", desiredQuantity);
-        if (!counter.count(currency, desiredQuantity).get()) {
+        if (!device.submit(new DeviceTaskCount()).get()) {
             error = "Still executing another command";
         }
         counterClassCommands(deviceId, currency);
@@ -246,8 +241,7 @@ public class DeviceController extends Controller {
 
     public static void cancelDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.cancelDeposit().get()) {
+        if (!device.submit(new DeviceTaskCancel()).get()) {
             error = "Cant cancel";
         }
         counterClassCommands(deviceId, currency);
@@ -255,9 +249,8 @@ public class DeviceController extends Controller {
 
     public static void storeDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
         int sequenceNumber = 1;
-        if (!counter.storeDeposit(sequenceNumber).get()) {
+        if (!device.submit(new DeviceTaskStore(sequenceNumber)).get()) {
             error = "Not counting cant store";
         }
         counterClassCommands(deviceId, currency);
@@ -265,8 +258,7 @@ public class DeviceController extends Controller {
 
     public static void withdrawDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.withdrawDeposit().get()) {
+        if (!device.submit(new DeviceTaskWithdraw()).get()) {
             error = "Not counting cant store";
         }
         counterClassCommands(deviceId, currency);
@@ -274,8 +266,7 @@ public class DeviceController extends Controller {
 
     public static void reset(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.errorReset().get()) {
+        if (!device.submit(new DeviceTaskReset()).get()) {
             error = "Executing another command";
         }
         counterClassCommands(deviceId, currency);
@@ -283,24 +274,23 @@ public class DeviceController extends Controller {
 
     public static void storingErrorReset(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.storingErrorReset().get()) {
+        if (!device.submit(new DeviceTaskStoringErrorReset()).get()) {
             error = "Executing another command";
         }
         counterClassCommands(deviceId, currency);
     }
 
-    public static void collectBag(Integer deviceId, Integer currency) {
+    public static void collectBag(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        counter.collect();
+        if (!device.submit(new DeviceTaskCollect()).get()) {
+            error = "Executing another command";
+        }
         counterClassCommands(deviceId, currency);
     }
 
     public static void envelopeDeposit(Integer deviceId, Integer currency) throws InterruptedException, ExecutionException {
         error = null;
-        DeviceClassCounterIntreface counter = (DeviceClassCounterIntreface) device;
-        if (!counter.envelopeDeposit().get()) {
+        if (!device.submit(new DeviceTaskEnvelopeDeposit()).get()) {
             error = "Executing another command";
         }
         counterClassCommands(deviceId, currency);

@@ -3,6 +3,8 @@ package controllers;
 import controllers.serializers.BillQuantitySerializer;
 import controllers.serializers.BillValueSerializer;
 import java.util.List;
+import machines.status.MachineBillDepositStatus;
+import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.Configuration;
 import models.ModelFacade;
@@ -15,31 +17,34 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
+import play.mvc.Controller;
 import play.mvc.Router;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeBillReference;
 
-public class BillDepositController extends ErrorController {
+public class BillDepositController extends Controller {
+
+    static MachineStatus status;
 
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
+        status = ModelFacade.getCurrentStatus();
         if (request.isAjax()) {
             return;
         }
-        status = ModelFacade.getStateStatus();
+
         String neededAction = status.getNeededAction();
-        String neededController = status.getNeededController();
-        if (neededAction == null || neededController == null) {
-            BillDepositData data = (BillDepositData) status.getFormData();
-            if (!request.actionMethod.equalsIgnoreCase("start") || data.currentUser != Secure.getCurrentUser()) {
-                Logger.debug("wizardFixPage Redirect Application.index");
+        if (neededAction == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start") && (status.getCurrentUserId() == null || !status.getCurrentUserId().equals(Secure.getCurrentUserId()))) {
+                Logger.debug("wizardFixPage Redirect Application.index, requested %s, currentUser %s, statusUser %d",
+                        request.actionMethod, Secure.getCurrentUser(), status.getCurrentUserId());
                 Application.index();
             }
         } else {
-            if (!(request.controller.equalsIgnoreCase(neededController))) {
-                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
-                redirect(Router.getFullUrl(neededController + "." + neededAction));
+            if (!(request.action.equalsIgnoreCase(neededAction))) {
+                Logger.debug("wizardFixPage REDIRECT Action %s TO NeededAction %s", request.action, neededAction);
+                redirect(Router.getFullUrl(neededAction));
             }
         }
     }
@@ -57,10 +62,6 @@ public class BillDepositController extends ErrorController {
         @CheckWith(FormCurrency.Validate.class)
         public FormCurrency currency = new FormCurrency();
 
-        public Currency getCurrency() {
-            return currency.currency;
-        }
-
         @Override
         public String toString() {
             return "FormData{" + "reference1=" + reference1 + ", reference2=" + reference2 + ", currency=" + currency + '}';
@@ -75,9 +76,7 @@ public class BillDepositController extends ErrorController {
                 && (referenceCodes.size() <= 1 || !Configuration.mustShowBillDepositReference1())
                 && !Configuration.mustShowBillDepositReference2()) {
             // Nothing to complete, navigte to next step
-            formData = new BillDepositData();
-            formData.currency = new FormCurrency(currencies.get(0));
-            if (ModelFacade.startBillDepositAction(formData)) {
+            if (ModelFacade.startBillDepositAction(formData.currentUser, currencies.get(0), "", null)) {
                 mainLoop();
             } else {
                 Application.index();
@@ -91,7 +90,11 @@ public class BillDepositController extends ErrorController {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
-                if (ModelFacade.startBillDepositAction(formData)) {
+                Integer reference1 = (formData.reference1.lov == null ? null : formData.reference1.lov.lovId);
+                if (formData.currency.currency == null) {
+                    formData.currency.currency = Currency.findByNumericId(Configuration.getDefaultCurrency());
+                }
+                if (ModelFacade.startBillDepositAction(formData.currentUser, formData.currency.currency, formData.reference2, reference1)) {
                     mainLoop();
                 } else {
                     Application.index();
@@ -110,31 +113,28 @@ public class BillDepositController extends ErrorController {
     }
 
     public static void mainLoop() {
-        BillDepositData data = (BillDepositData) status.getFormData();
-        BillDeposit d = (BillDeposit) status.getDeposit();
-        long totalSum = 0;
-        if (d != null) {
-            totalSum = d.getTotal();
+        if (status instanceof MachineBillDepositStatus) {
+            MachineBillDepositStatus billStatus = (MachineBillDepositStatus) status;
+            if (request.isAjax()) {
+                Object[] o = new Object[4];
+                o[0] = billStatus.getStateName();
+                o[1] = billStatus.getBillQuantities();
+                o[2] = Messages.get(billStatus.getMessage());
+                o[3] = billStatus.getTotalSum();
+                renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
+            } else {
+                renderArgs.put("billData", billStatus.getBillQuantities());
+                renderArgs.put("currentDeposit", billStatus.getCurrentDeposit());
+                renderArgs.put("totalSum", billStatus.getTotalSum());
+                renderArgs.put("currentTotalSum", billStatus.getCurrentSum());
+            }
         }
-        if (request.isAjax()) {
-            Object[] o = new Object[4];
-            o[0] = status.getState();
-            o[1] = ModelFacade.getBillQuantities(data.currency.value);
-            o[2] = Messages.get(status.getActionMessage());
-            o[3] = totalSum;
-            renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
-        } else {
-            /*            long currentTotalSum = totalSum;
-             for (BillDAO b : billList) {
-             currentTotalSum += (b.d * b.q);
-             }*/
+        if (!request.isAjax()) {
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
             renderArgs.put("user", Secure.getCurrentUser());
-            renderArgs.put("billData", ModelFacade.getBillQuantities(data.currency.value));
-            renderArgs.put("formData", status.getFormData());
-            renderArgs.put("totalSum", totalSum);
-            //renderArgs.put("currentTotalSum", currentTotalSum);
+            renderArgs.put("showReference1", Configuration.mustShowBillDepositReference1());
+            renderArgs.put("showReference2", Configuration.mustShowBillDepositReference2());
             render();
         }
     }
@@ -155,23 +155,22 @@ public class BillDepositController extends ErrorController {
     }
 
     public static void finish() {
-        BillDeposit deposit = (BillDeposit) status.getDeposit();
-        BillDepositData formData = (BillDepositData) status.getFormData();
-        if (formData == null) {
+        MachineBillDepositStatus billStatus = (MachineBillDepositStatus) status;
+        BillDeposit deposit = billStatus.getCurrentDeposit();
+        if (deposit == null || !deposit.isFinished()) {
             Application.index();
             return;
         }
         renderArgs.put("clientCode", Configuration.getClientDescription());
         renderArgs.put("user", Secure.getCurrentUser());
         renderArgs.put("providerCode", Configuration.getProviderDescription());
-        renderArgs.put("formData", formData);
-        if (deposit != null) {
-            Long total = deposit.getTotal();
-            renderArgs.put("finishCause", deposit.finishCause);
-            renderArgs.put("depositTotal", total);
-            renderArgs.put("depositId", deposit.depositId);
-        }
-        ModelFacade.finishAction();
+        renderArgs.put("currentDeposit", deposit);
+        renderArgs.put("finishCause", deposit.finishCause);
+        renderArgs.put("depositTotal", billStatus.getTotalSum());
+        renderArgs.put("depositId", deposit.depositId);
+        renderArgs.put("showReference1", Configuration.mustShowBillDepositReference1());
+        renderArgs.put("showReference2", Configuration.mustShowBillDepositReference2());
+        ModelFacade.confirmAction();
         render();
     }
 }

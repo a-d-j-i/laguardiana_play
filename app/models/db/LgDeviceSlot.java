@@ -1,7 +1,10 @@
 package models.db;
 
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
+import models.lov.Currency;
+import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
@@ -31,6 +34,29 @@ public class LgDeviceSlot extends GenericModel implements java.io.Serializable {
     @PrePersist
     protected void onCreate() {
         creationDate = new Date();
+    }
+
+    // Search all the slots corresponding to certain currency and device
+
+    public static List< LgDeviceSlot> find(Currency currency, LgDevice device) {
+        // return all slot for this device
+        if (currency == null) {
+            return LgBillType.find("select s from LgBillType l, LgDeviceSlot s where "
+                    + " l = s.billType and s.device = ? order by denomination desc", device).fetch();
+        }
+        return LgBillType.find("select s from LgBillType l, LgDeviceSlot s where l.currency = ? "
+                + " and l = s.billType and s.device = ? order by denomination desc", currency, device).fetch();
+    }
+
+    // Search all the slots corresponding to certain currency and device
+
+    public static LgDeviceSlot find(LgDevice device, String slot) {
+        List<LgDeviceSlot> l = LgBillType.find("select s from LgDeviceSlot s where s.slot = ? and s.device = ?", slot, device).fetch();
+        if (l.size() != 1) {
+            Logger.error("Must configure slots, error for slot %s -> %s", device.toString(), slot);
+            return null;
+        }
+        return l.get(0);
     }
 
     @Override

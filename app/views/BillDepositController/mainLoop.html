@@ -14,18 +14,20 @@
                     <div class="columna_1">
                         <!-- resumen de datos -->
                         <p style="font-size: larger;">&{ 'application.wellcome' }&nbsp;#{usernameTag user: user/}</p>
-                        <p>&{ 'counting_page.currency_title' }: ${formData.currency.currency.description}</p>
-                        #{if ( formData.showReference1 ) }
-                        <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+                        <p>&{ 'counting_page.currency_title' }: ${currentDeposit.currency.description}</p>
+                        #{if ( showReference1 ) }
+                        <p>&{ 'counting_page.reference1_title' }: ${currentDeposit.findUserCode()}</p>
                         #{/if}
-                        #{if ( formData.showReference2 && formData.reference2 != "" ) }
-                        <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+                        #{if ( showReference2 && reference2 != "" ) }
+                        <p>&{ 'counting_page.reference2_title' }: ${currentDeposit.userCode}</p>
                         #{/if}
                         <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                         <div id="total_sum_field" style="display: none;">
                             <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
                         </div>
-                        <p>&{ 'counting_page.current_total_sum' }: <span class="currentTotalSum">${currentTotalSum}</span></p>
+                        <div id="current_sum_field" style="display: none;">
+                            <p>&{ 'counting_page.current_total_sum' }: <span class="currentSum">${currentSum}</span></p>
+                        </div>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
                         <div class="info_message blink" style="color: green; font-size: x-large;"> 
@@ -95,7 +97,7 @@
                 <div id="alerta_texto">
                     <div id="error_text">
                         &{ 'bill_deposit.escrow_full_text_t1' }
-                        <span class="total">${ total }</span>&nbsp;${formData.currency.currency.description}<br>
+                        <span class="total">${ total }</span>&nbsp;${currentDeposit.currency.description}<br>
                         &{ 'bill_deposit.escrow_full_text_t2' }
                     </div>
                 </div>
@@ -166,7 +168,6 @@
         </div>
 
     </div>
-</div>
 </section>
 
 
@@ -197,7 +198,7 @@
                 } else if (status == 'TIMEOUT_WARNING') {
                 } else if (status == 'COUNTING') {
                 } else if (status == 'ERROR') {
-                    deposit_finished = "@{counterError()}";
+                    //deposit_finished = "{counterError()}";
                 } else {
                     alert("Invalid status : " + status + " last status : " + lastStatus);
                 }
@@ -236,7 +237,14 @@
                 lastStatus = status;
             }
 
-            $('.info_message').html(data[ 2 ]);
+            $('.info_message').html(data[ 4 ]);
+            var currentSum = data[ 2 ];
+            if (currentSum > 0) {
+                $('.currentSum').html(currentSum).show();
+                $('#current_sum_field').show();
+            } else {
+                $('#current_sum_field').hide();
+            }
             var totalSum = data[ 3 ];
             if (totalSum > 0) {
                 $('.totalSum').html(totalSum).show();
@@ -260,9 +268,6 @@
                 }
                 $('.cnt_total').html(cnt_total);
                 $('.total').html(total);
-                if (status != 'STORING') { // when storing the deposit total have the current quantity and the machine still report the same quantity.
-                    $('.currentTotalSum').html(parseInt(totalSum) + parseInt(total));
-                }
             }
             doneRefresh();
         })

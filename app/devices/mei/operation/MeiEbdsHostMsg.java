@@ -1,6 +1,6 @@
 package devices.mei.operation;
 
-import devices.mei.MeiEbdsDevice.MessageType;
+import devices.mei.task.MeiEbdsTaskMessage.ResponseType;
 
 /**
  *
@@ -113,6 +113,10 @@ public class MeiEbdsHostMsg {
         MEI_EBDS_MSG_BYTE_DESC.EXTENDED_NOTE_REPORTING.setBits(data);
     }
 
+    public boolean isSomeDenominationEnabled() {
+        return MEI_EBDS_MSG_BYTE_DESC.DENOMINATION_ENABLE.getValue(data) != 0;
+    }
+
     public void enableAllDenominations() {
         MEI_EBDS_MSG_BYTE_DESC.DENOMINATION_ENABLE.setBits(data);
     }
@@ -163,7 +167,7 @@ public class MeiEbdsHostMsg {
         MEI_EBDS_MSG_BYTE_DESC.ACK.clearBits(data);
     }
 
-    public void setMessageType(MessageType msgType) {
+    public void setMessageType(ResponseType msgType) {
         MEI_EBDS_MSG_BYTE_DESC.MESSAGE_TYPE.setValue(data, msgType.getId());
     }
 

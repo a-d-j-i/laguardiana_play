@@ -5,9 +5,6 @@ import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.mei.MeiEbds;
-import static devices.mei.MeiEbdsDevice.MeiEbdsTaskType.TASK_OPEN_PORT;
-import devices.mei.status.MeiEbdsStatus;
-import devices.mei.status.MeiEbdsStatus.MeiEbdsStatusType;
 import play.Logger;
 
 /**
@@ -21,25 +18,23 @@ public class MeiEbdsOpenPort extends MeiEbdsStateAbstract {
     }
 
     @Override
-    public DeviceStateInterface call(DeviceTaskAbstract task) {
-        Logger.debug("MeiEbdsOpenPort got task %s", task.toString());
-        if (task.getType() == TASK_OPEN_PORT) {
-            DeviceTaskOpenPort openPort = (DeviceTaskOpenPort) task;
+    public DeviceStateInterface call(DeviceTaskAbstract t) {
+        Logger.debug("MeiEbdsOpenPort got task %s", t.toString());
+        if (t instanceof DeviceTaskOpenPort) {
+            DeviceTaskOpenPort openPort = (DeviceTaskOpenPort) t;
+            Logger.debug("calling mei open");
             if (mei.open(openPort.getPort())) {
                 Logger.debug("MeiEbdsOpenPort new port %s", openPort.getPort());
-                task.setReturnValue(true);
+                t.setReturnValue(true);
                 return new MeiEbdsStateMain(mei);
             } else {
                 Logger.debug("MeiEbdsOpenPort new port %s failed to open", openPort.getPort());
-                task.setReturnValue(false);
-                return this;
             }
+        } else {
+            Logger.debug("MeiEbdsOpenPort ignore task %s because need to open the port first", t.toString());
         }
-        return null;
-    }
-
-    public DeviceStatusInterface getStatus() {
-        return new MeiEbdsStatus(MeiEbdsStatusType.OPEN_PORT);
+        t.setReturnValue(false);
+        return this;
     }
 
     @Override

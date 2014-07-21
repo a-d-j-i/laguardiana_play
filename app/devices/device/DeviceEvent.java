@@ -11,7 +11,7 @@ public class DeviceEvent extends EventObject {
 
     final private DeviceStatusInterface status;
 
-    public DeviceEvent(DeviceAbstract source, DeviceStatusInterface status) {
+    public DeviceEvent(DeviceInterface source, DeviceStatusInterface status) {
         super(source);
         this.status = status;
     }

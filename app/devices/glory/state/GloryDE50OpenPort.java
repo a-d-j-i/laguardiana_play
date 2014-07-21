@@ -4,7 +4,6 @@ import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
-import static devices.glory.GloryDE50Device.GloryDE50TaskType.TASK_OPEN_PORT;
 import play.Logger;
 
 /**
@@ -32,7 +31,7 @@ public class GloryDE50OpenPort extends GloryDE50StateOperation {
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
         Logger.debug("GloryDE50OpenPort got task %s", task.toString());
-        if (task.getType() == TASK_OPEN_PORT) {
+        if (task instanceof DeviceTaskOpenPort) {
             DeviceTaskOpenPort openPort = (DeviceTaskOpenPort) task;
             if (api.open(openPort.getPort())) {
                 Logger.debug("GloryDE50OpenPort new port %s", openPort.getPort());

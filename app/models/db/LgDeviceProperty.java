@@ -68,6 +68,10 @@ public class LgDeviceProperty extends GenericModel implements java.io.Serializab
         return l;
     }
 
+    static public List<LgDeviceProperty> getProperties(LgDevice device) {
+        return LgDeviceProperty.find("select p from LgDeviceProperty p where device = ?", device).fetch();
+    }
+
     public static List<LgDeviceProperty> getEditables(LgDevice device) {
         return LgDeviceProperty.find("select p from LgDeviceProperty p where device = ? and edit_type != ? order by p.name",
                 device,

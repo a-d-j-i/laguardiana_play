@@ -13,6 +13,14 @@ import devices.device.status.DeviceStatusInterface;
  */
 public class GloryDE50Status implements DeviceStatusInterface {
 
+    public boolean is(Enum type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean is(Class type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     static public enum GloryDE50StatusType {
 
         ERROR,

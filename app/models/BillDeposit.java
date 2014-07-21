@@ -2,31 +2,31 @@ package models;
 
 import controllers.Secure;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import javax.persistence.Entity;
+import models.db.LgBatch;
+import models.db.LgBill;
+import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgUser;
-import models.lov.DepositUserCodeReference;
+import models.lov.Currency;
+import play.Logger;
 
 @Entity
 public class BillDeposit extends LgDeposit {
 
-    public BillDeposit(LgUser user, String userCode, DepositUserCodeReference userCodeData) {
-        super(user, userCode, userCodeData);
+    public BillDeposit(LgUser user, Currency currency, String userCode, Integer userCodeLovId) {
+        super(user, currency, userCode, userCodeLovId);
     }
 
-    public Long getTotal() {
-        Long r = BillDeposit.find("select sum(b.quantity * bt.denomination) "
-                + " from BillDeposit d, LgBill b, LgBillType bt "
-                + " where b.deposit = d and b.billType = bt"
-                + " and d.depositId = ?", depositId).first();
-        if (r == null) {
-            return new Long(0);
-        }
-        return r;
+    public BillDeposit(LgDeposit refDeposit) {
+        super(refDeposit);
     }
 
     public List getDepositContent() {
@@ -45,7 +45,7 @@ public class BillDeposit extends LgDeposit {
     public List<BillQuantity> getBillList() {
         List<BillQuantity> ret = new ArrayList<BillQuantity>();
         List qret = BillDeposit.find(" "
-                + "select bt.denomination, bt.unitLov, sum( b.quantity )"
+                + "select bt.denomination, bt.currency, sum( b.quantity )"
                 + " from BillDeposit d, LgBill b, LgBillType bt"
                 + " where b.deposit = d "
                 + " and b.billType = bt"
@@ -58,7 +58,7 @@ public class BillDeposit extends LgDeposit {
         for (Object b : qret) {
             Object[] a = (Object[]) b;
             Long quantity = (Long) a[ 2];
-            BillValue bv = new BillValue((Integer) a[1], (Integer) a[ 0]);
+            BillValue bv = new BillValue((Currency) a[1], (Integer) a[ 0]);
             BillQuantity bill = new BillQuantity(bv);
             bill.quantity = quantity.intValue();
             ret.add(bill);
@@ -97,4 +97,33 @@ public class BillDeposit extends LgDeposit {
         }
         ModelFacade.print("PrinterController/billDeposit.html", args, Configuration.getPrintWidth(), Configuration.getBillDepositPrintLen());
     }
+
+    public Long getTotal() {
+        long ret = 0;
+        for (LgBill b : bills) {
+            LgBillType bt = b.billType;
+            ret += (b.quantity * bt.denomination);
+        }
+        return ret;
+    }
+
+    public boolean addBillToDeposit(LgBatch batch, LgBillType billType, int quantity) {
+        Logger.debug("Adding to deposit %d, batch %d, billType %s, quantity %d", depositId, batch.batchId, billType.toString(), quantity);
+        LgBill b = LgBill.getOrCreate(this, batch, billType);
+        b.quantity += quantity;
+        b.save();
+        return true;
+    }
+
+    public Map<LgBillType, Integer> getCurrentQuantity() {
+        Map<LgBillType, Integer> ret = new HashMap<LgBillType, Integer>();
+        for (LgBill b : bills) {
+            LgBillType bt = b.billType;
+            Integer c = ret.containsKey(bt) ? ret.get(bt) : 0;
+            c += b.quantity;
+            ret.put(bt, c);
+        }
+        return ret;
+    }
+
 }

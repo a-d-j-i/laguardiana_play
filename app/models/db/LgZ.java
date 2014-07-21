@@ -12,21 +12,21 @@ import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Table( name = "lg_z", schema = "public")
+@Table(name = "lg_z", schema = "public")
 public class LgZ extends GenericModel implements java.io.Serializable {
 
     @Id
-    @Column( name = "z_id", unique = true, nullable = false)
+    @Column(name = "z_id", unique = true, nullable = false)
     @GeneratedValue(generator = "LgZGenerator")
     @SequenceGenerator(name = "LgZGenerator", sequenceName = "lg_z_sequence")
     public Integer zId;
-    @Temporal( TemporalType.TIMESTAMP)
-    @Column( name = "creation_date", nullable = false, length = 13)
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate;
-    @Temporal( TemporalType.TIMESTAMP)
-    @Column( name = "close_date", length = 13)
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "close_date", length = 13)
     public Date closeDate;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "z")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "z")
     public Set<LgDeposit> deposits = new HashSet<LgDeposit>(0);
 
     public LgZ() {
@@ -61,6 +61,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
         if (currentZ == null) {
             Logger.error("APP ERROR z = null");
         }
+        Logger.debug("Current Z : %d", currentZ.zId);
         return currentZ;
     }
 

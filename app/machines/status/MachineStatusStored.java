@@ -4,12 +4,11 @@ package machines.status;
  *
  * @author adji
  */
-public class MachineStatusStored extends MachineStatus {
+public class MachineStatusStored {
 
     final String slot;
 
     public MachineStatusStored(String slot) {
-        super(MachineStatusType.STORED);
         this.slot = slot;
     }
 

@@ -15,8 +15,7 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
     String error = null;
     GloryDE50OperationResponse response = new GloryDE50OperationResponse();
 
-    public GloryDE50TaskOperation(Enum type, GloryDE50OperationInterface operation, boolean debug) {
-        super(type);
+    public GloryDE50TaskOperation(GloryDE50OperationInterface operation, boolean debug) {
         this.operation = operation;
         this.debug = debug;
     }

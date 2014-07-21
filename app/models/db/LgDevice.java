@@ -1,6 +1,3 @@
-/*
- I'm assuming that each machine has only one way of taking envelopes, so there is no device <-> envelope relation
- */
 package models.db;
 
 import java.util.Date;
@@ -27,13 +24,6 @@ import play.db.jpa.GenericModel;
 @Entity
 @Table(name = "lg_device", schema = "public")
 public class LgDevice extends GenericModel implements java.io.Serializable {
-
-    public enum DeviceClass {
-
-        DEVICE_CLASS_PRINTER,
-        DEVICE_CLASS_COUNTER,
-        DEVICE_CLASS_IOBOARD,
-    };
 
     public enum DeviceType {
 

@@ -4,7 +4,7 @@ package devices.device.status;
  *
  * @author adji
  */
-abstract public class DeviceStatusError implements DeviceStatusInterface {
+public class DeviceStatusError implements DeviceStatusInterface {
 
     final String error;
 
@@ -19,6 +19,14 @@ abstract public class DeviceStatusError implements DeviceStatusInterface {
     @Override
     public String toString() {
         return "DeviceStatusError{" + "error=" + error + '}';
+    }
+
+    public boolean is(Enum type) {
+        return false;
+    }
+
+    public boolean is(Class type) {
+        return this.getClass().equals(type);
     }
 
 }

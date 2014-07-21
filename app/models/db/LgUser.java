@@ -75,7 +75,7 @@ public class LgUser extends GenericModel implements java.io.Serializable {
 
     @Override
     public String toString() {
-        return "LgUser{" + "userId=" + userId + ", externalApp=" + externalApp + ", username=" + username + ", externalId=" + externalId + ", locked=" + locked + ", creationDate=" + creationDate + ", endDate=" + endDate + '}';
+        return "LgUser : " + "userId=" + userId + ", username=" + username + ", externalId=" + externalId + ", locked=" + locked + ", creationDate=" + creationDate + ", endDate=" + endDate + '}';
     }
     final static public String GUEST_NAME = "guest";
 
@@ -201,7 +201,7 @@ public class LgUser extends GenericModel implements java.io.Serializable {
     public void postLoad() {
         // TODO: Implement that with a query.
         for (LgRole rol : roles) {
-            Logger.info("\trole: %s", rol.toString());
+            //Logger.info("\trole: %s", rol.toString());
             for (LgAclRule rule : rol.aclRules) {
                 PermsKey k = new PermsKey(rule.resource.name, rule.operation);
                 perms.put(k, rule);
@@ -241,4 +241,24 @@ public class LgUser extends GenericModel implements java.io.Serializable {
         String passwordHash = new String(thedigest);
         return passwordHash;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 89 * hash + (this.userId != null ? this.userId.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final LgUser other = (LgUser) obj;
+        return (this.userId == other.userId);
+    }
+
 }
