@@ -3,7 +3,7 @@ package devices.glory.state;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import play.Logger;
 
 /**
@@ -12,7 +12,7 @@ import play.Logger;
  */
 public class GloryDE50OpenPort extends GloryDE50StateAbstract {
 
-    public GloryDE50OpenPort(GloryDE50DeviceStateApi api) {
+    public GloryDE50OpenPort(GloryDE50Device api) {
         super(api);
     }
 

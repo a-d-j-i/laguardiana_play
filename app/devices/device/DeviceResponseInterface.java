@@ -6,5 +6,4 @@ package devices.device;
  */
 public interface DeviceResponseInterface {
 
-    public Enum getType();
 }

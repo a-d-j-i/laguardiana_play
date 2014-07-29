@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50StateAbstract;
 
@@ -14,7 +10,7 @@ import devices.glory.state.GloryDE50StateAbstract;
  */
 public class GloryDE50Store extends GloryDE50StatePoll {
 
-    public GloryDE50Store(GloryDE50DeviceStateApi api) {
+    public GloryDE50Store(GloryDE50Device api) {
         super(api);
     }
 

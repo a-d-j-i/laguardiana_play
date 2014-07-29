@@ -3,7 +3,7 @@ package devices.mei.state;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
-import devices.mei.MeiEbds;
+import devices.mei.MeiEbdsDevice;
 import play.Logger;
 
 /**
@@ -12,7 +12,7 @@ import play.Logger;
  */
 public class MeiEbdsOpenPort extends MeiEbdsStateAbstract {
 
-    public MeiEbdsOpenPort(MeiEbds mei) {
+    public MeiEbdsOpenPort(MeiEbdsDevice mei) {
         super(mei);
     }
 

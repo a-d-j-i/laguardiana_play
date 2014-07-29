@@ -12,7 +12,7 @@ import devices.device.task.DeviceTaskEnvelopeDeposit;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.device.task.DeviceTaskReset;
 import devices.device.task.DeviceTaskStoringErrorReset;
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.state.poll.GloryDE50Collect;
 import devices.glory.state.poll.GloryDE50Count;
 import devices.glory.state.poll.GloryDE50EnvelopeDeposit;
@@ -28,7 +28,7 @@ import play.Logger;
  */
 public class GloryDE50WaitForOperation extends GloryDE50StateOperation {
 
-    public GloryDE50WaitForOperation(GloryDE50DeviceStateApi api) {
+    public GloryDE50WaitForOperation(GloryDE50Device api) {
         super(api);
     }
 

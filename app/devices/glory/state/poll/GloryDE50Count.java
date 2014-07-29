@@ -1,6 +1,6 @@
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
@@ -41,7 +41,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
     boolean batchEnd = false;
     boolean debug = true;
 
-    public GloryDE50Count(GloryDE50DeviceStateApi api, Map<String, Integer> desiredQuantity, Integer currency) {
+    public GloryDE50Count(GloryDE50Device api, Map<String, Integer> desiredQuantity, Integer currency) {
         super(api);
         this.desiredQuantity = desiredQuantity;
         if (currency == null) {
@@ -355,17 +355,14 @@ public class GloryDE50Count extends GloryDE50StatePoll {
         return true;
     }
 
-    @Override
     public Integer getCurrency() {
         return currency;
     }
 
-    @Override
     public Map<Integer, Integer> getCurrentQuantity() {
         return currentQuantity.get();
     }
 
-    @Override
     public Map<String, Integer> getDesiredQuantity() {
         return desiredQuantity;
     }

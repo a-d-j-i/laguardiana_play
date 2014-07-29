@@ -9,16 +9,18 @@ import devices.device.task.DeviceTaskOpenPort;
 import devices.device.task.DeviceTaskReset;
 import devices.device.task.DeviceTaskStore;
 import devices.device.task.DeviceTaskWithdraw;
-import devices.mei.MeiEbds;
-import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
 import devices.mei.response.MeiEbdsAcceptorMsgError;
 import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusStored;
 import devices.mei.task.MeiEbdsTaskCount;
 import devices.device.task.DeviceTaskMessage;
+import devices.mei.MeiEbdsDevice;
 import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 import static devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType.*;
+import devices.mei.response.MeiEbdsAcceptorMsgEnq;
+import devices.mei.response.MeiEbdsAcceptorMsgTimeout;
+import play.Logger;
 import play.data.validation.Error;
 
 /**
@@ -28,10 +30,10 @@ import play.data.validation.Error;
 public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
 
     protected void debug(String message, Object... args) {
-        //Logger.debug(message, args);
+        Logger.debug(message, args);
     }
 
-    public MeiEbdsStateMain(MeiEbds mei) {
+    public MeiEbdsStateMain(MeiEbdsDevice mei) {
         super(mei);
     }
 
@@ -42,35 +44,42 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract t) {
         boolean ret;
-        debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
+        //debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
         if (t instanceof DeviceTaskMessage) {
             DeviceTaskMessage msgTask = (DeviceTaskMessage) t;
             DeviceResponseInterface response = msgTask.getResponse();
             if (response != null) { // retry
                 String err = null;
-                switch ((ResponseType) response.getType()) {
-                    case Error:
-                        MeiEbdsAcceptorMsgError e = (MeiEbdsAcceptorMsgError) response;
-                        err = e.getError();
-                        break;
-                    case HostToAcceptor:
-                    default:
-                        err = String.format("%s got unexpected message type %s", mei.toString(), response.getType().name());
-                        break;
-                    case ENQ: // poll
-                        err = mei.sendPollMessage();
-                        break;
-                    case Extended: // TODO: check if a different treatment is needed
-                    case AcceptorToHost:
-                        MeiEbdsAcceptorMsgAck lastResponse = (MeiEbdsAcceptorMsgAck) response;
-                        MeiEbdsHostMsg message = (MeiEbdsHostMsg) msgTask.getMessage();
-                        if (!mei.isMessageOk(response)) {
-                            err = "Error the only valid message is lastResult";
-                        } else {
-                            if (mei.isAckOk(lastResponse)) { // if ack is not ok, just ignore
-                                return processAcceptorToHostMsg(message, lastResponse);
+                if (response instanceof MeiEbdsAcceptorMsgEnq) {
+                } else if (response instanceof MeiEbdsAcceptorMsgTimeout) {
+                } else if (response instanceof MeiEbdsAcceptorMsgAck) {
+                    MeiEbdsAcceptorMsgAck r = (MeiEbdsAcceptorMsgAck) response;
+                    switch ((ResponseType) r.getType()) {
+                        case Error:
+                            MeiEbdsAcceptorMsgError e = (MeiEbdsAcceptorMsgError) response;
+                            err = e.getError();
+                            break;
+                        case HostToAcceptor:
+                        default:
+                            err = String.format("%s got unexpected message type %s", mei.toString(), r.getType().name());
+                            break;
+                        case ENQ: // poll
+                            err = mei.sendPollMessage();
+                            break;
+                        case Extended:
+                        case AcceptorToHost:
+                            MeiEbdsAcceptorMsgAck lastResponse = (MeiEbdsAcceptorMsgAck) response;
+                            if (!mei.isMessageOk(response)) {
+                                err = "Error the only valid message is lastResult";
+                            } else {
+                                if (mei.isAckOk(lastResponse)) { // if ack is not ok, just ignore
+                                    t.setReturnValue(true);
+                                    return processAcceptorToHostMsg(lastResponse);
+                                }
                             }
-                        }
+                    }
+                } else {
+                    err = "Invalid response type";
                 }
                 if (err != null) {
                     return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
@@ -148,7 +157,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         return "MeiEbdsStateMain";
     }
 
-    protected DeviceStateInterface processAcceptorToHostMsg(MeiEbdsHostMsg message, MeiEbdsAcceptorMsgAck response) {
+    protected DeviceStateInterface processAcceptorToHostMsg(MeiEbdsAcceptorMsgAck response) {
         if (response.isJammed() || response.isFailure()) {
             mei.notifyListeners(MeiEbdsStatus.JAM);
             return null;
@@ -188,7 +197,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         } else {
             debug("%s Is None", mei.toString());
             if (response.isIdling()) {
-                if (message.isSomeDenominationEnabled()) {
+                if (mei.isSomeDenominationEnabled()) {
                     mei.notifyListeners(MeiEbdsStatus.COUNTING);
                 } else {
                     if (mustCancel) {

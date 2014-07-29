@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.*;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.*;
@@ -32,12 +28,12 @@ public class GloryDE50GotoNeutral extends GloryDE50StatePoll {
     boolean forceEmptyHoper = false;
     final GloryDE50StateAbstract prevState;
 
-    public GloryDE50GotoNeutral(GloryDE50DeviceStateApi api) {
+    public GloryDE50GotoNeutral(GloryDE50Device api) {
         super(api);
         this.prevState = new GloryDE50WaitForOperation(api);
     }
 
-    public GloryDE50GotoNeutral(GloryDE50DeviceStateApi api, GloryDE50StateAbstract prevState, boolean canOpenEscrow, boolean forceEmptyHoper) {
+    public GloryDE50GotoNeutral(GloryDE50Device api, GloryDE50StateAbstract prevState, boolean canOpenEscrow, boolean forceEmptyHoper) {
         super(api);
         this.prevState = prevState;
         this.canOpenEscrow = canOpenEscrow;
@@ -205,15 +201,13 @@ public class GloryDE50GotoNeutral extends GloryDE50StatePoll {
                             // set the time if possible, some times it fails, ignroe this
                             sret = sendGloryOperation(new devices.glory.operation.SetTime(new Date()));
                             if (sret.isError()) {
-                                String error = sret.getError();
-                                Logger.error("Error %s sending cmd SetTime", error);
+                                Logger.error("Error sending cmd SetTime");
                                 break;
                             }
                             // Rotate if possible, some time it fails, ignore this
                             sret = sendGloryOperation(new devices.glory.operation.SetCollectMode());
                             if (sret.isError()) {
-                                String error = sret.getError();
-                                Logger.error("Error %s sending cmd SetCollectMode", error);
+                                Logger.error("Error sending cmd SetCollectMode");
                                 break;
                             }
                             break;

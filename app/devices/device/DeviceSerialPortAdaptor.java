@@ -8,12 +8,13 @@ import play.Logger;
 
 /**
  * Device Adaptor
+ *
  * @author adji
  */
 public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInterface {
 
     private static void debug(String message, Object... args) {
-        //Logger.debug(message, args);
+        Logger.debug(message, args);
     }
 
     final private Thread readerThread;
@@ -37,10 +38,8 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
         debug("SerialPort Reader start");
         while (!mustStop.get()) {
             try {
-                debug("Calling getMessage");
                 DeviceResponseInterface msg = parser.getResponse(serialPort);
                 if (msg != null) {
-                    debug("Calling getMessage return %s", msg.toString());
                     listener.onDeviceMessageEvent(msg);
                 }
             } catch (InterruptedException ex) {

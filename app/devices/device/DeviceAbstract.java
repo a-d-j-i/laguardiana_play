@@ -3,7 +3,6 @@ package devices.device;
 import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.device.task.DeviceTaskMessage;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -24,43 +23,18 @@ public abstract class DeviceAbstract implements DeviceInterface {
         Logger.debug(message, args);
     }
 
-    public interface DeviceApi extends DeviceResponseListenerInterface {
+    abstract public DeviceStateInterface getInitState();
 
-        public void notifyListeners(DeviceStatusInterface status);
-    }
-
-    protected DeviceApi api = new DeviceApi() {
-
-        public void notifyListeners(DeviceStatusInterface status) {
-            DeviceAbstract.this.notifyListeners(status);
-        }
-
-        // switch thread.
-        public void onDeviceMessageEvent(final DeviceResponseInterface response) {
-            taskExecutor.submit(new Runnable() {
-                public void run() {
-                    DeviceAbstract.this.runTask(new DeviceTaskMessage(getLastCommand(), response));
-                }
-
-            }
-            );
-        }
-    };
-
-    abstract protected DeviceMessageInterface getLastCommand();
-
-    private final ExecutorService taskExecutor;
     private DeviceStateInterface currentState;
+    final ExecutorService taskExecutor;
 
     public DeviceAbstract() {
         this.taskExecutor = Executors.newSingleThreadExecutor();
     }
 
     public void start() {
-        currentState = initState();
+        currentState = getInitState();
     }
-
-    abstract public DeviceStateInterface initState();
 
     public void stop() {
         debug("Device %s stop task thread", this.toString());
@@ -94,14 +68,14 @@ public abstract class DeviceAbstract implements DeviceInterface {
         this.listeners.remove(listener);
     }
 
-    private void notifyListeners(DeviceStatusInterface state) {
+    public void notifyListeners(DeviceStatusInterface state) {
         final DeviceEvent le = new DeviceEvent(this, state);
         for (DeviceEventListener counterListener : listeners) {
             counterListener.onDeviceEvent(le);
         }
     }
 
-    private boolean runTask(final DeviceTaskAbstract deviceTask) {
+    protected boolean runTask(final DeviceTaskAbstract deviceTask) {
         debug(String.format("%s executing current step: %s", DeviceAbstract.this.toString(), currentState));
         DeviceStateInterface newState = deviceTask.execute(currentState);
         if (newState != null && currentState != newState) {

@@ -2,7 +2,7 @@ package devices.glory.state;
 
 import devices.device.state.DeviceStateAbstract;
 import devices.device.state.DeviceStateInterface;
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 
 /**
  * TODO: Use play jobs for this.
@@ -11,9 +11,9 @@ import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
  */
 abstract public class GloryDE50StateAbstract extends DeviceStateAbstract implements DeviceStateInterface {
 
-    protected final GloryDE50DeviceStateApi api;
+    protected final GloryDE50Device api;
 
-    public GloryDE50StateAbstract(GloryDE50DeviceStateApi api) {
+    public GloryDE50StateAbstract(GloryDE50Device api) {
         this.api = api;
     }
 
@@ -21,4 +21,9 @@ abstract public class GloryDE50StateAbstract extends DeviceStateAbstract impleme
     public String toString() {
         return "GloryDE50StateAbstract";
     }
+
+    public boolean isError() {
+        return false;
+    }
+
 }

@@ -3,7 +3,6 @@ package machines.P500_MEI.states;
 import machines.states.*;
 import java.util.Date;
 import models.BillDeposit;
-import models.EnvelopeDeposit;
 import play.Logger;
 
 /**

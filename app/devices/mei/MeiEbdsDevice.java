@@ -1,62 +1,110 @@
 package devices.mei;
 
-import devices.device.DeviceAbstract;
-import devices.device.DeviceMessageInterface;
+import devices.device.DeviceResponseInterface;
+import devices.device.DeviceSerialPortAbstract;
 import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskMessage;
 import devices.mei.state.MeiEbdsOpenPort;
-import devices.device.task.DeviceTaskOpenPort;
+import devices.mei.operation.MeiEbdsHostMsg;
+import devices.mei.response.MeiEbdsAcceptorMsgAck;
+import devices.serial.SerialPortAdapterAbstract;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class MeiEbdsDevice extends DeviceAbstract {
+final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
 
     private void debug(String message, Object... args) {
-        // Logger.debug(message, args);
+        Logger.debug(message, args);
     }
 
-    private final MeiEbds mei = new MeiEbds(api);
-
-    @Override
-    protected DeviceMessageInterface getLastCommand() {
-        return mei.getLastCommand();
-    }
-
-    @Override
-    public void finish() {
-        debug("MeiEbds Executing finish");
-        Logger.info("MeiEbds Closing mei serial port ");
-        mei.close();
+    public MeiEbdsDevice() {
+        super(new MeiEbdsParser(), new SerialPortAdapterAbstract.PortConfiguration(
+                SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7,
+                SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN)
+        );
     }
 
     @Override
-    public List<String> getNeededProperties() {
-        return Arrays.asList(new String[]{"port"});
+    public DeviceStateInterface getInitState() {
+        return new MeiEbdsOpenPort(this);
     }
+    private MeiEbdsAcceptorMsgAck lastResult = new MeiEbdsAcceptorMsgAck();
+    private final MeiEbdsHostMsg hostMsg = new MeiEbdsHostMsg();
 
-    @Override
-    public boolean setProperty(String property, String value) {
-        debug("trying to set property %s to %s", property, value);
-        if (property.compareToIgnoreCase("port") == 0) {
-            boolean ret = submitSynchronous(new DeviceTaskOpenPort(value));
-            debug("changing port to %s %s", value, ret ? "SUCCESS" : "FAIL");
-            return ret;
+    public void onDeviceMessageEvent(final DeviceResponseInterface response) {
+        if (response instanceof MeiEbdsAcceptorMsgAck) {
+            lastResult = (MeiEbdsAcceptorMsgAck) response;
         }
-        return false;
+        runTask(new DeviceTaskMessage(hostMsg, response));
     }
 
-    @Override
-    public DeviceStateInterface initState() {
-        return new MeiEbdsOpenPort(mei);
+    public boolean count(Map<String, Integer> desiredQuantity) {
+        // TODO: Implement slotlist
+        hostMsg.enableAllDenominations();
+        return true;
+    }
+
+    public boolean store() {
+        if (!lastResult.isEscrowed()) {
+            return false;
+        }
+        hostMsg.setStackNote();
+        return true;
+    }
+
+    public boolean reject() {
+        if (!lastResult.isEscrowed()) {
+            return false;
+        }
+        hostMsg.setReturnNote();
+        return true;
+    }
+
+    public String cancelCount() {
+        hostMsg.disableAllDenominations();
+        return sendPollMessage();
+    }
+
+    public String sendPollMessage() {
+        String err = null;
+        debug("%s MEI sending msg : %s", this.toString(), hostMsg.toString());
+        if (serialPortReader == null) {
+            throw new IllegalArgumentException("Serial port closed");
+        }
+        debug("%s Writting : %s", this.toString(), Arrays.toString(hostMsg.getCmdStr()));
+        if (!serialPortReader.write(hostMsg.getCmdStr())) {
+            err = "Error writting to the port";
+        }
+        hostMsg.clearStackNote();
+        hostMsg.clearReturnNote();
+        return err;
+    }
+
+    public boolean isAckOk(MeiEbdsAcceptorMsgAck msg) {
+        if (msg.getAck() != hostMsg.getAck()) { // repeated message, ignore
+            //return String.format("recived an nak message %s", msg);
+            return false;
+        }
+        //debug("%s GOT AN ACK FOR HOSTPOOL, flipping ack", this.toString());
+        hostMsg.flipAck();
+        return true;
+    }
+
+    public boolean isMessageOk(DeviceResponseInterface msg) {
+        return (msg == lastResult);
+    }
+
+    public boolean isSomeDenominationEnabled() {
+        return hostMsg.isSomeDenominationEnabled();
     }
 
     @Override
     public String toString() {
-        return mei.toString();
+        return "MeiEbdsDevice ( " + super.toString() + " )";
     }
-
 }

@@ -6,7 +6,6 @@ import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
 import machines.P500_MEI.states.P500MeiStateBillDepositStart;
 import machines.P500_MEI.states.P500MeiStateWaiting;
-import machines.states.MachineStateInterface;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
 import models.db.LgDeposit;

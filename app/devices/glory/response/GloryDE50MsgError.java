@@ -1,7 +1,6 @@
 package devices.glory.response;
 
 import devices.device.DeviceResponseInterface;
-import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 
 /**
  *
@@ -13,10 +12,6 @@ public class GloryDE50MsgError implements DeviceResponseInterface {
 
     public GloryDE50MsgError(String error) {
         this.error = error;
-    }
-
-    public ResponseType getType() {
-        return ResponseType.Error;
     }
 
     public String getError() {

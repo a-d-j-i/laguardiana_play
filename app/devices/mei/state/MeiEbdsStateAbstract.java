@@ -1,7 +1,7 @@
 package devices.mei.state;
 
 import devices.device.state.*;
-import devices.mei.MeiEbds;
+import devices.mei.MeiEbdsDevice;
 
 /**
  *
@@ -9,9 +9,9 @@ import devices.mei.MeiEbds;
  */
 abstract public class MeiEbdsStateAbstract extends DeviceStateAbstract implements DeviceStateInterface {
 
-    final protected MeiEbds mei;
+    final protected MeiEbdsDevice mei;
 
-    public MeiEbdsStateAbstract(MeiEbds mei) {
+    public MeiEbdsStateAbstract(MeiEbdsDevice mei) {
         this.mei = mei;
     }
 

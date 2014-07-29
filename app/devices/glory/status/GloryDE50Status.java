@@ -11,17 +11,9 @@ import devices.device.status.DeviceStatusInterface;
  *
  * @author adji
  */
-public class GloryDE50Status implements DeviceStatusInterface {
+public class GloryDE50Status {
 
-    public boolean is(Enum type) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public boolean is(Class type) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    static public enum GloryDE50StatusType {
+    static public enum GloryDE50StatusType implements DeviceStatusInterface {
 
         ERROR,
         OPEN_PORT,
@@ -41,10 +33,13 @@ public class GloryDE50Status implements DeviceStatusInterface {
         BAG_COLLECTED,
         JAM;
 
-    };
+        public boolean is(Enum type) {
+            return (type == this);
+        }
 
-    public Enum getType() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+        public boolean is(Class type) {
+            return false;
+        }
+    };
 
 }

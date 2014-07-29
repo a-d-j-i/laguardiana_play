@@ -27,7 +27,7 @@ public class DeviceTaskMessage extends DeviceTaskAbstract {
 
     @Override
     public String toString() {
-        return "MeiEbdsTaskMessage{" + "message=" + message + ", response=" + response + '}';
+        return "DeviceTaskMessage{" + "message=" + message + ", response=" + response + '}';
     }
 
 }

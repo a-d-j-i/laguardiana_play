@@ -2,7 +2,7 @@ package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.task.GloryDE50TaskOperation;
 
@@ -12,7 +12,7 @@ import devices.glory.task.GloryDE50TaskOperation;
  */
 abstract public class GloryDE50StateOperation extends GloryDE50StateAbstract {
 
-    public GloryDE50StateOperation(GloryDE50DeviceStateApi api) {
+    public GloryDE50StateOperation(GloryDE50Device api) {
         super(api);
     }
 

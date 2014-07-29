@@ -4,7 +4,7 @@
  */
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50StateAbstract;
 
@@ -16,7 +16,7 @@ public class GloryDE50Reset extends GloryDE50StatePoll {
 
     final GloryDE50StateAbstract prevStep;
 
-    public GloryDE50Reset(GloryDE50DeviceStateApi api, GloryDE50StateAbstract prevStep) {
+    public GloryDE50Reset(GloryDE50Device api, GloryDE50StateAbstract prevStep) {
         super(api);
         this.prevStep = prevStep;
     }

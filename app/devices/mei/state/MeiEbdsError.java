@@ -6,7 +6,7 @@ import devices.device.status.DeviceStatusError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.device.task.DeviceTaskReset;
-import devices.mei.MeiEbds;
+import devices.mei.MeiEbdsDevice;
 import devices.mei.state.MeiEbdsError.COUNTER_CLASS_ERROR_CODE;
 import play.Logger;
 
@@ -23,7 +23,7 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
 
     private final String error;
 
-    public MeiEbdsError(MeiEbds mei, COUNTER_CLASS_ERROR_CODE error_code, String error) {
+    public MeiEbdsError(MeiEbdsDevice mei, COUNTER_CLASS_ERROR_CODE error_code, String error) {
         super(mei);
         this.error = error;
         Logger.error(error);

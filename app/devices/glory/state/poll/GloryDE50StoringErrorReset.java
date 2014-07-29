@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
@@ -20,7 +16,7 @@ public class GloryDE50StoringErrorReset extends GloryDE50StatePoll {
 
     int retries = 100;
 
-    public GloryDE50StoringErrorReset(GloryDE50DeviceStateApi api) {
+    public GloryDE50StoringErrorReset(GloryDE50Device api) {
         super(api);
         api.setClosing(false);
     }

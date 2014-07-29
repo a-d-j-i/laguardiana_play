@@ -4,7 +4,7 @@
  */
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;
 import static devices.glory.response.GloryDE50OperationResponse.D1Mode.deposit;
@@ -29,7 +29,7 @@ import play.Logger;
  */
 public class GloryDE50Collect extends GloryDE50StatePoll {
 
-    public GloryDE50Collect(GloryDE50DeviceStateApi api) {
+    public GloryDE50Collect(GloryDE50Device api) {
         super(api);
     }
 

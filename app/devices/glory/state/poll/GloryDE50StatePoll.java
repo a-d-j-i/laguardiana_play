@@ -6,7 +6,7 @@ package devices.glory.state.poll;
 
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50Error;
@@ -25,7 +25,7 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateOperation {
 
     final AtomicBoolean mustCancel = new AtomicBoolean(false);
 
-    public GloryDE50StatePoll(GloryDE50DeviceStateApi api) {
+    public GloryDE50StatePoll(GloryDE50Device api) {
         super(api);
     }
 

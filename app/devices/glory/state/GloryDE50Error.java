@@ -1,6 +1,8 @@
 package devices.glory.state;
 
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.device.status.DeviceStatusError;
+import devices.device.status.DeviceStatusInterface;
+import devices.glory.GloryDE50Device;
 import play.Logger;
 
 /**
@@ -16,11 +18,11 @@ public class GloryDE50Error extends GloryDE50StateAbstract {
 
     private final String error;
 
-    public GloryDE50Error(GloryDE50DeviceStateApi api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
+    public GloryDE50Error(GloryDE50Device api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
         super(api);
         this.error = error;
         Logger.error(error);
-        api.notifyListeners(error);
+        api.notifyListeners(new DeviceStatusError(error));
     }
     /*
      @Override

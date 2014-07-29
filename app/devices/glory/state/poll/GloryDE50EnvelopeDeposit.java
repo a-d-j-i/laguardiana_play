@@ -1,6 +1,6 @@
 package devices.glory.state.poll;
 
-import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
+import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50OperationResponse;
 import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
 import devices.glory.state.GloryDE50Error;
@@ -18,7 +18,7 @@ import play.Logger;
  */
 public class GloryDE50EnvelopeDeposit extends GloryDE50StatePoll {
 
-    public GloryDE50EnvelopeDeposit(GloryDE50DeviceStateApi api) {
+    public GloryDE50EnvelopeDeposit(GloryDE50Device api) {
         super(api);
     }
 
