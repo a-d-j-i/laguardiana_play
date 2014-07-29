@@ -10,24 +10,12 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryDE50OpenPort extends GloryDE50StateOperation {
+public class GloryDE50OpenPort extends GloryDE50StateAbstract {
 
     public GloryDE50OpenPort(GloryDE50DeviceStateApi api) {
         super(api);
     }
 
-    /*    @Override
-     public DeviceStateInterface call(DeviceTaskAbstract task) {
-     // wait for operations
-     super.call(task);
-     if (api.open(port)) {
-     Logger.debug("Port open success");
-     return new GloryDE50GotoNeutral(api);
-     }
-     Logger.debug("Port not open, polling");
-     return this;
-     }
-     */
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
         Logger.debug("GloryDE50OpenPort got task %s", task.toString());

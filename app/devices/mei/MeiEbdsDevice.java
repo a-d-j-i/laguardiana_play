@@ -2,12 +2,9 @@ package devices.mei;
 
 import devices.device.DeviceAbstract;
 import devices.device.DeviceMessageInterface;
-import devices.device.status.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
-import devices.mei.task.MeiEbdsTaskMessage;
 import devices.mei.state.MeiEbdsOpenPort;
 import devices.device.task.DeviceTaskOpenPort;
-import devices.mei.operation.MeiEbdsHostMsg;
 import java.util.Arrays;
 import java.util.List;
 import play.Logger;
@@ -22,25 +19,12 @@ public class MeiEbdsDevice extends DeviceAbstract {
         // Logger.debug(message, args);
     }
 
-    public interface MeiApi {
+    private final MeiEbds mei = new MeiEbds(api);
 
-        public void notifyListeners(DeviceStatusInterface status);
-
-        public void onDeviceMessageEvent(MeiEbdsHostMsg hostMsg, DeviceMessageInterface msg);
-
+    @Override
+    protected DeviceMessageInterface getLastCommand() {
+        return mei.getLastCommand();
     }
-
-    private final MeiEbds mei = new MeiEbds(new MeiApi() {
-
-        public void onDeviceMessageEvent(MeiEbdsHostMsg msg, DeviceMessageInterface response) {
-            MeiEbdsDevice.this.submit(new MeiEbdsTaskMessage(msg, response));
-        }
-
-        public void notifyListeners(DeviceStatusInterface status) {
-            MeiEbdsDevice.this.notifyListeners(status);
-        }
-
-    });
 
     @Override
     public void finish() {

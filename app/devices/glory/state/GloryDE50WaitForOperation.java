@@ -13,7 +13,6 @@ import devices.device.task.DeviceTaskOpenPort;
 import devices.device.task.DeviceTaskReset;
 import devices.device.task.DeviceTaskStoringErrorReset;
 import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
-import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.poll.GloryDE50Collect;
 import devices.glory.state.poll.GloryDE50Count;
 import devices.glory.state.poll.GloryDE50EnvelopeDeposit;
@@ -21,7 +20,6 @@ import devices.glory.state.poll.GloryDE50GotoNeutral;
 import devices.glory.state.poll.GloryDE50Reset;
 import devices.glory.state.poll.GloryDE50StoringErrorReset;
 import devices.glory.task.GloryDE50TaskCount;
-import devices.glory.task.GloryDE50TaskOperation;
 import play.Logger;
 
 /**
@@ -35,41 +33,28 @@ public class GloryDE50WaitForOperation extends GloryDE50StateOperation {
     }
 
     @Override
-    public DeviceStateInterface call(DeviceTaskAbstract t) {
-        DeviceTaskAbstract task = (DeviceTaskAbstract) t;
-        if (t instanceof DeviceTaskCollect) {
+    public DeviceStateInterface command(DeviceTaskAbstract task) {
+        if (task instanceof DeviceTaskCollect) {
             task.setReturnValue(true);
             return new GloryDE50Collect(api);
-        } else if (t instanceof DeviceTaskCount) {
+        } else if (task instanceof DeviceTaskCount) {
             task.setReturnValue(true);
-            if (t instanceof GloryDE50TaskCount) {
+            if (task instanceof GloryDE50TaskCount) {
                 GloryDE50TaskCount count = (GloryDE50TaskCount) task;
                 return new GloryDE50Count(api, count.getDesiredQuantity(), count.getCurrency());
             } else {
-                return new GloryDE50Count(api, null, null);
+                return new GloryDE50Count(api, null, 1);
             }
-        } else if (t instanceof DeviceTaskEnvelopeDeposit) {
+        } else if (task instanceof DeviceTaskEnvelopeDeposit) {
             task.setReturnValue(true);
             return new GloryDE50EnvelopeDeposit(api);
-        } else if (t instanceof DeviceTaskReset) {
+        } else if (task instanceof DeviceTaskReset) {
             task.setReturnValue(true);
             return new GloryDE50Reset(api, new GloryDE50GotoNeutral(api));
-        } else if (t instanceof DeviceTaskStoringErrorReset) {
+        } else if (task instanceof DeviceTaskStoringErrorReset) {
             task.setReturnValue(true);
             return new GloryDE50StoringErrorReset(api);
-        } else if (t instanceof GloryDE50TaskOperation) {
-            GloryDE50TaskOperation op = (GloryDE50TaskOperation) task;
-            GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-            String err = api.sendGloryDE50Operation(op.getOperation(), op.isDebug(), response);
-            if (err == null) {
-                op.setError(null);
-                op.setResponse(response);
-            } else {
-                op.setError(err);
-                op.setResponse(null);
-            }
-            return null;
-        } else if (t instanceof DeviceTaskOpenPort) {
+        } else if (task instanceof DeviceTaskOpenPort) {
             DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
             if (api.open(open.getPort())) {
                 Logger.debug("GloryDE50WaitForOperation new port %s", open.getPort());

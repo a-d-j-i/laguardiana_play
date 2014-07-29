@@ -52,23 +52,13 @@ final public class MachineP500_MEI extends MachineAbstract {
         LgDeposit dep = LgDeposit.getCurrentDeposit();
         if (dep instanceof BillDeposit) {
             Logger.debug("--------> Start setting state to bill deposit %d", dep.depositId);
-            currentState = new P500MeiStateBillDepositStart(this, dep.user.userId, dep.depositId);
-            setCurrentState(currentState);
+            setCurrentState(new P500MeiStateBillDepositStart(this, dep.user.userId, dep.depositId));
         } else if (dep instanceof EnvelopeDeposit) {
 //            Logger.debug("--------> Start setting state to envelope deposit %d", dep.depositId);
 //            currentState = new P500MeiStateEnvelopeMain(this, (EnvelopeDeposit) dep);
             Logger.error("THIS MACHINE DON'T SUPPORT ENVELOPE DEPOSIT, CANCELING DEPOSIT");
         }
         Logger.debug("Machine Start done");
-    }
-
-    public boolean setCurrentState(MachineStateInterface state) {
-        if (!state.onStart()) {
-            Logger.error("Error setting current state %s", state.toString());
-            return false;
-        }
-        currentState = state;
-        return true;
     }
 
 }

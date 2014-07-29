@@ -3,6 +3,7 @@ package devices.device;
 import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskMessage;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -11,7 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import play.Logger;
 
 /**
@@ -21,10 +21,36 @@ import play.Logger;
 public abstract class DeviceAbstract implements DeviceInterface {
 
     private void debug(String message, Object... args) {
-        //Logger.debug(message, args);
+        Logger.debug(message, args);
     }
-    final private ExecutorService taskExecutor;
-    protected DeviceStateInterface currentState;
+
+    public interface DeviceApi extends DeviceResponseListenerInterface {
+
+        public void notifyListeners(DeviceStatusInterface status);
+    }
+
+    protected DeviceApi api = new DeviceApi() {
+
+        public void notifyListeners(DeviceStatusInterface status) {
+            DeviceAbstract.this.notifyListeners(status);
+        }
+
+        // switch thread.
+        public void onDeviceMessageEvent(final DeviceResponseInterface response) {
+            taskExecutor.submit(new Runnable() {
+                public void run() {
+                    DeviceAbstract.this.runTask(new DeviceTaskMessage(getLastCommand(), response));
+                }
+
+            }
+            );
+        }
+    };
+
+    abstract protected DeviceMessageInterface getLastCommand();
+
+    private final ExecutorService taskExecutor;
+    private DeviceStateInterface currentState;
 
     public DeviceAbstract() {
         this.taskExecutor = Executors.newSingleThreadExecutor();
@@ -68,11 +94,36 @@ public abstract class DeviceAbstract implements DeviceInterface {
         this.listeners.remove(listener);
     }
 
-    protected void notifyListeners(DeviceStatusInterface state) {
+    private void notifyListeners(DeviceStatusInterface state) {
         final DeviceEvent le = new DeviceEvent(this, state);
         for (DeviceEventListener counterListener : listeners) {
             counterListener.onDeviceEvent(le);
         }
+    }
+
+    private boolean runTask(final DeviceTaskAbstract deviceTask) {
+        debug(String.format("%s executing current step: %s", DeviceAbstract.this.toString(), currentState));
+        DeviceStateInterface newState = deviceTask.execute(currentState);
+        if (newState != null && currentState != newState) {
+            debug("Changing state old %s, new %s", currentState, newState.toString());
+            DeviceStateInterface initStateRet = newState.init();
+            if (initStateRet != null) {
+                newState = initStateRet;
+            }
+            debug("setting state to new %s", newState.toString());
+            currentState = newState;
+        }
+        debug("Device %s thread done", DeviceAbstract.this.toString());
+        try {
+            boolean ret = deviceTask.get();
+            debug("Device %s thread got %s", DeviceAbstract.this.toString(), ret ? "TRUE" : "FALSE");
+            return ret;
+        } catch (InterruptedException ex) {
+            Logger.error("InterruptedException %s on %s ", ex, DeviceAbstract.this.toString());
+        } catch (ExecutionException ex) {
+            Logger.error("InterruptedException %s on %s ", ex, DeviceAbstract.this.toString());
+        }
+        return false;
     }
 
     synchronized public Future<Boolean> submit(final DeviceTaskAbstract deviceTask) {
@@ -80,28 +131,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
         return taskExecutor.submit(new Callable<Boolean>() {
 
             public Boolean call() {
-                debug(String.format("%s executing current step: %s", DeviceAbstract.this.toString(), currentState));
-                DeviceStateInterface newState = deviceTask.execute(currentState);
-                if (newState != null && currentState != newState) {
-                    debug("Changing state old %s, new %s", currentState, newState.toString());
-                    DeviceStateInterface initStateRet = newState.init();
-                    if (initStateRet != null) {
-                        newState = initStateRet;
-                    }
-                    debug("setting state to new %s", newState.toString());
-                    currentState = newState;
-                }
-                debug("Device %s thread done", DeviceAbstract.this.toString());
-                try {
-                    boolean ret = deviceTask.get();
-                    debug("Device %s thread got %s", DeviceAbstract.this.toString(), ret ? "TRUE" : "FALSE");
-                    return ret;
-                } catch (InterruptedException ex) {
-                    Logger.error("InterruptedException %s on %s ", ex, DeviceAbstract.this.toString());
-                } catch (ExecutionException ex) {
-                    Logger.error("InterruptedException %s on %s ", ex, DeviceAbstract.this.toString());
-                }
-                return false;
+                return DeviceAbstract.this.runTask(deviceTask);
             }
         }
         );
@@ -118,31 +148,6 @@ public abstract class DeviceAbstract implements DeviceInterface {
             ex.printStackTrace();
         }
         return false;
-    }
-
-    protected Future<Boolean> falseFuture(final boolean ret) {
-        return new Future<Boolean>() {
-
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            public boolean isCancelled() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            public boolean isDone() {
-                return true;
-            }
-
-            public Boolean get() throws InterruptedException, ExecutionException {
-                return ret;
-            }
-
-            public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                return ret;
-            }
-        };
     }
 
     @Override

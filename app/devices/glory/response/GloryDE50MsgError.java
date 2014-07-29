@@ -1,4 +1,4 @@
-package devices.mei.response;
+package devices.glory.response;
 
 import devices.device.DeviceResponseInterface;
 import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
@@ -7,11 +7,11 @@ import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
  *
  * @author adji
  */
-public class MeiEbdsAcceptorMsgError implements DeviceResponseInterface {
+public class GloryDE50MsgError implements DeviceResponseInterface {
 
     private final String error;
 
-    public MeiEbdsAcceptorMsgError(String error) {
+    public GloryDE50MsgError(String error) {
         this.error = error;
     }
 

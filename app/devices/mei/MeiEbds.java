@@ -1,7 +1,8 @@
 package devices.mei;
 
+import devices.device.DeviceAbstract.DeviceApi;
 import devices.device.DeviceMessageInterface;
-import devices.device.DeviceMessageListenerInterface;
+import devices.device.DeviceResponseInterface;
 import devices.device.status.DeviceStatusInterface;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
@@ -10,14 +11,14 @@ import devices.mei.response.MeiEbdsAcceptorMsgError;
 import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
 import devices.serial.SerialPortMessageParserInterface;
-import devices.serial.SerialPortReader;
+import devices.device.DeviceSerialPortAdaptor;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import models.Configuration;
 import play.Logger;
 
-public class MeiEbds implements SerialPortMessageParserInterface, DeviceMessageListenerInterface {
+public class MeiEbds implements SerialPortMessageParserInterface {
 
     private void debug(String message, Object... args) {
         //Logger.debug(message, args);
@@ -27,16 +28,12 @@ public class MeiEbds implements SerialPortMessageParserInterface, DeviceMessageL
             SerialPortAdapterAbstract.PORTSTOPBITS.STOP_BITS_1, SerialPortAdapterAbstract.PORTPARITY.PARITY_EVEN);
     final private static int MEI_EBDS_READ_TIMEOUT = 3000; //35ms
 
-    private SerialPortReader serialPortReader = null;
-    final MeiEbdsDevice.MeiApi api;
+    private DeviceSerialPortAdaptor serialPortReader = null;
+    final DeviceApi api;
     int retries = 0;
 
-    public MeiEbds(MeiEbdsDevice.MeiApi api) {
+    public MeiEbds(DeviceApi api) {
         this.api = api;
-    }
-
-    public void onDeviceMessageEvent(DeviceMessageInterface msg) {
-        api.onDeviceMessageEvent(hostMsg, msg);
     }
 
     public void notifyListeners(DeviceStatusInterface status) {
@@ -54,7 +51,7 @@ public class MeiEbds implements SerialPortMessageParserInterface, DeviceMessageL
             Logger.info("%s Error opening mei serial port %s %s", this.toString(), serialPort, this.serialPortReader);
             return false;
         }
-        this.serialPortReader = new SerialPortReader(serialPort, this, this);
+        this.serialPortReader = new DeviceSerialPortAdaptor(serialPort, this, api);
         return serialPortReader.open();
     }
 
@@ -66,8 +63,8 @@ public class MeiEbds implements SerialPortMessageParserInterface, DeviceMessageL
         }
     }
 
-    public DeviceMessageInterface getMessage(SerialPortAdapterInterface serialPort) throws InterruptedException {
-        DeviceMessageInterface ret;
+    public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException {
+        DeviceResponseInterface ret;
         try {
             ret = getMessageInt();
         } catch (TimeoutException ex) {
@@ -87,7 +84,7 @@ public class MeiEbds implements SerialPortMessageParserInterface, DeviceMessageL
         return ret;
     }
 
-    private DeviceMessageInterface getMessageInt() throws TimeoutException, InterruptedException {
+    private DeviceResponseInterface getMessageInt() throws TimeoutException, InterruptedException {
         byte buffer[] = new byte[40];
         while (true) {
             Byte ch = read(MEI_EBDS_READ_TIMEOUT);
@@ -188,8 +185,12 @@ public class MeiEbds implements SerialPortMessageParserInterface, DeviceMessageL
         return true;
     }
 
-    public boolean isMessageOk(DeviceMessageInterface msg) {
+    public boolean isMessageOk(DeviceResponseInterface msg) {
         return (msg == lastResult);
+    }
+
+    DeviceMessageInterface getLastCommand() {
+        return hostMsg;
     }
 
     private Byte read(int timeout) throws TimeoutException, InterruptedException {

@@ -7,6 +7,7 @@ import devices.device.task.DeviceTaskWithdraw;
 import devices.glory.GloryDE50Device.GloryDE50DeviceStateApi;
 import devices.glory.state.poll.GloryDE50Store;
 import devices.glory.state.poll.GloryDE50Withdraw;
+import play.Logger;
 
 /**
  *
@@ -23,14 +24,15 @@ public class GloryDE50ReadyToStore extends GloryDE50StateOperation {
     }
 
     @Override
-    public DeviceStateInterface call(DeviceTaskAbstract t) {
-        DeviceTaskAbstract task = (DeviceTaskAbstract) t;
-        if (t instanceof DeviceTaskStore) {
+    public DeviceStateInterface command(DeviceTaskAbstract task) {
+        if (task instanceof DeviceTaskStore) {
             task.setReturnValue(true);
             return new GloryDE50Store(api);
-        } else if (t instanceof DeviceTaskWithdraw) {
+        } else if (task instanceof DeviceTaskWithdraw) {
             task.setReturnValue(true);
             return new GloryDE50Withdraw(api);
+        } else {
+            Logger.error("GloryDE50ReadyToStore Ignoring task : %s", task.toString());
         }
         return null;
     }

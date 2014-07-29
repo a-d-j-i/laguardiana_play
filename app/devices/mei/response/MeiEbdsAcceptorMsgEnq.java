@@ -1,13 +1,13 @@
 package devices.mei.response;
 
-import devices.device.DeviceMessageInterface;
-import devices.mei.task.MeiEbdsTaskMessage.ResponseType;
+import devices.device.DeviceResponseInterface;
+import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 
 /**
  *
  * @author adji
  */
-public class MeiEbdsAcceptorMsgEnq implements DeviceMessageInterface {
+public class MeiEbdsAcceptorMsgEnq implements DeviceResponseInterface {
 
     public MeiEbdsAcceptorMsgEnq() {
     }

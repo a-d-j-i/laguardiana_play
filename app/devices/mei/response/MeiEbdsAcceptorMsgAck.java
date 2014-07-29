@@ -1,9 +1,6 @@
 package devices.mei.response;
 
-import devices.device.DeviceMessageInterface;
-import devices.mei.task.MeiEbdsTaskMessage.ExtendedResponseSubType;
-import devices.mei.task.MeiEbdsTaskMessage.ResponseSubType;
-import devices.mei.task.MeiEbdsTaskMessage.ResponseType;
+import devices.device.DeviceResponseInterface;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +10,66 @@ import play.Logger;
  *
  * @author adji
  */
-public class MeiEbdsAcceptorMsgAck implements DeviceMessageInterface {
+public class MeiEbdsAcceptorMsgAck implements DeviceResponseInterface {
+
+    public interface ResponseSubType {
+
+        public int getId();
+
+    };
+
+    public enum ExtendedResponseSubType implements ResponseSubType {
+
+        BarcodeData(0x01),
+        RequestSupportedNoteSet(0x02),
+        SetExtendedNoteInhibits(0x03),
+        SetEscrowTimeouts(0x04);
+
+        private final int id;
+
+        private ExtendedResponseSubType(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+    };
+
+    public enum ResponseType {
+
+        HostToAcceptor(0x10),
+        AcceptorToHost(0x20),
+        BookmarkSelected(0x30),
+        CalibrateMode(0x40),
+        FlashDownload(0x50),
+        Request(0x60),
+        Extended(0x70),
+        ENQ(0x100),
+        Error(0x1000);
+
+        static {
+            for (ResponseSubType mt : ExtendedResponseSubType.values()) {
+                Extended.msgSubTypeMap.put(mt.getId(), mt);
+            }
+        }
+
+        final private Map<Integer, ResponseSubType> msgSubTypeMap = new HashMap<Integer, ResponseSubType>();
+        final private int id;
+
+        private ResponseType(int id) {
+            this.id = id;
+        }
+
+        public ResponseSubType getSubType(int subtypeId) {
+            return msgSubTypeMap.get(subtypeId);
+        }
+
+        public int getId() {
+            return id;
+        }
+
+    };
 
     enum MEI_EBDS_CMD_DATA_DESC {
 

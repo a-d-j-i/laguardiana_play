@@ -42,7 +42,12 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
     @Override
     public boolean onCancelDepositEvent() {
         closeBatch();
-        return machine.setCurrentState(new P500MeiStateCanceling(machine, currentUserId, billDepositId, batchId));
+        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
+        if (billDeposit.getTotal() > 0) {
+            return machine.setCurrentState(new P500MeiStateAccepting(machine, currentUserId, billDepositId, batchId));
+        } else {
+            return machine.setCurrentState(new P500MeiStateCanceling(machine, currentUserId, billDepositId, batchId));
+        }
     }
 
     @Override

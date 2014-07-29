@@ -9,6 +9,8 @@ import models.Configuration;
 import models.EnvelopeDeposit;
 import models.ModelFacade;
 import models.db.LgEnvelope;
+import models.db.LgEnvelopeContent;
+import models.db.LgEnvelopeContent.EnvelopeContentType;
 import models.db.LgUser;
 import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
@@ -119,8 +121,26 @@ public class EnvelopeDepositController extends Controller {
             params.flash(); // add http parameters to the flash scope
         } else {
             if (formData != null) {
+                LgEnvelope e = new LgEnvelope(0, formData.envelopeCode);
+                if (formData.cashData.amount > 0) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.CASH, formData.cashData.amount, formData.cashData.currency.numericId));
+                }
+                if (formData.checkData.amount > 0) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.CHECKS, formData.checkData.amount, formData.checkData.currency.numericId));
+                }
+                if (formData.ticketData.amount > 0) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.TICKETS, formData.ticketData.amount, formData.ticketData.currency.numericId));
+                }
+                if (formData.hasDocuments != null && formData.hasDocuments) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.DOCUMENTS, null, null));
+                }
+                if (formData.hasOthers != null && formData.hasOthers) {
+                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
+                }
                 Integer reference1 = (formData.reference1.lov == null ? null : formData.reference1.lov.lovId);
-                if (ModelFacade.startEnvelopeDepositAction(formData.currentUser, formData.reference2, reference1)) {
+                EnvelopeDeposit refDeposit = new EnvelopeDeposit(formData.currentUser, formData.reference2, reference1);
+                refDeposit.addEnvelope(e);
+                if (ModelFacade.startEnvelopeDepositAction(refDeposit)) {
                     mainLoop();
                     return;
                 } else {

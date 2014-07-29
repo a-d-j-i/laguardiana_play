@@ -3,8 +3,8 @@ package machines.states;
 import devices.device.status.DeviceStatusInterface;
 import machines.MachineDeviceDecorator;
 import machines.status.MachineStatus;
-import models.db.LgUser;
-import models.lov.Currency;
+import models.BillDeposit;
+import models.EnvelopeDeposit;
 
 /**
  *
@@ -22,9 +22,9 @@ abstract public interface MachineStateInterface {
 
     public boolean onConfirmDepositEvent();
 
-    public boolean onStartBillDeposit(LgUser user, Currency currency, String userCode, Integer userCodeLovId);
+    public boolean onStartBillDeposit(BillDeposit refBillDeposit);
 
-    public boolean onStartEnvelopeDeposit(LgUser user, String userCode, Integer userCodeLovId);
+    public boolean onStartEnvelopeDeposit(EnvelopeDeposit refEnvelopeDeposit);
 
     public boolean onStart();
 

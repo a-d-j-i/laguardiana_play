@@ -12,6 +12,7 @@ import devices.glory.response.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
+import devices.glory.state.GloryDE50StateOperation;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.CANCELING;
 import java.util.concurrent.atomic.AtomicBoolean;
 import play.Logger;
@@ -20,7 +21,7 @@ import play.Logger;
  *
  * @author adji
  */
-abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
+abstract public class GloryDE50StatePoll extends GloryDE50StateOperation {
 
     final AtomicBoolean mustCancel = new AtomicBoolean(false);
 
@@ -45,7 +46,7 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
     }
 
     @Override
-    public DeviceStateInterface call(DeviceTaskAbstract task) {
+    public DeviceStateInterface command(DeviceTaskAbstract task) {
 
         if (mustCancel.get()) {
             api.notifyListeners(CANCELING);
@@ -75,7 +76,6 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
         return null;
     }
 
-    @Override
     public boolean cancelDeposit() {
         mustCancel.set(true);
         return true;

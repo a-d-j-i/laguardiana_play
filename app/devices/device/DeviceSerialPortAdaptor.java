@@ -1,7 +1,7 @@
-package devices.serial;
+package devices.device;
 
-import devices.device.DeviceMessageListenerInterface;
-import devices.device.DeviceMessageInterface;
+import devices.serial.SerialPortAdapterInterface;
+import devices.serial.SerialPortMessageParserInterface;
 import java.security.InvalidParameterException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import play.Logger;
@@ -10,7 +10,7 @@ import play.Logger;
  * Device Adaptor
  * @author adji
  */
-public class SerialPortReader implements Runnable, SerialPortAdapterInterface {
+public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInterface {
 
     private static void debug(String message, Object... args) {
         //Logger.debug(message, args);
@@ -20,9 +20,9 @@ public class SerialPortReader implements Runnable, SerialPortAdapterInterface {
     final private AtomicBoolean mustStop = new AtomicBoolean(false);
     final SerialPortAdapterInterface serialPort;
     final SerialPortMessageParserInterface parser;
-    final DeviceMessageListenerInterface listener;
+    final DeviceResponseListenerInterface listener;
 
-    public SerialPortReader(SerialPortAdapterInterface serialPort, SerialPortMessageParserInterface parser, DeviceMessageListenerInterface listener) {
+    public DeviceSerialPortAdaptor(SerialPortAdapterInterface serialPort, SerialPortMessageParserInterface parser, DeviceResponseListenerInterface listener) {
         this.serialPort = serialPort;
         this.parser = parser;
         this.listener = listener;
@@ -38,7 +38,7 @@ public class SerialPortReader implements Runnable, SerialPortAdapterInterface {
         while (!mustStop.get()) {
             try {
                 debug("Calling getMessage");
-                DeviceMessageInterface msg = parser.getMessage(serialPort);
+                DeviceResponseInterface msg = parser.getResponse(serialPort);
                 if (msg != null) {
                     debug("Calling getMessage return %s", msg.toString());
                     listener.onDeviceMessageEvent(msg);

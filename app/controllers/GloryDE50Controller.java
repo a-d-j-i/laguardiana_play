@@ -362,7 +362,9 @@ public class GloryDE50Controller extends Application {
     private static void setStatusAndRedirect(Integer deviceId, GloryDE50TaskOperation op) {
         // TODO: op.isError();
         if (op.getResponse() != null) {
-            flash.put("status", new Gson().toJson(op.getResponse()));
+            GloryDE50OperationResponse ret = op.getResponse();
+            Logger.debug("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY : %s", ret.toString());
+            flash.put("status", new Gson().toJson(ret));
         }
         getStatus(deviceId, !op.isError());
     }

@@ -6,12 +6,11 @@ import machines.states.MachineStateApiInterface;
  *
  * @author adji
  */
-public class BillDepositContinue extends BillDepositStart {
+public class BillDepositContinue extends GloryDE50BillDepositStart {
 
-    public BillDepositContinue(MachineStateApiInterface machine) {
-        super(machine);
+    public BillDepositContinue(MachineStateApiInterface machine, Integer userId, Integer depositId) {
+        super(machine, userId, depositId);
     }
-
 
 //    @Override
 //    public String getStateName() {

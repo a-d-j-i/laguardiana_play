@@ -1,6 +1,6 @@
 package devices.serial;
 
-import devices.device.DeviceMessageInterface;
+import devices.device.DeviceResponseInterface;
 
 /**
  *
@@ -8,5 +8,5 @@ import devices.device.DeviceMessageInterface;
  */
 public interface SerialPortMessageParserInterface {
 
-    public DeviceMessageInterface getMessage(SerialPortAdapterInterface serialPort) throws InterruptedException;
+    public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException;
 }

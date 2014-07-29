@@ -1,7 +1,7 @@
 package machines.jobs;
 
 import machines.MachineInterface;
-import models.db.LgUser;
+import models.EnvelopeDeposit;
 
 /**
  *
@@ -9,24 +9,15 @@ import models.db.LgUser;
  */
 final public class MachineJobStartEnvelopeDepositAction extends MachineJob<Boolean> {
 
-    final LgUser user;
-    final String userCode;
-    final Integer userCodeLovId;
+    final EnvelopeDeposit refDeposit;
 
-    public MachineJobStartEnvelopeDepositAction(MachineInterface machine, LgUser user, String userCode, Integer userCodeLovId) {
+    public MachineJobStartEnvelopeDepositAction(MachineInterface machine, EnvelopeDeposit refDeposit) {
         super(machine);
-        this.user = user;
-        this.userCode = userCode;
-        this.userCodeLovId = userCodeLovId;
+        this.refDeposit = refDeposit;
     }
 
     @Override
     public Boolean doJobWithResult() {
-//        EnvelopeDeposit d = new EnvelopeDeposit(user, userCode, userCodeLovId);
-//        d.startDate = new Date();
-//        d.save();
-//        return new MachineStateInfoEnvelopeDeposit((MachineActionApiInterface) machine, d);
-        return machine.onStartEnvelopeDeposit(user, userCode, userCodeLovId);
+        return machine.onStartEnvelopeDeposit(refDeposit);
     }
-
 }

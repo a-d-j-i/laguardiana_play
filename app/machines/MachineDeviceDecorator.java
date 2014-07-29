@@ -141,7 +141,7 @@ public class MachineDeviceDecorator implements DeviceInterface {
         for (LgDeviceSlot s : LgDeviceSlot.find(currency, lgd)) {
             slots.put(s.slot, null);
         }
-        Logger.debug("Calling count on device, slots : %s", slots.toString());
+        Logger.debug("Calling count on device %s, slots : %s", device.toString(), slots.toString());
         return device.submitSynchronous(new MeiEbdsTaskCount(slots));
     }
 

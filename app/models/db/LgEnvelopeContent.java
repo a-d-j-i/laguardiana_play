@@ -61,6 +61,10 @@ public class LgEnvelopeContent extends GenericModel implements java.io.Serializa
         this.unitLov = unitLov;
     }
 
+    public LgEnvelopeContent(LgEnvelopeContent c) {
+        this(c.getType(), c.amount, c.unitLov);
+    }
+
     public EnvelopeContentType getType() {
         return EnvelopeContentType.find(contentTypeLov);
     }

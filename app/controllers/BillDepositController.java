@@ -30,6 +30,10 @@ public class BillDepositController extends Controller {
     // currentAction allways valid
     static void wizardFixPage() {
         status = ModelFacade.getCurrentStatus();
+        if (status == null) {
+            Logger.error("status is null");
+            Application.index();
+        }
         if (request.isAjax()) {
             return;
         }
@@ -76,7 +80,8 @@ public class BillDepositController extends Controller {
                 && (referenceCodes.size() <= 1 || !Configuration.mustShowBillDepositReference1())
                 && !Configuration.mustShowBillDepositReference2()) {
             // Nothing to complete, navigte to next step
-            if (ModelFacade.startBillDepositAction(formData.currentUser, currencies.get(0), "", null)) {
+            BillDeposit refDeposit = new BillDeposit(formData.currentUser, currencies.get(0), "", null);
+            if (ModelFacade.startBillDepositAction(refDeposit)) {
                 mainLoop();
             } else {
                 Application.index();
@@ -94,7 +99,8 @@ public class BillDepositController extends Controller {
                 if (formData.currency.currency == null) {
                     formData.currency.currency = Currency.findByNumericId(Configuration.getDefaultCurrency());
                 }
-                if (ModelFacade.startBillDepositAction(formData.currentUser, formData.currency.currency, formData.reference2, reference1)) {
+                BillDeposit refDeposit = new BillDeposit(formData.currentUser, formData.currency.currency, formData.reference2, reference1);
+                if (ModelFacade.startBillDepositAction(refDeposit)) {
                     mainLoop();
                 } else {
                     Application.index();

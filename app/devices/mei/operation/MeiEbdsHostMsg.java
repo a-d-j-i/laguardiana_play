@@ -1,12 +1,13 @@
 package devices.mei.operation;
 
-import devices.mei.task.MeiEbdsTaskMessage.ResponseType;
+import devices.device.DeviceMessageInterface;
+import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 
 /**
  *
  * @author adji
  */
-public class MeiEbdsHostMsg {
+public class MeiEbdsHostMsg implements DeviceMessageInterface {
 
     static final int PAYLOAD_OFFSET = 2;
 

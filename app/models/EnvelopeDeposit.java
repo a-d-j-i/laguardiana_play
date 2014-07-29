@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.Entity;
 import models.db.LgDeposit;
+import models.db.LgEnvelope;
 import models.db.LgUser;
 
 @Entity
@@ -17,6 +18,9 @@ public class EnvelopeDeposit extends LgDeposit {
 
     public EnvelopeDeposit(LgDeposit refDeposit) {
         super(refDeposit);
+        for (LgEnvelope e : refDeposit.envelopes) {
+            addEnvelope(new LgEnvelope(e));
+        }
     }
 
     @Override

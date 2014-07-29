@@ -3,8 +3,8 @@ package machines.states;
 import devices.device.status.DeviceStatusInterface;
 import machines.MachineDeviceDecorator;
 import machines.status.MachineStatus;
-import models.db.LgUser;
-import models.lov.Currency;
+import models.BillDeposit;
+import models.EnvelopeDeposit;
 import play.Logger;
 
 /**
@@ -50,13 +50,13 @@ abstract public class MachineStateAbstract implements MachineStateInterface {
     }
 
     @Override
-    public boolean onStartBillDeposit(LgUser user, Currency currency, String userCode, Integer userCodeLovId) {
+    public boolean onStartBillDeposit(BillDeposit refBillDeposit) {
         Logger.error("Can't start bill deposit current state is : %s", this.toString());
         return false;
     }
 
     @Override
-    public boolean onStartEnvelopeDeposit(LgUser user, String userCode, Integer userCodeLovId) {
+    public boolean onStartEnvelopeDeposit(EnvelopeDeposit refEnvelopeDeposit) {
         Logger.error("Can't start envelope deposit current state is : %s", this.toString());
         return false;
     }

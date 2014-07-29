@@ -6,6 +6,7 @@ import devices.printer.OSPrinter;
 import java.util.List;
 import java.util.Map;
 import javax.print.PrintService;
+import machines.GloryDE50.MachineP500_GLORY;
 import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
 import machines.MachineInterface;
@@ -21,8 +22,6 @@ import machines.jobs.MachineJobStartCountingAction;
 import machines.jobs.MachineJobStartEnvelopeDepositAction;
 import machines.jobs.MachineJobStartFilterAction;
 import machines.status.MachineStatus;
-import models.db.LgUser;
-import models.lov.Currency;
 import play.Logger;
 
 /**
@@ -52,11 +51,11 @@ public class ModelFacade {
                         return new MachineP500_MEI();
                     }
                 },
-        P500_MEI_GLORY {
+        P500_GLORY {
 
                     @Override
                     MachineAbstract getMachineInstance() {
-                        return new MachineP500_MEI();
+                        return new MachineP500_GLORY();
                     }
                 },;
 
@@ -88,9 +87,8 @@ public class ModelFacade {
         }
     }
 
-    static public boolean startBillDepositAction(LgUser user, Currency currency, String userCode, Integer userCodeLovId) {
-        return machine.execute(new MachineJobStartBillDepositAction(machine, user, currency, userCode, userCodeLovId)
-        );
+    static public boolean startBillDepositAction(BillDeposit refDeposit) {
+        return machine.execute(new MachineJobStartBillDepositAction(machine, refDeposit));
     }
 
     static public boolean startCountingAction(CountController.CountData data) {
@@ -101,8 +99,8 @@ public class ModelFacade {
         return machine.execute(new MachineJobStartFilterAction(machine, data));
     }
 
-    static public boolean startEnvelopeDepositAction(LgUser user, String userCode, Integer userCodeLovId) {
-        return machine.execute(new MachineJobStartEnvelopeDepositAction(machine, user, userCode, userCodeLovId));
+    static public boolean startEnvelopeDepositAction(EnvelopeDeposit refDeposit) {
+        return machine.execute(new MachineJobStartEnvelopeDepositAction(machine, refDeposit));
     }
 
     static public boolean accept() {

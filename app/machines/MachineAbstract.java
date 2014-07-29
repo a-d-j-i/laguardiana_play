@@ -12,7 +12,8 @@ import machines.jobs.MachineJob;
 import machines.states.MachineStateApiInterface;
 import machines.states.MachineStateInterface;
 import machines.status.MachineStatus;
-import models.db.LgUser;
+import models.BillDeposit;
+import models.EnvelopeDeposit;
 import models.lov.Currency;
 import play.Logger;
 
@@ -24,7 +25,7 @@ import play.Logger;
 abstract public class MachineAbstract implements MachineInterface, MachineStateApiInterface {
 
     final private Map<Integer, MachineDeviceDecorator> deviceMap = new HashMap<Integer, MachineDeviceDecorator>();
-    protected MachineStateInterface currentState;
+    private MachineStateInterface currentState;
 
     protected void addDevice(final MachineDeviceDecorator d) {
         deviceMap.put(d.getDeviceId(), d);
@@ -79,8 +80,13 @@ abstract public class MachineAbstract implements MachineInterface, MachineStateA
         }
     }
 
-    public MachineStatus getStatus() {
-        return currentState.getStatus();
+    public boolean setCurrentState(MachineStateInterface state) {
+        if (!state.onStart()) {
+            Logger.error("Error setting current state %s", state.toString());
+            return false;
+        }
+        currentState = state;
+        return true;
     }
 
     @Override
@@ -94,16 +100,22 @@ abstract public class MachineAbstract implements MachineInterface, MachineStateA
 
     abstract public boolean count(Currency currency);
 
+    abstract public boolean cancel();
+
+    public MachineStatus getStatus() {
+        return currentState.getStatus();
+    }
+
     public boolean onAcceptDepositEvent() {
         return currentState.onAcceptDepositEvent();
     }
 
-    public boolean onStartEnvelopeDeposit(LgUser user, String userCode, Integer userCodeLovId) {
-        return currentState.onStartEnvelopeDeposit(user, userCode, userCodeLovId);
+    public boolean onStartEnvelopeDeposit(EnvelopeDeposit refDeposit) {
+        return currentState.onStartEnvelopeDeposit(refDeposit);
     }
 
-    public boolean onStartBillDeposit(LgUser user, Currency currency, String userCode, Integer userCodeLovId) {
-        return currentState.onStartBillDeposit(user, currency, userCode, userCodeLovId);
+    public boolean onStartBillDeposit(BillDeposit refDeposit) {
+        return currentState.onStartBillDeposit(refDeposit);
     }
 
     public boolean onConfirmDeposit() {

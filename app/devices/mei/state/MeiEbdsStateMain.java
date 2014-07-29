@@ -1,6 +1,6 @@
 package devices.mei.state;
 
-import devices.device.DeviceMessageInterface;
+import devices.device.DeviceResponseInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskCancel;
@@ -16,11 +16,10 @@ import devices.mei.response.MeiEbdsAcceptorMsgError;
 import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusStored;
 import devices.mei.task.MeiEbdsTaskCount;
-import devices.mei.task.MeiEbdsTaskMessage;
-import static devices.mei.task.MeiEbdsTaskMessage.ResponseType.AcceptorToHost;
-import static devices.mei.task.MeiEbdsTaskMessage.ResponseType.ENQ;
-import static devices.mei.task.MeiEbdsTaskMessage.ResponseType.Extended;
-import static devices.mei.task.MeiEbdsTaskMessage.ResponseType.HostToAcceptor;
+import devices.device.task.DeviceTaskMessage;
+import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
+import static devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType.*;
+import play.data.validation.Error;
 
 /**
  *
@@ -44,12 +43,12 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     public DeviceStateInterface call(DeviceTaskAbstract t) {
         boolean ret;
         debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
-        if (t instanceof MeiEbdsTaskMessage) {
-            MeiEbdsTaskMessage msgTask = (MeiEbdsTaskMessage) t;
-            DeviceMessageInterface response = msgTask.getResponse();
+        if (t instanceof DeviceTaskMessage) {
+            DeviceTaskMessage msgTask = (DeviceTaskMessage) t;
+            DeviceResponseInterface response = msgTask.getResponse();
             if (response != null) { // retry
                 String err = null;
-                switch ((MeiEbdsTaskMessage.ResponseType) response.getType()) {
+                switch ((ResponseType) response.getType()) {
                     case Error:
                         MeiEbdsAcceptorMsgError e = (MeiEbdsAcceptorMsgError) response;
                         err = e.getError();
@@ -64,7 +63,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                     case Extended: // TODO: check if a different treatment is needed
                     case AcceptorToHost:
                         MeiEbdsAcceptorMsgAck lastResponse = (MeiEbdsAcceptorMsgAck) response;
-                        MeiEbdsHostMsg message = msgTask.getMessage();
+                        MeiEbdsHostMsg message = (MeiEbdsHostMsg) msgTask.getMessage();
                         if (!mei.isMessageOk(response)) {
                             err = "Error the only valid message is lastResult";
                         } else {

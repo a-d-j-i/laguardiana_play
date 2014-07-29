@@ -2,16 +2,35 @@ package machines.GloryDE50.states.bill_deposit;
 
 import machines.states.MachineStateAbstract;
 import machines.states.MachineStateApiInterface;
-import machines.status.MachineStatus;
+import machines.status.MachineBillDepositStatus;
+import models.BillDeposit;
+import models.BillQuantity;
+import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class BillDepositStart extends MachineStateAbstract {
+public class GloryDE50BillDepositStart extends MachineStateAbstract {
 
-    public BillDepositStart(MachineStateApiInterface machine) {
+    protected final Integer currentUserId;
+    protected final Integer billDepositId;
+    protected Integer batchId = null;
+
+    public GloryDE50BillDepositStart(MachineStateApiInterface machine, Integer currentUserId, Integer billDepositId) {
         super(machine);
+        this.currentUserId = currentUserId;
+        this.billDepositId = billDepositId;
+    }
+
+    @Override
+    public boolean onStart() {
+        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
+        if (!machine.count(billDeposit.currency)) {
+            Logger.error("Can't start MachineActionBillDeposit error in api.count");
+            return false;
+        }
+        return true;
     }
 
 //    @Override
@@ -93,30 +112,31 @@ public class BillDepositStart extends MachineStateAbstract {
 //    public String getMessage() {
 //        return "BillDepositStart, todo";
 //    }
-
 //    public void onDeviceEvent(DeviceEvent evt) {
 
-        /*        DeviceStatusInterface st = evt.getStatus();
-         if (st instanceof MeiEbdsStatus) {
-         switch ((MeiEbdsStatus.MeiEbdsStatusType) st.getType()) {
-         case READY_TO_STORE:
-         break;
-         default:
-         Logger.debug("%s invalid event %s", toString(), evt.toString());
-         break;
-         }
-         }*/
+    /*        DeviceStatusInterface st = evt.getStatus();
+     if (st instanceof MeiEbdsStatus) {
+     switch ((MeiEbdsStatus.MeiEbdsStatusType) st.getType()) {
+     case READY_TO_STORE:
+     break;
+     default:
+     Logger.debug("%s invalid event %s", toString(), evt.toString());
+     break;
+     }
+     }*/
 //        Logger.debug("%s ignore event : %s", toString(), evt.toString());
 //    }
-
     @Override
     public String toString() {
         return "BillDepositStart";
     }
 
     @Override
-    public MachineStatus getStatus() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public MachineBillDepositStatus getStatus() {
+        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
+        Long currentSum = billDeposit.getTotal();
+        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
+                currentUserId, "BillDepositController.mainloop", "CONTINUE_DEPOSIT", "BillDepositMain, todo", currentSum, currentSum);
     }
 
 }

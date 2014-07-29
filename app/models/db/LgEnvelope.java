@@ -1,6 +1,6 @@
 /*
  I'm assuming that each machine has only one way of taking envelopes, so there is no device <-> envelope relation
-*/
+ */
 package models.db;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import play.db.jpa.GenericModel;
 
 @Entity
 @Table(name = "lg_envelope", schema = "public")
-public class LgEnvelope extends GenericModel implements java.io.Serializable {
+public final class LgEnvelope extends GenericModel implements java.io.Serializable {
 
     @Id
     @Column(name = "envelope_id", unique = true, nullable = false)
@@ -31,6 +31,13 @@ public class LgEnvelope extends GenericModel implements java.io.Serializable {
     public LgEnvelope(Integer envelopeTypeLov, String envelopeNumber) {
         this.envelopeTypeLov = envelopeTypeLov;
         this.envelopeNumber = envelopeNumber;
+    }
+
+    public LgEnvelope(LgEnvelope e) {
+        this(e.envelopeTypeLov, e.envelopeNumber);
+        for (LgEnvelopeContent c : e.envelopeContents) {
+            addContent(new LgEnvelopeContent(c));
+        }
     }
 
     public void addContent(LgEnvelopeContent c) {

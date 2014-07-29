@@ -7,7 +7,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryDE50Error extends GloryDE50StateOperation {
+public class GloryDE50Error extends GloryDE50StateAbstract {
 
     public enum COUNTER_CLASS_ERROR_CODE {
 
