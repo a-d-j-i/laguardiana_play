@@ -1,7 +1,22 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.operation.GloryDE50OperationResponse;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.deposit;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.neutral;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.abnormal_device;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_recover_from_storing_error;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_restoration;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_store;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.counting;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.counting_start_request;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close_request;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_open;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_error;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_start_request;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;

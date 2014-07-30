@@ -1,6 +1,5 @@
 package devices.glory.operation;
 
-import devices.glory.response.GloryDE50OperationResponse;
 import play.Logger;
 
 

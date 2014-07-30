@@ -1,9 +1,29 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.response.GloryDE50OperationResponse;
-import static devices.glory.response.GloryDE50OperationResponse.D1Mode.*;
-import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.*;
+import devices.glory.operation.GloryDE50OperationResponse;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.collect_mode;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.deposit;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.initial;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.manual;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.neutral;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.abnormal_device;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_exchange_the_cassette;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_recover_from_storing_error;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_reset;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_restoration;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.counting;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.counting_start_request;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close_request;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_open;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_open_request;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_error;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_start_request;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
@@ -199,17 +219,17 @@ public class GloryDE50GotoNeutral extends GloryDE50StatePoll {
                             // Rotate the bag once to fix the glory proble.
                             bagRotated = true;
                             // set the time if possible, some times it fails, ignroe this
-                            sret = sendGloryOperation(new devices.glory.operation.SetTime(new Date()));
-                            if (sret.isError()) {
-                                Logger.error("Error sending cmd SetTime");
-                                break;
-                            }
-                            // Rotate if possible, some time it fails, ignore this
-                            sret = sendGloryOperation(new devices.glory.operation.SetCollectMode());
-                            if (sret.isError()) {
-                                Logger.error("Error sending cmd SetCollectMode");
-                                break;
-                            }
+//                            sret = sendGloryOperation(new devices.glory.operation.SetTime(new Date()));
+//                            if (sret.isError()) {
+//                                Logger.error("Error sending cmd SetTime");
+//                                break;
+//                            }
+//                            // Rotate if possible, some time it fails, ignore this
+//                            sret = sendGloryOperation(new devices.glory.operation.SetCollectMode());
+//                            if (sret.isError()) {
+//                                Logger.error("Error sending cmd SetCollectMode");
+//                                break;
+//                            }
                             break;
                         }
                         api.notifyListeners(NEUTRAL);

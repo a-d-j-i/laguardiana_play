@@ -2,7 +2,7 @@ package devices.glory.task;
 
 import devices.device.task.DeviceTaskAbstract;
 import devices.glory.operation.GloryDE50OperationInterface;
-import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.operation.GloryDE50OperationResponse;
 
 /**
  *
@@ -12,6 +12,7 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
 
     final GloryDE50OperationInterface operation;
     final boolean debug;
+    // this could be atomic if needed.
     String error = null;
     GloryDE50OperationResponse response = new GloryDE50OperationResponse();
 
@@ -28,12 +29,16 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
         return debug;
     }
 
-    public void setResponse(GloryDE50OperationResponse response) {
+    public void setResponse(String error, GloryDE50OperationResponse response) {
+        this.error = error;
         this.response = response;
         setReturnValue(response != null);
     }
 
     public GloryDE50OperationResponse getResponse() {
+        if (!isDone()) {
+            return null;
+        }
         return response;
     }
 
@@ -42,16 +47,22 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
     }
 
     public boolean isError() {
+        if (!isDone()) {
+            return true;
+        }
         return error != null;
     }
 
     public String getError() {
+        if (!isDone()) {
+            return "not done";
+        }
         return error;
     }
 
     @Override
     public String toString() {
-        return "GloryDE50TaskOperation{" + "operation=" + operation + ", debug=" + debug + ", error=" + error + ", response=" + response + '}';
+        return "GloryDE50TaskOperation{" + "operation=" + operation + "}";
     }
 
 }

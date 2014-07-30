@@ -33,7 +33,7 @@ public class GloryDE50WaitForOperation extends GloryDE50StateOperation {
     }
 
     @Override
-    public DeviceStateInterface command(DeviceTaskAbstract task) {
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
         if (task instanceof DeviceTaskCollect) {
             task.setReturnValue(true);
             return new GloryDE50Collect(api);
@@ -66,6 +66,13 @@ public class GloryDE50WaitForOperation extends GloryDE50StateOperation {
                 return new GloryDE50OpenPort(api);
             }
         }
-        return null;
+        // support operations.
+        return super.call(task);
     }
+
+    @Override
+    public String toString() {
+        return "GloryDE50WaitForOperation";
+    }
+
 }

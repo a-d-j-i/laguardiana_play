@@ -1,13 +1,11 @@
 package devices.glory;
 
 import devices.device.DeviceResponseInterface;
-import devices.glory.operation.GloryDE50OperationInterface;
+import devices.glory.response.GloryDE50AcceptorMsg;
 import devices.glory.response.GloryDE50MsgError;
 import devices.glory.response.GloryDE50MsgTimeout;
-import devices.glory.response.GloryDE50OperationResponse;
 import devices.serial.SerialPortAdapterInterface;
 import devices.serial.SerialPortMessageParserInterface;
-import java.security.InvalidParameterException;
 import java.util.concurrent.TimeoutException;
 import play.Logger;
 
@@ -20,23 +18,15 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
             Logger.debug(message, args);
         }
     }
-    final private static int GLORY_READ_TIMEOUT = 3000; //35ms
-    int retries = 0;
-    private GloryDE50OperationInterface lastCmd;
+    final private static int GLORY_READ_TIMEOUT = 1000;
 
     public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException {
         DeviceResponseInterface ret;
         try {
             ret = getMessageInt(serialPort);
         } catch (TimeoutException ex) {
-            debug("%s Timeout waiting for device, retry", this.toString());
-            //pool the machine.
-            if (retries++ > 100) {
-                return new GloryDE50MsgError(String.format("%s Timeout reading from port", this.toString()));
-            }
             return new GloryDE50MsgTimeout();
         }
-        retries = 0;
         debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
         return ret;
     }
@@ -88,13 +78,7 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
             }
             Logger.debug(h.toString());
         }
-        GloryDE50OperationResponse ret = new GloryDE50OperationResponse();
-        String err = lastCmd.fillResponse(b.length, b, ret);
-        if (err != null) {
-            return new GloryDE50MsgError(err);
-
-        }
-        return ret;
+        return new GloryDE50AcceptorMsg(b, b.length);
     }
 
     private Byte read(SerialPortAdapterInterface serialPort) throws TimeoutException, InterruptedException {
@@ -122,6 +106,7 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
         }
         return l;
     }
+
     /*
      public byte[] getBytes(int quantity) {
      if (serialPort == null) {
@@ -134,5 +119,9 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
      return b;
      }
      */
+    @Override
+    public String toString() {
+        return "GloryDE50Parser";
+    }
 
 }

@@ -22,8 +22,4 @@ abstract public class GloryDE50StateAbstract extends DeviceStateAbstract impleme
         return "GloryDE50StateAbstract";
     }
 
-    public boolean isError() {
-        return false;
-    }
-
 }

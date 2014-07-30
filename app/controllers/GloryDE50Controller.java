@@ -7,7 +7,7 @@ import devices.glory.operation.LogDataRequest;
 import devices.glory.operation.OperationWithAckResponse;
 import devices.glory.operation.Sense;
 import devices.glory.operation.StartUpload;
-import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.operation.GloryDE50OperationResponse;
 import devices.glory.task.GloryDE50TaskOperation;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import machines.MachineDeviceDecorator;
 import models.db.LgDevice;
 import play.Logger;
@@ -352,15 +353,22 @@ public class GloryDE50Controller extends Application {
             return deviceTask;
         } catch (InterruptedException ex) {
             Logger.error("exeption in sendGloryDE50Operation %s", ex);
+            ex.printStackTrace();
         } catch (ExecutionException ex) {
             Logger.error("exeption in sendGloryDE50Operation %s", ex);
+            ex.printStackTrace();
         }
         return null;
     }
 
     @Util
     private static void setStatusAndRedirect(Integer deviceId, GloryDE50TaskOperation op) {
-        // TODO: op.isError();
+        try {
+            // wait for completion.
+            boolean done = op.get();
+        } catch (InterruptedException ex) {
+        } catch (ExecutionException ex) {
+        }
         if (op.getResponse() != null) {
             GloryDE50OperationResponse ret = op.getResponse();
             Logger.debug("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY : %s", ret.toString());

@@ -8,7 +8,7 @@ import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.glory.GloryDE50Device;
 import devices.glory.operation.GloryDE50OperationInterface;
-import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.operation.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
@@ -45,8 +45,12 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateOperation {
         return null;
     }
 
+    boolean isError() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     @Override
-    public DeviceStateInterface command(DeviceTaskAbstract task) {
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
 
         if (mustCancel.get()) {
             api.notifyListeners(CANCELING);

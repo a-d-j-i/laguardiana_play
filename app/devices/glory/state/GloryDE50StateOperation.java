@@ -1,10 +1,14 @@
 package devices.glory.state;
 
+import devices.device.DeviceResponseInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskMessage;
 import devices.glory.GloryDE50Device;
-import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.operation.GloryDE50OperationInterface;
+import devices.glory.operation.GloryDE50OperationResponse;
 import devices.glory.task.GloryDE50TaskOperation;
+import play.Logger;
 
 /**
  *
@@ -19,19 +23,26 @@ abstract public class GloryDE50StateOperation extends GloryDE50StateAbstract {
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
         if (task instanceof GloryDE50TaskOperation) {
-            GloryDE50TaskOperation op = (GloryDE50TaskOperation) task;
-            GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-            String err = api.sendGloryDE50Operation(op.getOperation(), op.isDebug(), response);
-            if (err == null) {
-                op.setError(null);
-                op.setResponse(response);
-            } else {
-                op.setError(err);
-                op.setResponse(null);
+            GloryDE50TaskOperation opt = (GloryDE50TaskOperation) task;
+            api.sendOperation(opt);
+        } else if (task instanceof DeviceTaskMessage) {
+            DeviceTaskMessage msgt = (DeviceTaskMessage) task;
+            GloryDE50OperationInterface op = (GloryDE50OperationInterface) msgt.getMessage();
+            DeviceResponseInterface response = msgt.getResponse();
+            if (response instanceof GloryDE50OperationResponse) {
+                Logger.debug("Got response : %s to operation : %s", response.toString(), op.toString());
             }
+            task.setReturnValue(true);
+        } else {
+            Logger.error("Unexpected task : %s", task.toString());
+            task.setReturnValue(false);
         }
-        return command(task);
+        return null;
     }
 
-    abstract public DeviceStateInterface command(DeviceTaskAbstract task);
+    @Override
+    public String toString() {
+        return "GloryDE50StateOperation";
+    }
+
 }

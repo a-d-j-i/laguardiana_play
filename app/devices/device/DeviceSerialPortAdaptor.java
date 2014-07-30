@@ -43,7 +43,8 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
                     listener.onDeviceMessageEvent(msg);
                 }
             } catch (InterruptedException ex) {
-                // do nothing
+                Logger.error("Exception in Serial Port Reader : %s", ex.toString());
+                ex.printStackTrace();
             }
         }
         debug("SerialPort Reader done");

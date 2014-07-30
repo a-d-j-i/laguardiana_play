@@ -1,6 +1,5 @@
 package devices.glory.operation;
 
-import devices.glory.response.GloryDE50OperationResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import play.Logger;

@@ -24,7 +24,7 @@ public class GloryDE50ReadyToStore extends GloryDE50StateOperation {
     }
 
     @Override
-    public DeviceStateInterface command(DeviceTaskAbstract task) {
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
         if (task instanceof DeviceTaskStore) {
             task.setReturnValue(true);
             return new GloryDE50Store(api);

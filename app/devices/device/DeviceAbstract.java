@@ -75,9 +75,10 @@ public abstract class DeviceAbstract implements DeviceInterface {
         }
     }
 
+    // helper for the inner thread.
     protected boolean runTask(final DeviceTaskAbstract deviceTask) {
-        debug(String.format("%s executing current step: %s", DeviceAbstract.this.toString(), currentState));
-        DeviceStateInterface newState = deviceTask.execute(currentState);
+        debug(String.format("%s executing current step: %s with task %s", toString(), currentState, deviceTask.toString()));
+        DeviceStateInterface newState = currentState.call(deviceTask);
         if (newState != null && currentState != newState) {
             debug("Changing state old %s, new %s", currentState, newState.toString());
             DeviceStateInterface initStateRet = newState.init();
@@ -87,21 +88,11 @@ public abstract class DeviceAbstract implements DeviceInterface {
             debug("setting state to new %s", newState.toString());
             currentState = newState;
         }
-        debug("Device %s thread done", DeviceAbstract.this.toString());
-        try {
-            boolean ret = deviceTask.get();
-            debug("Device %s thread got %s", DeviceAbstract.this.toString(), ret ? "TRUE" : "FALSE");
-            return ret;
-        } catch (InterruptedException ex) {
-            Logger.error("InterruptedException %s on %s ", ex, DeviceAbstract.this.toString());
-        } catch (ExecutionException ex) {
-            Logger.error("InterruptedException %s on %s ", ex, DeviceAbstract.this.toString());
-        }
-        return false;
+        debug("Device %s thread done", toString());
+        return true;
     }
 
     synchronized public Future<Boolean> submit(final DeviceTaskAbstract deviceTask) {
-        debug("%s ---> Submitting task : %s", this.toString(), deviceTask.toString());
         return taskExecutor.submit(new Callable<Boolean>() {
 
             public Boolean call() {

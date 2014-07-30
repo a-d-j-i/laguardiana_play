@@ -5,15 +5,15 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.response.GloryDE50OperationResponse;
-import static devices.glory.response.GloryDE50OperationResponse.D1Mode.collect_mode;
-import static devices.glory.response.GloryDE50OperationResponse.D1Mode.deposit;
-import static devices.glory.response.GloryDE50OperationResponse.D1Mode.initial;
-import static devices.glory.response.GloryDE50OperationResponse.D1Mode.manual;
-import static devices.glory.response.GloryDE50OperationResponse.D1Mode.neutral;
-import static devices.glory.response.GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode;
-import static devices.glory.response.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
-import static devices.glory.response.GloryDE50OperationResponse.SR1Mode.storing_error;
+import devices.glory.operation.GloryDE50OperationResponse;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.collect_mode;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.deposit;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.initial;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.manual;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.neutral;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode;
+import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
+import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_error;
 import devices.glory.state.GloryDE50Error;
 import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;

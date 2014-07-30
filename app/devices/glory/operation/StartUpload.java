@@ -1,7 +1,5 @@
 package devices.glory.operation;
 
-import devices.glory.response.GloryDE50OperationResponse;
-
 
 /*
  * Upload a file from DE to TM. If DE have file with same name, DE delete it.

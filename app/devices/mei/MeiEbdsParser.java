@@ -67,11 +67,12 @@ public class MeiEbdsParser implements SerialPortMessageParserInterface {
             switch (length) {
                 case 0x0b: // normal message
                 case 30: // extendend message
+                    MeiEbdsAcceptorMsgAck ret = new MeiEbdsAcceptorMsgAck();
                     // TODO: I must check the checksum first and retry.
-                    if (!lastResult.setData(length, buffer)) {
+                    if (!ret.setData(length, buffer)) {
                         return new MeiEbdsAcceptorMsgError(String.format("%s mei invalid buffer data %s", this.toString(), Arrays.toString(buffer)));
                     }
-                    return lastResult;
+                    return ret;
                 case 8: // echo of my messages, retry.
                     return new MeiEbdsAcceptorMsgEnq();
                 default:
@@ -83,7 +84,6 @@ public class MeiEbdsParser implements SerialPortMessageParserInterface {
             }
         }
     }
-    private final MeiEbdsAcceptorMsgAck lastResult = new MeiEbdsAcceptorMsgAck();
 
     private Byte read(SerialPortAdapterInterface serialPort, int timeout) throws TimeoutException, InterruptedException {
         if (serialPort == null) {

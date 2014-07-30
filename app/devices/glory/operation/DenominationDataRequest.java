@@ -1,7 +1,6 @@
 package devices.glory.operation;
 
-import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.response.GloryDE50OperationResponse.Denomination;
+import devices.glory.operation.GloryDE50OperationResponse.Denomination;
 
 /*
  * This command is return Denomination Data.

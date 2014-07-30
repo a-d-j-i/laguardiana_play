@@ -1,6 +1,5 @@
 package devices.device.task;
 
-import devices.device.state.DeviceStateInterface;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -44,21 +43,16 @@ public class DeviceTaskAbstract implements Future<Boolean> {
         }
     }
 
-    // Executed by the inner thread.
-    public DeviceStateInterface execute(DeviceStateInterface currentState) {
+    // called by the inner thread.
+    public void setReturnValue(boolean returnValue) {
         lock.lock();
         try {
-            DeviceStateInterface ret = currentState.call(this);
+            this.returnValue = returnValue;
             done = true;
             cdone.signalAll();
-            return ret;
         } finally {
             lock.unlock();
         }
-    }
-
-    public void setReturnValue(boolean returnValue) {
-        this.returnValue = returnValue;
     }
 
     @Override
@@ -67,11 +61,11 @@ public class DeviceTaskAbstract implements Future<Boolean> {
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public boolean isCancelled() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public boolean isDone() {

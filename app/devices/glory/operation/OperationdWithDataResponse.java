@@ -1,8 +1,7 @@
 package devices.glory.operation;
 
-import devices.glory.response.GloryDE50OperationResponse;
-import devices.glory.response.GloryDE50OperationResponse.D1Mode;
-import devices.glory.response.GloryDE50OperationResponse.SR1Mode;
+import devices.glory.operation.GloryDE50OperationResponse.D1Mode;
+import devices.glory.operation.GloryDE50OperationResponse.SR1Mode;
 
 public class OperationdWithDataResponse extends OperationWithAckResponse {
 

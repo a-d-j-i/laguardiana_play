@@ -1,6 +1,7 @@
-package devices.glory.response;
+package devices.glory.operation;
 
-import devices.glory.response.GloryDE50OperationResponse.Denomination;
+import devices.glory.operation.GloryDE50OperationResponse;
+import devices.glory.operation.GloryDE50OperationResponse.Denomination;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;

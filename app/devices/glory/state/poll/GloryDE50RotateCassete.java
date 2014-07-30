@@ -1,7 +1,7 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.response.GloryDE50OperationResponse;
+import devices.glory.operation.GloryDE50OperationResponse;
 import devices.glory.state.GloryDE50StateAbstract;
 
 /**
