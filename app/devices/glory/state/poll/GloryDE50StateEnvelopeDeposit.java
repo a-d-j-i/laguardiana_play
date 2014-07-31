@@ -1,20 +1,20 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.operation.GloryDE50OperationResponse;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.abnormal_device;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_store;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close_request;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_open;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_error;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_start_request;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
-import devices.glory.state.GloryDE50Error;
-import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.response.GloryDE50ResponseWithData;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.abnormal_device;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_store;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_close;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_close_request;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_open;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.storing_error;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.storing_start_request;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.waiting;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.waiting_for_an_envelope_to_set;
+import devices.glory.state.GloryDE50StateError;
+import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
-import devices.glory.state.GloryDE50ReadyToStore;
+import devices.glory.state.GloryDE50StateReadyToStore;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.PUT_THE_ENVELOPE_IN_THE_ESCROW;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.READY_TO_STORE;
@@ -24,9 +24,9 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryDE50EnvelopeDeposit extends GloryDE50StatePoll {
+public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
 
-    public GloryDE50EnvelopeDeposit(GloryDE50Device api) {
+    public GloryDE50StateEnvelopeDeposit(GloryDE50Device api) {
         super(api);
     }
 
@@ -43,7 +43,7 @@ public class GloryDE50EnvelopeDeposit extends GloryDE50StatePoll {
     int waitForEscrow = 0;
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse) {
         GloryDE50StateAbstract sret;
         if (waitForEscrow == 0) {
             sret = sendGloryOperation(new devices.glory.operation.CloseEscrow());
@@ -73,7 +73,7 @@ public class GloryDE50EnvelopeDeposit extends GloryDE50StatePoll {
                 break;
             case storing_start_request:
                 api.notifyListeners(READY_TO_STORE);
-                return new GloryDE50ReadyToStore(api, this);
+                return new GloryDE50StateReadyToStore(api, this);
 
             case waiting:
                 // The second time after storing.
@@ -113,17 +113,12 @@ public class GloryDE50EnvelopeDeposit extends GloryDE50StatePoll {
                 }
                 break;
             case storing_error:
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN,
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN,
                         String.format("EnvelopeDeposit Storing error, todo: get the flags"));
             default:
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("EnvelopeDeposit invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
         }
         return this;
-    }
-
-    @Override
-    public GloryDE50StateAbstract doCancel() {
-        return null;
     }
 }

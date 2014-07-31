@@ -49,14 +49,14 @@ final public class MachineP500_GLORY extends MachineAbstract {
         // set current action.
         setCurrentState(new GloryDE50StateWaiting(this));
 
-        LgDeposit dep = LgDeposit.getCurrentDeposit();
-        if (dep instanceof BillDeposit) {
-            Logger.debug("--------> Start setting state to bill deposit %d", dep.depositId);
-            setCurrentState(new GloryDE50BillDepositStart(this, dep.user.userId, dep.depositId));
-        } else if (dep instanceof EnvelopeDeposit) {
-            Logger.debug("--------> Start setting state to envelope deposit %d", dep.depositId);
-            setCurrentState(new GloryDE50EnvelopeDepositStart(this, dep.user.userId, dep.depositId));
-        }
+//        LgDeposit dep = LgDeposit.getCurrentDeposit();
+//        if (dep instanceof BillDeposit) {
+//            Logger.debug("--------> Start setting state to bill deposit %d", dep.depositId);
+//            setCurrentState(new GloryDE50BillDepositStart(this, dep.user.userId, dep.depositId));
+//        } else if (dep instanceof EnvelopeDeposit) {
+//            Logger.debug("--------> Start setting state to envelope deposit %d", dep.depositId);
+//            setCurrentState(new GloryDE50EnvelopeDepositStart(this, dep.user.userId, dep.depositId));
+//        }
         Logger.debug("Machine Start done");
     }
 

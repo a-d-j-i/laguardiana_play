@@ -2,7 +2,9 @@ package devices.glory.task;
 
 import devices.device.task.DeviceTaskAbstract;
 import devices.glory.operation.GloryDE50OperationInterface;
-import devices.glory.operation.GloryDE50OperationResponse;
+import devices.glory.response.GloryDE50AcceptorMsg;
+import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50ResponseError;
 
 /**
  *
@@ -12,9 +14,7 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
 
     final GloryDE50OperationInterface operation;
     final boolean debug;
-    // this could be atomic if needed.
-    String error = null;
-    GloryDE50OperationResponse response = new GloryDE50OperationResponse();
+    GloryDE50Response response;
 
     public GloryDE50TaskOperation(GloryDE50OperationInterface operation, boolean debug) {
         this.operation = operation;
@@ -29,35 +29,21 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
         return debug;
     }
 
-    public void setResponse(String error, GloryDE50OperationResponse response) {
-        this.error = error;
-        this.response = response;
-        setReturnValue(response != null);
+    public void setError(String error) {
+        this.response = new GloryDE50ResponseError(error);
+        setReturnValue(false);
     }
 
-    public GloryDE50OperationResponse getResponse() {
+    public void fillResponse(GloryDE50AcceptorMsg msg) {
+        response = operation.getResponse(msg.getLength(), msg.getData());
+        setReturnValue(true);
+    }
+
+    public GloryDE50Response getResponse() {
         if (!isDone()) {
             return null;
         }
         return response;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public boolean isError() {
-        if (!isDone()) {
-            return true;
-        }
-        return error != null;
-    }
-
-    public String getError() {
-        if (!isDone()) {
-            return "not done";
-        }
-        return error;
     }
 
     @Override

@@ -2,8 +2,7 @@ package devices.glory;
 
 import devices.device.DeviceResponseInterface;
 import devices.glory.response.GloryDE50AcceptorMsg;
-import devices.glory.response.GloryDE50MsgError;
-import devices.glory.response.GloryDE50MsgTimeout;
+import devices.glory.response.GloryDE50ResponseError;
 import devices.serial.SerialPortAdapterInterface;
 import devices.serial.SerialPortMessageParserInterface;
 import java.util.concurrent.TimeoutException;
@@ -11,7 +10,7 @@ import play.Logger;
 
 public class GloryDE50Parser implements SerialPortMessageParserInterface {
 
-    final boolean debug = true;
+    final boolean debug = false;
 
     private void debug(String message, Object... args) {
         if (debug) {
@@ -20,13 +19,9 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
     }
     final private static int GLORY_READ_TIMEOUT = 1000;
 
-    public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException {
+    public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException, TimeoutException {
         DeviceResponseInterface ret;
-        try {
-            ret = getMessageInt(serialPort);
-        } catch (TimeoutException ex) {
-            return new GloryDE50MsgTimeout();
-        }
+        ret = getMessageInt(serialPort);
         debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
         return ret;
     }
@@ -36,7 +31,7 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
         for (int i = 0; i < 512; i++) {
             Byte r = read(serialPort);
             if (r == null) {
-                return new GloryDE50MsgError(String.format("Error reading from port: %s", serialPort));
+                return new GloryDE50ResponseError(String.format("Error reading from port: %s", serialPort));
             } else {
                 switch (r) {
                     case 0x02:
@@ -69,7 +64,7 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
             }
         }
         if (b == null) {
-            return new GloryDE50MsgError("Error parsing bytes");
+            return new GloryDE50ResponseError("Error parsing bytes");
         }
         if (debug) {
             StringBuilder h = new StringBuilder("Readed ");

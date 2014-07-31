@@ -1,5 +1,7 @@
 package devices.glory.operation;
 
+import devices.glory.response.GloryDE50ResponseWithData;
+
 
 /*
  * Upload a file from DE to TM. If DE have file with same name, DE delete it.
@@ -49,7 +51,7 @@ public class StartUpload extends OperationdWithDataResponse {
     }
 
     @Override
-    public String fillResponse(int len, byte[] dr, final GloryDE50OperationResponse response) {
+    public String fillResponse(int len, byte[] dr, final GloryDE50ResponseWithData response) {
         String err = super.fillResponse(len, dr, response);
         if (err != null) {
             return err;

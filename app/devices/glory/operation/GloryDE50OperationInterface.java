@@ -1,6 +1,7 @@
 package devices.glory.operation;
 
 import devices.device.DeviceMessageInterface;
+import devices.glory.response.GloryDE50Response;
 
 public interface GloryDE50OperationInterface extends DeviceMessageInterface {
 
@@ -8,5 +9,5 @@ public interface GloryDE50OperationInterface extends DeviceMessageInterface {
 
     public byte[] getCmdStr();
 
-    public String fillResponse(int len, byte[] b, GloryDE50OperationResponse response);
+    public GloryDE50Response getResponse(int len, byte[] b);
 }

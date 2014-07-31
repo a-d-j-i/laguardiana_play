@@ -1,27 +1,27 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.operation.GloryDE50OperationResponse;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.collect_mode;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.deposit;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.initial;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.manual;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.neutral;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.abnormal_device;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_recover_from_storing_error;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_reset;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_store;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close_request;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_open;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_open_request;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_error;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_start_request;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting;
-import devices.glory.state.GloryDE50Error;
-import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.response.GloryDE50ResponseWithData;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.collect_mode;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.deposit;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.initial;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.manual;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.neutral;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.normal_error_recovery_mode;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.storing_error_recovery_mode;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.abnormal_device;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_recover_from_storing_error;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_reset;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_store;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_close;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_close_request;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_open;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_open_request;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.storing_error;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.storing_start_request;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.waiting;
+import devices.glory.state.GloryDE50StateError;
+import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
 import play.Logger;
@@ -30,17 +30,17 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryDE50StoringErrorReset extends GloryDE50StatePoll {
+public class GloryDE50StateStoringErrorReset extends GloryDE50StatePoll {
 
     int retries = 100;
 
-    public GloryDE50StoringErrorReset(GloryDE50Device api) {
+    public GloryDE50StateStoringErrorReset(GloryDE50Device api) {
         super(api);
         api.setClosing(false);
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse) {
         Logger.debug("STORING_ERROR_RESET_COMMAND");
 
         switch (lastResponse.getD1Mode()) {
@@ -48,7 +48,7 @@ public class GloryDE50StoringErrorReset extends GloryDE50StatePoll {
             case storing_error_recovery_mode:
                 switch (lastResponse.getSr1Mode()) {
                     case abnormal_device:
-                        return new GloryDE50Reset(api, this);
+                        return new GloryDE50StateReset(api, this);
                     case storing_error:
                     case escrow_open_request:
                         if (api.isClosing()) {
@@ -98,7 +98,7 @@ public class GloryDE50StoringErrorReset extends GloryDE50StatePoll {
                     case waiting:
                         return sendGloryOperation(new devices.glory.operation.RemoteCancel());
                     default:
-                        return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                        return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                                 String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
                 break;
@@ -109,7 +109,7 @@ public class GloryDE50StoringErrorReset extends GloryDE50StatePoll {
                     case waiting:
                         return this;
                     default:
-                        return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                        return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                                 String.format("StoringErrorResetCommand Abnormal device Invalid SR1-1 mode %s", lastResponse.getSr1Mode().name()));
                 }
             case deposit:
@@ -123,15 +123,10 @@ public class GloryDE50StoringErrorReset extends GloryDE50StatePoll {
                         return sendGloryOperation(new devices.glory.operation.RemoteCancel());
                 }
             default:
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("StoringErrorResetCommand Invalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
         return this;
-    }
-
-    @Override
-    public GloryDE50StateAbstract doCancel() {
-        return null;
     }
 
 }

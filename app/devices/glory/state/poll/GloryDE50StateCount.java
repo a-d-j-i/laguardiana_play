@@ -1,24 +1,24 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.operation.GloryDE50OperationResponse;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.deposit;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.neutral;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.abnormal_device;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_recover_from_storing_error;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_restoration;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_store;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.counting;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.counting_start_request;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_close_request;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.escrow_open;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_error;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_start_request;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.waiting_for_an_envelope_to_set;
-import devices.glory.state.GloryDE50Error;
-import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.response.GloryDE50ResponseWithData;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.deposit;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.neutral;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.abnormal_device;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_recover_from_storing_error;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_restoration;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_store;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.counting;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.counting_start_request;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_close;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_close_request;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_open;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.storing_error;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.storing_start_request;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.waiting;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.waiting_for_an_envelope_to_set;
+import devices.glory.state.GloryDE50StateError;
+import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.COUNTING;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
@@ -35,7 +35,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryDE50Count extends GloryDE50StatePoll {
+public class GloryDE50StateCount extends GloryDE50StatePoll {
     /* Those must be treated as different states because there can be a race condition.
      private final AtomicBoolean needToStoreDeposit = new AtomicBoolean(false);
      private final AtomicBoolean needToWithdrawDeposit = new AtomicBoolean(false);
@@ -56,7 +56,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
     boolean batchEnd = false;
     boolean debug = true;
 
-    public GloryDE50Count(GloryDE50Device api, Map<String, Integer> desiredQuantity, Integer currency) {
+    public GloryDE50StateCount(GloryDE50Device api, Map<String, Integer> desiredQuantity, Integer currency) {
         super(api);
         this.desiredQuantity = desiredQuantity;
         if (currency == null) {
@@ -84,15 +84,16 @@ public class GloryDE50Count extends GloryDE50StatePoll {
     @Override
     public GloryDE50StateAbstract init() {
         Logger.error("CountCommand Start CURRENCY %d", currency.byteValue());
-        return this;
+        // send a sense.
+        return super.init();
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse) {
         GloryDE50StateAbstract sret;
         Logger.debug("COUNT_COMMAND");
         if (lastResponse.isCassetteFullCounter()) {
-            return new GloryDE50RotateCassete(api, this);
+            return new GloryDE50StateRotateCassete(api, this);
         }
         // If I'm not in deposit mode try to get there once
         switch (lastResponse.getD1Mode()) {
@@ -107,14 +108,14 @@ public class GloryDE50Count extends GloryDE50StatePoll {
                     if (sret != null) {
                         return sret;
                     }
-                    GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-                    String error = api.sendGloryDE50Operation(new devices.glory.operation.SetDepositMode(), debug, response);
+                    GloryDE50ResponseWithData response = new GloryDE50ResponseWithData();
+                    String error = sendGloryDE50Operation(new devices.glory.operation.SetDepositMode(), debug, response);
                     if (error == null) {
                         Logger.error("Error %s sending cmd : SetDepositMode", error);
-                        return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+                        return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
                     }
                     if (response.isCassetteFullCounter()) {
-                        return new GloryDE50RotateCassete(api, this);
+                        return new GloryDE50StateRotateCassete(api, this);
                     }
                 }
                 return this;
@@ -264,11 +265,11 @@ public class GloryDE50Count extends GloryDE50StatePoll {
                 break;
             case abnormal_device:
                 api.notifyListeners(JAM);
-                return new GloryDE50GotoNeutral(api, this, true, true);
+                return new GloryDE50StateGotoNeutral(api, this, true, true);
             case storing_error:
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, String.format("Count Storing error, todo: get the flags"));
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, String.format("Count Storing error, todo: get the flags"));
             default:
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, String.format("Count invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, String.format("Count invalid sr1 mode %s", lastResponse.getSr1Mode().name()));
         }
         return this;
     }
@@ -285,8 +286,8 @@ public class GloryDE50Count extends GloryDE50StatePoll {
              return false;
              }*/
             // Sometimes the BatchDataTransmition fails, trying randomly to see what can be.
-            GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-            String error = api.sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills), debug, response);
+            GloryDE50ResponseWithData response = new GloryDE50ResponseWithData();
+            String error = sendGloryDE50Operation(new devices.glory.operation.BatchDataTransmition(bills), debug, response);
             if (error == null) {
                 api.notifyListeners(COUNTING);
             } else {
@@ -296,17 +297,17 @@ public class GloryDE50Count extends GloryDE50StatePoll {
         }
 
         Logger.debug("ISBATCH");
-        GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-        String error = api.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), debug, response);
+        GloryDE50ResponseWithData response = new GloryDE50ResponseWithData();
+        String error = sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), debug, response);
         if (error != null) {
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+            return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         Map<Integer, Integer> currentQ = response.getBills();
         if (currentQ == null) {
             String err = String.format("Error getting current count");
             Logger.error("Error %s sending cmd : CountingDataRequest", err);
-            return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err);
+            return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err);
         }
 
         while (currentSlot < 32) {
@@ -318,7 +319,7 @@ public class GloryDE50Count extends GloryDE50StatePoll {
             if (current > desired) {
                 String err = String.format("Invalid bill value %d %d %d", currentSlot, current, desired);
                 Logger.error("Error %s sending cmd : CountingDataRequest", err);
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err);
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err);
             }
             bills[ currentSlot] = desired - current;
             Logger.debug("---------- slot %s batch billls : %d desired %d value %d", currentSlot, bills[ currentSlot], desired, current);
@@ -342,11 +343,11 @@ public class GloryDE50Count extends GloryDE50StatePoll {
     }
 
     private GloryDE50StateAbstract refreshQuantity() {
-        GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-        String error = api.sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), debug, response);
+        GloryDE50ResponseWithData response = new GloryDE50ResponseWithData();
+        String error = sendGloryDE50Operation(new devices.glory.operation.CountingDataRequest(), debug, response);
         if (error != null) {
             Logger.error("Error %s sending cmd : CountingDataRequest", error);
-            return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
+            return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
         }
         currentQuantity.set(response.getBills());
 //        for (Integer k : bills.keySet()) {
@@ -382,11 +383,10 @@ public class GloryDE50Count extends GloryDE50StatePoll {
         return desiredQuantity;
     }
 
-    @Override
-    public GloryDE50StateAbstract doCancel() {
-        return sendGloryOperation(new devices.glory.operation.StopCounting());
-    }
-
+//    @Override
+//    public GloryDE50StateAbstract doCancel() {
+//        return sendGloryOperation(new devices.glory.operation.StopCounting());
+//    }
     public boolean storeDeposit(Integer sequenceNumber) {
 //        needToStoreDeposit.set(true);
         return true;

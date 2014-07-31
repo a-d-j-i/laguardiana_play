@@ -3,7 +3,9 @@ package devices.mei;
 import devices.device.DeviceResponseInterface;
 import devices.device.DeviceSerialPortAbstract;
 import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskMessage;
+import devices.device.task.DeviceTaskResponse;
 import devices.mei.state.MeiEbdsOpenPort;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
@@ -36,11 +38,18 @@ final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
     private MeiEbdsAcceptorMsgAck lastResult = new MeiEbdsAcceptorMsgAck();
     private final MeiEbdsHostMsg hostMsg = new MeiEbdsHostMsg();
 
-    public void onDeviceMessageEvent(final DeviceResponseInterface response) {
-        if (response instanceof MeiEbdsAcceptorMsgAck) {
-            lastResult = (MeiEbdsAcceptorMsgAck) response;
+    @Override
+    protected boolean runTask(final DeviceTaskAbstract deviceTask) {
+        if (deviceTask instanceof DeviceTaskResponse) {
+            DeviceTaskResponse r = (DeviceTaskResponse) deviceTask;
+            DeviceResponseInterface response = r.getResponse();
+            if (response instanceof MeiEbdsAcceptorMsgAck) {
+                lastResult = (MeiEbdsAcceptorMsgAck) response;
+            }
+            return super.runTask(new DeviceTaskMessage(hostMsg, r));
+        } else {
+            return super.runTask(deviceTask);
         }
-        runTask(new DeviceTaskMessage(hostMsg, response));
     }
 
     public boolean count(Map<String, Integer> desiredQuantity) {
@@ -73,11 +82,7 @@ final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
     public String sendPollMessage() {
         String err = null;
         debug("%s MEI sending msg : %s", this.toString(), hostMsg.toString());
-        if (serialPortReader == null) {
-            throw new IllegalArgumentException("Serial port closed");
-        }
-        debug("%s Writting : %s", this.toString(), Arrays.toString(hostMsg.getCmdStr()));
-        if (!serialPortReader.write(hostMsg.getCmdStr())) {
+        if (!write(hostMsg.getCmdStr())) {
             err = "Error writting to the port";
         }
         hostMsg.clearStackNote();
@@ -107,4 +112,5 @@ final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
     public String toString() {
         return "MeiEbdsDevice ( " + super.toString() + " )";
     }
+
 }

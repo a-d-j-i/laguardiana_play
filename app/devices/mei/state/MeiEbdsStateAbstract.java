@@ -14,7 +14,7 @@ abstract public class MeiEbdsStateAbstract extends DeviceStateAbstract implement
     public MeiEbdsStateAbstract(MeiEbdsDevice mei) {
         this.mei = mei;
     }
-
+    
     @Override
     public String toString() {
         return "MeiEbdsStateAbstract";

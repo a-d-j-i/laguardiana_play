@@ -1,11 +1,14 @@
 package devices.device;
 
 import devices.device.task.DeviceTaskOpenPort;
+import devices.device.task.DeviceTaskReadTimeout;
+import devices.device.task.DeviceTaskResponse;
 import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterInterface;
 import devices.serial.SerialPortMessageParserInterface;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import models.Configuration;
 import play.Logger;
 
@@ -13,13 +16,13 @@ import play.Logger;
  *
  * @author adji
  */
-abstract public class DeviceSerialPortAbstract extends DeviceAbstract implements DeviceResponseListenerInterface {
+abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
 
     private void debug(String message, Object... args) {
         Logger.debug(message, args);
     }
 
-    protected DeviceSerialPortAdaptor serialPortReader = null;
+    private DeviceSerialPortAdaptor serialPortReader = null;
     private String port;
     private final SerialPortMessageParserInterface parser;
     private final SerialPortAdapterAbstract.PortConfiguration portConf;
@@ -27,14 +30,21 @@ abstract public class DeviceSerialPortAbstract extends DeviceAbstract implements
 
         // switch thread.
         public void onDeviceMessageEvent(final DeviceResponseInterface response) {
-            taskExecutor.submit(new Runnable() {
-                public void run() {
-                    DeviceSerialPortAbstract.this.onDeviceMessageEvent(response);
-                }
+            if (response == null) {
+                submit(new DeviceTaskReadTimeout());
+            } else {
+                submit(new DeviceTaskResponse(response));
             }
-            );
         }
     };
+
+    protected boolean write(byte[] cmdStr) {
+        if (serialPortReader == null) {
+            throw new IllegalArgumentException("Serial port closed");
+        }
+        debug("%s Writting : %s", this.toString(), Arrays.toString(cmdStr));
+        return serialPortReader.write(cmdStr);
+    }
 
     public DeviceSerialPortAbstract(SerialPortMessageParserInterface parser, SerialPortAdapterAbstract.PortConfiguration portConf) {
         this.parser = parser;
@@ -91,7 +101,5 @@ abstract public class DeviceSerialPortAbstract extends DeviceAbstract implements
     public String toString() {
         return "port=" + port;
     }
-
-    abstract public void onDeviceMessageEvent(DeviceResponseInterface msg);
 
 }

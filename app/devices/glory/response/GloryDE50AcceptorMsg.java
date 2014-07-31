@@ -26,6 +26,10 @@ public class GloryDE50AcceptorMsg implements DeviceResponseInterface {
 
     @Override
     public String toString() {
+        return "GloryDE50AcceptorMsg";
+    }
+
+    public String toString1() {
         if (data == null || length == 0) {
             return "Empty data";
         }

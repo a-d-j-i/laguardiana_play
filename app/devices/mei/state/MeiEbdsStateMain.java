@@ -15,11 +15,11 @@ import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusStored;
 import devices.mei.task.MeiEbdsTaskCount;
 import devices.device.task.DeviceTaskMessage;
+import devices.device.task.DeviceTaskReadTimeout;
 import devices.mei.MeiEbdsDevice;
 import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 import static devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType.*;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
-import devices.mei.response.MeiEbdsAcceptorMsgTimeout;
 import play.Logger;
 import play.data.validation.Error;
 
@@ -45,13 +45,14 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     public DeviceStateInterface call(DeviceTaskAbstract t) {
         boolean ret;
         //debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
-        if (t instanceof DeviceTaskMessage) {
+        if (t instanceof DeviceTaskReadTimeout) {
+            ret = true;
+        } else if (t instanceof DeviceTaskMessage) {
             DeviceTaskMessage msgTask = (DeviceTaskMessage) t;
             DeviceResponseInterface response = msgTask.getResponse();
             if (response != null) { // retry
                 String err = null;
                 if (response instanceof MeiEbdsAcceptorMsgEnq) {
-                } else if (response instanceof MeiEbdsAcceptorMsgTimeout) {
                 } else if (response instanceof MeiEbdsAcceptorMsgAck) {
                     MeiEbdsAcceptorMsgAck r = (MeiEbdsAcceptorMsgAck) response;
                     switch ((ResponseType) r.getType()) {
@@ -102,12 +103,13 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
             t.setReturnValue(true);
             return null;
         } else if (t instanceof DeviceTaskCancel) {
-            t.setReturnValue(true);
             mustCancel = true;
             String err = mei.cancelCount();
             if (err != null) {
+                t.setReturnValue(false);
                 return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
             }
+            t.setReturnValue(true);
             mei.notifyListeners(MeiEbdsStatus.CANCELING);
             return null;
         } else if (t instanceof DeviceTaskStore) {

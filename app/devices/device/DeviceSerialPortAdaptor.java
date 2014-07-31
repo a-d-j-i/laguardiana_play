@@ -3,7 +3,9 @@ package devices.device;
 import devices.serial.SerialPortAdapterInterface;
 import devices.serial.SerialPortMessageParserInterface;
 import java.security.InvalidParameterException;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import play.Logger;
 
 /**
@@ -34,13 +36,24 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
         }
     }
 
+    private AtomicBoolean writed = new AtomicBoolean(false);
+
     public void run() {
         debug("SerialPort Reader start");
         while (!mustStop.get()) {
             try {
-                DeviceResponseInterface msg = parser.getResponse(serialPort);
-                if (msg != null) {
-                    listener.onDeviceMessageEvent(msg);
+                DeviceResponseInterface msg;
+                try {
+                    msg = parser.getResponse(serialPort);
+                    if (msg != null) {
+                        listener.onDeviceMessageEvent(msg);
+                    }
+                } catch (TimeoutException ex) {
+                    if (writed.get()) { // skip one if something was writted.
+                        writed.set(false);
+                    } else {
+                        listener.onDeviceMessageEvent(null);
+                    }
                 }
             } catch (InterruptedException ex) {
                 Logger.error("Exception in Serial Port Reader : %s", ex.toString());
@@ -81,6 +94,7 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
     }
 
     public boolean write(byte[] buffer) {
+        writed.set(true);
         return serialPort.write(buffer);
     }
 

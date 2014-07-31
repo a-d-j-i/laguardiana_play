@@ -1,7 +1,11 @@
 package devices.glory.operation;
 
-import devices.glory.operation.GloryDE50OperationResponse.D1Mode;
-import devices.glory.operation.GloryDE50OperationResponse.SR1Mode;
+import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50ResponseError;
+import devices.glory.response.GloryDE50ResponseWithData;
+import devices.glory.response.GloryDE50ResponseWithData.D1Mode;
+import devices.glory.response.GloryDE50ResponseWithData.SR1Mode;
+import play.Logger;
 
 public class OperationdWithDataResponse extends OperationWithAckResponse {
 
@@ -10,7 +14,17 @@ public class OperationdWithDataResponse extends OperationWithAckResponse {
     }
 
     @Override
-    public String fillResponse(int len, byte[] dr, final GloryDE50OperationResponse response) {
+    public GloryDE50Response getResponse(int len, byte[] b) {
+        GloryDE50ResponseWithData ret = new GloryDE50ResponseWithData();
+        String err = fillResponse(len, b, ret);
+        if (err != null) {
+            Logger.error("Error %s filling response for task %s", err, toString());
+            return new GloryDE50ResponseError(err);
+        }
+        return ret;
+    }
+
+    public String fillResponse(int len, byte[] dr, final GloryDE50ResponseWithData response) {
         if (dr == null) {
             return "Invalid argument dr == null";
         }

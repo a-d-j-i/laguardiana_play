@@ -4,7 +4,6 @@ import devices.device.DeviceResponseInterface;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
 import devices.mei.response.MeiEbdsAcceptorMsgError;
-import devices.mei.response.MeiEbdsAcceptorMsgTimeout;
 import devices.serial.SerialPortAdapterInterface;
 import devices.serial.SerialPortMessageParserInterface;
 import java.util.Arrays;
@@ -20,7 +19,7 @@ public class MeiEbdsParser implements SerialPortMessageParserInterface {
 
     int retries = 0;
 
-    public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException {
+    public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException, TimeoutException {
         DeviceResponseInterface ret;
         try {
             ret = getMessageInt(serialPort);
@@ -30,7 +29,7 @@ public class MeiEbdsParser implements SerialPortMessageParserInterface {
                 return new MeiEbdsAcceptorMsgError(String.format("%s Timeout reading from port", this.toString()));
             }
             debug("%s Timeout waiting for device, retry", this.toString());
-            return new MeiEbdsAcceptorMsgTimeout();
+            throw ex;
         }
         retries = 0;
         debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());

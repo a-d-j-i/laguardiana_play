@@ -9,4 +9,5 @@ public class OpenEscrow extends OperationWithAckResponse {
     public OpenEscrow() {
         super(0x35);
     }
+
 }

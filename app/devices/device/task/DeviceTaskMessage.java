@@ -10,19 +10,25 @@ import devices.device.DeviceResponseInterface;
 public class DeviceTaskMessage extends DeviceTaskAbstract {
 
     private final DeviceMessageInterface message;
-    private final DeviceResponseInterface response;
+    private final DeviceTaskResponse response;
 
-    public DeviceTaskMessage(DeviceMessageInterface msg, DeviceResponseInterface response) {
+    public DeviceTaskMessage(DeviceMessageInterface msg, DeviceTaskResponse response) {
         this.message = msg;
         this.response = response;
     }
 
-    public DeviceResponseInterface getResponse() {
-        return response;
-    }
-
     public DeviceMessageInterface getMessage() {
         return message;
+    }
+
+    public DeviceResponseInterface getResponse() {
+        return response.getResponse();
+    }
+
+    @Override
+    public void setReturnValue(boolean returnValue) {
+        response.setReturnValue(returnValue);
+        super.setReturnValue(returnValue);
     }
 
     @Override

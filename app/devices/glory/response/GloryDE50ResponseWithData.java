@@ -1,6 +1,5 @@
-package devices.glory.operation;
+package devices.glory.response;
 
-import devices.device.DeviceResponseInterface;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +16,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryDE50OperationResponse implements Serializable {
+public class GloryDE50ResponseWithData extends GloryDE50Response implements Serializable, GloryDE50ResponseInterface {
 
     static public class Denomination {
 
@@ -502,9 +501,11 @@ public class GloryDE50OperationResponse implements Serializable {
         denominationData.add(d);
     }
 
-    public GloryDE50OperationResponseParser getRepr() {
-        return new GloryDE50OperationResponseParser(this);
+    @Override
+    public GloryDE50ResponseDetailsInterface getRepr() {
+        return new GloryDE50ResponseDetailsWithData(this);
     }
+
     int fileSize = -1;
 
     public void setFileSize(int l) {

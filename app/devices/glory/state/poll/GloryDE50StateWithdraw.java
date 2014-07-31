@@ -1,18 +1,18 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.operation.GloryDE50OperationResponse;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_reset;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.being_restoration;
+import devices.glory.response.GloryDE50ResponseWithData;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_reset;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_restoration;
 import devices.glory.state.GloryDE50StateAbstract;
 
 /**
  *
  * @author adji
  */
-public class GloryDE50Store extends GloryDE50StatePoll {
+public class GloryDE50StateWithdraw extends GloryDE50StatePoll {
 
-    public GloryDE50Store(GloryDE50Device api) {
+    public GloryDE50StateWithdraw(GloryDE50Device api) {
         super(api);
     }
 
@@ -22,7 +22,7 @@ public class GloryDE50Store extends GloryDE50StatePoll {
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse) {
         switch (lastResponse.getSr1Mode()) {
             case being_reset:
             case being_restoration:
@@ -30,11 +30,6 @@ public class GloryDE50Store extends GloryDE50StatePoll {
             default:
                 return this;
         }
-    }
-
-    @Override
-    public GloryDE50StateAbstract doCancel() {
-        return null;
     }
 
 }

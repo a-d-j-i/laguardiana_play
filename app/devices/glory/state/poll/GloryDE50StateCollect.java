@@ -5,17 +5,17 @@
 package devices.glory.state.poll;
 
 import devices.glory.GloryDE50Device;
-import devices.glory.operation.GloryDE50OperationResponse;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.collect_mode;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.deposit;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.initial;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.manual;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.neutral;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.normal_error_recovery_mode;
-import static devices.glory.operation.GloryDE50OperationResponse.D1Mode.storing_error_recovery_mode;
-import static devices.glory.operation.GloryDE50OperationResponse.SR1Mode.storing_error;
-import devices.glory.state.GloryDE50Error;
-import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.response.GloryDE50ResponseWithData;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.collect_mode;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.deposit;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.initial;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.manual;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.neutral;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.normal_error_recovery_mode;
+import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.storing_error_recovery_mode;
+import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.storing_error;
+import devices.glory.state.GloryDE50StateError;
+import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.BAG_COLLECTED;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS;
@@ -27,9 +27,9 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryDE50Collect extends GloryDE50StatePoll {
+public class GloryDE50StateCollect extends GloryDE50StatePoll {
 
-    public GloryDE50Collect(GloryDE50Device api) {
+    public GloryDE50StateCollect(GloryDE50Device api) {
         super(api);
     }
 
@@ -39,7 +39,7 @@ public class GloryDE50Collect extends GloryDE50StatePoll {
     }
 
     @Override
-    public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse) {
+    public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse) {
         GloryDE50StateAbstract sret;
         Logger.debug("COLLECT_COMMAND");
 
@@ -50,11 +50,11 @@ public class GloryDE50Collect extends GloryDE50StatePoll {
             }
             api.notifyListeners(BAG_COLLECTED);
             Logger.debug("COLLECT DONE");
-            return new GloryDE50GotoNeutral(api);
+            return new GloryDE50StateGotoNeutral(api);
         }
         switch (lastResponse.getSr1Mode()) {
             case storing_error:
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN, "Storing error must call admin");
         }
         switch (lastResponse.getD1Mode()) {
             case collect_mode:
@@ -78,11 +78,11 @@ public class GloryDE50Collect extends GloryDE50StatePoll {
                 break;
             case neutral:
                 if (lastResponse.isCassetteFullCounter()) {
-                    return new GloryDE50RotateCassete(api, this);
+                    return new GloryDE50StateRotateCassete(api, this);
                 }
                 break;
             default:
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
                         String.format("gotoNeutralInvalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
 
@@ -93,11 +93,6 @@ public class GloryDE50Collect extends GloryDE50StatePoll {
          */
         Logger.debug("COLLECT DONE CANCEL");
         return this;
-    }
-
-    @Override
-    public GloryDE50StateAbstract doCancel() {
-        return null;
     }
 
 }

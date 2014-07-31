@@ -10,9 +10,9 @@ import play.Logger;
  *
  * @author adji
  */
-public class GloryDE50OpenPort extends GloryDE50StateAbstract {
+public class GloryDE50StateOpenPort extends GloryDE50StateAbstract {
 
-    public GloryDE50OpenPort(GloryDE50Device api) {
+    public GloryDE50StateOpenPort(GloryDE50Device api) {
         super(api);
     }
 
@@ -24,7 +24,7 @@ public class GloryDE50OpenPort extends GloryDE50StateAbstract {
             if (api.open(openPort.getPort())) {
                 Logger.debug("GloryDE50OpenPort new port %s", openPort.getPort());
                 task.setReturnValue(true);
-                return new GloryDE50WaitForOperation(api);
+                return new GloryDE50StateWaitForOperation(api);
             }
             Logger.debug("GloryDE50OpenPort new port %s failed to open", openPort.getPort());
             task.setReturnValue(false);

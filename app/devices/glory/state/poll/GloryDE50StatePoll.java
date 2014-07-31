@@ -1,88 +1,82 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package devices.glory.state.poll;
 
+import devices.device.DeviceMessageInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskCancel;
+import devices.device.task.DeviceTaskMessage;
+import devices.device.task.DeviceTaskReadTimeout;
 import devices.glory.GloryDE50Device;
 import devices.glory.operation.GloryDE50OperationInterface;
-import devices.glory.operation.GloryDE50OperationResponse;
-import devices.glory.state.GloryDE50Error;
-import devices.glory.state.GloryDE50Error.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.response.GloryDE50ResponseWithData;
 import devices.glory.state.GloryDE50StateAbstract;
-import devices.glory.state.GloryDE50StateOperation;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.CANCELING;
-import java.util.concurrent.atomic.AtomicBoolean;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-abstract public class GloryDE50StatePoll extends GloryDE50StateOperation {
-
-    final AtomicBoolean mustCancel = new AtomicBoolean(false);
+abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
 
     public GloryDE50StatePoll(GloryDE50Device api) {
         super(api);
     }
 
-    abstract public GloryDE50StateAbstract poll(GloryDE50OperationResponse lastResponse);
-
-    abstract public GloryDE50StateAbstract doCancel();
-
-    GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface op) {
-        if (op != null) {
-            GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-            String error = api.sendGloryDE50Operation(op, false, response);
-            if (error != null) {
-                Logger.error("Error %s sending cmd : %s", error, op.getDescription());
-                return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
-            }
-        }
-        return null;
+    protected GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface op) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    boolean isError() {
+    protected String sendGloryDE50Operation(GloryDE50OperationInterface op, boolean debug, GloryDE50ResponseWithData response) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public DeviceStateInterface call(DeviceTaskAbstract task) {
-
-        if (mustCancel.get()) {
-            api.notifyListeners(CANCELING);
-            Logger.debug("doCancel");
-            GloryDE50StateAbstract ret = doCancel();
-            if (ret != null) {
-                return ret;
-            }
-            return new GloryDE50GotoNeutral(api);
-        }
-
-        GloryDE50OperationResponse response = new GloryDE50OperationResponse();
-        String error = api.sendGloryDE50Operation(new devices.glory.operation.Sense(), false, response);
-        if (error != null) {
-            Logger.error("Error %s sending cmd : SENSE", error);
-            return new GloryDE50Error(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, error);
-        }
-        Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", response.getD1Mode().name(), response.getSr1Mode().name()));
-        GloryDE50StateAbstract ret = poll(response);
-        if (ret != this) {
-            return ret;
-        }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
+    public GloryDE50StateAbstract init() {
+        senseOp = new devices.glory.operation.Sense();
+        String err = api.writeOperation(senseOp, false);
+        if (err != null) {
+            Logger.debug("GloryDE50StatePoll error in init %s", err);
         }
         return null;
     }
+    private GloryDE50OperationInterface senseOp = null;
 
-    public boolean cancelDeposit() {
-        mustCancel.set(true);
-        return true;
+    abstract public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse);
+
+    @Override
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
+        if (task instanceof DeviceTaskMessage) {
+            DeviceTaskMessage msgt = (DeviceTaskMessage) task;
+            DeviceMessageInterface message = msgt.getMessage();
+            if (message != senseOp) {
+                Logger.error("This message %s don't correspond to the sense I sent", message.toString());
+            } else {
+                GloryDE50ResponseWithData resp = (GloryDE50ResponseWithData) msgt.getResponse();
+                Logger.debug("Got response : %s to operation : %s", resp.toString(), resp.toString());
+                Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", resp.getD1Mode().name(), resp.getSr1Mode().name()));
+                task.setReturnValue(true);
+                return poll(resp);
+            }
+        } else if (task instanceof DeviceTaskReadTimeout) {
+            senseOp = new devices.glory.operation.Sense();
+            String err = api.writeOperation(senseOp, false);
+            if (err != null) {
+                Logger.debug("GloryDE50StatePoll error in writeOperation %s", err);
+                task.setReturnValue(false);
+            } else {
+                task.setReturnValue(true);
+            }
+            return null;
+        } else if (task instanceof DeviceTaskCancel) {
+            Logger.debug("doCancel");
+            task.setReturnValue(true);
+            api.notifyListeners(CANCELING);
+            return new GloryDE50StateGotoNeutral(api);
+        }
+        // if we want to support operations.
+        return super.call(task);
+
     }
 
     /*

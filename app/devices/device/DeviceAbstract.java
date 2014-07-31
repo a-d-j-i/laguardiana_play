@@ -26,7 +26,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
     abstract public DeviceStateInterface getInitState();
 
     private DeviceStateInterface currentState;
-    final ExecutorService taskExecutor;
+    final private ExecutorService taskExecutor;
 
     public DeviceAbstract() {
         this.taskExecutor = Executors.newSingleThreadExecutor();

@@ -1,7 +1,6 @@
-package devices.glory.operation;
+package devices.glory.response;
 
-import devices.glory.operation.GloryDE50OperationResponse;
-import devices.glory.operation.GloryDE50OperationResponse.Denomination;
+import devices.glory.response.GloryDE50ResponseWithData.Denomination;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +14,7 @@ import java.util.Map;
  *
  * @author adji
  */
-public class GloryDE50OperationResponseParser implements Serializable {
+public class GloryDE50ResponseDetailsWithData implements Serializable, GloryDE50ResponseDetailsInterface {
 
     static final HashMap< Byte, String> commands = new HashMap< Byte, String>();
 
@@ -94,11 +93,11 @@ public class GloryDE50OperationResponseParser implements Serializable {
     boolean haveData = false;
     List<Denomination> denominationData = null;
 
-    public GloryDE50OperationResponseParser(GloryDE50OperationResponse r) {
+    public GloryDE50ResponseDetailsWithData(GloryDE50ResponseWithData r) {
         if (r == null) {
             return;
         }
-        GloryDE50OperationResponse response = (GloryDE50OperationResponse) r;
+        GloryDE50ResponseWithData response = (GloryDE50ResponseWithData) r;
         denominationData = response.getDenominationData();
         bills = response.getBills();
         SR1Mode = String.format("Sr1 mode 0x%x %s", response.getSr1Mode().getByte(), response.getSr1Mode().name());

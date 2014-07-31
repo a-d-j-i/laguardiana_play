@@ -1,6 +1,7 @@
 package devices.glory.operation;
 
-import devices.glory.operation.GloryDE50OperationResponse.Denomination;
+import devices.glory.response.GloryDE50ResponseWithData;
+import devices.glory.response.GloryDE50ResponseWithData.Denomination;
 
 /*
  * This command is return Denomination Data.
@@ -12,7 +13,7 @@ public class DenominationDataRequest extends OperationdWithDataResponse {
     }
 
     @Override
-    public String fillResponse(int len, byte[] dr, final GloryDE50OperationResponse response) {
+    public String fillResponse(int len, byte[] dr, final GloryDE50ResponseWithData response) {
         String err = super.fillResponse(len, dr, response);
         if (err != null) {
             return err;

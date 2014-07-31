@@ -7,7 +7,9 @@ import devices.glory.operation.LogDataRequest;
 import devices.glory.operation.OperationWithAckResponse;
 import devices.glory.operation.Sense;
 import devices.glory.operation.StartUpload;
-import devices.glory.operation.GloryDE50OperationResponse;
+import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50ResponseError;
+import devices.glory.response.GloryDE50ResponseWithData;
 import devices.glory.task.GloryDE50TaskOperation;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,7 +18,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 import machines.MachineDeviceDecorator;
 import models.db.LgDevice;
 import play.Logger;
@@ -40,13 +41,20 @@ public class GloryDE50Controller extends Application {
 
     // Counter Class end
     public static void getStatus(Integer deviceId, boolean retval) {
-        GloryDE50OperationResponse response = new Gson().fromJson(flash.get("status"), GloryDE50OperationResponse.class);
-        if (response != null) {
-            Logger.debug("STATUS : %s", response.toString());
-            renderArgs.put("status", response.getRepr());
+        GloryDE50Response glResponse;
+        if (flash.get("responseData") != null) {
+            glResponse = new Gson().fromJson(flash.get("responseData"), GloryDE50ResponseWithData.class);
+        } else if (flash.get("responseError") != null) {
+            glResponse = new Gson().fromJson(flash.get("responseError"), GloryDE50ResponseError.class);
+        } else {
+            glResponse = new Gson().fromJson(flash.get("response"), GloryDE50Response.class);
+        }
+        if (glResponse != null) {
+            Logger.debug("STATUS : %s %s", glResponse.getClass().getSimpleName(), glResponse.toString());
+            renderArgs.put("status", glResponse.getRepr());
         }
         renderArgs.put("lastCmd", flash.get("lastCmd"));
-        renderArgs.put("lastResult", retval ? "SUCCESS" : "FAIL");
+        renderArgs.put("lastResult", !glResponse.getRepr().isError() ? "SUCCESS" : "FAIL");
         DeviceEvent de = glory.getLastEvent();
         String lastEvent = "";
         if (de != null) {
@@ -173,11 +181,12 @@ public class GloryDE50Controller extends Application {
     public static void logDataRequest(Integer deviceId) throws IOException, InterruptedException {
         flash.put("lastCmd", "logDataRequest");
         GloryDE50TaskOperation st = sendGloryDE50Operation(new devices.glory.operation.StartUpload(StartUpload.Files.COUNTER_INFO));
-        if (st.isError()) {
+        if (st.getResponse() instanceof GloryDE50ResponseError) {
             setStatusAndRedirect(deviceId, st);
             return;
         }
-        int fileSize = st.getResponse().getFileSize();
+        GloryDE50ResponseWithData opResponse = (GloryDE50ResponseWithData) st.getResponse();
+        int fileSize = opResponse.getFileSize();
         Logger.debug("Filesize : %d", fileSize);
         int block;
         FileWriter fstream = null;
@@ -188,11 +197,12 @@ public class GloryDE50Controller extends Application {
             for (block = 0; (block * 512) < fileSize; block++) {
                 LogDataRequest l = new devices.glory.operation.LogDataRequest(block);
                 st = sendGloryDE50Operation(l);
-                if (st.isError()) {
+                if (st.getResponse() instanceof GloryDE50ResponseError) {
                     setStatusAndRedirect(deviceId, st);
                     return;
                 }
-                byte[] b = st.getResponse().getData();
+                opResponse = (GloryDE50ResponseWithData) st.getResponse();
+                byte[] b = opResponse.getData();
                 int i;
                 for (i = 0; i < (b.length - 8) / 2 && (block * 512 + i) < fileSize; i++) {
                     char ch = (char) (16 * (b[2 * i + 8] - 0x30) + ((b[ 2 * i + 9] - 0x30)));
@@ -212,7 +222,7 @@ public class GloryDE50Controller extends Application {
 
         EndUpload c1 = new devices.glory.operation.EndUpload();
         st = sendGloryDE50Operation(c1);
-        if (st.isError()) {
+        if (st.getResponse() instanceof GloryDE50ResponseError) {
             setStatusAndRedirect(deviceId, st);
             return;
         }
@@ -272,8 +282,9 @@ public class GloryDE50Controller extends Application {
         flash.put("lastCmd", "getFileInformation");
         String gFileName = "UPGRADES.TXT";
         GloryDE50TaskOperation op = sendGloryDE50Operation(new devices.glory.operation.GetFileInformation(gFileName));
-        if (op.getResponse().getFileSize() > 0 && op.getResponse().getDate() != null) {
-            Logger.debug("Filesize : %d, Date : %s", op.getResponse().getFileSize(), op.getResponse().getDate().toString());
+        GloryDE50ResponseWithData opResponse = (GloryDE50ResponseWithData) op.getResponse();
+        if (opResponse.getFileSize() > 0 && opResponse.getDate() != null) {
+            Logger.debug("Filesize : %d, Date : %s", opResponse.getFileSize(), opResponse.getDate().toString());
         } else {
             Logger.debug("File not");
         }
@@ -291,7 +302,7 @@ public class GloryDE50Controller extends Application {
     static private GloryDE50TaskOperation UploadData(int fileSize, String fileName, byte[] data) {
         flash.put("lastCmd", "UploadData");
         GloryDE50TaskOperation st = sendGloryDE50Operation(new devices.glory.operation.StartDownload(fileSize, fileName));
-        if (st.isError()) {
+        if (st.getResponse() instanceof GloryDE50ResponseError) {
             return st;
         }
 
@@ -307,12 +318,12 @@ public class GloryDE50Controller extends Application {
             }
             Logger.debug("Packet no %d", j);
             st = sendGloryDE50Operation(new devices.glory.operation.RequestDownload(j, b));
-            if (st.isError()) {
+            if (st.getResponse() instanceof GloryDE50ResponseError) {
                 return st;
             }
         }
         st = sendGloryDE50Operation(new devices.glory.operation.EndDownload());
-        if (st.isError()) {
+        if (st.getResponse() instanceof GloryDE50ResponseError) {
             return st;
         }
         return null;
@@ -370,11 +381,16 @@ public class GloryDE50Controller extends Application {
         } catch (ExecutionException ex) {
         }
         if (op.getResponse() != null) {
-            GloryDE50OperationResponse ret = op.getResponse();
-            Logger.debug("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY : %s", ret.toString());
-            flash.put("status", new Gson().toJson(ret));
+            if (op.getResponse() instanceof GloryDE50ResponseWithData) {
+                flash.put("responseData", new Gson().toJson(op.getResponse()));
+            } else if (op.getResponse() instanceof GloryDE50ResponseError) {
+                flash.put("responseError", new Gson().toJson(op.getResponse()));
+            } else {
+                flash.put("response", new Gson().toJson(op.getResponse()));
+            }
         }
-        getStatus(deviceId, !op.isError());
+        //redirect
+        getStatus(deviceId, true);
     }
 
 }
