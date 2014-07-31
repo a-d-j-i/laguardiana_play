@@ -24,7 +24,7 @@ public class P500MeiStateAccepting extends P500MeiStateBillDepositContinue {
                 Logger.error("Error calling machine.cancel");
             }
         } else if (st.is(MeiEbdsStatus.CANCELED)) {
-            machine.setCurrentState(new P500MeiStateFinish(machine, currentUserId, billDepositId, FinishCause.FINISH_CAUSE_OK));
+            machine.setCurrentState(new P500MeiStateBillDepositFinish(machine, currentUserId, billDepositId, FinishCause.FINISH_CAUSE_OK));
             return;
         }
         super.onDeviceEvent(dev, st);

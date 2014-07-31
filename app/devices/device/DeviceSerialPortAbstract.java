@@ -84,7 +84,7 @@ abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
 
     public synchronized void close() {
         if (serialPortReader != null) {
-            Logger.info("%s Closing mei serial port ", this.toString());
+            Logger.info("%s Closing serial port ", this.toString());
             serialPortReader.close();
             serialPortReader = null;
         }
@@ -93,7 +93,6 @@ abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
     @Override
     public void finish() {
         debug("Executing finish");
-        Logger.info("Closing serial port ");
         close();
     }
 

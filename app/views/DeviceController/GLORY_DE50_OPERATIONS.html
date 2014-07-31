@@ -27,7 +27,7 @@
                     <div style="margin:20px;">
                         <div>
                             <ul class="columns">
-                                <li class="fixed column" style="width: 30%">
+                                <li class="fixed column" style="width: 20%">
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.sense(deviceId)}">Sense</a>
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.remoteCancel(deviceId)}">remoteCancel</a>
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setDepositMode(deviceId)}">setDepositMode</a>
@@ -39,7 +39,7 @@
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setCollectMode(deviceId)}">setCollectMode</a>
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setErrorRecoveryMode(deviceId)}">setErrorRecoveryMode</a>
                                 </li>
-                                <li class="fixed column" style="width: 30%">
+                                <li class="fixed column" style="width: 20%">
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.resetDevice(deviceId)}">resetDevice</a>
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.setStroringErrorRecoveryMode(deviceId)}">StroringErrorRecovery</a>
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.openEscrow(deviceId)}">openEscrow</a>
@@ -51,7 +51,7 @@
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,3)}">switchCurrent3</a>
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,4)}">switchCurrent4</a>
                                 </li>
-                                <li class="fixed column" style="width: 30%">
+                                <li class="fixed column" style="width: 20%">
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,5)}">switchCurrent5</a>
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,6)}">switchCurrent6</a>
                                     <a class="boton ${play.configuration['style.button_color']} full_width" href="@{GloryDE50Controller.switchCurrency(deviceId,7)}">switchCurrent7</a>
@@ -67,6 +67,34 @@
                                 </li>
                             </ul>
                         </div>
+                        #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
+                        <p style="word-wrap: break-word;"> Denomination Data
+                        <table>
+                            <thead></thead>
+                            <tbody>
+                                #{list items:status?.getDenominationData(), as:'p'}    
+                                #{if ( p_index - 1 ) % 2 == 0}<tr>#{/if}
+                                    <td>Denomination ( ${p.idx}, ${p.denominationCode} ): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if}</td>
+                                    #{if ( p_index -1 ) % 2 == 1}</tr>#{/if}
+                                #{/list}
+                            </tbody>
+                        </table>
+                        </p>
+                        #{/if}
+                        #{if ( status != null && status.getBills() != null && status.getBills().size() > 0 ) }
+                        <p style="word-wrap: break-word;"> Bills Data:
+                        <table>
+                            <thead></thead>
+                            <tbody>
+                                #{list items:status?.getBills(), as:'p'} 
+                                #{if ( p_index - 1 ) % 4 == 0}<tr>#{/if}
+                                    <td>Bill ${p}</td>
+                                    #{if ( p_index -1 ) % 4 == 3}</tr>#{/if}
+                                #{/list}
+                            </tbody>
+                        </table>
+                        </p>
+                        #{/if}
                     </div>
                 </li>
                 <li class="fixed column" style="width: 50%">
@@ -80,60 +108,20 @@
                         </div>
                     </div>
                     <div>
-
                         <p>DeviceId : ${deviceId}</p>
                         #{if ( status?.isError() ) }
-                            <p>${status?.getError()}</p>
+                        <p>${status?.getError()}</p>
                         #{/if}
                         #{else}
-                            #{if (status?.haveData() ) }
-                                <p style="word-wrap: break-word;"> 
-                                    Registers<br/>
-                                    ${status?.getSRMode()}<br/>
-                                    ${status?.getD1Mode()}<br/>
-                                    #{list items:status?.getSrBits(), as:'p'}${p}<br/>
-                                    #{/list}
-                                    #{list items:status?.getD2Bits(), as:'p'}${p}<br/>
-                                    #{/list}
-                                    #{list items:status?.getInfo(), as:'p'}${p}<br/>
-                                    #{/list}
-                                </p>
-                                <p style="word-wrap: break-word;"> Data: ${status?.getData()}</p>
-                            #{/if}
-                        #{if (status?.haveData() ) }
-                            #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
-                            <p style="word-wrap: break-word;"> 
-                                Denomination Data
-                            <table>
-                                <thead></thead>
-                                <tbody>
-                                    #{list items:status?.getDenominationData(), as:'p'}    
-                                    #{if ( p_index - 1 ) % 2 == 0}<tr>#{/if}
-                                        <td>Denomination ( ${p.idx}, ${p.denominationCode} ): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if}</td>
-                                        #{if ( p_index -1 ) % 2 == 1}</tr>#{/if}
-                                    #{/list}
-                                </tbody>
-                            </table>
-                            </p>
-                            #{/if}
-                            #{else}
-                                <p style="word-wrap: break-word;"> 
-                                    Bills Data:
-                                <table>
-                                    <thead></thead>
-                                    <tbody>
-                                        #{list items:status?.getBills(), as:'p'} 
-                                        #{if ( p_index - 1 ) % 4 == 0}<tr>#{/if}
-                                            <td>Bill ${p}</td>
-                                            #{if ( p_index -1 ) % 4 == 3}</tr>#{/if}
-                                        #{/list}
-                                    </tbody>
-                                </table>
-                                #{else}
-                                No bill information
-                                #{/else}
-                            </p>
-                            #{/else}
+                        #{if (status?.hasData()) }
+                        <div style="word-wrap: break-word;"> 
+                            Registers: SRMODE: ${status?.getSr1Mode()} , D1MODE : ${status?.getD1Mode()} , ERROR CODE : ${status?.getErrorCodeRepr()}<br/>
+                            <ul data-columns="3" style="columns: 3; -webkit-columns: 3; -moz-columns: 3;">
+                                #{list items:status?.getDRepr(), as:'p'}<li>${p}</li>#{/list}
+                                #{list items:status?.getSRRepr(), as:'p'}<li>${p}</li>#{/list}
+                            </ul>
+                        </div>
+                        <p style="word-wrap: break-word;"> Data: ${status?.getDataRepr()}</p>
                         #{/if}
                         #{/else}
                     </div>

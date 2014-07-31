@@ -46,7 +46,8 @@ final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
             if (response instanceof MeiEbdsAcceptorMsgAck) {
                 lastResult = (MeiEbdsAcceptorMsgAck) response;
             }
-            return super.runTask(new DeviceTaskMessage(hostMsg, r));
+            deviceTask.setReturnValue(true);
+            return super.runTask(new DeviceTaskMessage(hostMsg, response));
         } else {
             return super.runTask(deviceTask);
         }

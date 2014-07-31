@@ -10,9 +10,9 @@ import devices.device.DeviceResponseInterface;
 public class DeviceTaskMessage extends DeviceTaskAbstract {
 
     private final DeviceMessageInterface message;
-    private final DeviceTaskResponse response;
+    private final DeviceResponseInterface response;
 
-    public DeviceTaskMessage(DeviceMessageInterface msg, DeviceTaskResponse response) {
+    public DeviceTaskMessage(DeviceMessageInterface msg, DeviceResponseInterface response) {
         this.message = msg;
         this.response = response;
     }
@@ -22,13 +22,7 @@ public class DeviceTaskMessage extends DeviceTaskAbstract {
     }
 
     public DeviceResponseInterface getResponse() {
-        return response.getResponse();
-    }
-
-    @Override
-    public void setReturnValue(boolean returnValue) {
-        response.setReturnValue(returnValue);
-        super.setReturnValue(returnValue);
+        return response;
     }
 
     @Override

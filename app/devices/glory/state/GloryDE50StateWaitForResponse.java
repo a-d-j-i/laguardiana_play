@@ -6,8 +6,9 @@ import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskReadTimeout;
 import devices.device.task.DeviceTaskResponse;
 import devices.glory.GloryDE50Device;
-import devices.glory.response.GloryDE50ResponseWithData;
-import devices.glory.response.GloryDE50AcceptorMsg;
+import devices.glory.operation.GloryDE50OperationInterface;
+import devices.glory.operation.OperationWithAckResponse;
+import devices.glory.response.GloryDE50Response;
 import devices.glory.task.GloryDE50TaskOperation;
 import play.Logger;
 
@@ -17,13 +18,30 @@ import play.Logger;
  */
 public class GloryDE50StateWaitForResponse extends GloryDE50StateAbstract {
 
-    private final GloryDE50TaskOperation opTask;
-    private final GloryDE50StateAbstract nextStep;
+    static public interface GloryDE50StateWaitForResponseCallback {
 
-    public GloryDE50StateWaitForResponse(GloryDE50Device api, GloryDE50TaskOperation opTask, GloryDE50StateAbstract nextStep) {
+        DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response);
+    }
+    private final GloryDE50TaskOperation opTask;
+    private final GloryDE50StateWaitForResponseCallback callBack;
+
+    public GloryDE50StateWaitForResponse(GloryDE50Device api, GloryDE50TaskOperation opTask, GloryDE50StateWaitForResponseCallback callBack) {
         super(api);
         this.opTask = opTask;
-        this.nextStep = nextStep;
+        this.callBack = callBack;
+    }
+
+    public GloryDE50StateWaitForResponse(GloryDE50Device api, GloryDE50TaskOperation opTask, final DeviceStateInterface prevStep) {
+        super(api);
+        this.opTask = opTask;
+        this.callBack = new GloryDE50StateWaitForResponseCallback() {
+
+            @Override
+            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                return prevStep;
+            }
+
+        };
     }
 
     @Override
@@ -31,11 +49,13 @@ public class GloryDE50StateWaitForResponse extends GloryDE50StateAbstract {
         if (task instanceof DeviceTaskResponse) {
             DeviceTaskResponse rTask = (DeviceTaskResponse) task;
             DeviceResponseInterface taskResponse = rTask.getResponse();
-            if (taskResponse instanceof GloryDE50AcceptorMsg) {
-                GloryDE50AcceptorMsg response = (GloryDE50AcceptorMsg) taskResponse;
-                opTask.fillResponse(response);
+            if (taskResponse instanceof GloryDE50Response) {
+                OperationWithAckResponse op = (OperationWithAckResponse) opTask.getOperation();
+                opTask.setResponse((GloryDE50Response) taskResponse);
                 task.setReturnValue(true);
-                return nextStep;
+                // give next step the oportunity to process response.
+                Logger.debug("!!!!!!!!! GloryDE50StateWaitForResponse calling on response for operation %s, response %s", op.toString(), taskResponse.toString());
+                return callBack.onResponse(op, (GloryDE50Response) taskResponse);
             } else {
                 Logger.error("invalid response type : %s", taskResponse.toString());
                 task.setReturnValue(false);
@@ -44,7 +64,7 @@ public class GloryDE50StateWaitForResponse extends GloryDE50StateAbstract {
         } else if (task instanceof DeviceTaskReadTimeout) {
             opTask.setError("timeout");
             task.setReturnValue(true);
-            return new GloryDE50StateOpenPort(api);
+            return new GloryDE50StateError(api, GloryDE50StateError.COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, "timeout reading from port");
         } else if (task instanceof GloryDE50TaskOperation) {
             GloryDE50TaskOperation opt = (GloryDE50TaskOperation) task;
             opt.setError("Only one operation at a time");
@@ -55,7 +75,7 @@ public class GloryDE50StateWaitForResponse extends GloryDE50StateAbstract {
 
     @Override
     public String toString() {
-        return "GloryDE50StateWaitForResponse";
+        return "GloryDE50StateWaitForResponse : " + opTask.toString();
     }
 
 }

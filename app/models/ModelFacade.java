@@ -6,7 +6,7 @@ import devices.printer.OSPrinter;
 import java.util.List;
 import java.util.Map;
 import javax.print.PrintService;
-import machines.GloryDE50.MachineP500_GLORY;
+import machines.P500_GloryDE50.MachineP500_GLORY;
 import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
 import machines.MachineInterface;

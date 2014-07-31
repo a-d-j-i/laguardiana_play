@@ -1,6 +1,9 @@
 package devices.glory.state.poll;
 
+import devices.device.state.DeviceStateInterface;
 import devices.glory.GloryDE50Device;
+import devices.glory.operation.GloryDE50OperationInterface;
+import devices.glory.response.GloryDE50Response;
 import devices.glory.response.GloryDE50ResponseWithData;
 import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.collect_mode;
 import static devices.glory.response.GloryDE50ResponseWithData.D1Mode.deposit;
@@ -23,6 +26,7 @@ import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.waiting;
 import devices.glory.state.GloryDE50StateError;
 import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
+import devices.glory.state.GloryDE50StateWaitForResponse;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
 import play.Logger;
 
@@ -48,7 +52,9 @@ public class GloryDE50StateStoringErrorReset extends GloryDE50StatePoll {
             case storing_error_recovery_mode:
                 switch (lastResponse.getSr1Mode()) {
                     case abnormal_device:
-                        return new GloryDE50StateReset(api, this);
+                        // TODO: GOTO NEUTRAL OR SOMETHING ??
+                        return sendGloryOperation(new devices.glory.operation.ResetDevice());
+//                        return new GloryDE50StateReset(api);
                     case storing_error:
                     case escrow_open_request:
                         if (api.isClosing()) {
@@ -82,12 +88,15 @@ public class GloryDE50StateStoringErrorReset extends GloryDE50StatePoll {
                             api.notifyListeners(JAM);
                             break;
                         }
-                        GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.operation.CloseEscrow());
-                        if (sret != null) {
-                            return sret;
-                        }
-                        api.setClosing(true);
-                        break;
+                        return sendGloryOperation(new devices.glory.operation.CloseEscrow(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
+
+                            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                                if (!response.isError()) {
+                                    api.setClosing(true);
+                                }
+                                return GloryDE50StateStoringErrorReset.this;
+                            }
+                        });
                     case escrow_close:
                         api.setClosing(true);
                         break;
@@ -127,6 +136,11 @@ public class GloryDE50StateStoringErrorReset extends GloryDE50StatePoll {
                         String.format("StoringErrorResetCommand Invalid D1-4 mode %s", lastResponse.getD1Mode().name()));
         }
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "GloryDE50StateStoringErrorReset{" + "retries=" + retries + '}';
     }
 
 }

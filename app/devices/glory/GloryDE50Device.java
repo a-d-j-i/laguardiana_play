@@ -4,6 +4,7 @@ import devices.device.DeviceSerialPortAbstract;
 import devices.device.state.DeviceStateInterface;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.state.GloryDE50StateOpenPort;
+import devices.glory.task.GloryDE50TaskOperation;
 import devices.serial.SerialPortAdapterAbstract;
 import devices.serial.SerialPortAdapterAbstract.PortConfiguration;
 import java.security.InvalidParameterException;
@@ -31,11 +32,11 @@ final public class GloryDE50Device extends DeviceSerialPortAbstract {
         return new GloryDE50StateOpenPort(this);
     }
 
-    public String writeOperation(GloryDE50OperationInterface op, boolean debug) {
+    public String writeOperation(GloryDE50TaskOperation op, boolean debug) {
         if (op == null) {
             throw new InvalidParameterException("Glory unknown command");
         }
-        byte[] d = op.getCmdStr();
+        byte[] d = op.getOperation().getCmdStr();
         if (!write(d)) {
             return String.format("Error writting to port: %s", toString());
         }

@@ -9,5 +9,5 @@ public interface GloryDE50OperationInterface extends DeviceMessageInterface {
 
     public byte[] getCmdStr();
 
-    public GloryDE50Response getResponse(int len, byte[] b);
+    public GloryDE50Response getResponse();
 }

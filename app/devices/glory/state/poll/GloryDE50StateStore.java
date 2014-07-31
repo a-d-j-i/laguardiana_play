@@ -4,7 +4,6 @@ import devices.glory.GloryDE50Device;
 import devices.glory.response.GloryDE50ResponseWithData;
 import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_reset;
 import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_restoration;
-import devices.glory.operation.ResetDevice;
 import devices.glory.state.GloryDE50StateAbstract;
 
 /**
@@ -31,6 +30,11 @@ public class GloryDE50StateStore extends GloryDE50StatePoll {
             default:
                 return this;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "GloryDE50StateStore";
     }
 
 }

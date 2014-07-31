@@ -1,19 +1,22 @@
 package devices.glory.response;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import devices.device.DeviceResponseInterface;
 
 /**
  *
  * @author adji
  */
-public class GloryDE50ResponseError extends GloryDE50Response implements GloryDE50ResponseInterface {
+public class GloryDE50ResponseError extends GloryDE50Response implements DeviceResponseInterface {
 
-    private final String error;
+    protected String error;
 
     public GloryDE50ResponseError(String error) {
         this.error = error;
+    }
+
+    @Override
+    public boolean isError() {
+        return true;
     }
 
     public String getError() {
@@ -23,55 +26,5 @@ public class GloryDE50ResponseError extends GloryDE50Response implements GloryDE
     @Override
     public String toString() {
         return "GloryDE50ResponseError " + "error=" + error;
-    }
-
-    @Override
-    public GloryDE50ResponseDetailsInterface getRepr() {
-        return new GloryDE50ResponseDetailsInterface() {
-
-            public boolean isError() {
-                return true;
-            }
-
-            public String getError() {
-                return error;
-            }
-
-            public String getSRMode() {
-                return null;
-            }
-
-            public String getD1Mode() {
-                return null;
-            }
-
-            public ArrayList<String> getSrBits() {
-                return null;
-            }
-
-            public ArrayList<String> getD2Bits() {
-                return null;
-            }
-
-            public ArrayList<String> getInfo() {
-                return null;
-            }
-
-            public String getData() {
-                return null;
-            }
-
-            public Map<Integer, Integer> getBills() {
-                return null;
-            }
-
-            public boolean haveData() {
-                return false;
-            }
-
-            public List<GloryDE50ResponseWithData.Denomination> getDenominationData() {
-                return null;
-            }
-        };
     }
 }

@@ -27,4 +27,9 @@ public class GloryDE50StateRotateCassete extends GloryDE50StatePoll {
         return prevStep;
     }
 
+    @Override
+    public String toString() {
+        return "GloryDE50StateRotateCassete{" + "prevStep=" + prevStep + '}';
+    }
+
 }

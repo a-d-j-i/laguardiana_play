@@ -17,6 +17,7 @@ import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.storing_e
 import devices.glory.state.GloryDE50StateError;
 import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
+import devices.glory.state.GloryDE50StateWaitForOperation;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.BAG_COLLECTED;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_HOPER;
@@ -50,7 +51,7 @@ public class GloryDE50StateCollect extends GloryDE50StatePoll {
             }
             api.notifyListeners(BAG_COLLECTED);
             Logger.debug("COLLECT DONE");
-            return new GloryDE50StateGotoNeutral(api);
+            return new GloryDE50StateGotoNeutral(api, new GloryDE50StateWaitForOperation(api), false, false);
         }
         switch (lastResponse.getSr1Mode()) {
             case storing_error:
@@ -93,6 +94,11 @@ public class GloryDE50StateCollect extends GloryDE50StatePoll {
          */
         Logger.debug("COLLECT DONE CANCEL");
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "GloryDE50StateCollect";
     }
 
 }

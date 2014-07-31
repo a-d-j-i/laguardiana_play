@@ -16,7 +16,6 @@ import devices.glory.GloryDE50Device;
 import devices.glory.state.poll.GloryDE50StateCollect;
 import devices.glory.state.poll.GloryDE50StateCount;
 import devices.glory.state.poll.GloryDE50StateEnvelopeDeposit;
-import devices.glory.state.poll.GloryDE50StateGotoNeutral;
 import devices.glory.state.poll.GloryDE50StateReset;
 import devices.glory.state.poll.GloryDE50StateStoringErrorReset;
 import devices.glory.task.GloryDE50TaskCount;
@@ -51,7 +50,7 @@ public class GloryDE50StateWaitForOperation extends GloryDE50StateAbstract {
             return new GloryDE50StateEnvelopeDeposit(api);
         } else if (task instanceof DeviceTaskReset) {
             task.setReturnValue(true);
-            return new GloryDE50StateReset(api, new GloryDE50StateGotoNeutral(api));
+            return new GloryDE50StateReset(api, this);
         } else if (task instanceof DeviceTaskStoringErrorReset) {
             task.setReturnValue(true);
             return new GloryDE50StateStoringErrorReset(api);
@@ -68,7 +67,7 @@ public class GloryDE50StateWaitForOperation extends GloryDE50StateAbstract {
             }
         } else if (task instanceof GloryDE50TaskOperation) {
             GloryDE50TaskOperation opt = (GloryDE50TaskOperation) task;
-            String err = api.writeOperation(opt.getOperation(), true);
+            String err = api.writeOperation(opt, true);
             if (err != null) {
                 opt.setError(err);
                 task.setReturnValue(false);

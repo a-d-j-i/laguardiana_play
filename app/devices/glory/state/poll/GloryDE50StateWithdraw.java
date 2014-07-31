@@ -32,4 +32,10 @@ public class GloryDE50StateWithdraw extends GloryDE50StatePoll {
         }
     }
 
+    @Override
+    public String toString() {
+        return "GloryDE50StateWithdraw";
+    }
+
+
 }

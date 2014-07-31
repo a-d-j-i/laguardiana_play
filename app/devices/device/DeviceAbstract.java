@@ -1,5 +1,6 @@
 package devices.device;
 
+import devices.device.state.DeviceStateAbstract;
 import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskAbstract;
@@ -77,18 +78,25 @@ public abstract class DeviceAbstract implements DeviceInterface {
 
     // helper for the inner thread.
     protected boolean runTask(final DeviceTaskAbstract deviceTask) {
-        debug(String.format("%s executing current step: %s with task %s", toString(), currentState, deviceTask.toString()));
-        DeviceStateInterface newState = currentState.call(deviceTask);
+        debug(String.format("------------> %s executing current step: %s with task %s", toString(), currentState, deviceTask.toString()));
+        DeviceStateAbstract newState = (DeviceStateAbstract) currentState.call(deviceTask);
         if (newState != null && currentState != newState) {
-            debug("Changing state old %s, new %s", currentState, newState.toString());
-            DeviceStateInterface initStateRet = newState.init();
-            if (initStateRet != null) {
-                newState = initStateRet;
+            while (true) {
+                debug("Changing state old %s, new %s", currentState, newState.toString());
+                if (newState.isInitialized()) {
+                    break;
+                }
+                DeviceStateAbstract initStateRet = (DeviceStateAbstract) newState.doInit();
+                if (initStateRet != null && initStateRet != newState) {
+                    newState = initStateRet;
+                } else {
+                    break;
+                }
             }
             debug("setting state to new %s", newState.toString());
             currentState = newState;
         }
-        debug("Device %s thread done", toString());
+        debug("----------------------> Device %s thread done\n\n\n", toString());
         return true;
     }
 

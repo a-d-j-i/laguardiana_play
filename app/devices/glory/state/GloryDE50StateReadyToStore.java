@@ -16,7 +16,6 @@ import play.Logger;
 public class GloryDE50StateReadyToStore extends GloryDE50StateAbstract {
 
     final GloryDE50StateAbstract prevStep;
-    boolean sended = false;
 
     public GloryDE50StateReadyToStore(GloryDE50Device api, GloryDE50StateAbstract prevStep) {
         super(api);
@@ -36,4 +35,10 @@ public class GloryDE50StateReadyToStore extends GloryDE50StateAbstract {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "GloryDE50StateReadyToStore{" + "prevStep=" + prevStep + '}';
+    }
+
 }

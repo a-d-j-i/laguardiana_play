@@ -13,7 +13,7 @@ import models.db.LgDeposit.FinishCause;
 import play.Logger;
 
 /**
- *
+ * TODO: Move to MachineStateCanceling.
  * @author adji
  */
 public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
@@ -43,7 +43,7 @@ public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
                 Logger.error("Error calling machine.cancel");
             }
         } else if (st.is(MeiEbdsStatus.CANCELED)) {
-            machine.setCurrentState(new P500MeiStateFinish(machine, currentUserId, billDepositId, FinishCause.FINISH_CAUSE_CANCEL));
+            machine.setCurrentState(new P500MeiStateBillDepositFinish(machine, currentUserId, billDepositId, FinishCause.FINISH_CAUSE_CANCEL));
             return;
         }
         super.onDeviceEvent(dev, st);

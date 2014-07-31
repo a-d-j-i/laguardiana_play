@@ -39,4 +39,9 @@ public class GloryDE50StateReset extends GloryDE50StatePoll {
         }
     }
 
+    @Override
+    public String toString() {
+        return "GloryDE50StateReset{" + "prevStep=" + prevStep + '}';
+    }
+
 }

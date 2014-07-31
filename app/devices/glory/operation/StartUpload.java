@@ -1,7 +1,5 @@
 package devices.glory.operation;
 
-import devices.glory.response.GloryDE50ResponseWithData;
-
 
 /*
  * Upload a file from DE to TM. If DE have file with same name, DE delete it.
@@ -49,31 +47,4 @@ public class StartUpload extends OperationdWithDataResponse {
     public byte[] getCmdStr() {
         return getCmdStrFromData(fileName.name().getBytes());
     }
-
-    @Override
-    public String fillResponse(int len, byte[] dr, final GloryDE50ResponseWithData response) {
-        String err = super.fillResponse(len, dr, response);
-        if (err != null) {
-            return err;
-        }
-        byte[] data = response.getData();
-        if (data == null) {
-            return "Data is null";
-        }
-        if (data.length != 8) {
-            return String.format("Invalid command (%s) response length %d expected 8 bytes hex number", getDescription(), len);
-        }
-        byte[] b = data;
-        int l = 0;
-        for (int i = 0; i < b.length; i++) {
-            if (b[i] >= 0x30 && b[i] <= 0x3F) {
-                l += getHexDigit(b[i]) * Math.pow(16, b.length - i - 1);
-            } else {
-                return String.format("Invalid digit %d == 0x%x", b[i], b[i]);
-            }
-        }
-        response.setFileSize(l);
-        return null;
-    }
-
 }

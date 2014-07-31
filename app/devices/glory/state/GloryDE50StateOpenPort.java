@@ -30,6 +30,12 @@ public class GloryDE50StateOpenPort extends GloryDE50StateAbstract {
             task.setReturnValue(false);
             return this;
         }
-        return null;
+        return super.call(task);
     }
+
+    @Override
+    public String toString() {
+        return "GloryDE50StateOpenPort";
+    }
+
 }

@@ -2,7 +2,7 @@ package devices.glory.task;
 
 import devices.device.task.DeviceTaskAbstract;
 import devices.glory.operation.GloryDE50OperationInterface;
-import devices.glory.response.GloryDE50AcceptorMsg;
+import devices.glory.operation.OperationWithAckResponse;
 import devices.glory.response.GloryDE50Response;
 import devices.glory.response.GloryDE50ResponseError;
 
@@ -12,12 +12,12 @@ import devices.glory.response.GloryDE50ResponseError;
  */
 public class GloryDE50TaskOperation extends DeviceTaskAbstract {
 
-    final GloryDE50OperationInterface operation;
+    // access internal data.
+    final OperationWithAckResponse operation;
     final boolean debug;
-    GloryDE50Response response;
 
     public GloryDE50TaskOperation(GloryDE50OperationInterface operation, boolean debug) {
-        this.operation = operation;
+        this.operation = (OperationWithAckResponse) operation;
         this.debug = debug;
     }
 
@@ -25,25 +25,22 @@ public class GloryDE50TaskOperation extends DeviceTaskAbstract {
         return operation;
     }
 
-    public boolean isDebug() {
-        return debug;
-    }
-
-    public void setError(String error) {
-        this.response = new GloryDE50ResponseError(error);
+    public void setError(String err) {
+        operation.setResponse(new GloryDE50ResponseError(err));
         setReturnValue(false);
     }
 
-    public void fillResponse(GloryDE50AcceptorMsg msg) {
-        response = operation.getResponse(msg.getLength(), msg.getData());
+    public void setResponse(GloryDE50Response response) {
+        operation.setResponse(response);
         setReturnValue(true);
     }
 
     public GloryDE50Response getResponse() {
-        if (!isDone()) {
-            return null;
-        }
-        return response;
+        return operation.getResponse();
+    }
+
+    public boolean isDebug() {
+        return debug;
     }
 
     @Override

@@ -1,7 +1,11 @@
 package devices.glory.state;
 
+import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusError;
+import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskReset;
 import devices.glory.GloryDE50Device;
+import devices.glory.state.poll.GloryDE50StateReset;
 import play.Logger;
 
 /**
@@ -23,17 +27,18 @@ public class GloryDE50StateError extends GloryDE50StateAbstract {
         Logger.error(error);
         api.notifyListeners(new DeviceStatusError(error));
     }
-    
-    /*
-     @Override
-     public boolean reset() {
-     return comunicate(new Callable< GloryDE50StateAbstract>() {
-     public GloryDE50StateAbstract call() throws Exception {
-     return new Reset(getApi(), new GotoNeutral(getApi()));
-     }
-     });
-     }
 
+    @Override
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
+        if (task instanceof DeviceTaskReset) { // skip
+            task.setReturnValue(true);
+            return new GloryDE50StateReset(api, new GloryDE50StateWaitForOperation(api));
+        }
+        Logger.error("Unexpected task : %s", task.toString());
+        task.setReturnValue(false);
+        return null;
+    }
+    /*
      @Override
      public boolean storingErrorReset() {
      return comunicate(new Callable< GloryDE50StateAbstract>() {
@@ -43,19 +48,6 @@ public class GloryDE50StateError extends GloryDE50StateAbstract {
      });
      }
 
-     @Override
-     public boolean clearError() {
-     return comunicate(new Callable< GloryDE50StateAbstract>() {
-     public GloryDE50StateAbstract call() throws Exception {
-     return new OpenPort(api);
-     }
-     });
-     }
-
-     @Override
-     public String getError() {
-     return error;
-     }
      */
 
     @Override

@@ -1,16 +1,22 @@
 package devices.glory.state.poll;
 
-import devices.device.DeviceMessageInterface;
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskCancel;
-import devices.device.task.DeviceTaskMessage;
 import devices.device.task.DeviceTaskReadTimeout;
 import devices.glory.GloryDE50Device;
 import devices.glory.operation.GloryDE50OperationInterface;
+import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50ResponseError;
 import devices.glory.response.GloryDE50ResponseWithData;
 import devices.glory.state.GloryDE50StateAbstract;
+import devices.glory.state.GloryDE50StateError;
+import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
+import devices.glory.state.GloryDE50StateWaitForOperation;
+import devices.glory.state.GloryDE50StateWaitForResponse;
+import devices.glory.state.GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.CANCELING;
+import devices.glory.task.GloryDE50TaskOperation;
 import play.Logger;
 
 /**
@@ -19,64 +25,68 @@ import play.Logger;
  */
 abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
 
+    boolean debug = true;
+
     public GloryDE50StatePoll(GloryDE50Device api) {
         super(api);
     }
 
-    protected GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface op) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    protected String sendGloryDE50Operation(GloryDE50OperationInterface op, boolean debug, GloryDE50ResponseWithData response) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     @Override
     public GloryDE50StateAbstract init() {
-        senseOp = new devices.glory.operation.Sense();
-        String err = api.writeOperation(senseOp, false);
-        if (err != null) {
-            Logger.debug("GloryDE50StatePoll error in init %s", err);
-        }
-        return null;
+        return sense();
     }
-    private GloryDE50OperationInterface senseOp = null;
 
-    abstract public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse);
+    abstract public GloryDE50StateAbstract poll(GloryDE50ResponseWithData senseResponse);
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
-        if (task instanceof DeviceTaskMessage) {
-            DeviceTaskMessage msgt = (DeviceTaskMessage) task;
-            DeviceMessageInterface message = msgt.getMessage();
-            if (message != senseOp) {
-                Logger.error("This message %s don't correspond to the sense I sent", message.toString());
-            } else {
-                GloryDE50ResponseWithData resp = (GloryDE50ResponseWithData) msgt.getResponse();
-                Logger.debug("Got response : %s to operation : %s", resp.toString(), resp.toString());
-                Logger.debug(String.format("Sense D1Mode %s SR1 Mode : %s", resp.getD1Mode().name(), resp.getSr1Mode().name()));
-                task.setReturnValue(true);
-                return poll(resp);
-            }
-        } else if (task instanceof DeviceTaskReadTimeout) {
-            senseOp = new devices.glory.operation.Sense();
-            String err = api.writeOperation(senseOp, false);
-            if (err != null) {
-                Logger.debug("GloryDE50StatePoll error in writeOperation %s", err);
-                task.setReturnValue(false);
-            } else {
-                task.setReturnValue(true);
-            }
-            return null;
+        if (task instanceof DeviceTaskReadTimeout) {
+            task.setReturnValue(true);
+            return sense();
         } else if (task instanceof DeviceTaskCancel) {
             Logger.debug("doCancel");
             task.setReturnValue(true);
             api.notifyListeners(CANCELING);
-            return new GloryDE50StateGotoNeutral(api);
+            return new GloryDE50StateGotoNeutral(api, new GloryDE50StateWaitForOperation(api), true, true);
+        } else {
+            return super.call(task);
         }
-        // if we want to support operations.
-        return super.call(task);
+    }
 
+    protected GloryDE50StateAbstract sense() {
+        return sendGloryOperation(new devices.glory.operation.Sense(), new GloryDE50StateWaitForResponseCallback() {
+
+            @Override
+            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                Logger.debug("SENSE: %s", response.toString());
+                return poll((GloryDE50ResponseWithData) response);
+            }
+
+        });
+    }
+
+    protected GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface operation, GloryDE50StateWaitForResponseCallback callBack) {
+        GloryDE50TaskOperation opTask = new GloryDE50TaskOperation(operation, debug);
+        String err = api.writeOperation(opTask, false);
+        if (err != null) {
+            Logger.debug("GloryDE50StatePoll error %s sending operation %s", err, operation.toString());
+            opTask.setError(err);
+            return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err);
+        }
+        return new GloryDE50StateWaitForResponse(api, opTask, callBack);
+    }
+
+    protected GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface operation) {
+        return sendGloryOperation(operation, new GloryDE50StateWaitForResponseCallback() {
+
+            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                if (response instanceof GloryDE50ResponseError) {
+                    GloryDE50ResponseError err = (GloryDE50ResponseError) response;
+                    return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err.getError());
+                }
+                return sense();
+            }
+        });
     }
 
     /*
@@ -103,4 +113,9 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
      }
      }
      */
+    @Override
+    public String toString() {
+        return "GloryDE50StatePoll{" + "debug=" + debug + '}';
+    }
+
 }

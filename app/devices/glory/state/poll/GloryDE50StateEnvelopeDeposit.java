@@ -1,6 +1,9 @@
 package devices.glory.state.poll;
 
+import devices.device.state.DeviceStateInterface;
 import devices.glory.GloryDE50Device;
+import devices.glory.operation.GloryDE50OperationInterface;
+import devices.glory.response.GloryDE50Response;
 import devices.glory.response.GloryDE50ResponseWithData;
 import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.abnormal_device;
 import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_store;
@@ -15,6 +18,7 @@ import devices.glory.state.GloryDE50StateError;
 import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import devices.glory.state.GloryDE50StateReadyToStore;
+import devices.glory.state.GloryDE50StateWaitForResponse;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.PUT_THE_ENVELOPE_IN_THE_ESCROW;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.READY_TO_STORE;
@@ -32,11 +36,8 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
 
     @Override
     public GloryDE50StateAbstract init() {
-        GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.operation.SetManualMode());
-        if (sret != null) {
-            return sret;
-        }
-        return this;
+        // TODO: error callback.
+        return sendGloryOperation(new devices.glory.operation.SetManualMode());
     }
 
     boolean storeTry = false;
@@ -46,11 +47,15 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
     public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse) {
         GloryDE50StateAbstract sret;
         if (waitForEscrow == 0) {
-            sret = sendGloryOperation(new devices.glory.operation.CloseEscrow());
-            if (sret != null) {
-                return sret;
-            }
-            api.setClosing(true);
+            return sendGloryOperation(new devices.glory.operation.CloseEscrow(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
+
+                public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                    if (!response.isError()) {
+                        api.setClosing(true);
+                    }
+                    return GloryDE50StateEnvelopeDeposit.this;
+                }
+            });
         }
         if (waitForEscrow-- > 0) {
             return this;
@@ -82,11 +87,7 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
                 }
                 if (!lastResponse.isEscrowBillPresent()) {
                     api.setClosing(false);
-                    sret = sendGloryOperation(new devices.glory.operation.OpenEscrow());
-                    if (sret != null) {
-                        // sret ?
-                        return this;
-                    }
+                    return sendGloryOperation(new devices.glory.operation.OpenEscrow());
                 } else {
                     api.notifyListeners(READY_TO_STORE);
                 }
@@ -107,11 +108,7 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
                 /*if (!gotoNeutral(true, true)) {
                  return;
                  }*/
-                sret = sendGloryOperation(new devices.glory.operation.SetManualMode());
-                if (sret != null) {
-                    return sret;
-                }
-                break;
+                return sendGloryOperation(new devices.glory.operation.SetManualMode());
             case storing_error:
                 return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.STORING_ERROR_CALL_ADMIN,
                         String.format("EnvelopeDeposit Storing error, todo: get the flags"));
@@ -121,4 +118,10 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
         }
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "GloryDE50StateEnvelopeDeposit{" + "storeTry=" + storeTry + ", waitForEscrow=" + waitForEscrow + '}';
+    }
+
 }

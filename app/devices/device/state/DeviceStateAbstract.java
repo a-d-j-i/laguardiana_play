@@ -19,6 +19,16 @@ abstract public class DeviceStateAbstract implements DeviceStateInterface {
         task.setReturnValue(false);
         return null;
     }
+    private boolean initialized = false;
+
+    public DeviceStateInterface doInit() {
+        initialized = true;
+        return init();
+    }
+
+    public boolean isInitialized() {
+        return initialized;
+    }
 
     public DeviceStateInterface init() {
         return this;

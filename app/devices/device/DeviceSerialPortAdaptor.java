@@ -5,7 +5,6 @@ import devices.serial.SerialPortMessageParserInterface;
 import java.security.InvalidParameterException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import play.Logger;
 
 /**
@@ -36,7 +35,7 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
         }
     }
 
-    private AtomicBoolean writed = new AtomicBoolean(false);
+    private final AtomicBoolean writed = new AtomicBoolean(false);
 
     public void run() {
         debug("SerialPort Reader start");
@@ -55,9 +54,8 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
                         listener.onDeviceMessageEvent(null);
                     }
                 }
-            } catch (InterruptedException ex) {
-                Logger.error("Exception in Serial Port Reader : %s", ex.toString());
-                ex.printStackTrace();
+            } catch (InterruptedException ex) { // can be ignored
+                Logger.warn("Exception in Serial Port Reader : %s", ex.toString());
             }
         }
         debug("SerialPort Reader done");
@@ -67,9 +65,7 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
         Logger.info("Opening %s", serialPort);
         boolean ret = serialPort.open();
         if (ret) {
-            synchronized (readerThread) {
-                readerThread.start();
-            }
+            readerThread.start();
         }
         Logger.info("Opening %s %s", serialPort, ret ? "SUCCESS" : "FAIL");
         return ret;
@@ -79,15 +75,15 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
         mustStop.set(true);
         readerThread.interrupt();
         try {
-            synchronized (readerThread) {
-                if (readerThread.isAlive()) {
-                    readerThread.wait(30000);
-                }
+            if (readerThread.isAlive()) {
+                Logger.info("close 5 ");
+                readerThread.join(30000);
+                Logger.info("close 6 ");
             }
         } catch (InterruptedException ex) {
             Logger.error("Error in serial port reader wait thread close.");
         }
-        Logger.info("Closing %s", serialPort);
+        Logger.info("Closing done for %s", serialPort.toString());
         if (serialPort != null) {
             serialPort.close();
         }
