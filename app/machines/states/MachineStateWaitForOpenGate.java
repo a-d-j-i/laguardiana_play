@@ -1,10 +1,7 @@
 package machines.states;
 
 import devices.device.status.DeviceStatusInterface;
-import machines.states.MachineStateAbstract;
 import machines.MachineDeviceDecorator;
-import machines.states.MachineStateApiInterface;
-import machines.states.MachineStateInterface;
 import machines.status.MachineStatus;
 
 /**

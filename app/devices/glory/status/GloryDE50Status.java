@@ -15,7 +15,6 @@ public class GloryDE50Status {
         NEUTRAL,
         READY_TO_STORE,
         STORING,
-        STORED,
         PUT_THE_BILLS_ON_THE_HOPER,
         COUNTING,
         ESCROW_FULL,
