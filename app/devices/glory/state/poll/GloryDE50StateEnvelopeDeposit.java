@@ -1,6 +1,10 @@
 package devices.glory.state.poll;
 
 import devices.device.state.DeviceStateInterface;
+import devices.device.task.DeviceTaskAbstract;
+import devices.device.task.DeviceTaskCancel;
+import devices.device.task.DeviceTaskStore;
+import devices.device.task.DeviceTaskWithdraw;
 import devices.glory.GloryDE50Device;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50Response;
@@ -17,11 +21,12 @@ import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.waiting_f
 import devices.glory.state.GloryDE50StateError;
 import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
-import devices.glory.state.GloryDE50StateReadyToStore;
+import devices.glory.state.GloryDE50StateWaitForOperation;
 import devices.glory.state.GloryDE50StateWaitForResponse;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.PUT_THE_ENVELOPE_IN_THE_ESCROW;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.READY_TO_STORE;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.STORING;
 import play.Logger;
 
 /**
@@ -35,31 +40,42 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
     }
 
     @Override
+    public DeviceStateInterface call(DeviceTaskAbstract task) {
+        Logger.debug("in GloryDE50StateEnvelopeDeposit call : %s", task.toString());
+        if (task instanceof DeviceTaskStore) {
+            needToStoreDeposit = true;
+            task.setReturnValue(true);
+            return sense();
+        } else if (task instanceof DeviceTaskWithdraw) {
+            needToWithdrawDeposit = true;
+            task.setReturnValue(true);
+            return sense();
+        } else if (task instanceof DeviceTaskCancel) {
+            needToWithdrawDeposit = true;
+            task.setReturnValue(true);
+            return sense();
+        } else {
+            return super.call(task);
+        }
+    }
+
+    @Override
     public GloryDE50StateAbstract init() {
-        // TODO: error callback.
-        return sendGloryOperation(new devices.glory.operation.SetManualMode());
+        return sendGloryOperation(new devices.glory.operation.SetManualMode(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
+
+            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                return sense();
+            }
+        });
     }
 
     boolean storeTry = false;
     int waitForEscrow = 0;
+    boolean needToStoreDeposit = false;
+    boolean needToWithdrawDeposit = false;
 
     @Override
     public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse) {
-        GloryDE50StateAbstract sret;
-        if (waitForEscrow == 0) {
-            return sendGloryOperation(new devices.glory.operation.CloseEscrow(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
-
-                public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
-                    if (!response.isError()) {
-                        api.setClosing(true);
-                    }
-                    return GloryDE50StateEnvelopeDeposit.this;
-                }
-            });
-        }
-        if (waitForEscrow-- > 0) {
-            return this;
-        }
         Logger.debug("ENVELOPE_DEPOSIT_COMMAND");
         switch (lastResponse.getSr1Mode()) {
             case escrow_open:
@@ -73,17 +89,46 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
                 break;
             case escrow_close_request:
                 if (lastResponse.isEscrowBillPresent()) {
-                    waitForEscrow = 2000;
+                    if (waitForEscrow == 0) {
+                        waitForEscrow = 4;
+                    }
+                    if (waitForEscrow-- == 1) {
+                        waitForEscrow = 0;
+                        return sendGloryOperation(new devices.glory.operation.CloseEscrow(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
+
+                            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                                api.setClosing(true);
+                                return GloryDE50StateEnvelopeDeposit.this;
+                            }
+                        });
+
+                    }
+                } else {
+                    waitForEscrow = 0;
                 }
                 break;
             case storing_start_request:
-                api.notifyListeners(READY_TO_STORE);
-                return new GloryDE50StateReadyToStore(api, this);
+                if (needToStoreDeposit) {
+                    return sendGloryOperation(new devices.glory.operation.StoringStart(0), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
+
+                        @Override
+                        public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                            api.notifyListeners(STORING);
+                            return GloryDE50StateEnvelopeDeposit.this;
+                        }
+                    });
+                } else if (needToWithdrawDeposit) {
+                    return new GloryDE50StateGotoNeutral(api, new GloryDE50StateWaitForOperation(api), true, true);
+                } else {
+                    api.notifyListeners(READY_TO_STORE);
+                }
+
+                return this;
 
             case waiting:
                 // The second time after storing.
                 if (storeTry) {
-                    //return new GotoNeutral(api, this);
+                    return new GloryDE50StateWaitForOperation(api);
                 }
                 if (!lastResponse.isEscrowBillPresent()) {
                     api.setClosing(false);

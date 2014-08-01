@@ -15,46 +15,7 @@
         #{form @count(deviceId) }
         <ul class="columns">
             <li class="on-2 column">
-                <div style="padding:20px;">
-                    <table class="full_width">
-                        <thead>
-                            <tr>
-                                <th>&{ 'counting_page.slot' }</th>
-                                <th>&{ 'counting_page.desired' }</th>
-                                <th>&{ 'counting_page.quantity' }</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <!-- detalle de billetes -->
-                            #{list items:slots, as:'s'}
-                            <tr id="BTRID_${s}">
-                                <td id="bill_slot">${s}
-                                </td>
-                                <td id="bill_desired">
-                                    <input id="DID_${s}" value="${desired.get( s )}" name="slotsIds.${s}" type="text">
-                                </td>
-
-                                <td id="CID_${s}" 
-                                    #{if current.get( s ) != 0 }style="color: red;"
-                                    #{/if}
-                                    > ${current.get( s )}
-
-                            </td>
-                        </tr>
-                        #{/list}
-                        <!-- /detalle de billetes -->
-                    </tbody>
-
-                </table>
-            </div>
-        </li>
-        <li class="on-2 column">
-            <div style="padding:20px;">
-                Status: <div id="statusMsg" class="mensaje">${ status }</div>
-                Error: <div id="errorMsg" class="mensaje">${ error }</div>
-
-                <div class="columna_1">
+                <div class="columna">
                     <label for="currency">Currency</label>
                     <select id="currency" name="currency" class="full_width">
                         #{list items:currencyList, as:'b'}
@@ -67,19 +28,28 @@
                         #{/list}
                     </select>
                     <button type="submit" class="boton ${play.configuration['style.button_color']} full_width">Count</button>
+                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{cancelDeposit(deviceId)}">CancelDeposit</a>
+                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storeDeposit(deviceId)}">StoreDeposit</a>
+                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{withdrawDeposit(deviceId)}">WithdrawDeposit</a>
+                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{reset(deviceId)}">Reset</a>
+                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storingErrorReset(deviceId)}">StoringErrorReset</a>
+                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{collectBag(deviceId)}">Collect</a>
+                    <a class="boton ${play.configuration['style.button_color']} full_width" href="@{envelopeDeposit(deviceId)}">EnvelopeDeposit</a>
                 </div>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{cancelDeposit(deviceId)}">CancelDeposit</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storeDeposit(deviceId)}">StoreDeposit</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{withdrawDeposit(deviceId)}">WithdrawDeposit</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{reset(deviceId)}">Reset</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storingErrorReset(deviceId)}">StoringErrorReset</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{collectBag(deviceId)}">Collect</a>
-                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{envelopeDeposit(deviceId)}">EnvelopeDeposit</a>
-            </div>
-        </li>
-    </ul>
-    #{/form}
-</article>
+            </li>
+            <li class="on-2 column">
+                <div class="columna" style="height: 100%; padding: 20px;">
+                    <div>
+                        <p>ERROR:<span id="errorMsg">${error}</span></p>
+                    </div>
+                    <div style="overflow-y: scroll; height: 400px;">
+                        <p>LAST RESULT:<span style="word-wrap: break-word;" id="statusMsg">${status}</span></p>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        #{/form}
+    </article>
 </sction>
 
 
@@ -129,33 +99,31 @@
                 $("#errorMsg").html(error);
             }
             var status = data[1];
-            if (status == null || status.toString() == 'null') {
-                $("#statusMsg").html("NONE");
-            } else {
+            if (status) { // only if status is available
+                status = JSON.stringify(status) + "<br/>" + $("#statusMsg").html();
                 $("#statusMsg").html(status);
-            }
-            $("currency").html(data[ 2 ]);
-            var slots = data[ 3 ];
-            var current = data[ 4 ];
-            var desired = data[ 5 ];
-            for (var i = 0; i < slots.length; i++) {
-                var s = slots[ i ];
-                var nid = '#CID_' + s;
-                $(nid).html(current[ s ]);
-                if (current[ s ] > 0) {
-                    $(nid).css('color', 'red');
-                } else {
-                    $(nid).css('color', 'grey');
-                }
+                $("currency").html(data[ 2 ]);
+                var slots = data[ 3 ];
+                var current = data[ 4 ];
+                var desired = data[ 5 ];
+                for (var i = 0; i < slots.length; i++) {
+                    var s = slots[ i ];
+                    var nid = '#CID_' + s;
+                    $(nid).html(current[ s ]);
+                    if (current[ s ] > 0) {
+                        $(nid).css('color', 'red');
+                    } else {
+                        $(nid).css('color', 'grey');
+                    }
 
-                var nid = '#DID_' + s;
-                if (desired[ s ] > 0) {
-                    $(nid).val(desired[ s ]);
-                    $(nid).css('color', 'red');
-                } else {
-                    $(nid).css('color', 'grey');
+                    var nid = '#DID_' + s;
+                    if (desired[ s ] > 0) {
+                        $(nid).val(desired[ s ]);
+                        $(nid).css('color', 'red');
+                    } else {
+                        $(nid).css('color', 'grey');
+                    }
                 }
-
             }
         })
     }

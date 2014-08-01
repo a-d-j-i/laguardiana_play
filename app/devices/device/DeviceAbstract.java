@@ -21,7 +21,7 @@ import play.Logger;
 public abstract class DeviceAbstract implements DeviceInterface {
 
     private void debug(String message, Object... args) {
-        Logger.debug(message, args);
+        //Logger.debug(message, args);
     }
 
     abstract public DeviceStateInterface getInitState();

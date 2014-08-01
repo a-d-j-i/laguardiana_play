@@ -164,8 +164,8 @@ public class DeviceController extends Controller {
 
     // Counter Class
     public static void counterClassCommands(Integer deviceId, Integer currency) {
-        Map<Integer, Integer> current = new HashMap<Integer, Integer>();
-        Map<Integer, Integer> desired = new HashMap<Integer, Integer>();
+        Map<String, Integer> current = new HashMap<String, Integer>();
+        Map<String, Integer> desired = new HashMap<String, Integer>();
         DeviceStatusInterface st = null;
         DeviceEvent event = device.getLastEvent();
         if (event != null) {
@@ -181,16 +181,15 @@ public class DeviceController extends Controller {
             currency = 1;
         }
 
-        List<Integer> slots = new ArrayList<Integer>();
+        List<String> slots = new ArrayList<String>();
         slots.addAll(current.keySet());
         slots.addAll(desired.keySet());
-        for (int i = 0; i < 32; i++) {
-            slots.add(i);
-            if (current.get(i) == null) {
-                current.put(i, 0);
+        for (String s : slots) {
+            if (current.get(s) == null) {
+                current.put(s, 0);
             }
-            if (desired.get(i) == null) {
-                desired.put(i, 0);
+            if (desired.get(s) == null) {
+                desired.put(s, 0);
             }
         }
         if (request.isAjax()) {

@@ -121,9 +121,7 @@ public class GloryDE50StateGotoNeutral extends GloryDE50StatePoll {
                         return sendGloryOperation(new devices.glory.operation.CloseEscrow(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
 
                             public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
-                                if (!response.isError()) {
-                                    api.setClosing(true);
-                                }
+                                api.setClosing(true);
                                 return GloryDE50StateGotoNeutral.this;
                             }
                         });
@@ -164,15 +162,19 @@ public class GloryDE50StateGotoNeutral extends GloryDE50StatePoll {
                         return sendGloryOperation(new devices.glory.operation.RemoteCancel(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
 
                             public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
-                                if (response instanceof GloryDE50ResponseError) {
-                                    remoteCancelRetries--;
-                                    if (remoteCancelRetries <= 0) {
-                                        GloryDE50ResponseError err = (GloryDE50ResponseError) response;
-                                        return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err.getError());
-                                    }
+                                return sense();
+                            }
+
+                            @Override
+                            public DeviceStateInterface onError(GloryDE50Device api, GloryDE50OperationInterface operation, GloryDE50ResponseError response) {
+                                remoteCancelRetries--;
+                                if (remoteCancelRetries <= 0) {
+                                    GloryDE50ResponseError err = (GloryDE50ResponseError) response;
+                                    return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err.getError());
                                 }
                                 return sense();
                             }
+
                         });
                     default:
                         return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
@@ -217,7 +219,19 @@ public class GloryDE50StateGotoNeutral extends GloryDE50StatePoll {
                                         public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
                                             return sense();
                                         }
+
+                                        @Override
+                                        public DeviceStateInterface onError(GloryDE50Device api, GloryDE50OperationInterface operation, GloryDE50ResponseError response) {
+                                            return sense();
+                                        }
+
                                     });
+                                }
+
+                                @Override
+                                public DeviceStateInterface onError(GloryDE50Device api, GloryDE50OperationInterface operation, GloryDE50ResponseError response) {
+                                    // ignore.
+                                    return onResponse(operation, response);
                                 }
                             });
                         }

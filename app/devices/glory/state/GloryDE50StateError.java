@@ -4,8 +4,10 @@ import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskReset;
+import devices.device.task.DeviceTaskStoringErrorReset;
 import devices.glory.GloryDE50Device;
 import devices.glory.state.poll.GloryDE50StateReset;
+import devices.glory.state.poll.GloryDE50StateStoringErrorReset;
 import play.Logger;
 
 /**
@@ -30,25 +32,15 @@ public class GloryDE50StateError extends GloryDE50StateAbstract {
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
-        if (task instanceof DeviceTaskReset) { // skip
+        if (task instanceof DeviceTaskReset) {
             task.setReturnValue(true);
             return new GloryDE50StateReset(api, new GloryDE50StateWaitForOperation(api));
+        } else if (task instanceof DeviceTaskStoringErrorReset) {
+            task.setReturnValue(true);
+            return new GloryDE50StateStoringErrorReset(api);
         }
-        Logger.error("Unexpected task : %s", task.toString());
-        task.setReturnValue(false);
-        return null;
+        return super.call(task);
     }
-    /*
-     @Override
-     public boolean storingErrorReset() {
-     return comunicate(new Callable< GloryDE50StateAbstract>() {
-     public GloryDE50StateAbstract call() throws Exception {
-     return new StoringErrorReset(api);
-     }
-     });
-     }
-
-     */
 
     @Override
     public String toString() {

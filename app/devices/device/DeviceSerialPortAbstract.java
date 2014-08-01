@@ -8,7 +8,6 @@ import devices.serial.SerialPortAdapterInterface;
 import devices.serial.SerialPortMessageParserInterface;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import models.Configuration;
 import play.Logger;
 

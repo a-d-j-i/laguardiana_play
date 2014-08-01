@@ -2,20 +2,16 @@ package devices.glory.state.poll;
 
 import devices.device.state.DeviceStateInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.device.task.DeviceTaskCancel;
 import devices.device.task.DeviceTaskReadTimeout;
 import devices.glory.GloryDE50Device;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50Response;
-import devices.glory.response.GloryDE50ResponseError;
 import devices.glory.response.GloryDE50ResponseWithData;
 import devices.glory.state.GloryDE50StateAbstract;
 import devices.glory.state.GloryDE50StateError;
 import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
-import devices.glory.state.GloryDE50StateWaitForOperation;
 import devices.glory.state.GloryDE50StateWaitForResponse;
 import devices.glory.state.GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.CANCELING;
 import devices.glory.task.GloryDE50TaskOperation;
 import play.Logger;
 
@@ -43,11 +39,6 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
         if (task instanceof DeviceTaskReadTimeout) {
             task.setReturnValue(true);
             return sense();
-        } else if (task instanceof DeviceTaskCancel) {
-            Logger.debug("doCancel");
-            task.setReturnValue(true);
-            api.notifyListeners(CANCELING);
-            return new GloryDE50StateGotoNeutral(api, new GloryDE50StateWaitForOperation(api), true, true);
         } else {
             return super.call(task);
         }
@@ -80,10 +71,6 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
         return sendGloryOperation(operation, new GloryDE50StateWaitForResponseCallback() {
 
             public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
-                if (response instanceof GloryDE50ResponseError) {
-                    GloryDE50ResponseError err = (GloryDE50ResponseError) response;
-                    return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err.getError());
-                }
                 return sense();
             }
         });

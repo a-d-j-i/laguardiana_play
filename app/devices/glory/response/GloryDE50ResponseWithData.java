@@ -433,29 +433,29 @@ public class GloryDE50ResponseWithData extends GloryDE50Response {
         return denominationData;
     }
 
-    Map<Integer, Integer> bills = null;
+    Map<String, Integer> bills = null;
 
-    public Map<Integer, Integer> getBills() {
+    public Map<String, Integer> getBills() {
         if (bills != null) {
             return bills;
         }
         if (data.length == 32 * 3 + 21) {
-            bills = new HashMap<Integer, Integer>();
+            bills = new HashMap<String, Integer>();
             for (int slot = 0; slot < 32; slot++) {
                 Integer value = getDecDigit(data[ 3 * slot + 7]) * 100
                         + getDecDigit(data[ 3 * slot + 8]) * 10
                         + getDecDigit(data[ 3 * slot + 9]);
-                bills.put(slot, value);
+                bills.put(Integer.toString(slot), value);
                 //Logger.debug(String.format("Bill %d: quantity %d", slot, value));
             }
         } else if (data.length == 65 * 4 + 21) {
-            bills = new HashMap<Integer, Integer>();
+            bills = new HashMap<String, Integer>();
             for (int slot = 0; slot < 65; slot++) {
                 Integer value = getHexDigit(data[ 4 * slot + 7]) * 1000
                         + getHexDigit(data[ 4 * slot + 8]) * 100
                         + getHexDigit(data[ 4 * slot + 9]) * 10
                         + getHexDigit(data[ 4 * slot + 10]);
-                bills.put(slot, value);
+                bills.put(Integer.toString(slot), value);
                 //Logger.debug(String.format("Bill %d: quantity %d", slot, value));
             }
         } else {

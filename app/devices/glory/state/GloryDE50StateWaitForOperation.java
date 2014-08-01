@@ -16,10 +16,12 @@ import devices.glory.GloryDE50Device;
 import devices.glory.state.poll.GloryDE50StateCollect;
 import devices.glory.state.poll.GloryDE50StateCount;
 import devices.glory.state.poll.GloryDE50StateEnvelopeDeposit;
+import devices.glory.state.poll.GloryDE50StateGotoNeutral;
 import devices.glory.state.poll.GloryDE50StateReset;
 import devices.glory.state.poll.GloryDE50StateStoringErrorReset;
 import devices.glory.task.GloryDE50TaskCount;
 import devices.glory.task.GloryDE50TaskOperation;
+import java.util.HashMap;
 import play.Logger;
 
 /**
@@ -33,6 +35,11 @@ public class GloryDE50StateWaitForOperation extends GloryDE50StateAbstract {
     }
 
     @Override
+    public DeviceStateInterface init() {
+        return new GloryDE50StateGotoNeutral(api, this, false, true);
+    }
+
+    @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
         if (task instanceof DeviceTaskCollect) {
             task.setReturnValue(true);
@@ -43,7 +50,7 @@ public class GloryDE50StateWaitForOperation extends GloryDE50StateAbstract {
                 GloryDE50TaskCount count = (GloryDE50TaskCount) task;
                 return new GloryDE50StateCount(api, count.getDesiredQuantity(), count.getCurrency());
             } else {
-                return new GloryDE50StateCount(api, null, 1);
+                return new GloryDE50StateCount(api, new HashMap<String, Integer>(), 1);
             }
         } else if (task instanceof DeviceTaskEnvelopeDeposit) {
             task.setReturnValue(true);

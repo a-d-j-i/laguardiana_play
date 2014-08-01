@@ -2,7 +2,6 @@ package devices.glory;
 
 import devices.device.DeviceSerialPortAbstract;
 import devices.device.state.DeviceStateInterface;
-import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.state.GloryDE50StateOpenPort;
 import devices.glory.task.GloryDE50TaskOperation;
 import devices.serial.SerialPortAdapterAbstract;
@@ -45,9 +44,9 @@ final public class GloryDE50Device extends DeviceSerialPortAbstract {
             for (byte x : d) {
                 h.append(String.format("0x%x ", x));
             }
-            Logger.debug(h.toString());
+            debug(h.toString());
         }
-        Logger.debug("CMD : %s", op.toString());
+        debug("CMD : %s", op.toString());
         return null;
     }
 

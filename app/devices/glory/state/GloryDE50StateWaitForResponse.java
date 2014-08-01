@@ -9,6 +9,7 @@ import devices.glory.GloryDE50Device;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.operation.OperationWithAckResponse;
 import devices.glory.response.GloryDE50Response;
+import devices.glory.response.GloryDE50ResponseError;
 import devices.glory.task.GloryDE50TaskOperation;
 import play.Logger;
 
@@ -18,9 +19,13 @@ import play.Logger;
  */
 public class GloryDE50StateWaitForResponse extends GloryDE50StateAbstract {
 
-    static public interface GloryDE50StateWaitForResponseCallback {
+    static public abstract class GloryDE50StateWaitForResponseCallback {
 
-        DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response);
+        abstract public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response);
+
+        public DeviceStateInterface onError(final GloryDE50Device api, GloryDE50OperationInterface operation, GloryDE50ResponseError response) {
+            return new GloryDE50StateError(api, GloryDE50StateError.COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, response.getError());
+        }
     }
     private final GloryDE50TaskOperation opTask;
     private final GloryDE50StateWaitForResponseCallback callBack;
@@ -31,7 +36,7 @@ public class GloryDE50StateWaitForResponse extends GloryDE50StateAbstract {
         this.callBack = callBack;
     }
 
-    public GloryDE50StateWaitForResponse(GloryDE50Device api, GloryDE50TaskOperation opTask, final DeviceStateInterface prevStep) {
+    public GloryDE50StateWaitForResponse(final GloryDE50Device api, GloryDE50TaskOperation opTask, final DeviceStateInterface prevStep) {
         super(api);
         this.opTask = opTask;
         this.callBack = new GloryDE50StateWaitForResponseCallback() {
@@ -54,8 +59,15 @@ public class GloryDE50StateWaitForResponse extends GloryDE50StateAbstract {
                 opTask.setResponse((GloryDE50Response) taskResponse);
                 task.setReturnValue(true);
                 // give next step the oportunity to process response.
-                Logger.debug("!!!!!!!!! GloryDE50StateWaitForResponse calling on response for operation %s, response %s", op.toString(), taskResponse.toString());
-                return callBack.onResponse(op, (GloryDE50Response) taskResponse);
+                if (taskResponse instanceof GloryDE50ResponseError) {
+                    return callBack.onError(api, op, (GloryDE50ResponseError) taskResponse);
+                } else {
+                    DeviceStateInterface ret = callBack.onResponse(op, (GloryDE50Response) taskResponse);
+                    if (ret == null) {
+                        Logger.error("Callback must return a value != null !!!");
+                    }
+                    return ret;
+                }
             } else {
                 Logger.error("invalid response type : %s", taskResponse.toString());
                 task.setReturnValue(false);
