@@ -39,7 +39,7 @@ final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
     private final MeiEbdsHostMsg hostMsg = new MeiEbdsHostMsg();
 
     @Override
-    protected boolean runTask(final DeviceTaskAbstract deviceTask) {
+    protected void runTask(final DeviceTaskAbstract deviceTask) {
         if (deviceTask instanceof DeviceTaskResponse) {
             DeviceTaskResponse r = (DeviceTaskResponse) deviceTask;
             DeviceResponseInterface response = r.getResponse();
@@ -47,9 +47,9 @@ final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
                 lastResult = (MeiEbdsAcceptorMsgAck) response;
             }
             deviceTask.setReturnValue(true);
-            return super.runTask(new DeviceTaskMessage(hostMsg, response));
+            super.runTask(new DeviceTaskMessage(hostMsg, response));
         } else {
-            return super.runTask(deviceTask);
+            super.runTask(deviceTask);
         }
     }
 

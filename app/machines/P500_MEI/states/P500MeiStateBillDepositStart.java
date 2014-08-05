@@ -31,7 +31,7 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
         BillDeposit billDeposit = BillDeposit.findById(billDepositId);
         Long currentSum = billDeposit.getTotal();
         return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.mainloop", "IDLE", "BillDepositMain, todo", currentSum, currentSum);
+                currentUserId, "BillDepositController.mainloop", "IDLE", currentSum, currentSum);
     }
 
     @Override

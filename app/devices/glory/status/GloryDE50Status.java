@@ -24,6 +24,8 @@ public class GloryDE50Status {
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
         CANCELING,
+        REJECTING,
+        RETURNED,
         BAG_COLLECTED,
         JAM;
 

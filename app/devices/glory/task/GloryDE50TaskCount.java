@@ -28,7 +28,7 @@ public class GloryDE50TaskCount extends DeviceTaskCount {
 
     @Override
     public String toString() {
-        return "DeviceTaskCount{" + "desiredQuantity=" + desiredQuantity + ", currency=" + currency + '}';
+        return "GloryDE50TaskCount{" + "desiredQuantity=" + desiredQuantity + ", currency=" + currency + " " + super.toString() + '}';
     }
 
 }

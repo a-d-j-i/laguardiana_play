@@ -14,7 +14,6 @@ import machines.states.MachineStateInterface;
 import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
-import models.lov.Currency;
 import play.Logger;
 
 /**
@@ -81,10 +80,14 @@ abstract public class MachineAbstract implements MachineInterface, MachineStateA
     }
 
     public boolean setCurrentState(MachineStateInterface state) {
+        Logger.debug("setCurrentState calling state %s onStart", state.toString());
         if (!state.onStart()) {
-            Logger.error("Error setting current state %s", state.toString());
+            Logger.error("Rejecting state %s leave in state %s", state.toString(), currentState.toString());
             return false;
         }
+        Logger.debug("setCurrentState setting current state to : %s old state %s",
+                state == null ? "null" : state.toString(),
+                currentState == null ? "null" : currentState.toString());
         currentState = state;
         return true;
     }
@@ -97,10 +100,6 @@ abstract public class MachineAbstract implements MachineInterface, MachineStateA
     abstract public boolean isBagReady();
 
     abstract public boolean isBagFull();
-
-    abstract public boolean count(Currency currency);
-
-    abstract public boolean cancel();
 
     public MachineStatus getStatus() {
         return currentState.getStatus();

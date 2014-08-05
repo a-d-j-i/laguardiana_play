@@ -174,7 +174,7 @@ public class EnvelopeDepositController extends Controller {
             Object[] o = new Object[3];
             o[0] = envStatus.getStateName();
             o[1] = null;
-            o[2] = Messages.get(envStatus.getMessage());
+            o[2] = Messages.get("message." + envStatus.getStateName().toLowerCase());
             renderJSON(o);
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());

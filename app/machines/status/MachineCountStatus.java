@@ -13,8 +13,8 @@ public class MachineCountStatus extends MachineStatus {
     private final Long totalSum;
     final Collection<BillQuantity> billQuantities;
 
-    public MachineCountStatus(Long currentSum, Long totalSum, Collection<BillQuantity> billQuantities, Integer currentUserId, String neededAction, String stateName, String message) {
-        super(currentUserId, neededAction, stateName, message);
+    public MachineCountStatus(Long currentSum, Long totalSum, Collection<BillQuantity> billQuantities, Integer currentUserId, String neededAction, String stateName) {
+        super(currentUserId, neededAction, stateName);
         this.currentSum = currentSum;
         this.totalSum = totalSum;
         this.billQuantities = billQuantities;

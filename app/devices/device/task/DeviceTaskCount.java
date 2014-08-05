@@ -8,7 +8,7 @@ public class DeviceTaskCount extends DeviceTaskAbstract {
 
     @Override
     public String toString() {
-        return "DeviceTaskCount";
+        return "DeviceTaskCount " + super.toString();
     }
 
 }

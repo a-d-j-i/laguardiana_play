@@ -3,9 +3,7 @@ package machines;
 import devices.device.DeviceInterface;
 import devices.device.DeviceEvent;
 import devices.device.DeviceEventListener;
-import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskAbstract;
-import devices.mei.task.MeiEbdsTaskCount;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,11 +12,11 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
+import models.db.LgBillType;
 import models.db.LgDevice;
 import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
 import models.db.LgDeviceSlot;
-import models.lov.Currency;
 import play.Logger;
 
 /**
@@ -48,7 +46,7 @@ public class MachineDeviceDecorator implements DeviceInterface {
             }
         });
         for (String s : device.getNeededProperties()) {
-            LgDeviceProperty prop = LgDeviceProperty.getOrCreateProperty(lgd, s, LgDeviceProperty.EditType.STRING);
+            LgDeviceProperty.getOrCreateProperty(lgd, s, LgDeviceProperty.EditType.STRING);
         }
     }
 
@@ -136,13 +134,22 @@ public class MachineDeviceDecorator implements DeviceInterface {
         return lgd;
     }
 
-    public boolean count(Currency currency) {
-        Map<String, Integer> slots = new HashMap<String, Integer>();
-        for (LgDeviceSlot s : LgDeviceSlot.find(currency, lgd)) {
-            slots.put(s.slot, null);
+    public Map<LgBillType, Integer> getQuantities(Map<String, Integer> currentQuantity) {
+        Map<LgBillType, Integer> ret = new HashMap<LgBillType, Integer>();
+        for (String slot : currentQuantity.keySet()) {
+            LgDeviceSlot l = LgDeviceSlot.find(lgd, slot);
+            if (l == null) {
+                Logger.error("Configuration problem, slot %s not found for device %s", slot, lgd.toString());
+            } else {
+                Integer oldQ = ret.get(l.billType);
+                if (oldQ == null) {
+                    oldQ = 0;
+                }
+                oldQ += currentQuantity.get(slot);
+                ret.put(l.billType, oldQ);
+            }
         }
-        Logger.debug("Calling count on device %s, slots : %s", device.toString(), slots.toString());
-        return device.submitSynchronous(new MeiEbdsTaskCount(slots));
+        return ret;
     }
 
 }

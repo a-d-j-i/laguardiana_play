@@ -1,9 +1,10 @@
 package machines.P500_GloryDE50.states;
 
+import machines.P500_GloryDE50.states.bill_deposit.P500GloryDE50StateBillDepositStart;
 import machines.states.*;
 import java.util.Date;
-import machines.P500_GloryDE50.states.bill_deposit.GloryDE50BillDepositStart;
 import machines.P500_GloryDE50.states.envelope_deposit.GloryDE50EnvelopeDepositStart;
+import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
 import play.Logger;
@@ -21,16 +22,10 @@ public class P500GloryDE50StateWaiting extends MachineStateAbstract {
 
     @Override
     public boolean onStartBillDeposit(BillDeposit refDeposit) {
-        Logger.debug("startBillDeposit start");
         BillDeposit d = new BillDeposit(refDeposit);
         d.startDate = new Date();
         d.save();
-        machine.setCurrentState(new GloryDE50BillDepositStart(machine, d.user.userId, d.depositId));
-        if (!machine.count(d.currency)) {
-            Logger.error("Can't start MachineActionBillDeposit error in api.count");
-            return false;
-        }
-        return true;
+        return machine.setCurrentState(new P500GloryDE50StateBillDepositStart(machine, d.user.userId, d.depositId));
     }
 
     @Override
@@ -39,12 +34,12 @@ public class P500GloryDE50StateWaiting extends MachineStateAbstract {
         EnvelopeDeposit d = new EnvelopeDeposit(refDeposit);
         d.startDate = new Date();
         d.save();
-        machine.setCurrentState(new GloryDE50EnvelopeDepositStart(machine, d.user.userId, d.depositId));
-        if (!machine.count(d.currency)) {
-            Logger.error("Can't start MachineActionBillDeposit error in api.count");
-            return false;
-        }
-        return true;
+        return machine.setCurrentState(new GloryDE50EnvelopeDepositStart(machine, d.user.userId, d.depositId));
+    }
+
+    @Override
+    public MachineStatus getStatus() {
+        return new MachineStatus(null, null, "WAITING");
     }
 
     @Override

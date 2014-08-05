@@ -95,11 +95,16 @@ public class BillDeposit extends LgDeposit {
         ModelFacade.print("PrinterController/billDeposit.html", args, Configuration.getPrintWidth(), Configuration.getBillDepositPrintLen());
     }
 
+    // TODO: By currency
     public Long getTotal() {
-        long ret = 0;
+        Long ret = 0L;
         for (LgBill b : bills) {
             LgBillType bt = b.billType;
-            ret += (b.quantity * bt.denomination);
+            if (bt.currency != currency) {
+                Logger.error("NEED TO SUPPORT MULTIPLE CURRENCY %s != %s", bt.currency, currency);
+            } else {
+                ret += (b.quantity * bt.denomination);
+            }
         }
         return ret;
     }

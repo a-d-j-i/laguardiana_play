@@ -8,8 +8,8 @@ import models.EnvelopeDeposit;
  */
 public class MachineEnvelopeDepositStatus extends MachineStatus {
 
-    public MachineEnvelopeDepositStatus(Integer currentUserId, String neededController, String neededAction, String stateName, String message) {
-        super(currentUserId, neededAction, stateName, message);
+    public MachineEnvelopeDepositStatus(Integer currentUserId, String neededController, String neededAction, String stateName) {
+        super(currentUserId, neededAction, stateName);
     }
 
     public EnvelopeDeposit getCurrentDeposit() {

@@ -68,3 +68,243 @@ db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT1):
     billType:           2pesos
     slot:               "ARS002+00"
     creationDate:       2012-01-01
+    
+    
+    
+db.LgDevice(P500_GLORY_DEVICE_GLORY_DE50):
+    machineDeviceId:     "P500_GLORY_DEVICE_GLORY_DE50"
+    deviceType:          "GLORY_DE50"
+    creationDate:        2012-01-01
+    
+    
+
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_0):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-0"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_1):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-1"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_2):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-2"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_3):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-3"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_4):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-4"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_5):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-5"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_6):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-6"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_7):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-7"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_8):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-8"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_9):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-9"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_10):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-10"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_11):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-11"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_12):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-12"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_13):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-13"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_14):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-14"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_15):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-15"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_16):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-16"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_17):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-17"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_18):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-18"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_19):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-19"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_20):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-20"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_21):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-21"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_22):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-22"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_23):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-23"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_24):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-24"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_25):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-25"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_26):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-26"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_27):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-27"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_28):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-28"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_29):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-29"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_30):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-30"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_31):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-31"
+    creationDate:       2012-01-01
+    
+    
+db.LgDeviceSlot(P500_GLORY_DEVICE_GLORY_DE50_SLOT_32):
+    device:             P500_GLORY_DEVICE_GLORY_DE50
+    billType:           2pesos
+    slot:               "0-32"
+    creationDate:       2012-01-01
+    

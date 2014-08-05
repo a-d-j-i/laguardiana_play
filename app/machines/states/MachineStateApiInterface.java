@@ -13,5 +13,7 @@ public interface MachineStateApiInterface {
     public boolean count(Currency currency);
 
     public boolean cancel();
-    
+
+    public boolean withdraw();
+
 }

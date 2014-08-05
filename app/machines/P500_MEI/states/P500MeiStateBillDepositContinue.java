@@ -9,8 +9,8 @@ import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;
 import machines.states.MachineStateApiInterface;
 import machines.states.MachineStateError;
-import machines.states.MachineStateJam;
 import machines.status.MachineBillDepositStatus;
+import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.BillQuantity;
 import models.db.LgBatch;
@@ -52,7 +52,23 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
             }
             return;
         } else if (st.is(MeiEbdsStatus.JAM)) {
-            machine.setCurrentState(new MachineStateJam(machine, this, currentUserId, "BillDepositController"));
+            machine.setCurrentState(new MachineStateAbstract(machine) {
+                @Override
+                public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
+                    if (st.is(MeiEbdsStatus.NEUTRAL)) {
+                        machine.setCurrentState(P500MeiStateBillDepositContinue.this);
+                    } else {
+                        // TODO: Ignore ?
+                        P500MeiStateBillDepositContinue.this.onDeviceEvent(dev, st);
+                    }
+                }
+
+                @Override
+                public MachineStatus getStatus() {
+                    return new MachineStatus(currentUserId, "BillDepositController", "JAM");
+                }
+
+            });
             return;
         } else if (st.is(MeiEbdsStatusStored.class)) {
             MeiEbdsStatusStored stored = (MeiEbdsStatusStored) st;
@@ -69,7 +85,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
         BillDeposit billDeposit = BillDeposit.findById(billDepositId);
         Long currentSum = billDeposit.getTotal();
         return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.mainloop", "CONTINUE_DEPOSIT", "BillDepositMain, todo", currentSum, currentSum);
+                currentUserId, "BillDepositController.mainloop", "CONTINUE_DEPOSIT", currentSum, currentSum);
     }
 
     @Override

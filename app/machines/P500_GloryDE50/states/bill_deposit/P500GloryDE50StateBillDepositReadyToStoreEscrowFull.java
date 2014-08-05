@@ -1,29 +1,38 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package machines.P500_GloryDE50.states.bill_deposit;
 
-import machines.states.MachineStateAbstract;
+import machines.P500_MEI.states.P500MeiStateAccepting;
 import machines.states.MachineStateApiInterface;
+import machines.status.MachineBillDepositStatus;
 import machines.status.MachineStatus;
 
 /**
  *
  * @author adji
  */
-public class BillDepositReadyToStoreEscrowFull extends MachineStateAbstract {
+public class P500GloryDE50StateBillDepositReadyToStoreEscrowFull extends P500GloryDE50StateBillDepositContinue {
 
     private boolean delayedStore = false;
 
-    public BillDepositReadyToStoreEscrowFull(MachineStateApiInterface machine) {
-        super(machine);
+    public P500GloryDE50StateBillDepositReadyToStoreEscrowFull(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
+        super(machine, info);
+    }
+
+    @Override
+    public MachineBillDepositStatus getStatus() {
+        return getStatus("ESCROW_FULL");
     }
 
 //    @Override
-//    public String getStateName() {
-//        return "ESCROW_FULL";
+//    public boolean onAcceptDepositEvent() {
+//        closeBatch();
+//        return machine.setCurrentState(new P500MeiStateAccepting(machine, currentUserId, billDepositId, batchId));
 //    }
+
+    @Override
+    public boolean onCancelDepositEvent() {
+        return machine.setCurrentState(new P500GloryDE50StateBillDepositWithdraw(machine, info));
+    }
+
     /*
      @Override
      public void cancel() {
@@ -90,9 +99,4 @@ public class BillDepositReadyToStoreEscrowFull extends MachineStateAbstract {
      super.onIoBoardEvent(status);
      }
      */
-    @Override
-    public MachineStatus getStatus() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 }

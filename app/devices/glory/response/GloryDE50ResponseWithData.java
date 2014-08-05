@@ -445,7 +445,7 @@ public class GloryDE50ResponseWithData extends GloryDE50Response {
                 Integer value = getDecDigit(data[ 3 * slot + 7]) * 100
                         + getDecDigit(data[ 3 * slot + 8]) * 10
                         + getDecDigit(data[ 3 * slot + 9]);
-                bills.put(Integer.toString(slot), value);
+                bills.put(Integer.toString(getCurrency()) + "-" + Integer.toString(slot), value);
                 //Logger.debug(String.format("Bill %d: quantity %d", slot, value));
             }
         } else if (data.length == 65 * 4 + 21) {
@@ -455,11 +455,11 @@ public class GloryDE50ResponseWithData extends GloryDE50Response {
                         + getHexDigit(data[ 4 * slot + 8]) * 100
                         + getHexDigit(data[ 4 * slot + 9]) * 10
                         + getHexDigit(data[ 4 * slot + 10]);
-                bills.put(Integer.toString(slot), value);
+                bills.put(Integer.toString(getCurrency()) + "-" + Integer.toString(slot), value);
                 //Logger.debug(String.format("Bill %d: quantity %d", slot, value));
             }
         } else {
-            Logger.error("Invalid response length %d expected", data.length);
+            Logger.warn("Invalid response length %d expected", data.length);
         }
         return bills;
     }
@@ -515,14 +515,14 @@ public class GloryDE50ResponseWithData extends GloryDE50Response {
             fileSize = l;
 
         } else {
-            Logger.error(String.format("Invalid response length %d expected 8 / 16 bytes hex number", data.length));
+            Logger.warn(String.format("Invalid response length %d expected 8 / 16 bytes hex number", data.length));
         }
     }
 
     @Override
     public String toString() {
 //        return "GloryDE50ResponseWithData{" + "data=" + getDataRepr() + ", srPos=" + srPos + ", dPos=" + dPos + '}';
-        return "GloryDE50ResponseWithData{ SR1Mode : " + getSr1Mode().toString() + " D1Mode : " + getD1Mode().toString() + " }";
+        return "GloryDE50ResponseWithData{ SR1Mode : " + getSr1Mode().toString() + " D1Mode : " + getD1Mode().toString() + " bills : " + getBills() + " }";
     }
 
     protected byte getDecDigit(byte l) {

@@ -1,7 +1,11 @@
 package machines.P500_MEI;
 
 import devices.device.task.DeviceTaskCancel;
+import devices.device.task.DeviceTaskWithdraw;
 import devices.mei.MeiEbdsDevice;
+import devices.mei.task.MeiEbdsTaskCount;
+import java.util.HashMap;
+import java.util.Map;
 import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
 import machines.P500_MEI.states.P500MeiStateBillDepositStart;
@@ -10,6 +14,7 @@ import models.BillDeposit;
 import models.EnvelopeDeposit;
 import models.db.LgDeposit;
 import models.db.LgDevice;
+import models.db.LgDeviceSlot;
 import models.lov.Currency;
 import play.Logger;
 
@@ -27,11 +32,20 @@ final public class MachineP500_MEI extends MachineAbstract {
     }
 
     public boolean count(Currency currency) {
-        return mei.count(currency);
+        Map<String, Integer> slots = new HashMap<String, Integer>();
+        for (LgDeviceSlot s : LgDeviceSlot.find(currency, mei.getLgDevice())) {
+            slots.put(s.slot, null);
+        }
+        Logger.debug("Calling count on device %s, slots : %s", mei.toString(), slots.toString());
+        return mei.submitSynchronous(new MeiEbdsTaskCount(slots));
     }
 
     public boolean cancel() {
         return mei.submitSynchronous(new DeviceTaskCancel());
+    }
+
+    public boolean withdraw() {
+        return mei.submitSynchronous(new DeviceTaskWithdraw());
     }
 
     public boolean isBagFull() {

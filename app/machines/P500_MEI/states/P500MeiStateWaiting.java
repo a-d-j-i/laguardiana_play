@@ -2,6 +2,7 @@ package machines.P500_MEI.states;
 
 import machines.states.*;
 import java.util.Date;
+import machines.status.MachineStatus;
 import models.BillDeposit;
 import play.Logger;
 
@@ -28,6 +29,11 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public MachineStatus getStatus() {
+        return new MachineStatus(null, null, "WAITING");
     }
 
     @Override

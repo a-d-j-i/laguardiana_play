@@ -122,11 +122,12 @@ public class BillDepositController extends Controller {
         if (status instanceof MachineBillDepositStatus) {
             MachineBillDepositStatus billStatus = (MachineBillDepositStatus) status;
             if (request.isAjax()) {
-                Object[] o = new Object[4];
+                Object[] o = new Object[5];
                 o[0] = billStatus.getStateName();
                 o[1] = billStatus.getBillQuantities();
-                o[2] = Messages.get(billStatus.getMessage());
+                o[2] = billStatus.getCurrentSum();
                 o[3] = billStatus.getTotalSum();
+                o[4] = Messages.get("message." + billStatus.getStateName().toLowerCase());
                 renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
             } else {
                 renderArgs.put("billData", billStatus.getBillQuantities());

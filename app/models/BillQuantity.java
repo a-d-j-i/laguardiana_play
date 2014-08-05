@@ -1,8 +1,9 @@
 package models;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import models.db.LgBillType;
@@ -77,8 +78,15 @@ public class BillQuantity {
     }
 
     private static void visitBillList(Map<LgBillType, Integer> currentQuantity, Map<LgBillType, Integer> desiredQuantity, Currency currency, BillListVisitor visitor) {
-
-        List<LgBillType> billTypes = LgBillType.find(currency);
+        // Union of all the bill types for current currency and for the data received.1
+        Set<LgBillType> billTypes = new HashSet<LgBillType>();
+        if (currentQuantity != null) {
+            billTypes.addAll(currentQuantity.keySet());
+        }
+        if (desiredQuantity != null) {
+            billTypes.addAll(desiredQuantity.keySet());
+        }
+        billTypes.addAll(LgBillType.find(currency));
 
         // Sum over all bill types ignoring the device and slot they came from.
         // Plan B: separate the slots by device.

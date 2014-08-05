@@ -89,7 +89,7 @@ public class FilterController extends ErrorController {
             Object[] o = new Object[3];
             o[0] = countStatus.getStateName();
             o[1] = countStatus.getBillQuantities();
-            o[2] = Messages.get(countStatus.getMessage());
+            o[2] = Messages.get("message." + countStatus.getStateName());
             renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());

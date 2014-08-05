@@ -36,12 +36,13 @@ import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.ESCROW_FU
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.PUT_THE_BILLS_ON_THE_HOPER;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.READY_TO_STORE;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REJECTING;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_ESCROW;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_HOPER;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.RETURNED;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.STORING;
 import devices.glory.status.GloryDE50StatusCurrentCount;
-import java.util.HashMap;
 import java.util.Map;
 import play.Logger;
 
@@ -54,7 +55,6 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
     private boolean needToStoreDeposit = false;
     private boolean needToWithdrawDeposit = false;
 
-    private Map<String, Integer> currentQuantity = new HashMap<String, Integer>();
     final private Map<String, Integer> desiredQuantity;
     final private Integer currency;
 
@@ -99,6 +99,7 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
         } else if (task instanceof DeviceTaskWithdraw) {
             needToWithdrawDeposit = true;
             task.setReturnValue(true);
+            api.notifyListeners(REJECTING);
             return sense();
         } else if (task instanceof DeviceTaskCancel) {
             Logger.debug("doCancel");
@@ -147,7 +148,15 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
                 if (fakeCount) {
                     fakeCount = false;
                     api.notifyListeners(COUNTING);
-                    return refreshQuantity(null);
+                    return sendGloryOperation(new devices.glory.operation.CountingDataRequest(), new GloryDE50StateWaitForResponseCallback() {
+
+                        public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                            GloryDE50ResponseWithData data = (GloryDE50ResponseWithData) response;
+                            api.notifyListeners(new GloryDE50StatusCurrentCount(data.getBills(), desiredQuantity));
+                            return GloryDE50StateCount.this;
+                        }
+                    }
+                    );
                 }
                 if (lastResponse.isRejectBillPresent()) {
                     api.notifyListeners(REMOVE_REJECTED_BILLS);
@@ -155,7 +164,7 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
                 }
                 if (needToStoreDeposit) {
                     // We clear the counter because they are invalid now
-                    clearQuantity();
+                    //clearQuantity();
                     return sendGloryOperation(new devices.glory.operation.StoringStart(0), new GloryDE50StateWaitForResponseCallback() {
 
                         public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
@@ -172,9 +181,11 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
                         return this;
                     }
                     // We need a valid counters before generating the events.
-                    return refreshQuantity(new GloryDE50StateWaitForResponseCallback() {
+                    return sendGloryOperation(new devices.glory.operation.CountingDataRequest(), new GloryDE50StateWaitForResponseCallback() {
 
                         public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                            GloryDE50ResponseWithData data = (GloryDE50ResponseWithData) response;
+                            api.notifyListeners(new GloryDE50StatusCurrentCount(data.getBills(), desiredQuantity));
                             if (lastResponse.isEscrowFull()) {
                                 api.notifyListeners(ESCROW_FULL);
                             } else if (lastResponse.isHopperBillPresent()) {
@@ -184,7 +195,8 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
                             }
                             return GloryDE50StateCount.this;
                         }
-                    });
+                    }
+                    );
                 }
             case escrow_open:
                 api.notifyListeners(REMOVE_THE_BILLS_FROM_ESCROW);
@@ -213,34 +225,55 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
                     api.notifyListeners(COUNTING);
                     // The second time after storing.
                     // Ignore error.
-                    return refreshQuantity(null);
+                    return sendGloryOperation(new devices.glory.operation.CountingDataRequest(), new GloryDE50StateWaitForResponseCallback() {
+
+                        public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                            GloryDE50ResponseWithData data = (GloryDE50ResponseWithData) response;
+                            api.notifyListeners(new GloryDE50StatusCurrentCount(data.getBills(), desiredQuantity));
+                            return GloryDE50StateCount.this;
+                        }
+                    }
+                    );
                 }
                 break;
             case waiting:
-                return refreshQuantity(new GloryDE50StateWaitForResponseCallback() {
+                return sendGloryOperation(new devices.glory.operation.CountingDataRequest(), new GloryDE50StateWaitForResponseCallback() {
 
                     public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                        GloryDE50ResponseWithData data = (GloryDE50ResponseWithData) response;
+                        api.notifyListeners(new GloryDE50StatusCurrentCount(data.getBills(), desiredQuantity));
                         if (!lastResponse.isHopperBillPresent()) {
                             api.notifyListeners(PUT_THE_BILLS_ON_THE_HOPER);
                         }
                         count_retries = 1;
                         return GloryDE50StateCount.this;
                     }
-                });
+                }
+                );
             case being_store:
                 fakeCount = true;
                 needToStoreDeposit = false;
                 break;
             case counting_start_request:
                 needToStoreDeposit = false;
-                return refreshQuantity(new GloryDE50StateWaitForResponseCallback() {
+                return sendGloryOperation(new devices.glory.operation.CountingDataRequest(), new GloryDE50StateWaitForResponseCallback() {
 
                     public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                        GloryDE50ResponseWithData data = (GloryDE50ResponseWithData) response;
+                        Map<String, Integer> currentQuantity = data.getBills();
+                        api.notifyListeners(new GloryDE50StatusCurrentCount(currentQuantity, desiredQuantity));
                         if (lastResponse.isRejectBillPresent()) {
                             api.notifyListeners(REMOVE_REJECTED_BILLS);
                             return GloryDE50StateCount.this;
                         }
-                        if (isNoCounts()) {
+                        boolean noCounts = true;
+                        for (Integer i : currentQuantity.values()) {
+                            if (i != 0) {
+                                noCounts = false;
+                                break;
+                            }
+                        }
+                        if (noCounts) {
                             if (count_retries > MAX_COUNT_RETRIES) {
                                 Logger.error("Error in hopper sensor");
                                 api.notifyListeners(REMOVE_THE_BILLS_FROM_HOPER);
@@ -255,6 +288,7 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
 
                         fakeCount = false;
                         needToWithdrawDeposit = false;
+                        api.notifyListeners(RETURNED);
                         if (!needToStoreDeposit) {
                             // If there are bills in the hoper then it comes here after storing a full escrow
                             if (isBatch && batchEnd) { //BATCH END
@@ -274,7 +308,9 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
                         }
                         return GloryDE50StateCount.this;
                     }
-                });
+                }
+                );
+
             case abnormal_device:
                 api.notifyListeners(JAM);
                 return new GloryDE50StateGotoNeutral(api, this, true, true);
@@ -356,51 +392,9 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
         });
     }
 
-    private GloryDE50StateAbstract refreshQuantity(final GloryDE50StateWaitForResponseCallback callback) {
-        return sendGloryOperation(new devices.glory.operation.CountingDataRequest(), new GloryDE50StateWaitForResponseCallback() {
-
-            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
-//                GloryDE50ResponseWithData data = (GloryDE50ResponseWithData) response;
-//                Map<Integer, Integer> bs = data.getBills();
-//                currentQuantity.set(bs);
-//                for (Integer k : bs.keySet()) {
-//                    Logger.debug("bill %d %d", k, bs.get(k));
-//                }
-                GloryDE50ResponseWithData data = (GloryDE50ResponseWithData) response;
-                Map<String, Integer> currentQ = data.getBills();
-                if (currentQ == null) {
-                    String err = String.format("Error getting current count");
-                    Logger.error("Error %s sending cmd : CountingDataRequest", err);
-                    return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR, err);
-                }
-                currentQuantity = currentQ;
-                api.notifyListeners(new GloryDE50StatusCurrentCount(currentQuantity, desiredQuantity, currency));
-                if (callback != null) {
-                    return callback.onResponse(operation, response);
-                }
-                return GloryDE50StateCount.this;
-            }
-        }
-        );
-    }
-
-    private boolean isNoCounts() {
-        for (Integer i : currentQuantity.values()) {
-            if (i != 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean clearQuantity() {
-        currentQuantity = new HashMap<String, Integer>();
-        return true;
-    }
-
     @Override
     public String toString() {
-        return "GloryDE50StateCount{" + "currentQuantity=" + currentQuantity + ", desiredQuantity=" + desiredQuantity + ", currency=" + currency + ", MAX_COUNT_RETRIES=" + MAX_COUNT_RETRIES + ", currentSlot=" + currentSlot + ", isBatch=" + isBatch + ", fakeCount=" + fakeCount + ", count_retries=" + count_retries + ", batchEnd=" + batchEnd + '}';
+        return "GloryDE50StateCount{" + ", desiredQuantity=" + desiredQuantity + ", currency=" + currency + ", MAX_COUNT_RETRIES=" + MAX_COUNT_RETRIES + ", currentSlot=" + currentSlot + ", isBatch=" + isBatch + ", fakeCount=" + fakeCount + ", count_retries=" + count_retries + ", batchEnd=" + batchEnd + '}';
     }
 
 }

@@ -1,1 +1,6 @@
 $Id$
+
+
+TODO: 
+    1) Totals, subtotals by currency. Every bill count must be by currency in the view and bellow.
+    2) Messages must be part of the view not the machine class.

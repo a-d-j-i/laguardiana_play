@@ -3,7 +3,7 @@ package controllers;
 import controllers.serializers.BillQuantitySerializer;
 import controllers.serializers.BillValueSerializer;
 import devices.device.DeviceEvent;
-import devices.device.status.DeviceStatusClassCounterIntreface;
+import devices.device.status.DeviceStatusCountIntreface;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskCancel;
 import devices.device.task.DeviceTaskCollect;
@@ -170,8 +170,8 @@ public class DeviceController extends Controller {
         DeviceEvent event = device.getLastEvent();
         if (event != null) {
             st = event.getStatus();
-            if (st instanceof DeviceStatusClassCounterIntreface) {
-                DeviceStatusClassCounterIntreface status = (DeviceStatusClassCounterIntreface) st;
+            if (st instanceof DeviceStatusCountIntreface) {
+                DeviceStatusCountIntreface status = (DeviceStatusCountIntreface) st;
                 current = status.getCurrentQuantity();
                 desired = status.getDesiredQuantity();
             }

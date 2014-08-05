@@ -2,8 +2,7 @@ package machines.jobs;
 
 import machines.MachineInterface;
 import models.BillDeposit;
-import models.db.LgUser;
-import models.lov.Currency;
+import play.Logger;
 
 /**
  *

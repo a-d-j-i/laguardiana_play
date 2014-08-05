@@ -57,7 +57,7 @@ public class DeviceTaskAbstract implements Future<Boolean> {
 
     @Override
     public String toString() {
-        return "DeviceTaskAbstract";
+        return "DeviceTaskAbstract{" + ", done=" + done + ", returnValue=" + returnValue + '}';
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {

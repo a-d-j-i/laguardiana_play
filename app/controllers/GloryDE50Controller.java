@@ -55,6 +55,11 @@ public class GloryDE50Controller extends Application {
             Logger.debug("STATUS : %s %s", glResponse.getClass().getSimpleName(), glResponse.toString());
             renderArgs.put("status", glResponse);
             renderArgs.put("lastResult", glResponse.isError() ? "FAIL" : "SUCCESS");
+            if ( glResponse instanceof GloryDE50ResponseWithData ) {
+                GloryDE50ResponseWithData d = (GloryDE50ResponseWithData)glResponse;
+                renderArgs.put( "denominationData", d.getDenominationData() );
+                renderArgs.put( "billData", d.getBills() );
+            }
         }
         renderArgs.put("lastCmd", flash.get("lastCmd"));
         DeviceEvent de = glory.getLastEvent();

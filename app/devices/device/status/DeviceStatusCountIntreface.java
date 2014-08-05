@@ -2,9 +2,7 @@ package devices.device.status;
 
 import java.util.Map;
 
-public interface DeviceStatusClassCounterIntreface extends DeviceStatusInterface {
-
-    public Integer getCurrency();
+public interface DeviceStatusCountIntreface extends DeviceStatusInterface {
 
     public Map<String, Integer> getCurrentQuantity();
 

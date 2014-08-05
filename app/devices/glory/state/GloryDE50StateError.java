@@ -8,6 +8,7 @@ import devices.device.task.DeviceTaskStoringErrorReset;
 import devices.glory.GloryDE50Device;
 import devices.glory.state.poll.GloryDE50StateReset;
 import devices.glory.state.poll.GloryDE50StateStoringErrorReset;
+import devices.glory.task.GloryDE50TaskOperation;
 import play.Logger;
 
 /**
@@ -38,6 +39,15 @@ public class GloryDE50StateError extends GloryDE50StateAbstract {
         } else if (task instanceof DeviceTaskStoringErrorReset) {
             task.setReturnValue(true);
             return new GloryDE50StateStoringErrorReset(api);
+        } else if (task instanceof GloryDE50TaskOperation) {
+            GloryDE50TaskOperation opt = (GloryDE50TaskOperation) task;
+            String err = api.writeOperation(opt, true);
+            if (err != null) {
+                opt.setError(err);
+                task.setReturnValue(false);
+                return null;
+            }
+            return new GloryDE50StateWaitForResponse(api, opt, this);
         }
         return super.call(task);
     }

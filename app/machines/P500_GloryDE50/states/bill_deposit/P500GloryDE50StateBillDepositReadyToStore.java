@@ -1,21 +1,36 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
 import devices.device.status.DeviceStatusInterface;
+import devices.glory.status.GloryDE50Status;
+import devices.glory.status.GloryDE50StatusCurrentCount;
+import java.util.Map;
 import machines.MachineDeviceDecorator;
-import machines.states.MachineStateAbstract;
 import machines.states.MachineStateApiInterface;
-import machines.status.MachineStatus;
+import machines.status.MachineBillDepositStatus;
+import models.BillDeposit;
+import models.BillQuantity;
+import models.db.LgBillType;
 
 /**
  *
  * @author adji
  */
-public class BillDepositReadyToStore extends MachineStateAbstract {
+public class P500GloryDE50StateBillDepositReadyToStore extends P500GloryDE50StateBillDepositContinue {
 
     protected boolean delayedStore = false;
 
-    public BillDepositReadyToStore(MachineStateApiInterface machine) {
-        super(machine);
+    public P500GloryDE50StateBillDepositReadyToStore(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
+        super(machine, info);
+    }
+
+    @Override
+    public MachineBillDepositStatus getStatus() {
+        return getStatus("READY_TO_STORE");
+    }
+
+    @Override
+    public boolean onCancelDepositEvent() {
+        return machine.setCurrentState(new P500GloryDE50StateBillDepositWithdraw(machine, info));
     }
 
 //
@@ -95,14 +110,4 @@ public class BillDepositReadyToStore extends MachineStateAbstract {
      super.onIoBoardEvent(status);
      }
      */
-    @Override
-    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public MachineStatus getStatus() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 }

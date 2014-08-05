@@ -14,6 +14,7 @@ import play.Logger;
 
 /**
  * TODO: Move to MachineStateCanceling.
+ *
  * @author adji
  */
 public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
@@ -54,7 +55,7 @@ public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
         BillDeposit billDeposit = BillDeposit.findById(billDepositId);
         Long currentSum = billDeposit.getTotal();
         return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.mainloop", "CANCELING", "billdeposit.canceling", currentSum, currentSum);
+                currentUserId, "BillDepositController.mainloop", "CANCELING", currentSum, currentSum);
     }
 
     @Override

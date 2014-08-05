@@ -61,7 +61,7 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     @Override
     public String toString() {
         Integer d = denomination;
-        return (d.toString() + " " + currency.toString());
+        return (billTypeId + " == " + d.toString() + " " + currency.toString());
     }
 
     public BillValue getValue() {

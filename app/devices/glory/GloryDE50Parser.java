@@ -19,7 +19,7 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
             Logger.debug(message, args);
         }
     }
-    final private static int GLORY_READ_TIMEOUT = 500;
+    final private static int GLORY_READ_TIMEOUT = 1200;
 
     public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException, TimeoutException {
         DeviceResponseInterface ret = getMessageInt(serialPort);

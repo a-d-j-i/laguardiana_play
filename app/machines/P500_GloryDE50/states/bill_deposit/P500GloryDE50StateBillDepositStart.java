@@ -1,42 +1,54 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
-import machines.states.MachineStateAbstract;
+import devices.device.status.DeviceStatusInterface;
+import devices.glory.status.GloryDE50Status.GloryDE50StatusType;
+import machines.MachineDeviceDecorator;
 import machines.states.MachineStateApiInterface;
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
-import models.BillQuantity;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class GloryDE50BillDepositStart extends MachineStateAbstract {
+public class P500GloryDE50StateBillDepositStart extends P500GloryDE50StateBillDepositContinue {
 
-    protected final Integer currentUserId;
-    protected final Integer billDepositId;
-    protected Integer batchId = null;
+    public P500GloryDE50StateBillDepositStart(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
+        super(machine, info);
+    }
 
-    public GloryDE50BillDepositStart(MachineStateApiInterface machine, Integer currentUserId, Integer billDepositId) {
-        super(machine);
-        this.currentUserId = currentUserId;
-        this.billDepositId = billDepositId;
+    public P500GloryDE50StateBillDepositStart(MachineStateApiInterface machine, Integer currentUserId, Integer billDepositId) {
+        super(machine, new P500GloryDE50StateBillDepositInfo(currentUserId, billDepositId));
     }
 
     @Override
     public boolean onStart() {
-        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
+        Logger.debug("P500GloryDE50StateBillDepositStart");
+        BillDeposit billDeposit = BillDeposit.findById(info.billDepositId);
         if (!machine.count(billDeposit.currency)) {
-            Logger.error("Can't start MachineActionBillDeposit error in api.count");
+            Logger.error("Can't start P500GloryDE50StateBillDepositStart error in api.count");
             return false;
         }
+        Logger.debug("P500GloryDE50StateBillDepositStart api.count success");
         return true;
     }
 
-//    @Override
-//    public String getStateName() {
-//        return "IDLE";
-//    }
+    @Override
+    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
+        if (st.is(GloryDE50StatusType.NEUTRAL)) {
+        } else if (st.is(GloryDE50StatusType.READY_TO_STORE)) {
+            machine.setCurrentState(new P500GloryDE50StateBillDepositReadyToStore(machine, info));
+        } else if (st.is(GloryDE50StatusType.ESCROW_FULL)) {
+            machine.setCurrentState(new P500GloryDE50StateBillDepositReadyToStoreEscrowFull(machine, info));
+        }
+        super.onDeviceEvent(dev, st);
+    }
+
+    @Override
+    public MachineBillDepositStatus getStatus() {
+        return getStatus("IDLE");
+    }
 
     /*    @Override
      public boolean cancel() {
@@ -128,15 +140,7 @@ public class GloryDE50BillDepositStart extends MachineStateAbstract {
 //    }
     @Override
     public String toString() {
-        return "BillDepositStart";
-    }
-
-    @Override
-    public MachineBillDepositStatus getStatus() {
-        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
-        Long currentSum = billDeposit.getTotal();
-        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.mainloop", "CONTINUE_DEPOSIT", "BillDepositMain, todo", currentSum, currentSum);
+        return "P500GloryDE50StateBillDepositStart";
     }
 
 }

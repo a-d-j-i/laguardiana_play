@@ -8,7 +8,7 @@ import play.Logger;
 import play.db.jpa.GenericModel;
 
 @Entity
-@Table(name = "lg_device_slot", schema = "public")
+@Table(name = "lg_device_slot", schema = "public", uniqueConstraints = @UniqueConstraint(columnNames = {"slot"}))
 public class LgDeviceSlot extends GenericModel implements java.io.Serializable {
 
     @Id
@@ -37,7 +37,6 @@ public class LgDeviceSlot extends GenericModel implements java.io.Serializable {
     }
 
     // Search all the slots corresponding to certain currency and device
-
     public static List< LgDeviceSlot> find(Currency currency, LgDevice device) {
         // return all slot for this device
         if (currency == null) {
@@ -49,7 +48,6 @@ public class LgDeviceSlot extends GenericModel implements java.io.Serializable {
     }
 
     // Search all the slots corresponding to certain currency and device
-
     public static LgDeviceSlot find(LgDevice device, String slot) {
         List<LgDeviceSlot> l = LgBillType.find("select s from LgDeviceSlot s where s.slot = ? and s.device = ?", slot, device).fetch();
         if (l.size() != 1) {
@@ -61,7 +59,7 @@ public class LgDeviceSlot extends GenericModel implements java.io.Serializable {
 
     @Override
     public String toString() {
-        return "LgDeviceSlot{" + "deviceSlotId=" + deviceSlotId + ", device=" + device + ", slot=" + slot + ", creationDate=" + creationDate + ", endDate=" + endDate + '}';
+        return "deviceSlotId=" + deviceSlotId;
     }
 
     @Override

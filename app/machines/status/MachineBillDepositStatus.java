@@ -12,8 +12,9 @@ public class MachineBillDepositStatus extends MachineCountStatus {
 
     final BillDeposit deposit;
 
-    public MachineBillDepositStatus(BillDeposit deposit, Collection<BillQuantity> billQuantities, Integer currentUserId, String neededAction, String stateName, String message, Long currentSum, Long totalSum) {
-        super(currentSum, totalSum, billQuantities, currentUserId, neededAction, stateName, message);
+    public MachineBillDepositStatus(BillDeposit deposit, Collection<BillQuantity> billQuantities, Integer currentUserId,
+            String neededAction, String stateName, Long currentSum, Long totalSum) {
+        super(currentSum, totalSum, billQuantities, currentUserId, neededAction, stateName);
         this.deposit = deposit;
     }
 

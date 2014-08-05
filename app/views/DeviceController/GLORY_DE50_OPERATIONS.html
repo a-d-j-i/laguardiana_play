@@ -67,12 +67,12 @@
                                 </li>
                             </ul>
                         </div>
-                        #{if ( status != null && status.getDenominationData() != null && status.getDenominationData().size() > 0 ) }
+                        #{if ( denominationData != null && denominationData.size() > 0 ) }
                         <p style="word-wrap: break-word;"> Denomination Data
                         <table>
                             <thead></thead>
                             <tbody>
-                                #{list items:status?.getDenominationData(), as:'p'}    
+                                #{list items:denominationData, as:'p'}    
                                 #{if ( p_index - 1 ) % 2 == 0}<tr>#{/if}
                                     <td>Denomination ( ${p.idx}, ${p.denominationCode} ): ${p.currencyCode} ${p.value} #{if (p.newVal)}New#{/if}</td>
                                     #{if ( p_index -1 ) % 2 == 1}</tr>#{/if}
@@ -81,12 +81,12 @@
                         </table>
                         </p>
                         #{/if}
-                        #{if ( status != null && status.getBills() != null && status.getBills().size() > 0 ) }
+                        #{if ( billData != null && billData.size() > 0 ) }
                         <p style="word-wrap: break-word;"> Bills Data:
                         <table>
                             <thead></thead>
                             <tbody>
-                                #{list items:status?.getBills(), as:'p'} 
+                                #{list items:billData, as:'p'} 
                                 #{if ( p_index - 1 ) % 4 == 0}<tr>#{/if}
                                     <td>Bill ${p}</td>
                                     #{if ( p_index -1 ) % 4 == 3}</tr>#{/if}

@@ -1,6 +1,5 @@
 package machines.states;
 
-import machines.MachineAbstract;
 import machines.status.MachineStatus;
 import machines.status.MachineStatusError;
 
@@ -19,7 +18,7 @@ public class MachineStateError extends MachineStateAbstract {
 
     @Override
     public MachineStatus getStatus() {
-        return new MachineStatusError(null, "controller", "onError", "ERROR", error, error);
+        return new MachineStatusError(null, "controller", "onError", "ERROR", error);
     }
 
 }

@@ -2,7 +2,6 @@ package machines.states;
 
 import devices.device.status.DeviceStatusInterface;
 import machines.MachineDeviceDecorator;
-import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
 import play.Logger;
@@ -26,22 +25,20 @@ abstract public class MachineStateAbstract implements MachineStateInterface {
 
     @Override
     public boolean onAcceptDepositEvent() {
+        Logger.error("Can't accept deposit");
         return false;
     }
 
     @Override
     public boolean onCancelDepositEvent() {
+        Logger.error("Can't cancel deposit");
         return false;
     }
 
     @Override
     public boolean onConfirmDepositEvent() {
+        Logger.error("Can't confirm deposit");
         return false;
-    }
-
-    @Override
-    public MachineStatus getStatus() {
-        return new MachineStatus(null, null, null, null);
     }
 
     @Override
