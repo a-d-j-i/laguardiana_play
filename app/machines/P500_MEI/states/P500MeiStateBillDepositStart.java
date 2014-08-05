@@ -30,8 +30,11 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
     public MachineBillDepositStatus getStatus() {
         BillDeposit billDeposit = BillDeposit.findById(billDepositId);
         Long currentSum = billDeposit.getTotal();
+        if (billDeposit.getTotal() > 0) {
+            machine.setCurrentState(new P500MeiStateBillDepositContinue(machine, currentUserId, billDepositId, batchId));
+        }
         return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.mainloop", "IDLE", currentSum, currentSum);
+                currentUserId, "BillDepositController.mainloop", "IDLE", currentSum, null);
     }
 
     @Override
