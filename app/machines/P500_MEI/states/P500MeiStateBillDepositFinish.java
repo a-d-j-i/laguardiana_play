@@ -1,11 +1,11 @@
 package machines.P500_MEI.states;
 
 import machines.states.MachineStateAbstract;
-import machines.states.MachineStateApiInterface;
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
 import models.BillQuantity;
 import models.db.LgDeposit;
+import play.Logger;
 
 /**
  *
@@ -13,34 +13,30 @@ import models.db.LgDeposit;
  */
 public class P500MeiStateBillDepositFinish extends MachineStateAbstract {
 
-    private final Integer currentUserId;
     private final LgDeposit.FinishCause finishCause;
-    private final Integer billDepositId;
+    private final P500MEIStateContext context;
 
-    public P500MeiStateBillDepositFinish(MachineStateApiInterface machine, Integer currentUserId, Integer billDepositId, LgDeposit.FinishCause finishCause) {
-        super(machine);
-        this.currentUserId = currentUserId;
-        this.billDepositId = billDepositId;
+    public P500MeiStateBillDepositFinish(P500MEIStateContext context, LgDeposit.FinishCause finishCause) {
+        this.context = context;
         this.finishCause = finishCause;
     }
 
     @Override
     public boolean onStart() {
-        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
-        billDeposit.closeDeposit(finishCause);
+        context.closeDeposit(finishCause);
         return true;
     }
 
     @Override
     public MachineBillDepositStatus getStatus() {
-        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
+        BillDeposit billDeposit = context.getBillDeposit();
         Long currentSum = billDeposit.getTotal();
         return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.finish", "FINISH", currentSum, currentSum);
+                context.getCurrentUserId(), "BillDepositController.finish", "FINISH", currentSum, currentSum);
     }
 
     @Override
     public boolean onConfirmDepositEvent() {
-        return machine.setCurrentState(new P500MeiStateWaiting(machine));
+        return context.setCurrentState(new P500MeiStateWaiting(context));
     }
 }

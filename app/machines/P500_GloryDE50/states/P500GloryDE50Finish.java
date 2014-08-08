@@ -3,17 +3,18 @@ package machines.P500_GloryDE50.states;
 import devices.device.status.DeviceStatusInterface;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;
-import machines.states.MachineStateApiInterface;
 import machines.status.MachineStatus;
 
 /**
  *
  * @author adji
  */
-public class Finish extends MachineStateAbstract {
+public class P500GloryDE50Finish extends MachineStateAbstract {
 
-    public Finish(MachineStateApiInterface machine) {
-        super(machine);
+    private final P500GloryDE50StateContext context;
+
+    public P500GloryDE50Finish(P500GloryDE50StateContext context) {
+        this.context = context;
     }
 
     @Override

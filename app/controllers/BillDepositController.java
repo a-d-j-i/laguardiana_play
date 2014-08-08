@@ -132,8 +132,8 @@ public class BillDepositController extends Controller {
             } else {
                 renderArgs.put("billData", billStatus.getBillQuantities());
                 renderArgs.put("currentDeposit", billStatus.getCurrentDeposit());
+                renderArgs.put("currentSum", billStatus.getCurrentSum());
                 renderArgs.put("totalSum", billStatus.getTotalSum());
-                renderArgs.put("currentTotalSum", billStatus.getCurrentSum());
             }
         }
         if (!request.isAjax()) {

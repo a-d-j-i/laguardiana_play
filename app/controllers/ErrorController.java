@@ -20,24 +20,7 @@ public class ErrorController extends Controller {
 
     static MachineStatus status;
 
-    @Before
-    static void basicPropertiesAndFixWizard() throws Throwable {
-        status = ModelFacade.getCurrentStatus();
-        if (request.isAjax()) {
-            return;
-        }
-        String neededAction = status.getNeededAction();
-        Logger.debug("Needed action : %s", neededAction);
-        if (neededAction == null) {
-            return;
-        }
-        if (!request.action.equalsIgnoreCase(neededAction)) {
-            Logger.debug("basicPropertiesAndFixWizard REDIRECT TO neededAction %s", neededAction);
-            redirect(Router.getFullUrl(neededAction));
-        }
-    }
-
-    public static void onError(Integer cmd) {
+    public static void onError() {
         String gerror = null;
         PrinterStatus pstatus = null;
         String ierror = null;
@@ -50,9 +33,6 @@ public class ErrorController extends Controller {
         }
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
             pstatus = ModelFacade.getCurrentPrinter().getInternalState();
-        }
-        if (cmd != null) {
-            ModelFacade.confirmAction();
         }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
@@ -69,7 +49,7 @@ public class ErrorController extends Controller {
     }
 
     // TODO: Show machine status.
-    public static void onStoringError(Integer cmd) {
+    public static void onStoringError() {
         String gerror = null;
         PrinterStatus pstatus = null;
         String ierror = null;
@@ -83,9 +63,6 @@ public class ErrorController extends Controller {
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
             pstatus = ModelFacade.getCurrentPrinter().getInternalState();
         }
-        if (cmd != null) {
-            ModelFacade.confirmAction();
-        }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
 //            ret[ 0] = status.isError();
@@ -98,6 +75,14 @@ public class ErrorController extends Controller {
             renderArgs.put("errorCode", status.getStateName());
             render();
         }
+    }
+
+    public static void reset() {
+
+    }
+
+    public static void storingErrorReset() {
+
     }
 
 }

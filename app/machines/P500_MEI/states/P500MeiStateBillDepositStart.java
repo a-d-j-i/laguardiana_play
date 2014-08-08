@@ -1,6 +1,5 @@
 package machines.P500_MEI.states;
 
-import machines.states.MachineStateApiInterface;
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
 import models.BillQuantity;
@@ -12,14 +11,13 @@ import play.Logger;
  */
 public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinue {
 
-    public P500MeiStateBillDepositStart(MachineStateApiInterface machine, Integer userId, Integer billDepositId) {
-        super(machine, userId, billDepositId, null);
+    public P500MeiStateBillDepositStart(P500MEIStateContext context) {
+        super(context);
     }
 
     @Override
     public boolean onStart() {
-        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
-        if (!machine.count(billDeposit.currency)) {
+        if (!context.count()) {
             Logger.error("Can't start MachineActionBillDeposit error in api.count");
             return false;
         }
@@ -28,13 +26,11 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
 
     @Override
     public MachineBillDepositStatus getStatus() {
-        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
-        Long currentSum = billDeposit.getTotal();
+        BillDeposit billDeposit = context.getBillDeposit();
         if (billDeposit.getTotal() > 0) {
-            machine.setCurrentState(new P500MeiStateBillDepositContinue(machine, currentUserId, billDepositId, batchId));
+            context.setCurrentState(new P500MeiStateBillDepositContinue(context));
         }
-        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.mainloop", "IDLE", currentSum, null);
+        return super.getStatus();
     }
 
     @Override
@@ -44,12 +40,12 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
 
     @Override
     public boolean onCancelDepositEvent() {
-        closeBatch();
-        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
+        context.closeBatch();
+        BillDeposit billDeposit = context.getBillDeposit();
         if (billDeposit.getTotal() > 0) {
-            return machine.setCurrentState(new P500MeiStateAccepting(machine, currentUserId, billDepositId, batchId));
+            return context.setCurrentState(new P500MeiStateAccepting(context));
         } else {
-            return machine.setCurrentState(new P500MeiStateCanceling(machine, currentUserId, billDepositId, batchId));
+            return context.setCurrentState(new P500MeiStateCanceling(context));
         }
     }
 

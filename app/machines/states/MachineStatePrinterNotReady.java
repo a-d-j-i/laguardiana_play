@@ -1,9 +1,7 @@
 package machines.states;
 
 import devices.device.status.DeviceStatusInterface;
-import machines.states.MachineStateAbstract;
 import machines.MachineDeviceDecorator;
-import machines.states.MachineStateApiInterface;
 import machines.status.MachineStatus;
 
 /**
@@ -14,8 +12,7 @@ public class MachineStatePrinterNotReady extends MachineStateAbstract {
 
     final protected MachineStateAbstract prevState;
 
-    public MachineStatePrinterNotReady(MachineStateAbstract prevState, MachineStateApiInterface machine) {
-        super(machine);
+    public MachineStatePrinterNotReady(MachineStateAbstract prevState, MachineStateContextInterface machine) {
         this.prevState = prevState;
     }
 

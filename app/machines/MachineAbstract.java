@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import machines.jobs.MachineJob;
-import machines.states.MachineStateApiInterface;
 import machines.states.MachineStateInterface;
 import machines.status.MachineStatus;
 import models.BillDeposit;
@@ -21,7 +20,7 @@ import play.Logger;
  *
  * @author adji
  */
-abstract public class MachineAbstract implements MachineInterface, MachineStateApiInterface {
+abstract public class MachineAbstract implements MachineInterface {
 
     final private Map<Integer, MachineDeviceDecorator> deviceMap = new HashMap<Integer, MachineDeviceDecorator>();
     private MachineStateInterface currentState;
@@ -85,8 +84,7 @@ abstract public class MachineAbstract implements MachineInterface, MachineStateA
             Logger.error("Rejecting state %s leave in state %s", state.toString(), currentState.toString());
             return false;
         }
-        Logger.debug("setCurrentState setting current state to : %s old state %s",
-                state == null ? "null" : state.toString(),
+        Logger.debug("setCurrentState setting current state to : %s old state %s", state.toString(),
                 currentState == null ? "null" : currentState.toString());
         currentState = state;
         return true;

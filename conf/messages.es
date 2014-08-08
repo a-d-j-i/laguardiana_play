@@ -120,8 +120,8 @@ message.storing_detail=Depositando espere...
 message.deposit_canceled=Desposito Cancelado.
 message.deposit_canceled_bag_removed=Desposito Cancelado por que la bolsa de recaudacion fue removida!!!.
 message.deposit_canceled_bag_full=Desposito Cancelado por que el deposito no cabe en la bolsa de recaudacion!!!.
-message.total_sum=Subtotal ya depositado
-message.current_total_sum=Subtotal del deposito
+message.total_sum=Total depositado
+message.current_sum=Subtotal del deposito
 
 message.escrow_full_text=Se lleno el escrow. <br/>Retire los billetes del escrow.
 message.currency_title=Divisa

@@ -48,7 +48,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
              }*/
             taskExecutor.awaitTermination(20, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
-            Logger.error("Timeout waiting for task thread : %s", ex);
+            Logger.error("Timeout waiting for task thread : %s", ex.toString());
         }
         finish();
         debug("Device %s stop done", this.toString());

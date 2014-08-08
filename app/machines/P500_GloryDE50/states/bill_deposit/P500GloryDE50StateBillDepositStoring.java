@@ -1,6 +1,10 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
-import machines.states.MachineStateApiInterface;
+import devices.device.status.DeviceStatusInterface;
+import devices.device.task.DeviceTaskStore;
+import devices.glory.status.GloryDE50Status;
+import machines.MachineDeviceDecorator;
+import machines.states.MachineStateError;
 import machines.status.MachineBillDepositStatus;
 
 /**
@@ -9,8 +13,20 @@ import machines.status.MachineBillDepositStatus;
  */
 public class P500GloryDE50StateBillDepositStoring extends P500GloryDE50StateBillDepositContinue {
 
-    public P500GloryDE50StateBillDepositStoring(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
-        super(machine, info);
+    public P500GloryDE50StateBillDepositStoring(P500GloryDE50StateBillDepositContext context) {
+        super(context);
+    }
+
+    @Override
+    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
+        if (st.is(GloryDE50Status.GloryDE50StatusType.ESCROW_FULL)
+                || st.is(GloryDE50Status.GloryDE50StatusType.READY_TO_STORE)) {
+            if (!dev.submitSynchronous(new DeviceTaskStore(1))) {
+                context.setCurrentState(new MachineStateError(this, context.currentUserId, "Error submitting store"));
+                return;
+            }
+        }
+        super.onDeviceEvent(dev, st);
     }
 
     @Override

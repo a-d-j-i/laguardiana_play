@@ -13,8 +13,10 @@ import play.Logger;
  */
 public class P500MeiStateWaiting extends MachineStateAbstract {
 
-    public P500MeiStateWaiting(MachineStateApiInterface machine) {
-        super(machine);
+    private final P500MEIStateContext context;
+
+    public P500MeiStateWaiting(P500MEIStateContext context) {
+        this.context = context;
     }
 
     @Override
@@ -23,11 +25,7 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
         BillDeposit d = new BillDeposit(refBillDeposit);
         d.startDate = new Date();
         d.save();
-        machine.setCurrentState(new P500MeiStateBillDepositStart(machine, d.user.userId, d.depositId));
-        if (!machine.count(refBillDeposit.currency)) {
-            Logger.error("Can't start MachineActionBillDeposit error in api.count");
-            return false;
-        }
+        context.setCurrentState(new P500MeiStateBillDepositStart(new P500MEIStateContext(context, d)));
         return true;
     }
 

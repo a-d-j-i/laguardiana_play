@@ -2,9 +2,6 @@ package machines.states;
 
 import devices.device.status.DeviceStatusInterface;
 import machines.MachineDeviceDecorator;
-import machines.states.MachineStateAbstract;
-import machines.states.MachineStateApiInterface;
-import machines.states.MachineStateInterface;
 import machines.status.MachineStatus;
 
 /**
@@ -15,8 +12,7 @@ public class MachineStateWaitForClosedGate extends MachineStateAbstract {
 
     protected final MachineStateInterface nextAction;
 
-    public MachineStateWaitForClosedGate(MachineStateInterface nextAction, MachineStateApiInterface machine) {
-        super(machine);
+    public MachineStateWaitForClosedGate(MachineStateInterface nextAction, MachineStateContextInterface machine) {
         this.nextAction = nextAction;
     }
 

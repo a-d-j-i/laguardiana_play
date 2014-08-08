@@ -1,18 +1,11 @@
 package machines.P500_GloryDE50.states.count;
 
-import machines.states.MachineStateApiInterface;
-
 /**
  *
  * @author adji
  */
 public class ReadyToStoreCounting extends IdleCounting {
 
-    public ReadyToStoreCounting(MachineStateApiInterface machine) {
-        super(machine);
-    }
-
-    
 //    @Override
 //    public String getStateName() {
 //        return "READY_TO_STORE";

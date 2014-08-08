@@ -1,6 +1,6 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
-import machines.states.MachineStateApiInterface;
+import machines.states.MachineStateContextInterface;
 import machines.status.MachineBillDepositStatus;
 
 /**
@@ -11,8 +11,8 @@ public class P500GloryDE50StateBillDepositStoringEscrowFull extends P500GloryDE5
 
     boolean mustCancelBagRemoved = false;
 
-    public P500GloryDE50StateBillDepositStoringEscrowFull(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
-        super(machine, info);
+    public P500GloryDE50StateBillDepositStoringEscrowFull(P500GloryDE50StateBillDepositContext context) {
+        super(context);
     }
 
     @Override

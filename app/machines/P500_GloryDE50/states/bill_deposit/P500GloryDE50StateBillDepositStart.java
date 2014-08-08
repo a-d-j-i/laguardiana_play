@@ -3,7 +3,7 @@ package machines.P500_GloryDE50.states.bill_deposit;
 import devices.device.status.DeviceStatusInterface;
 import devices.glory.status.GloryDE50Status.GloryDE50StatusType;
 import machines.MachineDeviceDecorator;
-import machines.states.MachineStateApiInterface;
+import machines.P500_GloryDE50.states.P500GloryDE50StateContext;
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
 import play.Logger;
@@ -14,36 +14,34 @@ import play.Logger;
  */
 public class P500GloryDE50StateBillDepositStart extends P500GloryDE50StateBillDepositContinue {
 
-    public P500GloryDE50StateBillDepositStart(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
-        super(machine, info);
+    public P500GloryDE50StateBillDepositStart(P500GloryDE50StateBillDepositContext context) {
+        super(context);
     }
 
-    public P500GloryDE50StateBillDepositStart(MachineStateApiInterface machine, Integer currentUserId, Integer billDepositId) {
-        super(machine, new P500GloryDE50StateBillDepositInfo(currentUserId, billDepositId));
+    public P500GloryDE50StateBillDepositStart(P500GloryDE50StateContext context) {
+        super(new P500GloryDE50StateBillDepositContext(context));
     }
 
-    @Override
-    public boolean onStart() {
+//    @Override
+//    public boolean onStart() {
 //        BillDeposit billDeposit = BillDeposit.findById(info.billDepositId);
 //        if (!machine.count(billDeposit.currency)) {
 //            Logger.error("Can't start P500GloryDE50StateBillDepositStart error in api.count");
 //            return false;
 //        }
-        return true;
-    }
-
+//        return true;
+//    }
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         if (st.is(GloryDE50StatusType.NEUTRAL)) {
-            BillDeposit billDeposit = BillDeposit.findById(info.billDepositId);
-            if (!machine.count(billDeposit.currency)) {
+            if (!context.count()) {
                 Logger.error("Can't start P500GloryDE50StateBillDepositStart error in api.count");
             }
             return;
         } else if (st.is(GloryDE50StatusType.READY_TO_STORE)) {
-            machine.setCurrentState(new P500GloryDE50StateBillDepositReadyToStore(machine, info));
+            context.setCurrentState(new P500GloryDE50StateBillDepositReadyToStore(context));
         } else if (st.is(GloryDE50StatusType.ESCROW_FULL)) {
-            machine.setCurrentState(new P500GloryDE50StateBillDepositReadyToStoreEscrowFull(machine, info));
+            context.setCurrentState(new P500GloryDE50StateBillDepositReadyToStoreEscrowFull(context));
         }
         super.onDeviceEvent(dev, st);
     }

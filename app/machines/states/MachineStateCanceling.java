@@ -10,10 +10,6 @@ import machines.status.MachineStatus;
  */
 public class MachineStateCanceling extends MachineStateAbstract {
 
-    public MachineStateCanceling(MachineStateApiInterface machine) {
-        super(machine);
-    }
-
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

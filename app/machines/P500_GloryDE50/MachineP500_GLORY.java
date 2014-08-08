@@ -1,20 +1,16 @@
 package machines.P500_GloryDE50;
 
-import devices.device.task.DeviceTaskCancel;
-import devices.device.task.DeviceTaskWithdraw;
 import devices.glory.GloryDE50Device;
-import devices.glory.task.GloryDE50TaskCount;
-import java.util.HashMap;
 import machines.P500_GloryDE50.states.P500GloryDE50StateWaiting;
 import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
+import machines.P500_GloryDE50.states.P500GloryDE50StateContext;
 import machines.P500_GloryDE50.states.bill_deposit.P500GloryDE50StateBillDepositStart;
 import machines.P500_GloryDE50.states.envelope_deposit.P500GloryDE50StateEnvelopeDepositStart;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
 import models.db.LgDeposit;
 import models.db.LgDevice;
-import models.lov.Currency;
 import play.Logger;
 
 /**
@@ -30,27 +26,6 @@ final public class MachineP500_GLORY extends MachineAbstract {
         addDevice(glory);
     }
 
-    public boolean count(Currency currency) {
-        /*        Map<String, Integer> slots = new HashMap<String, Integer>();
-         for (LgDeviceSlot s : LgDeviceSlot.find(currency, glory.getLgDevice())) {
-         slots.put(s.slot, null);
-         }*/
-        Integer c = 1;
-        if (currency != null) {
-            c = currency.numericId;
-        }
-        Logger.debug("Calling count on device %s, currency : %d", glory.toString(), c);
-        return glory.submitSynchronous(new GloryDE50TaskCount(c, new HashMap<String, Integer>()));
-    }
-
-    public boolean cancel() {
-        return glory.submitSynchronous(new DeviceTaskCancel());
-    }
-
-    public boolean withdraw() {
-        return glory.submitSynchronous(new DeviceTaskWithdraw());
-    }
-
     public boolean isBagFull() {
         return true;
     }
@@ -62,16 +37,19 @@ final public class MachineP500_GLORY extends MachineAbstract {
     @Override
     public void start() {
         super.start();
-        // set current action.
-        setCurrentState(new P500GloryDE50StateWaiting(this));
 
         LgDeposit dep = LgDeposit.getCurrentDeposit();
+        P500GloryDE50StateContext context = new P500GloryDE50StateContext(this, glory, dep.user.userId, dep.depositId);
+
+        // set current action.
+        setCurrentState(new P500GloryDE50StateWaiting(context));
+
         if (dep instanceof BillDeposit) {
             Logger.debug("--------> Start setting state to bill deposit %d", dep.depositId);
-            setCurrentState(new P500GloryDE50StateBillDepositStart(this, dep.user.userId, dep.depositId));
+            setCurrentState(new P500GloryDE50StateBillDepositStart(context));
         } else if (dep instanceof EnvelopeDeposit) {
             Logger.debug("--------> Start setting state to envelope deposit %d", dep.depositId);
-            setCurrentState(new P500GloryDE50StateEnvelopeDepositStart(this, dep.user.userId, dep.depositId));
+            setCurrentState(new P500GloryDE50StateEnvelopeDepositStart(context));
         }
         Logger.debug("Machine Start done");
     }

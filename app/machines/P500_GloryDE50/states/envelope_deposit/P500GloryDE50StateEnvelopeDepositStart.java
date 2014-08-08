@@ -1,7 +1,7 @@
 package machines.P500_GloryDE50.states.envelope_deposit;
 
+import machines.P500_GloryDE50.states.P500GloryDE50StateContext;
 import machines.states.MachineStateAbstract;
-import machines.states.MachineStateApiInterface;
 import machines.status.MachineEnvelopeDepositStatus;
 import models.EnvelopeDeposit;
 
@@ -11,13 +11,10 @@ import models.EnvelopeDeposit;
  */
 public class P500GloryDE50StateEnvelopeDepositStart extends MachineStateAbstract {
 
-    final protected Integer userId;
-    final protected Integer depositId;
+    protected final P500GloryDE50StateContext context;
 
-    public P500GloryDE50StateEnvelopeDepositStart(MachineStateApiInterface machine, Integer userId, Integer depositId) {
-        super(machine);
-        this.userId = userId;
-        this.depositId = depositId;
+    public P500GloryDE50StateEnvelopeDepositStart(P500GloryDE50StateContext context) {
+        this.context = context;
     }
 
     @Override
@@ -27,8 +24,8 @@ public class P500GloryDE50StateEnvelopeDepositStart extends MachineStateAbstract
 
     @Override
     public MachineEnvelopeDepositStatus getStatus() {
-        EnvelopeDeposit envelopeDeposit = EnvelopeDeposit.findById(depositId);
-        return new MachineEnvelopeDepositStatus(envelopeDeposit, userId, "EnvelopeDepositControler.mainloop", "CONTINUE_DEPOSIT");
+        EnvelopeDeposit envelopeDeposit = EnvelopeDeposit.findById(context.depositId);
+        return new MachineEnvelopeDepositStatus(envelopeDeposit, context.currentUserId, "EnvelopeDepositControler.mainloop", "CONTINUE_DEPOSIT");
     }
 
 //    @Override

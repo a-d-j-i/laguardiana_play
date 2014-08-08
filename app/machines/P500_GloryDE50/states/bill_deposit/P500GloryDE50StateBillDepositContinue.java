@@ -7,7 +7,6 @@ import devices.glory.status.GloryDE50StatusMachineErrorCode;
 import java.util.Map;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;
-import machines.states.MachineStateApiInterface;
 import machines.status.MachineBillDepositStatus;
 import machines.status.MachineStatus;
 import models.BillDeposit;
@@ -21,11 +20,10 @@ import play.Logger;
  */
 public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract {
 
-    protected final P500GloryDE50StateBillDepositInfo info;
+    protected final P500GloryDE50StateBillDepositContext context;
 
-    public P500GloryDE50StateBillDepositContinue(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
-        super(machine);
-        this.info = info;
+    public P500GloryDE50StateBillDepositContinue(P500GloryDE50StateBillDepositContext context) {
+        this.context = context;
     }
 
     @Override
@@ -35,13 +33,13 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
             Logger.error("Machine on error 0x%x", e.getErrorCode());
             // TODO:
         } else if (st.is(GloryDE50Status.GloryDE50StatusType.COUNTING)) {
-            machine.setCurrentState(new P500GloryDE50StateBillDepositStart(machine, info));
+            context.setCurrentState(new P500GloryDE50StateBillDepositStart((P500GloryDE50StateBillDepositContext) context));
         } else if (st.is(GloryDE50Status.GloryDE50StatusType.PUT_THE_BILLS_ON_THE_HOPER)) {
-            machine.setCurrentState(new MachineStateAbstract(machine) {
+            context.setCurrentState(new MachineStateAbstract() {
                 @Override
                 public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
                     if (st.is(GloryDE50Status.GloryDE50StatusType.COUNTING)) {
-                        machine.setCurrentState(P500GloryDE50StateBillDepositContinue.this);
+                        context.setCurrentState(P500GloryDE50StateBillDepositContinue.this);
                     }
                     P500GloryDE50StateBillDepositContinue.this.onDeviceEvent(dev, st);
                 }
@@ -53,11 +51,11 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
             });
             return;
         } else if (st.is(GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS)) {
-            machine.setCurrentState(new MachineStateAbstract(machine) {
+            context.setCurrentState(new MachineStateAbstract() {
                 @Override
                 public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
                     if (!st.is(GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS)) {
-                        machine.setCurrentState(P500GloryDE50StateBillDepositContinue.this);
+                        context.setCurrentState(P500GloryDE50StateBillDepositContinue.this);
                     }
                     P500GloryDE50StateBillDepositContinue.this.onDeviceEvent(dev, st);
                 }
@@ -69,11 +67,11 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
             });
             return;
         } else if (st.is(GloryDE50Status.GloryDE50StatusType.JAM)) {
-            machine.setCurrentState(new MachineStateAbstract(machine) {
+            context.setCurrentState(new MachineStateAbstract() {
                 @Override
                 public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
                     if (st.is(GloryDE50Status.GloryDE50StatusType.NEUTRAL)) {
-                        machine.setCurrentState(P500GloryDE50StateBillDepositContinue.this);
+                        context.setCurrentState(P500GloryDE50StateBillDepositContinue.this);
                     }
                     P500GloryDE50StateBillDepositContinue.this.onDeviceEvent(dev, st);
                 }
@@ -86,12 +84,12 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
             return;
         } else if (st.is(GloryDE50StatusCurrentCount.class)) {
             GloryDE50StatusCurrentCount currentCountStatus = (GloryDE50StatusCurrentCount) st;
-            info.currentQuantity = dev.getQuantities(currentCountStatus.getCurrentQuantity());
-            info.currentSum = 0L;
-            for (Map.Entry<LgBillType, Integer> e : info.currentQuantity.entrySet()) {
-                info.currentSum += (e.getValue() * e.getKey().denomination);
+            context.currentQuantity = dev.getQuantities(currentCountStatus.getCurrentQuantity());
+            context.currentSum = 0L;
+            for (Map.Entry<LgBillType, Integer> e : context.currentQuantity.entrySet()) {
+                context.currentSum += (e.getValue() * e.getKey().denomination);
             }
-            Logger.debug("Setting current count from : %s to %s", st.toString(), info.toString());
+            Logger.debug("Setting current count from : %s to %s", st.toString(), context.toString());
             return;
         }
         super.onDeviceEvent(dev, st);
@@ -103,10 +101,10 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
     }
 
     public MachineBillDepositStatus getStatus(String stateName) {
-        BillDeposit billDeposit = BillDeposit.findById(info.billDepositId);
+        BillDeposit billDeposit = BillDeposit.findById(context.depositId);
         Long totalSum = billDeposit.getTotal();
-        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, info.currentQuantity, null),
-                info.currentUserId, "BillDepositController.mainloop", stateName, info.currentSum, totalSum);
+        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, context.currentQuantity, null),
+                context.currentUserId, "BillDepositController.mainloop", stateName, context.currentSum, totalSum);
     }
 
     /*

@@ -1,15 +1,6 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
-import devices.device.status.DeviceStatusInterface;
-import devices.glory.status.GloryDE50Status;
-import devices.glory.status.GloryDE50StatusCurrentCount;
-import java.util.Map;
-import machines.MachineDeviceDecorator;
-import machines.states.MachineStateApiInterface;
 import machines.status.MachineBillDepositStatus;
-import models.BillDeposit;
-import models.BillQuantity;
-import models.db.LgBillType;
 
 /**
  *
@@ -19,8 +10,8 @@ public class P500GloryDE50StateBillDepositReadyToStore extends P500GloryDE50Stat
 
     protected boolean delayedStore = false;
 
-    public P500GloryDE50StateBillDepositReadyToStore(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
-        super(machine, info);
+    public P500GloryDE50StateBillDepositReadyToStore(P500GloryDE50StateBillDepositContext context) {
+        super(context);
     }
 
     @Override
@@ -30,7 +21,7 @@ public class P500GloryDE50StateBillDepositReadyToStore extends P500GloryDE50Stat
 
     @Override
     public boolean onCancelDepositEvent() {
-        return machine.setCurrentState(new P500GloryDE50StateBillDepositWithdraw(machine, info));
+        return context.setCurrentState(new P500GloryDE50StateBillDepositWithdraw(context));
     }
 
 //

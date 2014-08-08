@@ -12,8 +12,7 @@ public class MachineStateStoringError extends MachineStateAbstract {
     private final String error;
     private final Integer currentUserId;
 
-    public MachineStateStoringError(MachineStateApiInterface machine, Integer currentUserId, String error, Object... args) {
-        super(machine);
+    public MachineStateStoringError(MachineStateContextInterface machine, Integer currentUserId, String error, Object... args) {
         this.error = String.format(error, args);
         this.currentUserId = currentUserId;
     }

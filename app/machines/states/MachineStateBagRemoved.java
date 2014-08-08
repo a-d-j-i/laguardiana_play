@@ -12,8 +12,7 @@ public class MachineStateBagRemoved extends MachineStateAbstract {
 
     final protected MachineStateAbstract prevState;
 
-    public MachineStateBagRemoved(MachineStateAbstract prevState, MachineStateApiInterface machine) {
-        super(machine);
+    public MachineStateBagRemoved(MachineStateAbstract prevState) {
         this.prevState = prevState;
     }
 

@@ -1,11 +1,11 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
 import devices.device.status.DeviceStatusInterface;
+import devices.device.task.DeviceTaskWithdraw;
 import devices.glory.status.GloryDE50Status;
 import machines.MachineDeviceDecorator;
-import machines.states.MachineStateApiInterface;
+import machines.states.MachineStateError;
 import machines.status.MachineBillDepositStatus;
-import play.Logger;
 
 /**
  *
@@ -13,14 +13,14 @@ import play.Logger;
  */
 public class P500GloryDE50StateBillDepositWithdraw extends P500GloryDE50StateBillDepositContinue {
 
-    public P500GloryDE50StateBillDepositWithdraw(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
-        super(machine, info);
+    public P500GloryDE50StateBillDepositWithdraw(P500GloryDE50StateBillDepositContext context) {
+        super(context);
     }
 
     @Override
     public boolean onStart() {
-        if (!machine.withdraw()) {
-            Logger.error("Can't start P500GloryDE50StateBillDepositStart error in api.count");
+        if (!context.glory.submitSynchronous(new DeviceTaskWithdraw())) {
+            context.setCurrentState(new MachineStateError(this, context.currentUserId, "Can't start P500GloryDE50StateBillDepositStart error in api.count"));
             return false;
         }
         return true;
@@ -28,8 +28,9 @@ public class P500GloryDE50StateBillDepositWithdraw extends P500GloryDE50StateBil
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
+
         if (st.is(GloryDE50Status.GloryDE50StatusType.RETURNED)) {
-            machine.setCurrentState(new P500GloryDE50StateBillDepositContinue(machine, info));
+            context.setCurrentState(new P500GloryDE50StateBillDepositContinue(context));
             return;
         }
         super.onDeviceEvent(dev, st);

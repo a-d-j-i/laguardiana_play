@@ -13,8 +13,7 @@ public class MachineStateWaitForOpenGate extends MachineStateAbstract {
     private boolean delayedStore = false;
     protected final MachineStateInterface nextAction;
 
-    public MachineStateWaitForOpenGate(MachineStateInterface nextAction, MachineStateApiInterface machine) {
-        super(machine);
+    public MachineStateWaitForOpenGate(MachineStateInterface nextAction, MachineStateContextInterface machine) {
         this.nextAction = nextAction;
     }
 

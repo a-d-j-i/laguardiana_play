@@ -1,14 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package machines.P500_GloryDE50.states.count;
 
 import devices.device.status.DeviceStatusInterface;
-import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;
-import machines.states.MachineStateApiInterface;
 import machines.status.MachineStatus;
 
 /**
@@ -16,10 +10,6 @@ import machines.status.MachineStatus;
  * @author adji
  */
 public class IdleCounting extends MachineStateAbstract {
-
-    public IdleCounting(MachineStateApiInterface machine) {
-        super(machine);
-    }
 
 //    @Override
 //    public String getStateName() {

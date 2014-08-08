@@ -8,7 +8,6 @@ package bootstrap;
 import static bootstrap.AppStart.singleThreadExecutor;
 import java.util.concurrent.TimeUnit;
 import models.ModelFacade;
-import play.Logger;
 import play.jobs.Job;
 import play.jobs.OnApplicationStop;
 
@@ -21,10 +20,7 @@ public class AppStop extends Job {
 
     @Override
     public void doJob() {
-        Logger.debug("onApplicationStop close all devices");
         ModelFacade.stop();
-        Logger.debug("onApplicationStop close all devices DONE");
-        Logger.debug("onApplicationStop stop execution service");
         singleThreadExecutor.shutdown();
         try {
             singleThreadExecutor.awaitTermination(3, TimeUnit.SECONDS);
