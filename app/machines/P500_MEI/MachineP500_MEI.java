@@ -36,10 +36,12 @@ final public class MachineP500_MEI extends MachineAbstract {
     @Override
     public void start() {
         super.start();
-        LgDeposit dep = LgDeposit.getCurrentDeposit();
-        P500MEIStateContext context = new P500MEIStateContext(this, mei, dep.user.userId, dep.depositId);
+
+        P500MEIStateContext context = new P500MEIStateContext(this, mei);
 
         // set current action.
+        LgDeposit dep = LgDeposit.getCurrentDeposit();
+        context.setDeposit(dep);
         setCurrentState(new P500MeiStateWaiting(context));
         if (dep instanceof BillDeposit) {
             Logger.debug("--------> Start setting state to bill deposit %d", dep.depositId);

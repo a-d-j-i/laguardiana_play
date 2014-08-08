@@ -25,11 +25,6 @@
                                 <a class="boton ${play.configuration['style.button_color']} full_width" href="@{reset}">Reset</a>
                             </div>
                         </li>
-                        <li class="column">
-                            <div class="columna">
-                                <a class="boton ${play.configuration['style.button_color']} full_width" href="@{storingErrorReset}">StoringErrorReset</a>
-                            </div>
-                        </li>
                     </ul>
                 </div>
                 #{/if}
@@ -41,11 +36,6 @@
                 <li class="column">
                     <div class="columna">
                         <!-- link cancelar -->
-                        <!--                    #{if isError }
-                                            <a href="@{counterError()}" class="boton gris">Refresh</a>
-                                            #{/if}
-                                            #{else}
-                                            #{/else}-->
                         <a href="@{Application.index()}" class="boton gris full_width">&{ 'main_menu.title' }</a>
                     </div>
                 </li>
@@ -66,28 +56,28 @@
 
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
-    var waiting = false;
-
-    // Reload the whole messages panel
-    function refresh() {
-        if (waiting) {
-            return;
-        }
-        waiting = true;
-        $.getJSON('@{onError}', function(data) {
-            waiting = false;
-            var error = data[ 0];
-            $("errorStr").html(data[1]);
-            $("errorCode").html(data[2]);
-            if (!error) {
-                window.location.href = "@{MenuController.MainMenu(null)}";
-            }
-            //$( '#gstatus' ).html(  data[ 0 ] );
-            //$( '#gerror' ).html(  data[ 1 ] );
-        });
-    }
-    setInterval(refresh, 500);
-    refresh();
+//    var waiting = false;
+//
+//    // Reload the whole messages panel
+//    function refresh() {
+//        if (waiting) {
+//            return;
+//        }
+//        waiting = true;
+//        $.getJSON('@{onError}', function(data) {
+//            waiting = false;
+//            var error = data[ 0];
+//            $("errorStr").html(data[1]);
+//            $("errorCode").html(data[2]);
+//            if (!error) {
+//                window.location.href = "@{MenuController.MainMenu(null)}";
+//            }
+//            //$( '#gstatus' ).html(  data[ 0 ] );
+//            //$( '#gerror' ).html(  data[ 1 ] );
+//        });
+//    }
+//    setInterval(refresh, 500);
+//    refresh();
 
 </script>
 #{/set}

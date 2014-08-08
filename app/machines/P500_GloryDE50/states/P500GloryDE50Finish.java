@@ -1,5 +1,6 @@
 package machines.P500_GloryDE50.states;
 
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateContext;
 import devices.device.status.DeviceStatusInterface;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;

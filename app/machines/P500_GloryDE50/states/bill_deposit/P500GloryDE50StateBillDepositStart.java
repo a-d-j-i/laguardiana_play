@@ -1,11 +1,10 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateBillDepositContext;
 import devices.device.status.DeviceStatusInterface;
 import devices.glory.status.GloryDE50Status.GloryDE50StatusType;
 import machines.MachineDeviceDecorator;
-import machines.P500_GloryDE50.states.P500GloryDE50StateContext;
 import machines.status.MachineBillDepositStatus;
-import models.BillDeposit;
 import play.Logger;
 
 /**
@@ -16,10 +15,6 @@ public class P500GloryDE50StateBillDepositStart extends P500GloryDE50StateBillDe
 
     public P500GloryDE50StateBillDepositStart(P500GloryDE50StateBillDepositContext context) {
         super(context);
-    }
-
-    public P500GloryDE50StateBillDepositStart(P500GloryDE50StateContext context) {
-        super(new P500GloryDE50StateBillDepositContext(context));
     }
 
 //    @Override
@@ -141,7 +136,6 @@ public class P500GloryDE50StateBillDepositStart extends P500GloryDE50StateBillDe
 //    }
     @Override
     public String toString() {
-        return "P500GloryDE50StateBillDepositStart";
+        return "P500GloryDE50StateBillDepositStart{" + "context=" + context.toString() + '}';
     }
-
 }

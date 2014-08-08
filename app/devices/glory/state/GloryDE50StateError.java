@@ -2,6 +2,7 @@ package devices.glory.state;
 
 import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusError;
+import devices.device.status.DeviceStatusStoringError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskReset;
 import devices.device.task.DeviceTaskStoringErrorReset;
@@ -19,16 +20,43 @@ public class GloryDE50StateError extends GloryDE50StateAbstract {
 
     public enum COUNTER_CLASS_ERROR_CODE {
 
-        GLORY_APPLICATION_ERROR, STORING_ERROR_CALL_ADMIN, BILLS_IN_ESCROW_CALL_ADMIN, CASSETE_FULL;
+        GLORY_APPLICATION_ERROR() {
+                    @Override
+                    void notifyError(GloryDE50Device api, String error) {
+                        Logger.error(error);
+                        api.notifyListeners(new DeviceStatusError(error));
+                    }
+                }, STORING_ERROR_CALL_ADMIN {
+                    @Override
+                    void notifyError(GloryDE50Device api, String error) {
+                        Logger.error(error);
+                        api.notifyListeners(new DeviceStatusStoringError(error));
+                    }
+                }, BILLS_IN_ESCROW_CALL_ADMIN {
+                    @Override
+                    void notifyError(GloryDE50Device api, String error) {
+                        Logger.error(error);
+                        api.notifyListeners(new DeviceStatusStoringError(error));
+                    }
+                }, CASSETE_FULL {
+                    @Override
+                    void notifyError(GloryDE50Device api, String error) {
+                        Logger.error(error);
+                        api.notifyListeners(new DeviceStatusError(error));
+                    }
+                };
+
+        abstract void notifyError(GloryDE50Device api, String error);
     }
 
     private final String error;
+    private final COUNTER_CLASS_ERROR_CODE error_code;
 
     public GloryDE50StateError(GloryDE50Device api, COUNTER_CLASS_ERROR_CODE error_code, String error) {
         super(api);
         this.error = error;
-        Logger.error(error);
-        api.notifyListeners(new DeviceStatusError(error));
+        this.error_code = error_code;
+        error_code.notifyError(api, error);
     }
 
     @Override
@@ -48,6 +76,8 @@ public class GloryDE50StateError extends GloryDE50StateAbstract {
                 return null;
             }
             return new GloryDE50StateWaitForResponse(api, opt, this);
+        } else { // TODO: allways ?
+            error_code.notifyError(api, error);
         }
         return super.call(task);
     }

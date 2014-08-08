@@ -17,10 +17,12 @@ import machines.jobs.MachineJobConfirmDeposit;
 import machines.jobs.MachineJobGetCurrentStatus;
 import machines.jobs.MachineJobIsBagFull;
 import machines.jobs.MachineJobIsBagReady;
+import machines.jobs.MachineJobReset;
 import machines.jobs.MachineJobStartBillDepositAction;
 import machines.jobs.MachineJobStartCountingAction;
 import machines.jobs.MachineJobStartEnvelopeDepositAction;
 import machines.jobs.MachineJobStartFilterAction;
+import machines.jobs.MachineJobStoringErrorReset;
 import machines.status.MachineStatus;
 import play.Logger;
 
@@ -129,6 +131,14 @@ public class ModelFacade {
 
     public static boolean isBagReady() {
         return machine.execute(new MachineJobIsBagFull(machine));
+    }
+
+    synchronized public static boolean errorReset() {
+        return machine.execute(new MachineJobReset(machine));
+    }
+
+    synchronized public static boolean storingErrorReset() {
+        return machine.execute(new MachineJobStoringErrorReset(machine));
     }
 
     // TODO: Consider adding this to machine !!!.

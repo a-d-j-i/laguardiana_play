@@ -1,5 +1,6 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateBillDepositContext;
 import machines.status.MachineBillDepositStatus;
 
 /**
@@ -96,4 +97,8 @@ public class P500GloryDE50StateBillDepositReadyToStoreEscrowFull extends P500Glo
      super.onIoBoardEvent(status);
      }
      */
+    @Override
+    public String toString() {
+        return "P500GloryDE50StateBillDepositReadyToStoreEscrowFull{" + "context=" + context.toString() + '}';
+    }
 }

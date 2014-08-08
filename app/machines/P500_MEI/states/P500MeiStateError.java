@@ -1,5 +1,6 @@
-package machines.states;
+package machines.P500_MEI.states;
 
+import machines.states.*;
 import machines.status.MachineStatus;
 import machines.status.MachineStatusError;
 import play.Logger;
@@ -8,12 +9,12 @@ import play.Logger;
  *
  * @author adji
  */
-public class MachineStateError extends MachineStateAbstract {
+public class P500MeiStateError extends MachineStateAbstract {
 
     private final String error;
     private final Integer currentUserId;
 
-    public MachineStateError(MachineStateAbstract prevState, Integer currentUserId, String error, Object... args) {
+    public P500MeiStateError(MachineStateAbstract prevState, Integer currentUserId, String error, Object... args) {
         this.error = String.format(error, args);
         this.currentUserId = currentUserId;
         Logger.error("-----------------> MACHINE ERROR : %s", error);

@@ -51,4 +51,15 @@ abstract public class MachineStateAbstract implements MachineStateInterface {
         Logger.error("Can't start envelope deposit current state is : %s", this.toString());
         return false;
     }
+
+    public boolean onReset() {
+        Logger.error("Can't reset device %s", this.toString());
+        return false;
+    }
+
+    public boolean onStoringErrorReset() {
+        Logger.error("Can't storing reset device %s", this.toString());
+        return false;
+    }
+
 }

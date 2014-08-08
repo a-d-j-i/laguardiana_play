@@ -1,6 +1,6 @@
 package machines.P500_GloryDE50.states.envelope_deposit;
 
-import machines.P500_GloryDE50.states.P500GloryDE50StateContext;
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateEnvelopeDepositContext;
 import machines.states.MachineStateAbstract;
 import machines.status.MachineEnvelopeDepositStatus;
 import models.EnvelopeDeposit;
@@ -11,21 +11,16 @@ import models.EnvelopeDeposit;
  */
 public class P500GloryDE50StateEnvelopeDepositStart extends MachineStateAbstract {
 
-    protected final P500GloryDE50StateContext context;
+    protected final P500GloryDE50StateEnvelopeDepositContext context;
 
-    public P500GloryDE50StateEnvelopeDepositStart(P500GloryDE50StateContext context) {
+    public P500GloryDE50StateEnvelopeDepositStart(P500GloryDE50StateEnvelopeDepositContext context) {
         this.context = context;
     }
 
     @Override
-    public String toString() {
-        return "P500GloryDE50StateEnvelopeDepositStart";
-    }
-
-    @Override
     public MachineEnvelopeDepositStatus getStatus() {
-        EnvelopeDeposit envelopeDeposit = EnvelopeDeposit.findById(context.depositId);
-        return new MachineEnvelopeDepositStatus(envelopeDeposit, context.currentUserId, "EnvelopeDepositControler.mainloop", "CONTINUE_DEPOSIT");
+        EnvelopeDeposit envelopeDeposit = context.getEnvelopeDeposit();
+        return new MachineEnvelopeDepositStatus(envelopeDeposit, context.getCurrentUserId(), "EnvelopeDepositControler.mainloop", "CONTINUE_DEPOSIT");
     }
 
 //    @Override
@@ -166,4 +161,8 @@ public class P500GloryDE50StateEnvelopeDepositStart extends MachineStateAbstract
      }*/
 //        Logger.debug("%s ignore event : %s", toString(), evt.toString());
 //    }
+    @Override
+    public String toString() {
+        return "P500GloryDE50StateEnvelopeDepositStart{" + "context=" + context.toString() + '}';
+    }
 }

@@ -24,19 +24,13 @@ public class P500MEIStateContext implements MachineStateContextInterface {
 
     private final MachineP500_MEI machine;
     private final MachineDeviceDecorator mei;
-    private final Integer depositId;
-    private final Integer currentUserId;
+    private Integer depositId;
+    private Integer currentUserId;
     private Integer batchId;
 
-    public P500MEIStateContext(MachineP500_MEI machine, MachineDeviceDecorator mei, Integer depositId, Integer userId) {
+    public P500MEIStateContext(MachineP500_MEI machine, MachineDeviceDecorator mei) {
         this.machine = machine;
         this.mei = mei;
-        this.depositId = depositId;
-        this.currentUserId = userId;
-    }
-
-    P500MEIStateContext(P500MEIStateContext context, BillDeposit d) {
-        this(context.machine, context.mei, d.depositId, null);
     }
 
     public boolean setCurrentState(MachineStateInterface prevState) {
@@ -109,10 +103,25 @@ public class P500MEIStateContext implements MachineStateContextInterface {
         return BillDeposit.findById(depositId);
     }
 
+    public void setDeposit(LgDeposit dep) {
+        if (dep != null) {
+            this.depositId = dep.depositId;
+            this.currentUserId = dep.user.userId;
+        } else {
+            this.depositId = null;
+            this.currentUserId = null;
+        }
+    }
+
     void closeDeposit(LgDeposit.FinishCause finishCause) {
         closeBatch();
-        BillDeposit billDeposit = BillDeposit.findById(depositId);
-        billDeposit.closeDeposit(finishCause);
+        BillDeposit billDeposit = null;
+        if (depositId != null) {
+            billDeposit = BillDeposit.findById(depositId);
+        }
+        if (billDeposit != null) {
+            billDeposit.closeDeposit(finishCause);
+        }
     }
 
 }

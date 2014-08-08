@@ -2,7 +2,7 @@ package machines.P500_GloryDE50.states.filter;
 
 import devices.device.status.DeviceStatusInterface;
 import machines.MachineDeviceDecorator;
-import machines.P500_GloryDE50.states.P500GloryDE50StateContext;
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateContext;
 import machines.states.MachineStateAbstract;
 import machines.status.MachineStatus;
 

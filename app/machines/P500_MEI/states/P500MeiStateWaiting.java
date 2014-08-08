@@ -25,7 +25,8 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
         BillDeposit d = new BillDeposit(refBillDeposit);
         d.startDate = new Date();
         d.save();
-        context.setCurrentState(new P500MeiStateBillDepositStart(new P500MEIStateContext(context, d)));
+        context.setDeposit(d);
+        context.setCurrentState(new P500MeiStateBillDepositStart(context));
         return true;
     }
 

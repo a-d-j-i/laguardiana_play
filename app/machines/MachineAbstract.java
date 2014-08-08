@@ -123,4 +123,12 @@ abstract public class MachineAbstract implements MachineInterface {
         return currentState.onCancelDepositEvent();
     }
 
+    public boolean onReset() {
+        return currentState.onReset();
+    }
+
+    public boolean onStoringErrorReset() {
+        return currentState.onStoringErrorReset();
+    }
+
 }

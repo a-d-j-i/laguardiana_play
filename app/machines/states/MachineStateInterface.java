@@ -28,4 +28,11 @@ abstract public interface MachineStateInterface {
 
     public boolean onStart();
 
+    public boolean onReset();
+
+    public boolean onStoringErrorReset();
+
+    @Override
+    public String toString();
+
 }

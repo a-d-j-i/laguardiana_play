@@ -2,12 +2,11 @@ package controllers;
 
 import devices.printer.OSPrinter.PrinterStatus;
 import machines.status.MachineStatus;
+import machines.status.MachineStatusError;
 import models.Configuration;
 import models.ModelFacade;
-import play.Logger;
 import play.mvc.Before;
 import play.mvc.Controller;
-import play.mvc.Router;
 import play.mvc.With;
 
 /**
@@ -19,6 +18,14 @@ import play.mvc.With;
 public class ErrorController extends Controller {
 
     static MachineStatus status;
+
+    @Before
+    static void basicPropertiesAndFixWizard() throws Throwable {
+        status = ModelFacade.getCurrentStatus();
+        if (request.isAjax()) {
+            return;
+        }
+    }
 
     public static void onError() {
         String gerror = null;
@@ -34,14 +41,18 @@ public class ErrorController extends Controller {
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
             pstatus = ModelFacade.getCurrentPrinter().getInternalState();
         }
+        boolean isError = true;
+        if (status instanceof MachineStatusError) {
+            MachineStatusError mse = (MachineStatusError) status;
+        }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-//            ret[ 0] = status.isError();
+            ret[ 0] = isError;
             ret[ 1] = Configuration.getErrorStr();
             ret[2] = status.getStateName();
             renderJSON(ret);
         } else {
-//            renderArgs.put("isError", status.isError());
+            renderArgs.put("isError", isError);
             renderArgs.put("errorStr", Configuration.getErrorStr());
             renderArgs.put("errorCode", status.getStateName());
             render();
@@ -63,14 +74,18 @@ public class ErrorController extends Controller {
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
             pstatus = ModelFacade.getCurrentPrinter().getInternalState();
         }
+        boolean isError = true;
+        if (status instanceof MachineStatusError) {
+            MachineStatusError mse = (MachineStatusError) status;
+        }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-//            ret[ 0] = status.isError();
+            ret[ 0] = isError;
             ret[ 1] = Configuration.getErrorStr();
             ret[2] = status.getStateName();
             renderJSON(ret);
         } else {
-//            renderArgs.put("isError", status.isError());
+            renderArgs.put("isError", isError);
             renderArgs.put("errorStr", Configuration.getErrorStr());
             renderArgs.put("errorCode", status.getStateName());
             render();
@@ -78,11 +93,13 @@ public class ErrorController extends Controller {
     }
 
     public static void reset() {
-
+        ModelFacade.errorReset();
+        onError();
     }
 
     public static void storingErrorReset() {
-
+        ModelFacade.storingErrorReset();
+        onError();
     }
 
 }

@@ -1,6 +1,6 @@
 package machines.P500_GloryDE50.states.envelope_deposit;
 
-import machines.P500_GloryDE50.states.P500GloryDE50StateContext;
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateEnvelopeDepositContext;
 import machines.status.MachineEnvelopeDepositStatus;
 import models.EnvelopeDeposit;
 
@@ -12,14 +12,14 @@ public class P500GloryDE50StateEnvelopeDepositReadyToStore extends P500GloryDE50
 
     private boolean delayedStore = false;
 
-    public P500GloryDE50StateEnvelopeDepositReadyToStore(P500GloryDE50StateContext context) {
+    public P500GloryDE50StateEnvelopeDepositReadyToStore(P500GloryDE50StateEnvelopeDepositContext context) {
         super(context);
     }
 
     @Override
     public MachineEnvelopeDepositStatus getStatus() {
-        EnvelopeDeposit envelopeDeposit = EnvelopeDeposit.findById(context.depositId);
-        return new MachineEnvelopeDepositStatus(envelopeDeposit, context.currentUserId, "EnvelopeDepositControler.mainloop", "READY_TO_STORE");
+        EnvelopeDeposit envelopeDeposit = context.getEnvelopeDeposit();
+        return new MachineEnvelopeDepositStatus(envelopeDeposit, context.getCurrentUserId(), "EnvelopeDepositControler.mainloop", "READY_TO_STORE");
     }
 
 //    @Override
@@ -88,4 +88,8 @@ public class P500GloryDE50StateEnvelopeDepositReadyToStore extends P500GloryDE50
 
      }
      */
+    @Override
+    public String toString() {
+        return "P500GloryDE50StateEnvelopeDepositReadyToStore{" + "context=" + context.toString() + '}';
+    }
 }

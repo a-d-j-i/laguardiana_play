@@ -6,7 +6,6 @@ import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusStored;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;
-import machines.states.MachineStateError;
 import machines.status.MachineBillDepositStatus;
 import machines.status.MachineStatus;
 import models.BillDeposit;
@@ -38,7 +37,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         if (st.is(MeiEbdsStatus.READY_TO_STORE)) {
             if (!dev.submitSynchronous(new DeviceTaskStore(1))) {
-                context.setCurrentState(new MachineStateError(this, context.getCurrentUserId(), "Error submitting store"));
+                context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting store"));
             }
             return;
         } else if (st.is(MeiEbdsStatus.JAM)) {
@@ -63,7 +62,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
         } else if (st.is(MeiEbdsStatusStored.class)) {
             MeiEbdsStatusStored stored = (MeiEbdsStatusStored) st;
             if (!context.addBillToDeposit(dev, stored.getSlot())) {
-                context.setCurrentState(new MachineStateError(this, context.getCurrentUserId(), "Error adding slot %s to batch", stored.getSlot()));
+                context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error adding slot %s to batch", stored.getSlot()));
             }
             return;
         }

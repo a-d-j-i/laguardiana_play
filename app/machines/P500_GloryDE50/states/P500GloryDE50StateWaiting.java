@@ -1,8 +1,10 @@
 package machines.P500_GloryDE50.states;
 
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateContext;
 import java.util.Date;
-import machines.P500_GloryDE50.states.bill_deposit.P500GloryDE50StateBillDepositContext;
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateBillDepositContext;
 import machines.P500_GloryDE50.states.bill_deposit.P500GloryDE50StateBillDepositStart;
+import machines.P500_GloryDE50.states.context.P500GloryDE50StateEnvelopeDepositContext;
 import machines.P500_GloryDE50.states.envelope_deposit.P500GloryDE50StateEnvelopeDepositStart;
 import machines.states.MachineStateAbstract;
 import machines.status.MachineStatus;
@@ -28,7 +30,7 @@ public class P500GloryDE50StateWaiting extends MachineStateAbstract {
         BillDeposit d = new BillDeposit(refDeposit);
         d.startDate = new Date();
         d.save();
-        return context.setCurrentState(new P500GloryDE50StateBillDepositStart(context));
+        return context.setCurrentState(new P500GloryDE50StateBillDepositStart(new P500GloryDE50StateBillDepositContext(context, d)));
     }
 
     @Override
@@ -37,7 +39,7 @@ public class P500GloryDE50StateWaiting extends MachineStateAbstract {
         EnvelopeDeposit d = new EnvelopeDeposit(refDeposit);
         d.startDate = new Date();
         d.save();
-        return context.setCurrentState(new P500GloryDE50StateEnvelopeDepositStart(context));
+        return context.setCurrentState(new P500GloryDE50StateEnvelopeDepositStart(new P500GloryDE50StateEnvelopeDepositContext(context, d)));
     }
 
     @Override
