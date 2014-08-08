@@ -2,7 +2,6 @@ package machines.P500_MEI.states;
 
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
-import models.BillQuantity;
 import play.Logger;
 
 /**
@@ -30,7 +29,7 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
         if (billDeposit.getTotal() > 0) {
             context.setCurrentState(new P500MeiStateBillDepositContinue(context));
         }
-        return super.getStatus();
+        return super.getStatus("IDLE");
     }
 
     @Override
@@ -51,7 +50,7 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
 
     @Override
     public String toString() {
-        return "P500MeiStateBillDepositStart{" + super.toString() + '}';
+        return "P500MeiStateBillDepositStart{" + context.toString() + '}';
     }
 
 }

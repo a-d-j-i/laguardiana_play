@@ -20,6 +20,7 @@ import devices.mei.MeiEbdsDevice;
 import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 import static devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType.*;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
+import devices.mei.status.MeiEbdsStatusReadyToStore;
 import play.Logger;
 import play.data.validation.Error;
 
@@ -171,6 +172,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         String err = null;
         if (response.isEscrowed()) {
             debug("%s Is escrowed", mei.toString());
+            lastNoteValue = response.getNoteSlot();
             if (mustCancel) {
                 if (!mei.reject()) {
                     err = "Mei Error in reject";
@@ -180,10 +182,9 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
             } else {
                 // skip the first escrowed after store.
                 if (!skipEscrowed) {
-                    mei.notifyListeners(MeiEbdsStatus.READY_TO_STORE);
+                    mei.notifyListeners(new MeiEbdsStatusReadyToStore(lastNoteValue));
                 }
             }
-            lastNoteValue = response.getNoteSlot();
         } else if (response.isReturned()) {
             debug("%s Is returned", mei.toString());
             mei.notifyListeners(MeiEbdsStatus.RETURNED);

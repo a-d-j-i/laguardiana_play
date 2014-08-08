@@ -1,6 +1,7 @@
 package machines.P500_MEI.states;
 
 import devices.device.task.DeviceTaskCancel;
+import devices.device.task.DeviceTaskStore;
 import devices.device.task.DeviceTaskWithdraw;
 import devices.mei.task.MeiEbdsTaskCount;
 import java.util.Date;
@@ -60,10 +61,23 @@ public class P500MEIStateContext implements MachineStateContextInterface {
         return mei.submitSynchronous(new DeviceTaskWithdraw());
     }
 
-    protected boolean addBillToDeposit(MachineDeviceDecorator dev, String slot) {
+    boolean store() {
+        return mei.submitSynchronous(new DeviceTaskStore(1));
+    }
+
+    boolean isValidBill(String slot) {
+        LgDeviceSlot s = LgDeviceSlot.find(mei.getLgDevice(), slot);
+        if (s == null) {
+            Logger.error("Error calling LgDeviceSlot.find for device %s, slot %s", mei.toString(), slot);
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean addBillToDeposit(String slot) {
         LgBatch refBatch;
         if (batchId == null) {
-            refBatch = new LgBatch(dev.getLgDevice());
+            refBatch = new LgBatch(mei.getLgDevice());
             refBatch.save();
             batchId = refBatch.batchId;
         } else {
@@ -73,12 +87,12 @@ public class P500MEIStateContext implements MachineStateContextInterface {
             Logger.error("Error gettong current batch id %d", batchId);
             return false;
         }
-        LgDeviceSlot s = LgDeviceSlot.find(dev.getLgDevice(), slot);
+        LgDeviceSlot s = LgDeviceSlot.find(mei.getLgDevice(), slot);
         if (s == null) {
-            Logger.error("Error calling LgDeviceSlot.find for device %s, slot %s", dev.toString(), slot);
+            Logger.error("Error calling LgDeviceSlot.find for device %s, slot %s", mei.toString(), slot);
             return false;
         }
-        Logger.debug("Found the slot %s from device %s, addToDeposit", slot, dev.toString());
+        Logger.debug("Found the slot %s from device %s, addToDeposit", slot, mei.toString());
         BillDeposit billDeposit = BillDeposit.findById(depositId);
         return billDeposit.addBillToDeposit(refBatch, s.billType, 1);
     }

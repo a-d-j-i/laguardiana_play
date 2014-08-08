@@ -12,7 +12,6 @@ public enum MeiEbdsStatus implements DeviceStatusInterface {
     CANCELING,
     STORING,
     REJECTING,
-    READY_TO_STORE,
     RETURNED,
     COUNTING,
     NEUTRAL,

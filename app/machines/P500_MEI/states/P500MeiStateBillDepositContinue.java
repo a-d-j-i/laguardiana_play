@@ -3,6 +3,7 @@ package machines.P500_MEI.states;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskStore;
 import devices.mei.status.MeiEbdsStatus;
+import devices.mei.status.MeiEbdsStatusReadyToStore;
 import devices.mei.status.MeiEbdsStatusStored;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;
@@ -35,9 +36,22 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        if (st.is(MeiEbdsStatus.READY_TO_STORE)) {
-            if (!dev.submitSynchronous(new DeviceTaskStore(1))) {
-                context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting store"));
+        if (st.is(MeiEbdsStatusReadyToStore.class)) {
+            MeiEbdsStatusReadyToStore rts = (MeiEbdsStatusReadyToStore) st;
+            if (!context.isValidBill(rts.getSlot())) {
+                if (!context.store()) {
+                    context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting store"));
+                }
+            } else {
+                if (!context.withdraw()) {
+                    context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting store"));
+                }
+            }
+            return;
+        } else if (st.is(MeiEbdsStatusStored.class)) {
+            MeiEbdsStatusStored stored = (MeiEbdsStatusStored) st;
+            if (!context.addBillToDeposit(stored.getSlot())) {
+                context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error adding slot %s to batch", stored.getSlot()));
             }
             return;
         } else if (st.is(MeiEbdsStatus.JAM)) {
@@ -58,12 +72,6 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
                 }
 
             });
-            return;
-        } else if (st.is(MeiEbdsStatusStored.class)) {
-            MeiEbdsStatusStored stored = (MeiEbdsStatusStored) st;
-            if (!context.addBillToDeposit(dev, stored.getSlot())) {
-                context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error adding slot %s to batch", stored.getSlot()));
-            }
             return;
         }
         super.onDeviceEvent(dev, st);
