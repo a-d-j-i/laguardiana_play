@@ -18,7 +18,6 @@ import devices.glory.state.GloryDE50StateError;
 import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import devices.glory.state.GloryDE50StateWaitForOperation;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.BAG_COLLECTED;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_HOPER;
 import java.util.Date;
@@ -49,7 +48,6 @@ public class GloryDE50StateCollect extends GloryDE50StatePoll {
             if (sret != null) {
                 return sret;
             }
-            api.notifyListeners(BAG_COLLECTED);
             Logger.debug("COLLECT DONE");
             return new GloryDE50StateGotoNeutral(api, new GloryDE50StateWaitForOperation(api), false, false);
         }

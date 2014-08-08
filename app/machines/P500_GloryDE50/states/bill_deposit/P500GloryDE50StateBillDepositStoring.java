@@ -1,25 +1,23 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
-import devices.device.status.DeviceStatusInterface;
-import machines.MachineDeviceDecorator;
-import machines.states.MachineStateAbstract;
 import machines.states.MachineStateApiInterface;
-import machines.status.MachineStatus;
+import machines.status.MachineBillDepositStatus;
 
 /**
  *
  * @author adji
  */
-public class BillDepositStoring extends MachineStateAbstract {
+public class P500GloryDE50StateBillDepositStoring extends P500GloryDE50StateBillDepositContinue {
 
-    public BillDepositStoring(MachineStateApiInterface machine) {
-        super(machine);
+    public P500GloryDE50StateBillDepositStoring(MachineStateApiInterface machine, P500GloryDE50StateBillDepositInfo info) {
+        super(machine, info);
     }
 
-//    @Override
-//    public String getStateName() {
-//        return "STORING";
-//    }
+    @Override
+    public MachineBillDepositStatus getStatus() {
+        return getStatus("STORING");
+    }
+
     /*
      @Override
      public void onGloryEvent(ManagerStatus m) {
@@ -79,13 +77,4 @@ public class BillDepositStoring extends MachineStateAbstract {
      }
      }
      */
-    @Override
-    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public MachineStatus getStatus() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

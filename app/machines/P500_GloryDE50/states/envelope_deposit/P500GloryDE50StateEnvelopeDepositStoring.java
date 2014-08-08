@@ -1,20 +1,23 @@
 package machines.P500_GloryDE50.states.envelope_deposit;
 
-import devices.device.status.DeviceStatusInterface;
-import machines.MachineAbstract;
-import machines.MachineDeviceDecorator;
-import machines.states.MachineStateAbstract;
 import machines.states.MachineStateApiInterface;
-import machines.status.MachineStatus;
+import machines.status.MachineEnvelopeDepositStatus;
+import models.EnvelopeDeposit;
 
 /**
  *
  * @author adji
  */
-class EnvelopeDepositStoring extends MachineStateAbstract {
+class P500GloryDE50StateEnvelopeDepositStoring extends P500GloryDE50StateEnvelopeDepositStart {
 
-    public EnvelopeDepositStoring(MachineStateApiInterface machine) {
-        super(machine);
+    public P500GloryDE50StateEnvelopeDepositStoring(MachineStateApiInterface machine, Integer userId, Integer depositId) {
+        super(machine, userId, depositId);
+    }
+
+    @Override
+    public MachineEnvelopeDepositStatus getStatus() {
+        EnvelopeDeposit envelopeDeposit = EnvelopeDeposit.findById(depositId);
+        return new MachineEnvelopeDepositStatus(envelopeDeposit, userId, "EnvelopeDepositControler.mainloop", "STORING");
     }
 
 //    @Override
@@ -61,13 +64,4 @@ class EnvelopeDepositStoring extends MachineStateAbstract {
      }
      }
      */
-    @Override
-    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public MachineStatus getStatus() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

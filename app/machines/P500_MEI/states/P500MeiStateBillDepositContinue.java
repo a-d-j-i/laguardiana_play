@@ -48,7 +48,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         if (st.is(MeiEbdsStatus.READY_TO_STORE)) {
             if (!dev.submitSynchronous(new DeviceTaskStore(1))) {
-                machine.setCurrentState(new MachineStateError(machine, "Error submitting store"));
+                machine.setCurrentState(new MachineStateError(machine, currentUserId, "Error submitting store"));
             }
             return;
         } else if (st.is(MeiEbdsStatus.JAM)) {
@@ -65,7 +65,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
                 @Override
                 public MachineStatus getStatus() {
-                    return new MachineStatus(currentUserId, "BillDepositController", "JAM");
+                    return P500MeiStateBillDepositContinue.this.getStatus("JAM");
                 }
 
             });
@@ -73,7 +73,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
         } else if (st.is(MeiEbdsStatusStored.class)) {
             MeiEbdsStatusStored stored = (MeiEbdsStatusStored) st;
             if (!addBillToDeposit(dev, stored.getSlot())) {
-                machine.setCurrentState(new MachineStateError(machine, "Error adding slot %s to batch", stored.getSlot()));
+                machine.setCurrentState(new MachineStateError(machine, currentUserId, "Error adding slot %s to batch", stored.getSlot()));
             }
             return;
         }
@@ -82,10 +82,14 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
     @Override
     public MachineBillDepositStatus getStatus() {
+        return getStatus("CONTINUE_DEPOSIT");
+    }
+
+    public MachineBillDepositStatus getStatus(String stateName) {
         BillDeposit billDeposit = BillDeposit.findById(billDepositId);
         Long currentSum = billDeposit.getTotal();
         return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.mainloop", "CONTINUE_DEPOSIT", currentSum, currentSum);
+                currentUserId, "BillDepositController.mainloop", stateName, currentSum, currentSum);
     }
 
     @Override

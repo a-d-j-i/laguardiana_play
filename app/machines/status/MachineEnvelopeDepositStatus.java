@@ -8,12 +8,15 @@ import models.EnvelopeDeposit;
  */
 public class MachineEnvelopeDepositStatus extends MachineStatus {
 
-    public MachineEnvelopeDepositStatus(Integer currentUserId, String neededController, String neededAction, String stateName) {
+    final EnvelopeDeposit deposit;
+
+    public MachineEnvelopeDepositStatus(EnvelopeDeposit deposit, Integer currentUserId, String neededAction, String stateName) {
         super(currentUserId, neededAction, stateName);
+        this.deposit = deposit;
     }
 
     public EnvelopeDeposit getCurrentDeposit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return deposit;
     }
 
 }

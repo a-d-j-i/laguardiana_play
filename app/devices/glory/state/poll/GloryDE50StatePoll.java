@@ -12,6 +12,7 @@ import devices.glory.state.GloryDE50StateError;
 import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateWaitForResponse;
 import devices.glory.state.GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback;
+import devices.glory.status.GloryDE50StatusMachineErrorCode;
 import devices.glory.task.GloryDE50TaskOperation;
 import play.Logger;
 
@@ -20,20 +21,20 @@ import play.Logger;
  * @author adji
  */
 abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
-
+    
     boolean debug = true;
-
+    
     public GloryDE50StatePoll(GloryDE50Device api) {
         super(api);
     }
-
+    
     @Override
     public GloryDE50StateAbstract init() {
         return sense();
     }
-
+    
     abstract public GloryDE50StateAbstract poll(GloryDE50ResponseWithData senseResponse);
-
+    
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
         if (task instanceof DeviceTaskReadTimeout) {
@@ -43,19 +44,24 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
             return super.call(task);
         }
     }
-
+    
     protected GloryDE50StateAbstract sense() {
         return sendGloryOperation(new devices.glory.operation.Sense(), new GloryDE50StateWaitForResponseCallback() {
-
+            
             @Override
             public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
                 Logger.debug("SENSE: %s", response.toString());
-                return poll((GloryDE50ResponseWithData) response);
+                GloryDE50ResponseWithData r = (GloryDE50ResponseWithData) response;
+                if (r.getErrorCode() != 0) {
+                    // till now just for book keeping.
+                    api.notifyListeners(new GloryDE50StatusMachineErrorCode(r.getErrorCode()));
+                }
+                return poll(r);
             }
-
+            
         });
     }
-
+    
     protected GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface operation, GloryDE50StateWaitForResponseCallback callBack) {
         GloryDE50TaskOperation opTask = new GloryDE50TaskOperation(operation, debug);
         String err = api.writeOperation(opTask, false);
@@ -66,10 +72,10 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
         }
         return new GloryDE50StateWaitForResponse(api, opTask, callBack);
     }
-
+    
     protected GloryDE50StateAbstract sendGloryOperation(GloryDE50OperationInterface operation) {
         return sendGloryOperation(operation, new GloryDE50StateWaitForResponseCallback() {
-
+            
             public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
                 return sense();
             }
@@ -104,5 +110,5 @@ abstract public class GloryDE50StatePoll extends GloryDE50StateAbstract {
     public String toString() {
         return "GloryDE50StatePoll{" + "debug=" + debug + '}';
     }
-
+    
 }

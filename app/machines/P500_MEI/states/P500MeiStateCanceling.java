@@ -36,7 +36,7 @@ public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         if (st.is(MeiEbdsStatus.READY_TO_STORE)) {
             if (!dev.submitSynchronous(new DeviceTaskWithdraw())) {
-                machine.setCurrentState(new MachineStateError(machine, "Error submitting withdraw"));
+                machine.setCurrentState(new MachineStateError(machine, currentUserId, "Error submitting withdraw"));
             }
             return;
         } else if (st.is(MeiEbdsStatus.COUNTING)) {
@@ -52,10 +52,7 @@ public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
 
     @Override
     public MachineBillDepositStatus getStatus() {
-        BillDeposit billDeposit = BillDeposit.findById(billDepositId);
-        Long currentSum = billDeposit.getTotal();
-        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
-                currentUserId, "BillDepositController.mainloop", "CANCELING", currentSum, currentSum);
+        return getStatus("CANCELING");
     }
 
     @Override

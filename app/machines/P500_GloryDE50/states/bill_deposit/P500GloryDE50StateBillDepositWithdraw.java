@@ -39,26 +39,4 @@ public class P500GloryDE50StateBillDepositWithdraw extends P500GloryDE50StateBil
     public MachineBillDepositStatus getStatus() {
         return getStatus("REMOVE_THE_BILLS_FROM_ESCROW");
     }
-
-    /*
-     @Override
-     public void onGloryEvent(ManagerStatus m) {
-     Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
-     switch (m.getState()) {
-     case REMOVE_REJECTED_BILLS:
-     break;
-     case JAM:
-     break;
-     case REMOVE_THE_BILLS_FROM_ESCROW:
-     break;
-     case NEUTRAL:
-     case INITIALIZING:
-     case COUNTING:
-     stateApi.setState(new BillDepositStart(stateApi));
-     default:
-     Logger.debug("Withdraw invalid state %s %s", m.name(), name());
-     break;
-     }
-     }
-     */
 }

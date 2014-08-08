@@ -3,6 +3,7 @@ package machines.P500_GloryDE50.states.bill_deposit;
 import devices.device.status.DeviceStatusInterface;
 import devices.glory.status.GloryDE50Status;
 import devices.glory.status.GloryDE50StatusCurrentCount;
+import devices.glory.status.GloryDE50StatusMachineErrorCode;
 import java.util.Map;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;
@@ -29,7 +30,11 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        if (st.is(GloryDE50Status.GloryDE50StatusType.COUNTING)) {
+        if (st.is(GloryDE50StatusMachineErrorCode.class)) {
+            GloryDE50StatusMachineErrorCode e = (GloryDE50StatusMachineErrorCode) st;
+            Logger.error("Machine on error 0x%x", e.getErrorCode());
+            // TODO:
+        } else if (st.is(GloryDE50Status.GloryDE50StatusType.COUNTING)) {
             machine.setCurrentState(new P500GloryDE50StateBillDepositStart(machine, info));
         } else if (st.is(GloryDE50Status.GloryDE50StatusType.PUT_THE_BILLS_ON_THE_HOPER)) {
             machine.setCurrentState(new MachineStateAbstract(machine) {

@@ -10,23 +10,23 @@ public class GloryDE50Status {
 
     static public enum GloryDE50StatusType implements DeviceStatusInterface {
 
-        ERROR,
         OPEN_PORT,
         NEUTRAL,
-        READY_TO_STORE,
-        STORING,
         PUT_THE_BILLS_ON_THE_HOPER,
+        PUT_THE_ENVELOPE_IN_THE_ESCROW,
         COUNTING,
         ESCROW_FULL,
-        PUT_THE_ENVELOPE_IN_THE_ESCROW,
-        INITIALIZING,
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
+
+        READY_TO_STORE,
+        STORING,
+        
         CANCELING,
+        CANCELED,
         REJECTING,
         RETURNED,
-        BAG_COLLECTED,
         JAM;
 
         public boolean is(Enum type) {

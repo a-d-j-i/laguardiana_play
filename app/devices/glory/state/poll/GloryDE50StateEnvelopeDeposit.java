@@ -9,6 +9,7 @@ import devices.glory.GloryDE50Device;
 import devices.glory.operation.GloryDE50OperationInterface;
 import devices.glory.response.GloryDE50Response;
 import devices.glory.response.GloryDE50ResponseWithData;
+import devices.glory.response.GloryDE50ResponseWithData.SR1Mode;
 import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.abnormal_device;
 import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.being_store;
 import static devices.glory.response.GloryDE50ResponseWithData.SR1Mode.escrow_close;
@@ -27,6 +28,7 @@ import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.PUT_THE_ENVELOPE_IN_THE_ESCROW;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.READY_TO_STORE;
 import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.STORING;
+import org.junit.runner.Result;
 import play.Logger;
 
 /**
@@ -59,16 +61,6 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
         }
     }
 
-    @Override
-    public GloryDE50StateAbstract init() {
-        return sendGloryOperation(new devices.glory.operation.SetManualMode(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
-
-            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
-                return sense();
-            }
-        });
-    }
-
     boolean storeTry = false;
     int waitForEscrow = 0;
     boolean needToStoreDeposit = false;
@@ -77,6 +69,22 @@ public class GloryDE50StateEnvelopeDeposit extends GloryDE50StatePoll {
     @Override
     public GloryDE50StateAbstract poll(GloryDE50ResponseWithData lastResponse) {
         Logger.debug("ENVELOPE_DEPOSIT_COMMAND");
+        // If I'm not in manual mode try to get there once
+        switch (lastResponse.getD1Mode()) {
+            case manual:
+                break;
+            case neutral:
+                return sendGloryOperation(new devices.glory.operation.SetManualMode(), new GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback() {
+
+                    public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                        return sense();
+                    }
+                });
+            default:
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                        String.format("Invalid d1 mode: %s, expected manual", lastResponse.getD1Mode().toString()));
+        }
+
         switch (lastResponse.getSr1Mode()) {
             case escrow_open:
                 api.notifyListeners(PUT_THE_ENVELOPE_IN_THE_ESCROW);

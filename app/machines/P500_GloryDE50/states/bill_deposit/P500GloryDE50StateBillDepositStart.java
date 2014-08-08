@@ -24,19 +24,22 @@ public class P500GloryDE50StateBillDepositStart extends P500GloryDE50StateBillDe
 
     @Override
     public boolean onStart() {
-        Logger.debug("P500GloryDE50StateBillDepositStart");
-        BillDeposit billDeposit = BillDeposit.findById(info.billDepositId);
-        if (!machine.count(billDeposit.currency)) {
-            Logger.error("Can't start P500GloryDE50StateBillDepositStart error in api.count");
-            return false;
-        }
-        Logger.debug("P500GloryDE50StateBillDepositStart api.count success");
+//        BillDeposit billDeposit = BillDeposit.findById(info.billDepositId);
+//        if (!machine.count(billDeposit.currency)) {
+//            Logger.error("Can't start P500GloryDE50StateBillDepositStart error in api.count");
+//            return false;
+//        }
         return true;
     }
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         if (st.is(GloryDE50StatusType.NEUTRAL)) {
+            BillDeposit billDeposit = BillDeposit.findById(info.billDepositId);
+            if (!machine.count(billDeposit.currency)) {
+                Logger.error("Can't start P500GloryDE50StateBillDepositStart error in api.count");
+            }
+            return;
         } else if (st.is(GloryDE50StatusType.READY_TO_STORE)) {
             machine.setCurrentState(new P500GloryDE50StateBillDepositReadyToStore(machine, info));
         } else if (st.is(GloryDE50StatusType.ESCROW_FULL)) {

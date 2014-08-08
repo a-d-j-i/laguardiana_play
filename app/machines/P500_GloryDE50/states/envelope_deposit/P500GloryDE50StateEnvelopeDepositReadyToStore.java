@@ -1,18 +1,25 @@
 package machines.P500_GloryDE50.states.envelope_deposit;
 
-import machines.MachineAbstract;
 import machines.states.MachineStateApiInterface;
+import machines.status.MachineEnvelopeDepositStatus;
+import models.EnvelopeDeposit;
 
 /**
  *
  * @author adji
  */
-public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
+public class P500GloryDE50StateEnvelopeDepositReadyToStore extends P500GloryDE50StateEnvelopeDepositStart {
 
     private boolean delayedStore = false;
 
-    public EnvelopeDepositReadyToStore(MachineStateApiInterface machine) {
-        super(machine);
+    public P500GloryDE50StateEnvelopeDepositReadyToStore(MachineStateApiInterface machine, Integer userId, Integer depositId) {
+        super(machine, userId, depositId);
+    }
+
+    @Override
+    public MachineEnvelopeDepositStatus getStatus() {
+        EnvelopeDeposit envelopeDeposit = EnvelopeDeposit.findById(depositId);
+        return new MachineEnvelopeDepositStatus(envelopeDeposit, userId, "EnvelopeDepositControler.mainloop", "READY_TO_STORE");
     }
 
 //    @Override

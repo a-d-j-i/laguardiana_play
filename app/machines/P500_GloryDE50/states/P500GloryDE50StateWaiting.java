@@ -3,7 +3,7 @@ package machines.P500_GloryDE50.states;
 import machines.P500_GloryDE50.states.bill_deposit.P500GloryDE50StateBillDepositStart;
 import machines.states.*;
 import java.util.Date;
-import machines.P500_GloryDE50.states.envelope_deposit.GloryDE50EnvelopeDepositStart;
+import machines.P500_GloryDE50.states.envelope_deposit.P500GloryDE50StateEnvelopeDepositStart;
 import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
@@ -34,7 +34,7 @@ public class P500GloryDE50StateWaiting extends MachineStateAbstract {
         EnvelopeDeposit d = new EnvelopeDeposit(refDeposit);
         d.startDate = new Date();
         d.save();
-        return machine.setCurrentState(new GloryDE50EnvelopeDepositStart(machine, d.user.userId, d.depositId));
+        return machine.setCurrentState(new P500GloryDE50StateEnvelopeDepositStart(machine, d.user.userId, d.depositId));
     }
 
     @Override

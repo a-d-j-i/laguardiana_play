@@ -30,18 +30,7 @@ import devices.glory.state.GloryDE50StateError.COUNTER_CLASS_ERROR_CODE;
 import devices.glory.state.GloryDE50StateAbstract;
 import devices.glory.state.GloryDE50StateWaitForOperation;
 import devices.glory.state.GloryDE50StateWaitForResponse.GloryDE50StateWaitForResponseCallback;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.CANCELING;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.COUNTING;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.ESCROW_FULL;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.JAM;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.PUT_THE_BILLS_ON_THE_HOPER;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.READY_TO_STORE;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REJECTING;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_REJECTED_BILLS;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_ESCROW;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.REMOVE_THE_BILLS_FROM_HOPER;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.RETURNED;
-import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.STORING;
+import static devices.glory.status.GloryDE50Status.GloryDE50StatusType.*;
 import devices.glory.status.GloryDE50StatusCurrentCount;
 import java.util.Map;
 import play.Logger;
@@ -130,15 +119,23 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
                 if (lastResponse.isRejectBillPresent()) {
                     api.notifyListeners(REMOVE_REJECTED_BILLS);
                     return this;
-                } else {
-                    Logger.error("CountCommand CURRENCY %d", currency.byteValue());
-                    return sendGloryOperation(new devices.glory.operation.SwitchCurrency(currency.byteValue()), new GloryDE50StateWaitForResponseCallback() {
-
-                        public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
-                            return sendGloryOperation(new devices.glory.operation.SetDepositMode());
-                        }
-                    });
                 }
+                Logger.error("CountCommand CURRENCY %d", currency.byteValue());
+                return sendGloryOperation(new devices.glory.operation.SwitchCurrency(currency.byteValue()), new GloryDE50StateWaitForResponseCallback() {
+
+                    public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                        return sendGloryOperation(new devices.glory.operation.SetDepositMode(), new GloryDE50StateWaitForResponseCallback() {
+
+                            @Override
+                            public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                                return sense();
+                            }
+                        });
+                    }
+                });
+            default:
+                return new GloryDE50StateError(api, COUNTER_CLASS_ERROR_CODE.GLORY_APPLICATION_ERROR,
+                        String.format("Invalid d1 mode: %s, expected deposit", lastResponse.getD1Mode().toString()));
         }
 
         switch (lastResponse.getSr1Mode()) {
@@ -378,12 +375,14 @@ public class GloryDE50StateCount extends GloryDE50StatePoll {
                     }
                 }
                 if (currentSlot < 32) {
-                    GloryDE50StateAbstract sret = sendGloryOperation(new devices.glory.operation.BatchDataTransmition(bills));
-                    if (sret != null) {
-                        return sret;
-                    }
-                    api.notifyListeners(COUNTING);
-                    //? return false?
+                    return sendGloryOperation(new devices.glory.operation.BatchDataTransmition(bills), new GloryDE50StateWaitForResponseCallback() {
+
+                        @Override
+                        public DeviceStateInterface onResponse(GloryDE50OperationInterface operation, GloryDE50Response response) {
+                            api.notifyListeners(COUNTING);
+                            return GloryDE50StateCount.this;
+                        }
+                    });
                 }
                 // TODO: recheck
                 batchEnd = true;

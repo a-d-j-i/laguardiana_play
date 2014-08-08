@@ -9,7 +9,7 @@ import machines.P500_GloryDE50.states.P500GloryDE50StateWaiting;
 import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
 import machines.P500_GloryDE50.states.bill_deposit.P500GloryDE50StateBillDepositStart;
-import machines.P500_GloryDE50.states.envelope_deposit.GloryDE50EnvelopeDepositStart;
+import machines.P500_GloryDE50.states.envelope_deposit.P500GloryDE50StateEnvelopeDepositStart;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
 import models.db.LgDeposit;
@@ -71,7 +71,7 @@ final public class MachineP500_GLORY extends MachineAbstract {
             setCurrentState(new P500GloryDE50StateBillDepositStart(this, dep.user.userId, dep.depositId));
         } else if (dep instanceof EnvelopeDeposit) {
             Logger.debug("--------> Start setting state to envelope deposit %d", dep.depositId);
-            setCurrentState(new GloryDE50EnvelopeDepositStart(this, dep.user.userId, dep.depositId));
+            setCurrentState(new P500GloryDE50StateEnvelopeDepositStart(this, dep.user.userId, dep.depositId));
         }
         Logger.debug("Machine Start done");
     }

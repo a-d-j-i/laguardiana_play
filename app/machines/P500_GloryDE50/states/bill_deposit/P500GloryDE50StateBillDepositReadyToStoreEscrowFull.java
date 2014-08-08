@@ -1,9 +1,7 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
-import machines.P500_MEI.states.P500MeiStateAccepting;
 import machines.states.MachineStateApiInterface;
 import machines.status.MachineBillDepositStatus;
-import machines.status.MachineStatus;
 
 /**
  *
@@ -22,11 +20,11 @@ public class P500GloryDE50StateBillDepositReadyToStoreEscrowFull extends P500Glo
         return getStatus("ESCROW_FULL");
     }
 
-//    @Override
-//    public boolean onAcceptDepositEvent() {
+    @Override
+    public boolean onAcceptDepositEvent() {
 //        closeBatch();
-//        return machine.setCurrentState(new P500MeiStateAccepting(machine, currentUserId, billDepositId, batchId));
-//    }
+        return machine.setCurrentState(new P500GloryDE50StateBillDepositStoring(machine, info));
+    }
 
     @Override
     public boolean onCancelDepositEvent() {
