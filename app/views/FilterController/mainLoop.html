@@ -15,8 +15,8 @@
                 <li class="fixed column" style="width: 45%">
                     <div class="columna_1">
                         <!-- resumen de datos -->
-                        <p>&{ 'counting_page.currency_title' }: ${currency}</p>
-                        <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
+                        <p>&{ 'message.currency_title' }: ${currency}</p>
+                        <p>&{ 'message.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
                         <div id="info_message" style="color: green;"> 
@@ -26,9 +26,9 @@
                     <table class="full_width">
                         <thead>
                             <tr>
-                                <th>&{ 'counting_page.denomination' }</th>
-                                <th>&{ 'counting_page.quantity' }</th>
-                                <th>&{ 'counting_page.total' }</th>
+                                <th>&{ 'message.denomination' }</th>
+                                <th>&{ 'message.quantity' }</th>
+                                <th>&{ 'message.total' }</th>
                             </tr>
                         </thead>
 
@@ -48,7 +48,7 @@
 
                         <tfoot>
                             <tr>
-                                <td>&{ 'counting_page.totals' }</td>
+                                <td>&{ 'message.totals' }</td>
                                 <!-- totales -->
                                 <td id ="cnt_total">${ cnt_total }</td>
                                 <td id ="total">${ total }</td>

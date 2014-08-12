@@ -10,7 +10,6 @@ import devices.mei.state.MeiEbdsOpenPort;
 import devices.mei.operation.MeiEbdsHostMsg;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
 import devices.serial.SerialPortAdapterAbstract;
-import java.util.Arrays;
 import java.util.Map;
 import play.Logger;
 
@@ -21,7 +20,7 @@ import play.Logger;
 final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
 
     private void debug(String message, Object... args) {
-        Logger.debug(message, args);
+        //Logger.debug(message, args);
     }
 
     public MeiEbdsDevice() {

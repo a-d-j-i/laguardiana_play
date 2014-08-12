@@ -11,26 +11,26 @@
             <h2>&{ 'application.thanks', providerCode }</h2>
             #{/if}
             #{elseif ( finishCause?.name() == 'FINISH_CAUSE_BAG_REMOVED' ) }
-            <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled_bag_removed' }</span></div>
+            <div class="mensaje" style='color:red;'><span>&{ 'message.deposit_canceled_bag_removed' }</span></div>
             <h2>&{ 'application.thanks', providerCode }</h2>
-            &{ 'counting_page.deposit_canceled' }
+            &{ 'message.deposit_canceled' }
             #{/elseif}
             #{elseif ( finishCause?.name() == 'FINISH_CAUSE_BAG_FULL' ) }
-            <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled_bag_full' }</span></div>
+            <div class="mensaje" style='color:red;'><span>&{ 'message.deposit_canceled_bag_full' }</span></div>
             <h2>&{ 'application.thanks', providerCode }</h2>
-            &{ 'counting_page.deposit_canceled' }
+            &{ 'message.deposit_canceled' }
             #{/elseif}
             #{else }
-            <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled' }</span></div>
+            <div class="mensaje" style='color:red;'><span>&{ 'message.deposit_canceled' }</span></div>
             <h2>&{ 'application.thanks', providerCode }</h2>
-            &{ 'counting_page.deposit_canceled' }
+            &{ 'message.deposit_canceled' }
             #{/else}
             <!-- /datos del deposito -->
             #{if ( showReference1 ) }
-            <p>&{ 'counting_page.reference1_title' }: ${currentDeposit.findUserCode()}</p>
+            <p>&{ 'message.reference1_title' }: ${currentDeposit.findUserCode()}</p>
             #{/if}
             #{if ( showReference2 && reference2 != "" ) }
-            <p>&{ 'counting_page.reference2_title' }: ${currentDeposit.userCode}</p>
+            <p>&{ 'message.reference2_title' }: ${currentDeposit.userCode}</p>
             #{/if}
             #{if ( depositTotal > 0 ) }
             <p>&{ 'summary.total' }: ${depositTotal} ${currentDeposit.currency.description}</p>

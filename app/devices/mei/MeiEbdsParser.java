@@ -13,7 +13,7 @@ import play.Logger;
 public class MeiEbdsParser implements SerialPortMessageParserInterface {
 
     private void debug(String message, Object... args) {
-        Logger.debug(message, args);
+       // Logger.debug(message, args);
     }
     final private static int MEI_EBDS_READ_TIMEOUT = 3000; //35ms
 

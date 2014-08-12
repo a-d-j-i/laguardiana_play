@@ -8,12 +8,12 @@
 #{/if}
 #{if ( showReference1 ) }
 #{if ( deposit.findUserCode() ) }
-&{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}<br>
+&{ 'message.reference1_title' }: ${deposit.findUserCode()}<br>
 #{/if}
 #{/if}
 #{if ( showReference2 ) }
 #{if ( deposit.userCode ) }
-&{ 'counting_page.reference2_title' }: ${deposit.userCode}<br>
+&{ 'message.reference2_title' }: ${deposit.userCode}<br>
 #{/if}
 #{/if}
 &{ 'summary.total' }: ${depositTotal} ${deposit.getCurrency().description}<br>
@@ -26,9 +26,9 @@
 <table border="0" cellpadding="0">
     <thead>
         <tr>
-            <th style="text-align: left;">&{ 'counting_page.denomination' }</th>
-            <th style="text-align: center;">&{ 'counting_page.quantity' }</th>
-            <th style="text-align: center;">&{ 'counting_page.total' }</th>
+            <th style="text-align: left;">&{ 'message.denomination' }</th>
+            <th style="text-align: center;">&{ 'message.quantity' }</th>
+            <th style="text-align: center;">&{ 'message.total' }</th>
         </tr>
     </thead>
     <tbody>
@@ -45,7 +45,7 @@
 
     <tfoot>
         <tr style="text-align: center;">
-            <td><b>&{ 'counting_page.totals' }</b></td>
+            <td><b>&{ 'message.totals' }</b></td>
             <td id ="cnt_total"><b>${ cnt_total }</b></td>
             <td id ="total"><b>${ total }</b></td>
         </tr>

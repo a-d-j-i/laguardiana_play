@@ -71,7 +71,13 @@ public class P500MEIStateContext implements MachineStateContextInterface {
             Logger.error("Error calling LgDeviceSlot.find for device %s, slot %s", mei.toString(), slot);
             return false;
         }
-        return true;
+        BillDeposit billDeposit = BillDeposit.findById(depositId);
+        boolean ret = (billDeposit.currency.equals(s.billType.currency));
+        if (!ret) {
+            Logger.warn("Invalid currency %s for slot %s, deposit currency %s",
+                    s.billType.currency.toString(), slot, billDeposit.currency.toString());
+        }
+        return ret;
     }
 
     protected boolean addBillToDeposit(String slot) {
@@ -135,6 +141,9 @@ public class P500MEIStateContext implements MachineStateContextInterface {
         }
         if (billDeposit != null) {
             billDeposit.closeDeposit(finishCause);
+            if (billDeposit.getTotal() > 0) {
+                billDeposit.print(false);
+            }
         }
     }
 

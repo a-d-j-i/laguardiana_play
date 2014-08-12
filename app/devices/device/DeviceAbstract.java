@@ -69,7 +69,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
     }
 
     public void notifyListeners(DeviceStatusInterface state) {
-        Logger.debug("Device %s Notify listeners : %s", this.toString(), state.toString());
+        debug("Device %s Notify listeners : %s", this.toString(), state.toString());
         final DeviceEvent le = new DeviceEvent(this, state);
         for (DeviceEventListener counterListener : listeners) {
             counterListener.onDeviceEvent(le);

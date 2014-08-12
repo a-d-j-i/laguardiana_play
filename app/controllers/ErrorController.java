@@ -1,6 +1,5 @@
 package controllers;
 
-import devices.printer.OSPrinter.PrinterStatus;
 import machines.status.MachineStatus;
 import machines.status.MachineStatusError;
 import models.Configuration;
@@ -29,7 +28,7 @@ public class ErrorController extends Controller {
 
     public static void onError() {
         String gerror = null;
-        PrinterStatus pstatus = null;
+        String pstatus = null;
         String ierror = null;
 
         if (!Configuration.isIgnoreIoBoard()) {
@@ -39,7 +38,7 @@ public class ErrorController extends Controller {
              }*/
         }
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
-            pstatus = ModelFacade.getCurrentPrinter().getInternalState();
+            pstatus = ModelFacade.getPrinterState();
         }
         boolean isError = true;
         if (status instanceof MachineStatusError) {
@@ -62,7 +61,7 @@ public class ErrorController extends Controller {
     // TODO: Show machine status.
     public static void onStoringError() {
         String gerror = null;
-        PrinterStatus pstatus = null;
+        String pstatus = null;
         String ierror = null;
 
         if (!Configuration.isIgnoreIoBoard()) {
@@ -72,7 +71,7 @@ public class ErrorController extends Controller {
              }*/
         }
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
-            pstatus = ModelFacade.getCurrentPrinter().getInternalState();
+            pstatus = ModelFacade.getPrinterState();
         }
         boolean isError = true;
         if (status instanceof MachineStatusError) {

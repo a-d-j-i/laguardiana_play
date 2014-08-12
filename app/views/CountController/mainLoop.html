@@ -14,10 +14,10 @@
                     <div class="columna_1">
                         <!-- resumen de datos -->
                         <p style="font-size: larger;">&{ 'application.wellcome' }&nbsp;#{usernameTag user: user/}</p>
-                        <p>&{ 'counting_page.currency_title' }: ${formData.currency.currency.description}</p>
-                        <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
+                        <p>&{ 'message.currency_title' }: ${formData.currency.currency.description}</p>
+                        <p>&{ 'message.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                         <div id="total_sum_field" style="display: none;">
-                            <p>&{ 'counting_page.total_sum' }: <span class="totalSum">${totalSum}</span></p>
+                            <p>&{ 'message.total_sum' }: <span class="totalSum">${totalSum}</span></p>
                         </div>
                         <p>&nbsp;</p>
                         <!-- /resumen de datos -->
@@ -29,9 +29,9 @@
                     <table class="full_width">
                         <thead>
                             <tr>
-                                <th>&{ 'counting_page.denomination' }</th>
-                                <th>&{ 'counting_page.quantity' }</th>
-                                <th>&{ 'counting_page.total' }</th>
+                                <th>&{ 'message.denomination' }</th>
+                                <th>&{ 'message.quantity' }</th>
+                                <th>&{ 'message.total' }</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,7 +50,7 @@
 
                         <tfoot>
                             <tr>
-                                <td>&{ 'counting_page.totals' }</td>
+                                <td>&{ 'message.totals' }</td>
                                 <!-- totales -->
                                 <td class ="cnt_total">${ cnt_total }</td>
                                 <td class ="total">${ total }</td>
@@ -132,19 +132,19 @@
             </div>
         </div>
         <div id="alerta_storing" class="alerta_info" style="display: none;">
-            <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
+            <div id="alerta_titulo">&{ 'message.storing' }</div>
             <div id="alerta_cuerpo">
                 <div id="alerta_texto">
-                    <span id="error_text">&{ 'counting_page.storing_detail' }</span>
+                    <span id="error_text">&{ 'message.storing_detail' }</span>
                     <span class="info_message" style="color: green;"></span>
                 </div>
             </div>
         </div>
         <div id="alerta_remove_rejected_bills" class="alerta_info" style="display: none;">
-            <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
+            <div id="alerta_titulo">&{ 'message.remove_rejected_bills' }</div>
             <div id="alerta_cuerpo">
                 <div id="alerta_texto">
-                    <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+                    <span id="error_text">&{ 'message.remove_rejected_bills' }</span>
                 </div>
             </div>
         </div>

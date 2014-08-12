@@ -6,12 +6,12 @@
         <div class="contenido_grande">
             <ul class="columns">
                 <li class="column">
-                    <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
+                    <p>&{ 'message.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                     #{if ( deposit.findUserCode() ) }
-                    <p>&{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}</p>
+                    <p>&{ 'message.reference1_title' }: ${deposit.findUserCode()}</p>
                     #{/if}
                     #{if ( deposit.userCode ) }
-                    <p>&{ 'counting_page.reference2_title' }: ${deposit.userCode}</p>
+                    <p>&{ 'message.reference2_title' }: ${deposit.userCode}</p>
                     #{/if}
                     #{list items:deposit.envelopes, as:'e'}
                     <div>

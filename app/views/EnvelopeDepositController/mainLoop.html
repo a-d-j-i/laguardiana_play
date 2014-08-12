@@ -10,12 +10,12 @@
             <div class="mensaje"><span>&{ 'envelope_deposit.put_ticket_in_envelope' }</span></div>
             <ul class="columns">
                 <li class="column">
-                    <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
+                    <p>&{ 'message.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                     #{if ( formData.showReference1 ) }
-                    <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+                    <p>&{ 'message.reference1_title' }: ${formData.reference1.lov}</p>
                     #{/if}
                     #{if ( formData.showReference2 && formData.reference2 != "" ) }
-                    <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+                    <p>&{ 'message.reference2_title' }: ${formData.reference2}</p>
                     #{/if}
                     #{if ( formData.cashData.amount > 0 ) }
                     <p>&{ 'envelope_deposit.amount_cash' }: ${ formData.cashData.amount } ${ formData.cashData.currency.description } </p>
@@ -71,10 +71,10 @@
             </div>
         </div>
         <div id="alerta_storing" class="alerta_info" style="display: none;">
-            <div id="alerta_titulo">&{ 'counting_page.storing' }</div>
+            <div id="alerta_titulo">&{ 'message.storing' }</div>
             <div id="alerta_cuerpo">
                 <div id="alerta_texto">
-                    <span id="error_text">&{ 'counting_page.storing_detail' }</span>
+                    <span id="error_text">&{ 'message.storing_detail' }</span>
                     <span class="info_message" style="color: green;"></span>
                 </div>
             </div>
@@ -91,10 +91,10 @@
             </div>
         </div>
         <div id="alerta_remove_rejected_bills" class="alerta_info" style="display: none;">
-            <div id="alerta_titulo">&{ 'counting_page.remove_rejected_bills' }</div>
+            <div id="alerta_titulo">&{ 'message.remove_rejected_bills' }</div>
             <div id="alerta_cuerpo">
                 <div id="alerta_texto">
-                    <span id="error_text">&{ 'counting_page.remove_rejected_bills' }</span>
+                    <span id="error_text">&{ 'message.remove_rejected_bills' }</span>
                 </div>
             </div>
         </div>

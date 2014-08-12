@@ -219,15 +219,6 @@ public class Configuration {
         return isProperty("style.useHardwareKeyboard");
     }
 
-    public static String getDefaultPrinter() {
-        String pc = getSystemProperty("printer.port");
-        return pc;
-    }
-
-    static void setDefaultPrinter(String prt) {
-        LgSystemProperty.setOrCreateProperty("printer.port", prt);
-    }
-
     public static String getErrorStr() {
         return getSystemProperty("application.error_msg");
     }
@@ -252,7 +243,7 @@ public class Configuration {
         return getSystemProperty("secure.crapauth_constant_id");
     }
 
-    private static String getSystemProperty(String property) {
+    public static String getSystemProperty(String property) {
         LgSystemProperty p = LgSystemProperty.getProperty(property);
         if (p != null && !p.value.isEmpty()) {
             return p.value;

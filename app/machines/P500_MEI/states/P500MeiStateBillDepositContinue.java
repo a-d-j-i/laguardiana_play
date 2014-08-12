@@ -38,13 +38,14 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         if (st.is(MeiEbdsStatusReadyToStore.class)) {
             MeiEbdsStatusReadyToStore rts = (MeiEbdsStatusReadyToStore) st;
-            if (!context.isValidBill(rts.getSlot())) {
+            if (context.isValidBill(rts.getSlot())) {
                 if (!context.store()) {
                     context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting store"));
                 }
             } else {
+                Logger.debug("Invalid slot %s, withdraw", rts.getSlot());
                 if (!context.withdraw()) {
-                    context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting store"));
+                    context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting withdraw"));
                 }
             }
             return;

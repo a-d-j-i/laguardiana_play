@@ -17,13 +17,13 @@ public class PrinterController extends Controller {
         }
         if (request.isAjax()) {
             Object o[] = new Object[2];
-            o[0] = ModelFacade.getCurrentPrinter().getPort();
-            o[1] = ModelFacade.getCurrentPrinter().getInternalState().toString();
+            o[0] = ModelFacade.getPrinterPort();
+            o[1] = ModelFacade.getPrinterState();
             renderJSON(o);
         }
-//        renderArgs.put("printers", ModelFacade.getPrinters());
-        renderArgs.put("printerStatus", ModelFacade.getCurrentPrinter().getInternalState());
-        renderArgs.put("currentPrinter", ModelFacade.getCurrentPrinter().getPort());
+        renderArgs.put("printers", ModelFacade.getPrinters());
+        renderArgs.put("printerStatus", ModelFacade.getPrinterState());
+        renderArgs.put("currentPrinter", ModelFacade.getPrinterPort());
 
         render();
     }
@@ -57,7 +57,7 @@ public class PrinterController extends Controller {
 
     public static void test(String printer) {
         try {
-            ModelFacade.print(printer, "PrinterController/test.html", renderArgs.data, 77, 30);
+            ModelFacade.printerTest(printer, "PrinterController/test.html", renderArgs.data, 77, 30);
         } catch (Throwable ex) {
             Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }

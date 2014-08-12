@@ -2,7 +2,8 @@ package models;
 
 import controllers.CountController;
 import controllers.FilterController;
-import devices.printer.OSPrinter;
+import devices.printer.Printer;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.print.PrintService;
@@ -10,6 +11,7 @@ import machines.P500_GloryDE50.MachineP500_GLORY;
 import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
 import machines.MachineInterface;
+import machines.MachinePrinterDecorator;
 import machines.P500_MEI.MachineP500_MEI;
 import machines.jobs.MachineJobAcceptDeposit;
 import machines.jobs.MachineJobCancelDeposit;
@@ -74,6 +76,7 @@ public class ModelFacade {
     };
 
     static private MachineInterface machine = null;
+    final static private MachinePrinterDecorator printer = new MachinePrinterDecorator();
 
     synchronized public static void start() throws Exception {
         Configuration.initCrapId();
@@ -81,11 +84,15 @@ public class ModelFacade {
         machine = machineType.getMachineInstance();
         Logger.debug("Executing machine start job");
         machine.start();
+        printer.start();
     }
 
     synchronized public static void stop() {
         if (machine != null) {
             machine.stop();
+        }
+        if (printer != null) {
+            printer.stop();
         }
     }
 
@@ -141,80 +148,46 @@ public class ModelFacade {
         return machine.execute(new MachineJobStoringErrorReset(machine));
     }
 
-    // TODO: Consider adding this to machine !!!.
-    public static void setCurrentPrinter(String prt) {
-        if (prt == null) {
-            prt = Configuration.getDefaultPrinter();
-            if (prt == null) {
-                Logger.error("Default printer must be configured");
-                return;
-            }
-        }
-
-        PrintService p = (PrintService) OSPrinter.printers.get(prt);
-        if (p == null) {
-            Logger.error("Wrong printer name %s", prt);
-            return;
-        }
-        Configuration.setDefaultPrinter(prt);
-////        Printer currPrinter = DeviceFactory.getPrinter(prt);
-////        currPrinter.addObserver(new Observer() {
-////            public void update(Observable o, Object data) {
-////                Promise now = new OnPrinterEvent((Printer.PrinterStatus) data).now();
-////            }
-////        });Map<LgDeviceSlot, Integer> 
-
-////        Printer oldPrinter = printer.getAndSet(currPrinter);
-////        if (oldPrinter != null) {
-        //oldPrinter.close();
-////        }
-    }
-
-    public static boolean isReadyToPrint() {
-////        return printer.get().needCheck();
-        return false;
-    }
-
-    public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
-        print(null, templateName, args, paperWidth, paperLen);
-    }
-
-    public static void print(String prt, String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
-        if (prt == null) {
-            prt = Configuration.getDefaultPrinter();
-            if (prt == null) {
-                Logger.error("Default printer must be configured");
-                return;
-            }
-        }
-
-        PrintService p = (PrintService) OSPrinter.printers.get(prt);
-        if (p == null) {
-            Logger.error("Wrong printer name %s", prt);
-            //return;
-        }
-////        Printer pp = DeviceFactory.getPrinter(prt);
-////        pp.print(templateName, args, paperWidth, paperLen);
-////        if (pp != printer.get()) {
-        //pp.close();
-////        }
-    }
-    /*
-     public static Object getPrinters() {
-     return OSPrinter.printers.values();
-     }
-     */
-
-    public static OSPrinter getCurrentPrinter() {
-////        return printer.get();
-        return null;
-    }
-
     public static MachineDeviceDecorator findDeviceById(Integer deviceId) {
         return machine.findDeviceById(deviceId);
     }
 
     public static List<MachineDeviceDecorator> getDevices() {
         return machine.getDevices();
+    }
+
+    public static boolean isReadyToPrint() {
+        return printer.needCheck();
+    }
+
+    public static void setCurrentPrinter(String prt) {
+        printer.setCurrentPrinter(prt);
+    }
+
+    public static String getPrinterPort() {
+        return printer.getPrinterPort();
+    }
+
+    public static String getPrinterState() {
+        return printer.getPrinterState();
+    }
+
+    public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+        printer.print(templateName, args, paperWidth, paperLen);
+    }
+
+    public static void printerTest(String prt, String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+        Logger.debug("Printing a test to printer : %s", prt);
+        final PrintService p = (PrintService) Printer.PRINTERS.get(prt);
+        if (p == null) {
+            Logger.error("Wrong printer name %s", prt);
+            return;
+        }
+        Printer prnt = new Printer(p);
+        prnt.print(Configuration.isPrinterTest(), templateName, args, paperWidth, paperLen);
+    }
+
+    public static Collection<PrintService> getPrinters() {
+        return printer.getPrinters();
     }
 }

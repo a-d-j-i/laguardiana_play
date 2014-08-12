@@ -6,14 +6,14 @@
             <div class="columna_1">
                 <!-- resumen de datos -->
                 <p style="font-size: larger;">&{ 'summary.username' }&nbsp;#{usernameTag user: deposit.user/}</p>
-                <p>&{ 'counting_page.currency_title' }: ${deposit.getCurrency().description}</p>
+                <p>&{ 'message.currency_title' }: ${deposit.getCurrency().description}</p>
                 #{if ( deposit.findUserCode() ) }
-                &{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}<br>
+                &{ 'message.reference1_title' }: ${deposit.findUserCode()}<br>
                 #{/if}
                 #{if ( deposit.userCode ) }
-                &{ 'counting_page.reference2_title' }: ${deposit.userCode}<br>
+                &{ 'message.reference2_title' }: ${deposit.userCode}<br>
                 #{/if}
-                <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
+                <p>&{ 'message.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
                 <p>&nbsp;</p>
             </div>
         </li>
@@ -22,9 +22,9 @@
             <table class="full_width">
                 <thead>
                     <tr>
-                        <th>&{ 'counting_page.denomination' }</th>
-                        <th>&{ 'counting_page.quantity' }</th>
-                        <th>&{ 'counting_page.total' }</th>
+                        <th>&{ 'message.denomination' }</th>
+                        <th>&{ 'message.quantity' }</th>
+                        <th>&{ 'message.total' }</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,7 +43,7 @@
 
                 <tfoot>
                     <tr>
-                        <td>&{ 'counting_page.totals' }</td>
+                        <td>&{ 'message.totals' }</td>
                         <!-- totales -->
                         <td class ="cnt_total">${ cnt_total }</td>
                         <td class ="total">${ total }</td>
