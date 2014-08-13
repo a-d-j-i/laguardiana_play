@@ -5,6 +5,7 @@ import controllers.serializers.BillValueSerializer;
 import java.util.List;
 import machines.status.MachineBillDepositStatus;
 import machines.status.MachineStatus;
+import machines.status.MachineStatusError;
 import models.BillDeposit;
 import models.Configuration;
 import models.ModelFacade;
@@ -84,7 +85,7 @@ public class BillDepositController extends Controller {
             if (ModelFacade.startBillDepositAction(refDeposit)) {
                 mainLoop();
             } else {
-                Application.index();
+                ErrorController.onError();
             }
             return;
         }
@@ -103,7 +104,7 @@ public class BillDepositController extends Controller {
                 if (ModelFacade.startBillDepositAction(refDeposit)) {
                     mainLoop();
                 } else {
-                    Application.index();
+                    ErrorController.onError();
                 }
                 return;
             }
@@ -119,24 +120,32 @@ public class BillDepositController extends Controller {
     }
 
     public static void mainLoop() {
-        if (status instanceof MachineBillDepositStatus) {
+        Object[] o;
+        if (status instanceof MachineStatusError) {
+            MachineStatusError err = (MachineStatusError) status;
+            o = new Object[5];
+            o[0] = err.getStateName();
+            o[4] = "ERROR : " + err.getError();
+        } else if (status instanceof MachineBillDepositStatus) {
             MachineBillDepositStatus billStatus = (MachineBillDepositStatus) status;
-            if (request.isAjax()) {
-                Object[] o = new Object[5];
-                o[0] = billStatus.getStateName();
-                o[1] = billStatus.getBillQuantities();
-                o[2] = billStatus.getCurrentSum();
-                o[3] = billStatus.getTotalSum();
-                o[4] = Messages.get("message." + billStatus.getStateName().toLowerCase());
-                renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
-            } else {
-                renderArgs.put("billData", billStatus.getBillQuantities());
-                renderArgs.put("currentDeposit", billStatus.getCurrentDeposit());
-                renderArgs.put("currentSum", billStatus.getCurrentSum());
-                renderArgs.put("totalSum", billStatus.getTotalSum());
-            }
+            o = new Object[5];
+            o[0] = billStatus.getStateName();
+            o[1] = billStatus.getBillQuantities();
+            o[2] = billStatus.getCurrentSum();
+            o[3] = billStatus.getTotalSum();
+            o[4] = Messages.get("message." + billStatus.getStateName().toLowerCase());
+            renderArgs.put("billData", billStatus.getBillQuantities());
+            renderArgs.put("currentDeposit", billStatus.getCurrentDeposit());
+            renderArgs.put("currentSum", billStatus.getCurrentSum());
+            renderArgs.put("totalSum", billStatus.getTotalSum());
+        } else {
+            o = new Object[1];
+            o[0] = "None";
         }
-        if (!request.isAjax()) {
+
+        if (request.isAjax()) {
+            renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
+        } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
             renderArgs.put("user", Secure.getCurrentUser());

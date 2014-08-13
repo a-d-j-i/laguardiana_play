@@ -1,6 +1,7 @@
 package machines.P500_MEI.states;
 
 import devices.device.task.DeviceTaskCancel;
+import devices.device.task.DeviceTaskReset;
 import devices.device.task.DeviceTaskStore;
 import devices.device.task.DeviceTaskWithdraw;
 import devices.mei.task.MeiEbdsTaskCount;
@@ -63,6 +64,10 @@ public class P500MEIStateContext implements MachineStateContextInterface {
 
     boolean store() {
         return mei.submitSynchronous(new DeviceTaskStore(1));
+    }
+
+    boolean reset() {
+        return mei.submitSynchronous(new DeviceTaskReset());
     }
 
     boolean isValidBill(String slot) {

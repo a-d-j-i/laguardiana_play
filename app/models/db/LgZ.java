@@ -10,6 +10,7 @@ import models.ReportTotals;
 import models.events.ZEvent;
 import play.Logger;
 import play.db.jpa.GenericModel;
+import play.db.jpa.JPA;
 
 @Entity
 @Table(name = "lg_z", schema = "public")
@@ -43,6 +44,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
             ZEvent.save(null, "There is no z creating one");
             currentZ = new LgZ();
             currentZ.save();
+            JPA.em().getTransaction().commit();
         } else {
             if (zs.size() > 1) {
                 Iterator<LgZ> i = zs.iterator();
@@ -54,6 +56,7 @@ public class LgZ extends GenericModel implements java.io.Serializable {
                     Logger.error("There are more than one open z, closing the z %d", toClose.zId);
                     ZEvent.save(toClose, String.format("There are more than one open z, closing the z %d", toClose.zId));
                 }
+                JPA.em().getTransaction().commit();
             } else {
                 currentZ = zs.get(0);
             }

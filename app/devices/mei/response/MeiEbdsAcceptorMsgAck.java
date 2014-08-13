@@ -1,9 +1,14 @@
 package devices.mei.response;
 
 import devices.device.DeviceResponseInterface;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import play.Logger;
 
 /**
@@ -266,7 +271,20 @@ public class MeiEbdsAcceptorMsgAck implements DeviceResponseInterface {
         if (t != null && t == ResponseType.Extended) {
             ResponseSubType st = getMessageSubType();
             if (st != null && st == ExtendedResponseSubType.RequestSupportedNoteSet) {
-                return new String(Arrays.copyOfRange(data, 11, 20));
+                Charset charset = Charset.forName("US-ASCII");
+                CharsetDecoder decoder = charset.newDecoder();
+                ByteBuffer buffer = ByteBuffer.wrap(Arrays.copyOfRange(data, 11, 20));
+                try {
+                    String ret = decoder.decode(buffer).toString().trim();
+                    if ( ret.isEmpty()) {
+                        return null;
+                    }
+//                    Logger.error("GOT slot : %s %d", ret, ret.length());
+                    return ret;
+                } catch (CharacterCodingException ex) {
+                    Logger.error("Error decoding slot : %s", ex.toString());
+                    return null;
+                }
             }
         }
         return Integer.toString(MEI_EBDS_CMD_DATA_DESC.NOTE_VALUE.getValue(data, cdataOffset) >> 3);
@@ -322,7 +340,7 @@ public class MeiEbdsAcceptorMsgAck implements DeviceResponseInterface {
                     }
             }
         }
-        return "MeiEbdsAcceptorMsgAck " + hexString.toString();
+        return "MeiEbdsAcceptorMsgAck " + hexString.toString() + " slot note  : " + getNoteSlot();
     }
 
 }

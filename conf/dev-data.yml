@@ -69,6 +69,30 @@ db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT1):
     slot:               "ARS002+00"
     creationDate:       2012-01-01
     
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT10):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           10pesos
+    slot:               "ARS001+01"
+    creationDate:       2012-01-01
+    
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT20):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           20pesos
+    slot:               "ARS002+01"
+    creationDate:       2012-01-01
+    
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT50):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           50pesos
+    slot:               "ARS005+01"
+    creationDate:       2012-01-01
+
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT100):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           100pesos
+    slot:               "ARS001+02"
+    creationDate:       2012-01-01
+    
     
     
 db.LgDevice(P500_GLORY_DEVICE_GLORY_DE50):

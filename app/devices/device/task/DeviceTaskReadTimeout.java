@@ -8,7 +8,7 @@ public class DeviceTaskReadTimeout extends DeviceTaskAbstract {
 
     @Override
     public String toString() {
-        return "DeviceTaskReadTimeout" + super.toString();
+        return "DeviceTaskReadTimeout : " + super.toString();
     }
 
 }

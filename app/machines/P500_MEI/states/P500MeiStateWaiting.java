@@ -1,7 +1,10 @@
 package machines.P500_MEI.states;
 
+import devices.device.status.DeviceStatusError;
+import devices.device.status.DeviceStatusInterface;
 import machines.states.*;
 import java.util.Date;
+import machines.MachineDeviceDecorator;
 import machines.status.MachineStatus;
 import models.BillDeposit;
 import play.Logger;
@@ -20,14 +23,24 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
     }
 
     @Override
+    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
+        if (st.is(DeviceStatusError.class)) {
+            DeviceStatusError err = (DeviceStatusError) st;
+            Logger.error("DEVICE ERROR : %s", err.getError());
+            context.setCurrentState(new P500MeiStateError(this, context, err.getError()));
+            return;
+        }
+        super.onDeviceEvent(dev, st);
+    }
+
+    @Override
     public boolean onStartBillDeposit(BillDeposit refBillDeposit) {
         Logger.debug("startBillDeposit start");
         BillDeposit d = new BillDeposit(refBillDeposit);
         d.startDate = new Date();
         d.save();
         context.setDeposit(d);
-        context.setCurrentState(new P500MeiStateBillDepositStart(context));
-        return true;
+        return context.setCurrentState(new P500MeiStateBillDepositStart(context));
     }
 
     @Override

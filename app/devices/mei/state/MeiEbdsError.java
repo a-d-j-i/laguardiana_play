@@ -48,7 +48,8 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
             t.setReturnValue(true);
             return new MeiEbdsStateMain(mei);
         }
-        return null;
+        t.setReturnValue(false);
+        return this;
     }
 
     public DeviceStatusInterface getStatus() {

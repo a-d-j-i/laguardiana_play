@@ -39,16 +39,23 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     }
 
     private boolean skipEscrowed = false;
-    private String lastNoteValue = "";
+    private String lastNoteValue = null;
     private boolean mustCancel = false;
+    private int retries = 0;
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract t) {
         boolean ret;
-        //debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
+        debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
         if (t instanceof DeviceTaskReadTimeout) {
+            retries++;
+            Logger.debug("RETRIES : %d", retries);
+            if (retries >= 100) {
+                return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "Timeout reading from serial port");
+            }
             ret = true;
         } else if (t instanceof DeviceTaskMessage) {
+            retries = 0;
             DeviceTaskMessage msgTask = (DeviceTaskMessage) t;
             DeviceResponseInterface response = msgTask.getResponse();
             if (response != null) { // retry
@@ -142,7 +149,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         if (err != null) {
             return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
         }
-        return null;
+        return this;
     }
 
 // send the first message
@@ -181,21 +188,21 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                 }
             } else {
                 // skip the first escrowed after store.
-                if (!skipEscrowed) {
+                if (!skipEscrowed && lastNoteValue != null) {
                     mei.notifyListeners(new MeiEbdsStatusReadyToStore(lastNoteValue));
                 }
             }
         } else if (response.isReturned()) {
             debug("%s Is returned", mei.toString());
             mei.notifyListeners(MeiEbdsStatus.RETURNED);
-            lastNoteValue = "";
+            lastNoteValue = null;
             err = mei.sendPollMessage();
         } else if (response.isStacked()) {
             debug("%s Is stacked", mei.toString());
-            if (!lastNoteValue.isEmpty()) {
+            if (lastNoteValue != null) {
                 mei.notifyListeners(new MeiEbdsStatusStored(lastNoteValue));
             }
-            lastNoteValue = "";
+            lastNoteValue = null;
             err = mei.sendPollMessage();
         } else {
             debug("%s Is None", mei.toString());
@@ -210,7 +217,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                         mei.notifyListeners(MeiEbdsStatus.NEUTRAL);
                     }
                 }
-                lastNoteValue = "";
+                lastNoteValue = null;
             }
         }
         skipEscrowed = false;

@@ -2,7 +2,6 @@ package machines.jobs;
 
 import machines.MachineInterface;
 import models.BillDeposit;
-import play.Logger;
 
 /**
  *

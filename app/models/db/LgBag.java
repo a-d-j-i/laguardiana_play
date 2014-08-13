@@ -141,6 +141,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
                     Logger.error("There are more than one open bag, closing the bag %d", toClose.bagId);
                     BagEvent.save(toClose, String.format("There are more than one open bag, closing the bag %d", toClose.bagId));
                 }
+                JPA.em().getTransaction().commit();
             } else {
                 currentBag = bags.get(0);
             }

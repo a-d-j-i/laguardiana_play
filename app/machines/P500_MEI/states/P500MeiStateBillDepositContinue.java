@@ -1,7 +1,7 @@
 package machines.P500_MEI.states;
 
+import devices.device.status.DeviceStatusError;
 import devices.device.status.DeviceStatusInterface;
-import devices.device.task.DeviceTaskStore;
 import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusReadyToStore;
 import devices.mei.status.MeiEbdsStatusStored;
@@ -40,19 +40,19 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
             MeiEbdsStatusReadyToStore rts = (MeiEbdsStatusReadyToStore) st;
             if (context.isValidBill(rts.getSlot())) {
                 if (!context.store()) {
-                    context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting store"));
+                    context.setCurrentState(new P500MeiStateError(this, context, "Error submitting store"));
                 }
             } else {
                 Logger.debug("Invalid slot %s, withdraw", rts.getSlot());
                 if (!context.withdraw()) {
-                    context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error submitting withdraw"));
+                    context.setCurrentState(new P500MeiStateError(this, context, "Error submitting withdraw"));
                 }
             }
             return;
         } else if (st.is(MeiEbdsStatusStored.class)) {
             MeiEbdsStatusStored stored = (MeiEbdsStatusStored) st;
             if (!context.addBillToDeposit(stored.getSlot())) {
-                context.setCurrentState(new P500MeiStateError(this, context.getCurrentUserId(), "Error adding slot %s to batch", stored.getSlot()));
+                context.setCurrentState(new P500MeiStateError(this, context, "Error adding slot %s to batch", stored.getSlot()));
             }
             return;
         } else if (st.is(MeiEbdsStatus.JAM)) {
@@ -73,6 +73,10 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
                 }
 
             });
+            return;
+        } else if (st.is(DeviceStatusError.class)) {
+            DeviceStatusError err = (DeviceStatusError) st;
+            context.setCurrentState(new P500MeiStateError(this, context, err.getError()));
             return;
         }
         super.onDeviceEvent(dev, st);

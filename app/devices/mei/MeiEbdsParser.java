@@ -13,25 +13,18 @@ import play.Logger;
 public class MeiEbdsParser implements SerialPortMessageParserInterface {
 
     private void debug(String message, Object... args) {
-       // Logger.debug(message, args);
+        //Logger.debug(message, args);
     }
-    final private static int MEI_EBDS_READ_TIMEOUT = 3000; //35ms
-
-    int retries = 0;
+    final private static int MEI_EBDS_READ_TIMEOUT = 300; //35ms
 
     public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException, TimeoutException {
         DeviceResponseInterface ret;
         try {
             ret = getMessageInt(serialPort);
         } catch (TimeoutException ex) {
-            //pool the machine.
-            if (retries++ > 100) {
-                return new MeiEbdsAcceptorMsgError(String.format("%s Timeout reading from port", this.toString()));
-            }
             debug("%s Timeout waiting for device, retry", this.toString());
             throw ex;
         }
-        retries = 0;
         debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
         return ret;
     }
