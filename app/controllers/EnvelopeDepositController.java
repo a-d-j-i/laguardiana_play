@@ -144,7 +144,7 @@ public class EnvelopeDepositController extends Controller {
                     mainLoop();
                     return;
                 } else {
-                    Application.index();
+                    ErrorController.onError();
                 }
                 return;
             }
