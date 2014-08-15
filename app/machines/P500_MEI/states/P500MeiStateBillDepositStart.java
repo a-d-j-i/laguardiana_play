@@ -18,7 +18,7 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
     public boolean onStart() {
         Logger.debug("sending count");
         if (!context.count()) {
-            context.setCurrentState(new P500MeiStateError(this,context,"Can't start MachineActionBillDeposit error in api.count"));
+            context.setCurrentState(new P500MeiStateError(this, context, "Can't start MachineActionBillDeposit error in api.count"));
             return false;
         }
         return true;

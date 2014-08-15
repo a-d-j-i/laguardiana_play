@@ -141,15 +141,20 @@ public class P500MEIStateContext implements MachineStateContextInterface {
     void closeDeposit(LgDeposit.FinishCause finishCause) {
         closeBatch();
         BillDeposit billDeposit = null;
+        Logger.info("Trying to print deposit: %d", depositId);
         if (depositId != null) {
             billDeposit = BillDeposit.findById(depositId);
         }
         if (billDeposit != null) {
             billDeposit.closeDeposit(finishCause);
             if (billDeposit.getTotal() > 0) {
+                Logger.info("Printing deposit: %d", depositId);
                 billDeposit.print(false);
+            } else {
+                Logger.info("Skipping deposit: %d", depositId);
             }
+        } else {
+            Logger.info("Deposit: %d not found", depositId);
         }
     }
-
 }

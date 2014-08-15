@@ -33,7 +33,7 @@ public class BillDeposit extends LgDeposit {
                 + " where b.deposit = d "
                 + " and b.billType = bt"
                 + " and d.depositId = ?"
-                + " group by bt.billTypeId, bt.denomination, bt.unitLov, bt.slot, bt.currency, bt.creationDate, bt.endDate"
+                + " group by bt"
                 + " order by bt.denomination desc"
                 + "", this.depositId).fetch();
         return qret;
@@ -42,13 +42,13 @@ public class BillDeposit extends LgDeposit {
     public List<BillQuantity> getBillList() {
         List<BillQuantity> ret = new ArrayList<BillQuantity>();
         List qret = BillDeposit.find(" "
-                + "select bt.denomination, bt.currency, sum( b.quantity )"
+                + "select bt, sum( b.quantity )"
                 + " from BillDeposit d, LgBill b, LgBillType bt"
                 + " where b.deposit = d "
                 + " and b.billType = bt"
                 + " and bt.endDate is null"
                 + " and d.depositId = ?"
-                + " group by bt.denomination, bt.unitLov"
+                + " group by bt"
                 + " order by bt.denomination desc"
                 + "", this.depositId).fetch();
 

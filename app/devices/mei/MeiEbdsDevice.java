@@ -20,7 +20,7 @@ import play.Logger;
 final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
 
     private void debug(String message, Object... args) {
-        Logger.debug(message, args);
+        //Logger.debug(message, args);
     }
 
     public MeiEbdsDevice() {

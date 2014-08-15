@@ -63,10 +63,16 @@ db.LgDevice(P500_MEI_DEVICE_MEI_EBDS):
     
     
 
-db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT1):
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT2):
     device:             P500_MEI_DEVICE_MEI_EBDS
     billType:           2pesos
     slot:               "ARS002+00"
+    creationDate:       2012-01-01
+    
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT5):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           5pesos
+    slot:               "ARS005+00"
     creationDate:       2012-01-01
     
 db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT10):

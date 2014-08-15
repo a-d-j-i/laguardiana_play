@@ -39,4 +39,10 @@ public class P500MeiStateBillDepositFinish extends MachineStateAbstract {
     public boolean onConfirmDepositEvent() {
         return context.setCurrentState(new P500MeiStateWaiting(context));
     }
+
+    @Override
+    public String toString() {
+        return "P500MeiStateBillDepositFinish{" + "finishCause=" + finishCause + ", context=" + context + '}';
+    }
+
 }

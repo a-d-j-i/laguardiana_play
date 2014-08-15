@@ -31,7 +31,7 @@ import play.data.validation.Error;
 public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
 
     protected void debug(String message, Object... args) {
-        Logger.debug(message, args);
+    //    Logger.debug(message, args);
     }
 
     public MeiEbdsStateMain(MeiEbdsDevice mei) {
@@ -49,7 +49,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
         if (t instanceof DeviceTaskReadTimeout) {
             retries++;
-            Logger.debug("RETRIES : %d", retries);
+            debug("RETRIES : %d", retries);
             if (retries >= 30) {
                 return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "Timeout reading from serial port");
             }
