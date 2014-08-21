@@ -71,9 +71,9 @@ public class MenuController extends Controller {
             s = s.substring(s.indexOf("latesttag:") + "latesttag:".length(), s.lastIndexOf("latesttag"));
             renderArgs.put("release", s);
         } catch (StringIndexOutOfBoundsException ex) {
-            Logger.error("Error reading release file : %s", ex.toString());
+            //Logger.error("Error reading release file : %s", ex.toString());
         } catch (IOException ex) {
-            Logger.error("Error reading release file : %s", ex.toString());
+            //Logger.error("Error reading release file : %s", ex.toString());
         }
 
         renderMenuAndNavigate(back, backAction, buttons, titles, null);

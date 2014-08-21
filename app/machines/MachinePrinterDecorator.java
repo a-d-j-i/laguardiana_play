@@ -46,7 +46,12 @@ public class MachinePrinterDecorator {
                 }
 
                 if (job != null) {
-                    job.run();
+                    try {
+                        job.run();
+                    } catch (Exception ex) {
+                        Logger.error("Exception in printer job.run %s", ex.toString());
+                        ex.printStackTrace();
+                    }
                     continue;
                 }
                 if (printer != null) {
@@ -110,6 +115,9 @@ public class MachinePrinterDecorator {
                 printer = new Printer(p);
             }
         });
+        if (!ret) {
+            Logger.error("Error setting current printer in the print job");
+        }
     }
 
     public Collection<PrintService> getPrinters() {
@@ -125,6 +133,9 @@ public class MachinePrinterDecorator {
                 }
             }
         });
+        if (!ret) {
+            Logger.error("Error inserting the print job");
+        }
     }
 
     public String getPrinterPort() {
@@ -134,12 +145,17 @@ public class MachinePrinterDecorator {
     public String getPrinterState() {
         try {
             Future<String> ret = new FutureTask<String>(new Callable<String>() {
-                public String call() throws Exception {
+                public String call() {
                     if (printer != null) {
                         Printer.State st = printer.getState();
-                        return st.toString();
+                        if (st != null) {
+                            return st.toString();
+                        } else {
+                            return "State is null";
+                        }
+                    } else {
+                        return "Invalid printer";
                     }
-                    return "Invalid printer";
                 }
             });
             if (!jobq.offer((Runnable) ret)) {
@@ -161,9 +177,13 @@ public class MachinePrinterDecorator {
             Future<Boolean> ret = new FutureTask<Boolean>(new Callable<Boolean>() {
                 public Boolean call() throws Exception {
                     if (printer != null) {
-                        return printer.getState().needCheck();
+                        Printer.State st = printer.getState();
+                        if (st != null) {
+                            return st.needCheck();
+                        }
                     }
-                    return false;
+                    Logger.error("Error getting printer state needCheck");
+                    return true;
                 }
             });
             if (!jobq.offer((Runnable) ret)) {
