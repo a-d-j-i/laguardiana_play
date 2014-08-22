@@ -21,7 +21,6 @@ import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 import static devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType.*;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
 import devices.mei.status.MeiEbdsStatusReadyToStore;
-import play.Logger;
 import play.data.validation.Error;
 
 /**
@@ -31,7 +30,7 @@ import play.data.validation.Error;
 public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
 
     protected void debug(String message, Object... args) {
-    //    Logger.debug(message, args);
+        //    Logger.debug(message, args);
     }
 
     public MeiEbdsStateMain(MeiEbdsDevice mei) {
@@ -41,21 +40,23 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     private boolean skipEscrowed = false;
     private String lastNoteValue = null;
     private boolean mustCancel = false;
-    private int retries = 0;
+    private int retries = 300;
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract t) {
         boolean ret;
         debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
         if (t instanceof DeviceTaskReadTimeout) {
-            retries++;
+            retries--;
             debug("RETRIES : %d", retries);
-            if (retries >= 30) {
+            if (retries <= 0) {
                 return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "Timeout reading from serial port");
             }
             ret = true;
         } else if (t instanceof DeviceTaskMessage) {
-            retries = 0;
+            if (retries <= 300) {
+                retries = 300;
+            }
             DeviceTaskMessage msgTask = (DeviceTaskMessage) t;
             DeviceResponseInterface response = msgTask.getResponse();
             if (response != null) { // retry
@@ -170,8 +171,10 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     protected DeviceStateInterface processAcceptorToHostMsg(MeiEbdsAcceptorMsgAck response) {
         if (response.isJammed() || response.isFailure()) {
             mei.notifyListeners(MeiEbdsStatus.JAM);
+            retries = 1000;
             return null;
         } else {
+            retries = 300;
             if (response.isPowerUp()) {
                 mei.notifyListeners(MeiEbdsStatus.NEUTRAL);
             }

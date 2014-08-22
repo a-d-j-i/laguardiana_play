@@ -11,7 +11,6 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -42,8 +41,6 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import play.Logger;
 import play.Play;
-import play.templates.Template;
-import play.templates.TemplateLoader;
 
 /**
  *
@@ -138,7 +135,7 @@ public class Printer {
         this.service = p;
     }
 
-    public void print(boolean isPrinterTest, String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+    public void print(boolean isPrinterTest, String body, int paperWidth, int paperLen) {
         if (!isPrinterTest) {
             if (service == null) {
                 state.setError(new PrinterError(PrinterError.ERROR_CODE.PRINTER_NOT_FOUND, String.format("Printer %s not found", service == null ? "NULL" : service)));
@@ -152,19 +149,6 @@ public class Printer {
         if (paperWidth <= 0) {
             paperWidth = DEFAULT_PAPER_WIDTH;
         }
-        Template template = TemplateLoader.load(templateName);
-        if (template == null) {
-            template = TemplateLoader.load(templateName + ".html");
-        }
-        if (template == null) {
-            template = TemplateLoader.load(templateName + ".txt");
-        }
-        if (template == null) {
-            state.setError(new PrinterError(PrinterError.ERROR_CODE.TEMPLATE_NOT_FOUND, String.format("Template %s not found", templateName)));
-            return;
-        }
-        args.put("currentDate", new Date());
-        String body = template.render(args);
         //Logger.debug("PRINT : %s", body);
 
         HTMLEditorKit kit = new HTMLEditorKit() {

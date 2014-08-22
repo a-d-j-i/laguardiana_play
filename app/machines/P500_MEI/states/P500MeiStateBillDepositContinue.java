@@ -59,10 +59,12 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
             context.setCurrentState(new MachineStateAbstract() {
                 @Override
                 public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-                    if (st.is(MeiEbdsStatus.NEUTRAL)) {
+                    Logger.debug("JAM DEVICE EVENT %s, %s", dev.toString(), st.toString());
+                    if (st.is(MeiEbdsStatus.NEUTRAL) || st.is(MeiEbdsStatus.COUNTING)) {
                         context.setCurrentState(P500MeiStateBillDepositContinue.this);
+                    } else if (st.is(MeiEbdsStatus.JAM)) {
+                        // Ignore
                     } else {
-                        // TODO: Ignore ?
                         P500MeiStateBillDepositContinue.this.onDeviceEvent(dev, st);
                     }
                 }

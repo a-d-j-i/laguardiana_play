@@ -4,6 +4,7 @@ import controllers.CountController;
 import controllers.FilterController;
 import devices.printer.Printer;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.print.PrintService;
@@ -27,6 +28,8 @@ import machines.jobs.MachineJobStartFilterAction;
 import machines.jobs.MachineJobStoringErrorReset;
 import machines.status.MachineStatus;
 import play.Logger;
+import play.templates.Template;
+import play.templates.TemplateLoader;
 
 /**
  * @author adji
@@ -184,7 +187,20 @@ public class ModelFacade {
             return;
         }
         Printer prnt = new Printer(p);
-        prnt.print(Configuration.isPrinterTest(), templateName, args, paperWidth, paperLen);
+        Template template = TemplateLoader.load(templateName);
+        if (template == null) {
+            template = TemplateLoader.load(templateName + ".html");
+        }
+        if (template == null) {
+            template = TemplateLoader.load(templateName + ".txt");
+        }
+        if (template == null) {
+            Logger.error("invalid template %s", templateName);
+            return;
+        }
+        args.put("currentDate", new Date());
+        final String body = template.render(args);
+        prnt.print(Configuration.isPrinterTest(), body, paperWidth, paperLen);
     }
 
     public static Collection<PrintService> getPrinters() {

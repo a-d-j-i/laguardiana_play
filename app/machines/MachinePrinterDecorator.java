@@ -2,6 +2,7 @@ package machines;
 
 import devices.printer.Printer;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -15,6 +16,8 @@ import javax.print.PrintService;
 import models.Configuration;
 import models.db.LgSystemProperty;
 import play.Logger;
+import play.templates.Template;
+import play.templates.TemplateLoader;
 
 /**
  *
@@ -126,10 +129,24 @@ public class MachinePrinterDecorator {
 
     public void print(final String templateName, final Map<String, Object> args, final int paperWidth, final int paperLen) {
         final boolean isPrinterTest = Configuration.isPrinterTest();
+        Template template = TemplateLoader.load(templateName);
+        if (template == null) {
+            template = TemplateLoader.load(templateName + ".html");
+        }
+        if (template == null) {
+            template = TemplateLoader.load(templateName + ".txt");
+        }
+        if (template == null) {
+            Logger.error("invalid template %s", templateName);
+            return;
+        }
+        args.put("currentDate", new Date());
+        final String body = template.render(args);
+
         boolean ret = jobq.offer(new Runnable() {
             public void run() {
                 if (printer != null) {
-                    printer.print(isPrinterTest, templateName, args, paperWidth, paperLen);
+                    printer.print(isPrinterTest, body, paperWidth, paperLen);
                 }
             }
         });

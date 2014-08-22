@@ -32,6 +32,7 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract t) {
+        Logger.debug("MeiEbdsError task : %s", t.toString());
         if (t instanceof DeviceTaskOpenPort) {
             DeviceTaskOpenPort open = (DeviceTaskOpenPort) t;
             if (mei.open(open.getPort())) {
