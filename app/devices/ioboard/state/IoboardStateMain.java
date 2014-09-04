@@ -55,6 +55,9 @@ public class IoboardStateMain extends IoboardStateAbstract {
             if (retries == IOBOARD_MAX_RETRIES) {
                 retries = 0;
                 task.setReturnValue(true);
+                if (pendingSensorStatusTask != null) {
+                    pendingSensorStatusTask.setReturnValue(false);
+                }
                 return new IoboardError(ioboard, "Timeout reading from serial port");
             }
             ret = true;
@@ -99,8 +102,6 @@ public class IoboardStateMain extends IoboardStateAbstract {
                     case BAG_NOT_APROVED:
                         break;
                 }
-                Logger.debug("LAST : %s compare to %s", r.toString(), lastStateResponse);
-                Logger.debug("LAST2 : %s compare to %s", prevBagAproveState.toString(), bagAproveState.toString());
                 if (lastStateResponse == null || !r.equals(lastStateResponse) || !bagAproveState.equals(prevBagAproveState)) {
                     ioboard.notifyListeners(new IoboardStatus(r, bagAproveState));
                 }
@@ -129,6 +130,9 @@ public class IoboardStateMain extends IoboardStateAbstract {
             } else {
                 debug("%s IoboardStateMain new port %s failed to open", ioboard.toString(), open.getPort());
                 task.setReturnValue(false);
+                if (pendingSensorStatusTask != null) {
+                    pendingSensorStatusTask.setReturnValue(false);
+                }
                 return new IoboardOpenPort(ioboard);
             }
         } else if (task instanceof IoboardTaskGetSensorStatus) {
@@ -136,6 +140,9 @@ public class IoboardStateMain extends IoboardStateAbstract {
                 pendingSensorStatusTask = (IoboardTaskGetSensorStatus) task;
                 String err = ioboard.sendCmd('S');
                 if (err != null) {
+                    if (pendingSensorStatusTask != null) {
+                        pendingSensorStatusTask.setReturnValue(false);
+                    }
                     return new IoboardError(ioboard, err);
                 }
             } else {
@@ -156,6 +163,9 @@ public class IoboardStateMain extends IoboardStateAbstract {
         task.setReturnValue(ret);
         String err = ioboard.sendCmd('S');
         if (err != null) {
+            if (pendingSensorStatusTask != null) {
+                pendingSensorStatusTask.setReturnValue(false);
+            }
             return new IoboardError(ioboard, err);
         }
         return this;
@@ -167,6 +177,9 @@ public class IoboardStateMain extends IoboardStateAbstract {
         retries = 0;
         String err = ioboard.sendCmd('S');
         if (err != null) {
+            if (pendingSensorStatusTask != null) {
+                pendingSensorStatusTask.setReturnValue(false);
+            }
             return new IoboardError(ioboard, err);
         }
         return null;

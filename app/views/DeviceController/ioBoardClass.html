@@ -69,27 +69,32 @@
             }
             var status = data[ 1 ];
             if (status) {
-                $("#sensor_status").text(status);
-            }
-            if (status.D & 0x10) {
-                $("#sensorA").css("background", "red");
+                $("#sensor_status").text(data[2]);
+                if (status.D & 0x10) {
+                    $("#sensorA").css("background", "red");
+                } else {
+                    $("#sensorA").css("background", "green");
+                }
+                if (status.D & 0x08) {
+                    $("#sensorB").css("background", "red");
+                } else {
+                    $("#sensorB").css("background", "green");
+                }
+                if (status.D & 0x04) {
+                    $("#sensorC").css("background", "red");
+                } else {
+                    $("#sensorC").css("background", "green");
+                }
+                if (status.D & 0x20) {
+                    $("#sensorD").css("background", "red");
+                } else {
+                    $("#sensorD").css("background", "green");
+                }
             } else {
-                $("#sensorA").css("background", "green");
-            }
-            if (status.D & 0x08) {
-                $("#sensorB").css("background", "red");
-            } else {
-                $("#sensorB").css("background", "green");
-            }
-            if (status.D & 0x04) {
-                $("#sensorC").css("background", "red");
-            } else {
-                $("#sensorC").css("background", "green");
-            }
-            if (status.D & 0x20) {
-                $("#sensorD").css("background", "red");
-            } else {
-                $("#sensorD").css("background", "green");
+                $("#sensorA").css("background", "yellow");
+                $("#sensorB").css("background", "yellow");
+                $("#sensorC").css("background", "yellow");
+                $("#sensorD").css("background", "yellow");
             }
 
             doneRefresh();

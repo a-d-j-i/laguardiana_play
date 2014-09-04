@@ -26,8 +26,8 @@ public class IoboardError extends IoboardStateAbstract {
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract t) {
+        Logger.debug("IoboardError task : %s", t.toString());
         if (t instanceof DeviceTaskOpenPort) {
-            Logger.debug("IoboardError task : %s", t.toString());
             DeviceTaskOpenPort open = (DeviceTaskOpenPort) t;
             if (ioboard.open(open.getPort())) {
                 Logger.debug("IoboardError new port %s", open.getPort());

@@ -3,6 +3,7 @@ package controllers;
 import static controllers.DeviceController.device;
 import devices.device.DeviceEvent;
 import devices.device.task.DeviceTaskReset;
+import devices.ioboard.response.IoboardStatusResponse;
 import devices.ioboard.task.IoboardTaskAproveBag;
 import devices.ioboard.task.IoboardTaskCloseGate;
 import devices.ioboard.task.IoboardTaskConfirmBag;
@@ -64,11 +65,13 @@ public class IoBoardController extends Application {
             lastEvent = de.toString();
         }
         if (request.isAjax()) {
-            Object ret[] = new Object[2];
+            Object ret[] = new Object[3];
             ret[ 0] = lastEvent;
             IoboardTaskGetSensorStatus deviceTask = new IoboardTaskGetSensorStatus();
             ioBoard.submit(deviceTask).get();
-            ret[ 1] = deviceTask.getSensorStatus();
+            IoboardStatusResponse res = deviceTask.getSensorStatus();
+            ret[ 1] = res;
+            ret[ 2] = (res == null ? null : res.toString());
             renderJSON(ret);
         } else {
             renderArgs.put("deviceId", deviceId);
