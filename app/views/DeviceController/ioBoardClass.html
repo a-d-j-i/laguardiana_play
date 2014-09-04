@@ -1,0 +1,100 @@
+#{set title:'MeiEbds (Comandos)' /}
+#{extends 'main.html' /}
+
+#{set 'moreStyles'}
+<style>
+    .circle {
+        background: yellow;
+        border-radius: 100%;
+        font-size: x-large;
+    }
+</style>
+#{/set}
+
+<section id ="menu_principal">
+    <header></header>
+    <nav>
+        <a id ="backButton" href="@{DeviceController.commands(deviceId)}" class="boton_top">◄ &{ 'application.back' }</a>
+    </nav>
+    <article>
+        <div style="overflow-y: scroll; height: 200px;">
+            <p>LAST EVENTS:<br/><span id="last_event">${lastEvent}</span></p>
+        </div>
+        <div class="botonera">
+            <ul class="on-2 unit">
+                <li class="column">
+                    <div style="margin:20px;">
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{IoBoardController.openGate(deviceId)}">OpenGate</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{IoBoardController.closeGate(deviceId)}">CloseGate</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{IoBoardController.aproveBag(deviceId)}">AproveBag</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{IoBoardController.aproveBagConfirm(deviceId)}">AproveBagConfirm</a>
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{IoBoardController.clearError(deviceId)}">ClearError</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna" style="height: 100%; padding: 20px;">
+                        <div>
+                            <p>LAST CMD:<span id="last_cmd">${lastCmd}</span></p>
+                            <p>LAST RESULT:<span id="last_result">${lastResult}</span></p>
+                        </div>
+                        <div>
+                            <p>
+                                <span ID="sensorA" class="circle">&nbsp;A&nbsp;</span>
+                                &nbsp;
+                                <span ID="sensorB" class="circle">&nbsp;B&nbsp;</span>
+                                &nbsp;
+                                <span ID="sensorC" class="circle">&nbsp;C&nbsp;</span>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <span ID="sensorD" class="circle">&nbsp;L&nbsp;</span>
+                            </p>
+                            <p>SENSOR STATUS:<br/><span id="sensor_status">${sensorStatus}</span></p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+    </article>
+</section>
+
+#{set 'moreScripts'}
+<script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script type="text/javascript" charset="${_response_encoding}">
+    doRefresh = function() {
+        $.getJSON('@{IoBoardController.getStatus(deviceId)}', function(data) {
+            var lastEvent = data[ 0 ];
+            if (lastEvent) {
+                lastEvent = lastEvent + "\n" + $("#last_event").text();
+                $("#last_event").text(lastEvent);
+            }
+            var status = data[ 1 ];
+            if (status) {
+                $("#sensor_status").text(status);
+            }
+            if (status.D & 0x10) {
+                $("#sensorA").css("background", "red");
+            } else {
+                $("#sensorA").css("background", "green");
+            }
+            if (status.D & 0x08) {
+                $("#sensorB").css("background", "red");
+            } else {
+                $("#sensorB").css("background", "green");
+            }
+            if (status.D & 0x04) {
+                $("#sensorC").css("background", "red");
+            } else {
+                $("#sensorC").css("background", "green");
+            }
+            if (status.D & 0x20) {
+                $("#sensorD").css("background", "red");
+            } else {
+                $("#sensorD").css("background", "green");
+            }
+
+            doneRefresh();
+        })
+    };
+
+</script>
+#{/set}

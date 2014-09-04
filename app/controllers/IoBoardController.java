@@ -1,9 +1,17 @@
 package controllers;
 
+import static controllers.DeviceController.device;
 import devices.device.DeviceEvent;
-import java.io.IOException;
+import devices.device.task.DeviceTaskReset;
+import devices.ioboard.task.IoboardTaskAproveBag;
+import devices.ioboard.task.IoboardTaskCloseGate;
+import devices.ioboard.task.IoboardTaskConfirmBag;
+import devices.ioboard.task.IoboardTaskGetSensorStatus;
+import devices.ioboard.task.IoboardTaskOpenGate;
+import java.util.concurrent.ExecutionException;
 import machines.MachineDeviceDecorator;
 import models.db.LgDevice;
+import play.exceptions.TemplateNotFoundException;
 import play.mvc.Before;
 
 public class IoBoardController extends Application {
@@ -13,9 +21,7 @@ public class IoBoardController extends Application {
     @Before
     static void getBoard(Integer deviceId) throws Throwable {
         DeviceController.getCounter(deviceId);
-        if (DeviceController.device.getType() == LgDevice.DeviceType.IO_BOARD_MX220_1_0
-                || DeviceController.device.getType() == LgDevice.DeviceType.IO_BOARD_V4520_1_0
-                || DeviceController.device.getType() == LgDevice.DeviceType.IO_BOARD_V4520_1_2) {
+        if (DeviceController.device.getDeviceType() == LgDevice.DeviceType.IO_BOARD_MEI_1_0) {
             ioBoard = DeviceController.device;
         } else {
             renderArgs.put("error", "invalid device id");
@@ -23,50 +29,57 @@ public class IoBoardController extends Application {
         }
     }
 
-    public static void openGate(Integer deviceId) throws IOException {
+    public static void openGate(Integer deviceId) throws InterruptedException, ExecutionException {
         flash.put("lastCmd", "openGate");
-//        getStatus(deviceId, ioBoard.openGate());
+        getStatus(deviceId, ioBoard.submit(new IoboardTaskOpenGate()).get());
     }
 
-    public static void closeGate(Integer deviceId) {
+    public static void closeGate(Integer deviceId) throws InterruptedException, ExecutionException {
         flash.put("lastCmd", "closeGate");
-//        getStatus(deviceId, ioBoard.closeGate());
+        getStatus(deviceId, ioBoard.submit(new IoboardTaskCloseGate()).get());
     }
 
-    public static void aproveBag(Integer deviceId) throws IOException {
+    public static void aproveBag(Integer deviceId) throws InterruptedException, ExecutionException {
         flash.put("lastCmd", "aproveBag");
-//        getStatus(deviceId, ioBoard.aproveBag());
+        getStatus(deviceId, ioBoard.submit(new IoboardTaskAproveBag()).get());
     }
 
-    public static void aproveBagConfirm(Integer deviceId) {
+    public static void aproveBagConfirm(Integer deviceId) throws InterruptedException, ExecutionException {
         flash.put("lastCmd", "aproveBagConfirm");
-//        getStatus(deviceId, ioBoard.aproveBagConfirm());
+        getStatus(deviceId, ioBoard.submit(new IoboardTaskConfirmBag()).get());
     }
 
-    public static void clearError(Integer deviceId) {
+    public static void clearError(Integer deviceId) throws InterruptedException, ExecutionException {
         flash.put("lastCmd", "clearError");
- //       getStatus(deviceId, ioBoard.reset());
+        getStatus(deviceId, ioBoard.submit(new DeviceTaskReset()).get());
     }
 
-    public static void getStatus(Integer deviceId, boolean retval) {
+    public static void getStatus(Integer deviceId, boolean retval) throws InterruptedException, ExecutionException {
         renderArgs.put("lastCmd", flash.get("lastCmd"));
         renderArgs.put("lastResult", retval ? "SUCCESS" : "FAIL");
+
         DeviceEvent de = ioBoard.getLastEvent();
         String lastEvent = "";
         if (de != null) {
             lastEvent = de.toString();
         }
         if (request.isAjax()) {
-            Object ret[] = new Object[1];
+            Object ret[] = new Object[2];
             ret[ 0] = lastEvent;
-            //o[1] = ioBoard.getInternalState();
+            IoboardTaskGetSensorStatus deviceTask = new IoboardTaskGetSensorStatus();
+            ioBoard.submit(deviceTask).get();
+            ret[ 1] = deviceTask.getSensorStatus();
             renderJSON(ret);
         } else {
             renderArgs.put("deviceId", deviceId);
-            renderArgs.put("device", ioBoard);
             renderArgs.put("lastEvent", lastEvent);
             //renderArgs.put("backUrl", flash.get("backUrl"));
-            render("DeviceController/" + ioBoard.getType().name().toUpperCase() + "_OPERATIONS.html");
+            try {
+                render("DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
+            } catch (TemplateNotFoundException ex) {
+                renderArgs.put(device.getDeviceType().getDeviceClass().name(), true);
+                render("DeviceController/ioBoardClass.html");
+            }
         }
     }
 }

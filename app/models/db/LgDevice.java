@@ -18,6 +18,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import play.Logger;
 import play.db.jpa.GenericModel;
 
@@ -25,14 +26,30 @@ import play.db.jpa.GenericModel;
 @Table(name = "lg_device", schema = "public")
 public class LgDevice extends GenericModel implements java.io.Serializable {
 
+    public enum DeviceClass {
+
+        IO_BOARD,
+        PRINTER,
+        BILL_VALIDATOR;
+    }
+
     public enum DeviceType {
 
-        OS_PRINTER,
-        IO_BOARD_V4520_1_0,
-        IO_BOARD_V4520_1_2,
-        IO_BOARD_MX220_1_0,
-        GLORY_DE50,
-        MEI_EBDS;
+        OS_PRINTER(DeviceClass.PRINTER),
+        GLORY_DE50(DeviceClass.BILL_VALIDATOR),
+        MEI_EBDS(DeviceClass.BILL_VALIDATOR),
+        IO_BOARD_MEI_1_0(DeviceClass.IO_BOARD);
+
+        private DeviceType(DeviceClass deviceClass) {
+            this.deviceClass = deviceClass;
+        }
+        @Transient
+        transient private final DeviceClass deviceClass;
+
+        @Transient
+        public DeviceClass getDeviceClass() {
+            return deviceClass;
+        }
     };
     @Id
     @Column(name = "device_id", unique = true, nullable = false)

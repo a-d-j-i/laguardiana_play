@@ -13,12 +13,7 @@
 <section id ="menu_principal">
     <header></header>
     <nav>
-        #{if hasClass}
         <a id ="backButton" href="@{DeviceController.commands(deviceId)}" class="boton_top">◄ &{ 'application.back' }</a>
-        #{/if}
-        #{else}
-        <a id ="backButton" href="@{DeviceController.list()}" class="boton_top">◄ &{ 'application.back' }</a>
-        #{/else}
     </nav>
     <article>
         <div class="botonera">

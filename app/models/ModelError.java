@@ -1,10 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package models;
 
-import devices.ioboard.IoBoardError;
 import devices.printer.PrinterError;
 import play.Logger;
 
@@ -20,27 +15,22 @@ public class ModelError {
     }
 //    private GloryDE50DeviceErrorEvent gloryError = null;
     private PrinterError printerError = null;
-    private IoBoardError ioBoardError = null;
     private ERROR_CODE errorCode;
     private String detail;
 
     synchronized public boolean isError() {
-        return errorCode != null || ioBoardError != null || printerError != null;
+        return errorCode != null || printerError != null;
     }
-/*
-    synchronized public void setError(GloryDE50DeviceErrorEvent error) {
-        Logger.debug("Error in gloryError %s", error);
-        this.gloryError = error;
-    }
-*/
+    /*
+     synchronized public void setError(GloryDE50DeviceErrorEvent error) {
+     Logger.debug("Error in gloryError %s", error);
+     this.gloryError = error;
+     }
+     */
+
     synchronized public void setError(PrinterError error) {
         Logger.debug("Error in printerError %s", error);
         this.printerError = error;
-    }
-
-    synchronized public void setError(IoBoardError error) {
-        Logger.debug("Error in ioBoardError %s", error);
-        this.ioBoardError = error;
     }
 
     synchronized public void setError(ERROR_CODE errorCode, String detail) {
@@ -48,17 +38,14 @@ public class ModelError {
         this.errorCode = errorCode;
         this.detail = detail;
     }
-/*
-    synchronized public GloryDE50DeviceErrorEvent getGloryError() {
-        return gloryError;
-    }
-*/
+    /*
+     synchronized public GloryDE50DeviceErrorEvent getGloryError() {
+     return gloryError;
+     }
+     */
+
     synchronized public PrinterError getPrinterError() {
         return printerError;
-    }
-
-    synchronized public IoBoardError getIoBoardError() {
-        return ioBoardError;
     }
 
     synchronized public ERROR_CODE getErrorCode() {
@@ -69,21 +56,17 @@ public class ModelError {
         return detail;
     }
 
-    synchronized void clearIoBoardError() {
-        Logger.debug("--> Model ioboard error cleared");
-        this.ioBoardError = null;
-    }
-/*
-    synchronized void clearGloryError() {
-        Logger.debug("--> Model glory error cleared");
-        this.gloryError = null;
-    }
+    /*
+     synchronized void clearGloryError() {
+     Logger.debug("--> Model glory error cleared");
+     this.gloryError = null;
+     }
 
-    synchronized void clearPrinterError() {
-        Logger.debug("--> Model printer error cleared");
-        this.gloryError = null;
-    }
-*/
+     synchronized void clearPrinterError() {
+     Logger.debug("--> Model printer error cleared");
+     this.gloryError = null;
+     }
+     */
     synchronized void clearErrorCodeError() {
         Logger.debug("--> Model errorCode error cleared");
         this.errorCode = null;
@@ -92,6 +75,7 @@ public class ModelError {
 
     @Override
     public String toString() {
-        return "printerError = { " + printerError + " }, ioBoardError = { " + ioBoardError + "}, errorCode = { " + errorCode + " }, detail = { " + detail + " }";
+        return "ModelError{" + "printerError=" + printerError + ", errorCode=" + errorCode + ", detail=" + detail + '}';
     }
+
 }

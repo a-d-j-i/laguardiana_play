@@ -30,7 +30,7 @@ public class GloryDE50Controller extends Application {
     @Before
     static void getCounter(Integer deviceId) throws Throwable {
         DeviceController.getCounter(deviceId);
-        if (DeviceController.device.getType() == LgDevice.DeviceType.GLORY_DE50) {
+        if (DeviceController.device.getDeviceType() == LgDevice.DeviceType.GLORY_DE50) {
             glory = DeviceController.device;
         } else {
             renderArgs.put("error", "invalid device id");
@@ -55,10 +55,10 @@ public class GloryDE50Controller extends Application {
             Logger.debug("STATUS : %s %s", glResponse.getClass().getSimpleName(), glResponse.toString());
             renderArgs.put("status", glResponse);
             renderArgs.put("lastResult", glResponse.isError() ? "FAIL" : "SUCCESS");
-            if ( glResponse instanceof GloryDE50ResponseWithData ) {
-                GloryDE50ResponseWithData d = (GloryDE50ResponseWithData)glResponse;
-                renderArgs.put( "denominationData", d.getDenominationData() );
-                renderArgs.put( "billData", d.getBills() );
+            if (glResponse instanceof GloryDE50ResponseWithData) {
+                GloryDE50ResponseWithData d = (GloryDE50ResponseWithData) glResponse;
+                renderArgs.put("denominationData", d.getDenominationData());
+                renderArgs.put("billData", d.getBills());
             }
         }
         renderArgs.put("lastCmd", flash.get("lastCmd"));
@@ -75,7 +75,7 @@ public class GloryDE50Controller extends Application {
             renderArgs.put("deviceId", deviceId);
             renderArgs.put("device", glory);
             renderArgs.put("lastEvent", lastEvent);
-            render("DeviceController/" + glory.getType().name().toUpperCase() + "_OPERATIONS.html");
+            render("DeviceController/" + glory.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
         }
     }
 

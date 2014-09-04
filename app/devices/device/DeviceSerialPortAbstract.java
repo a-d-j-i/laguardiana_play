@@ -17,9 +17,7 @@ import play.Logger;
  */
 abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
 
-    private void debug(String message, Object... args) {
-        //Logger.debug(message, args);
-    }
+    abstract protected void debug(String message, Object... args);
 
     private DeviceSerialPortAdaptor serialPortReader = null;
     private String port;

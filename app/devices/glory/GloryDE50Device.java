@@ -15,8 +15,8 @@ import play.Logger;
  */
 final public class GloryDE50Device extends DeviceSerialPortAbstract {
 
-    private void debug(String message, Object... args) {
-        Logger.debug(message, args);
+    protected void debug(String message, Object... args) {
+        //Logger.debug(message, args);
     }
 
     public GloryDE50Device() {

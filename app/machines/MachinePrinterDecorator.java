@@ -84,13 +84,17 @@ public class MachinePrinterDecorator {
     }
 
     public void stop() {
+        Logger.debug("Printer stop start");
         mustStop.set(true);
         statusThread.interrupt();
         try {
-            statusThread.join(PRINTER_STATUS_POOL_TIMEOUT * 2);
+            if (statusThread.isAlive()) {
+                statusThread.join(PRINTER_STATUS_POOL_TIMEOUT * 2);
+            }
         } catch (InterruptedException ex) {
             Logger.error("Error closing the printer status thread %s", ex.getMessage());
         }
+        Logger.debug("Printer stopped");
     }
 
     @Override

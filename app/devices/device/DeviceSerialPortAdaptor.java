@@ -82,9 +82,7 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
             Logger.error("Error in serial port reader wait thread close.");
         }
         Logger.info("Closing done for %s", serialPort.toString());
-        if (serialPort != null) {
-            serialPort.close();
-        }
+        serialPort.close();
     }
 
     public boolean write(byte[] buffer) {

@@ -22,7 +22,7 @@ public class MeiEbdsController extends Application {
     @Before
     static void getCounter(Integer deviceId) throws Throwable {
         DeviceController.getCounter(deviceId);
-        if (DeviceController.device.getType() == LgDevice.DeviceType.MEI_EBDS) {
+        if (DeviceController.device.getDeviceType() == LgDevice.DeviceType.MEI_EBDS) {
             meiDevice = DeviceController.device;
         } else {
             renderArgs.put("error", "invalid device id");
@@ -83,7 +83,7 @@ public class MeiEbdsController extends Application {
             renderArgs.put("device", meiDevice);
             renderArgs.put("lastEvent", lastEvent);
             //renderArgs.put("backUrl", flash.get("backUrl"));
-            render("DeviceController/" + meiDevice.getType().name().toUpperCase() + "_OPERATIONS.html");
+            render("DeviceController/" + meiDevice.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
         }
     }
 

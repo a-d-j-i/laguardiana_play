@@ -1,4 +1,4 @@
-package devices.mei.state;
+package devices.ioboard.state;
 
 import devices.device.status.DeviceStatusInterface;
 import devices.device.state.DeviceStateInterface;
@@ -6,42 +6,42 @@ import devices.device.status.DeviceStatusError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.device.task.DeviceTaskReset;
-import devices.mei.MeiEbdsDevice;
+import devices.ioboard.IoboardDevice;
 import play.Logger;
 
 /**
  *
  * @author adji
  */
-public class MeiEbdsError extends MeiEbdsStateAbstract {
+public class IoboardError extends IoboardStateAbstract {
 
     private final String error;
 
-    public MeiEbdsError(MeiEbdsDevice mei, String error) {
-        super(mei);
+    public IoboardError(IoboardDevice ioboard, String error) {
+        super(ioboard);
         this.error = error;
         Logger.error(error);
-        mei.notifyListeners(new DeviceStatusError(error));
+        ioboard.notifyListeners(new DeviceStatusError(error));
     }
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract t) {
         if (t instanceof DeviceTaskOpenPort) {
-            Logger.debug("MeiEbdsError task : %s", t.toString());
+            Logger.debug("IoboardError task : %s", t.toString());
             DeviceTaskOpenPort open = (DeviceTaskOpenPort) t;
-            if (mei.open(open.getPort())) {
-                Logger.debug("MeiEbdsError new port %s", open.getPort());
+            if (ioboard.open(open.getPort())) {
+                Logger.debug("IoboardError new port %s", open.getPort());
                 open.setReturnValue(true);
                 return this;
             } else {
-                Logger.debug("MeiEbdsError new port %s failed to open", open.getPort());
+                Logger.debug("IoboardError new port %s failed to open", open.getPort());
                 open.setReturnValue(false);
-                return new MeiEbdsOpenPort(mei);
+                return new IoboardOpenPort(ioboard);
             }
         } else if (t instanceof DeviceTaskReset) {
-            Logger.debug("MeiEbdsError executing reset task %s", t.toString());
+            Logger.debug("executing reset task %s", t.toString());
             t.setReturnValue(true);
-            return new MeiEbdsStateMain(mei);
+            return new IoboardStateMain(ioboard);
         }
         t.setReturnValue(false);
         return this;
@@ -54,27 +54,27 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
     /*
      @Override
      public boolean reset() {
-     return comunicate(new Callable< MeiEbdsStateAbstract>() {
-     public MeiEbdsStateAbstract call() throws Exception {
-     return new Reset(mei, new GotoNeutral(mei));
+     return comunicate(new Callable< IoboardStateAbstract>() {
+     public IoboardStateAbstract call() throws Exception {
+     return new Reset(ioboard, new GotoNeutral(ioboard));
      }
      });
      }
 
      @Override
      public boolean storingErrorReset() {
-     return comunicate(new Callable< MeiEbdsStateAbstract>() {
-     public MeiEbdsStateAbstract call() throws Exception {
-     return new StoringErrorReset(mei);
+     return comunicate(new Callable< IoboardStateAbstract>() {
+     public IoboardStateAbstract call() throws Exception {
+     return new StoringErrorReset(ioboard);
      }
      });
      }
 
      @Override
      public boolean clearError() {
-     return comunicate(new Callable< MeiEbdsStateAbstract>() {
-     public MeiEbdsStateAbstract call() throws Exception {
-     return new OpenPort(mei);
+     return comunicate(new Callable< IoboardStateAbstract>() {
+     public IoboardStateAbstract call() throws Exception {
+     return new OpenPort(ioboard);
      }
      });
      }
@@ -86,6 +86,6 @@ public class MeiEbdsError extends MeiEbdsStateAbstract {
      */
     @Override
     public String toString() {
-        return "MeiEbdsError{" + "error=" + error + '}';
+        return "IoboardError{" + "error=" + error + '}';
     }
 }

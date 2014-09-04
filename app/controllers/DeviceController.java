@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import machines.MachineDeviceDecorator;
 import models.ModelFacade;
-import models.db.LgDevice;
 import models.db.LgDeviceProperty;
 import play.Logger;
+import play.exceptions.TemplateNotFoundException;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -31,8 +31,6 @@ import play.mvc.With;
 public class DeviceController extends Controller {
 
     static MachineDeviceDecorator device;
-    static boolean hasClass = false;
-    static String deviceName;
 
     @Before
     static void getCounter(Integer deviceId) throws Throwable {
@@ -41,28 +39,7 @@ public class DeviceController extends Controller {
             if (device == null) {
                 list();
             }
-            deviceName = device.getType().name();
-            hasClass = true;
-            switch ((LgDevice.DeviceType) device.getType()) {
-                case GLORY_DE50:
-                case MEI_EBDS:
-                    renderArgs.put("classCounter", true);
-                    break;
-                case IO_BOARD_MX220_1_0:
-                case IO_BOARD_V4520_1_0:
-                case IO_BOARD_V4520_1_2:
-                    renderArgs.put("classIoBoard", true);
-                    break;
-                case OS_PRINTER:
-                    renderArgs.put("classPrinter", true);
-                    break;
-                default:
-                    hasClass = false;
-                    break;
-
-            }
             renderArgs.put("device", device);
-            renderArgs.put("hasClass", hasClass);
             renderArgs.put("deviceId", deviceId);
         }
     }
@@ -73,7 +50,8 @@ public class DeviceController extends Controller {
     }
 
     public static void commands(Integer deviceId) {
-        if (hasClass) {
+        if (true) {
+            renderArgs.put(device.getDeviceType().getDeviceClass().name(), true);
             render("DeviceController/deviceClass.html");
         } else {
             operations(deviceId);
@@ -81,8 +59,12 @@ public class DeviceController extends Controller {
     }
 
     public static void operations(Integer deviceId) {
-        render("DeviceController/" + deviceName.toUpperCase() + "_OPERATIONS.html"
-        );
+        try {
+            render("DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
+        } catch (TemplateNotFoundException ex) {
+            renderArgs.put(device.getDeviceType().getDeviceClass().name(), true);
+            render("DeviceController/deviceClass.html");
+        }
     }
 
     public static void printerClassCommands(Integer deviceId) {

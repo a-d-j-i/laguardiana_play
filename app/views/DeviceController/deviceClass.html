@@ -9,16 +9,16 @@
     <article>
         <div>
             <p>DeviceId : ${deviceId}</p>
-            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{operations(deviceId)}">Operations</a>
-            #{if classIoBoard}
+            #{if IO_BOARD}
             <a class="boton ${play.configuration['style.button_color']} full_width" href="@{ioBoardClassCommands(deviceId)}">IoBoardClass Commands</a>
             #{/if}
-            #{if classPrinter}
+            #{if PRINTER}
             <a class="boton ${play.configuration['style.button_color']} full_width" href="@{printerClassCommands(deviceId)}">PrinterClass Commands</a>
             #{/if}
-            #{if classCounter}
+            #{if BILL_VALIDATOR}
             <a class="boton ${play.configuration['style.button_color']} full_width" href="@{counterClassCommands(deviceId)}">CounterClass Commands</a>
             #{/if}
+            <a class="boton ${play.configuration['style.button_color']} full_width" href="@{operations(deviceId)}">Operations</a>
         </div>
     </article>
 </section>

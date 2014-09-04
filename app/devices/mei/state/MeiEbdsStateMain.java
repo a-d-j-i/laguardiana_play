@@ -50,7 +50,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
             retries--;
             debug("RETRIES : %d", retries);
             if (retries <= 0) {
-                return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, "Timeout reading from serial port");
+                return new MeiEbdsError(mei, "Timeout reading from serial port");
             }
             ret = true;
         } else if (t instanceof DeviceTaskMessage) {
@@ -92,7 +92,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                     err = "Invalid response type";
                 }
                 if (err != null) {
-                    return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
+                    return new MeiEbdsError(mei, err);
                 }
             }
             // TODO: Check
@@ -116,7 +116,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
             String err = mei.cancelCount();
             if (err != null) {
                 t.setReturnValue(false);
-                return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
+                return new MeiEbdsError(mei, err);
             }
             t.setReturnValue(true);
             mei.notifyListeners(MeiEbdsStatus.CANCELING);
@@ -148,7 +148,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         t.setReturnValue(ret);
         String err = mei.sendPollMessage();
         if (err != null) {
-            return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
+            return new MeiEbdsError(mei, err);
         }
         return this;
     }
@@ -158,7 +158,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     public DeviceStateInterface init() {
         String err = mei.sendPollMessage();
         if (err != null) {
-            return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
+            return new MeiEbdsError(mei, err);
         }
         return null;
     }
@@ -225,7 +225,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         }
         skipEscrowed = false;
         if (err != null) {
-            return new MeiEbdsError(mei, MeiEbdsError.COUNTER_CLASS_ERROR_CODE.MEI_EBDS_APPLICATION_ERROR, err);
+            return new MeiEbdsError(mei, err);
         }
         return null;
     }

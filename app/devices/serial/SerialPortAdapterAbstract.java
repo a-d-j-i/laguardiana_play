@@ -175,13 +175,16 @@ public abstract class SerialPortAdapterAbstract implements SerialPortAdapterInte
             switch (state) {
                 case START:
                     // remove from queue
-                    int ch = read(timeoutMS);
+                    Byte ch = read(timeoutMS);
+                    if (ch == null) {
+                        return null;
+                    }
                     if (ch == 0x0d) {
                         state = SerialPortAdapterAbstract.State.CR_DETECTED;
                     } else if (ch == 0x0a) {
                         done = true;
                     } else {
-                        sb.append(ch);
+                        sb.append((char) ch.byteValue());
                     }
                     break;
                 case CR_DETECTED:
