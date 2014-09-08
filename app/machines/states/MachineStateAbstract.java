@@ -14,7 +14,7 @@ abstract public class MachineStateAbstract implements MachineStateInterface {
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-//        Logger.debug("%s ignore device %s, status %s", toString(), dev.toString(), st.toString());
+        Logger.debug("%s ignore device %s, status %s", toString(), dev.toString(), st.toString());
     }
 
     @Override

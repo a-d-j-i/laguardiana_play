@@ -20,6 +20,7 @@ import devices.ioboard.task.IoboardTaskAproveBag;
 import devices.ioboard.task.IoboardTaskCloseGate;
 import devices.ioboard.task.IoboardTaskConfirmBag;
 import devices.ioboard.task.IoboardTaskGetSensorStatus;
+import devices.ioboard.task.IoboardTaskGetStatus;
 import devices.ioboard.task.IoboardTaskOpenGate;
 import play.Logger;
 
@@ -39,25 +40,33 @@ public class IoboardStateMain extends IoboardStateAbstract {
 
     private int retries = 0;
     private IoboardStatus.IoboardBagApprovedState bagAproveState = IoboardStatus.IoboardBagApprovedState.BAG_APROVED;
-    private IoboardStateResponse lastStateResponse;
-    private IoboardStatusResponse lastStatusResponse;
     private IoboardTaskGetSensorStatus pendingSensorStatusTask = null;
+    private IoboardTaskGetStatus pendingStatusTask = null;
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract task) {
+        DeviceStateInterface ret = callInt(task);
+        if (ret != this && ret != null) {
+            if (pendingSensorStatusTask != null) {
+                pendingSensorStatusTask.setReturnValue(false);
+            }
+            if (pendingStatusTask != null) {
+                pendingStatusTask.setReturnValue(false);
+            }
+        }
+        return ret;
+    }
+
+    public DeviceStateInterface callInt(DeviceTaskAbstract task) {
         //debug("IoboardStateMain received task %s", task.toString());
         boolean ret;
         if (task instanceof DeviceTaskReadTimeout) {
             task.setReturnValue(true);
             retries++;
-            debug("RETRIES : %d", retries);
 
             if (retries == IOBOARD_MAX_RETRIES) {
                 retries = 0;
                 task.setReturnValue(true);
-                if (pendingSensorStatusTask != null) {
-                    pendingSensorStatusTask.setReturnValue(false);
-                }
                 return new IoboardError(ioboard, "Timeout reading from serial port");
             }
             ret = true;
@@ -102,10 +111,11 @@ public class IoboardStateMain extends IoboardStateAbstract {
                     case BAG_NOT_APROVED:
                         break;
                 }
-                if (lastStateResponse == null || !r.equals(lastStateResponse) || !bagAproveState.equals(prevBagAproveState)) {
-                    ioboard.notifyListeners(new IoboardStatus(r, bagAproveState));
+                if (pendingStatusTask != null) {
+                    pendingStatusTask.setResponse(new IoboardStatus(r, bagAproveState));
+                    pendingStatusTask = null;
                 }
-                lastStateResponse = r;
+                ioboard.notifyListeners(new IoboardStatus(r, bagAproveState));
             } else if (response instanceof IoboardErrorResponse) {
                 IoboardErrorResponse r = (IoboardErrorResponse) response;
                 ioboard.notifyListeners(new DeviceStatusError(r.getError()));
@@ -113,9 +123,8 @@ public class IoboardStateMain extends IoboardStateAbstract {
                 IoboardCriticalResponse r = (IoboardCriticalResponse) response;
                 ioboard.notifyListeners(new IoboardStatusCriticalError(r.getError()));
             } else if (response instanceof IoboardStatusResponse) {
-                lastStatusResponse = (IoboardStatusResponse) response;
                 if (pendingSensorStatusTask != null) {
-                    pendingSensorStatusTask.setResponse(lastStatusResponse);
+                    pendingSensorStatusTask.setResponse((IoboardStatusResponse) response);
                     pendingSensorStatusTask = null;
                 }
             }
@@ -130,9 +139,6 @@ public class IoboardStateMain extends IoboardStateAbstract {
             } else {
                 debug("%s IoboardStateMain new port %s failed to open", ioboard.toString(), open.getPort());
                 task.setReturnValue(false);
-                if (pendingSensorStatusTask != null) {
-                    pendingSensorStatusTask.setReturnValue(false);
-                }
                 return new IoboardOpenPort(ioboard);
             }
         } else if (task instanceof IoboardTaskGetSensorStatus) {
@@ -140,9 +146,17 @@ public class IoboardStateMain extends IoboardStateAbstract {
                 pendingSensorStatusTask = (IoboardTaskGetSensorStatus) task;
                 String err = ioboard.sendCmd('S');
                 if (err != null) {
-                    if (pendingSensorStatusTask != null) {
-                        pendingSensorStatusTask.setReturnValue(false);
-                    }
+                    return new IoboardError(ioboard, err);
+                }
+            } else {
+                task.setReturnValue(false);
+            }
+            return null;
+        } else if (task instanceof IoboardTaskGetStatus) {
+            if (pendingStatusTask == null) {
+                pendingStatusTask = (IoboardTaskGetStatus) task;
+                String err = ioboard.sendCmd('S');
+                if (err != null) {
                     return new IoboardError(ioboard, err);
                 }
             } else {
@@ -150,9 +164,6 @@ public class IoboardStateMain extends IoboardStateAbstract {
             }
             return null;
         } else if (task instanceof DeviceTaskReset) {
-            debug("CLEARING STATES");
-            lastStateResponse = null;
-            lastStatusResponse = null;
             task.setReturnValue(true);
             return null;
         } else {
@@ -163,9 +174,6 @@ public class IoboardStateMain extends IoboardStateAbstract {
         task.setReturnValue(ret);
         String err = ioboard.sendCmd('S');
         if (err != null) {
-            if (pendingSensorStatusTask != null) {
-                pendingSensorStatusTask.setReturnValue(false);
-            }
             return new IoboardError(ioboard, err);
         }
         return this;
@@ -177,9 +185,6 @@ public class IoboardStateMain extends IoboardStateAbstract {
         retries = 0;
         String err = ioboard.sendCmd('S');
         if (err != null) {
-            if (pendingSensorStatusTask != null) {
-                pendingSensorStatusTask.setReturnValue(false);
-            }
             return new IoboardError(ioboard, err);
         }
         return null;

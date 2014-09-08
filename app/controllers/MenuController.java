@@ -24,7 +24,7 @@ public class MenuController extends Controller {
             bagFreeSpace = (long) 0;
         }
         boolean isBagFull = Configuration.isBagFull(iq.bills - 1, iq.envelopes + 1);
-        boolean isBagRemoved = !Configuration.isIgnoreBag() && !ModelFacade.isBagReady();
+        boolean isBagRemoved = !Configuration.isIgnoreBag() && !ModelFacade.isBagReady(false);
         if (request.isAjax()) {
             Object[] o = new Object[3];
             o[0] = ModelFacade.isReadyToPrint();

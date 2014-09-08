@@ -2,8 +2,8 @@ package machines.P500_MEI;
 
 import devices.ioboard.IoboardDevice;
 import devices.mei.MeiEbdsDevice;
-import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
+import machines.MachineWithBagAbstract;
 import machines.P500_MEI.states.P500MEIStateContext;
 import machines.P500_MEI.states.P500MeiStateBillDepositStart;
 import machines.P500_MEI.states.P500MeiStateWaiting;
@@ -17,26 +17,18 @@ import play.Logger;
  *
  * @author adji
  */
-final public class MachineP500_MEI extends MachineAbstract {
+final public class MachineP500_MEI extends MachineWithBagAbstract {
 
     final private MachineDeviceDecorator mei;
-    final private MachineDeviceDecorator ioboard;
 
     public MachineP500_MEI() {
+        // ioboard
+        super(new MachineDeviceDecorator("P500_MEI_DEVICE_IOBOARD", LgDevice.DeviceType.IO_BOARD_MEI_1_0,
+                new IoboardDevice(IoboardDevice.IoBoardDeviceType.IOBOARD_DEVICE_TYPE_MEI_1_0)));
+        // counter.
         mei = new MachineDeviceDecorator("P500_MEI_DEVICE_MEI_EBDS", LgDevice.DeviceType.MEI_EBDS,
                 new MeiEbdsDevice());
         addDevice(mei);
-        ioboard = new MachineDeviceDecorator("P500_MEI_DEVICE_IOBOARD", LgDevice.DeviceType.IO_BOARD_MEI_1_0,
-                new IoboardDevice(IoboardDevice.IoBoardDeviceType.IOBOARD_DEVICE_TYPE_MEI_1_0));
-        addDevice(ioboard);
-    }
-
-    public boolean isBagFull() {
-        return true;
-    }
-
-    public boolean isBagReady() {
-        return true;
     }
 
     @Override

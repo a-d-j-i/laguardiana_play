@@ -48,7 +48,6 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
         if (t instanceof DeviceTaskReadTimeout) {
             retries--;
-            debug("RETRIES : %d", retries);
             if (retries <= 0) {
                 return new MeiEbdsError(mei, "Timeout reading from serial port");
             }

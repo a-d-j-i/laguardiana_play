@@ -156,7 +156,7 @@ public class EnvelopeDepositController extends Controller {
             formData.ticketData.value = Configuration.getDefaultCurrency();
 
         }
-        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagFull(true)) {
+        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagReady(true)) {
             Application.index();
         }
 

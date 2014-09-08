@@ -3,6 +3,7 @@ package machines;
 import devices.device.DeviceInterface;
 import devices.device.DeviceEvent;
 import devices.device.DeviceEventListener;
+import devices.device.status.DeviceStatusInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,8 +97,6 @@ abstract public class MachineAbstract implements MachineInterface {
     }
 
     abstract public boolean isBagReady();
-
-    abstract public boolean isBagFull();
 
     public MachineStatus getStatus() {
         return currentState.getStatus();

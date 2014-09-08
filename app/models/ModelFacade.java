@@ -18,7 +18,6 @@ import machines.jobs.MachineJobAcceptDeposit;
 import machines.jobs.MachineJobCancelDeposit;
 import machines.jobs.MachineJobConfirmDeposit;
 import machines.jobs.MachineJobGetCurrentStatus;
-import machines.jobs.MachineJobIsBagFull;
 import machines.jobs.MachineJobIsBagReady;
 import machines.jobs.MachineJobReset;
 import machines.jobs.MachineJobStartBillDepositAction;
@@ -27,6 +26,7 @@ import machines.jobs.MachineJobStartEnvelopeDepositAction;
 import machines.jobs.MachineJobStartFilterAction;
 import machines.jobs.MachineJobStoringErrorReset;
 import machines.status.MachineStatus;
+import models.db.LgBag;
 import play.Logger;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -135,12 +135,32 @@ public class ModelFacade {
         return machine.execute(new MachineJobGetCurrentStatus(machine));
     }
 
-    static public boolean isBagFull(final boolean envelope) {
+    private static boolean isMachineBagReady() {
         return machine.execute(new MachineJobIsBagReady(machine));
     }
 
-    public static boolean isBagReady() {
-        return machine.execute(new MachineJobIsBagFull(machine));
+    public static boolean isBagReady(boolean envelope) {
+        if (Configuration.isIgnoreBag()) {
+            return true;
+        }
+        if (!ModelFacade.isMachineBagReady()) {
+            //Logger.info("Can't start bag removed");
+            return false;
+        }
+        LgBag currentBag = LgBag.getCurrentBag();
+        ItemQuantity iq = currentBag.getItemQuantity();
+        // for an envelope deposit I neet at least space for one envelope more.
+        if (envelope) {
+            iq.envelopes++;
+            iq.bills--;
+        }
+        //Logger.debug("isBagReady quantity : %s", iq);
+        if (Configuration.isBagFull(iq.bills, iq.envelopes)) {
+            //Logger.info("Can't start bag full");
+            //modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
+            return false;
+        }
+        return true;
     }
 
     synchronized public static boolean errorReset() {
