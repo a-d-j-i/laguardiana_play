@@ -14,7 +14,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import models.db.LgBillType;
 import models.db.LgDevice;
-import models.db.LgDevice.DeviceClass;
 import models.db.LgDevice.DeviceType;
 import models.db.LgDeviceProperty;
 import models.db.LgDeviceSlot;

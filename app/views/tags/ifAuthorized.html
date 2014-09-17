@@ -1,4 +1,4 @@
-%{ def url = actionBridge."$_resource".call() }%
+%{ def url = play.mvc.Router.reverse( "$_resource" ) }%
 #{if ( controllers.Secure.checkPermission( _resource, _operation ) ) }
 #{doBody /}
 #{/if}

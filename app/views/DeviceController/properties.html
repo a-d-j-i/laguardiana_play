@@ -65,7 +65,7 @@
     function postToServer(event, deviceId, property, value) {
         $(".form_input").prop('disabled', true);
         $("#processing").html("&{ 'application.wait' }... ");
-        $.getJSON('@{setProperty}', {deviceId: deviceId, property: property, value: value},
+        $.getJSON('@{setDeviceProperty}', {deviceId: deviceId, property: property, value: value},
         function(data) {
             waiting = false;
             var propId = data[0];

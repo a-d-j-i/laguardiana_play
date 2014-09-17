@@ -7,9 +7,10 @@ play war -o "$TMP_DIR" --exclude "TODO:d.sh:build.xml:archive.sh:PlayRunner.jar:
 
 #find "$TMP_DIR" -name "*.java" -exec rm "{}" \;
 rm "$TMP_DIR/WEB-INF/web.xml"
-rm -rf "$TMP_DIR/WEB-INF/classes" "$TMP_DIR/WEB-INF/framework" "$TMP_DIR/WEB-INF/resources"
+#rm -rf "$TMP_DIR/WEB-INF/classes" "$TMP_DIR/WEB-INF/framework" "$TMP_DIR/WEB-INF/resources"
 cp ./PlayRunner.jar "$TMP_DIR/WEB-INF"
-echo `hg parents --template 'branch:{branch}\nlatesttag:{latesttag}\n'` > "$TMP_DIR/WEB-INF/.hg_archival.txt"
+cp ./run.sh "$TMP_DIR/WEB-INF"
+echo `hg parents --template '{latesttag}'` > "$TMP_DIR/WEB-INF/application/version.txt"
 exit
 
 #hg archive "/tmp/cajero_$LAST_TAG.tgz"

@@ -1,8 +1,8 @@
 #{extends 'main.html' /}
 %{  def action = "$request.action";
     def xml_url = actionBridge."$action".call();
-    def prev_url = actionBridge."$action".call(prevPage);
-    def next_url = actionBridge."$action".call(nextPage);
+    def prev_url = play.mvc.Router.reverse( "$action( prevPage )" )
+    def next_url = play.mvc.Router.reverse( "$action( nextPage )"  )
 }%
 <section>
     <header></header>

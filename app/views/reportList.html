@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 %{  def action = "$request.action";
-def prev_url = actionBridge."$action".call(prevPage);
-def next_url = actionBridge."$action".call(nextPage);
+def prev_url = play.mvc.Router.reverse( "$action( prevPage )" )
+def next_url = play.mvc.Router.reverse( "$action( nextPage )" )
 }%
 <section>
     <header></header>
@@ -52,66 +52,64 @@ def next_url = actionBridge."$action".call(nextPage);
 #{set 'moreScripts'}
 <script type="text/javascript" charset="${_response_encoding}">
     function getPage() {
-        var form = $( "#mainForm" );
-        var data = $.get( form.attr( "action" ) + "?" + form.serialize(),
-        function(data) {
-            $('body').html( data );
-            //            $('.result').html(data);
-        });    
+    var form = $("#mainForm");
+            var data = $.get(form.attr("action") + "?" + form.serialize(),
+                    function(data) {
+                    $('body').html(data);
+                            //            $('.result').html(data);
+                    });
     }
     $(function() {
-        $( ".datepicker" ).datepicker({
-            dateFormat : "dd/mm/yy",
+    $(".datepicker").datepicker({
+    dateFormat : "dd/mm/yy",
             onSelect: function(date) {
-                $( "#mainForm" ).submit();
+            $("#mainForm").submit();
             }
-        });
-        $( "#first" ).click(function( event ) {
-            $( "[name = page]" ).val( 1 );
+    });
+            $("#first").click(function(event) {
+    $("[name = page]").val(1);
             getPage();
             //            $( "#mainForm" ).submit();
             event.preventDefault();
-        });
-        $( "#prev" ).click(function( event ) {
-            $( "[name = page]" ).val( parseInt( $( "[name = page]" ).val() ) - 1 );
+    });
+            $("#prev").click(function(event) {
+    $("[name = page]").val(parseInt($("[name = page]").val()) - 1);
             getPage();
             //            $( "#mainForm" ).submit();
             event.preventDefault();
-        });
-        $( "#next" ).click(function( event ) {
-            $( "[name = page]" ).val( parseInt( $( "[name = page]" ).val() ) + 1 );
+    });
+            $("#next").click(function(event) {
+    $("[name = page]").val(parseInt($("[name = page]").val()) + 1);
             getPage();
             //            $( "#mainForm" ).submit();
             event.preventDefault();
-        });
-        $( "#last" ).click(function( event ) {
-            $( "[name = page]" ).val( ${totalPage} );
+    });
+            $("#last").click(function(event) {
+    $("[name = page]").val(${totalPage});
             getPage();
             //            $( "#mainForm" ).submit();
             event.preventDefault();
-        });
-        $( ".submitForm" ).click(function( event ) {
-            $( "[name = id]" ).val( $(this).attr( "id" ) );
-            $( "#mainForm" ).attr("action", $(this).attr("href") ).submit();
+    });
+            $(".submitForm").click(function(event) {
+    $("[name = id]").val($(this).attr("id"));
+            $("#mainForm").attr("action", $(this).attr("href")).submit();
             event.preventDefault();
-        });
-        $( ".clickBack" ).click( function( e ) {
-            {
-                var defaultLocation = "@{MenuController.reportMenu(1)}";
-                var oldHash = window.location.hash;
-                
-                history.back(); // Try to go back
-                
-                var newHash = window.location.hash;
-                
-                if( newHash === oldHash &&
-                    (typeof(document.referrer) !== "string" || document.referrer  === "")){
-                    window.location.href = defaultLocation;
-                }
-                //e.preventDefault();
-                return false; // stop event propagation and browser default event
-            }
-        });
+    });
+            $(".clickBack").click(function(e) {
+    {
+    var defaultLocation = "@{MenuController.reportMenu(1)}";
+            var oldHash = window.location.hash;
+            history.back(); // Try to go back
+
+            var newHash = window.location.hash;
+            if (newHash === oldHash &&
+                    (typeof (document.referrer) !== "string" || document.referrer === "")){
+    window.location.href = defaultLocation;
+    }
+    //e.preventDefault();
+    return false; // stop event propagation and browser default event
+    }
+    });
     });
 </script>
 #{/set}

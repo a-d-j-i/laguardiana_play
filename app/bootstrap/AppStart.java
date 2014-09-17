@@ -31,6 +31,7 @@ public class AppStart extends Job {
 
     @Override
     public void doJob() throws Exception {
+        Logger.info("AppVersion : %s", ModelFacade.getAppVersion());
         Logger.debug("onApplicationStart populate roles");
         populateRoles();
         Logger.debug("onApplicationStart open all devices");

@@ -3,6 +3,9 @@ package models;
 import controllers.CountController;
 import controllers.FilterController;
 import devices.printer.Printer;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -225,5 +228,22 @@ public class ModelFacade {
 
     public static Collection<PrintService> getPrinters() {
         return printer.getPrinters();
+    }
+
+    public static String getAppVersion() {
+        File f = play.Play.getFile("version.txt");
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(f);
+            byte[] data = new byte[(int) f.length()];
+            fis.read(data);
+            fis.close();
+            return new String(data, "UTF-8");
+        } catch (StringIndexOutOfBoundsException ex) {
+            //Logger.error("Error reading release file : %s", ex.toString());
+        } catch (IOException ex) {
+            //Logger.error("Error reading release file : %s", ex.toString());
+        }
+        return "cant get app version from " + f.getAbsolutePath();
     }
 }

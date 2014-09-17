@@ -91,7 +91,7 @@ public class DeviceController extends Controller {
         render();
     }
 
-    public static void setProperty(Integer deviceId, String property, String value) throws InterruptedException, ExecutionException {
+    public static void setDeviceProperty(Integer deviceId, String property, String value) {
         if (!request.isAjax()) {
             list();
         }
@@ -107,7 +107,6 @@ public class DeviceController extends Controller {
         LgDeviceProperty newProp = device.getProperty(property);
         if (newProp == null) {
             ret[2] = String.format("invalid property %s", property);
-            renderJSON(ret);
         } else {
             ret[0] = newProp.devicePropertyId;
             ret[1] = newProp.value;
@@ -138,8 +137,8 @@ public class DeviceController extends Controller {
                     ret[2] = String.format("Property %s not editable", property);
                     break;
             }
-            renderJSON(ret);
         }
+        renderJSON(ret);
     }
 
     static String error = null;
