@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import models.Configuration;
-import models.db.LgSystemProperty;
 import models.db.LgUser;
 import play.Logger;
 import play.Play;

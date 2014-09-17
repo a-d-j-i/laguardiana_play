@@ -31,7 +31,7 @@ public class ConfigController extends Controller {
     }
 
     public static void setProperty(String property, String value) {
-        if (!request.isAjax()) {
+        if (!request.isAjax() || property == null || value == null) {
             index();
         }
         boolean perm = Secure.checkPermission(property, "SET");
@@ -49,7 +49,6 @@ public class ConfigController extends Controller {
             ret[0] = null;
             ret[1] = null;
             ret[2] = String.format("invalid property %s", property);
-            renderJSON(ret);
         } else {
             ret[0] = p.propertyId;
             ret[1] = p.value;
@@ -84,7 +83,7 @@ public class ConfigController extends Controller {
                     ret[2] = String.format("Property %s not editable", property);
                     break;
             }
-            renderJSON(ret);
         }
+        renderJSON(ret);
     }
 }
