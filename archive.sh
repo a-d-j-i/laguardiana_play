@@ -7,7 +7,7 @@ play war -o "$TMP_DIR" --exclude "TODO:d.sh:build.xml:archive.sh:PlayRunner.jar:
 
 #find "$TMP_DIR" -name "*.java" -exec rm "{}" \;
 rm "$TMP_DIR/WEB-INF/web.xml"
-rm -rf "$TMP_DIR/classes" "$TMP_DIR/framework" "$TMP_DIR/resources"
+rm -rf "$TMP_DIR/WEB-INF/classes" "$TMP_DIR/WEB-INF/framework" "$TMP_DIR/WEB-INF/resources"
 cp ./PlayRunner.jar "$TMP_DIR/WEB-INF"
 echo `hg parents --template 'branch:{branch}\nlatesttag:{latesttag}\n'` > "$TMP_DIR/WEB-INF/.hg_archival.txt"
 exit

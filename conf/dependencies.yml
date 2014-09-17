@@ -1,5 +1,6 @@
 # Application dependencies
 
 require:
-    - play -> crud
+    - play
+#    - play -> crud
 #    - org.xhtmlrenderer -> core-renderer R8

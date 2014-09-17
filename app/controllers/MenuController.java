@@ -60,22 +60,22 @@ public class MenuController extends Controller {
         String backAction = "MenuController.mainMenu";
         String[] buttons = {"MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu", "ConfigController.index"};
         String[] titles = {"other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports", "other_menu.config"};
-        File f = play.Play.getFile(".hg_archival.txt");
-        FileInputStream fis;
-        try {
-            fis = new FileInputStream(f);
-            byte[] data = new byte[(int) f.length()];
-            fis.read(data);
-            fis.close();
-            String s = new String(data, "UTF-8");
-            s = s.substring(s.indexOf("latesttag:") + "latesttag:".length(), s.lastIndexOf("latesttag"));
-            renderArgs.put("release", s);
-        } catch (StringIndexOutOfBoundsException ex) {
-            //Logger.error("Error reading release file : %s", ex.toString());
-        } catch (IOException ex) {
-            //Logger.error("Error reading release file : %s", ex.toString());
-        }
-
+//        File f = play.Play.getFile(".hg_archival.txt");
+//        FileInputStream fis;
+//        try {
+//            fis = new FileInputStream(f);
+//            byte[] data = new byte[(int) f.length()];
+//            fis.read(data);
+//            fis.close();
+//            String s = new String(data, "UTF-8");
+//            s = s.substring(s.indexOf("latesttag:") + "latesttag:".length(), s.lastIndexOf("latesttag"));
+//            renderArgs.put("release", s);
+//        } catch (StringIndexOutOfBoundsException ex) {
+//            //Logger.error("Error reading release file : %s", ex.toString());
+//        } catch (IOException ex) {
+//            //Logger.error("Error reading release file : %s", ex.toString());
+//        }
+//
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
