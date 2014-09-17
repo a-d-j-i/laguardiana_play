@@ -4,7 +4,6 @@ import machines.states.MachineStateAbstract;
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
 import models.BillQuantity;
-import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -13,25 +12,38 @@ import play.Logger;
  */
 public class P500MeiStateBillDepositFinish extends MachineStateAbstract {
 
-    private final LgDeposit.FinishCause finishCause;
+    private final BillDeposit.FinishCause finishCause;
     private final P500MEIStateContext context;
 
-    public P500MeiStateBillDepositFinish(P500MEIStateContext context, LgDeposit.FinishCause finishCause) {
+    public P500MeiStateBillDepositFinish(P500MEIStateContext context, BillDeposit.FinishCause finishCause) {
         this.context = context;
         this.finishCause = finishCause;
     }
 
     @Override
     public boolean onStart() {
-        context.closeDeposit(finishCause);
+        context.closeBatch();
+        BillDeposit billDeposit = BillDeposit.findById(context.getDepositId());
+        if (billDeposit != null) {
+            Logger.info("Trying to print deposit: %d", billDeposit.depositId);
+            billDeposit.closeDeposit(finishCause);
+            if (billDeposit.getTotal() > 0) {
+                Logger.info("Printing deposit: %d", billDeposit.depositId);
+                billDeposit.print(false);
+            } else {
+                Logger.info("Skipping deposit: %d", billDeposit.depositId);
+            }
+        } else {
+            Logger.info("Deposit: %d not found", billDeposit.depositId);
+        }
         return true;
     }
 
     @Override
     public MachineBillDepositStatus getStatus() {
-        BillDeposit billDeposit = context.getBillDeposit();
+        BillDeposit billDeposit = BillDeposit.findById(context.getDepositId());
         Long currentSum = billDeposit.getTotal();
-        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
+        return new MachineBillDepositStatus(context.getDepositId(), BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
                 context.getCurrentUserId(), "BillDepositController.finish", "FINISH", currentSum, currentSum);
     }
 

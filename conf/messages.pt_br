@@ -103,7 +103,9 @@ bill_deposit.escrow_full_text_t1=Dinhero recontado:
 bill_deposit.escrow_full_text_t2=Se confirma o depósito não poderá voltar atrás.
 bill_deposit.ready_to_store=Pressione continuar para depositar
 
-envelope_deposit.put_the_envelope_in_the_escrow=Coloque o envelope na máquina.
+message.ready_to_store=Coloque o envelope na máquina.
+message.ready_to_store_sensorless=Coloque o envelope na máquina.
+message.continue_deposit_nc=Agregue mas billetes o presione continuar para terminar.
 
 counting.ready_to_store=Coloque mais bilhetes
 counting.escrow_full=Retire os bilhetes da máquina para continuar

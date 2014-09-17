@@ -1,11 +1,9 @@
 package machines.P500_MEI.states;
 
-import java.util.Date;
 import machines.states.*;
 import machines.status.MachineStatus;
 import machines.status.MachineStatusError;
 import models.BillDeposit;
-import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -38,7 +36,7 @@ public class P500MeiStateError extends MachineStateAbstract {
     @Override
     public boolean onCancelDepositEvent() {
         context.closeBatch();
-        return context.setCurrentState(new P500MeiStateBillDepositFinish(context, LgDeposit.FinishCause.FINISH_CAUSE_ERROR));
+        return context.setCurrentState(new P500MeiStateBillDepositFinish(context, BillDeposit.FinishCause.FINISH_CAUSE_ERROR));
     }
 
     @Override

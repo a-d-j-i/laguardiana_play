@@ -77,7 +77,7 @@ public class FilterController extends ErrorController {
         if (formData == null) {
             formData = new FilterData();
         }
-        List<Currency> currencies = Currency.findAll();
+        List<Currency> currencies = Currency.findEnabled();
         renderArgs.put("formData", formData);
         renderArgs.put("currencies", currencies);
         render();

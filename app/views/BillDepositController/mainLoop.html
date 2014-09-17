@@ -76,7 +76,7 @@
                 <li class="column">
                     <div class="columna">
                         <!-- link cancelar -->
-                        <a href="#" class="cancelButton boton full_width rojo">&{ 'application.cancel' }</a>
+                        <a href="#" id="cancelButton" class="cancelButton boton full_width rojo">&{ 'application.cancel' }</a>
                     </div>
                 </li>
                 <li class="column">
@@ -175,8 +175,8 @@
 <script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
     var deposit_finished = false;
-    doRefresh = function() {
-        $.getJSON('@{mainLoop}', function(data) {
+    doRefresh = function () {
+        $.getJSON('@{mainLoop}', function (data) {
 
             if (deposit_finished) {
                 window.location.href = deposit_finished;
@@ -187,10 +187,13 @@
             var status = data[ 0 ];
 
             if (status != null && status.toString() != 'null') {
-                if (status == 'IDLE' || status == 'REMOVE_THE_BILLS_FROM_ESCROW' || 
-                        status == 'TIMEOUT_WARNING' || status == 'CANCELING' || 
-                        status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' ||
-                        status == 'PUT_THE_BILLS_ON_THE_HOPER' ) {
+                if (status == 'IDLE' || status == 'REMOVE_THE_BILLS_FROM_ESCROW' ||
+                        status == 'TIMEOUT_WARNING' || status == 'CANCELING' ||
+                        status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' || 
+                        status == 'PUT_THE_BILLS_ON_THE_HOPER') {
+                    $('#cancelButton').show();
+                } else if (status == 'CONTINUE_DEPOSIT_NC') {
+                    $('#cancelButton').hide();
                 } else if (status == 'STORING') {
                 } else if (status == 'REMOVE_REJECTED_BILLS') {
                 } else if (status == 'JAM') {
@@ -200,8 +203,10 @@
                     deposit_finished = "@{finish}";
                 } else if (status == 'TIMEOUT_WARNING') {
                 } else if (status == 'COUNTING') {
+                    $('#cancelButton').show();
                 } else if (status == 'ERROR') {
                     //deposit_finished = "{counterError()}";
+                    $('#cancelButton').show();
                 } else {
                     alert("Invalid status : " + status + " last status : " + lastStatus);
                 }
@@ -231,12 +236,11 @@
                      closeAlert( "#alerta_bag_removed" );*/
                 }
 
-                if (status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT') {
+                if (status == 'CONTINUE_DEPOSIT_NC' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT') {
                     $('#continueButton').show();
                 } else {
                     $('#continueButton').hide();
                 }
-
                 lastStatus = status;
             }
 
@@ -276,36 +280,31 @@
         })
     }
 
-    $('.cancelButton').click(function(event) {
+    $('.cancelButton').click(function (event) {
         if (!deposit_finished) {
-            $.getJSON('@{cancel()}', function(data) {
+            $.getJSON('@{cancel()}', function (data) {
             });
         }
     });
 
-    $('.continueButton').click(function(event) {
-        if (lastStatus == 'IDLE') {
-        } else if (lastStatus == 'ESCROW_FULL' || lastStatus == 'READY_TO_STORE' || lastStatus == 'CONTINUE_DEPOSIT') {
-            if (!deposit_finished) {
-                $.getJSON('@{accept()}', function(data) {
-                });
-            }
-        } else {
-            //alert( "Invalid last status : " + lastStatus );
+    $('.continueButton').click(function (event) {
+        if (!deposit_finished) {
+            $.getJSON('@{accept()}', function (data) {
+            });
         }
     });
 
 
 
-    $('#timeout_cancelButton').click(function(event) {
+    $('#timeout_cancelButton').click(function (event) {
         closeAlert("#alerta_timeout");
-        $.getJSON('@{cancel()}', function(data) {
+        $.getJSON('@{cancel()}', function (data) {
         });
     });
 
-    $('#timeout_continueButton').click(function(event) {
+    $('#timeout_continueButton').click(function (event) {
         closeAlert("#alerta_timeout");
-        $.getJSON('@{cancelTimeout()}', function(data) {
+        $.getJSON('@{cancelTimeout()}', function (data) {
         });
     });
 

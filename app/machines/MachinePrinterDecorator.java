@@ -77,12 +77,6 @@ public class MachinePrinterDecorator {
         setCurrentPrinter(null);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        stop();
-        super.finalize();
-    }
-
     public void stop() {
         Logger.debug("Printer stop start");
         mustStop.set(true);
@@ -203,7 +197,7 @@ public class MachinePrinterDecorator {
                             return st.needCheck();
                         }
                     }
-                    Logger.error("Error getting printer state needCheck");
+                    //Logger.error("Error getting printer state needCheck");
                     return true;
                 }
             });

@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import play.Logger;
 
 /**
@@ -38,8 +39,13 @@ public abstract class DeviceAbstract implements DeviceInterface {
 
     public void stop() {
         debug("Device %s stop task thread", this.toString());
-        taskExecutor.shutdown();
         finish();
+        taskExecutor.shutdown();
+        try {
+            taskExecutor.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            Logger.error("Exception in device stop %s", ex.toString());
+        }
         debug("Device %s stop done", this.toString());
     }
 

@@ -107,9 +107,9 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
     }
 
     public MachineBillDepositStatus getStatus(String stateName) {
-        BillDeposit billDeposit = context.getBillDeposit();
+        BillDeposit billDeposit = BillDeposit.findById(context.getDepositId());
         Long totalSum = billDeposit.getTotal();
-        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, context.getCurrentQuantity(), null),
+        return new MachineBillDepositStatus(context.getDepositId(), BillQuantity.getBillQuantities(billDeposit.currency, context.getCurrentQuantity(), null),
                 context.getCurrentUserId(), "BillDepositController.mainloop", stateName, context.getCurrentSum(), totalSum);
     }
 

@@ -1,9 +1,10 @@
 package machines.P500_GloryDE50;
 
 import devices.glory.GloryDE50Device;
+import devices.ioboard.IoboardDevice;
 import machines.P500_GloryDE50.states.P500GloryDE50StateWaiting;
-import machines.MachineAbstract;
 import machines.MachineDeviceDecorator;
+import machines.MachineWithBagAbstract;
 import machines.P500_GloryDE50.states.context.P500GloryDE50StateContext;
 import machines.P500_GloryDE50.states.bill_deposit.P500GloryDE50StateBillDepositStart;
 import machines.P500_GloryDE50.states.context.P500GloryDE50StateBillDepositContext;
@@ -19,21 +20,16 @@ import play.Logger;
  *
  * @author adji
  */
-final public class MachineP500_GLORY extends MachineAbstract {
+final public class MachineP500_GLORY extends MachineWithBagAbstract {
 
     final private MachineDeviceDecorator glory;
 
     public MachineP500_GLORY() {
+        // ioboard
+        super(new MachineDeviceDecorator("P500_GLORY_DEVICE_IOBOARD", LgDevice.DeviceType.IO_BOARD_MEI_1_0,
+                new IoboardDevice(IoboardDevice.IoBoardDeviceType.IOBOARD_DEVICE_TYPE_MEI_1_0)));
         glory = new MachineDeviceDecorator("P500_GLORY_DEVICE_GLORY_DE50", LgDevice.DeviceType.GLORY_DE50, new GloryDE50Device());
         addDevice(glory);
-    }
-
-    public boolean isBagFull() {
-        return true;
-    }
-
-    public boolean isBagReady() {
-        return true;
     }
 
     @Override

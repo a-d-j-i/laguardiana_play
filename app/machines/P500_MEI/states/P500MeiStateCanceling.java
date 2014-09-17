@@ -3,6 +3,7 @@ package machines.P500_MEI.states;
 import devices.device.status.DeviceStatusError;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskWithdraw;
+import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusReadyToStore;
 import machines.MachineDeviceDecorator;
 import machines.status.MachineBillDepositStatus;
@@ -30,7 +31,9 @@ public class P500MeiStateCanceling extends P500MeiStateAccepting {
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        if (st.is(MeiEbdsStatusReadyToStore.class)) {
+        Logger.debug("P500MeiStateCanceling DEVICE EVENT %s, %s", dev.toString(), st.toString());
+        if (st.is(MeiEbdsStatus.NEUTRAL)) {
+        } else if (st.is(MeiEbdsStatusReadyToStore.class)) {
             if (!dev.submitSynchronous(new DeviceTaskWithdraw())) {
                 context.setCurrentState(new P500MeiStateError(this, context, "Error submitting withdraw"));
             }

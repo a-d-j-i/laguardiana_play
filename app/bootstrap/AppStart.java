@@ -7,8 +7,8 @@ package bootstrap;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import machines.jobs.MachineJob;
 import models.ModelFacade;
 import models.db.LgAclRule;
 import models.db.LgResource;
@@ -29,15 +29,10 @@ import play.test.Fixtures;
 @OnApplicationStart
 public class AppStart extends Job {
 
-    public static ExecutorService singleThreadExecutor = null;
-
     @Override
     public void doJob() throws Exception {
         Logger.debug("onApplicationStart populate roles");
         populateRoles();
-        Logger.debug("onApplicationStart start execution service");
-        singleThreadExecutor = Executors.newSingleThreadExecutor();
-        Logger.debug("onApplicationStart start execution service DONE");
         Logger.debug("onApplicationStart open all devices");
         ModelFacade.start();
         Logger.debug("onApplicationStart open all devices DONE");

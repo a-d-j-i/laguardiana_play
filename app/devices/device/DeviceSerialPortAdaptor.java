@@ -75,9 +75,7 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
         mustStop.set(true);
         readerThread.interrupt();
         try {
-            if (readerThread.isAlive()) {
-                readerThread.join(30000);
-            }
+            readerThread.join(30000);
         } catch (InterruptedException ex) {
             Logger.error("Error in serial port reader wait thread close.");
         }

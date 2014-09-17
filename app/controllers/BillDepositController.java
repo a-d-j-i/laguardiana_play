@@ -1,5 +1,6 @@
 package controllers;
 
+import static controllers.EnvelopeDepositController.mainLoop;
 import controllers.serializers.BillQuantitySerializer;
 import controllers.serializers.BillValueSerializer;
 import java.util.List;
@@ -74,8 +75,8 @@ public class BillDepositController extends Controller {
     }
 
     public static void start(@Valid BillDepositData formData) throws Throwable {
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findEnabled();
+        List<Currency> currencies = Currency.findEnabled();
 
         if (currencies.size() == 1
                 && (referenceCodes.size() <= 1 || !Configuration.mustShowBillDepositReference1())
@@ -173,9 +174,12 @@ public class BillDepositController extends Controller {
     public static void finish() {
         MachineBillDepositStatus billStatus = (MachineBillDepositStatus) status;
         BillDeposit deposit = billStatus.getCurrentDeposit();
-        if (deposit == null || !deposit.isFinished()) {
+        if (deposit == null) {
             Application.index();
             return;
+        }
+        if (!deposit.isFinished()) {
+            mainLoop();
         }
         renderArgs.put("clientCode", Configuration.getClientDescription());
         renderArgs.put("user", Secure.getCurrentUser());

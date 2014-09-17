@@ -1,6 +1,7 @@
 package machines.P500_GloryDE50.states.context;
 
 import models.EnvelopeDeposit;
+import play.Logger;
 
 /**
  *
@@ -19,10 +20,6 @@ public class P500GloryDE50StateEnvelopeDepositContext extends P500GloryDE50State
 
     public Integer getDepositId() {
         return depositId;
-    }
-
-    public EnvelopeDeposit getEnvelopeDeposit() {
-        return EnvelopeDeposit.findById(depositId);
     }
 
     public Integer getCurrentUserId() {

@@ -10,21 +10,21 @@ import models.BillQuantity;
  */
 public class MachineBillDepositStatus extends MachineCountStatus {
 
-    final BillDeposit deposit;
+    final Integer depositId;
 
-    public MachineBillDepositStatus(BillDeposit deposit, Collection<BillQuantity> billQuantities, Integer currentUserId,
+    public MachineBillDepositStatus(Integer depositId, Collection<BillQuantity> billQuantities, Integer currentUserId,
             String neededAction, String stateName, Long currentSum, Long totalSum) {
         super(currentSum, totalSum, billQuantities, currentUserId, neededAction, stateName);
-        this.deposit = deposit;
+        this.depositId = depositId;
     }
 
     public BillDeposit getCurrentDeposit() {
-        return deposit;
+        return BillDeposit.findById(depositId);
     }
 
     @Override
     public String toString() {
-        return "MachineBillDepositStatus{" + "deposit=" + deposit + '}' + super.toString();
+        return "MachineBillDepositStatus{" + "depositId=" + depositId + '}' + super.toString();
     }
 
 }

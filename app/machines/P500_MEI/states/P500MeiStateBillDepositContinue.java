@@ -2,6 +2,9 @@ package machines.P500_MEI.states;
 
 import devices.device.status.DeviceStatusError;
 import devices.device.status.DeviceStatusInterface;
+import static devices.ioboard.response.IoboardStateResponse.BAG_STATE.BAG_STATE_INPLACE;
+import devices.ioboard.status.IoboardStatus;
+import devices.ioboard.status.IoboardStatus.IoboardBagApprovedState;
 import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusReadyToStore;
 import devices.mei.status.MeiEbdsStatusStored;
@@ -11,6 +14,7 @@ import machines.status.MachineBillDepositStatus;
 import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.BillQuantity;
+import models.Configuration;
 import play.Logger;
 
 /**
@@ -36,7 +40,57 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        if (st.is(MeiEbdsStatusReadyToStore.class)) {
+        Logger.debug("P500MeiStateBillDepositContinue DEVICE EVENT %s, %s", dev.toString(), st.toString());
+        if (st.is(IoboardStatus.class)) {
+            IoboardStatus iobs = (IoboardStatus) st;
+            if (iobs.getBagState() != BAG_STATE_INPLACE && !Configuration.isIgnoreBag()) {
+                context.setCurrentState(new MachineStateAbstract() {
+                    boolean delayedStore = false;
+
+                    @Override
+                    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
+                        Logger.debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
+                        if (st.is(MeiEbdsStatusReadyToStore.class)) {
+                            MeiEbdsStatusReadyToStore rts = (MeiEbdsStatusReadyToStore) st;
+                            if (context.isValidBill(rts.getSlot())) {
+                                delayedStore = true;
+                            } else {
+                                Logger.debug("Invalid slot %s, withdraw", rts.getSlot());
+                                if (!context.withdraw()) {
+                                    context.setCurrentState(new P500MeiStateError(this, context, "Error submitting withdraw"));
+                                }
+                            }
+                        } else if (st.is(IoboardStatus.class)) {
+                            IoboardStatus s = (IoboardStatus) st;
+                            if (s.getBagApprovedState() == IoboardBagApprovedState.BAG_APROVED) {
+                                if (delayedStore) {
+                                    if (!context.store()) {
+                                        context.setCurrentState(new P500MeiStateError(P500MeiStateBillDepositContinue.this, context, "Error submitting store"));
+                                        return;
+                                    }
+                                }
+                                context.setCurrentState(P500MeiStateBillDepositContinue.this);
+                            }
+                        } else {
+                            P500MeiStateBillDepositContinue.this.onDeviceEvent(dev, st);
+                        }
+                    }
+
+                    @Override
+                    public MachineStatus getStatus() {
+                        return P500MeiStateBillDepositContinue.this.getStatus("BAG_REMOVED");
+                    }
+
+                    @Override
+                    public boolean onCancelDepositEvent() {
+                        return P500MeiStateBillDepositContinue.this.onCancelDepositEvent();
+                    }
+
+                }
+                );
+            }
+            return;
+        } else if (st.is(MeiEbdsStatusReadyToStore.class)) {
             MeiEbdsStatusReadyToStore rts = (MeiEbdsStatusReadyToStore) st;
             if (context.isValidBill(rts.getSlot())) {
                 if (!context.store()) {
@@ -86,13 +140,13 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
     @Override
     public MachineBillDepositStatus getStatus() {
-        return getStatus("CONTINUE_DEPOSIT");
+        return getStatus("CONTINUE_DEPOSIT_NC");
     }
 
     public MachineBillDepositStatus getStatus(String stateName) {
-        BillDeposit billDeposit = context.getBillDeposit();
+        BillDeposit billDeposit = BillDeposit.findById(context.getDepositId());
         Long currentSum = billDeposit.getTotal();
-        return new MachineBillDepositStatus(billDeposit, BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
+        return new MachineBillDepositStatus(context.getDepositId(), BillQuantity.getBillQuantities(billDeposit.currency, billDeposit.getCurrentQuantity(), null),
                 context.getCurrentUserId(), "BillDepositController.mainloop", stateName, null, currentSum);
     }
 

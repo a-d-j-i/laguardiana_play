@@ -2,11 +2,14 @@ package machines.P500_MEI.states;
 
 import devices.device.status.DeviceStatusError;
 import devices.device.status.DeviceStatusInterface;
+import devices.ioboard.status.IoboardStatus;
+import devices.mei.status.MeiEbdsStatus;
 import machines.states.*;
 import java.util.Date;
 import machines.MachineDeviceDecorator;
 import machines.status.MachineStatus;
 import models.BillDeposit;
+import models.EnvelopeDeposit;
 import play.Logger;
 
 /**
@@ -20,6 +23,7 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
 
     public P500MeiStateWaiting(P500MEIStateContext context) {
         this.context = context;
+        this.context.clean();
     }
 
     @Override
@@ -28,6 +32,12 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
             DeviceStatusError err = (DeviceStatusError) st;
             Logger.error("DEVICE ERROR : %s", err.getError());
             context.setCurrentState(new P500MeiStateError(this, context, err.getError()));
+            return;
+        } else if (st.is(MeiEbdsStatus.NEUTRAL)) {
+            // ignore is ok.
+            return;
+        } else if (st.is(IoboardStatus.class)) {
+            // ignore is ok.
             return;
         }
         super.onDeviceEvent(dev, st);
@@ -41,6 +51,16 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
         d.save();
         context.setDeposit(d);
         return context.setCurrentState(new P500MeiStateBillDepositStart(context));
+    }
+
+    @Override
+    public boolean onStartEnvelopeDeposit(EnvelopeDeposit refDeposit) {
+        Logger.debug("startEnvelopeDeposit start");
+        EnvelopeDeposit d = new EnvelopeDeposit(refDeposit);
+        d.startDate = new Date();
+        d.save();
+        context.setDeposit(d);
+        return context.setCurrentState(new P500MeiStateEnvelopeDepositMain(context));
     }
 
     @Override

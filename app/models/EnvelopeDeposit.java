@@ -13,11 +13,11 @@ import models.db.LgUser;
 public class EnvelopeDeposit extends LgDeposit {
 
     public EnvelopeDeposit(LgUser user, String userCode, Integer userCodeLovId) {
-        super(user, null, userCode, userCodeLovId);
+        super(user, userCode, userCodeLovId);
     }
 
-    public EnvelopeDeposit(LgDeposit refDeposit) {
-        super(refDeposit);
+    public EnvelopeDeposit(EnvelopeDeposit refDeposit) {
+        this((LgUser) LgUser.findById(refDeposit.user.userId), refDeposit.userCode, refDeposit.userCodeLov);
         for (LgEnvelope e : refDeposit.envelopes) {
             addEnvelope(new LgEnvelope(e));
         }
@@ -61,4 +61,5 @@ public class EnvelopeDeposit extends LgDeposit {
         setRenderArgs(args);
         ModelFacade.print("PrinterController/envelopeDeposit_start.html", args, Configuration.getPrintWidth(), Configuration.getEvenlopeStartPrintLen());
     }
+
 }

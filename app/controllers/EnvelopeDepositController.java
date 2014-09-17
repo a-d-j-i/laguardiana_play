@@ -1,10 +1,12 @@
 package controllers;
 
-import static controllers.BillDepositController.status;
+import controllers.serializers.BillQuantitySerializer;
+import controllers.serializers.BillValueSerializer;
 import java.util.List;
 import java.util.Set;
 import machines.status.MachineEnvelopeDepositStatus;
 import machines.status.MachineStatus;
+import machines.status.MachineStatusError;
 import models.Configuration;
 import models.EnvelopeDeposit;
 import models.ModelFacade;
@@ -31,17 +33,19 @@ import validation.FormDepositUserCodeEnvelopeReference;
 @With(Secure.class)
 public class EnvelopeDepositController extends Controller {
 
+    static MachineStatus status;
+
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
-        MachineStatus status = ModelFacade.getCurrentStatus();
+        status = ModelFacade.getCurrentStatus();
         if (request.isAjax()) {
             return;
         }
 
         String neededAction = status.getNeededAction();
         if (neededAction == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start") || (status.getCurrentUserId() == null || !status.getCurrentUserId().equals(Secure.getCurrentUserId()))) {
+            if (!request.actionMethod.equalsIgnoreCase("start") && (status.getCurrentUserId() == null || !status.getCurrentUserId().equals(Secure.getCurrentUserId()))) {
                 Logger.debug("wizardFixPage Redirect Application.index, requested %s, currentUser %s, statusUser %s",
                         request.actionMethod, Secure.getCurrentUser(), status.getCurrentUserId());
                 Application.index();
@@ -160,8 +164,8 @@ public class EnvelopeDepositController extends Controller {
             Application.index();
         }
 
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findEnabled();
+        List<Currency> currencies = Currency.findEnabled();
         renderArgs.put("formData", formData);
         renderArgs.put("referenceCodes", referenceCodes);
         renderArgs.put("currencies", currencies);
@@ -169,18 +173,32 @@ public class EnvelopeDepositController extends Controller {
     }
 
     public static void mainLoop() {
-        MachineEnvelopeDepositStatus envStatus = (MachineEnvelopeDepositStatus) status;
-        if (request.isAjax()) {
-            Object[] o = new Object[3];
+        Object[] o;
+        if (status instanceof MachineStatusError) {
+            MachineStatusError err = (MachineStatusError) status;
+            o = new Object[5];
+            o[0] = err.getStateName();
+            o[4] = "ERROR : " + err.getError();
+        } else if (status instanceof MachineEnvelopeDepositStatus) {
+            MachineEnvelopeDepositStatus envStatus = (MachineEnvelopeDepositStatus) status;
+            o = new Object[3];
             o[0] = envStatus.getStateName();
             o[1] = null;
             o[2] = Messages.get("message." + envStatus.getStateName().toLowerCase());
-            renderJSON(o);
+            renderArgs.put("stateName", envStatus.getStateName());
+            renderArgs.put("currentDeposit", envStatus.getCurrentDeposit());
+        } else {
+            o = new Object[1];
+            o[0] = "None";
+        }
+        if (request.isAjax()) {
+            renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         } else {
             renderArgs.put("clientCode", Configuration.getClientDescription());
             renderArgs.put("user", Secure.getCurrentUser());
             renderArgs.put("providerCode", Configuration.getProviderDescription());
-            renderArgs.put("currentDeposit", envStatus.getCurrentDeposit());
+            renderArgs.put("showReference1", Configuration.mustShowBillDepositReference1());
+            renderArgs.put("showReference2", Configuration.mustShowBillDepositReference2());
             render();
         }
     }
@@ -198,18 +216,24 @@ public class EnvelopeDepositController extends Controller {
     public static void finish() {
         MachineEnvelopeDepositStatus envStatus = (MachineEnvelopeDepositStatus) status;
         EnvelopeDeposit deposit = envStatus.getCurrentDeposit();
-        if (deposit != null) {
-            Set<LgEnvelope> envelopes = deposit.envelopes;
-            renderArgs.put("envelopes", envelopes);
-            renderArgs.put("finishCause", deposit.finishCause);
-            renderArgs.put("truncated", deposit.closeDate == null);
-        }
-        if (deposit.isFinished()) {
-            ModelFacade.confirmAction();
-        } else {
+        if (deposit == null) {
+            Logger.error("Deposit not found, status %s", status.toString());
             Application.index();
             return;
         }
+        if (!deposit.isFinished()) {
+            Logger.error("Deposit not finished, status %s", status.toString());
+            mainLoop();
+        }
+        ModelFacade.confirmAction();
+        Set<LgEnvelope> envelopes = deposit.envelopes;
+        renderArgs.put("envelopes", envelopes);
+        renderArgs.put("finishCause", deposit.finishCause);
+        renderArgs.put("truncated", deposit.closeDate == null);
+        renderArgs.put("currentDeposit", deposit);
+        renderArgs.put("depositId", deposit.depositId);
+        renderArgs.put("showReference1", Configuration.mustShowBillDepositReference1());
+        renderArgs.put("showReference2", Configuration.mustShowBillDepositReference2());
         renderArgs.put("clientCode", Configuration.getClientDescription());
         renderArgs.put("user", Secure.getCurrentUser());
         renderArgs.put("providerCode", Configuration.getProviderDescription());

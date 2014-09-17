@@ -104,12 +104,14 @@ bill_deposit.escrow_full_text_t1=Dinero recontado:
 bill_deposit.escrow_full_text_t2=Si confirma el depósito no podrá volver atrás.
 bill_deposit.ready_to_store=Presione continuar para depositar
 
-envelope_deposit.put_the_envelope_in_the_escrow=Coloque el sobre en la maquina.
+message.ready_to_store=Coloque el sobre en la maquina.
+message.ready_to_store_sensorless=Coloque el sobre en la maquina.
 
 counting.ready_to_store=Coloque mas billetes.
 counting.escrow_full=Retire los billetes de la maquina para continuar.
 message.idle=
 message.continue_deposit=
+message.continue_deposit_nc=Agregue mas billetes o presione continuar para terminar.
 message.finish=
 message.put_the_bills_on_the_hoper=Coloque los billetes en la maquina
 message.remove_the_bills_from_escrow=Retire los objetos del interior de la maquina.

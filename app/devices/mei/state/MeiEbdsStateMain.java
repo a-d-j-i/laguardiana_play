@@ -21,6 +21,7 @@ import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 import static devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType.*;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
 import devices.mei.status.MeiEbdsStatusReadyToStore;
+import play.Logger;
 import play.data.validation.Error;
 
 /**
@@ -30,7 +31,7 @@ import play.data.validation.Error;
 public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
 
     protected void debug(String message, Object... args) {
-        //    Logger.debug(message, args);
+        //Logger.debug(message, args);
     }
 
     public MeiEbdsStateMain(MeiEbdsDevice mei) {
@@ -88,7 +89,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                             }
                     }
                 } else {
-                    err = "Invalid response type";
+                    err = String.format("Invalid response type %s", response.getClass().toString());
                 }
                 if (err != null) {
                     return new MeiEbdsError(mei, err);
@@ -168,7 +169,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     }
 
     protected DeviceStateInterface processAcceptorToHostMsg(MeiEbdsAcceptorMsgAck response) {
-        if (response.isJammed() || response.isFailure()) {
+        if (response.isCassetteFull() || response.isJammed() || response.isFailure()) {
             mei.notifyListeners(MeiEbdsStatus.JAM);
             retries = 1000;
             return null;

@@ -13,6 +13,7 @@ import machines.P500_MEI.MachineP500_MEI;
 import machines.states.MachineStateContextInterface;
 import machines.states.MachineStateInterface;
 import models.BillDeposit;
+import models.EnvelopeDeposit;
 import models.db.LgBatch;
 import models.db.LgDeposit;
 import models.db.LgDeviceSlot;
@@ -44,6 +45,12 @@ public class P500MEIStateContext implements MachineStateContextInterface {
         return "P500MEIStateContext{" + "machine=" + machine + ", mei=" + mei + ", depositId=" + depositId + ", currentUserId=" + currentUserId + ", batchId=" + batchId + '}';
     }
 
+    void clean() {
+        depositId = null;
+        currentUserId = null;
+        batchId = null;
+    }
+
     public boolean count() {
         BillDeposit billDeposit = BillDeposit.findById(depositId);
         Map<String, Integer> slots = new HashMap<String, Integer>();
@@ -58,7 +65,7 @@ public class P500MEIStateContext implements MachineStateContextInterface {
         return mei.submitSynchronous(new DeviceTaskCancel());
     }
 
-    public boolean withdraw() {
+    boolean withdraw() {
         return mei.submitSynchronous(new DeviceTaskWithdraw());
     }
 
@@ -124,8 +131,8 @@ public class P500MEIStateContext implements MachineStateContextInterface {
         return currentUserId;
     }
 
-    BillDeposit getBillDeposit() {
-        return BillDeposit.findById(depositId);
+    public Integer getDepositId() {
+        return depositId;
     }
 
     public void setDeposit(LgDeposit dep) {
@@ -138,23 +145,4 @@ public class P500MEIStateContext implements MachineStateContextInterface {
         }
     }
 
-    void closeDeposit(LgDeposit.FinishCause finishCause) {
-        closeBatch();
-        BillDeposit billDeposit = null;
-        Logger.info("Trying to print deposit: %d", depositId);
-        if (depositId != null) {
-            billDeposit = BillDeposit.findById(depositId);
-        }
-        if (billDeposit != null) {
-            billDeposit.closeDeposit(finishCause);
-            if (billDeposit.getTotal() > 0) {
-                Logger.info("Printing deposit: %d", depositId);
-                billDeposit.print(false);
-            } else {
-                Logger.info("Skipping deposit: %d", depositId);
-            }
-        } else {
-            Logger.info("Deposit: %d not found", depositId);
-        }
-    }
 }

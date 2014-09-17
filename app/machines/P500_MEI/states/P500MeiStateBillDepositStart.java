@@ -26,7 +26,7 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
 
     @Override
     public MachineBillDepositStatus getStatus() {
-        BillDeposit billDeposit = context.getBillDeposit();
+        BillDeposit billDeposit = BillDeposit.findById(context.getDepositId());
         if (billDeposit.getTotal() > 0) {
             context.setCurrentState(new P500MeiStateBillDepositContinue(context));
         }
@@ -41,7 +41,7 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
     @Override
     public boolean onCancelDepositEvent() {
         context.closeBatch();
-        BillDeposit billDeposit = context.getBillDeposit();
+        BillDeposit billDeposit = BillDeposit.findById(context.getDepositId());
         if (billDeposit.getTotal() > 0) {
             return context.setCurrentState(new P500MeiStateAccepting(context));
         } else {

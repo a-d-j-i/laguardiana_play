@@ -9,7 +9,6 @@ import java.util.Set;
 import javax.persistence.*;
 import models.db.LgLov.LovCol;
 import models.events.DepositEvent;
-import models.lov.Currency;
 import models.lov.DepositUserCodeReference;
 import play.Logger;
 import play.db.jpa.GenericModel;
@@ -67,9 +66,6 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     public FinishCause finishCause;
     @Column(name = "confirm_date", length = 13)
     public Date confirmDate;
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "currency", nullable = false)
-    public Currency currency;
     @Column(name = "user_code", length = 128)
     public String userCode;
     @Column(name = "user_code_lov")
@@ -80,19 +76,18 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "deposit")
     public Set<LgBill> bills = new HashSet<LgBill>(0);
 
-    public LgDeposit(LgUser user, Currency currency, String userCode, Integer userCodeLovId) {
+    public LgDeposit(LgUser user, String userCode, Integer userCodeLovId) {
         this.bag = LgBag.getCurrentBag();
         this.z = LgZ.getCurrentZ();
         this.user = user;
-        this.currency = currency;
         this.userCodeLov = userCodeLovId;
         this.creationDate = new Date();
     }
-
-    public LgDeposit(LgDeposit refDeposit) {
-        this((LgUser) LgUser.findById(refDeposit.user.userId), (Currency) Currency.findById(refDeposit.currency.lovId),
-                refDeposit.userCode, refDeposit.userCodeLov);
-    }
+//
+//    public LgDeposit(LgDeposit refDeposit) {
+//        this((LgUser) LgUser.findById(refDeposit.user.userId), (Currency) Currency.findById(refDeposit.currency.lovId),
+//                refDeposit.userCode, refDeposit.userCodeLov);
+//    }
 
     private static String getFindQuery(String query, List<Object> args, Date start, Date end, Integer bagId, Integer zId) {
         if (end == null) {
@@ -225,7 +220,7 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     @Override
     public String toString() {
-        return "LgDeposit{" + "depositId=" + depositId + ", currency=" + currency + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", closeDate=" + closeDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag + ", z=" + z + '}';
+        return "LgDeposit{" + "depositId=" + depositId + ", user=" + user + ", creationDate=" + creationDate + ", startDate=" + startDate + ", finishDate=" + finishDate + ", closeDate=" + closeDate + ", userCode=" + userCode + ", userCodeLov=" + userCodeLov + ", bag=" + bag + ", z=" + z + '}';
     }
 
     abstract public void setRenderArgs(Map args);

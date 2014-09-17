@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import models.db.LgBatch;
 import models.db.LgBill;
 import models.db.LgBillType;
@@ -18,12 +21,18 @@ import play.Logger;
 @Entity
 public class BillDeposit extends LgDeposit {
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "currency", nullable = true)
+    public Currency currency;
+
     public BillDeposit(LgUser user, Currency currency, String userCode, Integer userCodeLovId) {
-        super(user, currency, userCode, userCodeLovId);
+        super(user, userCode, userCodeLovId);
+        this.currency = currency;
     }
 
-    public BillDeposit(LgDeposit refDeposit) {
-        super(refDeposit);
+    public BillDeposit(BillDeposit refDeposit) {
+        this((LgUser) LgUser.findById(refDeposit.user.userId), (Currency) Currency.findById(refDeposit.currency.lovId),
+                refDeposit.userCode, refDeposit.userCodeLov);
     }
 
     public List getDepositContent() {
@@ -54,8 +63,8 @@ public class BillDeposit extends LgDeposit {
 
         for (Object b : qret) {
             Object[] a = (Object[]) b;
-            Long quantity = (Long) a[ 2];
-            BillValue bv = new BillValue((Currency) a[1], (Integer) a[ 0]);
+            Long quantity = (Long) a[2];
+            BillValue bv = new BillValue((Currency) a[1], (Integer) a[0]);
             BillQuantity bill = new BillQuantity(bv);
             bill.quantity = quantity.intValue();
             ret.add(bill);

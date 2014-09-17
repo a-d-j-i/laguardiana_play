@@ -56,8 +56,8 @@ public class P500GloryDE50StateBillDepositContext extends P500GloryDE50StateCont
         Logger.debug("Setting current count from : %s to %s", st.toString(), toString());
     }
 
-    public BillDeposit getBillDeposit() {
-        return BillDeposit.findById(depositId);
+    public Integer getDepositId() {
+        return depositId;
     }
 
     public Map<LgBillType, Integer> getCurrentQuantity() {

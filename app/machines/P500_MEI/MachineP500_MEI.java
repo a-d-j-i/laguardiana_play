@@ -6,6 +6,7 @@ import machines.MachineDeviceDecorator;
 import machines.MachineWithBagAbstract;
 import machines.P500_MEI.states.P500MEIStateContext;
 import machines.P500_MEI.states.P500MeiStateBillDepositStart;
+import machines.P500_MEI.states.P500MeiStateEnvelopeDepositMain;
 import machines.P500_MEI.states.P500MeiStateWaiting;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
@@ -45,9 +46,9 @@ final public class MachineP500_MEI extends MachineWithBagAbstract {
             Logger.debug("--------> Start setting state to bill deposit %d", dep.depositId);
             setCurrentState(new P500MeiStateBillDepositStart(context));
         } else if (dep instanceof EnvelopeDeposit) {
-//            Logger.debug("--------> Start setting state to envelope deposit %d", dep.depositId);
-//            currentState = new P500MeiStateEnvelopeMain(this, (EnvelopeDeposit) dep);
-            Logger.error("THIS MACHINE DON'T SUPPORT ENVELOPE DEPOSIT, CANCELING DEPOSIT");
+            Logger.debug("--------> Start setting state to envelope deposit %d", dep.depositId);
+            setCurrentState(new P500MeiStateEnvelopeDepositMain(context));
+//            Logger.error("THIS MACHINE DON'T SUPPORT ENVELOPE DEPOSIT, CANCELING DEPOSIT");
         }
         Logger.debug("Machine Start done");
     }

@@ -35,12 +35,16 @@ abstract public class MachineAbstract implements MachineInterface {
                 submit(new MachineJob<Void>(MachineAbstract.this) {
                     @Override
                     public Void doJobWithResult() {
-                        currentState.onDeviceEvent(d, evt.getStatus());
+                        MachineAbstract.this.onDeviceEvent(d, evt.getStatus());
                         return null;
                     }
                 });
             }
         });
+    }
+
+    public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface status) {
+        currentState.onDeviceEvent(dev, status);
     }
 
     public List<MachineDeviceDecorator> getDevices() {

@@ -81,9 +81,9 @@ public class MenuController extends Controller {
 
     public static void hardwareMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"DeviceController.list", "IoBoardController.index", "PrinterController.listPrinters",};
+        String[] buttons = {"DeviceController.list", "PrinterController.listPrinters",};
 //            "ConfigController.status", "PrinterController.listPrinters", "MenuController.printTemplateMenu"};
-        String[] titles = {"other_menu.devices", "other_menu.ioboard_cmd", "other_menu.printer_list"};
+        String[] titles = {"other_menu.devices", "other_menu.printer_list"};
 //            "other_menu.printer_list", "other_menu.printer_test"};
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }

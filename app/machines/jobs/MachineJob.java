@@ -1,8 +1,9 @@
 package machines.jobs;
 
-import static bootstrap.AppStart.singleThreadExecutor;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import machines.MachineAbstract;
 import machines.MachineInterface;
 import play.Logger;
@@ -16,6 +17,8 @@ import play.libs.F;
  * @param <V>
  */
 public class MachineJob<V> extends Job<V> {
+
+    public static ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 
     protected final MachineAbstract machine;
 
@@ -72,5 +75,4 @@ public class MachineJob<V> extends Job<V> {
 //        }
 //        return true;
 //    }
-
 }

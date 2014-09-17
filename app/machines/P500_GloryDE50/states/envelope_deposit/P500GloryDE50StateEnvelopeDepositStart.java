@@ -3,7 +3,7 @@ package machines.P500_GloryDE50.states.envelope_deposit;
 import machines.P500_GloryDE50.states.context.P500GloryDE50StateEnvelopeDepositContext;
 import machines.states.MachineStateAbstract;
 import machines.status.MachineEnvelopeDepositStatus;
-import models.EnvelopeDeposit;
+import play.Logger;
 
 /**
  *
@@ -19,8 +19,8 @@ public class P500GloryDE50StateEnvelopeDepositStart extends MachineStateAbstract
 
     @Override
     public MachineEnvelopeDepositStatus getStatus() {
-        EnvelopeDeposit envelopeDeposit = context.getEnvelopeDeposit();
-        return new MachineEnvelopeDepositStatus(envelopeDeposit, context.getCurrentUserId(), "EnvelopeDepositControler.mainloop", "CONTINUE_DEPOSIT");
+        Logger.debug("getting deposit %d", context.getDepositId());
+        return new MachineEnvelopeDepositStatus(context.getDepositId(), context.getCurrentUserId(), "EnvelopeDepositControler.mainloop", "CONTINUE_DEPOSIT");
     }
 
 //    @Override

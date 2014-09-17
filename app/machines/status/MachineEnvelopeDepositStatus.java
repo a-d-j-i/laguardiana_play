@@ -8,15 +8,20 @@ import models.EnvelopeDeposit;
  */
 public class MachineEnvelopeDepositStatus extends MachineStatus {
 
-    final EnvelopeDeposit deposit;
+    final Integer depositId;
 
-    public MachineEnvelopeDepositStatus(EnvelopeDeposit deposit, Integer currentUserId, String neededAction, String stateName) {
+    public MachineEnvelopeDepositStatus(Integer depositId, Integer currentUserId, String neededAction, String stateName) {
         super(currentUserId, neededAction, stateName);
-        this.deposit = deposit;
+        this.depositId = depositId;
     }
 
     public EnvelopeDeposit getCurrentDeposit() {
-        return deposit;
+        return EnvelopeDeposit.findById(depositId);
+    }
+
+    @Override
+    public String toString() {
+        return "MachineEnvelopeDepositStatus{" + "depositId=" + depositId + '}';
     }
 
 }
