@@ -144,10 +144,11 @@ public class ModelFacade {
 
     public static boolean isBagReady(boolean envelope) {
         if (Configuration.isIgnoreBag()) {
+            Logger.debug("isBagReady ignore bug");
             return true;
         }
         if (!ModelFacade.isMachineBagReady()) {
-            //Logger.info("Can't start bag removed");
+            Logger.info("Can't start bag removed");
             return false;
         }
         LgBag currentBag = LgBag.getCurrentBag();
@@ -157,9 +158,9 @@ public class ModelFacade {
             iq.envelopes++;
             iq.bills--;
         }
-        //Logger.debug("isBagReady quantity : %s", iq);
         if (Configuration.isBagFull(iq.bills, iq.envelopes)) {
-            //Logger.info("Can't start bag full");
+            Logger.debug("isBagReady quantity : %s", iq);
+            Logger.info("Can't start bag full for %s", envelope ? "ENVELOPE" : "BILL");
             //modelError.setError(ModelError.ERROR_CODE.BAG_FULL, "Bag full too many bills and evenlopes");
             return false;
         }

@@ -118,7 +118,7 @@ public class EnvelopeDepositController extends Controller {
     }
 
     public static void start(@Valid EvenlopeDepositData formData) {
-        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagReady(false)) {
+        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagReady(true)) {
             Application.index();
         }
         if (Validation.hasErrors()) {
