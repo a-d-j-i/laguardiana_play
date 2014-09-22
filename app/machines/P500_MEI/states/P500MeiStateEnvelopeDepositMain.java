@@ -6,12 +6,12 @@ import static devices.ioboard.response.IoboardStateResponse.BAG_STATE.BAG_STATE_
 import devices.ioboard.status.IoboardStatus;
 import devices.ioboard.status.IoboardStatus.IoboardBagApprovedState;
 import devices.mei.status.MeiEbdsStatus;
-import devices.mei.status.MeiEbdsStatusReadyToStore;
 import machines.MachineDeviceDecorator;
 import machines.states.MachineStateAbstract;
 import machines.status.MachineEnvelopeDepositStatus;
 import machines.status.MachineStatus;
 import models.Configuration;
+import models.EnvelopeDeposit;
 import models.db.LgDeposit;
 import play.Logger;
 
@@ -28,6 +28,19 @@ public class P500MeiStateEnvelopeDepositMain extends MachineStateAbstract {
     }
 
     @Override
+    public boolean onStart() {
+        Logger.debug("DEPOSIT ID : %d", context.getDepositId());
+        EnvelopeDeposit envelopeDeposit = EnvelopeDeposit.findById(context.getDepositId());
+        if (envelopeDeposit != null) {
+            Logger.info("Trying to print deposit ticket: %d", envelopeDeposit.depositId);
+            envelopeDeposit.printStart();
+        } else {
+            Logger.info("Deposit: %d not found", envelopeDeposit.depositId);
+        }
+        return true;
+    }
+
+    @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         if (st.is(IoboardStatus.class)) {
             IoboardStatus iobs = (IoboardStatus) st;
@@ -36,7 +49,7 @@ public class P500MeiStateEnvelopeDepositMain extends MachineStateAbstract {
 
                     @Override
                     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-                        Logger.debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
+                        debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
                         if (st.is(IoboardStatus.class)) {
                             IoboardStatus s = (IoboardStatus) st;
                             if (s.getBagApprovedState() == IoboardBagApprovedState.BAG_APROVED) {

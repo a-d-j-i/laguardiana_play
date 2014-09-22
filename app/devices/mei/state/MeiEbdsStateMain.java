@@ -50,7 +50,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         if (t instanceof DeviceTaskReadTimeout) {
             retries--;
             if (retries <= 0) {
-                return new MeiEbdsError(mei, "Timeout reading from serial port");
+                return new MeiEbdsError(mei, "mei main state Timeout reading from serial port");
             }
             ret = true;
         } else if (t instanceof DeviceTaskMessage) {

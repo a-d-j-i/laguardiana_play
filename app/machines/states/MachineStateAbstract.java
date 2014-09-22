@@ -12,6 +12,10 @@ import play.Logger;
  */
 abstract public class MachineStateAbstract implements MachineStateInterface {
 
+    protected void debug(String message, Object... args) {
+        //    Logger.debug(message, args);
+    }
+
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         Logger.debug("%s ignore device %s, status %s", toString(), dev.toString(), st.toString());

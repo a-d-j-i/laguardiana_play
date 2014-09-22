@@ -31,7 +31,7 @@ public class P500MeiStateCanceling extends P500MeiStateAccepting {
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        Logger.debug("P500MeiStateCanceling DEVICE EVENT %s, %s", dev.toString(), st.toString());
+        debug("P500MeiStateCanceling DEVICE EVENT %s, %s", dev.toString(), st.toString());
         if (st.is(MeiEbdsStatus.NEUTRAL)) {
         } else if (st.is(MeiEbdsStatusReadyToStore.class)) {
             if (!dev.submitSynchronous(new DeviceTaskWithdraw())) {

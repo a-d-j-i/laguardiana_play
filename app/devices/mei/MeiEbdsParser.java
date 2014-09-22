@@ -15,7 +15,7 @@ public class MeiEbdsParser implements SerialPortMessageParserInterface {
     private void debug(String message, Object... args) {
         //Logger.debug(message, args);
     }
-    final private static int MEI_EBDS_READ_TIMEOUT = 1000; //35ms
+    final private static int MEI_EBDS_READ_TIMEOUT = 100; //35ms
 
     public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException, TimeoutException {
         DeviceResponseInterface ret;

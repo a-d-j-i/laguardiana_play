@@ -1,10 +1,10 @@
 package machines.P500_MEI;
 
+import machines.P500_MEI.states.P500MEIStateContext;
 import devices.ioboard.IoboardDevice;
 import devices.mei.MeiEbdsDevice;
 import machines.MachineDeviceDecorator;
 import machines.MachineWithBagAbstract;
-import machines.P500_MEI.states.P500MEIStateContext;
 import machines.P500_MEI.states.P500MeiStateBillDepositStart;
 import machines.P500_MEI.states.P500MeiStateEnvelopeDepositMain;
 import machines.P500_MEI.states.P500MeiStateWaiting;
@@ -40,13 +40,14 @@ final public class MachineP500_MEI extends MachineWithBagAbstract {
 
         // set current action.
         LgDeposit dep = LgDeposit.getCurrentDeposit();
-        context.setDeposit(dep);
         setCurrentState(new P500MeiStateWaiting(context));
         if (dep instanceof BillDeposit) {
             Logger.debug("--------> Start setting state to bill deposit %d", dep.depositId);
+            context.setDeposit(dep);
             setCurrentState(new P500MeiStateBillDepositStart(context));
         } else if (dep instanceof EnvelopeDeposit) {
             Logger.debug("--------> Start setting state to envelope deposit %d", dep.depositId);
+            context.setDeposit(dep);
             setCurrentState(new P500MeiStateEnvelopeDepositMain(context));
 //            Logger.error("THIS MACHINE DON'T SUPPORT ENVELOPE DEPOSIT, CANCELING DEPOSIT");
         }

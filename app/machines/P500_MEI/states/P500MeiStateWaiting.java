@@ -45,7 +45,7 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
 
     @Override
     public boolean onStartBillDeposit(BillDeposit refBillDeposit) {
-        Logger.debug("startBillDeposit start");
+        debug("startBillDeposit start");
         BillDeposit d = new BillDeposit(refBillDeposit);
         d.startDate = new Date();
         d.save();
@@ -55,7 +55,7 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
 
     @Override
     public boolean onStartEnvelopeDeposit(EnvelopeDeposit refDeposit) {
-        Logger.debug("startEnvelopeDeposit start");
+        debug("startEnvelopeDeposit start");
         EnvelopeDeposit d = new EnvelopeDeposit(refDeposit);
         d.startDate = new Date();
         d.save();

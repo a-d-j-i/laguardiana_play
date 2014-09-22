@@ -13,7 +13,6 @@ import machines.P500_MEI.MachineP500_MEI;
 import machines.states.MachineStateContextInterface;
 import machines.states.MachineStateInterface;
 import models.BillDeposit;
-import models.EnvelopeDeposit;
 import models.db.LgBatch;
 import models.db.LgDeposit;
 import models.db.LgDeviceSlot;
@@ -46,9 +45,16 @@ public class P500MEIStateContext implements MachineStateContextInterface {
     }
 
     void clean() {
+        Logger.debug("P500MEIStateContext Cleaning, old deposit %s", depositId);
         depositId = null;
         currentUserId = null;
         batchId = null;
+    }
+
+    public void setDeposit(LgDeposit dep) {
+        Logger.debug("P500MEIStateContext Configuring deposit %s", depositId);
+        this.depositId = dep.depositId;
+        this.currentUserId = dep.user.userId;
     }
 
     public boolean count() {
@@ -133,16 +139,6 @@ public class P500MEIStateContext implements MachineStateContextInterface {
 
     public Integer getDepositId() {
         return depositId;
-    }
-
-    public void setDeposit(LgDeposit dep) {
-        if (dep != null) {
-            this.depositId = dep.depositId;
-            this.currentUserId = dep.user.userId;
-        } else {
-            this.depositId = null;
-            this.currentUserId = null;
-        }
     }
 
 }

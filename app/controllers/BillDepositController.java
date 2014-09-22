@@ -75,6 +75,10 @@ public class BillDepositController extends Controller {
     }
 
     public static void start(@Valid BillDepositData formData) throws Throwable {
+        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagReady(false)) {
+            Application.index();
+        }
+
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findEnabled();
         List<Currency> currencies = Currency.findEnabled();
 

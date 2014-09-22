@@ -41,8 +41,7 @@ public class LgSystemProperty extends GenericModel implements java.io.Serializab
     }
 
     static public LgSystemProperty getProperty(String name) {
-        LgSystemProperty l = LgSystemProperty.find("select p from LgSystemProperty p where trim( p.name ) = trim( ? )", name).first();
-        return l;
+        return LgSystemProperty.find("select p from LgSystemProperty p where trim( p.name ) = trim( ? )", name).first();
     }
 
     public static List<LgSystemProperty> getEditables() {

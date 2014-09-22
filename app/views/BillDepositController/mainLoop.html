@@ -236,6 +236,10 @@
                      closeAlert( "#alerta_bag_removed" );*/
                 }
 
+                if ( status == 'CONTINUE_DEPOSIT_NC' ) {
+                    $('#continueButton').html( "&{ 'application.finish' }" );
+                }
+
                 if (status == 'CONTINUE_DEPOSIT_NC' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT') {
                     $('#continueButton').show();
                 } else {

@@ -25,7 +25,7 @@ public class P500MeiStateError extends MachineStateAbstract {
 
     @Override
     public boolean onReset() {
-        Logger.debug("Reset on device %s error %s", context.toString(), error);
+        debug("Reset on device %s error %s", context.toString(), error);
         boolean ret = context.reset();
         if (ret) {
             context.setCurrentState(prevState);

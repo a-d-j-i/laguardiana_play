@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import models.db.LgBill;
+import models.db.LgBillType;
 import models.db.LgDeposit;
 import models.db.LgDeposit.DepositVisitor;
 import models.db.LgEnvelope;
@@ -31,6 +32,12 @@ public class ReportTotals {
         public long checksToValidate = 0;
         public long ticketsToValidate = 0;
         private SortedMap<BillValue, BillQuantity> detail = new TreeMap<BillValue, BillQuantity>();
+
+        private Total(Currency c) {
+            for (LgBillType bt : LgBillType.find(c)) {
+                detail.put(bt.getValue(), new BillQuantity(bt.getValue()));
+            }
+        }
 
         public Collection<BillQuantity> getDetail() {
             return detail.values();
@@ -66,7 +73,7 @@ public class ReportTotals {
 
             Total at = byCurrencyTotal.get(c);
             if (at == null) {
-                at = new Total();
+                at = new Total(c);
                 byCurrencyTotal.put(c, at);
             }
             at.validatedAmmount += b.getTotal();
@@ -104,7 +111,7 @@ public class ReportTotals {
                 Currency c = ec.getCurrency();
                 Total at = byCurrencyTotal.get(c);
                 if (at == null) {
-                    at = new Total();
+                    at = new Total(c);
                     byCurrencyTotal.put(c, at);
                 }
                 switch (ec.getType()) {

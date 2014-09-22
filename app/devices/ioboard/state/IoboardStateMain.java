@@ -67,7 +67,7 @@ public class IoboardStateMain extends IoboardStateAbstract {
             if (retries == IOBOARD_MAX_RETRIES) {
                 retries = 0;
                 task.setReturnValue(true);
-                return new IoboardError(ioboard, "Timeout reading from serial port");
+                return new IoboardError(ioboard, "ioboard state Timeout reading from serial port");
             }
             ret = true;
         } else if (task instanceof IoboardTaskOpenGate) {

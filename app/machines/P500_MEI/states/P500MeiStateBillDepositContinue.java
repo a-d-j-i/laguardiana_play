@@ -40,7 +40,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        Logger.debug("P500MeiStateBillDepositContinue DEVICE EVENT %s, %s", dev.toString(), st.toString());
+        debug("P500MeiStateBillDepositContinue DEVICE EVENT %s, %s", dev.toString(), st.toString());
         if (st.is(IoboardStatus.class)) {
             IoboardStatus iobs = (IoboardStatus) st;
             if (iobs.getBagState() != BAG_STATE_INPLACE && !Configuration.isIgnoreBag()) {
@@ -49,13 +49,13 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
                     @Override
                     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-                        Logger.debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
+                        debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
                         if (st.is(MeiEbdsStatusReadyToStore.class)) {
                             MeiEbdsStatusReadyToStore rts = (MeiEbdsStatusReadyToStore) st;
                             if (context.isValidBill(rts.getSlot())) {
                                 delayedStore = true;
                             } else {
-                                Logger.debug("Invalid slot %s, withdraw", rts.getSlot());
+                                Logger.error("Invalid slot %s, withdraw", rts.getSlot());
                                 if (!context.withdraw()) {
                                     context.setCurrentState(new P500MeiStateError(this, context, "Error submitting withdraw"));
                                 }
@@ -97,7 +97,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
                     context.setCurrentState(new P500MeiStateError(this, context, "Error submitting store"));
                 }
             } else {
-                Logger.debug("Invalid slot %s, withdraw", rts.getSlot());
+                Logger.error("Invalid slot %s, withdraw", rts.getSlot());
                 if (!context.withdraw()) {
                     context.setCurrentState(new P500MeiStateError(this, context, "Error submitting withdraw"));
                 }
@@ -113,7 +113,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
             context.setCurrentState(new MachineStateAbstract() {
                 @Override
                 public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-                    Logger.debug("JAM DEVICE EVENT %s, %s", dev.toString(), st.toString());
+                    debug("JAM DEVICE EVENT %s, %s", dev.toString(), st.toString());
                     if (st.is(MeiEbdsStatus.NEUTRAL) || st.is(MeiEbdsStatus.COUNTING)) {
                         context.setCurrentState(P500MeiStateBillDepositContinue.this);
                     } else if (st.is(MeiEbdsStatus.JAM)) {

@@ -118,6 +118,9 @@ public class EnvelopeDepositController extends Controller {
     }
 
     public static void start(@Valid EvenlopeDepositData formData) {
+        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagReady(false)) {
+            Application.index();
+        }
         if (Validation.hasErrors()) {
             for (play.data.validation.Error error : Validation.errors()) {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
