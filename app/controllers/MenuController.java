@@ -1,11 +1,15 @@
 package controllers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import models.Configuration;
 import models.ItemQuantity;
 import models.ModelFacade;
 import models.db.LgBag;
+import play.Logger;
 import play.mvc.*;
 
 @With({Secure.class})
@@ -56,6 +60,21 @@ public class MenuController extends Controller {
         String backAction = "MenuController.mainMenu";
         String[] buttons = {"CRUD.index", "MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu"};
         String[] titles = {"other_menu.db_admin", "other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports"};
+        File f = play.Play.getFile(".hg_archival.txt");
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(f);
+            byte[] data = new byte[(int) f.length()];
+            fis.read(data);
+            fis.close();
+            String s = new String(data, "UTF-8");
+            s = s.substring(s.indexOf("latesttag:") + "latesttag:".length(), s.lastIndexOf("latesttag"));
+            renderArgs.put("release", s);
+        } catch (StringIndexOutOfBoundsException ex) {
+            //Logger.error("Error reading release file : %s", ex.toString());
+        } catch (IOException ex) {
+            //Logger.error("Error reading release file : %s", ex.toString());
+        }
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
@@ -120,7 +139,7 @@ public class MenuController extends Controller {
             perms.put(buttons[i], perm);
             if (perm) {
                 cnt++;
-                r = buttons[ i];
+                r = buttons[i];
             }
         }
         if (extraButtons != null) {

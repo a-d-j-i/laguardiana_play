@@ -48,6 +48,8 @@ public class BillDepositStoring extends ActionState {
                 stateApi.cancelDeposit();
                 break;
             case COUNTING:
+            case READY_TO_STORE:
+            case ESCROW_FULL:
                 stateApi.closeBatch();
                 if (Configuration.isIgnoreShutter()) {
                     stateApi.setState(new BillDepositStart(stateApi));
@@ -55,8 +57,6 @@ public class BillDepositStoring extends ActionState {
                     stateApi.closeGate();
                     stateApi.setState(new WaitForClosedGate(stateApi, new BillDepositStart(stateApi)));
                 }
-                break;
-            case STORING:
                 break;
             default:
                 Logger.debug("BillDepositStoring invalid state %s %s", m.name(), name());

@@ -40,12 +40,10 @@ public class BillDepositReadyToStore extends ActionState {
             return;
         }
         stateApi.cancelTimer();
-        stateApi.addBatchToDeposit();
         if (Configuration.isIgnoreShutter()) {
             if (!stateApi.store()) {
                 Logger.error("startBillDeposit can't deposit");
             }
-            stateApi.setState(new BillDepositStoring(stateApi));
         } else {
             stateApi.openGate();
             stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoring(stateApi)));
@@ -72,13 +70,17 @@ public class BillDepositReadyToStore extends ActionState {
                 stateApi.setState(new Canceling(stateApi));
                 break;
             case COUNTING:
-                stateApi.setState(new BillDepositStart(stateApi));
+//                stateApi.setState(new BillDepositStart(stateApi));
                 break;
             case ESCROW_FULL:
                 stateApi.setState(new BillDepositReadyToStoreEscrowFull(stateApi));
                 break;
             case PUT_THE_BILLS_ON_THE_HOPER:
                 //stateApi.startTimer();
+                break;
+            case STORING:
+                stateApi.addBatchToDeposit(m.getBills());
+                stateApi.setState(new BillDepositStoring(stateApi));
                 break;
             default:
                 Logger.debug("BillDepositReadyToStore onGloryEvent invalid state %s %s", m.name(), name());

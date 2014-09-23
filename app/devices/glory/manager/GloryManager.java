@@ -64,6 +64,10 @@ public class GloryManager {
             return state.getStatus().getState();
         }
 
+        public void setState(Map<Integer, Integer> bills) {
+            state.setState(bills);
+        }
+
         public void setState(MANAGER_STATE s) {
             state.setState(s);
         }

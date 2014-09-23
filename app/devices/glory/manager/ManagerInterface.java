@@ -1,6 +1,7 @@
 package devices.glory.manager;
 
 import devices.glory.Glory;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -34,15 +35,27 @@ public interface ManagerInterface {
 
         final private MANAGER_STATE state;
         final private GloryManagerError error;
+        final private Map<Integer, Integer> bills;
 
         protected ManagerStatus(State aThis) {
             this.state = aThis.state;
             this.error = aThis.error;
+            bills = new HashMap<Integer, Integer>();
+        }
+
+        private ManagerStatus(Map<Integer, Integer> bills) {
+            this.state = MANAGER_STATE.STORING;
+            this.error = null;
+            this.bills = bills;
         }
 
         @Override
         public String toString() {
-            return "Status{" + "state=" + state + ", error = ( " + error + " ) }";
+            return "ManagerStatus{" + "state=" + state + ", error=" + error + ", bills=" + bills + '}';
+        }
+
+        public Map<Integer, Integer> getBills() {
+            return bills;
         }
 
         public MANAGER_STATE getState() {
@@ -71,6 +84,13 @@ public interface ManagerInterface {
 
         synchronized ManagerStatus getStatus() {
             return new ManagerStatus(this);
+        }
+
+        synchronized public void setState(Map<Integer, Integer> bills) {
+            if (this.state != MANAGER_STATE.ERROR) {
+                setChanged();
+                notifyObservers(new ManagerStatus(bills));
+            }
         }
 
         synchronized void setState(MANAGER_STATE state) {

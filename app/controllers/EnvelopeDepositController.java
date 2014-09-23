@@ -142,8 +142,8 @@ public class EnvelopeDepositController extends CounterController {
             Application.index();
         }
 
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findEnabled();
+        List<Currency> currencies = Currency.findEnabled();
         renderArgs.put("formData", formData);
         renderArgs.put("referenceCodes", referenceCodes);
         renderArgs.put("currencies", currencies);

@@ -9,6 +9,7 @@ import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import models.ItemQuantity;
 import models.ModelError;
@@ -86,11 +87,11 @@ abstract public class UserAction {
             return currentBag.getItemQuantity(currentDepositId);
         }
 
-        public void addBatchToDeposit() {
+        public void addBatchToDeposit(Map<Integer, Integer> bills) {
             LgDeposit deposit = LgDeposit.findById(currentDepositId);
             LgBatch batch = new LgBatch();
-            for (LgBill bill : userActionApi.getCurrentBillList()) {
-                Logger.debug(" -> quantity %d", bill.quantity);
+            for (LgBill bill : userActionApi.getCurrentBillList(bills)) {
+                Logger.debug("%s -> quantity %d", bill.billType.toString(), bill.quantity);
                 batch.addBill(bill);
             }
             deposit.addBatch(batch);

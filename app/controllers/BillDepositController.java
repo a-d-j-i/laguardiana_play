@@ -60,8 +60,8 @@ public class BillDepositController extends CounterController {
     }
 
     public static void start(@Valid FormData formData) throws Throwable {
-        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
-        List<Currency> currencies = Currency.findAll();
+        List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findEnabled();
+        List<Currency> currencies = Currency.findEnabled();
 
         if (!Configuration.isIgnoreBag() && !ModelFacade.isBagReady(false)) {
             Application.index();

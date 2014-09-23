@@ -322,8 +322,18 @@ public class ModelFacade {
 
         public List<LgBill> getCurrentBillList() {
             synchronized (ModelFacade.class) {
+                Map<Integer, Integer> currentQuantity = null;
+                if (manager != null) {
+                    currentQuantity = manager.getCurrentQuantity();
+                }
+                return getCurrentBillList(currentQuantity);
+            }
+        }
+
+        public List<LgBill> getCurrentBillList(final Map<Integer, Integer> currentQuantity) {
+            synchronized (ModelFacade.class) {
                 final List<LgBill> ret = new ArrayList<LgBill>();
-                visitBillList(new BillListVisitor() {
+                visitBillList(currentQuantity, new BillListVisitor() {
                     public void visit(LgBillType billType, Integer desired, Integer current) {
                         LgBill b = new LgBill(current, billType);
                         ret.add(b);
@@ -455,8 +465,12 @@ public class ModelFacade {
     }
 
     synchronized public static Collection<BillQuantity> getBillQuantities() {
+        Map<Integer, Integer> currentQuantity = null;
+        if (manager != null) {
+            currentQuantity = manager.getCurrentQuantity();
+        }
         final SortedMap<BillValue, BillQuantity> ret = new TreeMap<BillValue, BillQuantity>();
-        visitBillList(new BillListVisitor() {
+        visitBillList(currentQuantity, new BillListVisitor() {
             public void visit(LgBillType billType, Integer desired, Integer current) {
                 BillValue bv = billType.getValue();
                 BillQuantity billQuantity = ret.get(bv);
@@ -472,7 +486,7 @@ public class ModelFacade {
         return ret.values();
     }
 
-    private static void visitBillList(BillListVisitor visitor) {
+    private static void visitBillList(Map<Integer, Integer> currentQuantity, BillListVisitor visitor) {
         Integer currency = manager.getCurrency();
         if (currency == null) {
             return;
@@ -481,9 +495,7 @@ public class ModelFacade {
         List<LgBillType> billTypes = LgBillType.find(currency);
 
         Map<Integer, Integer> desiredQuantity = null;
-        Map<Integer, Integer> currentQuantity = null;
         if (manager != null) {
-            currentQuantity = manager.getCurrentQuantity();
             desiredQuantity = manager.getDesiredQuantity();
         }
         Set<Integer> slots = new HashSet();

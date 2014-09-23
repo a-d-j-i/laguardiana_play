@@ -69,7 +69,7 @@ public class FilterController extends CounterController {
         if (formData == null) {
             formData = new FormData();
         }
-        List<Currency> currencies = Currency.findAll();
+        List<Currency> currencies = Currency.findEnabled();
         renderArgs.put("formData", formData);
         renderArgs.put("currencies", currencies);
         render();

@@ -62,8 +62,6 @@ public class BillDepositStoringEscrowFull extends BillDepositStoring {
                 break;
             case READY_TO_STORE: // aparentrly sometimes the escrow isn't full any more.
                 break;
-            case STORING:
-                break;
             default:
                 Logger.debug("BillDepositStoringEscrowFull invalid state %s %s", m.name(), name());
                 break;

@@ -1,7 +1,9 @@
 package models.lov;
 
+import java.util.List;
 import javax.persistence.Entity;
 import models.db.LgLov;
+import play.db.jpa.JPABase;
 
 /**
  *
@@ -16,6 +18,10 @@ public class Currency extends LgLov implements Comparable {
 
     public static Currency findByNumericId(Integer numericId) {
         return (Currency) LgLov.findByNumericId(Currency.class.getSimpleName(), numericId);
+    }
+
+    public static <T extends JPABase> List<T> findEnabled() {
+        return LgLov.findEnabled(Currency.class.getSimpleName());
     }
 
     public int compareTo(Object obj) {

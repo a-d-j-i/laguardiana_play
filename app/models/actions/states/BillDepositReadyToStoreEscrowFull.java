@@ -42,12 +42,10 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
             return;
         }
         stateApi.cancelTimer();
-        stateApi.addBatchToDeposit();
         if (Configuration.isIgnoreShutter()) {
             if (!stateApi.store()) {
                 Logger.error("startBillDeposit can't cancel glory");
             }
-            stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
         } else {
             stateApi.openGate();
             stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoringEscrowFull(stateApi)));
@@ -73,6 +71,10 @@ public class BillDepositReadyToStoreEscrowFull extends ActionState {
                 break;
             case REMOVE_THE_BILLS_FROM_ESCROW:
                 stateApi.setState(new BillDepositWithdraw(stateApi));
+                break;
+            case STORING:
+                stateApi.addBatchToDeposit(m.getBills());
+                stateApi.setState(new BillDepositStoringEscrowFull(stateApi));
                 break;
             default:
                 Logger.debug("BillDepositReadyEscrowFull onGloryEvent invalid state %s %s", m.name(), name());

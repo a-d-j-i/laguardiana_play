@@ -10,6 +10,7 @@ import devices.glory.manager.GloryManager.ThreadCommandApi;
 import devices.glory.manager.GloryManagerError;
 import devices.glory.manager.ManagerInterface;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -365,6 +366,10 @@ abstract public class ManagerCommandAbstract implements Runnable {
         Logger.error("MANAGER ERROR : %s", e);
         threadCommandApi.setError(e);
         setState(ManagerInterface.MANAGER_STATE.ERROR);
+    }
+
+    protected void setState(Map<Integer, Integer> bills) {
+        threadCommandApi.setState(bills);
     }
 
     protected void setState(ManagerInterface.MANAGER_STATE state) {

@@ -145,7 +145,7 @@ public class CountCommand extends ManagerCommandAbstract {
                 if (storeAction == STORE_ACTION.STORE_ACTION_NONE) {
                     storeAction = STORE_ACTION.STORE_ACTION_WITHDRAW;
                 } else {
-                    Logger.debug("Count command storeDeposit invalid store action %s", storeAction.name());
+                    Logger.debug("Count command withdrawDeposit invalid store action %s", storeAction.name());
                 }
             } finally {
                 wunlock();
@@ -158,7 +158,7 @@ public class CountCommand extends ManagerCommandAbstract {
                 if (storeAction == STORE_ACTION.STORE_ACTION_WITHDRAW) {
                     storeAction = STORE_ACTION.STORE_ACTION_NONE;
                 } else {
-                    Logger.debug("Count command storeDepositDone invalid store action %s", storeAction.name());
+                    Logger.debug("Count command withdrawDepositDone invalid store action %s", storeAction.name());
                 }
             } finally {
                 wunlock();
@@ -225,12 +225,17 @@ public class CountCommand extends ManagerCommandAbstract {
                         break;
                     }
                     if (countData.needToStoreDeposit()) {
+                        // Get current quantity.
+                        if (!sendGloryCommand(new devices.glory.command.CountingDataRequest())) {
+                            return;
+                        }
+                        Map<Integer, Integer> bills = gloryStatus.getBills();
                         // We clear the counter because they are invalid now
                         clearQuantity();
                         if (!sendGloryCommand(new devices.glory.command.StoringStart(0))) {
                             return;
                         }
-                        setState(ManagerInterface.MANAGER_STATE.STORING);
+                        setState(bills);
                         break;
                     } else if (countData.needToWithdrawDeposit()) {
                         if (!openEscrow()) {

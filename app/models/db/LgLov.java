@@ -5,8 +5,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.*;
 import play.db.jpa.GenericModel;
+import play.db.jpa.JPABase;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -38,16 +40,20 @@ abstract public class LgLov extends GenericModel implements java.io.Serializable
     public Date endDate;
 
     static public long count(String ctype, Integer numericId) {
-        return LgLov.find("select count(*) from LgLov l where numericId = ? and l.class = ?", numericId, ctype).first();
+        return LgLov.find("select count(*) from LgLov l where numericId = ? and l.class = ? order by l.endDate desc nulls first", numericId, ctype).first();
     }
 
     static public LgLov findByNumericId(String ctype, Integer numericId) {
-        return LgLov.find("select l from LgLov l where numericId = ? and l.class = ?", numericId, ctype).first();
+        return LgLov.find("select l from LgLov l where numericId = ? and l.class = ? order by l.endDate desc nulls first", numericId, ctype).first();
         //return LgLov.find("byType", UserCodeReference).fetch();
     }
 
     static public LgLov findByTextId(String ctype, String textId) {
-        return LgLov.find("select l from LgLov l where textId = ? and l.class = ?", textId, ctype).first();
+        return LgLov.find("select l from LgLov l where textId = ? and l.class = ? order by l.endDate desc nulls first", textId, ctype).first();
+    }
+
+    public static <T extends JPABase> List<T> findEnabled(String ctype) {
+        return LgLov.find("select l from LgLov l where l.class = ? and ( l.endDate is null or l.endDate > current_timestamp() )", ctype).fetch();
     }
 
     @Override
