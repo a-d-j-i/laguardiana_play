@@ -7,6 +7,7 @@ import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusReadyToStore;
 import machines.MachineDeviceDecorator;
 import machines.status.MachineBillDepositStatus;
+import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -14,7 +15,7 @@ import play.Logger;
  *
  * @author adji
  */
-public class P500MeiStateCanceling extends P500MeiStateAccepting {
+public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
 
     public P500MeiStateCanceling(P500MEIStateContext context) {
         super(context);
@@ -42,6 +43,13 @@ public class P500MeiStateCanceling extends P500MeiStateAccepting {
             DeviceStatusError err = (DeviceStatusError) st;
             context.setCurrentState(new P500MeiStateError(this, context, err.getError()));
             return;
+        } else if (st.is(MeiEbdsStatus.CANCELED)) {
+            context.setCurrentState(new P500MeiStateBillDepositFinish(context, LgDeposit.FinishCause.FINISH_CAUSE_CANCEL));
+            return;
+        } else if (st.is(MeiEbdsStatus.COUNTING)) {
+            if (!context.cancel()) {
+                Logger.error("Error calling machine.cancel");
+            }
         }
         super.onDeviceEvent(dev, st);
     }

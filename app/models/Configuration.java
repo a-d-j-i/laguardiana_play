@@ -223,7 +223,7 @@ public class Configuration {
         return getSystemProperty("application.error_msg");
     }
 
-    public static void initCrapId() {
+    private static void initCrapId() {
         SecureRandom random = new SecureRandom();
         byte bytes[] = new byte[3];
         random.nextBytes(bytes);
@@ -234,8 +234,13 @@ public class Configuration {
         }
         setOrCreateProperty("secure.crapauth_variable_id", Integer.toString(val));
     }
+    private static boolean crapIdInitialized = false;
 
     public static String getCrapAuthId() {
+        if (!crapIdInitialized) {
+            crapIdInitialized = true;
+            initCrapId();
+        }
         return getSystemProperty("secure.crapauth_variable_id");
     }
 

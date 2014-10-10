@@ -85,7 +85,6 @@ public class ModelFacade {
     final static private MachinePrinterDecorator printer = new MachinePrinterDecorator();
 
     synchronized public static void start() throws Exception {
-        Configuration.initCrapId();
         MachineType machineType = MachineType.getMachineType(Configuration.getMachineType());
         machine = machineType.getMachineInstance();
         Logger.debug("Executing machine start job");
