@@ -191,18 +191,6 @@ public class Configuration {
         }
     }
 
-    public static String getGloryPort() {
-        return getProperty("glory.port");
-    }
-
-    public static String getIoBoardPort() {
-        return getProperty("io_board.port");
-    }
-
-    public static String getIoBoardVersion() {
-        return getProperty("io_board.version");
-    }
-
     public static boolean isCrapAuth() {
         return isSystemProperty("secure.crapAuth");
     }
@@ -223,7 +211,7 @@ public class Configuration {
         return getSystemProperty("application.error_msg");
     }
 
-    private static void initCrapId() {
+    public static void initCrapId() {
         SecureRandom random = new SecureRandom();
         byte bytes[] = new byte[3];
         random.nextBytes(bytes);
