@@ -12,10 +12,8 @@ cp ./PlayRunner.jar "$TMP_DIR/WEB-INF"
 cp ./launcher.py "$TMP_DIR/WEB-INF"
 cp ./run.bat "$TMP_DIR/WEB-INF"
 echo `hg parents --template '{latesttag}'` > "$TMP_DIR/WEB-INF/application/version.txt"
-exit
 
-#hg archive "/tmp/cajero_$LAST_TAG.tgz"
-#pushd /tmp
-zip -e "cajero_$LAST_TAG.zip" "cajero_$LAST_TAG.tgz"
-rm "/tmp/cajero_$LAST_TAG.tgz"
+mv "$TMP_DIR/WEB-INF" "$TMP_DIR/cajero"
+pushd "$TMP_DIR"
+zip -re "/tmp/cajero_$LAST_TAG.zip" cajero
 popd
