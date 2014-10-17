@@ -185,7 +185,7 @@ public class MachinePrinterDecorator {
     }
 
     public boolean needCheck() {
-        if (Configuration.isPrinterTest()) {
+        if (Configuration.isPrinterTest() || Configuration.isIgnorePrinter()) {
             return false;
         }
         try {

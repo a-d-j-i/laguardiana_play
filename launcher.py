@@ -5,11 +5,11 @@ import httplib
 import os
 from _winreg import *
 
-CAJERO = r"C:\Documents and Settings\usuario\Escritorio\laguardiana_play"
-CHROME = r"C:\Archivos de programa\Google\Chrome\Application\chrome.exe"
-JAVA = r"C:\Program Files (x86)\Java\jre7\bin\java.exe"
+CAJERO = r"C:\Documents and Settings\usuario\Escritorio\cajero"
+CHROME = r"C:\Documents and Settings\usuario\Configuración local\Datos de programa\Google\Chrome\Application\chrome.exe"
+JAVA = r"C:\Archivos de programa\Java\jre7\bin\java.exe"
 RUNNER = r"PlayRunner.jar"
-JAVA_CMD = [ JAVA, "-Xmx1024M", "-XX:-UseSplitVerifier", "-Dfile.encoding=utf-8", "-XX:CompileCommand=exclude,jregex/Pretokenizer,next -jar", os.path.join( CAJERO, RUNNER ) ]
+JAVA_CMD = [ JAVA, "-Xmx1024M", "-XX:-UseSplitVerifier", "-Dfile.encoding=utf-8", "-XX:CompileCommand=exclude,jregex/Pretokenizer,next", "-jar", os.path.join( CAJERO, RUNNER ) ]
 
 
 if not os.path.exists( CAJERO ):
@@ -40,7 +40,8 @@ elif len( sys.argv ) != 1:
     sys.exit( 2 )
     
 si = subprocess.STARTUPINFO()
-si.dwFlags = subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+#si.dwFlags = subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
+si.dwFlags = subprocess.STARTF_USESHOWWINDOW
 si.wShowWindow = subprocess.SW_HIDE
 play_pid = subprocess.Popen( JAVA_CMD, cwd = CAJERO, startupinfo = si ).pid
 

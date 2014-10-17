@@ -14,6 +14,9 @@ import machines.MachineDeviceDecorator;
 import models.db.LgDevice;
 import play.exceptions.TemplateNotFoundException;
 import play.mvc.Before;
+import play.mvc.results.RenderTemplate;
+import play.templates.Template;
+import play.templates.TemplateLoader;
 
 public class IoBoardController extends Application {
 
@@ -66,19 +69,21 @@ public class IoBoardController extends Application {
         }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-            ret[ 0] = lastEvent;
+            ret[0] = lastEvent;
             IoboardTaskGetSensorStatus deviceTask = new IoboardTaskGetSensorStatus();
             ioBoard.submit(deviceTask).get();
             IoboardStatusResponse res = deviceTask.getSensorStatus();
-            ret[ 1] = res;
-            ret[ 2] = (res == null ? null : res.toString());
+            ret[1] = res;
+            ret[2] = (res == null ? null : res.toString());
             renderJSON(ret);
         } else {
             renderArgs.put("deviceId", deviceId);
             renderArgs.put("lastEvent", lastEvent);
             //renderArgs.put("backUrl", flash.get("backUrl"));
+            String t = "DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html";
             try {
-                render("DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
+                TemplateLoader.load(t);
+                render(t);
             } catch (TemplateNotFoundException ex) {
                 renderArgs.put(device.getDeviceType().getDeviceClass().name(), true);
                 render("DeviceController/ioBoardClass.html");

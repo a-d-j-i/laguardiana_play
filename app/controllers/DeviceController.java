@@ -26,6 +26,7 @@ import play.exceptions.TemplateNotFoundException;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.templates.TemplateLoader;
 
 @With({Secure.class})
 public class DeviceController extends Controller {
@@ -59,8 +60,10 @@ public class DeviceController extends Controller {
     }
 
     public static void operations(Integer deviceId) {
+        String t = "DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html";
         try {
-            render("DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
+            TemplateLoader.load(t);
+            render(t);
         } catch (TemplateNotFoundException ex) {
             renderArgs.put(device.getDeviceType().getDeviceClass().name(), true);
             render("DeviceController/deviceClass.html");
