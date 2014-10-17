@@ -111,7 +111,10 @@ public class ConfigController extends Controller {
             }
         }
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
-            pstatus = ModelFacade.getCurrentPrinter().getInternalState();
+            Printer p = ModelFacade.getCurrentPrinter();
+            if (p != null) {
+                pstatus = p.getInternalState();
+            }
         }
         if (request.isAjax()) {
             renderJSON(ModelFacade.isError());

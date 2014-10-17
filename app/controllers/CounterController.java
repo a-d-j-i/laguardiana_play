@@ -7,6 +7,7 @@ package controllers;
 import devices.ioboard.IoBoard;
 import devices.glory.manager.ManagerInterface;
 import devices.glory.manager.ManagerInterface.ManagerStatus;
+import devices.printer.Printer;
 import devices.printer.Printer.PrinterStatus;
 import models.Configuration;
 import models.ModelFacade;
@@ -66,7 +67,10 @@ public class CounterController extends Controller {
             }
         }
         if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
-            pstatus = ModelFacade.getCurrentPrinter().getInternalState();
+            Printer p = ModelFacade.getCurrentPrinter();
+            if (p != null) {
+                pstatus = p.getInternalState();
+            }
         }
         if (cmd != null) {
             switch (cmd) {
@@ -80,8 +84,8 @@ public class CounterController extends Controller {
         }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-            ret[ 0] = ModelFacade.isError();
-            ret[ 1] = Configuration.getErrorStr();
+            ret[0] = ModelFacade.isError();
+            ret[1] = Configuration.getErrorStr();
             ret[2] = ModelFacade.getState();
             renderJSON(ret);
         } else {

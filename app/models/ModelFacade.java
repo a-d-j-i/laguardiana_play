@@ -666,7 +666,14 @@ public class ModelFacade {
     }
 
     public static boolean printerNeedCheck() {
-        return printer.get().needCheck();
+        if (Configuration.isIgnorePrinter()) {
+            return false;
+        }
+        Printer p = printer.get();
+        if (p == null) {
+            return true;
+        }
+        return p.needCheck();
     }
 
     public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
