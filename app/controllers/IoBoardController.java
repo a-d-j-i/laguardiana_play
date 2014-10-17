@@ -14,6 +14,9 @@ import machines.MachineDeviceDecorator;
 import models.db.LgDevice;
 import play.exceptions.TemplateNotFoundException;
 import play.mvc.Before;
+import play.mvc.results.RenderTemplate;
+import play.templates.Template;
+import play.templates.TemplateLoader;
 
 public class IoBoardController extends Application {
 
@@ -77,9 +80,10 @@ public class IoBoardController extends Application {
             renderArgs.put("deviceId", deviceId);
             renderArgs.put("lastEvent", lastEvent);
             //renderArgs.put("backUrl", flash.get("backUrl"));
+            String t = "DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html";
             try {
-                Logger.debug("Template : " + "DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
-                render("DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
+                TemplateLoader.load(t);
+                render(t);
             } catch (TemplateNotFoundException ex) {
                 renderArgs.put(device.getDeviceType().getDeviceClass().name(), true);
                 render("DeviceController/ioBoardClass.html");
