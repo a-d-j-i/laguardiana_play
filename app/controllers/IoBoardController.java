@@ -66,18 +66,19 @@ public class IoBoardController extends Application {
         }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-            ret[ 0] = lastEvent;
+            ret[0] = lastEvent;
             IoboardTaskGetSensorStatus deviceTask = new IoboardTaskGetSensorStatus();
             ioBoard.submit(deviceTask).get();
             IoboardStatusResponse res = deviceTask.getSensorStatus();
-            ret[ 1] = res;
-            ret[ 2] = (res == null ? null : res.toString());
+            ret[1] = res;
+            ret[2] = (res == null ? null : res.toString());
             renderJSON(ret);
         } else {
             renderArgs.put("deviceId", deviceId);
             renderArgs.put("lastEvent", lastEvent);
             //renderArgs.put("backUrl", flash.get("backUrl"));
             try {
+                Logger.debug("Template : " + "DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
                 render("DeviceController/" + device.getDeviceType().name().toUpperCase() + "_OPERATIONS.html");
             } catch (TemplateNotFoundException ex) {
                 renderArgs.put(device.getDeviceType().getDeviceClass().name(), true);
