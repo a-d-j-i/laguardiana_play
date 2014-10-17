@@ -17,7 +17,7 @@ echo `hg parents --template '{latesttag}'` > "$TMP_DIR/WEB-INF/application/versi
 mv "$TMP_DIR/WEB-INF" "$TMP_DIR/cajero"
 if [ $# == 0 ]
 then
-pushd "$TMP_DIR"
-zip -re "/tmp/cajero_$LAST_TAG.zip" cajero
-popd
+    pushd "$TMP_DIR"
+    zip -re "/tmp/cajero_$LAST_TAG.zip" cajero
+    popd
 fi
