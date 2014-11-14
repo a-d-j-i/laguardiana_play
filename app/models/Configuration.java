@@ -6,6 +6,7 @@ package models;
 
 import devices.serial.SerialPortAdapterAbstract.PortConfiguration;
 import devices.serial.SerialPortAdapterInterface;
+import devices.serial.implementations.SerialPortAdapterJSSC;
 import devices.serial.implementations.SerialPortAdapterRxTx;
 import java.security.SecureRandom;
 import models.db.LgSystemProperty;
@@ -272,7 +273,10 @@ public class Configuration {
     }
 
     public static SerialPortAdapterInterface getSerialPort(String port, PortConfiguration conf) {
-        //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
-        return new SerialPortAdapterRxTx(port, conf);
+        if (getProperty("application.serial").toUpperCase().contains("JSSC")) {
+            return new SerialPortAdapterJSSC(port, conf);
+        } else {
+            return new SerialPortAdapterRxTx(port, conf);
+        }
     }
 }

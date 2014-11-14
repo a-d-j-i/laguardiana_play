@@ -1,7 +1,6 @@
 package devices.serial.implementations;
 
 import devices.serial.SerialPortAdapterAbstract;
-import java.io.IOException;
 import jssc.*;
 import play.Logger;
 
@@ -25,7 +24,7 @@ public final class SerialPortAdapterJSSC extends SerialPortAdapterAbstract imple
         }
     }
 
-    public SerialPortAdapterJSSC(String portN, PortConfiguration conf) throws IOException {
+    public SerialPortAdapterJSSC(String portN, PortConfiguration conf) {
         super(conf);
         portName = portN;
     }
@@ -36,7 +35,7 @@ public final class SerialPortAdapterJSSC extends SerialPortAdapterAbstract imple
             String[] ports = SerialPortList.getPortNames();
             Integer p = Integer.parseInt(portName);
             if (p < ports.length) {
-                portName = ports[ p];
+                portName = ports[p];
             }
         } catch (NumberFormatException e) {
         }
