@@ -273,7 +273,8 @@ public class Configuration {
     }
 
     public static SerialPortAdapterInterface getSerialPort(String port, PortConfiguration conf) {
-        if (getProperty("application.serial").toUpperCase().contains("JSSC")) {
+        String prop = getProperty("application.serial");
+        if (prop != null && prop.toUpperCase().contains("JSSC")) {
             return new SerialPortAdapterJSSC(port, conf);
         } else {
             return new SerialPortAdapterRxTx(port, conf);
