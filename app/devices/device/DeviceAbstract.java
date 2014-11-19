@@ -4,6 +4,8 @@ import devices.device.state.DeviceStateAbstract;
 import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskAbstract;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -11,7 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import play.Logger;
 
 /**
@@ -98,7 +99,14 @@ public abstract class DeviceAbstract implements DeviceInterface {
         taskExecutor.submit(new Runnable() {
 
             public void run() {
-                DeviceAbstract.this.runTask(deviceTask);
+                try {
+                    DeviceAbstract.this.runTask(deviceTask);
+                } catch (Throwable ex) {
+                    StringWriter errors = new StringWriter();
+                    ex.printStackTrace(new PrintWriter(errors));
+                    Logger.error("Exception %s executing task %s : %s", ex.toString(), deviceTask.toString(), errors.toString());
+                    deviceTask.setReturnValue(false);
+                }
             }
         }
         );
