@@ -48,6 +48,7 @@ lov.Currency(EUR_BILL):
 
 db.LgBillType(2pesos):
   denomination:   2
+  unitLov:        1
   currency:       ARS_BILL
   creationDate:   2012-12-31
   

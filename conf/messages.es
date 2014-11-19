@@ -64,6 +64,7 @@ application.input_reference=Ingrese Referencia
 other_menu.accounting=Contabilidad
 other_menu.reports=Reportes
 other_menu.hardware_admin=Hardware Admin
+other_menu.parameters=Parametros
 other_menu.config=Configuracion
 other_menu.db_admin=Administrar DB
 other_menu.glory_cmd=Glory Comandos

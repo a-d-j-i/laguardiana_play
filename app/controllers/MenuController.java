@@ -54,23 +54,23 @@ public class MenuController extends Controller {
 
     public static void otherMenu(String back) {
         String backAction = "MenuController.mainMenu";
-        String[] buttons = {"MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu", "ConfigController.index"};
-        String[] titles = {"other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports", "other_menu.config"};
+        String[] buttons = {"MenuController.configMenu", "MenuController.accountingMenu", "MenuController.reportMenu"};
+        String[] titles = {"other_menu.config", "other_menu.accounting", "other_menu.reports"};
         renderArgs.put("release", ModelFacade.getAppVersion());
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
-    public static void hardwareMenu(String back) {
+    public static void configMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"DeviceController.list", "PrinterController.listPrinters",};
+        String[] buttons = {"DeviceController.list", "PrinterController.listPrinters", "ConfigController.index"};
 //            "ConfigController.status", "PrinterController.listPrinters", "MenuController.printTemplateMenu"};
-        String[] titles = {"other_menu.devices", "other_menu.printer_list"};
+        String[] titles = {"other_menu.devices", "other_menu.printer_list", "other_menu.parameters"};
 //            "other_menu.printer_list", "other_menu.printer_test"};
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 
     public static void printTemplateMenu(String back) {
-        String backAction = "MenuController.hardwareMenu";
+        String backAction = "MenuController.configMenu";
         String[] buttons = {"PrinterController.billDeposit", "PrinterController.envelopeDeposit_finish",
             "PrinterController.envelopeDeposit_start", "PrinterController.test"};
         String[] titles = {"other_menu.print_billDeposit", "other_menu.print_envelopeDeposit_finish",

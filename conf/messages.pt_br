@@ -62,6 +62,7 @@ application.input_reference=Ingrese referência
 other_menu.accounting=Contabilidade
 other_menu.reports=Relatórios
 other_menu.hardware_admin=Hardware Admin
+other_menu.parameters=Parametros
 other_menu.config=Configuracion
 other_menu.devices=Dispositivos
 
