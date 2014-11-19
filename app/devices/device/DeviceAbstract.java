@@ -117,11 +117,13 @@ public abstract class DeviceAbstract implements DeviceInterface {
         try {
             return submit(deviceTask).get();
         } catch (InterruptedException ex) {
-            Logger.error("exception in submitSynchronous", ex.toString());
-            ex.printStackTrace();
+            StringWriter errors = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errors));
+            Logger.error("InterruptedException %s executing task %s : %s", ex.toString(), deviceTask.toString(), errors.toString());
         } catch (ExecutionException ex) {
-            Logger.error("exception in submitSynchronous", ex.toString());
-            ex.printStackTrace();
+            StringWriter errors = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errors));
+            Logger.error("ExecutionException %s executing task %s : %s", ex.toString(), deviceTask.toString(), errors.toString());
         }
         return false;
     }

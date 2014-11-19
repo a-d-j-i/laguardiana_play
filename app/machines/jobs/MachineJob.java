@@ -1,5 +1,7 @@
 package machines.jobs;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -43,10 +45,13 @@ public class MachineJob<V> extends Job<V> {
         try {
             return now().get();
         } catch (InterruptedException ex) {
-            Logger.error("Excetion inm runNow : %s", ex);
+            StringWriter errors = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errors));
+            Logger.error("InterruptedException inm runNow : %s : %s", ex.toString(), errors.toString());
         } catch (ExecutionException ex) {
-            Logger.error("Excetion inm runNow : %s", ex);
-            ex.printStackTrace();
+            StringWriter errors = new StringWriter();
+            ex.printStackTrace(new PrintWriter(errors));
+            Logger.error("ExecutionException inm runNow : %s : %s", ex.toString(), errors.toString());
         }
         return null;
     }
