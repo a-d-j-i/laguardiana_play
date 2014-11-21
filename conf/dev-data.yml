@@ -99,13 +99,60 @@ db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT100):
     
     
 
-    
-    
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT5E):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           5euro
+    slot:               "EUR005+00"
+    creationDate:       2012-01-01
 
-db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT2U):
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT10E):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           10euro
+    slot:               "EUR001+01"
+    creationDate:       2012-01-01
+    
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT20E):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           20euro
+    slot:               "EUR002+01"
+    creationDate:       2012-01-01
+    
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT50E):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           50euro
+    slot:               "EUR005+01"
+    creationDate:       2012-01-01
+    
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT100E):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           100euro
+    slot:               "EUR001+02"
+    creationDate:       2012-01-01
+    
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT200E):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           200euro
+    slot:               "EUR002+02"
+    creationDate:       2012-01-01
+
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT500E):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           500euro
+    slot:               "USD005+02"
+    creationDate:       2012-01-01
+
+        
+        
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT1U):
     device:             P500_MEI_DEVICE_MEI_EBDS
     billType:           1dolar
     slot:               "USD001+00"
+    creationDate:       2012-01-01
+
+db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT2U):
+    device:             P500_MEI_DEVICE_MEI_EBDS
+    billType:           2dolar
+    slot:               "USD002+00"
     creationDate:       2012-01-01
     
 db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT5U):
@@ -137,6 +184,7 @@ db.LgDeviceSlot(P500_MEI_DEVICE_MEI_EBDS_SLOT100U):
     billType:           100dolar
     slot:               "USD001+02"
     creationDate:       2012-01-01
+    
     
     
     
