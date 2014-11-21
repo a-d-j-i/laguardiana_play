@@ -56,4 +56,9 @@ public class IoboardStatus implements DeviceStatusInterface {
     public boolean is(Class type) {
         return this.getClass().equals(type);
     }
+
+    public boolean dontLog() {
+        return true;
+    }
+
 }

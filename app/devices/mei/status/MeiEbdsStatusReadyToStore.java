@@ -31,4 +31,8 @@ public class MeiEbdsStatusReadyToStore implements DeviceStatusInterface {
         return this.getClass().equals(type);
     }
 
+    public boolean dontLog() {
+        return false;
+    }
+
 }

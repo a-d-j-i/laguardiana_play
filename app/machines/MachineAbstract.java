@@ -14,6 +14,7 @@ import machines.states.MachineStateInterface;
 import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
+import models.events.MachineEvent;
 import play.Logger;
 
 /**
@@ -32,6 +33,9 @@ abstract public class MachineAbstract implements MachineInterface {
 
             public void onDeviceEvent(final DeviceEvent evt) {
                 // don't wait.
+                if (!evt.getStatus().dontLog()) {
+                    MachineEvent.save(MachineAbstract.this, evt.toString());
+                }
                 submit(new MachineJob<Void>(MachineAbstract.this) {
                     @Override
                     public Void doJobWithResult() {
@@ -65,21 +69,21 @@ abstract public class MachineAbstract implements MachineInterface {
 
     @Override
     public void start() {
-        Logger.debug("Machine Start start");
+        MachineEvent.save(this, "Machine Start start");
         // start devices.
         for (DeviceInterface d : deviceMap.values()) {
-            Logger.debug("Start device %s", d.toString());
+            MachineEvent.save(this, "Start device %s", d.toString());
             d.start();
-            Logger.debug("Start device %s done", d.toString());
+            MachineEvent.save(this, "Start device %s done", d.toString());
         }
     }
 
     @Override
     public void stop() {
         for (DeviceInterface d : deviceMap.values()) {
-            Logger.debug("Stop device %s", d.toString());
+            MachineEvent.save(this, "Stop device %s", d.toString());
             d.stop();
-            Logger.debug("Stop device %s done", d.toString());
+            MachineEvent.save(this, "Stop device %s done", d.toString());
         }
     }
 
@@ -107,30 +111,37 @@ abstract public class MachineAbstract implements MachineInterface {
     }
 
     public boolean onAcceptDepositEvent() {
+        MachineEvent.save(this, "onAcceptDepositEvent");
         return currentState.onAcceptDepositEvent();
     }
 
     public boolean onStartEnvelopeDeposit(EnvelopeDeposit refDeposit) {
+        MachineEvent.save(this, "onStartEnvelopeDeposit");
         return currentState.onStartEnvelopeDeposit(refDeposit);
     }
 
     public boolean onStartBillDeposit(BillDeposit refDeposit) {
+        MachineEvent.save(this, "onStartBillDeposit");
         return currentState.onStartBillDeposit(refDeposit);
     }
 
     public boolean onConfirmDeposit() {
+        MachineEvent.save(this, "onConfirmDeposit");
         return currentState.onConfirmDepositEvent();
     }
 
     public boolean onCancelDeposit() {
+        MachineEvent.save(this, "onCancelDeposit");
         return currentState.onCancelDepositEvent();
     }
 
     public boolean onReset() {
+        MachineEvent.save(this, "onReset");
         return currentState.onReset();
     }
 
     public boolean onStoringErrorReset() {
+        MachineEvent.save(this, "onStoringErrorReset");
         return currentState.onStoringErrorReset();
     }
 

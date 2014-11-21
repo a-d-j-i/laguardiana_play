@@ -24,4 +24,8 @@ public enum MeiEbdsStatus implements DeviceStatusInterface {
     public boolean is(Class type) {
         return false;
     }
+
+    public boolean dontLog() {
+        return this == NEUTRAL || this == COUNTING;
+    }
 }

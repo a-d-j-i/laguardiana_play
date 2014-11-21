@@ -19,10 +19,8 @@ public class GloryDE50Status {
         REMOVE_THE_BILLS_FROM_ESCROW,
         REMOVE_REJECTED_BILLS,
         REMOVE_THE_BILLS_FROM_HOPER,
-
         READY_TO_STORE,
         STORING,
-        
         CANCELING,
         CANCELED,
         REJECTING,
@@ -35,6 +33,10 @@ public class GloryDE50Status {
 
         public boolean is(Class type) {
             return false;
+        }
+
+        public boolean dontLog() {
+            return this == NEUTRAL;
         }
     };
 

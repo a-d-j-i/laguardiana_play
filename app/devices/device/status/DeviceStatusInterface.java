@@ -10,4 +10,5 @@ public interface DeviceStatusInterface {
 
     public boolean is(Class type);
 
+    public boolean dontLog();
 }
