@@ -24,6 +24,7 @@ PSQL_PORT=5432
 PSQL_HOST='127.0.0.1'
 CAJERO = r"C:\Documents and Settings\usuario\Escritorio\cajero"
 CHROME = r"C:\Documents and Settings\usuario\Configuración local\Datos de programa\Google\Chrome\Application\chrome.exe"
+#CHROME = r"C:\Archivos de programa\Google\Chrome\Application\chrome.exe"
 JAVA = r"C:\Archivos de programa\Java\jre7\bin\java.exe"
 RUNNER = r"PlayRunner.jar"
 JAVA_CMD = [ JAVA, "-Xmx1024M", "-XX:-UseSplitVerifier", "-Dfile.encoding=utf-8", "-XX:CompileCommand=exclude,jregex/Pretokenizer,next", "-jar", os.path.join( CAJERO, RUNNER ) ]
@@ -74,6 +75,7 @@ for i in range( 100 ):
             time.sleep( 1 )
     finally:
         s.close()
+log( "checking for database done" )
 
 
 si = subprocess.STARTUPINFO()
