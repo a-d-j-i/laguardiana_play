@@ -1,0 +1,12 @@
+M:bag
+S:Fbag$_str_0$0$0({46}DA46,SC:S),D,0,0
+S:Fbag$_str_1$0$0({21}DA21,SC:S),D,0,0
+S:Fbag$_str_2$0$0({44}DA44,SC:S),D,0,0
+S:Fbag$_str_3$0$0({49}DA49,SC:S),D,0,0
+S:Fbag$_str_4$0$0({54}DA54,SC:S),D,0,0
+S:Fbag$_str_5$0$0({14}DA14,SC:S),D,0,0
+S:Fbag$_str_6$0$0({54}DA54,SC:S),D,0,0
+S:Fbag$_str_7$0$0({14}DA14,SC:S),D,0,0
+S:Fbag$_str_8$0$0({42}DA42,SC:S),D,0,0
+S:Fbag$_str_9$0$0({49}DA49,SC:S),D,0,0
+S:Fbag$_str_10$0$0({31}DA31,SC:S),D,0,0

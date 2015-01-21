@@ -1,0 +1,21 @@
+
+Configurar el xp para que se loguee autoaticamente como un usuario fijo:
+    Ejecutar: CONTROL USERPASSWORDS2
+    Elegir el usuario con el que se deberia loguear en windows (NO ELEGIR Administrator).
+    Desseleccionar "Users must enter a user name and password to user this computer"
+
+Configurar el screen saver Desktop->propiedades->protector de pantall
+
+Copiar el ejecutable main.exe y el file launcher.py a una misma carpeta en el disco rigido (por ejemplo c:\lg).
+Editar el file launcher.py y ajustar los paths:
+
+    CAJERO = r"C:\Documents and Settings\usuario\Escritorio\laguardiana_play"
+        path a la aplicacion
+    PLAY = r"C:\Documents and Settings\usuario\Escritorio\play-1.2.5rc4\play.bat"
+        directorio donde se instalo el framework play
+    CHROME = r"C:\Archivos de programa\Google\Chrome\Application\chrome.exe"
+        path al navegador chrome.
+La r delante de las comillas es necesaria!!!
+Ejecutar main.exe install para configurar el launcher como aplicacion de inicio.
+Rebootear la maquina. 
+La aplicacion levanta automaticamente unos segundos despues de que la maquina inicio.

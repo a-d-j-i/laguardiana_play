@@ -1,0 +1,146 @@
+#include "laguardiana.h"
+
+
+/* Initialise a stack of 255 bytes at RAM address 0x300 */
+#pragma stack 0x300 0xFF
+
+
+
+static unsigned char x212223[] = { X21, X22, X23 };
+static unsigned char x21[] = { X21 };
+static unsigned char x2123[] = { X21, X23 };
+static unsigned char x22[] = { X22 };
+static unsigned char x2223[] = { X22, X23 };
+static unsigned char x23[] = { X23 };
+static unsigned char x2122[] = { X21, X22 };
+#define J21_LEFT  setOutputs( 2, x2123, 1, x22 );
+#define J21_RIGHT setOutputs( 2, x2223, 1, x21 );
+#define J21_STOP setOutputs( 1, x23, 2, x2122 );
+#define J21_OFF setOutputs( 0, 0, 3, x212223 );
+
+enum _ST {
+	ST_START, ST_1B, ST_5B,
+ 	ST_LEFT, ST_RIGHT,
+   	ST_RUN_LEFT, ST_RUN_RIGHT, ST_STOP
+};
+
+static unsigned char st = ST_START;
+static unsigned char c = 'G';
+static unsigned int time = 0;
+
+void main()
+{
+
+	
+	init();
+	setupPorts();
+	usart_init();
+
+	for (;;)
+	{	
+		//J21_LEFT
+		//J21_RIGHT
+		//J21_OFF
+		//J21_STOP
+		// 0x1b, 0x5b, 0x42
+		// 0x1b, 0x5b, 0x41
+		c = getchar();
+/*		if ( c != 0 ) {
+			if ( c >= 33 && c <= 126 ) {
+				printf( "USART: %c 0x%x\r\n", c, c );
+			} else {
+				printf( "USART: . 0x%x\r\n", c );
+			}
+		}
+*/
+		
+		switch ( st ) {
+			case ST_START:
+				if ( c != 0 && c == 0x1b ) {
+					st = ST_1B;
+				}
+				break;
+				
+			case ST_1B:
+				//printf( "ST1B 0x%x\r\n", c );
+				if ( c != 0 ) {
+					if ( c == 0x5b ) {
+						st = ST_5B;
+					} else {
+						st = ST_START;
+					}
+				}
+				break;
+				
+			case ST_5B:
+				//printf( "ST5B 0x%x\r\n", c );
+				if ( c != 0 ) {
+					if ( c == 0x42 ) { // left
+						st = ST_LEFT;
+					} else if ( c == 0x41 ) { // right
+						st = ST_RIGHT;
+					} else {
+						st = ST_START;
+					}
+				}
+				break;
+				
+			case ST_LEFT:
+				printf( "LEFT\r\n" );
+				time = 0;
+				J21_LEFT;
+				st = ST_RUN_LEFT;
+				break;
+			
+			case ST_RIGHT:
+				printf( "RIGHT\r\n" );
+				time = 0;
+				J21_RIGHT;
+				st = ST_RUN_RIGHT;
+				break;
+				
+			case ST_RUN_LEFT:
+				if ( time > 0xFFFE || ( ( PORTD & 0x02 ) != 0 ) ) {
+					//printf( "STOP\r\n" );
+					time = 0;
+					J21_STOP
+					st = ST_STOP;
+				} else {
+					time++;
+				}
+				break;
+			
+			case ST_RUN_RIGHT:
+				if ( time > 0xFFFE || ( ( PORTD & 0x01 ) != 0 ) ) {
+					//printf( "STOP\r\n" );
+					time = 0;
+					J21_STOP
+					st = ST_STOP;
+				} else {
+					time++;
+				}
+				break;
+
+			case ST_STOP:
+				if ( time > 256 ) {
+					printf( "DONE\r\n" );
+					time = 0;
+					J21_OFF
+					st = ST_START;
+				} else {
+					time++;
+				}
+				break;
+				
+			default:
+				st = ST_START;
+				break;
+		}
+		
+		flushUart();
+	}
+}
+
+
+
+

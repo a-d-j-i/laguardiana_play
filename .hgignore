@@ -1,3 +1,4 @@
+syntax: glob
 logs/*
 test-result/*
 project/project
@@ -14,3 +15,24 @@ doc/schema.architect~
 eclipse
 modules
 precompiled
+laguardiana.asm
+init.asm
+usart.asm
+io.asm
+bag.asm
+main.asm
+shutter.asm
+lockin.asm
+*.cod
+*.cof
+*.hex
+*.lst
+*.map
+*.o
+*.c~
+*.h~
+*.pyc
+py2exe/build/*
+# switch to regexp syntax.
+syntax: regexp
+
