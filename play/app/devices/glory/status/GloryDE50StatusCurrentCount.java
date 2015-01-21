@@ -39,4 +39,8 @@ public class GloryDE50StatusCurrentCount implements DeviceStatusInterface, Devic
         return this.getClass().equals(type);
     }
 
+    public boolean dontLog() {
+        return false;
+    }
+
 }

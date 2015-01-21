@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.print.PrintService;
 import models.Configuration;
 import models.db.LgSystemProperty;
+import models.events.PrinterEvent;
 import play.Logger;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -141,6 +142,8 @@ public class MachinePrinterDecorator {
         args.put("currentDate", new Date());
         final String body = template.render(args);
 
+        PrinterEvent.save(printer, "PRINTING : paperWidth : %d, paperLen : %d, template : %s", paperWidth, paperLen, templateName);
+        Logger.debug("PRINTING : paperWidth : %d, paperLen : %d, template : %s, args : %s", paperWidth, paperLen, templateName, args);
         boolean ret = jobq.offer(new Runnable() {
             public void run() {
                 if (printer != null) {

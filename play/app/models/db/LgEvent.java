@@ -1,8 +1,12 @@
 package models.db;
 
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import javax.persistence.*;
+import play.Logger;
 import play.db.jpa.GenericModel;
+import play.db.jpa.JPABase;
+import play.jobs.Job;
 
 @Entity
 @Table(name = "lg_event", schema = "public")
@@ -11,7 +15,7 @@ import play.db.jpa.GenericModel;
 abstract public class LgEvent extends GenericModel implements java.io.Serializable {
 
     @Id
-    @Column( name = "event_id", unique = true, nullable = false)
+    @Column(name = "event_id", unique = true, nullable = false)
     @GeneratedValue(generator = "LgEventGenerator")
     @SequenceGenerator(name = "LgEventGenerator", sequenceName = "lg_event_sequence")
     public Integer eventId;
@@ -20,10 +24,10 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
     public LgUser user;
     @Column(name = "event_source_id", nullable = true)
     public Integer eventSourceId;
-    @Temporal( TemporalType.TIMESTAMP)
-    @Column( name = "creation_date", nullable = false, length = 13)
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate = new Date();
-    @Column( name = "message", nullable = true, length = 512)
+    @Column(name = "message", nullable = true, length = 512)
     public String message;
 
     public LgEvent(LgUser user, Integer eventSourceId, String message) {
@@ -85,5 +89,18 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
         el.setExternalApp(ea);
         el.save();
         return true;
+    }
+
+    @Override
+    public <T extends JPABase> T save() {
+        // Enqueue and get JPA context if needed.
+        new Job<T>() {
+            @Override
+            public T doJobWithResult() throws Exception {
+                Logger.debug("SAVING EVENT : %s", LgEvent.this.toString());
+                return LgEvent.super.save();
+            }
+        }.now();
+        return (T) this;
     }
 }
