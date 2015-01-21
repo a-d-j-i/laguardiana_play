@@ -2,6 +2,19 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="11">
         <file>
+            <url>app/devices/glory/state/poll/GloryDE50StateCount.java</url>
+            <bookmark id="3">
+                <name/>
+                <line>147</line>
+                <key/>
+            </bookmark>
+            <bookmark id="2">
+                <name/>
+                <line>310</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
             <url>app/devices/glory/state/poll/GloryDE50StatePoll.java</url>
             <bookmark id="1">
                 <name/>
@@ -37,19 +50,6 @@
             <bookmark id="5">
                 <name/>
                 <line>79</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
-            <url>app/devices/glory/state/poll/GloryDE50StateCount.java</url>
-            <bookmark id="3">
-                <name/>
-                <line>147</line>
-                <key/>
-            </bookmark>
-            <bookmark id="2">
-                <name/>
-                <line>310</line>
                 <key/>
             </bookmark>
         </file>
