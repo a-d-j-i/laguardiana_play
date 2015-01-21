@@ -5,6 +5,7 @@ import sys
 import subprocess
 import httplib
 import logging
+from logging import handlers
 import os
 from _winreg import *
 
