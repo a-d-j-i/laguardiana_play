@@ -21,9 +21,9 @@ static BAG_STATUS BAG_SENSOR2STATUS[] = {
 
 
 void clearBagState() {
-    if (bag_state == BAG_STATE_ERROR) {
+    //if (bag_state == BAG_STATE_ERROR) {
         initBagState();
-    }
+    //}
 }
 
 void aproveBag() {

@@ -18,6 +18,7 @@ precompiled
 laguardiana.asm
 init.asm
 usart.asm
+timer.asm
 io.asm
 bag.asm
 main.asm
