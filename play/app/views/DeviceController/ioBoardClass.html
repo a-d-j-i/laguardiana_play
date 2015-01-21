@@ -45,7 +45,7 @@
                                 &nbsp;
                                 <span ID="sensorC" class="circle">&nbsp;C&nbsp;</span>
                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <span ID="sensorD" class="circle">&nbsp;L&nbsp;</span>
+                                <span ID="sensorLock" class="circle">&nbsp;L&nbsp;</span>
                             </p>
                             <p>SENSOR STATUS:<br/><span id="sensor_status">${sensorStatus}</span></p>
                         </div>
@@ -60,8 +60,8 @@
 #{set 'moreScripts'}
 <script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
-    doRefresh = function() {
-        $.getJSON('@{IoBoardController.getStatus(deviceId)}', function(data) {
+    doRefresh = function () {
+        $.getJSON('@{IoBoardController.getStatus(deviceId)}', function (data) {
             var lastEvent = data[ 0 ];
             if (lastEvent) {
                 lastEvent = lastEvent + "\n" + $("#last_event").text();
@@ -70,31 +70,43 @@
             var status = data[ 1 ];
             if (status) {
                 $("#sensor_status").text(data[2]);
-                if (status.D & 0x10) {
+
+                if (status.sensorA === true) {
+                    $("#sensorA").css("background", "green");
+                } else if (status.sensorA === false) {
                     $("#sensorA").css("background", "red");
                 } else {
-                    $("#sensorA").css("background", "green");
+                    $("#sensorA").css("background", "yellow");
                 }
-                if (status.D & 0x08) {
+
+                if (status.sensorB === true) {
+                    $("#sensorB").css("background", "green");
+                } else if (status.sensorB === false) {
                     $("#sensorB").css("background", "red");
                 } else {
-                    $("#sensorB").css("background", "green");
+                    $("#sensorB").css("background", "yellow");
                 }
-                if (status.D & 0x04) {
+
+                if (status.sensorC === true) {
+                    $("#sensorC").css("background", "green");
+                } else if (status.sensorC === false) {
                     $("#sensorC").css("background", "red");
                 } else {
-                    $("#sensorC").css("background", "green");
+                    $("#sensorC").css("background", "yellow");
                 }
-                if (status.D & 0x20) {
-                    $("#sensorD").css("background", "red");
+
+                if (status.sensorLock === true) {
+                    $("#sensorLock").css("background", "green");
+                } else if (status.sensorLock === false) {
+                    $("#sensorLock").css("background", "red");
                 } else {
-                    $("#sensorD").css("background", "green");
+                    $("#sensorLock").css("background", "yellow");
                 }
             } else {
                 $("#sensorA").css("background", "yellow");
                 $("#sensorB").css("background", "yellow");
                 $("#sensorC").css("background", "yellow");
-                $("#sensorD").css("background", "yellow");
+                $("#sensorLock").css("background", "yellow");
             }
 
             doneRefresh();

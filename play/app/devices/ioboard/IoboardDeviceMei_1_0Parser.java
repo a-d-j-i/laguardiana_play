@@ -43,7 +43,7 @@ public class IoboardDeviceMei_1_0Parser implements SerialPortMessageParserInterf
                     Integer D = Integer.parseInt(l.substring(37, 39), 16);
                     Integer BAG_SENSOR = Integer.parseInt(l.substring(54, 56), 16);
                     Integer BAG_STATUS = Integer.parseInt(l.substring(70, 72), 16);
-                    return new IoboardStatusResponse(A, B, C, D, BAG_SENSOR, BAG_STATUS);
+                    return new IoboardStatusResponse(((D & 0x10) == 0), ((D & 0x8) == 0), null, ((D & 0x04) == 0), A, B, C, D, BAG_SENSOR, BAG_STATUS);
                 } catch (NumberFormatException e) {
                     Logger.warn("checkStatus invalid number: %s", e.getMessage());
                 }

@@ -1,6 +1,7 @@
 package machines;
 
 import devices.device.status.DeviceStatusInterface;
+import devices.device.task.DeviceTaskReset;
 import devices.ioboard.response.IoboardStateResponse;
 import devices.ioboard.status.IoboardStatus;
 import static devices.ioboard.status.IoboardStatus.IoboardBagApprovedState.BAG_APROVED;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import models.Configuration;
 import models.db.LgBag;
+import models.events.MachineEvent;
 import play.Logger;
 
 /**
@@ -24,7 +26,7 @@ import play.Logger;
  */
 abstract public class MachineWithBagAbstract extends MachineAbstract implements MachineInterface {
 
-    private final MachineDeviceDecorator ioboard;
+    protected final MachineDeviceDecorator ioboard;
 
     protected MachineWithBagAbstract(MachineDeviceDecorator ioboard) {
         this.ioboard = ioboard;
@@ -53,6 +55,12 @@ abstract public class MachineWithBagAbstract extends MachineAbstract implements 
             onIoBoardEvent((IoboardStatus) status);
         }
         super.onDeviceEvent(dev, status);
+    }
+
+    @Override
+    public boolean onReset() {
+        ioboard.submitSynchronous(new DeviceTaskReset());
+        return super.onReset();
     }
 
     private void onIoBoardEvent(IoboardStatus st) {

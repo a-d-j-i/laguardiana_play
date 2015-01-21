@@ -5,6 +5,7 @@ import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
+import devices.device.task.DeviceTaskReadTimeout;
 import devices.device.task.DeviceTaskReset;
 import devices.ioboard.IoboardDevice;
 import play.Logger;
@@ -20,8 +21,6 @@ public class IoboardError extends IoboardStateAbstract {
     public IoboardError(IoboardDevice ioboard, String error) {
         super(ioboard);
         this.error = error;
-        Logger.error(error);
-        ioboard.notifyListeners(new DeviceStatusError(error));
     }
 
     @Override
@@ -42,6 +41,9 @@ public class IoboardError extends IoboardStateAbstract {
             Logger.debug("executing reset task %s", t.toString());
             t.setReturnValue(true);
             return new IoboardStateMain(ioboard);
+        } else {
+            Logger.error(error);
+            ioboard.notifyListeners(new DeviceStatusError(error));
         }
         t.setReturnValue(false);
         return this;
