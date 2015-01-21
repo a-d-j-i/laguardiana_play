@@ -33,6 +33,7 @@ lockin.asm
 *.c~
 *.h~
 *.pyc
+*.log
 py2exe/build/*
 # switch to regexp syntax.
 syntax: regexp
