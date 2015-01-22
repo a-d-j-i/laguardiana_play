@@ -10,7 +10,8 @@ static unsigned char c = 'G';
 unsigned long loop_cnt = 0;
 
 void main() {
-//    unsigned int i;
+    unsigned int i;
+    unsigned int j;
     init();
     setupPorts();
     timer_init();
@@ -19,9 +20,17 @@ void main() {
     INTCONbits.GIEL = 1; //enable interrupts
     INTCONbits.GIEH = 1;
 
-
+    
+    for( i = 0; i < 100; i++ ) {
+        for( j = 0; j < 5000; j++ ) {
+            processUart();
+	}
+	printf( ".", i );
+    }
+    printf( "\r\n" );
     // Freeze the port value
     initBagState();
+
 
     for (;;) {
         loop_cnt++;

@@ -42,7 +42,7 @@ void initBagState() {
         case BAG_STATUS_INPLACE_OPEN:
             bag_state = BAG_STATE_INPLACE;
             break;
-        case BAG_STATUS_REMOVED_EXCHANGE_00:    
+        case BAG_STATUS_REMOVED_EXCHANGE_00:
             bag_state = BAG_STATE_REMOVED;
             break;
         default:
