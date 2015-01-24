@@ -17,7 +17,10 @@
       <item>usart.c</item>
       <item>version.h</item>
       <item>timer.c</item>
+      <item>spbrgselect.inc</item>
+      <item>Bootloader.asm</item>
     </files>
+    <custom_linker_script>/home/adji/Desktop/work/laguardiana/laguardiana_play_new/pic/laguardiana.lkr</custom_linker_script>
   </general>
   <editors>
     <bookmarks>

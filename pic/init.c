@@ -41,7 +41,7 @@ __code char __at __CONFIG7L CONFIG7L = _EBTR0_OFF_7L & _EBTR1_OFF_7L & _EBTR2_OF
 __code char __at __CONFIG7H CONFIG7H = _EBTRB_OFF_7H;
 #endif
 
-
+unsigned char bData;
 void init()
 {
     
@@ -54,6 +54,50 @@ void init()
 	
 	// ALL A/D disabled
 	ADCON1 |= 0x0F;
+
+// BOOTLOADER
+// READ EEPROM
+        EEADR = 0;
+        EECON1bits.CFGS = 0;
+        EECON1bits.EEPGD = 0;
+        EECON1bits.RD = 1;
+        bData = EEDATA;
+        if ( bData == 0x00 ) {
+                IntrareBootloader();
+        }
+}
+
+void init_bootloader() {
+//        printf( "Bootloader Setup previous bData %d\r\n", bData );
+        EEDATA = 0x00;
+        EEADR = 0;
+        // start write sequence as described in datasheet, page 91
+        EECON1bits.EEPGD = 0;
+        EECON1bits.CFGS = 0;
+        EECON1bits.WREN = 1; // enable writes to data EEPROM
+        INTCONbits.GIE = 0;  // disable interrupts
+        EECON2 = 0x55;
+        EECON2 = 0x0AA;
+        EECON1bits.WR = 1;   // start writing
+        while( EECON1bits.WR != 0 );
+        if(EECON1bits.WRERR){
+                printf( "ERROR: writing to EEPROM failed!\r\n" );
+        EECON1bits.WREN = 0;
+        INTCONbits.GIE = 1;
+        } else {
+                EECON1bits.WREN = 0;
+                INTCONbits.GIE = 1;
+
+//              printf( "Bootloader Setup Eprom writted\r\n" );
+//              EEADR = 0;
+//              EECON1bits.CFGS = 0;
+//              EECON1bits.EEPGD = 0;
+//              EECON1bits.RD = 1;
+//              printf( "Bootloader Setup Eprom rereaded %d\r\n", EEDATA );
+                __asm
+                        reset
+                __endasm;
+        }
 
 }
 

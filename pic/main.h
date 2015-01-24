@@ -41,6 +41,9 @@ typedef struct {
 
 // UART
 extern void init();
+extern void init_bootloader();
+extern void IntrareBootloader( void );
+
 extern void usart_init();
 extern int txBufSize(void);
 extern void processUart();

@@ -9,9 +9,13 @@
 static unsigned char c = 'G';
 unsigned long loop_cnt = 0;
 
+unsigned char prgBootIdx = 0;
+char* prgBootKey = "PROGRAM";
+
+unsigned int i;
+unsigned int j;
+
 void main() {
-    unsigned int i;
-    unsigned int j;
     init();
     setupPorts();
     timer_init();
@@ -21,6 +25,7 @@ void main() {
     INTCONbits.GIEH = 1;
 
     
+    //printf( "VERSION : " VERSION "\r\n" );
     for( i = 0; i < 100; i++ ) {
         for( j = 0; j < 5000; j++ ) {
             processUart();
@@ -42,6 +47,18 @@ void main() {
         // 0x1b, 0x5b, 0x42
         // 0x1b, 0x5b, 0x41
         c = getchar();
+
+        if ( c != 0 ) {
+            if ( c == prgBootKey[ prgBootIdx ] ) {
+                prgBootIdx++;
+                if ( prgBootKey[ prgBootIdx ] == 0 ) {
+                   //readMemory();
+                   prgBootIdx = 0;
+                }
+            } else {
+                prgBootIdx = 0;
+            }
+        }
         /*
                                 if ( c != 0 ) {
                                         if ( c >= 33 && c <= 126 ) {
@@ -53,6 +70,10 @@ void main() {
          */
         // Keyboard
         switch (c) {
+            case 'p':
+            case 'P':
+                init_bootloader();
+                break;
             case 'v':
             case 'V':
                 if (txBufSize() > 130) {
