@@ -10,10 +10,11 @@ static unsigned char c = 'G';
 unsigned long loop_cnt = 0;
 
 unsigned char prgBootIdx = 0;
-char* prgBootKey = "PROGRAM";
+char* prgBootKey = "pPROGRAM";
 
 unsigned int i;
 unsigned int j;
+
 
 void main() {
     init();
@@ -52,13 +53,14 @@ void main() {
             if ( c == prgBootKey[ prgBootIdx ] ) {
                 prgBootIdx++;
                 if ( prgBootKey[ prgBootIdx ] == 0 ) {
-                   //readMemory();
+                   init_bootloader();
                    prgBootIdx = 0;
                 }
+                continue;
             } else {
                 prgBootIdx = 0;
             }
-        }
+        } 
         /*
                                 if ( c != 0 ) {
                                         if ( c >= 33 && c <= 126 ) {
@@ -71,8 +73,8 @@ void main() {
         // Keyboard
         switch (c) {
             case 'p':
-            case 'P':
-                init_bootloader();
+            case 'P': 
+                // reserved for programming start.
                 break;
             case 'v':
             case 'V':

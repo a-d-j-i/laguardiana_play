@@ -16,13 +16,13 @@ except:
 def transfer_hex(gui,filename,port,baud,type,max_flash,family,rts):
     
     global s    
-    s=serial.Serial(port,baud,timeout=1)
+    s=serial.Serial(port,baud,timeout=3)
     
-    pic_mem={}
 
     if max_flash==None:
         return  'Fail'
 
+    pic_mem=[0xFF]*max_flash
     try:
         f=open(filename, 'r')
     except IOError:
@@ -100,7 +100,7 @@ def transfer_hex(gui,filename,port,baud,type,max_flash,family,rts):
     
     for pic_pos in range(minpos,maxpos,block):
  
-        mem_block=[0]*hblock
+        mem_block=[0xFF]*hblock
         write_block=False
         for j in range(0,hblock):
 
@@ -124,7 +124,6 @@ def transfer_hex(gui,filename,port,baud,type,max_flash,family,rts):
            
             if gui != None and progress<=1:
                 gui.progress_bar.set_fraction(progress)
-                
             elif gui == None and progress<=1:
                 print str(int(progress*100)) + '%  Writed'
             i=i+1
@@ -133,7 +132,7 @@ def transfer_hex(gui,filename,port,baud,type,max_flash,family,rts):
                 return 'Fail'
    
     s.close()
-    
+    print "done"
     return 'OK'
                 
                 
@@ -180,7 +179,7 @@ def write_mem(pic_pos,mem_block,family,rts):
 
     ret=s.read(1)
     if ret!="K":
-        print "Error writing to the memory position: "+ hex(pic_pos)+"\n\n"
+        print "Error writing to the memory position (" + ret + ") : "+ hex(pic_pos)+"\n\n"
         
     while gtk.events_pending():
         gtk.main_iteration()

@@ -63,7 +63,10 @@ void init()
         EECON1bits.RD = 1;
         bData = EEDATA;
         if ( bData == 0x00 ) {
-                IntrareBootloader();
+                bootloader();
+                __asm 
+                        reset;
+                __endasm;
         }
 }
 
@@ -100,4 +103,3 @@ void init_bootloader() {
         }
 
 }
-
