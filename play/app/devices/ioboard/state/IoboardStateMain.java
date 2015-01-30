@@ -2,7 +2,6 @@ package devices.ioboard.state;
 
 import devices.device.DeviceResponseInterface;
 import devices.device.state.DeviceStateInterface;
-import devices.device.status.DeviceStatusError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.device.task.DeviceTaskReadTimeout;
@@ -14,6 +13,7 @@ import devices.ioboard.response.IoboardCriticalResponse;
 import devices.ioboard.response.IoboardErrorResponse;
 import devices.ioboard.response.IoboardStateResponse;
 import devices.ioboard.response.IoboardStatusResponse;
+import devices.ioboard.status.IoBoardStatusError;
 import devices.ioboard.status.IoboardStatus;
 import devices.ioboard.status.IoboardStatusCriticalError;
 import devices.ioboard.task.IoboardTaskAproveBag;
@@ -60,12 +60,12 @@ public class IoboardStateMain extends IoboardStateAbstract {
             task.setReturnValue(true);
             retries++;
 
-            if (retries == IOBOARD_MAX_RETRIES) {
+            if (retries >= IOBOARD_MAX_RETRIES) {
                 retries = 0;
                 task.setReturnValue(true);
                 //return new IoboardError(ioboard, "ioboard state Timeout reading from serial port");
                 // don' go to error, just report
-                ioboard.notifyListeners(new DeviceStatusError("ioboard state Timeout reading from serial port"));
+                ioboard.notifyListeners(new IoBoardStatusError("ioboard state Timeout reading from serial port"));
                 return this;
             }
             ret = true;
@@ -117,7 +117,7 @@ public class IoboardStateMain extends IoboardStateAbstract {
                 ioboard.notifyListeners(new IoboardStatus(r, bagAproveState));
             } else if (response instanceof IoboardErrorResponse) {
                 IoboardErrorResponse r = (IoboardErrorResponse) response;
-                ioboard.notifyListeners(new DeviceStatusError(r.getError()));
+                ioboard.notifyListeners(new IoBoardStatusError(r.getError()));
             } else if (response instanceof IoboardCriticalResponse) {
                 IoboardCriticalResponse r = (IoboardCriticalResponse) response;
                 ioboard.notifyListeners(new IoboardStatusCriticalError(r.getError()));

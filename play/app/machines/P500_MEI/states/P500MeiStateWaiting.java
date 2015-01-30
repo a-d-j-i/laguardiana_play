@@ -2,6 +2,7 @@ package machines.P500_MEI.states;
 
 import devices.device.status.DeviceStatusError;
 import devices.device.status.DeviceStatusInterface;
+import devices.ioboard.status.IoBoardStatusError;
 import devices.ioboard.status.IoboardStatus;
 import devices.mei.status.MeiEbdsStatus;
 import machines.states.*;
@@ -29,6 +30,9 @@ public class P500MeiStateWaiting extends MachineStateAbstract {
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
         if (st.is(DeviceStatusError.class)) {
+            if (st.is(IoBoardStatusError.class) && ((IoBoardStatusError) st).canIgnore()) {
+                return;
+            }
             DeviceStatusError err = (DeviceStatusError) st;
             Logger.error("DEVICE ERROR : %s", err.getError());
             context.setCurrentState(new P500MeiStateError(this, context, err.getError()));

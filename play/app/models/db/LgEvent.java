@@ -95,7 +95,7 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
     public <T extends JPABase> T save() {
         Logger.debug("ENQUEUE SAVING EVENT : %s", LgEvent.this.toString());
         // Enqueue and get JPA context if needed.
-/*        new Job<T>() {
+        new Job<T>() {
             @Override
             public T doJobWithResult() throws Exception {
                 try {
@@ -106,8 +106,6 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
                 return null;
             }
         }.now();
-        */
-        Logger.debug("SKIPPING EVENT : %s", LgEvent.this.toString());
         return (T) this;
     }
 }

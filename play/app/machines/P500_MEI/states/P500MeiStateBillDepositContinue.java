@@ -3,6 +3,7 @@ package machines.P500_MEI.states;
 import devices.device.status.DeviceStatusError;
 import devices.device.status.DeviceStatusInterface;
 import static devices.ioboard.response.IoboardStateResponse.BAG_STATE.BAG_STATE_INPLACE;
+import devices.ioboard.status.IoBoardStatusError;
 import devices.ioboard.status.IoboardStatus;
 import devices.ioboard.status.IoboardStatus.IoboardBagApprovedState;
 import devices.mei.status.MeiEbdsStatus;
@@ -131,6 +132,9 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
             });
             return;
         } else if (st.is(DeviceStatusError.class)) {
+            if (st.is(IoBoardStatusError.class) && ((IoBoardStatusError) st).canIgnore()) {
+                return;
+            }
             DeviceStatusError err = (DeviceStatusError) st;
             context.setCurrentState(new P500MeiStateError(this, context, err.getError()));
             return;

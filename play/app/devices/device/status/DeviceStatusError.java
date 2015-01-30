@@ -8,7 +8,7 @@ import java.security.InvalidParameterException;
  */
 public class DeviceStatusError implements DeviceStatusInterface {
 
-    final String error;
+    final protected String error;
 
     public DeviceStatusError(String error) {
         if (error == null) {

@@ -7,6 +7,7 @@ import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
 import devices.device.task.DeviceTaskReset;
 import devices.ioboard.IoboardDevice;
+import devices.ioboard.status.IoBoardStatusError;
 import play.Logger;
 
 /**
@@ -42,7 +43,7 @@ public class IoboardError extends IoboardStateAbstract {
             return new IoboardStateMain(ioboard);
         } else {
             Logger.error(error);
-            ioboard.notifyListeners(new DeviceStatusError(error));
+            ioboard.notifyListeners(new IoBoardStatusError(error));
         }
         t.setReturnValue(false);
         return this;

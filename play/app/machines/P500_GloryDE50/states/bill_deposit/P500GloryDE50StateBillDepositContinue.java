@@ -7,6 +7,7 @@ import devices.device.status.DeviceStatusStoringError;
 import devices.glory.status.GloryDE50Status;
 import devices.glory.status.GloryDE50StatusCurrentCount;
 import devices.glory.status.GloryDE50StatusMachineErrorCode;
+import devices.ioboard.status.IoBoardStatusError;
 import machines.MachineDeviceDecorator;
 import machines.P500_GloryDE50.states.P500GloryDE50StateError;
 import machines.P500_GloryDE50.states.P500GloryDE50StateStoringError;
@@ -90,6 +91,9 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
             context.setCurrentQuantity((GloryDE50StatusCurrentCount) st);
             return;
         } else if (st.is(DeviceStatusError.class)) {
+            if (st.is(IoBoardStatusError.class) && ((IoBoardStatusError) st).canIgnore()) {
+                return;
+            }
             DeviceStatusError se = (DeviceStatusError) st;
             context.setCurrentState(new P500GloryDE50StateError(context, this, se.getError()));
             return;

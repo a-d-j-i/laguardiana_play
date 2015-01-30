@@ -3,6 +3,7 @@ package machines.P500_MEI.states;
 import devices.device.status.DeviceStatusError;
 import devices.device.status.DeviceStatusInterface;
 import devices.device.task.DeviceTaskWithdraw;
+import devices.ioboard.status.IoBoardStatusError;
 import devices.mei.status.MeiEbdsStatus;
 import devices.mei.status.MeiEbdsStatusReadyToStore;
 import machines.MachineDeviceDecorator;
@@ -40,6 +41,9 @@ public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
             }
             return;
         } else if (st.is(DeviceStatusError.class)) {
+            if (st.is(IoBoardStatusError.class) && ((IoBoardStatusError) st).canIgnore()) {
+                return;
+            }
             DeviceStatusError err = (DeviceStatusError) st;
             context.setCurrentState(new P500MeiStateError(this, context, err.getError()));
             return;
