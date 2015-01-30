@@ -36,6 +36,7 @@ pic/*.adb
 *.pyc
 *.log
 py2exe/build/*
+PlayRunner/build/*
 # switch to regexp syntax.
 syntax: regexp
 
