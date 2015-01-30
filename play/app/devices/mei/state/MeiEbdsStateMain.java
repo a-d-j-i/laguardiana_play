@@ -2,6 +2,7 @@ package devices.mei.state;
 
 import devices.device.DeviceResponseInterface;
 import devices.device.state.DeviceStateInterface;
+import devices.device.status.DeviceStatusError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskCancel;
 import devices.device.task.DeviceTaskCount;
@@ -17,6 +18,7 @@ import devices.mei.task.MeiEbdsTaskCount;
 import devices.device.task.DeviceTaskMessage;
 import devices.device.task.DeviceTaskReadTimeout;
 import devices.mei.MeiEbdsDevice;
+import static devices.mei.MeiEbdsDevice.MEI_EBDS_MAX_RETRIES;
 import devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType;
 import static devices.mei.response.MeiEbdsAcceptorMsgAck.ResponseType.*;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
@@ -30,10 +32,6 @@ import play.data.validation.Error;
  */
 public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
 
-    protected void debug(String message, Object... args) {
-        //Logger.debug(message, args);
-    }
-
     public MeiEbdsStateMain(MeiEbdsDevice mei) {
         super(mei);
     }
@@ -41,21 +39,27 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     private boolean skipEscrowed = false;
     private String lastNoteValue = null;
     private boolean mustCancel = false;
-    private int retries = 300;
+    private int retries;
 
     @Override
     public DeviceStateInterface call(DeviceTaskAbstract t) {
         boolean ret;
-        debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
+        Logger.debug("%s ----------------> Received a task call : %s", mei.toString(), t.toString());
         if (t instanceof DeviceTaskReadTimeout) {
-            retries--;
             if (retries <= 0) {
-                return new MeiEbdsError(mei, "mei main state Timeout reading from serial port");
+                t.setReturnValue(true);
+                // return new MeiEbdsError(mei, "mei main state Timeout reading from serial port");
+                // Don't change state just report.
+                mei.notifyListeners(new DeviceStatusError("mei main state Timeout reading from serial port"));
+                retries = MEI_EBDS_MAX_RETRIES;
+                return this;
+            } else {
+                retries--;
             }
             ret = true;
         } else if (t instanceof DeviceTaskMessage) {
-            if (retries <= 300) {
-                retries = 300;
+            if (retries <= MEI_EBDS_MAX_RETRIES) {
+                retries = MEI_EBDS_MAX_RETRIES;
             }
             DeviceTaskMessage msgTask = (DeviceTaskMessage) t;
             DeviceResponseInterface response = msgTask.getResponse();
@@ -100,11 +104,11 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         } else if (t instanceof DeviceTaskOpenPort) {
             DeviceTaskOpenPort open = (DeviceTaskOpenPort) t;
             if (mei.open(open.getPort())) {
-                debug("%s MeiEbdsStateMain new port %s", mei.toString(), open.getPort());
+                Logger.debug("%s MeiEbdsStateMain new port %s", mei.toString(), open.getPort());
                 t.setReturnValue(true);
                 return this;
             } else {
-                debug("%s MeiEbdsStateMain new port %s failed to open", mei.toString(), open.getPort());
+                Logger.debug("%s MeiEbdsStateMain new port %s failed to open", mei.toString(), open.getPort());
                 t.setReturnValue(false);
                 return new MeiEbdsOpenPort(mei);
             }
@@ -141,7 +145,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                 ret = mei.count(null);
             }
         } else {
-            debug("%s ignoring task %s", mei.toString(), t.toString());
+            Logger.debug("%s ignoring task %s", mei.toString(), t.toString());
             t.setReturnValue(false);
             return null;
         }
@@ -171,17 +175,17 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
     protected DeviceStateInterface processAcceptorToHostMsg(MeiEbdsAcceptorMsgAck response) {
         if (response.isCassetteFull() || response.isJammed() || response.isFailure()) {
             mei.notifyListeners(MeiEbdsStatus.JAM);
-            retries = 1000;
+            retries = MEI_EBDS_MAX_RETRIES * 5;
             return null;
         } else {
-            retries = 300;
+            retries = MEI_EBDS_MAX_RETRIES;
             if (response.isPowerUp()) {
                 mei.notifyListeners(MeiEbdsStatus.NEUTRAL);
             }
         }
         String err = null;
         if (response.isEscrowed()) {
-            debug("%s Is escrowed", mei.toString());
+            Logger.debug("%s Is escrowed", mei.toString());
             lastNoteValue = response.getNoteSlot();
             if (mustCancel) {
                 if (!mei.reject()) {
@@ -196,19 +200,19 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                 }
             }
         } else if (response.isReturned()) {
-            debug("%s Is returned", mei.toString());
+            Logger.debug("%s Is returned", mei.toString());
             mei.notifyListeners(MeiEbdsStatus.RETURNED);
             lastNoteValue = null;
             err = mei.sendPollMessage();
         } else if (response.isStacked()) {
-            debug("%s Is stacked", mei.toString());
+            Logger.debug("%s Is stacked", mei.toString());
             if (lastNoteValue != null) {
                 mei.notifyListeners(new MeiEbdsStatusStored(lastNoteValue));
             }
             lastNoteValue = null;
             err = mei.sendPollMessage();
         } else {
-            debug("%s Is None", mei.toString());
+            Logger.debug("%s Is None", mei.toString());
             if (response.isIdling()) {
                 if (mei.isSomeDenominationEnabled()) {
                     mei.notifyListeners(MeiEbdsStatus.COUNTING);

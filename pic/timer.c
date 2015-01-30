@@ -67,7 +67,7 @@ void TimerInterruptHandler() __interrupt ( 1 ) {
 // Output trough RB3 in configuration bits CCP2MX=PORTBE
 void timer_init(void) {
         // Output bits
-        TRISBbits.TRISB3 = 0;
+        TRISBbits.TRISB3 = 0;  // J9
         PORTBbits.RB3 = 0;
 /*
         TRISCbits.TRISC1 = 0;
@@ -137,7 +137,7 @@ void timer_init(void) {
 //        CCPR2H = 0xFF;
 //        CCPR2L = 0xFF - 5;
         CCPR2 = 21;
-        CCP2CON = 0x0C;
+        CCP2CON = 0x0C;         // PWM mode
 
         
        

@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import models.Configuration;
 import models.db.LgBag;
-import models.events.MachineEvent;
 import play.Logger;
 
 /**

@@ -30,10 +30,6 @@ import play.Logger;
  */
 public class IoboardStateMain extends IoboardStateAbstract {
 
-    protected void debug(String message, Object... args) {
-        Logger.debug(message, args);
-    }
-
     public IoboardStateMain(IoboardDevice ioboard) {
         super(ioboard);
     }
@@ -67,7 +63,10 @@ public class IoboardStateMain extends IoboardStateAbstract {
             if (retries == IOBOARD_MAX_RETRIES) {
                 retries = 0;
                 task.setReturnValue(true);
-                return new IoboardError(ioboard, "ioboard state Timeout reading from serial port");
+                //return new IoboardError(ioboard, "ioboard state Timeout reading from serial port");
+                // don' go to error, just report
+                ioboard.notifyListeners(new DeviceStatusError("ioboard state Timeout reading from serial port"));
+                return this;
             }
             ret = true;
         } else if (task instanceof IoboardTaskOpenGate) {
@@ -133,11 +132,11 @@ public class IoboardStateMain extends IoboardStateAbstract {
         } else if (task instanceof DeviceTaskOpenPort) {
             DeviceTaskOpenPort open = (DeviceTaskOpenPort) task;
             if (ioboard.open(open.getPort())) {
-                debug("%s IoboardStateMain new port %s", ioboard.toString(), open.getPort());
+                Logger.debug("%s IoboardStateMain new port %s", ioboard.toString(), open.getPort());
                 task.setReturnValue(true);
                 return this;
             } else {
-                debug("%s IoboardStateMain new port %s failed to open", ioboard.toString(), open.getPort());
+                Logger.debug("%s IoboardStateMain new port %s failed to open", ioboard.toString(), open.getPort());
                 task.setReturnValue(false);
                 return new IoboardOpenPort(ioboard);
             }
@@ -167,7 +166,7 @@ public class IoboardStateMain extends IoboardStateAbstract {
             task.setReturnValue(true);
             return null;
         } else {
-            debug("%s ignoring task %s", ioboard.toString(), task.toString());
+            Logger.debug("%s ignoring task %s", ioboard.toString(), task.toString());
             task.setReturnValue(false);
             return null;
         }

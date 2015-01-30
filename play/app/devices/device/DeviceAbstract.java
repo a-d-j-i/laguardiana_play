@@ -21,10 +21,6 @@ import play.Logger;
  */
 public abstract class DeviceAbstract implements DeviceInterface {
 
-    private void debug(String message, Object... args) {
-        //Logger.debug(message, args);
-    }
-
     abstract public DeviceStateInterface getInitState();
 
     private DeviceStateInterface currentState;
@@ -39,7 +35,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
     }
 
     public void stop() {
-        debug("Device %s stop task thread", this.toString());
+        Logger.debug("Device %s stop task thread", this.toString());
         finish();
         taskExecutor.shutdown();
         try {
@@ -47,7 +43,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
         } catch (InterruptedException ex) {
             Logger.error("Exception in device stop %s", ex.toString());
         }
-        debug("Device %s stop done", this.toString());
+        Logger.debug("Device %s stop done", this.toString());
     }
 
     public void finish() {
@@ -65,7 +61,7 @@ public abstract class DeviceAbstract implements DeviceInterface {
     }
 
     public void notifyListeners(DeviceStatusInterface state) {
-        debug("Device %s Notify listeners : %s", this.toString(), state.toString());
+        Logger.debug("Device %s Notify listeners : %s", this.toString(), state.toString());
         final DeviceEvent le = new DeviceEvent(this, state);
         for (DeviceEventListener counterListener : listeners) {
             counterListener.onDeviceEvent(le);
@@ -74,11 +70,11 @@ public abstract class DeviceAbstract implements DeviceInterface {
 
     // helper for the inner thread.
     protected void runTask(final DeviceTaskAbstract deviceTask) {
-        debug(String.format("------------> %s executing current step: %s with task %s", toString(), currentState, deviceTask.toString()));
+        Logger.debug(String.format("------------> %s executing current step: %s with task %s", toString(), currentState, deviceTask.toString()));
         DeviceStateAbstract newState = (DeviceStateAbstract) currentState.call(deviceTask);
         if (newState != null && currentState != newState) {
             while (true) {
-                debug("Changing state old %s, new %s", currentState, newState.toString());
+                Logger.debug("Changing state old %s, new %s", currentState, newState.toString());
                 if (newState.isInitialized()) {
                     break;
                 }
@@ -89,10 +85,10 @@ public abstract class DeviceAbstract implements DeviceInterface {
                     break;
                 }
             }
-            debug("setting state to new %s", newState.toString());
+            Logger.debug("setting state to new %s", newState.toString());
             currentState = newState;
         }
-        debug("----------------------> Device %s thread done result %s\n\n\n", toString(), deviceTask.toString());
+        Logger.debug("----------------------> Device %s thread done result %s\n\n\n", toString(), deviceTask.toString());
     }
 
     synchronized public Future<Boolean> submit(final DeviceTaskAbstract deviceTask) {

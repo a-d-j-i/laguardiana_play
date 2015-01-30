@@ -49,7 +49,7 @@ public class P500MeiStateEnvelopeDepositMain extends MachineStateAbstract {
 
                     @Override
                     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-                        debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
+                        Logger.debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
                         if (st.is(IoboardStatus.class)) {
                             IoboardStatus s = (IoboardStatus) st;
                             if (s.getBagApprovedState() == IoboardBagApprovedState.BAG_APROVED) {

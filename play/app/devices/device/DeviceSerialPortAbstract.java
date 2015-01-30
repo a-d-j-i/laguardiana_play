@@ -17,8 +17,6 @@ import play.Logger;
  */
 abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
 
-    abstract protected void debug(String message, Object... args);
-
     private DeviceSerialPortAdaptor serialPortReader = null;
     private String port;
     private final SerialPortMessageParserInterface parser;
@@ -39,7 +37,7 @@ abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
         if (serialPortReader == null) {
             throw new IllegalArgumentException("Serial port closed");
         }
-        debug("%s Writting : %s", this.toString(), Arrays.toString(cmdStr));
+        Logger.debug("%s Writting : %s", this.toString(), Arrays.toString(cmdStr));
         return serialPortReader.write(cmdStr);
     }
 
@@ -55,10 +53,10 @@ abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
 
     @Override
     public boolean setProperty(String property, String value) {
-        debug("trying to set property %s to %s", property, value);
+        Logger.debug("trying to set property %s to %s", property, value);
         if (property.compareToIgnoreCase("port") == 0) {
             boolean ret = submitSynchronous(new DeviceTaskOpenPort(value));
-            debug("changing port to %s %s", value, ret ? "SUCCESS" : "FAIL");
+            Logger.debug("changing port to %s %s", value, ret ? "SUCCESS" : "FAIL");
             return ret;
         }
         return false;
@@ -66,16 +64,16 @@ abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
 
     public synchronized boolean open(String port) {
         this.port = port;
-        debug("%s api open", this.toString());
+        Logger.debug("%s api open", this.toString());
         close();
         SerialPortAdapterInterface serialPort = Configuration.getSerialPort(port, portConf);
         if (serialPort == null || this.serialPortReader != null) {
             Logger.info("%s Error opening mei serial port %s %s", this.toString(), serialPort, this.serialPortReader);
             return false;
         }
-        debug("%s creating adapter", this.toString());
+        Logger.debug("%s creating adapter", this.toString());
         serialPortReader = new DeviceSerialPortAdaptor(serialPort, parser, responseListener);
-        debug("%s calling adapter.open", this.toString());
+        Logger.debug("%s calling adapter.open", this.toString());
         return serialPortReader.open();
     }
 
@@ -89,7 +87,7 @@ abstract public class DeviceSerialPortAbstract extends DeviceAbstract {
 
     @Override
     public void finish() {
-        debug("Executing finish");
+        Logger.debug("Executing finish");
         close();
     }
 

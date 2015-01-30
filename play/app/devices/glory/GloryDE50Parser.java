@@ -12,18 +12,11 @@ import play.Logger;
 
 public class GloryDE50Parser implements SerialPortMessageParserInterface {
 
-    final boolean debug = false;
-
-    private void debug(String message, Object... args) {
-        if (debug) {
-            Logger.debug(message, args);
-        }
-    }
     final private static int GLORY_READ_TIMEOUT = 1200;
 
     public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException, TimeoutException {
         DeviceResponseInterface ret = getMessageInt(serialPort);
-        debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
+        Logger.debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
         return ret;
     }
 
@@ -37,17 +30,17 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
             switch (r) {
                 case 0x02:
                     byte[] a = new byte[3];
-                    a[ 0] = read(serialPort);
-                    a[ 1] = read(serialPort);
-                    a[ 2] = read(serialPort);
+                    a[0] = read(serialPort);
+                    a[1] = read(serialPort);
+                    a[2] = read(serialPort);
                     int l = getXXVal(a);
-                    //Logger.debug("Read len %d", l);
+                    //Logger.Logger.debug("Read len %d", l);
                     b = new byte[l + 5];
                     b[0] = a[0];
                     b[1] = a[1];
                     b[2] = a[2];
                     for (int j = 0; j < l + 2; j++) {
-                        b[ j + 3] = read(serialPort);
+                        b[j + 3] = read(serialPort);
                     }
                     break;
                 case 0x06:
@@ -65,25 +58,23 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
         if (b == null) {
             return new GloryDE50ResponseError("Error parsing bytes");
         }
-        if (debug) {
-            StringBuilder h = new StringBuilder("Readed ");
-            for (byte x : b) {
-                h.append(String.format("0x%x ", x));
-            }
-            Logger.debug(h.toString());
+        StringBuilder h = new StringBuilder("Readed ");
+        for (byte x : b) {
+            h.append(String.format("0x%x ", x));
         }
+        Logger.debug(h.toString());
 
-        if (b[ b.length - 2] != 3) {
+        if (b[b.length - 2] != 3) {
             return new GloryDE50ResponseError(String.format("Error message end not found"));
         }
 
         byte checksum = 0;
         for (int i = 0; i < b.length - 1; i++) {
-            checksum = (byte) (checksum ^ b[ i]);
+            checksum = (byte) (checksum ^ b[i]);
         }
 
-        if (b[ b.length - 1] != (byte) checksum) {
-            return new GloryDE50ResponseError(String.format("CHECKSUM don't match 0x%x != 0x%x", b[ b.length - 1], checksum));
+        if (b[b.length - 1] != (byte) checksum) {
+            return new GloryDE50ResponseError(String.format("CHECKSUM don't match 0x%x != 0x%x", b[b.length - 1], checksum));
         }
         return new GloryDE50ResponseWithData(b);
     }
@@ -96,7 +87,7 @@ public class GloryDE50Parser implements SerialPortMessageParserInterface {
         if (ch == null) {
             throw new TimeoutException("timeout reading from port");
         }
-//        debug("readed ch : 0x%x", ch);
+//        Logger.debug("readed ch : 0x%x", ch);
         return ch;
     }
 

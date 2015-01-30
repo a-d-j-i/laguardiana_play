@@ -40,7 +40,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
     @Override
     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-        debug("P500MeiStateBillDepositContinue DEVICE EVENT %s, %s", dev.toString(), st.toString());
+        Logger.debug("P500MeiStateBillDepositContinue DEVICE EVENT %s, %s", dev.toString(), st.toString());
         if (st.is(IoboardStatus.class)) {
             IoboardStatus iobs = (IoboardStatus) st;
             if (iobs.getBagState() != BAG_STATE_INPLACE && !Configuration.isIgnoreBag()) {
@@ -49,7 +49,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
 
                     @Override
                     public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-                        debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
+                        Logger.debug("BAG REMOVED DEVICE EVENT %s, %s", dev.toString(), st.toString());
                         if (st.is(MeiEbdsStatusReadyToStore.class)) {
                             MeiEbdsStatusReadyToStore rts = (MeiEbdsStatusReadyToStore) st;
                             if (context.isValidBill(rts.getSlot())) {
@@ -113,7 +113,7 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
             context.setCurrentState(new MachineStateAbstract() {
                 @Override
                 public void onDeviceEvent(MachineDeviceDecorator dev, DeviceStatusInterface st) {
-                    debug("JAM DEVICE EVENT %s, %s", dev.toString(), st.toString());
+                    Logger.debug("JAM DEVICE EVENT %s, %s", dev.toString(), st.toString());
                     if (st.is(MeiEbdsStatus.NEUTRAL) || st.is(MeiEbdsStatus.COUNTING)) {
                         context.setCurrentState(P500MeiStateBillDepositContinue.this);
                     } else if (st.is(MeiEbdsStatus.JAM)) {

@@ -13,19 +13,15 @@ import play.Logger;
 
 public class IoboardDeviceMei_1_0Parser implements SerialPortMessageParserInterface {
 
-    private void debug(String message, Object... args) {
-        // Logger.debug(message, args);
-    }
-
     public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException, TimeoutException {
         DeviceResponseInterface ret;
         try {
             ret = getMessageInt(serialPort);
         } catch (TimeoutException ex) {
-            debug("%s Timeout waiting for device, retry", this.toString());
+            Logger.debug("%s Timeout waiting for device, retry", this.toString());
             throw ex;
         }
-        debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
+        Logger.debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
         return ret;
     }
 

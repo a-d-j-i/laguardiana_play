@@ -107,6 +107,20 @@
                 </div>
             </div>
         </div>
+        <div id="alerta_locked" class="alerta_info" style="display: none;">
+            <div id="alerta_titulo">&{ 'bill_deposit.locked' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <div id="error_text">
+                        &{ 'bill_deposit.locked_text_t1' }
+                        <span class="total">${ total }</span>&nbsp;${currentDeposit.currency.description}<br>
+                    </div>
+                </div>
+                <div id="alerta_botonera">
+                    <a href="#" id="alerta_locked_cancel_btn" class="cancelButton boton rojo">&{ 'application.cancel' }</a>
+                </div>
+            </div>
+        </div>
         <div id="alerta_bag_removed" class="alerta_info" style="display: none;">
             <div id="alerta_titulo">&{ 'application.bag_not_in_place' }</div>
             <div id="alerta_cuerpo">
@@ -189,7 +203,7 @@
             if (status != null && status.toString() != 'null') {
                 if (status == 'IDLE' || status == 'REMOVE_THE_BILLS_FROM_ESCROW' ||
                         status == 'TIMEOUT_WARNING' || status == 'CANCELING' ||
-                        status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' || 
+                        status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT' ||
                         status == 'PUT_THE_BILLS_ON_THE_HOPER') {
                     $('#cancelButton').show();
                 } else if (status == 'CONTINUE_DEPOSIT_NC') {
@@ -199,6 +213,7 @@
                 } else if (status == 'JAM') {
                 } else if (status == 'BAG_REMOVED') {
                 } else if (status == 'ESCROW_FULL') {
+                } else if (status == 'LOCKED') {
                 } else if (status == 'FINISH') {
                     deposit_finished = "@{finish}";
                 } else if (status == 'TIMEOUT_WARNING') {
@@ -211,8 +226,11 @@
                     alert("Invalid status : " + status + " last status : " + lastStatus);
                 }
 
-                if (status == 'ESCROW_FULL') {
+                if (status == 'FINISH') {
+                } else if (status == 'ESCROW_FULL') {
                     showAlert("#alerta_escrow_full");
+                } else if (status == 'LOCKED' || status == 'ERROR') {
+                    showAlert("#alerta_locked");
                 } else if (status == 'TIMEOUT_WARNING') {
                     showAlert("#alerta_timeout");
                 } else if (status == 'CANCELING') {
@@ -227,17 +245,10 @@
                     showAlert('#alerta_bag_removed');
                 } else {
                     closeAlert();
-                    /*                    closeAlert( "#alerta_escrow_full" );
-                     closeAlert( "#alerta_timeout" );
-                     closeAlert( "#alerta_cancel" );
-                     closeAlert( "#alerta_storing" );    
-                     closeAlert( "#alerta_remove_rejected_bills" );    
-                     closeAlert( "#alerta_jam" );    
-                     closeAlert( "#alerta_bag_removed" );*/
                 }
 
-                if ( status == 'CONTINUE_DEPOSIT_NC' ) {
-                    $('#continueButton').html( "&{ 'application.finish' }" );
+                if (status == 'CONTINUE_DEPOSIT_NC') {
+                    $('#continueButton').html("&{ 'application.finish' }");
                 }
 
                 if (status == 'CONTINUE_DEPOSIT_NC' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT') {

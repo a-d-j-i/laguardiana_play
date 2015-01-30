@@ -73,27 +73,23 @@ public class VirtualGraphics extends Graphics2D {
     public VirtualGraphics() {
     }
 
-    private void debug(String message, Object... args) {
-        //Logger.debug(message, args);
-    }
-
     @Override
     public void draw3DRect(int x, int y, int width, int height, boolean raised) {
-        debug("----------> draw3DRect %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> draw3DRect %d %d %d %d", x, y, width, height);
         limit.extend(x, y, x + width, y + height);
         //delegate.draw3DRect(x, y, width, height, raised);
     }
 
     @Override
     public void fill3DRect(int x, int y, int width, int height, boolean raised) {
-        debug("----------> fill3DRect %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> fill3DRect %d %d %d %d", x, y, width, height);
         limit.extend(x, y, x + width, y + height);
         //delegate.fill3DRect(x, y, width, height, raised);
     }
 
     @Override
     public void draw(Shape s) {
-        debug("----------> draw %s", s.getBounds());
+        Logger.debug("----------> draw %s", s.getBounds());
         limit.extend(s.getBounds());
         //limit.extend(s.getBounds2D());
         //delegate.draw(s);
@@ -103,11 +99,11 @@ public class VirtualGraphics extends Graphics2D {
     public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
         int height = img.getHeight(new ImageObserver() {
             public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-                debug("----------> drawImage observer %d %d %d %d", x, y, width, height);
+                Logger.debug("----------> drawImage observer %d %d %d %d", x, y, width, height);
                 return true;
             }
         });
-        debug("----------> drawImage %d", height);
+        Logger.debug("----------> drawImage %d", height);
         //obs.imageUpdate(img, null, x, y, width, height);
         return true;
         //return delegate.drawImage(img, xform, obs);
@@ -115,188 +111,188 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
-        debug("----------> drawImage %d %d %d %d", img.getWidth(), img.getHeight(), x, y);
+        Logger.debug("----------> drawImage %d %d %d %d", img.getWidth(), img.getHeight(), x, y);
         //delegate.drawImage(img, op, x, y);
     }
 
     @Override
     public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
-        debug("----------> drawRenderedImage %d %d", img.getHeight(), img.getWidth());
+        Logger.debug("----------> drawRenderedImage %d %d", img.getHeight(), img.getWidth());
         //delegate.drawRenderedImage(img, xform);
     }
 
     @Override
     public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
-        debug("----------> drawRenderableImage %d %d", img.getHeight(), img.getWidth());
+        Logger.debug("----------> drawRenderableImage %d %d", img.getHeight(), img.getWidth());
         //delegate.drawRenderableImage(img, xform);
     }
 
     @Override
     public void drawString(String str, int x, int y) {
-        debug("----------> drawString %d %d", x, y);
+        Logger.debug("----------> drawString %d %d", x, y);
         //delegate.drawString(str, x, y);
     }
 
     @Override
     public void drawString(String str, float x, float y) {
-        debug("----------> drawString %f %f", x, y);
+        Logger.debug("----------> drawString %f %f", x, y);
         //delegate.drawString(str, x, y);
     }
 
     @Override
     public void drawString(AttributedCharacterIterator iterator, int x, int y) {
-        debug("----------> drawString %d %d", x, y);
+        Logger.debug("----------> drawString %d %d", x, y);
         //delegate.drawString(iterator, x, y);
     }
 
     @Override
     public void drawString(AttributedCharacterIterator iterator, float x, float y) {
-        debug("----------> drawString %f %f", x, y);
+        Logger.debug("----------> drawString %f %f", x, y);
         //delegate.drawString(iterator, x, y);
     }
 
     @Override
     public void drawGlyphVector(GlyphVector g, float x, float y) {
-        debug("----------> drawGlyphVector %f %f", x, y);
+        Logger.debug("----------> drawGlyphVector %f %f", x, y);
         //delegate.drawGlyphVector(g, x, y);
     }
 
     @Override
     public void fill(Shape s) {
-        debug("----------> fill %s", s);
+        Logger.debug("----------> fill %s", s);
         //delegate.fill(s);
     }
 
     @Override
     public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
-        debug("----------> hit %s %s", rect, s);
+        Logger.debug("----------> hit %s %s", rect, s);
         return true;
         //return delegate.hit(rect, s, onStroke);
     }
 
     @Override
     public GraphicsConfiguration getDeviceConfiguration() {
-        debug("----------> getDeviceConfiguration");
+        Logger.debug("----------> getDeviceConfiguration");
         return null;
         //return delegate.getDeviceConfiguration();
     }
 
     @Override
     public void setComposite(Composite comp) {
-        debug("----------> setComposite");
+        Logger.debug("----------> setComposite");
         //delegate.setComposite(comp);
     }
 
     @Override
     public void setPaint(Paint paint) {
-        debug("----------> setPaint");
+        Logger.debug("----------> setPaint");
         //delegate.setPaint(paint);
     }
 
     @Override
     public void setStroke(Stroke s) {
-        debug("----------> setStroke");
+        Logger.debug("----------> setStroke");
         //delegate.setStroke(s);
     }
 
     @Override
     public void setRenderingHint(RenderingHints.Key hintKey, Object hintValue) {
-        debug("----------> setRenderingHint");
+        Logger.debug("----------> setRenderingHint");
         //delegate.setRenderingHint(hintKey, hintValue);
     }
 
     @Override
     public Object getRenderingHint(RenderingHints.Key hintKey) {
-        debug("----------> getRenderingHint");
+        Logger.debug("----------> getRenderingHint");
         return null;
         //return delegate.getRenderingHint(hintKey);
     }
 
     @Override
     public void setRenderingHints(Map<?, ?> hints) {
-        debug("----------> setRenderingHints");
+        Logger.debug("----------> setRenderingHints");
         //delegate.setRenderingHints(hints);
     }
 
     @Override
     public void addRenderingHints(Map<?, ?> hints) {
-        debug("----------> addRenderingHints");
+        Logger.debug("----------> addRenderingHints");
         //delegate.addRenderingHints(hints);
     }
 
     @Override
     public RenderingHints getRenderingHints() {
-        debug("----------> RenderingHints");
+        Logger.debug("----------> RenderingHints");
         return null;
         //return delegate.getRenderingHints();
     }
 
     @Override
     public void translate(int x, int y) {
-        debug("----------> translate");
+        Logger.debug("----------> translate");
         //delegate.translate(x, y);
     }
 
     @Override
     public void translate(double tx, double ty) {
-        debug("----------> translate");
+        Logger.debug("----------> translate");
         //delegate.translate(tx, ty);
     }
 
     @Override
     public void rotate(double theta) {
-        debug("----------> rotate");
+        Logger.debug("----------> rotate");
         //delegate.rotate(theta);
     }
 
     @Override
     public void rotate(double theta, double x, double y) {
-        debug("----------> rotate");
+        Logger.debug("----------> rotate");
         //delegate.rotate(theta, x, y);
     }
 
     @Override
     public void scale(double sx, double sy) {
-        debug("----------> scale");
+        Logger.debug("----------> scale");
         //delegate.scale(sx, sy);
     }
 
     @Override
     public void shear(double shx, double shy) {
-        debug("----------> shear");
+        Logger.debug("----------> shear");
         //delegate.shear(shx, shy);
     }
 
     @Override
     public void transform(AffineTransform Tx) {
-        debug("----------> transform");
+        Logger.debug("----------> transform");
         //delegate.transform(Tx);
     }
 
     @Override
     public void setTransform(AffineTransform Tx) {
-        debug("----------> setTransform");
+        Logger.debug("----------> setTransform");
         //delegate.setTransform(Tx);
     }
 
     @Override
     public AffineTransform getTransform() {
-        debug("----------> getTransform");
+        Logger.debug("----------> getTransform");
         return new AffineTransform(1, 0, 0, 1, 0, 0);
         //return delegate.getTransform();
     }
 
     @Override
     public Paint getPaint() {
-        debug("----------> getPaint");
+        Logger.debug("----------> getPaint");
         return new Paint() {
             public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds, AffineTransform xform, RenderingHints hints) {
-                debug("----------> Paint createContext");
+                Logger.debug("----------> Paint createContext");
                 return null;
             }
 
             public int getTransparency() {
-                debug("----------> Paint getTransparency");
+                Logger.debug("----------> Paint getTransparency");
                 return Paint.OPAQUE;
             }
         };
@@ -305,7 +301,7 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public Composite getComposite() {
-        debug("----------> getComposite");
+        Logger.debug("----------> getComposite");
         return new Composite() {
             public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
                 return new CompositeContext() {
@@ -322,20 +318,20 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public void setBackground(Color color) {
-        debug("----------> setBackground");
+        Logger.debug("----------> setBackground");
         //delegate.setBackground(color);
     }
 
     @Override
     public Color getBackground() {
-        debug("----------> getBackground");
+        Logger.debug("----------> getBackground");
         return new Color(0);
         //return delegate.getBackground();
     }
 
     @Override
     public Stroke getStroke() {
-        debug("----------> getStroke");
+        Logger.debug("----------> getStroke");
         return new Stroke() {
             public Shape createStrokedShape(Shape p) {
                 return p;
@@ -346,72 +342,72 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public void clip(Shape s) {
-        debug("----------> clip");
+        Logger.debug("----------> clip");
         //delegate.clip(s);
     }
 
     @Override
     public FontRenderContext getFontRenderContext() {
-        debug("----------> FontRenderContext");
+        Logger.debug("----------> FontRenderContext");
         return fontRenderContext;
         //return delegate.getFontRenderContext();
     }
 
     @Override
     public Graphics create() {
-        debug("----------> create");
+        Logger.debug("----------> create");
         return this;
 //        return new VirtualGraphics((Graphics2D) delegate.create());
     }
 
     @Override
     public Graphics create(int x, int y, int width, int height) {
-        debug("----------> create");
+        Logger.debug("----------> create");
         return this;
         //return delegate.create(x, y, width, height);
     }
 
     @Override
     public Color getColor() {
-        debug("----------> getColor");
+        Logger.debug("----------> getColor");
         return new Color(0);
         //return delegate.getColor();
     }
 
     @Override
     public void setColor(Color c) {
-        debug("----------> setColor");
+        Logger.debug("----------> setColor");
         //delegate.setColor(c);
     }
 
     @Override
     public void setPaintMode() {
-        debug("----------> setPaintMode");
+        Logger.debug("----------> setPaintMode");
         //delegate.setPaintMode();
     }
 
     @Override
     public void setXORMode(Color c1) {
-        debug("----------> setXORMode");
+        Logger.debug("----------> setXORMode");
         //delegate.setXORMode(c1);
     }
 
     @Override
     public Font getFont() {
-        debug("----------> getFont");
+        Logger.debug("----------> getFont");
         return new Font("NoneFont", Font.PLAIN, 10);
         //return delegate.getFont();
     }
 
     @Override
     public void setFont(Font font) {
-        debug("----------> setFont");
+        Logger.debug("----------> setFont");
         //delegate.setFont(font);
     }
 
     @Override
     public FontMetrics getFontMetrics() {
-        debug("----------> getFontMetrics");
+        Logger.debug("----------> getFontMetrics");
         return new FontMetrics(new Font("NoneFont", Font.PLAIN, 10)) {
         };
         //return delegate.getFontMetrics();
@@ -419,7 +415,7 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public FontMetrics getFontMetrics(Font f) {
-        debug("----------> getFontMetrics");
+        Logger.debug("----------> getFontMetrics");
         return new FontMetrics(f) {
         };
         //return delegate.getFontMetrics(f);
@@ -427,51 +423,51 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public Rectangle getClipBounds() {
-        debug("----------> getClipBounds");
+        Logger.debug("----------> getClipBounds");
         return new Rectangle(0, 0, 1000, 1000);
         //return delegate.getClipBounds();
     }
 
     @Override
     public void clipRect(int x, int y, int width, int height) {
-        debug("----------> clipRect");
+        Logger.debug("----------> clipRect");
         //delegate.clipRect(x, y, width, height);
     }
 
     @Override
     public void setClip(int x, int y, int width, int height) {
-        debug("----------> setClip");
+        Logger.debug("----------> setClip");
         //delegate.setClip(x, y, width, height);
     }
 
     @Override
     public Shape getClip() {
-        debug("----------> getClip");
+        Logger.debug("----------> getClip");
         return new Rectangle(0, 0, 1000, 1000);
         //return delegate.getClip();
     }
 
     @Override
     public void setClip(Shape clip) {
-        debug("----------> setClip");
+        Logger.debug("----------> setClip");
         //delegate.setClip(clip);
     }
 
     @Override
     public void copyArea(int x, int y, int width, int height, int dx, int dy) {
-        debug("----------> copyArea %d %d %d %d %d %d", x, y, width, height, dx, dy);
+        Logger.debug("----------> copyArea %d %d %d %d %d %d", x, y, width, height, dx, dy);
         //delegate.copyArea(x, y, width, height, dx, dy);
     }
 
     @Override
     public void drawLine(int x1, int y1, int x2, int y2) {
-        debug("----------> drawLine %d %d %d %d", x1, y1, x2, y2);
+        Logger.debug("----------> drawLine %d %d %d %d", x1, y1, x2, y2);
         //delegate.drawLine(x1, y1, x2, y2);
     }
 
     @Override
     public void fillRect(int x, int y, int width, int height) {
-        debug("----------> fillRect %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> fillRect %d %d %d %d", x, y, width, height);
         // Here the height is the total page length that I want to avoid.
         limit.extend(x, y, width, 0);
         //delegate.fillRect(x, y, width, height);
@@ -479,98 +475,98 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public void drawRect(int x, int y, int width, int height) {
-        debug("----------> drawRect %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> drawRect %d %d %d %d", x, y, width, height);
         //delegate.drawRect(x, y, width, height);
     }
 
     @Override
     public void clearRect(int x, int y, int width, int height) {
-        debug("----------> clearRect %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> clearRect %d %d %d %d", x, y, width, height);
         //delegate.clearRect(x, y, width, height);
     }
 
     @Override
     public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-        debug("----------> drawRoundRect %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> drawRoundRect %d %d %d %d", x, y, width, height);
         //delegate.drawRoundRect(x, y, width, height, arcWidth, arcHeight);
     }
 
     @Override
     public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-        debug("----------> fillRoundRect %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> fillRoundRect %d %d %d %d", x, y, width, height);
         //delegate.fillRoundRect(x, y, width, height, arcWidth, arcHeight);
     }
 
     @Override
     public void drawOval(int x, int y, int width, int height) {
-        debug("----------> drawOval %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> drawOval %d %d %d %d", x, y, width, height);
         //delegate.drawOval(x, y, width, height);
     }
 
     @Override
     public void fillOval(int x, int y, int width, int height) {
-        debug("----------> fillOval %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> fillOval %d %d %d %d", x, y, width, height);
         //delegate.fillOval(x, y, width, height);
     }
 
     @Override
     public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-        debug("----------> drawArc %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> drawArc %d %d %d %d", x, y, width, height);
         //delegate.drawArc(x, y, width, height, startAngle, arcAngle);
     }
 
     @Override
     public void fillArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-        debug("----------> fillArc %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> fillArc %d %d %d %d", x, y, width, height);
         //delegate.fillArc(x, y, width, height, startAngle, arcAngle);
     }
 
     @Override
     public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
-        debug("----------> drawPolyline");
+        Logger.debug("----------> drawPolyline");
         //delegate.drawPolyline(xPoints, yPoints, nPoints);
     }
 
     @Override
     public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-        debug("----------> drawPolygon");
+        Logger.debug("----------> drawPolygon");
         //delegate.drawPolygon(xPoints, yPoints, nPoints);
     }
 
     @Override
     public void drawPolygon(Polygon p) {
-        debug("----------> drawPolygon");
+        Logger.debug("----------> drawPolygon");
         //delegate.drawPolygon(p);
     }
 
     @Override
     public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-        debug("----------> fillPolygon");
+        Logger.debug("----------> fillPolygon");
         //delegate.fillPolygon(xPoints, yPoints, nPoints);
     }
 
     @Override
     public void fillPolygon(Polygon p) {
-        debug("----------> fillPolygon");
+        Logger.debug("----------> fillPolygon");
         //delegate.fillPolygon(p);
     }
 
     @Override
     public void drawChars(char[] data, int offset, int length, int x, int y) {
-        debug("----------> drawChars %d %d %d %d", offset, length, x, y);
+        Logger.debug("----------> drawChars %d %d %d %d", offset, length, x, y);
         limit.extend(x, y, x, y);
         //delegate.drawChars(data, offset, length, x, y);
     }
 
     @Override
     public void drawBytes(byte[] data, int offset, int length, int x, int y) {
-        debug("----------> drawBytes %d %d %d %d", offset, length, x, y);
+        Logger.debug("----------> drawBytes %d %d %d %d", offset, length, x, y);
         //delegate.drawBytes(data, offset, length, x, y);
     }
 
     @Override
     public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
-        debug("----------> drawImage1 %d %d %d %d", x, y, img.getWidth(null), img.getHeight(null));
+        Logger.debug("----------> drawImage1 %d %d %d %d", x, y, img.getWidth(null), img.getHeight(null));
         //observer.imageUpdate(img, y, x, y, y, y);
         return true;
         //return delegate.drawImage(img, x, y, observer);
@@ -578,7 +574,7 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
-        debug("----------> drawImage2 %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> drawImage2 %d %d %d %d", x, y, width, height);
         limit.extend(0, 0, x + width, y + height);
         //observer.imageUpdate(img, y, x, y, y, y);
         return true;
@@ -587,7 +583,7 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
-        debug("----------> drawImage3 %d %d %d %d", x, y, img.getWidth(null), img.getHeight(null));
+        Logger.debug("----------> drawImage3 %d %d %d %d", x, y, img.getWidth(null), img.getHeight(null));
         //observer.imageUpdate(img, y, x, y, y, y);
         return true;
         //return delegate.drawImage(img, x, y, bgcolor, observer);
@@ -595,7 +591,7 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
-        debug("----------> drawImage4 %d %d %d %d", x, y, width, height);
+        Logger.debug("----------> drawImage4 %d %d %d %d", x, y, width, height);
         //observer.imageUpdate(img, y, x, y, y, y);
         return true;
         //return delegate.drawImage(img, x, y, width, height, bgcolor, observer);
@@ -603,7 +599,7 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, ImageObserver observer) {
-        debug("----------> drawImage5 %d %d %d %d %d %d %d %d", dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2);
+        Logger.debug("----------> drawImage5 %d %d %d %d %d %d %d %d", dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2);
         //observer.imageUpdate(img, sy2, sx2, sy2, dy2, sy2);
         return true;
         //return delegate.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, observer);
@@ -611,7 +607,7 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer) {
-        debug("----------> drawImage6 %d %d %d %d %d %d %d %d", dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2);
+        Logger.debug("----------> drawImage6 %d %d %d %d %d %d %d %d", dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2);
         observer.imageUpdate(img, sy2, sx2, sy2, dy2, sy2);
         return true;
         //return delegate.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, bgcolor, observer);
@@ -619,7 +615,7 @@ public class VirtualGraphics extends Graphics2D {
 
     @Override
     public void dispose() {
-        debug("----------> dispose");
+        Logger.debug("----------> dispose");
         //delegate.dispose();
     }
 }

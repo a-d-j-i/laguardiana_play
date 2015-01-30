@@ -15,7 +15,7 @@ public enum MeiEbdsStatus implements DeviceStatusInterface {
     RETURNED,
     COUNTING,
     NEUTRAL,
-    JAM,;
+    JAM;
 
     public boolean is(Enum type) {
         return (type == this);

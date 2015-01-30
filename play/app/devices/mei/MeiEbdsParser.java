@@ -1,6 +1,7 @@
 package devices.mei;
 
 import devices.device.DeviceResponseInterface;
+import static devices.mei.MeiEbdsDevice.MEI_EBDS_READ_TIMEOUT;
 import devices.mei.response.MeiEbdsAcceptorMsgAck;
 import devices.mei.response.MeiEbdsAcceptorMsgEnq;
 import devices.mei.response.MeiEbdsAcceptorMsgError;
@@ -12,20 +13,15 @@ import play.Logger;
 
 public class MeiEbdsParser implements SerialPortMessageParserInterface {
 
-    private void debug(String message, Object... args) {
-        Logger.debug(message, args);
-    }
-    final private static int MEI_EBDS_READ_TIMEOUT = 100; //35ms
-
     public DeviceResponseInterface getResponse(SerialPortAdapterInterface serialPort) throws InterruptedException, TimeoutException {
         DeviceResponseInterface ret;
         try {
             ret = getMessageInt(serialPort);
         } catch (TimeoutException ex) {
-            debug("%s Timeout waiting for device, retry", this.toString());
+            Logger.debug("%s Timeout waiting for device, retry", this.toString());
             throw ex;
         }
-        debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
+        Logger.debug("%s Received msg : %s == %s", this.toString(), ret.getClass().getSimpleName(), ret.toString());
         return ret;
     }
 
@@ -85,7 +81,7 @@ public class MeiEbdsParser implements SerialPortMessageParserInterface {
         if (ch == null) {
             throw new TimeoutException("timeout reading from port");
         }
-        debug("readed ch : 0x%x", ch);
+        Logger.debug("readed ch : 0x%x", ch);
         return ch;
     }
 }

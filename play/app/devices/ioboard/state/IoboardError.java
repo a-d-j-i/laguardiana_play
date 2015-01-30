@@ -5,7 +5,6 @@ import devices.device.state.DeviceStateInterface;
 import devices.device.status.DeviceStatusError;
 import devices.device.task.DeviceTaskAbstract;
 import devices.device.task.DeviceTaskOpenPort;
-import devices.device.task.DeviceTaskReadTimeout;
 import devices.device.task.DeviceTaskReset;
 import devices.ioboard.IoboardDevice;
 import play.Logger;

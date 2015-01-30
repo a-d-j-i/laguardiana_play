@@ -13,12 +13,8 @@ import play.Logger;
  */
 final public class IoboardDevice extends DeviceSerialPortAbstract {
 
-    protected void debug(String message, Object... args) {
-        //    Logger.debug(message, args);
-    }
-
-    public static final int IOBOARD_MAX_RETRIES = 3;
-    public static final int IOBOARD_READ_TIMEOUT = 1000;
+    public static final int IOBOARD_MAX_RETRIES = 20;
+    public static final int IOBOARD_READ_TIMEOUT = 100;
 
     static public enum IoBoardDeviceType {
 

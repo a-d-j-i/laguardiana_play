@@ -105,6 +105,9 @@ bill_deposit.escrow_full_text_t1=Dinero recontado:
 bill_deposit.escrow_full_text_t2=Si confirma el depósito no podrá volver atrás.
 bill_deposit.ready_to_store=Presione continuar para depositar
 
+bill_deposit.locked=Maquina trabada, ¿desea cancelar el deposito?
+bill_deposit.locked_text_t1=Dinero recontado: 
+
 message.ready_to_store=Coloque el sobre en la maquina.
 message.ready_to_store_sensorless=Coloque el sobre en la maquina.
 

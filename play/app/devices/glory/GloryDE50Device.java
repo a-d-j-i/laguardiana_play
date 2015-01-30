@@ -15,10 +15,6 @@ import play.Logger;
  */
 final public class GloryDE50Device extends DeviceSerialPortAbstract {
 
-    protected void debug(String message, Object... args) {
-        //Logger.debug(message, args);
-    }
-
     public GloryDE50Device() {
         super(new GloryDE50Parser(), new PortConfiguration(
                 SerialPortAdapterAbstract.PORTSPEED.BAUDRATE_9600, SerialPortAdapterAbstract.PORTBITS.BITS_7,
@@ -44,9 +40,9 @@ final public class GloryDE50Device extends DeviceSerialPortAbstract {
             for (byte x : d) {
                 h.append(String.format("0x%x ", x));
             }
-            debug(h.toString());
+            Logger.debug(h.toString());
         }
-        debug("CMD : %s", op.toString());
+        Logger.debug("CMD : %s", op.toString());
         return null;
     }
 

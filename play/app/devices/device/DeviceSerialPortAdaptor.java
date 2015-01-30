@@ -14,10 +14,6 @@ import play.Logger;
  */
 public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInterface {
 
-    private static void debug(String message, Object... args) {
-        Logger.debug(message, args);
-    }
-
     final private Thread readerThread;
     final private AtomicBoolean mustStop = new AtomicBoolean(false);
     final SerialPortAdapterInterface serialPort;
@@ -38,7 +34,7 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
     private final AtomicBoolean writed = new AtomicBoolean(false);
 
     public void run() {
-        debug("SerialPort Reader start");
+        Logger.debug("SerialPort Reader start");
         while (!mustStop.get()) {
             try {
                 DeviceResponseInterface msg;
@@ -58,7 +54,7 @@ public class DeviceSerialPortAdaptor implements Runnable, SerialPortAdapterInter
                 Logger.warn("Exception in Serial Port Reader : %s", ex.toString());
             }
         }
-        debug("SerialPort Reader done");
+        Logger.debug("SerialPort Reader done");
     }
 
     public boolean open() {

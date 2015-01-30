@@ -19,9 +19,8 @@ import play.Logger;
  */
 final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
 
-    protected void debug(String message, Object... args) {
-        Logger.debug(message, args);
-    }
+    final public static int MEI_EBDS_MAX_RETRIES = 100;
+    final public static int MEI_EBDS_READ_TIMEOUT = 50; //35ms
 
     public MeiEbdsDevice() {
         super(new MeiEbdsParser(), new SerialPortAdapterAbstract.PortConfiguration(
@@ -81,7 +80,7 @@ final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
 
     public String sendPollMessage() {
         String err = null;
-        debug("%s MEI sending msg : %s", this.toString(), hostMsg.toString());
+        Logger.debug("%s MEI sending msg : %s", this.toString(), hostMsg.toString());
         if (!write(hostMsg.getCmdStr())) {
             err = "Error writting to the port";
         }
@@ -95,7 +94,7 @@ final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
             //return String.format("recived an nak message %s", msg);
             return false;
         }
-        //debug("%s GOT AN ACK FOR HOSTPOOL, flipping ack", this.toString());
+        //Logger.debug("%s GOT AN ACK FOR HOSTPOOL, flipping ack", this.toString());
         hostMsg.flipAck();
         return true;
     }

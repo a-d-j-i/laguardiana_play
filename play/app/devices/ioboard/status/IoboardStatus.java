@@ -14,7 +14,7 @@ public class IoboardStatus implements DeviceStatusInterface {
         BAG_APROVED,
         BAG_NOT_APROVED,
         BAG_APROVE_WAIT,
-        BAG_APROVE_CONFIRM,;
+        BAG_APROVE_CONFIRM;
     }
     private final IoboardStateResponse.SHUTTER_STATE shutterState;
     private final IoboardStateResponse.BAG_STATE bagState;
