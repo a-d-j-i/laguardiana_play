@@ -4,7 +4,7 @@
     <device>18F4520</device>
     <tool>sdcc</tool>
     <programmer>custom</programmer>
-    <description/>
+    <description></description>
     <version>0.1</version>
     <output_type>executable</output_type>
     <files>
@@ -17,10 +17,9 @@
       <item>usart.c</item>
       <item>version.h</item>
       <item>timer.c</item>
-      <item>spbrgselect.inc</item>
       <item>Bootloader.asm</item>
     </files>
-    <custom_linker_script>/home/adji/Desktop/work/laguardiana/laguardiana_play_new/pic/laguardiana.lkr</custom_linker_script>
+    <custom_linker_script></custom_linker_script>
   </general>
   <editors>
     <bookmarks>
@@ -30,7 +29,7 @@
   </editors>
   <compiler>
     <has_custom_arguments>true</has_custom_arguments>
-    <custom_options/>
+    <custom_options></custom_options>
     <custom_arguments>
       <item>--use-non-free</item>
       <item>-m%FAMILY</item>
@@ -48,7 +47,7 @@
   </compiler>
   <linker>
     <has_custom_arguments>true</has_custom_arguments>
-    <custom_options/>
+    <custom_options></custom_options>
     <format>inhx32</format>
     <custom_arguments>
       <item>--use-non-free</item>
@@ -72,7 +71,7 @@
   </linker>
   <librarian>
     <has_custom_arguments>true</has_custom_arguments>
-    <custom_options/>
+    <custom_options></custom_options>
     <custom_arguments>
       <item>-c</item>
       <item>%O</item>

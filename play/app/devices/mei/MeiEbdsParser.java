@@ -13,7 +13,7 @@ import play.Logger;
 public class MeiEbdsParser implements SerialPortMessageParserInterface {
 
     private void debug(String message, Object... args) {
-        //Logger.debug(message, args);
+        Logger.debug(message, args);
     }
     final private static int MEI_EBDS_READ_TIMEOUT = 100; //35ms
 
@@ -45,16 +45,16 @@ public class MeiEbdsParser implements SerialPortMessageParserInterface {
                     }
                     continue;
             }
-            buffer[ 0] = ch;
+            buffer[0] = ch;
             ch = read(serialPort, 120);
             byte length = ch;
-            buffer[ 1] = length;
+            buffer[1] = length;
             for (int i = 0; i < Math.min(length, buffer.length) - 2; i++) {
                 ch = read(serialPort, 120);
                 if (ch == null) {
                     return new MeiEbdsAcceptorMsgError(String.format("%s mei invalid len %d and timeout reading", this.toString(), length));
                 }
-                buffer[ i + 2] = ch;
+                buffer[i + 2] = ch;
             }
             switch (length) {
                 case 0x0b: // normal message
@@ -85,7 +85,7 @@ public class MeiEbdsParser implements SerialPortMessageParserInterface {
         if (ch == null) {
             throw new TimeoutException("timeout reading from port");
         }
-//        debug("readed ch : 0x%x", ch);
+        debug("readed ch : 0x%x", ch);
         return ch;
     }
 }
