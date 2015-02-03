@@ -24,6 +24,7 @@ cp ./PlayRunner/dist/PlayRunner.jar "$TMP_DIR/WEB-INF"
 
 mkdir "$TMP_DIR/WEB-INF/launcher"
 cp ./py2exe/i386/launcher.py "$TMP_DIR/WEB-INF/launcher"
+cp ./py2exe/i386/install.txt "$TMP_DIR/WEB-INF/launcher"
 cp ./py2exe/i386/main_console.exe "$TMP_DIR/WEB-INF/launcher"
 cp ./py2exe/i386/main_window.exe "$TMP_DIR/WEB-INF/launcher"
 cp ./py2exe/i386/main_window.exe "$TMP_DIR/WEB-INF/launcher/main.exe"
