@@ -64,11 +64,43 @@ void TimerInterruptHandler() __interrupt ( 1 ) {
 }
 */
 
+static char cnt = 0;
+static char in = 0;
+void TimerInterruptHandler() __interrupt ( 1 ) {
+        if ( PIR2bits.TMR3IF & PIE2bits.TMR3IE ) {    // Timer0 overflow interrupt
+                TMR3H = 0xfe;
+                TMR3L = 0x00;
+                PIR2bits.TMR3IF = 0;    // ACK
+                if ( cnt > 80 ) {
+                        cnt = 0;
+                        TRISBbits.TRISB3 = 1; // disabled
+                } else if ( cnt > 72 ) {
+                        TRISBbits.TRISB3 = 0; // enabled
+                } 
+
+                if ( cnt == 0 ) {
+                        if ( PORTBbits.RB1 ) {
+                                PORTBbits.RB4 = 1;
+                        } else {
+                                PORTBbits.RB4 = 0;
+                        }
+                        //PORTBbits.RB4 = !PORTBbits.RB1;
+                        //PORTBbits.RB4 = 1;
+/*                } else {
+                        PORTBbits.RB4 = 0;*/
+                }
+                cnt++;
+        }
+}
+
 // Output trough RB3 in configuration bits CCP2MX=PORTBE
 void timer_init(void) {
         // Output bits
         TRISBbits.TRISB3 = 0;  // J9
         PORTBbits.RB3 = 0;
+
+        TRISBbits.TRISB4 = 0;  // J8
+        PORTBbits.RB4 = 0;
 /*
         TRISCbits.TRISC1 = 0;
         PORTCbits.RC1 = 0;
@@ -136,9 +168,29 @@ void timer_init(void) {
         CCP2CON = 0;
 //        CCPR2H = 0xFF;
 //        CCPR2L = 0xFF - 5;
-        CCPR2 = 21;
+        CCPR2 = 105;
         CCP2CON = 0x0C;         // PWM mode
 
+
+
+        T3CONbits.RD16 = 1;         // one 16 bits read/write
+        T3CONbits.T3CCP1 = 0;       // source for ccp1
+        T3CONbits.T3CCP2 = 0;       // source for ccp2
+
+        T3CONbits.T3SYNC = 1;       // ignored
+
+        T3CONbits.TMR3CS = 0;       // use internal clock fosc/4 = 2Mhz
+        // prescaler
+        T3CONbits.T3CKPS0 = 0;
+        T3CONbits.T3CKPS1 = 0;
+
+        T3CONbits.TMR3ON = 1;       // time on
+    
+        TMR3H = 0;
+        TMR3L = 0;
+
+        IPR2bits.TMR3IP = 1;    // high priority interrupt
+        PIE2bits.TMR3IE = 1;
         
        
 }

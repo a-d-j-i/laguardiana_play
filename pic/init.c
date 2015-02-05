@@ -28,7 +28,7 @@ __code char __at __CONFIG2H CONFIG2H = _WDT_OFF_2H;
 /* Power up timeout and brown out detection enabled */
 __code char __at __CONFIG2L CONFIG2L = _PWRT_ON_2L & _BOREN_OFF_2L;
 /* MCLR settings */
-__code char __at __CONFIG3H CONFIG3H = _MCLRE_ON_3H & _CCP2MX_PORTBE_3H; 
+__code char __at __CONFIG3H CONFIG3H = _MCLRE_ON_3H & _CCP2MX_PORTBE_3H & _PBADEN_OFF_3H; 
 /* Low voltage programming disabled, Stack Overflow Reset enabled */
 __code char __at __CONFIG4L CONFIG4L = _LVP_OFF_4L & _STVREN_ON_4L;
 
