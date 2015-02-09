@@ -9,8 +9,12 @@
 static unsigned char c = 'G';
 unsigned long loop_cnt = 0;
 
-unsigned char prgBootIdx = 0;
-unsigned char* prgBootKey = "pPROGRAM";
+unsigned char stringIdx = 0;
+unsigned char* prgBootKey       = "PROGRAM";
+unsigned char* prgMei           = "MEI";
+unsigned char* prgGlory         = "GLORY";
+unsigned char* prgReset         = "RESET";
+unsigned char* currString       = 0;
 
 unsigned int i;
 unsigned int j;
@@ -49,18 +53,48 @@ void main() {
         // 0x1b, 0x5b, 0x41
         c = getchar();
 
-        if ( c != 0 ) {
-            if ( c == prgBootKey[ prgBootIdx ] ) {
-                prgBootIdx++;
-                if ( prgBootKey[ prgBootIdx ] == 0 ) {
-                   init_bootloader();
-                   prgBootIdx = 0;
+        // Process strings
+        if ( c != 0 && stringIdx > 0 ) {
+                if ( stringIdx == 1 ) {
+                        if ( prgBootKey[ 0 ] == c ) {
+                                currString = prgBootKey;
+                                stringIdx++;
+                        } else if ( prgMei[ 0 ] == c ) {
+                                currString = prgMei;
+                                stringIdx++;
+                        } else if ( prgGlory[ 0 ] == c ) {
+                                currString = prgGlory;
+                                stringIdx++;
+                        } else if ( prgReset[ 0 ] == c ) {
+                                currString = prgReset;
+                                stringIdx++;
+                        } else {
+                                stringIdx = 0;
+                        }
+                } else {
+                        if ( c == currString[ stringIdx - 1 ] ) {
+                                stringIdx++;
+                                if ( currString[ stringIdx - 1 ] == 0 ) {
+                                        if ( currString == prgBootKey ) {
+                                                init_bootloader();
+                                        } else if ( currString == prgMei ) {
+                                                setBagMode( BAG_MODE_MEI );
+                                        } else if ( currString == prgGlory ) {
+                                                setBagMode( BAG_MODE_GLORY );
+                                        } else if ( currString == prgReset ) {
+                                                __asm 
+                                                        reset;
+                                                __endasm;
+                                        }
+                                        stringIdx = 0;
+                                }
+                        } else {
+                                stringIdx = 0;
+                        }
                 }
                 continue;
-            } else {
-                prgBootIdx = 0;
-            }
-        } 
+        }
+
         /*
                                 if ( c != 0 ) {
                                         if ( c >= 33 && c <= 126 ) {
@@ -74,27 +108,11 @@ void main() {
         switch (c) {
             case 'p':
             case 'P': 
-                // reserved for programming start.
-                break;
-            case 'r':
-            case 'R': 
-                __asm 
-                        reset;
-                __endasm;
+                stringIdx = 1;
                 break;
             case 'b':
             case 'B': 
                 printBagMode();
-                break;
-            case 'g':
-            case 'G': 
-                // switch bag routine.
-                setBagMode( BAG_MODE_GLORY );
-                break;
-            case 'm':
-            case 'M': 
-                // switch bag routine.
-                setBagMode( BAG_MODE_MEI );
                 break;
             case 'v':
             case 'V':
@@ -150,8 +168,7 @@ void main() {
             case 'h':
             default:
                 if (txBufSize() > 130) {
-                    printf("Press O open / C close / S status / U,L UnLock door / E clear errors / V version / H help\r\n");
-                    printf("G set glory mode / M set mei mode / B print mode\r\n");
+                    printf("Press O open / C close / S status / U,L UnLock door / E clear errors / B print bag mode / V version / H help\r\n");
                 }
                 break;
         }

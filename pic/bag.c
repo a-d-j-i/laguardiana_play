@@ -9,7 +9,7 @@ void initMeiBagState();
 BAG_STATUS bag_status;
 BAG_STATE bag_state;
 unsigned char bag_aproved = 0;
-static BAG_MODE bag_mode = BAG_MODE_GLORY;
+static BAG_MODE bag_mode;
 
 void clearBagState() {
     //if (bag_state == BAG_STATE_ERROR) {
@@ -73,7 +73,6 @@ void initBagState() {
                         initMeiBagState();
                         break;
                 default:
-                        printf( "CRITICAL : Invalid bag mode %d\r\n", bag_mode );
                         bag_mode = BAG_MODE_MEI;
                         break;
         }
@@ -92,7 +91,7 @@ void setBagMode( BAG_MODE mode ) {
         EECON1bits.WR = 1;   // start writing
         while( EECON1bits.WR != 0 );
         if(EECON1bits.WRERR){
-                printf( "ERROR: writing to EEPROM failed!\r\n" );
+                printf( "ERROR: writing bag mode to EEPROM failed!\r\n" );
         }
         EECON1bits.WREN = 0;
         INTCONbits.GIE = 1;
