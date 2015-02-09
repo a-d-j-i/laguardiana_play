@@ -61,82 +61,102 @@ extern void setupPorts();
 extern void setOutputs(unsigned char lon, unsigned char xOn[], unsigned char loff, unsigned char xOff[]);
 
 enum _XX {
-    X0 = 0, // X0, J1 == rb5
-    X1, // J2 == rb2
-    X2, // J3 == rb0
-    X3, // J4 == rd6
-    X4, // J5 == rd4
-    X5, // J6 == rd3
-    X6, // J7 == rd1
-    X7, // J8 == rb4
-    X8, // J9 == rb3
-    X9, // J10 == rb1
-    X10, // J11 == rd7
-    X11, // J12 == rd5
-    X12, // J13 == rd2
-    X13, // J14 == rd0
-    // output only
-    X14, // J18A == ra3
-    X15, // J18B == ra4
-    X16, // J18A/J18B/J19A/J19B == ra2 enable AB
-    X17, // J17 == ra7
-    X18, // J20A == re1
-    X19, // J20B == re2
-    X20, // J20A/J20B == rc2 enable A
-    X21, // J21A == re0
-    X22, // J21B == ra5
-    X23, // J21A/J21B == rc1 enable B
-    X24, // J19A == ra0
-    X25, // J19B == ra1
+        X0 = 0, // X0, J1 == rb5
+        X1, // J2 == rb2
+        X2, // J3 == rb0
+        X3, // J4 == rd6
+        X4, // J5 == rd4
+        X5, // J6 == rd3
+        X6, // J7 == rd1
+        X7, // J8 == rb4
+        X8, // J9 == rb3
+        X9, // J10 == rb1
+        X10, // J11 == rd7
+        X11, // J12 == rd5
+        X12, // J13 == rd2
+        X13, // J14 == rd0
+        // output only
+        X14, // J18A == ra3
+        X15, // J18B == ra4
+        X16, // J18A/J18B/J19A/J19B == ra2 enable AB
+        X17, // J17 == ra7
+        X18, // J20A == re1
+        X19, // J20B == re2
+        X20, // J20A/J20B == rc2 enable A
+        X21, // J21A == re0
+        X22, // J21B == ra5
+        X23, // J21A/J21B == rc1 enable B
+        X24, // J19A == ra0
+        X25, // J19B == ra1
 };
 
 typedef struct _IN_PORT_DATA {
-    unsigned char portB;
-    unsigned char portD;
+        unsigned char portB;
+        unsigned char portD;
 } IN_PORT_DATA;
 
 typedef struct _OUT_PORT_DATA {
-    unsigned char portA;
-    unsigned char portB;
-    unsigned char portC;
-    unsigned char portD;
-    unsigned char portE;
+        unsigned char portA;
+        unsigned char portB;
+        unsigned char portC;
+        unsigned char portD;
+        unsigned char portE;
 } OUT_PORT_DATA;
 
 typedef enum _SHUTTER_ST {
-    SHUTTER_START_CLOSE,
-    SHUTTER_START_OPEN,
-    SHUTTER_RUN_OPEN,
-    SHUTTER_RUN_CLOSE,
-    SHUTTER_RUN_OPEN_PORT,
-    SHUTTER_RUN_CLOSE_PORT,
-    SHUTTER_STOP_OPEN,
-    SHUTTER_STOP_CLOSE,
-    SHUTTER_OPEN,
-    SHUTTER_CLOSED
+        SHUTTER_START_CLOSE,
+        SHUTTER_START_OPEN,
+        SHUTTER_RUN_OPEN,
+        SHUTTER_RUN_CLOSE,
+        SHUTTER_RUN_OPEN_PORT,
+        SHUTTER_RUN_CLOSE_PORT,
+        SHUTTER_STOP_OPEN,
+        SHUTTER_STOP_CLOSE,
+        SHUTTER_OPEN,
+SHUTTER_CLOSED
 } SHUTTER_ST;
 
 typedef enum _BAG_STATUS {
-    BAG_STATUS_ERROR,
-    BAG_STATUS_INPLACE_OPEN,
-    BAG_STATUS_REMOVED_EXCHANGE_00,
-    BAG_STATUS_EXCHANGE_01,
-    BAG_STATUS_EXCHANGE_10,
-    BAG_STATUS_EXCHANGE_11,
-    BAG_STATUS_INPLACE_CLOSED 
+        BAG_STATUS_ERROR = 0,
+        BAG_STATUS_INPLACE = 1,
+        BAG_STATUS_INPLACE_OPEN = 1,
+        BAG_STATUS_REMOVED_EXCHANGE_00 = 2,
+        BAG_STATUS_REMOVED = 2,
+        BAG_STATUS_EXCHANGE_00 = 3,
+        BAG_STATUS_EXCHANGE_01 = 4,
+        BAG_STATUS_EXCHANGE_10 = 5,
+        BAG_STATUS_EXCHANGE_11 = 6,
+        BAG_STATUS_INPLACE_CLOSED = 7 
 } BAG_STATUS;
 
 // J6, J13
 //#define BAG_SENSOR(X) ( ( (X) & 0x1C ) >> 2 )
 #define BAG_SENSOR(X) ( ( ( ~(X) ) & 0x1C ) >> 2 )
+#define BAG_LOCK_SENSOR(X) ( ( ( X ) & 0x20 ) == 0 )
+
 
 typedef enum _BAG_STATE {
-    BAG_STATE_ERROR = 0,
-    BAG_STATE_REMOVED = 1,
-    BAG_STATE_INPLACE = 2,
-    BAG_STATE_TAKING_START = 3,
-    BAG_STATE_TAKING_STEP1 = 4,
+        BAG_STATE_ERROR = 0,
+        BAG_STATE_REMOVED = 1,
+        BAG_STATE_INPLACE = 2,
+        BAG_STATE_TAKING_START = 3,
+        BAG_STATE_TAKING_STEP1 = 4,
+        //glory
+        BAG_STATE_TAKING_STEP2 = 5,
+        BAG_STATE_PUTTING_START = 6,
+        BAG_STATE_PUTTING_1 = 7,
+        BAG_STATE_PUTTING_2 = 8,
+        BAG_STATE_PUTTING_3 = 9,
+        BAG_STATE_PUTTING_4 = 10,
+        BAG_STATE_PUTTING_5 = 11,
+        BAG_STATE_PUTTING_6 = 12
+
 } BAG_STATE;
+
+typedef enum _BAG_MODE {
+        BAG_MODE_GLORY = 1,
+        BAG_MODE_MEI = 2,
+} BAG_MODE;
 
 extern unsigned char portd;
 extern unsigned long loop_cnt;
@@ -150,10 +170,12 @@ void processShutter();
 // Bag
 extern BAG_STATUS bag_status;
 extern BAG_STATE bag_state;
+void printBagMode();
 void initBagState();
 void clearBagState();
 void aproveBag();
 void processBagState();
+void setBagMode( BAG_MODE mode );
 // timer
 void timer_init(void);
 

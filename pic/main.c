@@ -10,7 +10,7 @@ static unsigned char c = 'G';
 unsigned long loop_cnt = 0;
 
 unsigned char prgBootIdx = 0;
-char* prgBootKey = "pPROGRAM";
+unsigned char* prgBootKey = "pPROGRAM";
 
 unsigned int i;
 unsigned int j;
@@ -76,6 +76,26 @@ void main() {
             case 'P': 
                 // reserved for programming start.
                 break;
+            case 'r':
+            case 'R': 
+                __asm 
+                        reset;
+                __endasm;
+                break;
+            case 'b':
+            case 'B': 
+                printBagMode();
+                break;
+            case 'g':
+            case 'G': 
+                // switch bag routine.
+                setBagMode( BAG_MODE_GLORY );
+                break;
+            case 'm':
+            case 'M': 
+                // switch bag routine.
+                setBagMode( BAG_MODE_MEI );
+                break;
             case 'v':
             case 'V':
                 if (txBufSize() > 130) {
@@ -131,6 +151,7 @@ void main() {
             default:
                 if (txBufSize() > 130) {
                     printf("Press O open / C close / S status / U,L UnLock door / E clear errors / V version / H help\r\n");
+                    printf("G set glory mode / M set mei mode / B print mode\r\n");
                 }
                 break;
         }

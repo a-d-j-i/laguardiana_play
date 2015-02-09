@@ -11,13 +11,15 @@
       <item>io.c</item>
       <item>init.c</item>
       <item>shutter.c</item>
-      <item>bag.c</item>
       <item>main.c</item>
       <item>main.h</item>
       <item>usart.c</item>
       <item>version.h</item>
       <item>timer.c</item>
       <item>Bootloader.asm</item>
+      <item>mei_bag.c</item>
+      <item>glory_bag.c</item>
+      <item>bag.c</item>
     </files>
     <custom_linker_script/>
   </general>
