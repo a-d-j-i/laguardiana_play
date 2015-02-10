@@ -13,7 +13,7 @@ play war -o "$TMP_DIR" --exclude "TODO:d.sh:build.xml:archive.sh:launcher.py:Pla
 popd
 
 pushd pic
-make
+make -e VERSION=$LAST_TAG
 popd
 
 

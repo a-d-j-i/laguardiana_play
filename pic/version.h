@@ -1,5 +1,7 @@
 #ifndef _VERSION_H_
 #define _VERSION_H_
 
-#define VERSION "PIC_MAKEFILE_BOOTLOADER"
+#ifndef VERSION
+#define VERSION "compiled by hand"
+#endif
 #endif

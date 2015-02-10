@@ -1,4 +1,5 @@
 #include "main.h"
+#include "version.h"
 // Common bag routines
 void processGloryBagState();
 void initGloryBagState();
@@ -20,10 +21,10 @@ void clearBagState() {
 void printBagMode() {
         switch( bag_mode ) {
                 case BAG_MODE_GLORY:
-                        printf( "bag mode GLORY\r\n" );
+                        printf( "bag mode GLORY %s\r\n", VERSION );
                         break;
                 case BAG_MODE_MEI:
-                        printf( "bag mode MEI\r\n" );
+                        printf( "bag mode MEI %s\r\n", VERSION );
                         break;
                 default:
                         printf( "CRITICAL : Invalid bag mode %d setting to mei\r\n", bag_mode );

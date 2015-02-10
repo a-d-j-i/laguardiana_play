@@ -2,8 +2,9 @@
 CPU=PIC18F4520
 HEX_FILE=laguardiana.hex
 
+VERSION=$(shell hg parents --template '{latesttag}' )
 CC = /opt/sdcc/bin/sdcc 
-MFLAGS = --use-non-free -mpic16 -V --debug -I. 
+MFLAGS = -DVERSION="\"$(VERSION)\"" --use-non-free -mpic16 -V --debug -I. 
 
 ASM = /usr/bin/gpasm 
 AFLAGS = -I. -pp18f4520 -w0
@@ -12,7 +13,8 @@ LINK = /usr/bin/gplink
 LINK_INCLUDES = -I"/opt/sdcc/bin/../share/sdcc/lib/pic16" -I"/opt/sdcc/bin/../share/sdcc/non-free/lib/pic16" 
 LFLAGS = -c -m -w -r
 LIBS = crt0i.o "libio18f4520.lib" "libc18f.lib" "libdev18f4520.lib" "libsdcc.lib" 
-OBJECTS = io.o main.o init.o bag.o shutter.o usart.o timer.o Bootloader.o
+OBJECTS = io.o main.o init.o bag.o shutter.o usart.o timer.o Bootloader.o mei_bag.o glory_bag.o
+
 
 all: $(HEX_FILE) 
 
@@ -27,7 +29,6 @@ $(HEX_FILE): $(OBJECTS)
 
 clean:
 	rm -f *.hex *.o
-
 
 program:
 	pk2cmd -R -P$(CPU) -M -F$(HEX_FILE)

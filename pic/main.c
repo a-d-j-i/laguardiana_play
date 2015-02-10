@@ -118,9 +118,9 @@ void main() {
             case 'V':
                 if (txBufSize() > 130) {
 #if defined(__XC) | defined(__18CXX) | defined(HI_TECH_C)
-                    printf("Version : %S\r\n", VERSION);
+                    printf("Version : %S\r\n", ##VERSION);
 #else
-                    printf("Version : %s\r\n", VERSION);
+                    printf("Version : %s\r\n", ##VERSION);
 #endif
 
                 }
