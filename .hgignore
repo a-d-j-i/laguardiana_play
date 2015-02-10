@@ -21,6 +21,8 @@ usart.asm
 timer.asm
 io.asm
 bag.asm
+glory_bag.asm
+mei_bag.asm
 main.asm
 shutter.asm
 lockin.asm
