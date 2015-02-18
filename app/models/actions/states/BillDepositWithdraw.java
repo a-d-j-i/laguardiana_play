@@ -37,6 +37,7 @@ public class BillDepositWithdraw extends ActionState {
             case INITIALIZING:
             case COUNTING:
                 stateApi.setState(new BillDepositStart(stateApi));
+                break;
             default:
                 Logger.debug("Withdraw invalid state %s %s", m.name(), name());
                 break;
