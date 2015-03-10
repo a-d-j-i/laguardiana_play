@@ -199,7 +199,7 @@
                 } else if (status == 'ERROR') {
                     deposit_finished = "@{counterError()}";
                 } else {
-                    alert("Invalid status : " + status + " last status : " + lastStatus);
+                    console.log("Invalid status : " + status + " last status : " + lastStatus);
                 }
 
                 if (status == 'ESCROW_FULL') {
