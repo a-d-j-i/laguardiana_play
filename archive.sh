@@ -1,4 +1,4 @@
-LAST_TAG=`hg parents --template '{latesttag}'`
+LAST_TAG=`git describe --abbrev=0 --tags`
 
 TMP_DIR="/tmp/cajero_$LAST_TAG.war"
 
@@ -34,7 +34,7 @@ cp ./pic/transferhex.py "$TMP_DIR/WEB-INF/pic"
 cp ./pic/laguardiana.hex "$TMP_DIR/WEB-INF/pic"
 
 cp ./play/run.bat "$TMP_DIR/WEB-INF"
-echo `hg parents --template '{latesttag}'` > "$TMP_DIR/WEB-INF/application/version.txt"
+echo $LASTTAG > "$TMP_DIR/WEB-INF/application/version.txt"
 
 mv "$TMP_DIR/WEB-INF" "$TMP_DIR/cajero"
 if [ $# == 0 ]
