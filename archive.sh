@@ -13,7 +13,8 @@ play war -o "$TMP_DIR" --exclude "TODO:d.sh:build.xml:archive.sh:launcher.py:Pla
 popd
 
 pushd pic
-make -e VERSION=$LAST_TAG
+make clean
+make
 popd
 
 
@@ -31,7 +32,7 @@ cp ./py2exe/i386/main_window.exe "$TMP_DIR/WEB-INF/launcher/main.exe"
 
 mkdir "$TMP_DIR/WEB-INF/pic"
 cp ./pic/transferhex.py "$TMP_DIR/WEB-INF/pic"
-cp ./pic/laguardiana.hex "$TMP_DIR/WEB-INF/pic"
+cp ./pic/output/laguardiana.hex "$TMP_DIR/WEB-INF/pic"
 
 cp ./play/run.bat "$TMP_DIR/WEB-INF"
 echo $LASTTAG > "$TMP_DIR/WEB-INF/application/version.txt"

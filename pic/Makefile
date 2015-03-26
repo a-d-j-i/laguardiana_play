@@ -1,8 +1,8 @@
 
 CPU=PIC18F4520
-HEX_FILE=laguardiana.hex
+HEX_FILE=output/laguardiana.hex
 
-VERSION=$(shell hg parents --template '{latesttag}' )
+VERSION=$(shell git describe --abbrev=0 --tags )
 CC = /opt/sdcc/bin/sdcc 
 MFLAGS = -DVERSION="\"$(VERSION)\"" --use-non-free -mpic16 -V --debug -I. 
 
@@ -13,22 +13,22 @@ LINK = /usr/bin/gplink
 LINK_INCLUDES = -I"/opt/sdcc/bin/../share/sdcc/lib/pic16" -I"/opt/sdcc/bin/../share/sdcc/non-free/lib/pic16" 
 LFLAGS = -c -m -w -r
 LIBS = crt0i.o "libio18f4520.lib" "libc18f.lib" "libdev18f4520.lib" "libsdcc.lib" 
-OBJECTS = io.o main.o init.o bag.o shutter.o usart.o timer.o Bootloader.o mei_bag.o glory_bag.o
+OBJECTS = output/io.o output/main.o output/init.o output/bag.o output/shutter.o output/usart.o output/timer.o output/Bootloader.o output/mei_bag.o output/glory_bag.o
 
 
 all: $(HEX_FILE) 
 
 $(HEX_FILE): $(OBJECTS)
-	$(LINK) $(LINK_INCLUDES) $(LFLAGS) -o $(HEX_FILE) $(OBJECTS) $(LIBS)
+	$(LINK) $(LINK_INCLUDES) $(LFLAGS) -I output -o $(HEX_FILE) $(OBJECTS) $(LIBS)
 
-%.o: %.c
-	$(CC) -c $(CFLAGS) $(MFLAGS) -p$(CPU) $<
+output/%.o: %.c
+	$(CC) -c $(CFLAGS) $(MFLAGS) -p$(CPU) -o $@ $<
 
-%.o: %.asm
-	$(ASM) -c $(AFLAGS) -p$(CPU) $<
+output/%.o: %.asm
+	$(ASM) -c $(AFLAGS) -p$(CPU) -o $@ $<
 
 clean:
-	rm -f *.hex *.o
+	rm -rf output/*
 
 program:
 	pk2cmd -R -P$(CPU) -M -F$(HEX_FILE)
