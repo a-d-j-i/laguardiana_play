@@ -155,7 +155,7 @@ public class CountCommand extends ManagerCommandAbstract {
         private void withdrawDepositDone() {
             wlock();
             try {
-                if (storeAction == STORE_ACTION.STORE_ACTION_WITHDRAW) {
+                if (storeAction == STORE_ACTION.STORE_ACTION_WITHDRAW || storeAction == STORE_ACTION.STORE_ACTION_NONE) {
                     storeAction = STORE_ACTION.STORE_ACTION_NONE;
                 } else {
                     Logger.debug("Count command withdrawDepositDone invalid store action %s", storeAction.name());

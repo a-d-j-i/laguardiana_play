@@ -60,6 +60,7 @@ public class BillDepositStoringEscrowFull extends BillDepositStoring {
                     }
                 }
                 break;
+            case STORING:
             case READY_TO_STORE: // aparentrly sometimes the escrow isn't full any more.
                 break;
             default:

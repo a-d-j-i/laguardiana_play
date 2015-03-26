@@ -131,7 +131,9 @@ public class ReportTotals {
                     return;
                 }
                 if (item instanceof EnvelopeDeposit) {
-                    visitEnvelopeDeposit((EnvelopeDeposit) item);
+                    if (!item.finishCause.isCancel()) {
+                        visitEnvelopeDeposit((EnvelopeDeposit) item);
+                    }
                 } else if (item instanceof BillDeposit) {
                     visitBillDeposit((BillDeposit) item);
                 } else {

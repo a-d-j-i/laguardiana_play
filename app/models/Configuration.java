@@ -97,6 +97,14 @@ public class Configuration {
         return getSystemProperty("application.machine_code");
     }
 
+    public static String getTicketFooter() {
+        return getSystemProperty("application.ticket_footer");
+    }
+
+    public static String getTicketHeader() {
+        return getSystemProperty("application.ticket_header");
+    }
+
     public static String getMachineDescription() {
         return getSystemProperty("application.machine_description");
     }
