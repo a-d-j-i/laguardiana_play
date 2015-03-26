@@ -1,4 +1,5 @@
 logs/*
+play/precompiled
 test-result/*
 project/project
 project/target
@@ -15,3 +16,4 @@ doc/schema.architect~
 eclipse
 modules
 archive.pwd
+/PlayRunner/build/
