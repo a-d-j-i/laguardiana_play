@@ -69,8 +69,8 @@ public class BillDeposit extends LgDeposit {
 
         for (Object b : qret) {
             Object[] a = (Object[]) b;
-            Long quantity = (Long) a[ 2];
-            BillValue bv = new BillValue((Integer) a[1], (Integer) a[ 0]);
+            Long quantity = (Long) a[2];
+            BillValue bv = new BillValue((Integer) a[1], (Integer) a[0]);
             BillQuantity bill = new BillQuantity(bv);
             bill.quantity = quantity.intValue();
             ret.add(bill);
@@ -87,6 +87,8 @@ public class BillDeposit extends LgDeposit {
         args.put("providerCode", Configuration.getProviderDescription());
         args.put("branchCode", Configuration.getBranchCode());
         args.put("machineCode", Configuration.getMachineCode());
+        args.put("ticketFooter", Configuration.getTicketFooter());
+        args.put("ticketHeader", Configuration.getTicketHeader());
         ReportTotals totals = new ReportTotals();
         args.put("billData", totals.visitBillDeposit(this));
         args.put("depositTotal", this.getTotal());

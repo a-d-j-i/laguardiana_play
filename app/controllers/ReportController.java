@@ -173,9 +173,7 @@ public class ReportController extends Controller {
                 if (d instanceof BillDeposit) {
                     ret.depositData.add(new BillDepositData((BillDeposit) d));
                 } else if (d instanceof EnvelopeDeposit) {
-                    if (!d.finishCause.isCancel()) {
-                        ret.depositData.add(new EnvelopeDepositData((EnvelopeDeposit) d));
-                    }
+                    ret.depositData.add(new EnvelopeDepositData((EnvelopeDeposit) d));
                 } else {
                     Logger.error("Invalid deposit type");
                 }
