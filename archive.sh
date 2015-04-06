@@ -35,7 +35,7 @@ cp ./pic/transferhex.py "$TMP_DIR/WEB-INF/pic"
 cp ./pic/output/laguardiana.hex "$TMP_DIR/WEB-INF/pic"
 
 cp ./play/run.bat "$TMP_DIR/WEB-INF"
-echo $LASTTAG > "$TMP_DIR/WEB-INF/application/version.txt"
+echo $LAST_TAG > "$TMP_DIR/WEB-INF/application/version.txt"
 
 mv "$TMP_DIR/WEB-INF" "$TMP_DIR/cajero"
 if [ $# == 0 ]
