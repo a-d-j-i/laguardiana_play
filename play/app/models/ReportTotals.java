@@ -28,9 +28,9 @@ public class ReportTotals {
 
         public long validatedAmmount = 0;
         public long validatedQuantity = 0;
-        public long cashToValidate = 0;
-        public long checksToValidate = 0;
-        public long ticketsToValidate = 0;
+        public double cashToValidate = 0;
+        public double checksToValidate = 0;
+        public double ticketsToValidate = 0;
         private SortedMap<BillValue, BillQuantity> detail = new TreeMap<BillValue, BillQuantity>();
 
         private Total(Currency c) {
@@ -43,7 +43,7 @@ public class ReportTotals {
             return detail.values();
         }
 
-        public long getToValidateTotal() {
+        public double getToValidateTotal() {
             return cashToValidate + checksToValidate + ticketsToValidate;
         }
     }
