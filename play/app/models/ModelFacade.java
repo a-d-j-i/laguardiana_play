@@ -2,6 +2,7 @@ package models;
 
 import controllers.CountController;
 import controllers.FilterController;
+import controllers.Secure;
 import devices.printer.Printer;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +31,7 @@ import machines.jobs.MachineJobStartFilterAction;
 import machines.jobs.MachineJobStoringErrorReset;
 import machines.status.MachineStatus;
 import models.db.LgBag;
+import models.db.LgUser;
 import play.Logger;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -99,6 +101,21 @@ public class ModelFacade {
         if (printer != null) {
             printer.stop();
         }
+    }
+
+    public static Object getLockedByUser() {
+        MachineStatus status = getCurrentStatus();
+        if (status == null || status.getCurrentUserId() == null) {
+            return false;
+        }
+        LgUser currentUser = LgUser.findById(status.getCurrentUserId());
+        if (currentUser == null) {
+            return false;
+        }
+        if (!Secure.isLocked(status.getCurrentUserId())) {
+            return null;
+        }
+        return currentUser.username;
     }
 
     static public boolean startBillDepositAction(BillDeposit refDeposit) {

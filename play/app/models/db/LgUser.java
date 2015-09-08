@@ -158,6 +158,10 @@ public class LgUser extends GenericModel implements java.io.Serializable {
         postLoad();
     }
 
+    public boolean isAdmin() {
+        return checkPermission("ADMIN", "ADMIN");
+    }
+
     class PermsKey {
 
         String resource;

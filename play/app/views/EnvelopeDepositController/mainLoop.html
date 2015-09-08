@@ -170,7 +170,7 @@
                 lastStatus = status
             }
             doneRefresh();
-        })
+        }).fail( function() { window.location.href = "@{Secure.login()}" } );
     };
 
 

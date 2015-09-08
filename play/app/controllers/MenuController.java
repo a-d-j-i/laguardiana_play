@@ -6,6 +6,7 @@ import models.Configuration;
 import models.ItemQuantity;
 import models.ModelFacade;
 import models.db.LgBag;
+import play.Logger;
 import play.mvc.*;
 
 @With({Secure.class})
@@ -33,6 +34,7 @@ public class MenuController extends Controller {
         renderArgs.put("bagTotals", iq);
         renderArgs.put("bagFreeSpace", bagFreeSpace);
         renderArgs.put("checkPrinter", ModelFacade.isReadyToPrint());
+        renderArgs.put("lockedByUser", ModelFacade.getLockedByUser());
         // I need space for at least one envelope. see ModelFacade->isBagReady too.
         renderArgs.put("bagFull", isBagFull);
 
@@ -47,6 +49,7 @@ public class MenuController extends Controller {
             if (back != null) {
                 Secure.logout("Application.index");
             } else {
+                Logger.debug("Main menu nextstep: %s", nextStep);
                 redirect(Router.getFullUrl(nextStep));
             }
         }

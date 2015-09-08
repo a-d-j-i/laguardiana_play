@@ -25,6 +25,9 @@ import play.mvc.Router;
  */
 public class Secure extends Controller {
 
+    // Use the same as session expiration.
+    static final String expire = Play.configuration.getProperty("application.session.maxAge"); //"2h";
+
     @Before(unless = {"login", "authenticate", "logout"})
     static void checkAccess() throws Throwable {
 
@@ -44,12 +47,19 @@ public class Secure extends Controller {
         // Authentication
         LgUser user = getCurrentUser();
         if (user == null) {
+            if (request.isAjax()) {
+                Logger.error("User not found trying to access %s %s", request.action, request.method);
+                badRequest();
+            }
             login();
             return;
         }
         if (!checkPermission(request.action, request.method)) {
             Logger.error("User %s not allowed to access %s %s", user.username, request.action, request.method);
             flash.error("secure.not_allowed");
+            if (request.isAjax()) {
+                badRequest();
+            }
             login();
         }
         renderArgs.put("user", user);
@@ -60,12 +70,12 @@ public class Secure extends Controller {
             //Logger.info("IN DEV MODE ALL ALLOWED!!!");
             return true;
         }
-        LgUser user = Cache.get(session.getId() + "-user", LgUser.class);
+        LgUser user = getFromCache();
         if (user == null) {
             Logger.error("Invalid user");
             return false;
         }
-        if (user.checkPermission("ADMIN", "ADMIN")) {
+        if (user.isAdmin()) {
             return true;
         }
         return user.checkPermission(resource, operation);
@@ -143,10 +153,6 @@ public class Secure extends Controller {
         }
 
         // Mark user as connected
-        String expire = "30mn";
-        if (remember) {
-            expire = "30d";
-        }
         Cache.set(session.getId() + "-user", user, expire);
 
         Map<String, String> m = Router.route("GET", getOriginalUrl());
@@ -193,12 +199,23 @@ public class Secure extends Controller {
         return url;
     }
 
-    // Is it ok to be public?? 
-    public static LgUser getCurrentUser() {
+    static private LgUser getFromCache() {
         LgUser user = null;
         if (session != null) {
             user = Cache.get(session.getId() + "-user", LgUser.class);
         }
+        if (user != null) {
+            if (!request.isAjax()) {
+                // refresh the cache to avoid expiration.
+                Cache.set(session.getId() + "-user", user, expire);
+            }
+        }
+        return user;
+    }
+
+    // Is it ok to be public?? 
+    public static LgUser getCurrentUser() {
+        LgUser user = getFromCache();
         if (user == null) {
             List<LgUser> q = LgUser.find("byUserName", LgUser.GUEST_NAME).fetch();
             if (q.size() > 1) {
@@ -214,7 +231,7 @@ public class Secure extends Controller {
 
             if (user.isGuest()) {
                 if (session != null) {
-                    Cache.set(session.getId() + "-user", user);
+                    Cache.set(session.getId() + "-user", user, expire);
                 }
             } else {
                 login();
@@ -231,4 +248,13 @@ public class Secure extends Controller {
         }
         return u.userId;
     }
+
+    public static boolean isLocked(Integer currentUserId) {
+        LgUser loggedUser = getCurrentUser();
+        if (loggedUser.isAdmin()) {
+            return false;
+        }
+        return currentUserId != null && !currentUserId.equals(loggedUser.userId);
+    }
+
 }

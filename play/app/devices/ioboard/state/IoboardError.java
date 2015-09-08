@@ -40,6 +40,7 @@ public class IoboardError extends IoboardStateAbstract {
         } else if (t instanceof DeviceTaskReset) {
             Logger.debug("executing reset task %s", t.toString());
             t.setReturnValue(true);
+            ioboard.sendCmd('E');
             return new IoboardStateMain(ioboard);
         } else {
             Logger.error(error);

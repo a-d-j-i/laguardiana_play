@@ -292,7 +292,7 @@
                 $('.total').html(total);
             }
             doneRefresh();
-        })
+        }).fail( function() { window.location.href = "@{Secure.login()}" } );
     }
 
     $('.cancelButton').click(function (event) {

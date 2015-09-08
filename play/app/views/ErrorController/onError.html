@@ -10,6 +10,7 @@
         <h2 class="">&{ 'application.wait' }</h2>
         #{/else}
         <div class="contenido"  style="overflow-y: auto;">
+            <div id="lockedByUser" style="color: red; #{if !lockedByUser}display: none;#{/if}">&{'application.lockedByUser', lockedByUser }</div><br/>
             #{if ( isError ) }
                 <div style="margin: 30px;">
                     <p id="errorCode">
@@ -36,7 +37,9 @@
                 <li class="column">
                     <div class="columna">
                         <!-- link cancelar -->
-                        <a href="@{Application.index()}" class="boton gris full_width">&{ 'main_menu.title' }</a>
+                        #{ifAuthorized resource: 'MenuController.mainMenu', operation: 'GET', fill: 1}
+                            <a href="@{MenuController.MainMenu(null)}" class="boton gris full_width">&{ 'main_menu.title' }</a>
+                        #{/ifAuthorized}
                     </div>
                 </li>
                 <li class="column">
@@ -70,7 +73,9 @@
 //            $("errorStr").html(data[1]);
 //            $("errorCode").html(data[2]);
 //            if (!error) {
-//                window.location.href = "@{MenuController.MainMenu(null)}";
+//                #{ifAuthorized resource: 'MenuController.mainMenu', operation: 'GET', fill: 1}
+//                    window.location.href = "@{MenuController.MainMenu(null)}";
+//                #{/ifAuthorized}
 //            }
 //            //$( '#gstatus' ).html(  data[ 0 ] );
 //            //$( '#gerror' ).html(  data[ 1 ] );

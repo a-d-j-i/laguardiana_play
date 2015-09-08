@@ -10,12 +10,13 @@ import devices.ioboard.task.IoboardTaskConfirmBag;
 import devices.ioboard.task.IoboardTaskGetSensorStatus;
 import devices.ioboard.task.IoboardTaskOpenGate;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import machines.MachineDeviceDecorator;
 import models.db.LgDevice;
+import play.Logger;
 import play.exceptions.TemplateNotFoundException;
 import play.mvc.Before;
-import play.mvc.results.RenderTemplate;
-import play.templates.Template;
 import play.templates.TemplateLoader;
 
 public class IoBoardController extends Application {
@@ -70,11 +71,16 @@ public class IoBoardController extends Application {
         if (request.isAjax()) {
             Object ret[] = new Object[3];
             ret[0] = lastEvent;
-            IoboardTaskGetSensorStatus deviceTask = new IoboardTaskGetSensorStatus();
-            ioBoard.submit(deviceTask).get();
-            IoboardStatusResponse res = deviceTask.getSensorStatus();
-            ret[1] = res;
-            ret[2] = (res == null ? null : res.toString());
+            try {
+                IoboardTaskGetSensorStatus deviceTask = new IoboardTaskGetSensorStatus();
+                ioBoard.submit(deviceTask).get(2000, TimeUnit.MILLISECONDS);
+                IoboardStatusResponse res = deviceTask.getSensorStatus();
+                ret[1] = res;
+                ret[2] = (res == null ? null : res.toString());
+            } catch (TimeoutException ex) {
+                ret[1] = null;
+                ret[2] = "Timeout";
+            }
             renderJSON(ret);
         } else {
             renderArgs.put("deviceId", deviceId);

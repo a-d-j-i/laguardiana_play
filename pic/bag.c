@@ -74,7 +74,8 @@ void initBagState() {
                         initMeiBagState();
                         break;
                 default:
-                        bag_mode = BAG_MODE_MEI;
+                        printf( "INVALID BAG MODE %u IN EEPROM\r\n", bag_mode );
+                        setBagMode( BAG_MODE_MEI );
                         break;
         }
 }

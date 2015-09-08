@@ -30,5 +30,5 @@ output/%.o: %.asm
 clean:
 	rm -rf output/*
 
-program:
+program: all
 	pk2cmd -R -P$(CPU) -M -F$(HEX_FILE)

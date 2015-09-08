@@ -209,7 +209,8 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         final ItemQuantity ret = new ItemQuantity();
         LgDeposit.visitDeposits(deposits, new LgDeposit.DepositVisitor() {
             public void visit(LgDeposit item) {
-                if (item.depositId.equals(currentDepositId) || item.finishCause != LgDeposit.FinishCause.FINISH_CAUSE_CANCEL) {
+                if (item.depositId.equals(currentDepositId) || (item.finishCause != null && !item.finishCause.isCancel())) {
+                    //if (item.depositId.equals(currentDepositId) || item.finishCause != LgDeposit.FinishCause.FINISH_CAUSE_CANCEL) {
                     if (item instanceof EnvelopeDeposit) {
                         ret.envelopes++;
                     } else if (item instanceof BillDeposit) {

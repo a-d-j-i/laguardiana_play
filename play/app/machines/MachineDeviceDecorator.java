@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import models.db.LgBillType;
 import models.db.LgDevice;
 import models.db.LgDevice.DeviceType;
@@ -90,7 +92,11 @@ public class MachineDeviceDecorator implements DeviceInterface {
     final private BlockingQueue<DeviceEvent> eventHistory = new ArrayBlockingQueue<DeviceEvent>(10);
 
     public DeviceEvent getLastEvent() {
-        return eventHistory.poll();
+        try {
+            return eventHistory.poll(500, TimeUnit.MICROSECONDS);
+        } catch (InterruptedException ex) {
+            return null;
+        }
     }
 
     public Future<Boolean> submit(DeviceTaskAbstract deviceTask) {

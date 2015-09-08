@@ -22,11 +22,20 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
 
     public enum FinishCause {
 
-        FINISH_CAUSE_OK,
-        FINISH_CAUSE_ERROR,
-        FINISH_CAUSE_CANCEL,
-        FINISH_CAUSE_BAG_REMOVED,
-        FINISH_CAUSE_BAG_FULL,;
+        FINISH_CAUSE_OK(false),
+        FINISH_CAUSE_ERROR(true),
+        FINISH_CAUSE_CANCEL(true),
+        FINISH_CAUSE_BAG_REMOVED(true),
+        FINISH_CAUSE_BAG_FULL(true),;
+        final private boolean cancel;
+
+        public boolean isCancel() {
+            return cancel;
+        }
+
+        private FinishCause(boolean cancel) {
+            this.cancel = cancel;
+        }
 
         @Override
         public String toString() {

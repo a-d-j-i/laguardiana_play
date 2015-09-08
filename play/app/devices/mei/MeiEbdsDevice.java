@@ -20,7 +20,7 @@ import play.Logger;
 final public class MeiEbdsDevice extends DeviceSerialPortAbstract {
 
     final public static int MEI_EBDS_MAX_RETRIES = 100;
-    final public static int MEI_EBDS_READ_TIMEOUT = 50; //35ms
+    final public static int MEI_EBDS_READ_TIMEOUT = 500; //35ms
 
     public MeiEbdsDevice() {
         super(new MeiEbdsParser(), new SerialPortAdapterAbstract.PortConfiguration(

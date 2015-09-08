@@ -27,6 +27,7 @@ application.back=VOLVER
 application.continue=CONTINUAR
 application.cancel=CANCELAR
 application.checkPrinter=Revise la impresora.
+application.lockedByUser=Bloqueado por usuario %s.
 application.bagRemoved=La bolsa de recaudacion fue removida, espere para depositar.
 application.bagFull=La bolsa de recaudacion esta llena, espere para depositar.
 application.bill_jam=Billete atascado revise la maquina y retirelos.

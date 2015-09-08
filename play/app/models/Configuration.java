@@ -239,7 +239,7 @@ public class Configuration {
 
     public static String getSystemProperty(String property) {
         LgSystemProperty p = LgSystemProperty.getProperty(property);
-        if (p != null && !p.value.isEmpty()) {
+        if (p != null && p.value != null && !p.value.isEmpty()) {
             return p.value;
         } else {
             return getProperty(property);

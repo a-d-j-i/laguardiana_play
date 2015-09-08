@@ -120,7 +120,7 @@
             }
             $( '#cnt_total' ).html( cnt_total );
             $( '#total' ).html( total );
-        })
+        }).fail( function() { window.location.href = "@{Secure.login()}" } );
     }
     
     $( '#cancelButton' ).click( function(event) {

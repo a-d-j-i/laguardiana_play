@@ -66,6 +66,15 @@ public class IoboardStateMain extends IoboardStateAbstract {
                 //return new IoboardError(ioboard, "ioboard state Timeout reading from serial port");
                 // don' go to error, just report
                 ioboard.notifyListeners(new IoBoardStatusError("ioboard state Timeout reading from serial port"));
+                // If we don't switch state we must free the task.
+                if (pendingSensorStatusTask != null) {
+                    pendingSensorStatusTask.setReturnValue(false);
+                    pendingSensorStatusTask = null;
+                }
+                if (pendingStatusTask != null) {
+                    pendingStatusTask.setReturnValue(false);
+                    pendingStatusTask = null;
+                }
                 return this;
             }
             ret = true;

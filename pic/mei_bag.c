@@ -19,7 +19,6 @@ static BAG_STATUS BAG_SENSOR2STATUS[] = {
 
 
 void initMeiBagState() {
-
     bag_status = BAG_SENSOR2STATUS[ BAG_SENSOR(PORTD) ];
     switch (bag_status) {
         case BAG_STATUS_INPLACE_OPEN:

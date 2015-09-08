@@ -93,7 +93,7 @@ public class ReportController extends Controller {
             this.bag_id = d.bag.bagId;
             this.user_id = d.user.externalId;
             this.gecos = d.user.gecos;
-            this.canceled = (d.finishCause == LgDeposit.FinishCause.FINISH_CAUSE_CANCEL);
+            this.canceled = (d.finishCause != null && d.finishCause.isCancel());
             this.startDate = d.startDate;
             this.closeDate = d.closeDate;
             this.finishDate = d.finishDate;
@@ -110,7 +110,7 @@ public class ReportController extends Controller {
 
             for (Object b : qret) {
                 Object[] a = (Object[]) b;
-                Long quantity = (Long) a[ 1];
+                Long quantity = (Long) a[1];
 
                 LgBillType bt = (LgBillType) a[0];
                 BillContentData bdc = new BillContentData(bt.currency.textId, bt.denomination.intValue(), quantity.intValue());

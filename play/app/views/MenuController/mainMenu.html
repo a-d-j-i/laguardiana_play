@@ -26,6 +26,7 @@
             &{'application.bagTotals', bagTotals.bills, bagTotals.envelopes }<br/>
             &{'application.bagSpace', bagFreeSpace }<br/>
             <div id="checkPrinter" style="color: red; #{if !checkPrinter}display: none;#{/if}">&{'application.checkPrinter'}</div><br/>
+            <div id="lockedByUser" style="color: red; #{if !lockedByUser}display: none;#{/if}">&{'application.lockedByUser', lockedByUser }</div><br/>
         </div>
         <hr />
         #{menuBottomButtons}
@@ -63,7 +64,7 @@
                 }
             }
             doneRefresh();
-        });
+        }).fail( function() { window.location.href = "@{Secure.login()}" } );
 
     }
 </script>

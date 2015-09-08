@@ -1,6 +1,5 @@
 package controllers;
 
-import static controllers.EnvelopeDepositController.mainLoop;
 import controllers.serializers.BillQuantitySerializer;
 import controllers.serializers.BillValueSerializer;
 import java.util.List;
@@ -39,10 +38,12 @@ public class BillDepositController extends Controller {
         if (request.isAjax()) {
             return;
         }
-
+        if (Secure.isLocked(status.getCurrentUserId())) {
+            ErrorController.onError();
+        }
         String neededAction = status.getNeededAction();
         if (neededAction == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start") && (status.getCurrentUserId() == null || !status.getCurrentUserId().equals(Secure.getCurrentUserId()))) {
+            if (!request.actionMethod.equalsIgnoreCase("start")) {
                 Logger.debug("wizardFixPage Redirect Application.index, requested %s, currentUser %s, statusUser %d",
                         request.actionMethod, Secure.getCurrentUser(), status.getCurrentUserId());
                 Application.index();

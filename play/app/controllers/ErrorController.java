@@ -46,11 +46,12 @@ public class ErrorController extends Controller {
         }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-            ret[ 0] = isError;
-            ret[ 1] = Configuration.getErrorStr();
+            ret[0] = isError;
+            ret[1] = Configuration.getErrorStr();
             ret[2] = status.getStateName();
             renderJSON(ret);
         } else {
+            renderArgs.put("lockedByUser", ModelFacade.getLockedByUser());
             renderArgs.put("isError", isError);
             renderArgs.put("errorStr", Configuration.getErrorStr());
             renderArgs.put("errorCode", status.getStateName());
@@ -79,8 +80,8 @@ public class ErrorController extends Controller {
         }
         if (request.isAjax()) {
             Object ret[] = new Object[3];
-            ret[ 0] = isError;
-            ret[ 1] = Configuration.getErrorStr();
+            ret[0] = isError;
+            ret[1] = Configuration.getErrorStr();
             ret[2] = status.getStateName();
             renderJSON(ret);
         } else {

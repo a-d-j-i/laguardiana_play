@@ -2,14 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="11">
         <file>
-            <url>app/devices/glory/state/poll/GloryDE50StatePoll.java</url>
-            <bookmark id="1">
-                <name/>
-                <line>42</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
             <url>app/machines/MachineAbstract.java</url>
             <bookmark id="9">
                 <name/>
@@ -28,19 +20,6 @@
             </bookmark>
         </file>
         <file>
-            <url>app/devices/device/DeviceAbstract.java</url>
-            <bookmark id="7">
-                <name/>
-                <line>64</line>
-                <key/>
-            </bookmark>
-            <bookmark id="5">
-                <name/>
-                <line>75</line>
-                <key/>
-            </bookmark>
-        </file>
-        <file>
             <url>app/devices/glory/state/poll/GloryDE50StateCount.java</url>
             <bookmark id="3">
                 <name/>
@@ -50,6 +29,27 @@
             <bookmark id="2">
                 <name/>
                 <line>310</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>app/devices/glory/state/poll/GloryDE50StatePoll.java</url>
+            <bookmark id="1">
+                <name/>
+                <line>42</line>
+                <key/>
+            </bookmark>
+        </file>
+        <file>
+            <url>app/devices/device/DeviceAbstract.java</url>
+            <bookmark id="7">
+                <name/>
+                <line>64</line>
+                <key/>
+            </bookmark>
+            <bookmark id="5">
+                <name/>
+                <line>75</line>
                 <key/>
             </bookmark>
         </file>
