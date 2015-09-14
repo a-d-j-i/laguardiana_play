@@ -45,12 +45,12 @@ public class LgBillType extends GenericModel implements java.io.Serializable {
     }
 
     public static LgBillType find(int denomination, int unitLov) {
-        return LgBillType.find("select l from LgBillType l where denomination = ? and unitLov = ?",
+        return LgBillType.find("select l from LgBillType l where denomination = ? and unitLov = ? and ( end_date is null or end_date > current_timestamp())",
                 denomination, unitLov).first();
     }
 
     public static List< LgBillType> find(Currency currency) {
-        return LgBillType.find("select l from LgBillType l where currency = ? order by denomination desc", currency).fetch();
+        return LgBillType.find("select l from LgBillType l where currency = ? and ( end_date is null or end_date > current_timestamp()) order by denomination desc", currency).fetch();
     }
 
     @PrePersist

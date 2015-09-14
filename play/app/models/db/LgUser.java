@@ -81,7 +81,7 @@ public class LgUser extends GenericModel implements java.io.Serializable {
 
     public static LgUser authenticate(String username, String password) {
         List<LgUser> users = LgUser.find("select u from LgUser u where u.username = ? and "
-                + "( u.endDate is null or u.endDate > CURRENT_TIMESTAMP )", username).fetch();
+                + "( u.endDate is null or u.endDate > current_timestamp() )", username).fetch();
         LgUser validated = null;
         for (LgUser user : users) {
             Logger.debug("Validating user %s", user.username);
