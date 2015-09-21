@@ -26,7 +26,8 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         FINISH_CAUSE_ERROR(true),
         FINISH_CAUSE_CANCEL(true),
         FINISH_CAUSE_BAG_REMOVED(true),
-        FINISH_CAUSE_BAG_FULL(true),;
+        FINISH_CAUSE_BAG_FULL(true),
+        FINISH_STORING_ERROR(true),;
         final private boolean cancel;
 
         public boolean isCancel() {

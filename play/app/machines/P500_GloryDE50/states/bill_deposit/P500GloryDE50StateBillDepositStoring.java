@@ -37,6 +37,12 @@ public class P500GloryDE50StateBillDepositStoring extends P500GloryDE50StateBill
 
     /*
      @Override
+     public void cancel() {
+     // this could happen on error
+     cancelWithCause(FinishCause.FINISH_CAUSE_STORING_ERROR);
+     }
+
+     @Override
      public void onGloryEvent(ManagerStatus m) {
      Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
      switch (m.getState()) {

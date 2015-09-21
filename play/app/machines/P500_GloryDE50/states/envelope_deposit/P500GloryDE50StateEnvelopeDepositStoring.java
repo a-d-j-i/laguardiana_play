@@ -24,6 +24,12 @@ class P500GloryDE50StateEnvelopeDepositStoring extends P500GloryDE50StateEnvelop
 //    }
     /*
      @Override
+     public void cancel() {
+     // this could happen on error
+     cancelWithCause(FinishCause.FINISH_CAUSE_STORING_ERROR);
+     }
+
+     @Override
      public void onGloryEvent(ManagerStatus m) {
      Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());
      switch (m.getState()) {
