@@ -13,7 +13,7 @@ public class PrinterEvent extends LgEvent {
     }
 
     public static void save(Printer m, String format, Object... args) {
-        String msg = String.format("PrinterEvent : %s -> %s", m.toString(), String.format(format, args));
+        String msg = String.format("PrinterEvent : %s -> %s", m == null ? "NULL" : m.toString(), String.format(format, args));
         Logger.debug(msg);
         try {
             PrinterEvent e = new PrinterEvent(msg);

@@ -31,6 +31,7 @@ import machines.jobs.MachineJobStartFilterAction;
 import machines.jobs.MachineJobStoringErrorReset;
 import machines.status.MachineStatus;
 import models.db.LgBag;
+import models.db.LgDeposit;
 import models.db.LgUser;
 import play.Logger;
 import play.templates.Template;
@@ -139,7 +140,7 @@ public class ModelFacade {
     }
 
     static public boolean cancel() {
-        return machine.execute(new MachineJobCancelDeposit(machine));
+        return machine.execute(new MachineJobCancelDeposit(machine, LgDeposit.FinishCause.FINISH_CAUSE_CANCEL));
     }
 
     static public boolean confirmAction() {

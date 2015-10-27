@@ -101,7 +101,6 @@ public class IoboardStateMain extends IoboardStateAbstract {
             DeviceResponseInterface response = tr.getResponse();
             if (response instanceof IoboardStateResponse) {
                 IoboardStateResponse r = (IoboardStateResponse) response;
-                IoboardStatus.IoboardBagApprovedState prevBagAproveState = bagAproveState;
                 switch (bagAproveState) {
                     case BAG_APROVED:
                         if (!r.isBagAproveState()) {
@@ -172,6 +171,10 @@ public class IoboardStateMain extends IoboardStateAbstract {
             }
             return null;
         } else if (task instanceof DeviceTaskReset) {
+            String err = ioboard.sendCmd('E');
+            if (err != null) {
+                return new IoboardError(ioboard, err);
+            }
             task.setReturnValue(true);
             return null;
         } else {

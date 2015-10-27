@@ -18,8 +18,11 @@ import play.Logger;
  */
 public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
 
-    public P500MeiStateCanceling(P500MEIStateContext context) {
+    private final LgDeposit.FinishCause finishCause;
+
+    P500MeiStateCanceling(P500MEIStateContext context, LgDeposit.FinishCause finishCause) {
         super(context);
+        this.finishCause = finishCause;
     }
 
     @Override
@@ -48,7 +51,7 @@ public class P500MeiStateCanceling extends P500MeiStateBillDepositContinue {
             context.setCurrentState(new P500MeiStateError(this, context, err.getError()));
             return;
         } else if (st.is(MeiEbdsStatus.CANCELED)) {
-            context.setCurrentState(new P500MeiStateBillDepositFinish(context, LgDeposit.FinishCause.FINISH_CAUSE_CANCEL));
+            context.setCurrentState(new P500MeiStateBillDepositFinish(context, finishCause));
             return;
         } else if (st.is(MeiEbdsStatus.COUNTING)) {
             if (!context.cancel()) {

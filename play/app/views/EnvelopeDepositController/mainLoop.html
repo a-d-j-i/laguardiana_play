@@ -175,13 +175,17 @@
 
 
     $('.continueButton').click(function (event) {
-        $.getJSON('@{accept()}', function (data) {
-        });
+        if (!waiting) {
+            $.getJSON('@{accept()}', function (data) {
+            });
+        }
     });
 
     $('.cancelButton').click(function (event) {
-        $.getJSON('@{cancel()}', function (data) {
-        });
+        if (!waiting) {
+            $.getJSON('@{cancel()}', function (data) {
+            });
+        }
     });
 </script>
 #{/set}

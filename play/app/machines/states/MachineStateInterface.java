@@ -5,6 +5,7 @@ import machines.MachineDeviceDecorator;
 import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
+import models.db.LgDeposit;
 
 /**
  *
@@ -18,7 +19,7 @@ abstract public interface MachineStateInterface {
 
     public boolean onAcceptDepositEvent();
 
-    public boolean onCancelDepositEvent();
+    public boolean onCancelDepositEvent(LgDeposit.FinishCause finishCause);
 
     public boolean onConfirmDepositEvent();
 

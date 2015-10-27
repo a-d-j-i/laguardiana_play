@@ -202,24 +202,19 @@ public class LgBag extends GenericModel implements java.io.Serializable {
     }
 
     public ItemQuantity getItemQuantity() {
-        return getItemQuantity(null);
-    }
-
-    public ItemQuantity getItemQuantity(final Integer currentDepositId) {
         final ItemQuantity ret = new ItemQuantity();
         LgDeposit.visitDeposits(deposits, new LgDeposit.DepositVisitor() {
             public void visit(LgDeposit item) {
-                if (item.depositId.equals(currentDepositId) || (item.finishCause != null && !item.finishCause.isCancel())) {
-                    //if (item.depositId.equals(currentDepositId) || item.finishCause != LgDeposit.FinishCause.FINISH_CAUSE_CANCEL) {
-                    if (item instanceof EnvelopeDeposit) {
+                if (item instanceof EnvelopeDeposit) {
+                    if (item.finishCause != null && !item.finishCause.isCancel()) {
                         ret.envelopes++;
-                    } else if (item instanceof BillDeposit) {
-                        for (LgBill b : item.bills) {
-                            ret.bills += b.quantity;
-                        }
-                    } else {
-                        Logger.error(String.format("Invalid deposit type %s", item.getClass()));
                     }
+                } else if (item instanceof BillDeposit) {
+                    for (LgBill b : item.bills) {
+                        ret.bills += b.quantity;
+                    }
+                } else {
+                    Logger.error(String.format("Invalid deposit type %s", item.getClass()));
                 }
             }
         });

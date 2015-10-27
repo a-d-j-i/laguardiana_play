@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import models.BillDeposit;
 import models.Configuration;
+import static models.Configuration.EXTERNAL_APP_ID;
 import models.EnvelopeDeposit;
 import models.ReportTotals;
 import models.ReportTotals.Total;
@@ -28,8 +29,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 
 public class ReportController extends Controller {
-
-    final static int EXTERNAL_APP_ID = 2;
 
     @Before
     public static void setFormat(String format) {
@@ -151,18 +150,27 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgDeposit> depositList = LgDeposit.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            List<LgDeposit> depositList;
+            while (true) {
+                depositList = LgDeposit.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+                if (depositList.isEmpty() && page > 1) {
+                    page--;
+                } else {
+                    break;
+                }
+            }
+            if (!depositList.isEmpty()) {
+                renderArgs.put("nextPage", page + 1);
+            } else {
+                renderArgs.put("nextPage", page);
+            }
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
                 renderArgs.put("prevPage", 1);
             }
-            if (depositList.size() == length) {
-                renderArgs.put("nextPage", page + 1);
-            } else {
-                renderArgs.put("nextPage", page);
-            }
             renderArgs.put("data", depositList);
+            renderArgs.put("page", page);
             render();
         } else {
             List<LgDeposit> depositList = LgDeposit.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
@@ -240,18 +248,27 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            List<LgBag> bagList;
+            while (true) {
+                bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+                if (bagList.isEmpty() && page > 1) {
+                    page--;
+                } else {
+                    break;
+                }
+            }
+            if (!bagList.isEmpty()) {
+                renderArgs.put("nextPage", page + 1);
+            } else {
+                renderArgs.put("nextPage", page);
+            }
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
                 renderArgs.put("prevPage", 1);
             }
-            if (bagList.size() == length) {
-                renderArgs.put("nextPage", page + 1);
-            } else {
-                renderArgs.put("nextPage", page);
-            }
             renderArgs.put("data", bagList);
+            renderArgs.put("page", page);
             render();
         } else {
             List<LgBag> bagList = LgBag.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
@@ -300,18 +317,27 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            List<LgZ> zList;
+            while (true) {
+                zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+                if (zList.isEmpty() && page > 1) {
+                    page--;
+                } else {
+                    break;
+                }
+            }
+            if (!zList.isEmpty()) {
+                renderArgs.put("nextPage", page + 1);
+            } else {
+                renderArgs.put("nextPage", page);
+            }
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
                 renderArgs.put("prevPage", 1);
             }
-            if (zList.size() == length) {
-                renderArgs.put("nextPage", page + 1);
-            } else {
-                renderArgs.put("nextPage", page);
-            }
             renderArgs.put("data", zList);
+            renderArgs.put("page", page);
             render();
         } else {
             List<LgZ> zList = LgZ.findUnprocessed(EXTERNAL_APP_ID).fetch(50);
@@ -371,18 +397,27 @@ public class ReportController extends Controller {
                 page = 1;
             }
             int length = 4;
-            List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+            List<LgEvent> eventList;
+            while (true) {
+                eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(page, length);
+                if (eventList.isEmpty() && page > 1) {
+                    page--;
+                } else {
+                    break;
+                }
+            }
+            if (!eventList.isEmpty()) {
+                renderArgs.put("nextPage", page + 1);
+            } else {
+                renderArgs.put("nextPage", page);
+            }
             if (page > 1) {
                 renderArgs.put("prevPage", page - 1);
             } else {
                 renderArgs.put("prevPage", 1);
             }
-            if (eventList.size() == length) {
-                renderArgs.put("nextPage", page + 1);
-            } else {
-                renderArgs.put("nextPage", page);
-            }
             renderArgs.put("data", eventList);
+            renderArgs.put("page", page);
             render();
         } else {
             List<LgEvent> eventList = LgEvent.findUnprocessed(EXTERNAL_APP_ID).fetch(50);

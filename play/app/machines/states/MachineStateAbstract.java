@@ -4,6 +4,7 @@ import devices.device.status.DeviceStatusInterface;
 import machines.MachineDeviceDecorator;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
+import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -24,8 +25,8 @@ abstract public class MachineStateAbstract implements MachineStateInterface {
     }
 
     @Override
-    public boolean onCancelDepositEvent() {
-        Logger.error("Can't cancel deposit");
+    public boolean onCancelDepositEvent(LgDeposit.FinishCause finishCause) {
+        Logger.error("Can't cancel deposit with finish cause %s", finishCause.toString());
         return false;
     }
 

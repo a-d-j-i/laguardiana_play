@@ -1,7 +1,9 @@
 package machines.P500_GloryDE50.states.bill_deposit;
 
+import machines.P500_GloryDE50.states.P500GloryDE50StateError;
 import machines.P500_GloryDE50.states.context.P500GloryDE50StateBillDepositContext;
 import machines.status.MachineBillDepositStatus;
+import models.db.LgDeposit;
 
 /**
  *
@@ -27,8 +29,12 @@ public class P500GloryDE50StateBillDepositReadyToStoreEscrowFull extends P500Glo
     }
 
     @Override
-    public boolean onCancelDepositEvent() {
-        return context.setCurrentState(new P500GloryDE50StateBillDepositWithdraw(context));
+    public boolean onCancelDepositEvent(LgDeposit.FinishCause finishCause) {
+        if (finishCause == LgDeposit.FinishCause.FINISH_CAUSE_CANCEL) {
+            return context.setCurrentState(new P500GloryDE50StateBillDepositWithdraw(context));
+        } else {
+            return context.setCurrentState(new P500GloryDE50StateError(context, this, "Invalid finish cause %s", finishCause.toString()));
+        }
     }
 
     /*

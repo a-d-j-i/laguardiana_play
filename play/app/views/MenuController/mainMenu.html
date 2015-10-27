@@ -21,9 +21,9 @@
                     #{menuButtons buttons: buttons, perms: perms, titles: titles/}
                 </ul>
             </div>
-            <div id="bagFull" style="color: red; #{if !bagFull || bagRemoved }display: none;#{/if}">&{'application.bagFull'}<br/></div>
-            <div id="bagRemoved" style="color: red; #{if !bagRemoved}display: none;#{/if}">&{'application.bagRemoved'}</div><br/>
-            &{'application.bagTotals', bagTotals.bills, bagTotals.envelopes }<br/>
+            <div id="bagFull" style="color: red; #{if !bagFull}display: none;#{/if}">&{'application.bagFull'}<br/></div>
+            <div id="bagRemoved" style="color: red; #{if bagFull || !bagRemoved }display: none;#{/if}">&{'application.bagRemoved'}</div><br/>
+            <div id="totals">${bagTotals}</div><br/>
             &{'application.bagSpace', bagFreeSpace }<br/>
             <div id="checkPrinter" style="color: red; #{if !checkPrinter}display: none;#{/if}">&{'application.checkPrinter'}</div><br/>
             <div id="lockedByUser" style="color: red; #{if !lockedByUser}display: none;#{/if}">&{'application.lockedByUser', lockedByUser }</div><br/>
@@ -47,20 +47,21 @@
             var checkPrinter = data[ 0 ];
             var bagRemoved = data[ 1 ];
             var bagFull = data[ 2 ];
+            $("#totals").text(data[3]);
             if (checkPrinter) {
                 $("#checkPrinter").show();
             } else {
                 $("#checkPrinter").hide();
             }
-            if (bagRemoved) {
-                $("#bagRemoved").show();
-                $("#bagFull").hide();
-            } else {
+            if (bagFull) {
                 $("#bagRemoved").hide();
-                if (bagFull) {
-                    $("#bagFull").show();
+                $("#bagFull").show();
+            } else {
+                $("#bagFull").hide();
+                if (bagRemoved) {
+                    $("#bagRemoved").show();
                 } else {
-                    $("#bagFull").hide();
+                    $("#bagRemoved").hide();
                 }
             }
             doneRefresh();

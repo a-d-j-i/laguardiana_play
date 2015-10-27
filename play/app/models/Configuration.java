@@ -126,7 +126,8 @@ public class Configuration {
         if (d == null) {
             return 50;
         }
-        return Long.parseLong(d);
+        long ret = Long.parseLong(d);
+        return Math.max(1, ret);
     }
 
     static public long equivalentBillQuantity(Long bills, Long envelopes) {
