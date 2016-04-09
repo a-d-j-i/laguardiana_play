@@ -55,7 +55,16 @@ void init()
 	// ALL A/D disabled
 	ADCON1 |= 0x0F;
 
-// BOOTLOADER
+// INT0,1 config
+        INTCON2bits.INTEDG0 = 0;
+        INTCON2bits.INTEDG1 = 0;
+        INTCON3bits.INT1IP = 1;
+        
+        INTCONbits.INT0IE = 1;
+        INTCON3bits.INT1IE = 1;
+        
+
+        // BOOTLOADER
 // READ EEPROM
         EEADR = 0;
         EECON1bits.CFGS = 0;

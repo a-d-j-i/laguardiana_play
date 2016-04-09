@@ -10,7 +10,7 @@ void TimerInterruptHandler() __interrupt ( 1 ) {
                 PORTAbits.RA1   = !PORTAbits.RA1;
         }
 }
-*/
+ */
 
 
 /*
@@ -46,7 +46,7 @@ void timer_init(void) {
         INTCONbits.TMR0IE = 1; //enable interrupts
 
 }
-*/
+ */
 /*
 void TimerInterruptHandler() __interrupt ( 1 ) {
         if ( PIR2bits.TMR3IF & PIE2bits.TMR3IE ) {    // Timer0 overflow interrupt
@@ -62,135 +62,161 @@ void TimerInterruptHandler() __interrupt ( 1 ) {
                 PORTBbits.RB5   = !PORTBbits.RB5;
         }
 }
-*/
+ */
 
 static char cnt = 0;
 static char in = 0;
-void TimerInterruptHandler() __interrupt ( 1 ) {
-        if ( PIR2bits.TMR3IF & PIE2bits.TMR3IE ) {    // Timer0 overflow interrupt
-                TMR3H = 0xfe;
-                TMR3L = 0x00;
-                PIR2bits.TMR3IF = 0;    // ACK
-                if ( cnt > 80 ) {
-                        cnt = 0;
-                        TRISBbits.TRISB3 = 1; // disabled
-                } else if ( cnt > 72 ) {
-                        TRISBbits.TRISB3 = 0; // enabled
-                } 
+static long lock2_cnt = 0;
+static char lock_exec = 0;
 
-                if ( cnt == 0 ) {
-                        if ( PORTBbits.RB1 ) {
-                                PORTBbits.RB4 = 1;
-                        } else {
-                                PORTBbits.RB4 = 0;
-                        }
-                        //PORTBbits.RB4 = !PORTBbits.RB1;
-                        //PORTBbits.RB4 = 1;
-/*                } else {
-                        PORTBbits.RB4 = 0;*/
-                }
-                cnt++;
+void TimerInterruptHandler() __interrupt(1) {
+    if (INTCONbits.INT0IF && INTCONbits.INT0IE) {
+        if (lock_exec == 0) {
+            lock2_cnt = 10000;
+            lock_exec = 1;
+            lock_print = 1;
         }
+        INTCONbits.INT0IF = 0;
+    } else if (INTCON3bits.INT1IF && INTCON3bits.INT1IE) {
+        if (PORTBbits.RB0 == 1) {
+            lock2_cnt = 50000;
+            must_sound = 1;
+            lock_exec = 0;
+        }
+        INTCON3bits.INT1IF = 0;
+    } else if (PIR2bits.TMR3IF & PIE2bits.TMR3IE) { // Timer0 overflow interrupt
+        TMR3H = 0xfe;
+        TMR3L = 0x00;
+        PIR2bits.TMR3IF = 0; // ACK
+
+        if (lock2_cnt == 0) {
+            must_sound = 0;
+            PORTAbits.RA7 = 0;
+        } else {
+            lock2_cnt--;
+            PORTAbits.RA7 = 1;
+        }
+        if (cnt > 80) {
+            cnt = 0;
+            TRISBbits.TRISB3 = 1; // disabled
+        } else if (cnt > 72) {
+            TRISBbits.TRISB3 = 0; // enabled
+        }
+
+        if (cnt == 0) {
+            if (PORTBbits.RB1) {
+                PORTBbits.RB4 = 1;
+            } else {
+                PORTBbits.RB4 = 0;
+            }
+            //PORTBbits.RB4 = !PORTBbits.RB1;
+            //PORTBbits.RB4 = 1;
+            /*                } else {
+                                    PORTBbits.RB4 = 0;*/
+        }
+        cnt++;
+    }
 }
 
 // Output trough RB3 in configuration bits CCP2MX=PORTBE
+
 void timer_init(void) {
-        // Output bits
-        TRISBbits.TRISB3 = 0;  // J9
-        PORTBbits.RB3 = 0;
+    // Output bits
+    TRISBbits.TRISB3 = 0; // J9
+    PORTBbits.RB3 = 0;
 
-        TRISBbits.TRISB4 = 0;  // J8
-        PORTBbits.RB4 = 0;
-/*
-        TRISCbits.TRISC1 = 0;
-        PORTCbits.RC1 = 0;
-        TRISCbits.TRISC2 = 0;
-        PORTCbits.RC2 = 0;
-*/
-/*
-        TRISBbits.TRISB4 = 0;
-        PORTBbits.RB4 = 0;
-        TRISBbits.TRISB5 = 0;
-        PORTBbits.RB5 = 0;
-*/
+    TRISBbits.TRISB4 = 0; // J8
+    PORTBbits.RB4 = 0;
+    /*
+            TRISCbits.TRISC1 = 0;
+            PORTCbits.RC1 = 0;
+            TRISCbits.TRISC2 = 0;
+            PORTCbits.RC2 = 0;
+     */
+    /*
+            TRISBbits.TRISB4 = 0;
+            PORTBbits.RB4 = 0;
+            TRISBbits.TRISB5 = 0;
+            PORTBbits.RB5 = 0;
+     */
 
-        // prescaler
-        T2CONbits.T2CKPS0 = 0;
-        T2CONbits.T2CKPS0 = 0;
+    // prescaler
+    T2CONbits.T2CKPS0 = 0;
+    T2CONbits.T2CKPS0 = 0;
 
-        // postscaler
-        T2CONbits.T2OUTPS0 = 0;
-        T2CONbits.T2OUTPS1 = 0;
-        T2CONbits.T2OUTPS2 = 0;
-        T2CONbits.T2OUTPS3 = 0;
+    // postscaler
+    T2CONbits.T2OUTPS0 = 0;
+    T2CONbits.T2OUTPS1 = 0;
+    T2CONbits.T2OUTPS2 = 0;
+    T2CONbits.T2OUTPS3 = 0;
 
-        TMR2 = 0;
-        PR2 = 210;
+    TMR2 = 0;
+    PR2 = 210;
 
-        T2CONbits.TMR2ON = 1;
+    T2CONbits.TMR2ON = 1;
 
-        // Disable timer interrupts
-        IPR1bits.TMR2IP = 1;    // high priority interrupt
-        PIE1bits.TMR2IE = 0;
+    // Disable timer interrupts
+    IPR1bits.TMR2IP = 1; // high priority interrupt
+    PIE1bits.TMR2IE = 0;
 
 
 
-        // Configure timer
-/*        T3CONbits.RD16 = 1;         // one 16 bits read/write
-        T3CONbits.T3CCP1 = 1;       // source for ccp1
-        T3CONbits.T3CCP2 = 1;       // source for ccp2
+    // Configure timer
+    /*        T3CONbits.RD16 = 1;         // one 16 bits read/write
+            T3CONbits.T3CCP1 = 1;       // source for ccp1
+            T3CONbits.T3CCP2 = 1;       // source for ccp2
 
-        T3CONbits.T3SYNC = 1;       // ignored
+            T3CONbits.T3SYNC = 1;       // ignored
 
-        T3CONbits.TMR3CS = 0;       // use internal clock fosc/4 = 2Mhz
-        // prescaler
-        T3CONbits.T3CKPS0 = 0;
-        T3CONbits.T3CKPS1 = 0;
+            T3CONbits.TMR3CS = 0;       // use internal clock fosc/4 = 2Mhz
+            // prescaler
+            T3CONbits.T3CKPS0 = 0;
+            T3CONbits.T3CKPS1 = 0;
 
-        T3CONbits.TMR3ON = 1;       // time on
+            T3CONbits.TMR3ON = 1;       // time on
     
 
-        TMR3H = 0xFF;
-        TMR3L = 0xFF - 26;
+            TMR3H = 0xFF;
+            TMR3L = 0xFF - 26;
         
-        // Disable timer interrupts
-        IPR2bits.TMR3IP = 1;    // high priority interrupt
-        PIE2bits.TMR3IE = 1;
-*/
+            // Disable timer interrupts
+            IPR2bits.TMR3IP = 1;    // high priority interrupt
+            PIE2bits.TMR3IE = 1;
+     */
 
 
-        // Disable compare interrupts
-        IPR2bits.CCP2IP = 1;    // high priority interrupt
-        PIE2bits.CCP2IE = 0;
+    // Disable compare interrupts
+    IPR2bits.CCP2IP = 1; // high priority interrupt
+    PIE2bits.CCP2IE = 0;
 
 
-        // Capture module
-        CCP2CON = 0;
-//        CCPR2H = 0xFF;
-//        CCPR2L = 0xFF - 5;
-        CCPR2 = 105;
-        CCP2CON = 0x0C;         // PWM mode
+    // Capture module
+    CCP2CON = 0;
+    //        CCPR2H = 0xFF;
+    //        CCPR2L = 0xFF - 5;
+    CCPR2 = 105;
+    CCP2CON = 0x0C; // PWM mode
 
 
 
-        T3CONbits.RD16 = 1;         // one 16 bits read/write
-        T3CONbits.T3CCP1 = 0;       // source for ccp1
-        T3CONbits.T3CCP2 = 0;       // source for ccp2
+    T3CONbits.RD16 = 1; // one 16 bits read/write
+    T3CONbits.T3CCP1 = 0; // source for ccp1
+    T3CONbits.T3CCP2 = 0; // source for ccp2
 
-        T3CONbits.T3SYNC = 1;       // ignored
+    T3CONbits.T3SYNC = 1; // ignored
 
-        T3CONbits.TMR3CS = 0;       // use internal clock fosc/4 = 2Mhz
-        // prescaler
-        T3CONbits.T3CKPS0 = 0;
-        T3CONbits.T3CKPS1 = 0;
+    T3CONbits.TMR3CS = 0; // use internal clock fosc/4 = 2Mhz
+    // prescaler
+    T3CONbits.T3CKPS0 = 0;
+    T3CONbits.T3CKPS1 = 0;
 
-        T3CONbits.TMR3ON = 1;       // time on
-    
-        TMR3H = 0;
-        TMR3L = 0;
+    T3CONbits.TMR3ON = 1; // time on
 
-        IPR2bits.TMR3IP = 1;    // high priority interrupt
-        PIE2bits.TMR3IE = 1;
-        
-       
+    TMR3H = 0;
+    TMR3L = 0;
+
+    IPR2bits.TMR3IP = 1; // high priority interrupt
+    PIE2bits.TMR3IE = 1;
+
+
 }
