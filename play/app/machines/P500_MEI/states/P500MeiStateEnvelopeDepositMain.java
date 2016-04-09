@@ -67,8 +67,8 @@ public class P500MeiStateEnvelopeDepositMain extends MachineStateAbstract {
                     }
 
                     @Override
-                    public boolean onCancelDepositEvent() {
-                        return P500MeiStateEnvelopeDepositMain.this.onCancelDepositEvent();
+                    public boolean onCancelDepositEvent(LgDeposit.FinishCause finishCause) {
+                        return P500MeiStateEnvelopeDepositMain.this.onCancelDepositEvent(finishCause);
                     }
 
                 }
@@ -99,8 +99,8 @@ public class P500MeiStateEnvelopeDepositMain extends MachineStateAbstract {
     }
 
     @Override
-    public boolean onCancelDepositEvent() {
-        return context.setCurrentState(new P500MeiStateEnvelopeDepositFinish(context, LgDeposit.FinishCause.FINISH_CAUSE_CANCEL));
+    public boolean onCancelDepositEvent(LgDeposit.FinishCause finishCause) {
+        return context.setCurrentState(new P500MeiStateEnvelopeDepositFinish(context, finishCause));
     }
 
     @Override

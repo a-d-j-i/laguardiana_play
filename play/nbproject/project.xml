@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
-            <name>Cajero</name>
+            <name>Cajero MEI</name>
         </general-data>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>Cajero</name>
+            <name>Cajero MEI</name>
             <properties>
                 <property name="ant.script">/opt/play-1.2.7/framework/build.xml</property>
                 <property name="application.path">/home/adji/Desktop/work/laguardiana/laguardiana_play_new</property>

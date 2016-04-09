@@ -7,6 +7,7 @@ import models.ItemQuantity;
 import models.ModelFacade;
 import models.db.LgBag;
 import play.Logger;
+import play.i18n.Messages;
 import play.mvc.*;
 
 @With({Secure.class})
@@ -22,16 +23,18 @@ public class MenuController extends Controller {
         }
         boolean isBagFull = Configuration.isBagFull(iq.bills - 1, iq.envelopes + 1);
         boolean isBagRemoved = !Configuration.isIgnoreBag() && !ModelFacade.isBagReady(false);
+        String bagTotals = Messages.get("application.bagTotals", iq.bills, iq.envelopes);
         if (request.isAjax()) {
-            Object[] o = new Object[3];
+            Object[] o = new Object[4];
             o[0] = ModelFacade.isReadyToPrint();
             o[1] = isBagRemoved;
             // I need space for at least one envelope. see ModelFacade->isBagReady too.
             o[2] = isBagFull;
+            o[3] = bagTotals;
             renderJSON(o);
         }
         renderArgs.put("bagRemoved", isBagRemoved);
-        renderArgs.put("bagTotals", iq);
+        renderArgs.put("bagTotals", bagTotals);
         renderArgs.put("bagFreeSpace", bagFreeSpace);
         renderArgs.put("checkPrinter", ModelFacade.isReadyToPrint());
         renderArgs.put("lockedByUser", ModelFacade.getLockedByUser());

@@ -73,7 +73,7 @@
                             #{select 'formData.cashData.value', items: currencies, valueProperty:'numericId', labelProperty:'description', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input type="number" autocomplete="off" name="formData.cashData.amount" id="cashData" value="${formData?.cashData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            <input type="text" autocomplete="off" name="formData.cashData.amount" id="cashData" value="${formData?.cashData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
                             #{ifError 'formData.cashData.amount'}
                             <label for="formData.cashData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.cashData_amount' }</label>
                             #{/ifError}
@@ -92,7 +92,7 @@
                             #{select 'formData.checkData.value', items: currencies, valueProperty:'numericId', labelProperty:'description', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input type="number" autocomplete="off" name="formData.checkData.amount" id="checkData" value="${formData?.checkData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            <input type="text" autocomplete="off" name="formData.checkData.amount" id="checkData" value="${formData?.checkData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
                             #{ifError 'formData.checkData.amount'}
                             <label for="formData.checkData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.checkData_amount' }</label>
                             #{/ifError}
@@ -112,7 +112,7 @@
                             #{select 'formData.ticketData.value', items: currencies, valueProperty:'numericId', labelProperty:'description', value:val, class : 'full_width' /}
                             &{ 'envelope_deposit.amount_to_confirm' }
                             &nbsp;&nbsp;
-                            <input type="number" autocomplete="off" name="formData.ticketData.amount" id="ticketData" value="${formData?.ticketData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
+                            <input type="text" autocomplete="off" name="formData.ticketData.amount" id="ticketData" value="${formData?.ticketData?.amount}" placeholder="&{ 'envelope_deposit.amount_to_confirm_title' }" class="full_width" />
                             #{ifError 'formData.ticketData.amount'}
                             <label for="formData.ticketData.amount" generated="true" class="error" style="display: inline; ">&{ 'validation.required.ticketData_amount' }</label>
                             #{/ifError}         

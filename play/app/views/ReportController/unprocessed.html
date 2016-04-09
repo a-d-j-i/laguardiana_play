@@ -1,35 +1,100 @@
 #{extends 'main.html' /}
 %{  def action = "$request.action";
-    def xml_url = actionBridge."$action".call();
-    def prev_url = play.mvc.Router.reverse( "$action( prevPage )" )
-    def next_url = play.mvc.Router.reverse( "$action( nextPage )"  )
+def action_url = actionBridge."$action".call();
+def prev_url = play.mvc.Router.reverse( "$action( prevPage )" )
+def next_url = play.mvc.Router.reverse( "$action( nextPage )"  )
 }%
 <section>
     <header></header>
     <a href="@{MenuController.unprocessedMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
     <article>
         <div class="contenido_grande" style="overflow: auto;">
+            <div style="text-align: center;">
+                <form action="${action_url}" method="get" accept-charset="utf-8" enctype="application/x-www-form-urlencoded" id="mainForm">
+                <input type="hidden" name="page" value="${page}">
+                </form>
+            </div>
             #{doLayout /}
         </div>
         <hr>
         <div class="botonera">
-            <ul class="on-3 columns">
+            <ul class="on-4 columns">
                 <li class="column">
                     <div class="columna">
-                        <a href="${xml_url}/xml" class="boton ${play.configuration['style.button_color']} full_width separar">xml</a>
+                        <a href="${action_url}/xml" class="boton ${play.configuration['style.button_color']} full_width separar">xml</a>
                     </div>
                 </li>
                 <li class="column">
                     <div class="columna">
-                        <a href="${prev_url}" class="boton ${play.configuration['style.button_color']} full_width separar">prev page</a>
+                        <a href="#" id="first" class="boton ${play.configuration['style.button_color']} full_width separar">first</a>
                     </div>
                 </li>
                 <li class="column">
                     <div class="columna">
-                        <a href="${next_url}" class="boton ${play.configuration['style.button_color']} full_width separar">next page</a>
+                        <a href="#" id="prev" class="boton ${play.configuration['style.button_color']} full_width separar">prev page</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="#" id="next" class="boton ${play.configuration['style.button_color']} full_width separar">next page</a>
                     </div>
                 </li>
             </ul>
         </div>
     </article>
 </section>
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    function getPage() {
+        var form = $("#mainForm");
+        var data = $.get(form.attr("action") + "?" + form.serialize(),
+                function (data) {
+                    $('body').html(data);
+                    //            $('.result').html(data);
+                });
+    }
+    $(function () {
+        $("#first").click(function (event) {
+            $("[name = page]").val(1);
+            getPage();
+            //            $( "#mainForm" ).submit();
+            event.preventDefault();
+        });
+        $("#prev").click(function (event) {
+            $("[name = page]").val(parseInt($("[name = page]").val()) - 1);
+            getPage();
+            //            $( "#mainForm" ).submit();
+            event.preventDefault();
+        });
+        $("#next").click(function (event) {
+            $("[name = page]").val(parseInt($("[name = page]").val()) + 1);
+            getPage();
+            //            $( "#mainForm" ).submit();
+            event.preventDefault();
+        });
+        $(".submitForm").click(function (event) {
+            $("[name = id]").val($(this).attr("id"));
+            $("#mainForm").attr("action", $(this).attr("href")).submit();
+            event.preventDefault();
+        });
+        $(".clickBack").click(function (e) {
+            {
+                var defaultLocation = "@{MenuController.reportMenu(1)}";
+                var oldHash = window.location.hash;
+                history.back(); // Try to go back
+
+                var newHash = window.location.hash;
+                if (newHash === oldHash &&
+                        (typeof (document.referrer) !== "string" || document.referrer === "")) {
+                    window.location.href = defaultLocation;
+                }
+                //e.preventDefault();
+                return false; // stop event propagation and browser default event
+            }
+        });
+    });
+</script>
+#{/set}
+
+
+

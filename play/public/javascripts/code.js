@@ -44,7 +44,9 @@ $(function() {
                     break;
             }
             focused_input.focus();
-            focused_input[0].selectionStart = focused_input[0].selectionEnd = focused_input.val().length;
+            if (focused_input[0].type != 'number') {
+               focused_input[0].selectionStart = focused_input[0].selectionEnd = focused_input.val().length;
+            }
             focused_input.keyup();
         }
     });

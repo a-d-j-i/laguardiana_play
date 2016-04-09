@@ -77,6 +77,10 @@ abstract public class MachineWithBagAbstract extends MachineAbstract implements 
             // if bag not in place rotate current bag.
             LgBag.withdrawBag(true);
         }
+        if (st.getBagState() == IoboardStateResponse.BAG_STATE.BAG_STATE_ERROR) {
+            Logger.debug("onIoBoardEvent sending reset");
+            ioboard.submitSynchronous(new DeviceTaskReset());
+        }
         // Bag change.
         if (st.getBagState() == IoboardStateResponse.BAG_STATE.BAG_STATE_INPLACE) {
             switch (st.getBagApprovedState()) {

@@ -34,7 +34,7 @@ public class P500MeiStateBillDepositFinish extends MachineStateAbstract {
                 Logger.info("Skipping deposit: %d", billDeposit.depositId);
             }
         } else {
-            Logger.info("Deposit: %d not found", billDeposit.depositId);
+            Logger.info("Deposit not found");
         }
         return true;
     }

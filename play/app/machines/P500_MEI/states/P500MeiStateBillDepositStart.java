@@ -2,7 +2,9 @@ package machines.P500_MEI.states;
 
 import machines.status.MachineBillDepositStatus;
 import models.BillDeposit;
+import models.db.LgDeposit;
 import play.Logger;
+import play.db.Model;
 
 /**
  *
@@ -39,13 +41,13 @@ public class P500MeiStateBillDepositStart extends P500MeiStateBillDepositContinu
     }
 
     @Override
-    public boolean onCancelDepositEvent() {
+    public boolean onCancelDepositEvent(LgDeposit.FinishCause finishCause) {
         context.closeBatch();
         BillDeposit billDeposit = BillDeposit.findById(context.getDepositId());
         if (billDeposit.getTotal() > 0) {
             return context.setCurrentState(new P500MeiStateAccepting(context));
         } else {
-            return context.setCurrentState(new P500MeiStateCanceling(context));
+            return context.setCurrentState(new P500MeiStateCanceling(context, finishCause));
         }
     }
 

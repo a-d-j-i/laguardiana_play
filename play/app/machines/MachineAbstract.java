@@ -14,6 +14,7 @@ import machines.states.MachineStateInterface;
 import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
+import models.db.LgDeposit;
 import models.events.MachineEvent;
 import play.Logger;
 
@@ -130,9 +131,9 @@ abstract public class MachineAbstract implements MachineInterface {
         return currentState.onConfirmDepositEvent();
     }
 
-    public boolean onCancelDeposit() {
+    public boolean onCancelDeposit(LgDeposit.FinishCause finishCause) {
         MachineEvent.save(this, "onCancelDeposit");
-        return currentState.onCancelDepositEvent();
+        return currentState.onCancelDepositEvent(finishCause);
     }
 
     public boolean onReset() {

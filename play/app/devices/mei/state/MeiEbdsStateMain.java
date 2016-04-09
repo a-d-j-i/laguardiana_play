@@ -186,6 +186,9 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         String err = null;
         if (response.isEscrowed()) {
             Logger.debug("%s Is escrowed", mei.toString());
+            if (lastNoteValue!=null) {
+                Logger.error("%s Is escrowed but there is a lastNoteValue: %s", mei.toString(), lastNoteValue);
+            }
             lastNoteValue = response.getNoteSlot();
             if (mustCancel) {
                 if (!mei.reject()) {
@@ -202,12 +205,15 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
         } else if (response.isReturned()) {
             Logger.debug("%s Is returned", mei.toString());
             mei.notifyListeners(MeiEbdsStatus.RETURNED);
+            Logger.debug("%s is returned lastNoteValue: %s", mei.toString(), lastNoteValue);
             lastNoteValue = null;
             err = mei.sendPollMessage();
         } else if (response.isStacked()) {
             Logger.debug("%s Is stacked", mei.toString());
             if (lastNoteValue != null) {
                 mei.notifyListeners(new MeiEbdsStatusStored(lastNoteValue));
+            } else {
+                Logger.error("%s Is stacked but no last note value", mei.toString());
             }
             lastNoteValue = null;
             err = mei.sendPollMessage();
@@ -224,6 +230,7 @@ public class MeiEbdsStateMain extends MeiEbdsStateAbstract {
                         mei.notifyListeners(MeiEbdsStatus.NEUTRAL);
                     }
                 }
+                Logger.debug("%s is none lastNoteValue: %s", mei.toString(), lastNoteValue);
                 lastNoteValue = null;
             }
         }

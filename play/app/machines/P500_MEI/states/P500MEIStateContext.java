@@ -10,9 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import machines.MachineDeviceDecorator;
 import machines.P500_MEI.MachineP500_MEI;
+import machines.jobs.MachineJobCancelDeposit;
 import machines.states.MachineStateContextInterface;
 import machines.states.MachineStateInterface;
 import models.BillDeposit;
+import models.Configuration;
+import models.ItemQuantity;
 import models.db.LgBatch;
 import models.db.LgDeposit;
 import models.db.LgDeviceSlot;
@@ -108,7 +111,7 @@ public class P500MEIStateContext implements MachineStateContextInterface {
             refBatch = LgBatch.findById(batchId);
         }
         if (refBatch == null) {
-            Logger.error("Error gettong current batch id %d", batchId);
+            Logger.error("Error getting current batch id %d", batchId);
             return false;
         }
         LgDeviceSlot s = LgDeviceSlot.find(mei.getLgDevice(), slot);
@@ -118,7 +121,17 @@ public class P500MEIStateContext implements MachineStateContextInterface {
         }
         Logger.debug("Found the slot %s from device %s, addToDeposit", slot, mei.toString());
         BillDeposit billDeposit = BillDeposit.findById(depositId);
-        return billDeposit.addBillToDeposit(refBatch, s.billType, 1);
+        if (!billDeposit.addBillToDeposit(refBatch, s.billType, 1)) {
+            Logger.error("Error calling adding bill to deposit");
+            return false;
+        }
+        ItemQuantity iq = billDeposit.bag.getItemQuantity();
+        Long bagFreeSpace = Configuration.maxBillsPerBag() - Configuration.equivalentBillQuantity(iq.bills, iq.envelopes);
+        if (bagFreeSpace <= 0) {
+            Logger.debug("CANCEL, BAG FULL %s %s", iq.toString(), s.toString());
+            machine.submit(new MachineJobCancelDeposit(machine, LgDeposit.FinishCause.FINISH_CAUSE_BAG_FULL));
+        }
+        return true;
     }
 
     protected void closeBatch() {

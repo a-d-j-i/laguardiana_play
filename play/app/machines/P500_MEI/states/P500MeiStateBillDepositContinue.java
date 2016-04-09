@@ -16,6 +16,7 @@ import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.BillQuantity;
 import models.Configuration;
+import models.db.LgDeposit;
 import play.Logger;
 
 /**
@@ -83,8 +84,8 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
                     }
 
                     @Override
-                    public boolean onCancelDepositEvent() {
-                        return P500MeiStateBillDepositContinue.this.onCancelDepositEvent();
+                    public boolean onCancelDepositEvent(LgDeposit.FinishCause finishCause) {
+                        return P500MeiStateBillDepositContinue.this.onCancelDepositEvent(finishCause);
                     }
 
                 }
@@ -161,9 +162,9 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
     }
 
     @Override
-    public boolean onCancelDepositEvent() {
+    public boolean onCancelDepositEvent(LgDeposit.FinishCause finishCause) {
         context.closeBatch();
-        return context.setCurrentState(new P500MeiStateCanceling(context));
+        return context.setCurrentState(new P500MeiStateCanceling(context, finishCause));
     }
 
     @Override
