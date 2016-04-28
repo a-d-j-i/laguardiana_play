@@ -43,6 +43,10 @@ typedef struct {
 extern char must_beep;
 extern char must_sound;
 extern char lock_print;
+extern char lock_exec;
+extern char counter_removed;
+#define CHECK_COUNTER_REMOVED { counter_removed = (PORTBbits.RB2 == 0); }
+
 extern void init();
 extern void init_bootloader();
 extern void bootloader(void);

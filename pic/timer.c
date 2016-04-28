@@ -64,11 +64,7 @@ void TimerInterruptHandler() __interrupt ( 1 ) {
 }
  */
 
-static char cnt = 0;
-static char in = 0;
 static long lock2_cnt = 0;
-static char lock_exec = 0;
-
 void TimerInterruptHandler() __interrupt(1) {
     if (INTCONbits.INT0IF && INTCONbits.INT0IE) {
         if (lock_exec == 0) {
@@ -84,6 +80,9 @@ void TimerInterruptHandler() __interrupt(1) {
             lock_exec = 0;
         }
         INTCON3bits.INT1IF = 0;
+    } else if (INTCON3bits.INT2IF && INTCON3bits.INT2IE) {
+        CHECK_COUNTER_REMOVED;
+        INTCON3bits.INT2IF = 0;
     } else if (PIR2bits.TMR3IF & PIE2bits.TMR3IE) { // Timer0 overflow interrupt
         TMR3H = 0xfe;
         TMR3L = 0x00;
@@ -96,25 +95,6 @@ void TimerInterruptHandler() __interrupt(1) {
             lock2_cnt--;
             PORTAbits.RA7 = 1;
         }
-        if (cnt > 80) {
-            cnt = 0;
-            TRISBbits.TRISB3 = 1; // disabled
-        } else if (cnt > 72) {
-            TRISBbits.TRISB3 = 0; // enabled
-        }
-
-        if (cnt == 0) {
-            if (PORTBbits.RB1) {
-                PORTBbits.RB4 = 1;
-            } else {
-                PORTBbits.RB4 = 0;
-            }
-            //PORTBbits.RB4 = !PORTBbits.RB1;
-            //PORTBbits.RB4 = 1;
-            /*                } else {
-                                    PORTBbits.RB4 = 0;*/
-        }
-        cnt++;
     }
 }
 
@@ -122,11 +102,11 @@ void TimerInterruptHandler() __interrupt(1) {
 
 void timer_init(void) {
     // Output bits
-    TRISBbits.TRISB3 = 0; // J9
-    PORTBbits.RB3 = 0;
+    //TRISBbits.TRISB3 = 0; // J9
+    //PORTBbits.RB3 = 0;
 
-    TRISBbits.TRISB4 = 0; // J8
-    PORTBbits.RB4 = 0;
+    //TRISBbits.TRISB4 = 0; // J8
+    //PORTBbits.RB4 = 0;
     /*
             TRISCbits.TRISC1 = 0;
             PORTCbits.RC1 = 0;
@@ -217,6 +197,4 @@ void timer_init(void) {
 
     IPR2bits.TMR3IP = 1; // high priority interrupt
     PIE2bits.TMR3IE = 1;
-
-
 }

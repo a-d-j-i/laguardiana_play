@@ -23,7 +23,9 @@ unsigned int j;
 char must_beep = 0; // false
 char must_sound = 0; // false
 char lock_print = 0;
-
+char lock_exec = 0;
+char counter_removed = 0;
+char counter_removed_printed = 0;
 void main() {
     init();
     setupPorts();
@@ -144,8 +146,10 @@ void main() {
             case 's':
             case 'S':
                 if (txBufSize() > 130) {
-                    printf("STATE : BAG %02d BAG_APROVED %d SHUTTER %02d LOCK %01d\r\n",
-                            bag_state, bag_aproved, shutter_st, (PORTA & 0x06) >> 2);
+                    printf("STATE : BAG %02d BAG_APROVED %d SHUTTER %02d LOCK %01d GATE %01d\r\n",
+                            bag_state, bag_aproved, shutter_st,
+                            (PORTA & 0x06) >> 2,
+                            ( counter_removed || lock_exec));
                             printf("STATUS : A 0x%02X  B 0x%02X  C 0x%02X  D 0x%02X  BAG_SENSOR 0x%02X BAG_STATUS 0x%02X\r\n",
                             PORTA, PORTB, PORTC, PORTD, BAG_SENSOR(PORTD), bag_status);
                 }
@@ -210,7 +214,17 @@ void main() {
             PORTE = PORTE & 0xFB;
             beep_cnt = 0;
         }
+        CHECK_COUNTER_REMOVED;
+        if (counter_removed || lock_exec) {
+            if (!counter_removed_printed) {
+                printf("CRITICAL: COUNTER REMOVED\r\n");
+                counter_removed_printed = 1;
+            }
+        } else {
+            counter_removed_printed = 0;
+        }
     }
+    
 }
 
 

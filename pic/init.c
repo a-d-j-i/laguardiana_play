@@ -57,11 +57,15 @@ void init()
 
 // INT0,1 config
         INTCON2bits.INTEDG0 = 0;
+        INTCONbits.INT0IE = 1;
+
         INTCON2bits.INTEDG1 = 0;
         INTCON3bits.INT1IP = 1;
-        
-        INTCONbits.INT0IE = 1;
         INTCON3bits.INT1IE = 1;
+
+        INTCON2bits.INTEDG2 = 0;
+        INTCON3bits.INT2IP = 1;
+        INTCON3bits.INT2IE = 1;
         
 
         // BOOTLOADER
