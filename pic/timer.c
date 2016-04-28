@@ -75,6 +75,9 @@ void TimerInterruptHandler() __interrupt(1) {
         INTCONbits.INT0IF = 0;
     } else if (INTCON3bits.INT1IF && INTCON3bits.INT1IE) {
         if (PORTBbits.RB0 == 1) {
+            if (lock2_cnt == 0) {
+                unlock_print = 1;
+            }
             lock2_cnt = 50000;
             must_sound = 1;
             lock_exec = 0;
@@ -83,7 +86,7 @@ void TimerInterruptHandler() __interrupt(1) {
     } else if (INTCON3bits.INT2IF && INTCON3bits.INT2IE) {
         CHECK_COUNTER_REMOVED;
         INTCON3bits.INT2IF = 0;
-    } else if (PIR2bits.TMR3IF & PIE2bits.TMR3IE) { // Timer0 overflow interrupt
+    } else if (PIR2bits.TMR3IF & PIE2bits.TMR3IE) {
         TMR3H = 0xfe;
         TMR3L = 0x00;
         PIR2bits.TMR3IF = 0; // ACK

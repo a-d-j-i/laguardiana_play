@@ -23,6 +23,7 @@ unsigned int j;
 char must_beep = 0; // false
 char must_sound = 0; // false
 char lock_print = 0;
+char unlock_print = 0;
 char lock_exec = 0;
 char counter_removed = 0;
 char counter_removed_printed = 0;
@@ -187,10 +188,6 @@ void main() {
         processBagState();
         processUart();
         //flushUart();
-        if (lock_print) {
-            lock_print = 0;
-            printf("CRITICAL: Lock executed\r\n");
-        }
                 // BEEP
         if (must_beep || must_sound) {
             // Enable output.
@@ -223,8 +220,15 @@ void main() {
         } else {
             counter_removed_printed = 0;
         }
+        if (lock_print) {
+            lock_print = 0;
+            printf("CRITICAL: Lock executed\r\n");
+        }
+        if (unlock_print) {
+            unlock_print = 0;
+            printf("CRITICAL: UnLock executed\r\n");
+        }
     }
-    
 }
 
 
