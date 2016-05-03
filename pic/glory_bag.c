@@ -1,8 +1,6 @@
 #include "main.h"
 
 
-static unsigned long cnt = 0;
-
 static BAG_STATUS BAG_SENSOR2STATUS[] = {// START MIDDLE END usar not!!!
     // ABC
     BAG_STATUS_REMOVED, // 000
@@ -304,20 +302,9 @@ void processGloryBagState() {
     }
 
     if (bag_state != BAG_STATE_INPLACE || !bag_lock_sensor) {
-        // Enable output.
-        PORTC = PORTC | 0x04;
-        cnt++;
-        if (cnt > 30000) {
-            cnt = 0;
-        }
-        if (cnt < 2000) {
-            PORTE = PORTE | 0x04;
-        } else {
-            PORTE = PORTE & 0xFB;
-        }
+        must_beep = 1;
     } else {
-        cnt = 0;
-        PORTC = PORTC & 0xFB;
+        must_beep = 0;
     }
 }
 

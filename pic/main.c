@@ -8,18 +8,25 @@
 
 static unsigned char c = 'G';
 unsigned long loop_cnt = 0;
+static unsigned long beep_cnt = 0;
+
 
 unsigned char stringIdx = 0;
-unsigned char* prgBootKey       = "PROGRAM";
-unsigned char* prgMei           = "MEI";
-unsigned char* prgGlory         = "GLORY";
-unsigned char* prgReset         = "RESET";
-unsigned char* currString       = 0;
+unsigned char* prgBootKey = "PROGRAM";
+unsigned char* prgMei = "MEI";
+unsigned char* prgGlory = "GLORY";
+unsigned char* prgReset = "RESET";
+unsigned char* currString = 0;
 
 unsigned int i;
 unsigned int j;
-
-
+char must_beep = 0; // false
+char must_sound = 0; // false
+char lock_print = 0;
+char unlock_print = 0;
+char lock_exec = 0;
+char counter_removed = 0;
+char counter_removed_printed = 0;
 void main() {
     init();
     setupPorts();
@@ -29,15 +36,15 @@ void main() {
     INTCONbits.GIEL = 1; //enable interrupts
     INTCONbits.GIEH = 1;
 
-    
+
     //printf( "VERSION : " VERSION "\r\n" );
-    for( i = 0; i < 100; i++ ) {
-        for( j = 0; j < 5000; j++ ) {
+    for (i = 0; i < 100; i++) {
+        for (j = 0; j < 5000; j++) {
             processUart();
-	}
-	printf( ".", i );
+        }
+        printf(".", i);
     }
-    printf( "\r\n" );
+    printf("\r\n");
     // Freeze the port value
     initBagState();
 
@@ -54,45 +61,45 @@ void main() {
         c = getchar();
 
         // Process strings
-        if ( c != 0 && stringIdx > 0 ) {
-                if ( stringIdx == 1 ) {
-                        if ( prgBootKey[ 0 ] == c ) {
-                                currString = prgBootKey;
-                                stringIdx++;
-                        } else if ( prgMei[ 0 ] == c ) {
-                                currString = prgMei;
-                                stringIdx++;
-                        } else if ( prgGlory[ 0 ] == c ) {
-                                currString = prgGlory;
-                                stringIdx++;
-                        } else if ( prgReset[ 0 ] == c ) {
-                                currString = prgReset;
-                                stringIdx++;
-                        } else {
-                                stringIdx = 0;
-                        }
+        if (c != 0 && stringIdx > 0) {
+            if (stringIdx == 1) {
+                if (prgBootKey[ 0 ] == c) {
+                    currString = prgBootKey;
+                    stringIdx++;
+                } else if (prgMei[ 0 ] == c) {
+                    currString = prgMei;
+                    stringIdx++;
+                } else if (prgGlory[ 0 ] == c) {
+                    currString = prgGlory;
+                    stringIdx++;
+                } else if (prgReset[ 0 ] == c) {
+                    currString = prgReset;
+                    stringIdx++;
                 } else {
-                        if ( c == currString[ stringIdx - 1 ] ) {
-                                stringIdx++;
-                                if ( currString[ stringIdx - 1 ] == 0 ) {
-                                        if ( currString == prgBootKey ) {
-                                                init_bootloader();
-                                        } else if ( currString == prgMei ) {
-                                                setBagMode( BAG_MODE_MEI );
-                                        } else if ( currString == prgGlory ) {
-                                                setBagMode( BAG_MODE_GLORY );
-                                        } else if ( currString == prgReset ) {
-                                                __asm 
-                                                        reset;
-                                                __endasm;
-                                        }
-                                        stringIdx = 0;
-                                }
-                        } else {
-                                stringIdx = 0;
-                        }
+                    stringIdx = 0;
                 }
-                continue;
+            } else {
+                if (c == currString[ stringIdx - 1 ]) {
+                    stringIdx++;
+                    if (currString[ stringIdx - 1 ] == 0) {
+                        if (currString == prgBootKey) {
+                            init_bootloader();
+                        } else if (currString == prgMei) {
+                            setBagMode(BAG_MODE_MEI);
+                        } else if (currString == prgGlory) {
+                            setBagMode(BAG_MODE_GLORY);
+                        } else if (currString == prgReset) {
+                            __asm
+                            reset;
+                            __endasm;
+                        }
+                        stringIdx = 0;
+                    }
+                } else {
+                    stringIdx = 0;
+                }
+            }
+            continue;
         }
 
         /*
@@ -107,20 +114,20 @@ void main() {
         // Keyboard
         switch (c) {
             case 'p':
-            case 'P': 
+            case 'P':
                 stringIdx = 1;
                 break;
             case 'b':
-            case 'B': 
+            case 'B':
                 printBagMode();
                 break;
             case 'v':
             case 'V':
                 if (txBufSize() > 130) {
 #if defined(__XC) | defined(__18CXX) | defined(HI_TECH_C)
-                    printf("Version : %S\r\n", ##VERSION);
+                    printf("Version : %S\r\n",##VERSION);
 #else
-                    printf("Version : %s\r\n", ##VERSION);
+                    printf("Version : %s\r\n",##VERSION);
 #endif
 
                 }
@@ -140,9 +147,11 @@ void main() {
             case 's':
             case 'S':
                 if (txBufSize() > 130) {
-                    printf("STATE : BAG %02d BAG_APROVED %d SHUTTER %02d LOCK %01d\r\n",
-                            bag_state, bag_aproved, shutter_st, (PORTA & 0x06) >> 2);
-                    printf("STATUS : A 0x%02X  B 0x%02X  C 0x%02X  D 0x%02X  BAG_SENSOR 0x%02X BAG_STATUS 0x%02X\r\n",
+                    printf("STATE : BAG %02d BAG_APROVED %d SHUTTER %02d LOCK %01d GATE %01d\r\n",
+                            bag_state, bag_aproved, shutter_st,
+                            (PORTA & 0x06) >> 2,
+                            ( counter_removed || lock_exec));
+                            printf("STATUS : A 0x%02X  B 0x%02X  C 0x%02X  D 0x%02X  BAG_SENSOR 0x%02X BAG_STATUS 0x%02X\r\n",
                             PORTA, PORTB, PORTC, PORTD, BAG_SENSOR(PORTD), bag_status);
                 }
                 break;
@@ -174,14 +183,51 @@ void main() {
         }
 
         // Shutter
-        processShutter();
-
+        processShutter();              
         // Bag
         processBagState();
-
         processUart();
-
         //flushUart();
+                // BEEP
+        if (must_beep || must_sound) {
+            // Enable output.
+            PORTC = PORTC | 0x04;
+        } else {
+            PORTC = PORTC & 0xFB;
+        }
+        if (must_sound) {
+            PORTE = PORTE | 0x04;
+        } else if (must_beep) {
+            beep_cnt++;
+            if (beep_cnt > 30000) {
+                beep_cnt = 0;
+            }
+            if (beep_cnt < 2000) {
+                PORTE = PORTE | 0x04;
+            } else {
+                PORTE = PORTE & 0xFB;
+            }
+        } else {
+            PORTE = PORTE & 0xFB;
+            beep_cnt = 0;
+        }
+        CHECK_COUNTER_REMOVED;
+        if (counter_removed || lock_exec) {
+            if (!counter_removed_printed) {
+                printf("CRITICAL: COUNTER REMOVED\r\n");
+                counter_removed_printed = 1;
+            }
+        } else {
+            counter_removed_printed = 0;
+        }
+        if (lock_print) {
+            lock_print = 0;
+            printf("CRITICAL: Lock executed\r\n");
+        }
+        if (unlock_print) {
+            unlock_print = 0;
+            printf("CRITICAL: UnLock executed\r\n");
+        }
     }
 }
 
