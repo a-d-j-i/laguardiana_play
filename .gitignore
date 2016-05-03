@@ -4,6 +4,7 @@ test-result/*
 project/project
 project/target
 play/nbproject/private
+pic/nbproject/private
 target
 tmp
 .history
