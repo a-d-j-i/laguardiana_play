@@ -3,7 +3,7 @@ play/precompiled
 test-result/*
 project/project
 project/target
-nbproject
+play/nbproject/private
 target
 tmp
 .history
