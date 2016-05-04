@@ -15,6 +15,7 @@
       <in>shutter.c</in>
       <in>timer.c</in>
       <in>usart.c</in>
+      <in>version.h</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -36,6 +37,10 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <codeAssistance>
+        <transientMacros>
+          <Elem>p18f4520</Elem>
+          <Elem>pic18f4520</Elem>
+        </transientMacros>
       </codeAssistance>
       <makefileType>
         <makeTool>
@@ -44,7 +49,6 @@
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath>output\laguardiana.hex</executablePath>
           <cTool>
-            <standard>2</standard>
             <incDir>
               <pElem>/opt/sdcc/share/sdcc/non-free/include</pElem>
               <pElem>/opt/sdcc/share/sdcc/non-free/include/pic16</pElem>
@@ -58,7 +62,6 @@
             </preprocessorList>
           </cTool>
           <ccTool>
-            <standard>4</standard>
             <incDir>
               <pElem>/opt/sdcc/share/sdcc/non-free/include</pElem>
               <pElem>/opt/sdcc/share/sdcc/non-free/include/pic16</pElem>
@@ -87,9 +90,9 @@
       </item>
       <item path="lockin.c" ex="false" tool="0" flavor2="2">
       </item>
-      <item path="main.c" ex="false" tool="0" flavor2="2">
+      <item path="main.c" ex="false" tool="0" flavor2="9">
       </item>
-      <item path="main.h" ex="false" tool="3" flavor2="0">
+      <item path="main.h" ex="false" tool="0" flavor2="0">
       </item>
       <item path="mei_bag.c" ex="false" tool="0" flavor2="2">
       </item>
@@ -98,6 +101,8 @@
       <item path="timer.c" ex="false" tool="0" flavor2="2">
       </item>
       <item path="usart.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="version.h" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
   </confs>
