@@ -48,7 +48,6 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 import javax.swing.text.html.StyleSheet;
-import models.Configuration;
 import play.Logger;
 import play.Play;
 
@@ -264,7 +263,7 @@ public class Printer {
         Logger.debug("CALCULATED SCALE %f %f, DESIRED %f %f", scalex, scaley, desiredX / MM, desiredY / MM);
 
         //        EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
-        if (!Configuration.isPrinterTest()) {
+        if (!isPrinterTest) {
             try {
                 Book book = new Book();
                 //                book.append(pnl, pageFormat);
