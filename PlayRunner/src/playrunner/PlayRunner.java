@@ -13,9 +13,9 @@ public class PlayRunner {
 
     /**
      * @param args the command line arguments
-     * @throws java.lang.InterruptedException
-     * @throws java.io.IOException
-     * @throws java.net.URISyntaxException
+     * @throws java.lang.InterruptedException dont care
+     * @throws java.io.IOException dont care
+     * @throws java.net.URISyntaxException dont care
      */
     public static void main(String[] args) throws InterruptedException, IOException, URISyntaxException {
 
