@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 %{  def action = "$request.action";
-def action_url = actionBridge."$action".call();
+def action_url = play.mvc.Router.reverse( "$action()" )
 def prev_url = play.mvc.Router.reverse( "$action( prevPage )" )
 def next_url = play.mvc.Router.reverse( "$action( nextPage )"  )
 }%

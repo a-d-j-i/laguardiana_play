@@ -46,7 +46,7 @@ extern char lock_print;
 extern char unlock_print;
 extern char lock_exec;
 extern char counter_removed;
-#define CHECK_COUNTER_REMOVED { counter_removed = (PORTBbits.RB2 == 0); }
+#define CHECK_COUNTER_REMOVED { counter_removed = (PORTBbits.RB2 == 0 || PORTBbits.RB3 == 0); }
 
 extern void init();
 extern void init_bootloader();
