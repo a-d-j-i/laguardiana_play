@@ -1,0 +1,108 @@
+.ui-keyboard {
+	z-index: 16000;
+}
+
+.ui-keyboard-has-focus {
+	z-index: 16001;
+}
+
+.ui-keyboard div {
+
+}
+
+.ui-keyboard-button { /* tecla */
+	width: 52px;
+	height: 52px;
+	line-height: 52px;
+	text-align: center;
+	cursor: pointer;
+	margin: 0 10px 7px 0;
+	font-family: DIN;
+	font-size: 19pt;
+	background-color: #ffffff;
+	border: 1px solid #7f7548;
+	background-image: -moz-linear-gradient(top, #5a5a5a, #a3a3a3);
+	background-image: -o-linear-gradient(top, #5a5a5a, #a3a3a3);
+	background-image: -webkit-gradient(linear, center top, center bottom, from(#5a5a5a), to(#a3a3a3));
+	background-image: -webkit-linear-gradient(top, #5a5a5a, #a3a3a3);
+	background-image: linear-gradient(top, #5a5a5a, #a3a3a3);
+	color: white;
+}
+
+.ui-keyboard-button span { /* texto dentro de la tecla */
+	padding: 0;
+	margin: 0;
+	white-space: nowrap;
+}
+
+.ui-keyboard-button-endrow {
+	
+}
+
+.ui-keyboard-widekey { /* teclas como space, bksp, etc */
+	width: 114px;
+}
+
+.ui-keyboard-space { /* tecla space */
+	
+}
+
+.ui-keyboard-preview-wrapper { 
+
+}
+
+.ui-keyboard-preview {
+
+}
+
+.ui-keyboard-keyset { /* wrapper que engloba solo las teclas */
+	
+}
+
+.ui-keyboard-input { 
+	
+}
+
+.ui-keyboard-input-current {
+	
+}
+
+.ui-keyboard-placeholder { 
+	
+}
+
+.ui-keyboard-nokeyboard {
+
+}
+
+.ui-keyboard-button.disabled {
+
+}
+
+.ui-keyboard-spacer { 
+	border: none;
+	background: none;
+	width: 54px;
+	height: 54px;
+	margin: 0 10px 8px 0;
+}
+
+.ui-keyboard-button.ui-keyboard-combo.ui-state-default { 
+
+}
+
+button.ui-keyboard-accept.ui-keyboard-valid-input { 
+
+}
+
+button.ui-keyboard-accept.ui-keyboard-valid-input:hover { 
+
+}
+
+button.ui-keyboard-accept.ui-keyboard-invalid-input { 
+
+}
+
+button.ui-keyboard-accept.ui-keyboard-invalid-input:hover { 
+
+}

@@ -1,0 +1,4 @@
+#{extends 'reportDetail.html' /}
+#{set title: 'current Bag Totals' /}
+Contenido actual de la maquina en la bolsa ${ bag.bagId }, colocada el ${ bag.creationDate.format('dd/MM/yyyy HH:mm:ss') }<br>
+#{ bills_table bill_data: totals /}

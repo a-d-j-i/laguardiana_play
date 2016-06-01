@@ -1,0 +1,51 @@
+#{extends 'main.html' /}
+#{set title:'Contenido del sobre' /}
+
+<section id="depositar_sobre_07">
+    <header></header>
+    <article>
+        <h1 class="depositar_sobre">&{ 'main_menu.envelope_deposit' }</h1>
+        <div class="contenido">
+            <!-- datos del deposito -->
+            #{if ( wasStored ) }
+            <div class="mensaje"><span>&{ 'envelope_deposit.deposit_done' }</span></div>
+            <h2>&{ 'application.thanks', providerCode }</h2>
+            &{ 'application.remove_ticket' }
+            #{/if}
+            #{else }
+            <div class="mensaje"><span>&{ 'counting_page.deposit_canceled' }</span></div>
+            <h2>&{ 'application.thanks', providerCode }</h2>
+            &{ 'counting_page.deposit_canceled' }
+            #{/else}
+            <!-- /datos del deposito -->
+        </div>
+        <hr />
+        <div class="botonera">
+            <ul class="on-2 unit">
+                <li class="column">
+                    <!-- link cancelar -->
+                    <div class="columna">
+                        <a href="@{Application.index()}" class="boton full_width gris">&{ 'application.continue' }</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
+                        <a href="@{ Secure.logout( "Application.index" ) }" class="boton full_width verde">&{'main_menu.logout'}</a>
+                        #{/if}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    function done() {
+        window.location.href = "@{Secure.logout()}";
+    }
+    ;
+            setTimeout(done, ${play.configuration['finish_screen.timeout']});
+
+</script>
+#{/set}

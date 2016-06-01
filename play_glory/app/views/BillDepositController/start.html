@@ -1,0 +1,118 @@
+#{extends 'main.html' /}
+#{set title:'Depositar Efectivo' /}
+<section>
+    <header></header>
+    <a href="@{MenuController.mainMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    <article>
+        <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
+        #{form @start(), 'id' : 'startForm', 'onSubmit' : 'return testSubmit();' }
+        <div class="contenido_grande">
+            <ul class="columns">
+                <li class="fixed column" style="width: 100%;">
+                    #{ifErrors}
+                    <p class="error">
+                        All fields are required!
+                    </p>
+                    #{/ifErrors}
+                    <div class="columna_1">
+                        #{ if ( formData.showReference1 || formData.showReference2 ) }
+                        <div class="mensaje"><span>&{ 'application.input_reference' }</span></div>
+                        #{/if}
+                        <div style="width: 60%">
+                            #{ if ( formData.showReference1 ) }
+                            #{if referenceCodes.size() == 1 } 
+                            #{select 'formData.reference1.value', disabled: 'disabled', items: referenceCodes, valueProperty:'numericId', labelProperty:'description', value:formData.reference1.value, class : 'full_width' /}
+                            <input type="hidden" name="formData.reference1.value" value="${ referenceCodes.get(0).numericId }">
+                            #{/if}
+                            #{else}
+                            #{select 'formData.reference1.value', items: referenceCodes, valueProperty:'numericId', labelProperty:'description', value:formData.reference1.value, class : 'full_width' /}
+                            #{/else}
+
+                            #{ifError 'formData.reference1'}
+                            <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required' }</label>
+                            #{/ifError}
+                            #{/if}
+                            #{error 'formData.reference1' /}
+                        </div>
+                        <div style="width: 60%">
+                            #{ if ( formData.showReference2 ) }
+                            <input type="text" autocomplete="off" id="reference2_input" name="formData.reference2" type="text"
+                                   placeholder="&{ 'counting_page.reference2_title' }:" class="full_width popup_keyboard" data-type="qwerty"/> 
+                            <!--                           value="#{if play.mode.isDev() }REFERENCE2 TESTVAL#{/if}"-->
+                            #{ifError 'formData.reference2'}
+                            <label for="formData.reference1.value" generated="true" class="error" style="display: inline; ">&{ 'validation.required.reference2' }</label>
+                            #{/ifError}
+                            #{/if}
+                        </div>
+                        <div style="width: 60%">
+                            <div class="mensaje"><span>&{ 'application.choose_currency_before' }</span></div>
+                        </div>
+                        <ul class="columns" style="width: 100%">
+                            <li class="fixed column"  style="width: 60%">
+
+                                #{if currencies.size() == 1 } 
+                                #{select 'formData.currency.value', disabled: 'disabled', items: currencies, valueProperty:'numericId', labelProperty:'description', value:formData.currency.value, class : 'full_width' /}
+                                <input type="hidden" name="formData.currency.value" value="${ currencies.get(0).numericId }">
+                                #{/if}
+                                #{else}
+                                #{select 'formData.currency.value', items: currencies, valueProperty:'numericId', labelProperty:'description', value:formData.currency.value, class : 'full_width' /}
+                                #{/else}
+                            </li>
+                            <li class="fixed column" style="width: 40%">
+                                <div class="botonera">
+                                    <div class="columna">
+                                        <!-- link accion -->
+                                        <a id ="startCountingButton" href="#" class="boton full_width ${play.configuration['style.button_color']}">&{ 'application.start_counting' }</a>
+                                    </div>
+                                </div>  
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        #{/form}
+        #{ popup_keyboard /}
+    </article>
+</section>
+
+
+#{set 'moreScripts'}
+#{script 'jquery/jquery.form.js' /}
+#{script 'jquery/jquery.validate.js' /}
+<script type="text/javascript" charset="${_response_encoding}">
+    var s = false;
+    function testSubmit() {
+        return s;
+    }
+    /*    $( '#reference2_input' ).keyup( function(event) {
+     if ( $( this ).val() ) {
+     $( '#startCountingButton' ).removeClass( 'gris' ).addClass( '${play.configuration['style.button_color']}' );
+     } else {
+     $( '#startCountingButton' ).removeClass( '${play.configuration['style.button_color']}' ).addClass( 'gris' );
+     }
+     } );*/
+    $('#startCountingButton').click(function(event) {
+        s = true;
+        //        $("#startForm").validate( {
+        //            errorPlacement: function(error, element) {
+        //            },
+        //            showErrors: function(errorMap, errorList) {
+        //                $("#summary").html("Your form contains "
+        //                    + this.numberOfInvalids() 
+        //                    + " errors, see details below.");
+        //                this.defaultShowErrors();
+        //            },
+        //            rules: {
+        //                'formData.reference2' : "required",
+        //            },
+        //            messages: {
+        //                'formData.reference2': { required: "&{ 'validation.required' }", number: "&{ 'validation.must_be_a_number'} "},
+        //            }
+        //        });
+        //if ( $( '#reference2_input' ).val() ) {
+        $('#startForm').submit();
+        //}
+    });
+</script>
+#{/set}

@@ -1,0 +1,209 @@
+#{extends 'main.html' /}
+#{set title:'Login' /}
+<section id ="login">
+    <header></header>
+    <!--    <a href="@{Application.index}" class="boton_top">◄ &{ 'application.back' }</a>-->
+    <article>
+        <h1 class="candado" id="candado">&{'secure.title'}</h1>
+        #{if ( models.Configuration.dontAskForPassword() ) }
+        <div class="mensaje"><span>&{'secure.continue_message_user' }</span></div>
+        #{/if}
+        #{else}
+        <div class="mensaje"><span>&{'secure.continue_message_password' }</span></div>
+        #{/else}
+        #{form @authenticate(), id : 'mainForm' }       
+        <!--        <input type="text" placeholder="&{'secure.username'}"  class="keyboard_alpha keyboard_default" name="username"/>
+                <input type="password" placeholder="&{'secure.password'}" class="keyboard_alpha" name="password"/>
+                <a href="#">&{'secure.pass_forget'}</a>
+                <div id="keyboard_placeholder"></div>
+                <button type="submit" class="btn" >&{'secure.signin'}</button>
+                <a href="${lastUrl}"><input type="button" name="cancel" value="Cancel" class="btn" /></a>
+        -->
+        <input id="username" type="text" placeholder="&{'secure.username'}"  class="focus_me" name="username"/>
+        #{if ( models.Configuration.dontAskForPassword() ) }
+        <input id="password" type="password" placeholder="&{'secure.password'}" name="password" style="display: none;"/>
+        #{if ( models.Configuration.isCrapAuth() ) }
+        <h1 id="crapId" style="display: none;"/>${crapId}</h1>
+        #{/if}
+        #{/if}
+        #{else}
+        <input id="password" type="password" placeholder="&{'secure.password'}" name="password"/>
+        #{if ( models.Configuration.isCrapAuth() ) }
+        <h1 id="crapId" style="display: inline;"/>${crapId}</h1>
+        #{/if}
+        #{/else}
+        #{/form}
+        #{if ( models.Configuration.useHardwareKeyboard() ) }
+        <div class="contenido_chico">
+        </div>
+        <hr>
+        <div class="botonera">
+            <ul class="on-2 unit">
+                <li class="column">
+                    <div class="columna">
+                        &nbsp;
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <!-- link continuar -->
+                        <a id="continueButton" href="#" class="full_width boton ${play.configuration['style.button_color']}">&{'application.continue'}</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        #{/if}
+        #{else}
+        <div class="contenido_chico">
+            <div class="keyboard">
+                <ul class="on-11 same-height columns">
+
+                    <li class="column"><span><a class="element key" data-key="1">1</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="2">2</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="3">3</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="4">4</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="5">5</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="6">6</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="7">7</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="8">8</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="9">9</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="0">0</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="{backspace}">←</a></span></li>
+
+                    <li class="column"><span><a class="element key" data-key="Q">Q</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="W">W</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="E">E</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="R">R</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="T">T</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="Y">Y</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="U">U</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="I">I</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="O">O</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="P">P</a></span></li>
+                    <li class="column"></li>
+
+                    <li class="column"><span><a class="element key" data-key="A">A</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="S">S</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="D">D</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="F">F</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="G">G</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="H">H</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="J">J</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="K">K</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="L">L</a></span></li>
+                    <li class="span-2 column"><span><a class="element key" data-key=" ">&{'keyboard.space'}</a></span></li>
+
+                    <li class="column"><span><a class="element key" data-key="Z">Z</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="X">X</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="C">C</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="V">V</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="B">B</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="N">N</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="M">M</a></span></li>
+                    <li class="column"><span><a class="element key" data-key=".">.</a></span></li>
+                    <li class="column"><span><a class="element key" data-key="-">-</a></span></li>
+                    <li class="span-2 column"><span><a id="continueButton" href="#" class="element action">&{'keyboard.continue'}</a></span></li>
+
+                </ul>
+            </div>
+        </div>
+        #{/else}
+        <div id="alerta" class="alerta_automatica alerta error" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.error' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="error_text"></span>
+                </div>
+                <div id="alerta_botonera">
+                    <a class="alerta_cerrar boton ${play.configuration['style.button_color']}">&{ 'application.close' }</a>
+                </div>
+            </div>
+        </div>
+        <div id="alerta_success" class="alerta_automatica alerta info" style="display: none;">
+            <div id="alerta_titulo">&{ 'application.wellcome' }</div>
+            <div id="alerta_cuerpo">
+                <div id="alerta_texto">
+                    <span id="info_text"></span>
+                </div>
+                <div id="alerta_botonera">
+                    <a id ="alerta_success_cancel" href="#" class="boton rojo">&{ 'application.cancel' }</a>
+                    <a id="alerta_success_done" class="boton ${play.configuration['style.button_color']}">&{ 'application.continue' }</a>
+                </div>
+            </div>
+        </div>
+    </article>
+</section>
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    var candado_count = 0;
+            $("#candado").click(function(event) {
+    candado_count++;
+            if (candado_count >= 3) {
+    if ($("#password").is(":visible")) {
+    $("#password").val("");
+            $("#password").hide();
+            $("#crapId").hide();
+    } else {
+    $("#password").show();
+            $("#crapId").css('display', 'inline');
+    }
+    candado_count = 0;
+    }
+    });
+            function refresh() {
+            candado_count = 0;
+            };
+            setInterval(refresh, 3000);
+            /* attach a submit handler to the form */
+            $("#mainForm").submit(function(event) {
+    /* stop form from submitting normally */
+    event.preventDefault();
+            /* Send the data using post and put the results in a div */
+            $.post($(this).attr('action'), $(this).serialize(),
+            function(data) {
+            var status = data[ 0 ];
+                    var extra = data[ 1 ];
+                    $('#username').val("");
+                    $('#password').val("");
+                    if (status == 'error') {
+            $('#error_text').html(extra);
+                    $("#alerta").overlay().load();
+                    $('#username').val("").focus();
+                    $('#password').val("");
+            } else if (status == 'success') {
+            #{if ( models.Configuration.wellcomePopup() ) }
+            $('#info_text').html(data[ 2 ] + "<br> " + data [ 3 ]);
+                    $('#alerta_success_done').click(function(event) {
+            window.location.href = extra;
+            });
+                    $("#alerta_success").overlay().onClose(function(event) {
+            window.location.href = extra;
+            }).load();
+                    #{/if}
+                    #{ else}
+            window.location.href = extra;
+                    #{/else}
+            } else {
+            $('#error_text').html('Estado invalido : ' + data);
+                    $("#alerta").overlay().load();
+            }
+            }
+            );
+            });
+                    $('#continueButton').click(function(event) {
+            $('#mainForm').submit();
+            });
+                    $('#alerta_success_cancel').click(function(event) {
+            window.location.href = "@{Secure.logout()}";
+            });
+                    $(':input').keypress(function (e) {
+            if (e.which == 13) {
+            $('#mainForm').submit();
+                    return false;
+            }
+            });
+
+</script>
+#{/set}
+

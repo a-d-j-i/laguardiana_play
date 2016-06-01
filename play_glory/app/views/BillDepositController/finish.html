@@ -1,0 +1,57 @@
+#{extends 'main.html' /}
+#{set title:'Depositar Efectivo' /}
+<section>
+    <header></header>
+    <article>
+        <h1 class="depositar_efectivo">&{ 'main_menu.cash_deposit' }</h1>
+        <div class="contenido">
+            <!-- datos del deposito -->
+            #{if ( wasStored ) }
+                <div class="mensaje"><span>&{ 'summary.ticket' }</span></div>
+                <h2>&{ 'application.thanks', providerCode }</h2>
+                #{if ( formData.showReference1 ) }
+                    <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+                #{/if}
+                #{if ( formData.showReference2 && formData.reference2 != "" ) }
+                    <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+                #{/if}
+                <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.description}</p>
+            #{/if}
+            #{else }
+                <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled' }</span></div>
+                <h2>&{ 'application.thanks', providerCode }</h2>
+                &{ 'counting_page.deposit_canceled' }
+            #{/else}
+            <!-- /datos del deposito -->
+        </div>
+        <hr />
+        <div class="botonera">
+            <ul class="columns">
+                <li class="fixed column" style="width: 50%">
+                    <div class="columna">
+                        <a href="@{Application.index()}" class="boton full_width gris">&{ 'application.continue' }</a>
+                    </div>
+                </li>
+                <li class="fixed column" style="width: 50%">
+                    <div class="columna">
+                        <div class="columna">
+                            #{if ( controllers.Secure.getCurrentUser() != null && ! controllers.Secure.getCurrentUser().isGuest() ) }
+                            <a href="@{ Secure.logout( "Application.index" ) }" class="boton full_width verde">&{'main_menu.logout'}</a>
+                            #{/if}
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    function done() {
+        window.location.href = "@{Secure.logout()}";
+    };
+    setTimeout(done,  ${play.configuration['finish_screen.timeout']});
+
+</script>
+#{/set}

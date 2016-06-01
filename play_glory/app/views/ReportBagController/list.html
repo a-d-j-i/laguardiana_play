@@ -1,0 +1,63 @@
+#{extends 'reportList.html' /}
+#{set title: 'List Bags' /}
+<table style="margin-left: auto; margin-right: auto; border: 1px solid; font-size: small;">
+    <thead>
+    <th>Transaccion</th>
+    <th>Fecha de la bolsa</th>
+    <th>Fecha retiro de bolsa</th>
+    <th>Total de depositos</th>
+    <th>Total de sobres</th>
+    <th>Total de billetes</th>
+    <th>Total de efectivo validado+no validado/billetes</th>
+    <th colspan="4">Acciones</th>
+</thead>
+<tbody>
+    #{list items:data, as:'bag' }
+    %{ def totals = bag.getTotals(); }%
+    #{if ( ! bag.withdrawDate ) } 
+    <tr style="background-color: lightpink;">
+        #{/if}
+        #{else}
+    <tr style="background-color: lightgreen;">
+        #{/else}
+        <td>${bag.bagId} </td>
+        <td>${bag.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
+        <td style="width:180px;">
+            ${bag.withdrawDate?.format('dd/MM/yyyy HH:mm:ss')}
+        </td>
+        <td style="width:100px;">
+            ${totals.deposits}
+        </td>
+        <td style="width:100px;">
+            ${totals.envelopes}
+        </td>
+        <td style="width:100px;">
+            ${totals.bills}
+        </td>
+        <td style="width:350px;">
+            #{list items:totals.currencies, as:'currency'}
+            ${ totals.byCurrencyTotal.get( currency ).validatedAmmount } 
+            &nbsp; + &nbsp; 
+            ${ totals.byCurrencyTotal.get( currency ).toValidateTotal } 
+            &nbsp; / &nbsp; 
+            ${ totals.byCurrencyTotal.get( currency ).validatedQuantity } &nbsp; ${ currency }<br>
+            #{/list}
+        </td>
+        <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
+            <a id="${ bag.bagId }" href="@{reprint}" class="submitForm"><img src="../public/images/list_reprint.png" border="0" alt="Reimprimir Ticket"></a>
+        </td>
+        <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
+            <a id="${ bag.bagId }" href="@{detail}" class="submitForm"><img src="../public/images/list_detail.png" border="0" alt="Detalle"></a>
+        </td>
+        <td style="font-size: 8px; background-color: lightblue; border: 1px solid;">
+            <a id="${ bag.bagId }" href="@{ReportDepositController.list( 1, null, null, bag.bagId, null )}" class="NosubmitForm"><img src="../public/images/list_deposits.png" border="0" alt="Depositos"></a>        </td>
+    </tr>
+    #{/list}
+</tbody>
+<tfoot> 
+    <tr>
+        <td colspan="3" style="text-align: left;">Cantidad de bolsas: ${cnt}</td>
+        <td colspan="8" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
+    </tr>
+</tfoot>
+</table>

@@ -1,0 +1,35 @@
+#{extends 'main.html' /}
+%{  def action = "$request.action";
+    def xml_url = actionBridge."$action".call();
+    def prev_url = actionBridge."$action".call(prevPage);
+    def next_url = actionBridge."$action".call(nextPage);
+}%
+<section>
+    <header></header>
+    <a href="@{MenuController.unprocessedMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    <article>
+        <div class="contenido_grande" style="overflow: auto;">
+            #{doLayout /}
+        </div>
+        <hr>
+        <div class="botonera">
+            <ul class="on-3 columns">
+                <li class="column">
+                    <div class="columna">
+                        <a href="${xml_url}/xml" class="boton ${play.configuration['style.button_color']} full_width separar">xml</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="${prev_url}" class="boton ${play.configuration['style.button_color']} full_width separar">prev page</a>
+                    </div>
+                </li>
+                <li class="column">
+                    <div class="columna">
+                        <a href="${next_url}" class="boton ${play.configuration['style.button_color']} full_width separar">next page</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </article>
+</section>

@@ -1,0 +1,45 @@
+Total de depositos ${ _bill_data.deposits }<br>
+Total de sobres ${ _bill_data.envelopes }<br>
+Total de billetes ${ _bill_data.bills }<br>
+#{list items:_bill_data.currencies, as:'currency'}
+<div>
+    <h2>${currency}</h2>
+    <table border="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th>&{ 'counting_page.denomination' }</th>
+                <th>&{ 'counting_page.quantity' }</th>
+                <th>&{ 'counting_page.total' }</th>
+            </tr>
+        </thead>
+        <tbody>
+            %{ total = 0; cnt_total = 0;}%
+            #{list items:_bill_data.getDetail( currency ), as:'b'}
+            <tr class="BTRID_${b.key}" style="text-align: center;">
+                <td id="bill_denomination">${b.denomination}</td>
+                <td class="bill_quantity">${b.quantity}</td>
+                <td class="bill_total">${b.ammount}</td>
+                %{ total += b.ammount; cnt_total += b.quantity; }%
+            </tr>
+            #{/list}
+        </tbody>
+        <tfoot>
+            <tr style="text-align: center;">
+                <td><b>&{ 'counting_page.totals' }</b></td>
+                <td id ="cnt_total"><b>${ cnt_total }</b></td>
+                <td id ="total"><b>${ total }</b></td>
+            </tr>
+        </tfoot>
+    </table>
+    <p>
+        Total de dinero validado ${ _bill_data.byCurrencyTotal.get( currency ).validatedAmmount }<br>
+        Total de billetes ${ _bill_data.byCurrencyTotal.get( currency ).validatedQuantity }<br>
+    </p>
+    <p>
+        Total de dinero sin validar ${ _bill_data.byCurrencyTotal.get( currency ).toValidateTotal }<br>
+        <span class="tab">Efectivo : ${ _bill_data.byCurrencyTotal.get( currency ).cashToValidate }</span><br>
+        <span class="tab">Cheques : ${ _bill_data.byCurrencyTotal.get( currency ).checksToValidate }</span><br>
+        <span class="tab">Tickets : ${ _bill_data.byCurrencyTotal.get( currency ).ticketsToValidate }</span><br>
+    </p>
+</div>
+#{/list}

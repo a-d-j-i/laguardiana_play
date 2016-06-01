@@ -1,0 +1,529 @@
+@font-face {
+    font-family: 'DIN';
+    src: url('../fonts/DINPro-Medium.eot');
+    src: local('☺'),
+        url('../fonts/DINPro-Medium.woff') format('woff'),
+        url('../fonts/DINPro-Medium.ttf') format('truetype'),
+        url('../fonts/DINPro-Medium.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+#foreground {
+    width: 100%; 
+    height: 100%; 
+    position: absolute; 
+    left: 0px; 
+    top: 0px; 
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
+}
+#background {
+    width: 100%; 
+    height: 100%; 
+    position: absolute; 
+    left: 0px; 
+    top: 0px; 
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
+    overflow: hidden;
+}
+
+.stretch {
+    width:100%;
+    height:100%;
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
+}
+
+html {
+    height: 100%;
+    width: 100%; /*800px;*/
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
+}
+
+body {
+    background: black;
+    width: 100%; /*800px;*/
+    height: 100%;
+    padding: 0;
+    margin: 0px 0px;
+    border: 0px;
+    font-family: DIN;
+    font-size: 62.5%;
+    font-size: 1em;
+    color: black;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+/* defaults */
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* layout */
+
+section {
+    width: 100%; /*800px;*/
+    height: 100%;
+    margin: 0 auto;
+    position: relative;
+}
+
+header {
+    height: 10%;
+    background: url('../images/logo.png') 94% 50% no-repeat;
+}
+
+
+article {
+    height: 70%;
+    padding: 3% 3% 0 3%;
+}
+
+/* headings */
+
+h1 {
+    line-height: 42px;
+    font-size: 30pt !important;
+    margin-bottom: 25px !important;
+    background-repeat: no-repeat;
+    background-position: 0% 50%;
+}
+
+h1.candado {
+    background-image: url('../images/icono_candado.png');
+    padding-left: 51px;
+}
+
+h1.casa {
+    background-image: url('../images/icono_casa.png');
+    padding-left: 66px;
+}
+
+h1.contar_dinero {
+    background-image: url('../images/icono_contar_dinero.png');
+    padding-left: 62px;
+}
+
+h1.depositar_efectivo {
+    background-image: url('../images/icono_depositar_efectivo.png');
+    padding-left: 62px;
+}
+
+h1.depositar_sobre {
+    background-image: url('../images/icono_depositar_sobre.png');
+    padding-left: 63px;
+}
+
+h2 {
+    font-size: 19pt !important;
+    margin-bottom: 15px !important;
+}
+
+.blink {
+    font-size: 19pt !important;
+    margin-bottom: 15px !important;
+}
+
+/* separador */
+
+hr {
+    border: none;
+    height: 1px;
+    background: url('../images/separador.png') top right no-repeat;
+    padding: 0;
+    margin: 10px 0;
+}
+
+/* mensaje */
+
+.mensaje {
+    background: url('../images/caption_flecha.png') left bottom no-repeat;
+    padding-bottom: 12px;
+}
+
+.mensaje span {
+    background: url('../images/caption_fondo.png');
+    display: inline-block;
+    font-size: 15pt;
+    padding: 10px 22px 10px 20px;
+}
+
+/* botones */
+
+.boton {
+    height: 47px;
+    line-height: 47px;
+    font-size: 15pt;
+    border: none;
+    border-right: 1px solid;
+    display: inline-block;
+    padding: 0 18px 0 70px;
+    cursor: pointer;
+}
+
+.boton.verde {
+    color: white;
+    background: url('../images/boton_verde.png') top left no-repeat;
+    border-right-color: #547a1f;
+}
+
+.boton.gris {
+    color: black;
+    background: url('../images/boton_gris.png') top left no-repeat;
+    border-right-color: #b3b3b3;
+}
+
+.boton.naranja {
+    color: black;
+    background: url('../images/boton_naranja.png') top left no-repeat;
+    border-right-color: #fcba09;
+}
+
+.boton.azul {
+    color: black;
+    background: url('../images/boton_azul.png') top left no-repeat;
+    border-right-color: #00AEEF;
+}
+
+.boton.rojo {
+    color: white;
+    background: url('../images/boton_rojo.png') top left no-repeat;
+    border-right-color: #b91b0b;
+}
+
+.boton_top {
+    background: url('../images/boton_top_fondo.png') top left repeat-y;
+    color: black;
+    padding: 12px 189px 12px 63px;
+    min-width: 252px;
+    font-size: 15pt;
+}
+
+/* forms */
+
+input[type='text'], input[type='password'], input[type='number'], textarea {
+    background: white;
+    border: 1px solid #BCBCBC;
+    padding: 10px;
+    font-size: 15pt;
+    color: #999999;
+}
+
+input[type='text'] {
+    margin-bottom: 15px;
+}
+
+select {
+    background: white;
+    border: 1px solid #BCBCBC;
+    padding: 10px;
+    font-size: 15pt;
+    color: #999999;
+    height: 50px;
+    margin-bottom: 15px;
+}
+
+
+select option {
+    background: white;
+    padding: 10px;
+    font-size: 15pt;
+    color: #999999;
+}
+
+/* modificadores */
+
+.full_width {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    width: 100%;
+}
+
+/* tablas */
+
+table {
+    background: url('../images/tabla_fondo.png') top left repeat-x #B8B8B8;
+    border: 1px solid #BCBCBC;
+    width: 90%;
+    height: 90%;
+}
+
+table thead {
+
+}
+
+table thead tr {
+
+}
+
+table thead tr th {
+    color: black;
+    text-align: center;
+    padding: 5px;
+}
+
+table tbody {
+
+}
+
+table tbody tr {
+
+}
+
+table tbody tr td {
+    text-align: center;
+    color: #666666;
+    padding: 1px 5px;
+    border-top: 1px solid #B9B9B9;
+}
+
+table tfoot {
+
+}
+
+table tfoot tr {
+
+}
+
+table tfoot tr td {
+    color: black;
+    text-align: center;
+    padding: 5px;
+    border-top: 1px solid #B9B9B9;
+}
+
+/* teclados */
+
+.keyboard {
+}
+/*.keyboard {
+    margin-top: 10px;
+}*/
+
+/*.keyboard {
+    margin-top: 10px;
+    margin-bottom: 41px;
+}*/
+
+
+
+.keyboard .element {
+
+    /* box model */
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+
+    /* medidas */
+    width: 100%;
+    height: 52px;
+    line-height: 52px;
+    cursor: pointer;
+
+    /* font */
+    font-family: DIN;
+    font-size: 17pt;
+    text-align: center;
+
+    /* display */
+    display: inline-block;
+
+}
+
+.keyboard .element.key {
+    color: white;
+    background-color: #ffffff;
+    border: 1px solid #7f7548;
+    background-image: -moz-linear-gradient(top, #5a5a5a, #a3a3a3);
+    background-image: -o-linear-gradient(top, #5a5a5a, #a3a3a3);
+    background-image: -webkit-gradient(linear, center top, center bottom, from(#5a5a5a), to(#a3a3a3));
+    background-image: -webkit-linear-gradient(top, #5a5a5a, #a3a3a3);
+    background-image: linear-gradient(top, #5a5a5a, #a3a3a3);
+}
+
+.keyboard .element.action {
+    color: black;
+    background-color: #ffffff;
+    border: 1px solid #FFBC00;
+    background-image: -moz-linear-gradient(top, #F7B304, #DB7B00);
+    background-image: -o-linear-gradient(top, #F7B304, #DB7B00);
+    background-image: -webkit-gradient(linear, center top, center bottom, from(#F7B304), to(#DB7B00));
+    background-image: -webkit-linear-gradient(top, #F7B304, #DB7B00);
+    background-image: linear-gradient(top, #F7B304, #DB7B00);
+    font-size: 14pt;
+}
+
+.keyboard span {
+    margin: 0 8px 8px 0;
+    display: block;
+}
+
+.popup_keyboard_qwerty {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    background: url('../images/overlay.png');
+    padding-top: 140px;
+}
+
+.popup_keyboard_qwerty .keyboard {
+    width: 770px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+#popup_keyboard_qwerty_input {
+    margin-bottom: 20px;
+}
+
+
+/* alertas */
+
+.alerta {
+    margin-left: 100px;
+    width: 100%; /*600px;*/
+    height: 100%; /*500px;*/
+    background: none;
+    display: none;
+}
+
+.alerta #alerta_titulo {
+    font-size: 30pt;
+    color: white;
+    margin-bottom: 20px;
+    background-position-x: 0%;
+    background-position-y: 50%;
+    background-repeat: no-repeat;
+    padding-left: 65px;
+    line-height: 44px;
+}
+
+.alerta.info #alerta_titulo {
+    background-image: url('../images/alertas_icono_info.png');
+}
+
+.alerta.error #alerta_titulo {
+    background-image: url('../images/alertas_icono_error.png');
+}
+
+.alerta.success #alerta_titulo {
+    background-image: url('../images/alertas_icono_success.png');
+}
+
+.alerta.continue #alerta_titulo {
+    background-image: url('../images/alertas_icono_continue.png');
+}
+
+.alerta #alerta_cuerpo {
+    padding-left: 70px;
+}
+
+.alerta #alerta_cuerpo #alerta_texto {
+    background: url('../images/alertas_flecha.png') top left no-repeat;
+    padding-top: 13px;
+    margin-bottom: 30px;
+    width: 80%;
+    background: #FFF7C2;
+    padding: 15px;
+    color: black;
+    font-size: 14pt;
+    display: block;
+}
+
+.alerta #alerta_cuerpo #alerta_botonera {
+    padding-left: 70px;
+}
+
+/* section: login */
+
+#login input[type='text'] {
+    width: 30%;
+    margin-right: 15px;
+}
+
+#login input[type='password'] {
+    width: 30%;
+    margin-right: 15px;
+}
+
+#login #keyboard_placeholder {
+    overflow: auto;
+    margin-top: 15px;
+}
+
+.botonera {
+    overflow: hidden;
+    padding: 0% 0% 0% 0%;
+}
+
+.botonera .column {
+    width: 48%;
+    float: left;
+}
+
+.botonera .columna {
+    padding: 0 10px;
+    height: 50px;
+}
+
+.botonera .columna a {
+    margin-bottom: 20px;
+}
+
+.contenido_chico {
+    overflow: hidden;
+    height: 70%;
+}
+
+.contenido {
+    overflow: hidden;
+    height: 75%;
+}
+
+.contenido_grande {
+    overflow: hidden;
+    height: 80%;
+}
+
+hr {
+    margin: 15px 0;
+}
+
+
+
+/*Jquery tools calendar */
+
+#calbody {
+    /* background gradient with image. background color can be changed */
+    background:#F5F9FF url('../images/h300.png') repeat-x;
+    /* CSS shadow for the calendar body */
+    -moz-box-shadow:0 0 10px 0px #ccc;
+    -webkit-box-shadow:0 0 10px 0px #ccc;
+}
+
+/* styling of the current date */
+#caltoday {
+    /* some shadow for the text */
+    text-shadow:0 1px 0 #000;
+    /* inner shadow */
+    -moz-box-shadow:inset 0 0 10px 0px #000;
+}
+
+.tab { margin-left: 40px; }

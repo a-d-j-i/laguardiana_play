@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="${lang}">
+    <head>
+        <title>#{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=${_response_encoding}">
+
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/'}/${play.configuration['style.favicon']}">
+        <!-- yui reset -->
+        <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/yui/reset.css'}">
+        <!-- local css -->
+        <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/base.css'}">
+        <!-- elasticss -->
+        <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/elastic.css'}">
+        <style>
+            header {
+                background: url('../public/images/${play.configuration['style.logo']}') 94% 50% no-repeat;
+            }
+            .boton_top {
+                background: url('../public/images/${play.configuration['style.button_top']}') top left repeat-y;
+            }
+        </style>
+        <!-- jquery ui -->
+        <link rel="stylesheet" media="screen" type="text/css" href="@{'/public/stylesheets/jquery-ui.css'}">
+        <!-- mottie -->
+        #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
+        <link rel="stylesheet"  media="screen" type="text/css" href="@{'/public/stylesheets/mottie.css'}" />
+        #{/if}
+        #{get 'moreStyles' /}
+    </head>
+
+    <body>
+        <div id="background">
+            <img src="../public/images/${play.configuration['style.background']}" class="stretch" alt="" />
+        </div>
+        <div id="foreground" style="overflow: auto;">
+            #{doLayout /}
+        </div>
+    </body>
+    <!-- javascript Placed at the end of the document so the pages load faster -->
+    <!-- jquery -->
+    <script src="@{'/public/javascripts/jquery/jquery-1.8.0.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <!-- jquery ui -->
+    <script src="@{'/public/javascripts/jquery/jquery-ui.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <!-- jquery-tools -->
+    <script src="@{'/public/javascripts/jquery/jquery.tools.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <!-- mottie -->
+    #{if ( play.configuration[ 'style.useMottieKeyboard' ] ) }
+    <script src="@{'/public/javascripts/jquery/jquery.keyboard.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <script>
+        $(function() {
+            $(":text, [type='password'], textarea").keyboard({
+                layout: 'custom',
+                autoAccept: true,
+                openOn: 'click',
+                customLayout: {
+                    'default': [
+                        '` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
+                        '{tab} q w e r t y u i o p [ ] \\',
+                        'a s d f g h j k l ; \' {accept}',
+                        '{shift} z x c v b n m , . / {shift}',
+                        '{space} {cancel}'
+                    ],
+                    'shift': [
+                        '~ ! @ # $ % ^ & * ( ) _ + {bksp}',
+                        '{tab} Q W E R T Y U I O P { } |',
+                        'A S D F G H J K L : " {accept}',
+                        '{shift} Z X C V B N M < > ? {shift}',
+                        '{space} {cancel}'
+                    ]
+                }
+            });
+            $("[type='number']").keyboard({
+                layout: 'custom',
+                autoAccept: true,
+                openOn: 'click',
+                customLayout: {
+                    'default': [
+                        '7 8 9 {c}',
+                        '4 5 6 {b}',
+                        '1 2 3 {clear}',
+                        '0 . {accept}'
+                    ]
+                }
+            });
+        });
+    </script>
+
+    #{/if}
+    <!-- default value -->
+    <script src="@{'/public/javascripts/jquery/jquery.defaultvalue.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <!-- elasticss -->
+    <script src="@{'/public/javascripts/elastic.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <!-- local js -->
+    <script src="@{'/public/javascripts/code.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+        <script src="@{'/public/javascripts/html5.js'}"></script>
+    <![endif]-->
+    #{get 'moreScripts' /}
+</html>

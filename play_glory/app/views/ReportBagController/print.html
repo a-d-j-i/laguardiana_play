@@ -1,0 +1,10 @@
+#{extends 'PrinterController/ticket_160mm.html' /}
+<center><img src="../public/images/${play.configuration['style.plogo']}"></center>
+<br/>
+Contenido actual de la maquina<br/>
+en la bolsa ${ bag.bagId }, colocada el ${ bag.creationDate.format('dd/MM/yyyy HH:mm:ss') }<br/>
+#{if reprint } 
+<b>&{ 'summary.reprint' }</b><br/>
+#{/if}
+#{ bills_table_printer bill_data: totals /}
+${ currentDate.format('dd/MM/yyyy HH:mm:ss') }${ticketFooter}

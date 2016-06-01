@@ -1,0 +1,111 @@
+# you describe your data using the YAML notation here
+# and then load them using Fixtures.load("data.yml")
+#
+
+#
+# External Application Codes
+#
+  db.LgExternalApp(PlayInternalApp):
+    appId:          1
+    name:           PlayInternalApp
+    retryInterval:  -1
+    executionTime:  0000-00-00
+    presicion:      1
+    interval:       -1
+
+  db.LgExternalApp(PlayInternalApp):
+    appId:          2
+    name:           PRDM
+    retryInterval:  -1
+    executionTime:  0000-00-00
+    presicion:      1
+    interval:       -1
+
+
+#
+# Roles
+#
+  db.LgRole(RoleAdmin):
+    name:           admin
+  db.LgRole(RoleGuest):
+    name:           guest
+
+
+#
+# Resources
+#
+  db.LgResource(ResourceAdmin):
+    name:           ADMIN
+
+  
+# ACLs
+#
+# ACLs for Role: Admin
+  db.LgAclRule(RoleAdminAdmin):
+    role:           RoleAdmin
+    resource:       ResourceAdmin
+    priority:       1
+    operation:      ADMIN
+    permission:     ALLOW
+
+# Basic users
+  db.LgUser(admin):
+    externalApp:    PlayInternalApp
+    username:       admin
+    password:       X
+    gecos:          "Gecos del Usario administrador"
+    creationDate:   2012-01-01
+    endDate:        2112-01-02    
+    externalId:     0
+    locked:         #x42
+    roles:          [ RoleAdmin ]
+
+  db.LgUser(guest):
+    externalApp:    PlayInternalApp
+    username:       guest
+    password:       guest
+    gecos:          "Gecos del Usario guest"
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          [ RoleGuest ]
+    
+  db.LgUser(demo):
+    externalApp:    PlayInternalApp
+    username:       demo
+    password:       demo
+    gecos:          "Gecos del Usario demo"
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          []
+
+  db.LgUser(user):
+    externalApp:    PlayInternalApp
+    username:       user
+    password:       ""
+    gecos:          "Gecos del Usario user"
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          []
+
+  db.LgUser(supervisor):
+    externalApp:    PlayInternalApp
+    username:       supervisor
+    password:       supervisor
+    gecos:          "Gecos del Usario supervisor"
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          []
+    
+  db.LgUserProperty(adminCrapAuth):
+    property:       crap_auth
+    value:          true
+    user:           [ admin ]
+  

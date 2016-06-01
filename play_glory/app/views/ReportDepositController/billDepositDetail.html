@@ -1,0 +1,58 @@
+#{extends 'reportDetail.html' /}
+#{set title: 'current Deposit Totals' /}
+<div class="contenido_grande">
+    <ul class="columns">
+        <li class="fixed column" style="width: 45%">
+            <div class="columna_1">
+                <!-- resumen de datos -->
+                <p style="font-size: larger;">&{ 'summary.username' }&nbsp;#{usernameTag cuser: deposit.user/}</p>
+                <p>&{ 'counting_page.currency_title' }: ${deposit.getCurrency().description}</p>
+                #{if ( deposit.findUserCode() ) }
+                &{ 'counting_page.reference1_title' }: ${deposit.findUserCode()}<br>
+                #{/if}
+                #{if ( deposit.userCode ) }
+                &{ 'counting_page.reference2_title' }: ${deposit.userCode}<br>
+                #{/if}
+                <p>&{ 'counting_page.client_code_title' }: #{if play.configuration['style.useGecosAsClientCode']}${user.gecos}#{/if}#{else}${clientCode}#{/else}</p>
+                <p>&nbsp;</p>
+            </div>
+        </li>
+        #{list items:billData.currencies, as:'currency'}
+        <li class="fixed column" style="width: 55%">
+            <table class="full_width">
+                <thead>
+                    <tr>
+                        <th>&{ 'counting_page.denomination' }</th>
+                        <th>&{ 'counting_page.quantity' }</th>
+                        <th>&{ 'counting_page.total' }</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- detalle de billetes -->
+                    %{ total = 0; cnt_total = 0;}%
+                    #{list items:billData.getDetail( currency ), as:'b'}
+                    <tr class="BTRID_${b.key}">
+                        <td id="bill_denomination">${b.denomination} ${b.currency.textId}</td>
+                        <td class="bill_quantity">${b.quantity}</td>
+                        <td class="bill_total">${b.ammount}</td>
+                        %{ total += b.ammount; cnt_total += b.quantity; }%
+                    </tr>
+                    #{/list}
+                    <!-- /detalle de billetes -->
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td>&{ 'counting_page.totals' }</td>
+                        <!-- totales -->
+                        <td class ="cnt_total">${ cnt_total }</td>
+                        <td class ="total">${ total }</td>
+                        <!-- /totales -->
+                    </tr>
+                </tfoot>
+            </table>
+        </li>
+        #{/list}
+    </ul>
+</div>
+

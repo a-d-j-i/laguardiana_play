@@ -1,0 +1,7 @@
+#{extends 'reportDetail.html' /}
+#{set title: 'current Z totals' /}
+Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy HH:mm:ss') } y 
+#{ if z.closeDate == null }aun no cerrado#{/if}
+#{ else }cerrado el ${ z.closeDate.format('dd/MM/yyyy HH:mm:ss') }#{/else}
+<br>
+#{ bills_table bill_data: totals /}

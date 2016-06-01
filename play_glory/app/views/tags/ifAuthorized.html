@@ -1,0 +1,9 @@
+%{ def url = actionBridge."$_resource".call() }%
+#{if ( controllers.Secure.checkPermission( _resource, _operation ) ) }
+#{doBody /}
+#{/if}
+#{else}
+#{if _fill }
+&nbsp;
+#{/if}
+#{/else}

@@ -1,0 +1,185 @@
+# You can specialize this file for each language.
+# For example, for French create a messages.fr file
+username=NOME DE USUÁRIO
+password=SENHA
+externalId=Id externo
+#
+
+secure.username=USUARIO
+secure.password=SENHA
+secure.title=INGRESSE USUÁRIO
+secure.signin=Log in now
+secure.remember=Remember me
+secure.logout=Logout success.
+secure.not_allowed=Not allowed must login.
+secure.invalid_field=Erro, deve ingressar todos os campos
+secure.invalid_user_password=Erro, usuário ou senha incorretos.
+secure.invalid_user=O usuário é incorreto.
+secure.continue_message_user=Para continuar, ingresse seu usuário
+secure.continue_message_password=Para continuar, ingresse seu usuário e senha
+secure.pass_forget=Não lembra seus dados?
+
+keyboard.continue=CONTINUAR
+keyboard.space=ESPAÇO
+
+application.back=ATRÁS
+application.continue=CONTINUAR
+application.cancel=CANCELAR
+application.checkPrinter=Revise la impresora.
+application.lockedByUser=Bloqueado por usuario %s.
+application.bagRemoved=La bolsa de recaudacion fue removida, no deposite.
+application.bagFull=La bolsa de recaudacion esta llena, espere para depositar.
+application.bill_jam=Bilhete travado, verifique a máquina e remova-os
+application.envelope_jam=Sobre travado, verifique a máquina e remova-os
+application.canceling=Cancelando
+application.jam=Billete atascado.
+application.canceling_detail=Cancelando, aguarde...
+application.finish=FINALIZAR
+application.choose_one=Selecione alguma opcão
+application.wellcome=Bem-vindo
+application.choose_currency=Seleccione moeda
+application.thanks=OBRIGADO POR OPERAR COM %s
+application.bagTotals=Existem %d bilhetes e %d envelope/s na saca
+application.bagSpace=Resta espaço para %d bilhetes
+application.error=ERRO
+application.bag_not_in_place=A saca de cobrança não se encontra colocada na máquina
+application.wait=Aguarde...
+application.ok=Sin errores
+application.close=FINALIZAR
+application.printers=Impressoras
+application.timeout=Precisa mais tempo
+application.timeout_detail=Precisa mais tempo
+application.hardware_error=Erro em hardware contáte-se com o administrador
+application.error_code=Codigo de error
+application.remove_ticket=Por favor retire su ticket
+
+application.start_counting=COMEÇAR CONTAR
+application.choose_currency_before=Selecione moeda antes de iniciar a contagem
+application.input_reference=Ingrese referência
+
+
+
+other_menu.accounting=Contabilidade
+other_menu.reports=Relatórios
+other_menu.hardware_admin=Hardware Admin
+other_menu.config=Configuracion
+
+other_menu.db_admin=Administrar DB
+other_menu.glory_cmd=Glory Comandos
+other_menu.glory_manager=Glory Manager
+other_menu.ioboard_cmd=IoBoard
+other_menu.status=Status
+other_menu.printer_test=Test
+other_menu.printer_list=Impresoras
+
+other_menu.current_z_totals=Coleção atual
+other_menu.rotate_z=Balancete
+other_menu.current_bag_totals=Dinheiro na saca
+other_menu.rotate_bag=Trocar saca
+
+other_menu.unprocessed_menu=Objetos a processar
+other_menu.unprocessed_zs=Zs a processar
+other_menu.unprocessed_bags=Sacas a processar
+other_menu.unprocessed_deposits=Despósitos a processar
+other_menu.unprocessed_events=Eventos a processar
+other_menu.list_zs=Listar balancetes
+other_menu.list_bags=Listar sacas
+other_menu.list_deposits=Listar depósitos
+other_menu.list_events=Listar eventos
+
+main_menu.title=MENÚ PRINCIPAL
+main_menu.cash_deposit=DEPOSITAR EFETIVO
+main_menu.envelope_deposit=DEPOSITAR ENVELOPE
+main_menu.count=CONTAR BILLETES
+main_menu.filter=SEPARAR BILLETES
+main_menu.other_operations=OTRAS OPERAÇÕES
+main_menu.login=INGRESSAR AO SISTEMA
+main_menu.logout=SAÍR DO SISTEMA
+other_menu.title=OUTRAS OPERAÇÕES
+
+bill_deposit.escrow_full=ESCROW COMPLETO, Pronto pra depositar?
+bill_deposit.escrow_full_text_t1=Dinhero recontado: 
+bill_deposit.escrow_full_text_t2=Se confirma o depósito não poderá voltar atrás.
+bill_deposit.ready_to_store=Pressione continuar para depositar
+
+envelope_deposit.put_the_envelope_in_the_escrow=Coloque o envelope na máquina.
+
+counting.ready_to_store=Coloque mais bilhetes
+counting.escrow_full=Retire os bilhetes da máquina para continuar
+
+counting_page.put_the_bills_on_the_hoper=Coloque os bilhetes na máquina
+counting_page.remove_the_bills_from_escrow=Retire os objetos do interior da máquina.
+counting_page.remove_the_bills_from_hoper=Retire os bilhetes da parte superior da máquina.
+counting_page.remove_rejected_bills=Retire os bilhetes rejeitados
+counting_page.storing=Depositando...
+counting_page.storing_detail=Depositando, aguarde por favor...
+counting_page.deposit_canceled=Despósito Cancelado
+counting_page.deposit_canceled_bag_removed=Desposito Cancelado por que la bolsa de recaudacion fue removida!!!.
+counting_page.deposit_canceled_bag_full=Desposito Cancelado por que el deposito no cabe en la bolsa de recaudacion!!!.
+counting_page.total_sum=Sub-total já depositado
+counting_page.current_total_sum=Sub-total do depósito
+
+counting_page.escrow_full_text=Escrow lotado. <br/>Retire os bilhetes do escrow.
+counting_page.currency_title=Moeda
+counting_page.reference1_title=Referência
+counting_page.reference2_title=Aplicar a
+counting_page.client_code_title=Empresa
+counting_page.denomination=DENOMINAÇÃO
+counting_page.quantity=QUANTIDADE
+counting_page.total=TOTAL
+counting_page.totals=TOTAIS
+
+summary.ticket=Retire seu ticket
+summary.total=Importe depositado
+summary.transaction_code=Transação
+summary.username=Usuário
+summary.client_code=Empresa
+summary.branch_code=Sucursal
+summary.machine_code=Terminal
+summary.reprint=Re-impresão
+summary.original=Original
+summary.copy=Copia
+
+envelope_deposit.select_contents=Selecione os conteúdos do envelope
+envelope_deposit.contents=Conteúdos do envelope
+envelope_deposit.cash=EFETIVO
+envelope_deposit.documents=DOCUMENTOS
+envelope_deposit.checks=CHEQUES
+envelope_deposit.tickets=TICKETS
+envelope_deposit.others=OUTROS
+envelope_deposit.amount_to_confirm=Quantidade a confirmar
+envelope_deposit.amount_to_confirm_title=Ingresse quantidade
+envelope_deposit.type_amount_to_confirm=Ingresse quantidade a confirmar
+envelope_deposit.envelope_code_title=Ingresse número de envelope
+envelope_deposit.envelope_code=Nro. de envelope
+envelope_deposit.put_ticket_in_envelope=Coloque o ticket e o dinhero no envelope e ingrésse-o na máquina
+envelope_deposit.deposit_done=Por favor retire seu ticket
+envelope_deposit.has_documents=Contém documentos
+envelope_deposit.has_others=Contém outros
+envelope_deposit.amount_cash=Quantidade em efetivo
+envelope_deposit.amount_checks=Quantidade em cheques
+envelope_deposit.amount_tickets=Quantidade em tickets
+envelope_deposit.required.reference1=Deve ingressar referência
+envelope_deposit.required.reference2=Deve ingressar referência
+envelope_deposit.required.envelopeCode=Falta o código do envelope
+
+validation.required=%s é um campo obrigatório
+validation.required=campo obrigatório
+validation.must_be_a_number=Aceitam-se depósitos com dois decimais
+validation.must_be_a_5_number=o campo deve conter 5 dígitos no máximo
+validation.required.reference2=campo obrigatório
+validation.required.envelopeCode=campo obrigatório
+validation.required.cashData_amount=campo obrigatório
+validation.required.checkData_amount=campo obrigatório
+validation.required.ticketData_amount=campo obrigatório
+validation.atleastone=deve escolher pelo menos um conteúdo
+
+filter.choose_denomination=Escolha a denominação
+
+
+other_menu.print_billDeposit=Depósito Bilhetes
+other_menu.print_currentBagTotals=Total na saca
+other_menu.print_envelopeDeposit_finish=Depósito envelope fim
+other_menu.print_envelopeDeposit_start=Depósito envelope começo
+other_menu.print_currentZTotals=Balancete
+print_other_menu.test=Teste genérico

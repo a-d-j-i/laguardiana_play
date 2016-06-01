@@ -1,0 +1,9 @@
+#{if ( _cuser ) }
+    #{if play.Play.configuration.get( "style.useGecosAsUsername" ) == 'true' }
+        ${_cuser.gecos}
+    #{/if}
+    #{else}
+        ${_cuser.username}
+    #{/else}
+#{/if}
+

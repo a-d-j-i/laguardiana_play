@@ -1,0 +1,76 @@
+#{extends 'reportList.html' /}
+#{set title: 'List Deposits' /}
+<table style="margin-left: auto; margin-right: auto; border: 1px solid; font-size: small;">
+    <thead>
+    <th>Transaccion</th>
+    <th>Usuario</th>
+    <th>Fecha del deposito</th>
+    <th>Cierre contable</th>
+    <th>Fecha retiro de bolsa</th>
+    <th>Total</th>
+    <th colspan="2">Acciones</th>
+</thead>
+<tbody>
+    #{list items:data, as:'deposit' }
+    #{if ( ! deposit.finishDate ) } 
+        <tr style="background-color: lightpink;">
+    #{/if} #{else}
+        #{if ( deposit.finishCause?.name() != 'FINISH_CAUSE_OK' ) } 
+            #{if ( deposit.finishCause?.name() != 'FINISH_CAUSE_CANCEL' ) } 
+                #{if ( deposit.finishCause?.name() != 'FINISH_CAUSE_STORING_ERROR' ) } 
+                    <tr style="background-color: red;">
+                #{/if} #{else}
+                    <tr style="background-color: lightsalmon;">
+                #{/else}
+            #{/if} #{else}
+                <tr style="background-color: lightyellow;">
+            #{/else}
+        #{/if} #{else}
+                <tr style="background-color: lightgreen;">
+        #{/else}
+    #{/else}
+        <td>${deposit.depositId} </td>
+        <td>#{usernameTag cuser: deposit.user/}</td>
+        <td>${deposit.creationDate?.format('dd/MM/yyyy HH:mm:ss')}</td>
+        <td style="width:180px;">
+            ${deposit.z.creationDate?.format('dd/MM/yyyy HH:mm:ss')}
+            <br>
+            ${deposit.z.closeDate?.format('dd/MM/yyyy HH:mm:ss')}
+        </td>
+        <td style="width:180px;">
+            ${deposit.bag.withdrawDate?.format('dd/MM/yyyy HH:mm:ss')}
+        </td>
+        <td style="width:150px;">
+            #{if ( deposit.class.getSimpleName() == "BillDeposit" )}
+            ${deposit.getTotal()}
+            #{/if}
+            #{if ( deposit.class.getSimpleName() == "EnvelopeDeposit" )}
+            Deposito por sobre
+            #{/if}
+        </td>
+        <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ deposit.depositId }" href="@{reprint}" class="submitForm"><img src="../public/images/list_reprint.png" border="0" alt="Reimprimir Ticket"></a>
+        </td>
+        <td style="background-color: lightblue; border: 1px solid;">
+            <a id="${ deposit.depositId }" href="@{detail}" class="submitForm"><img src="../public/images/list_detail.png" border="0" alt="Detalle"></a>
+        </td>
+    </tr>
+    #{/list}
+</tbody>
+<tfoot> 
+    <tr>
+        <td colspan="3" style="text-align: left;">Cantidad de depositos: ${cnt}</td>
+        <td colspan="5" style="text-align: right;">Pagina : ${page} de ${totalPage}</td>
+    </tr>
+</tfoot>
+</table>
+#{if bag}
+    Contenido de la bolsa ${ bag.bagId }, colocada el ${ bag.creationDate.format('dd/MM/yyyy HH:mm:ss') } y
+    #{if bag.withdrawDate} retirada el ${ bag.withdrawDate.format('dd/MM/yyyy HH:mm:ss') }#{/if}
+    #{else} aun no retirada#{/else}
+#{/if}
+#{if z}
+    Contenido del cierre contable iniciado el ${ z.creationDate.format('dd/MM/yyyy HH:mm:ss') } y 
+    #{ if z.closeDate == null } aun no cerrado#{/if}
+    #{ else } cerrado el ${ z.closeDate.format('dd/MM/yyyy HH:mm:ss') }#{/else}
+#{/if}

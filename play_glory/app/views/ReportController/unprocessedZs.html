@@ -1,0 +1,12 @@
+#{extends 'ReportController/unprocessed.html' /}
+#{set title: 'Unprocessed Zs' /}
+<ul>
+    #{list items:data, as:'z' }
+    <li>${z.zId} : ${z.toString()}
+        <a href="@{processZ(z.zId)}" style="color: green">process</a>
+    </li>
+    #{/list}
+</ul>
+
+
+

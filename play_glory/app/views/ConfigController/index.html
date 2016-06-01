@@ -1,0 +1,116 @@
+#{extends 'main.html' /}
+#{set title:'Configuracion' /}
+<section>
+    <header></header>
+    <nav>
+        <a href="@{MenuController.hardwareMenu(1)}" class="boton_top">◄ &{ 'application.back' }</a>
+    </nav>
+    <article>
+        <h1 class="casa">&{'other_menu.config'}&nbsp;<span id="processing" style="text-align: right; height: 30px; color: red;"></span></h1>
+        <div class="contenido">
+            <div style="overflow:auto; height:  80%;">
+                #{form @index(), id:'configForm', style:'height:  100%;'}
+                <table style="background: #E8E8E8;" style="margin: 10px;">
+                    #{list items:data, as:'b'}
+                    <tr>
+                        <td style="text-align: left; width: 30%;">
+                            ${b.name}
+                        </td>
+                        <td style="text-align: left; width: 70%;">
+                            #{if b.editType.name() == 'INTEGER' }
+                                <input class="form_input propInput_integer" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="number" id="ID_${b.propertyId}" name="${b.name}" value="${b.value}">
+                            #{/if}
+                            #{elseif b.editType.name() == 'BOOLEAN'}
+                                <input class="form_input propInput_boolean" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="checkbox" id="ID_${b.propertyId}" name="${b.name}" #{if b.value == 'true' }checked='checked'#{/}">
+                            #{/elseif}
+                            #{elseif b.editType.name() == 'STRING'}
+                                <input class="form_input propInput_string" style="width: 100%; margin-bottom: 0px; padding: 0px;" type="text" id="ID_${b.propertyId}" name="${b.name}" value="${b.value}">
+                            #{/elseif}
+                            #{else}
+                                <p style="width: 100%; margin-bottom: 0px; padding: 0px;">${b.value}</p>
+                            #{/else}
+                        </td>
+                    </tr>
+                    #{/list}
+                </table>
+                #{/form}
+            </div>
+        </div>
+        <hr />
+        #{menuBottomButtons}&nbsp;#{/menuBottomButtons}
+        <div id="main_overlay" class="alerta info" style="display: none;">
+            <div id="alerta_error" class="alerta_error">
+                <div id="alerta_titulo">&{ 'application.error' }</div>
+                <div id="alerta_cuerpo">
+                    <div id="alerta_texto">
+                        <div id="error_text">
+                        </div>
+                    </div>
+                    <div id="alerta_botonera">
+                        <a href="#" id="error_cancel_btn" class="cancelButton boton naranja">&{ 'application.cancel' }</a>
+                    </div>
+                </div>
+            </div>
+
+    </article>
+</section>
+
+
+
+#{set 'moreScripts'}
+<script type="text/javascript" charset="${_response_encoding}">
+    var current_overlay;
+    function postToServer(event, property, value) {
+        $(".form_input").prop('disabled', true);
+        $("#processing").html( "&{ 'application.wait' }... ");
+        $.getJSON('@{setProperty}', { property: property, value: value },
+            function(data) {
+                waiting = false;
+                var propId = data[0];
+                var oldVal = data[1];
+                var error = data[ 2];
+                if (error) {
+                    $("#ID_" + propId).val(oldVal);
+                    $('#error_text').html(error);
+                    current_overlay = $("#main_overlay").overlay({
+                             top: 100,
+                            left: "center",
+                            mask: {
+                            color: "#000",
+                                    loadSpeed: 1,
+                                    closeSpeed: 1,
+                                    opacity: 0.9
+                            },
+                            closeOnClick: true,
+                            closeOnEsc: true,
+                            speed: "fast",
+                            oneInstance: true
+                    });
+                    current_overlay = $("#main_overlay").overlay();
+                    current_overlay.load();
+                } 
+                $(".form_input").prop('disabled', false);
+                $("#processing").html( "&nbsp;");
+            });
+        }
+        $(document).ready(function() {
+            $("#error_cancel_btn").click(function() {
+                if ( current_overlay ) {
+                    current_overlay.close().onClose( function(){
+                        current_overlay = undefined;
+                    });
+                }
+            });
+            $(".propInput_integer").change(function(event) {
+                postToServer(event, $(this).attr('name'), $(this).val() );
+            });
+            $(".propInput_string").change(function(event) {
+                postToServer(event, $(this).attr('name'), $(this).val());
+            });
+            $(".propInput_boolean").change(function(event) {
+                postToServer(event, $(this).attr('name'), $(this).is(':checked'));
+            });
+           
+        });
+</script>
+#{/set}
