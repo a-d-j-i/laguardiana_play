@@ -27,16 +27,6 @@
     name:  "application.machine_code"
     value:  "el codigo de la maquina"
     editType: STRING
-  
-  db.LgSystemProperty(ticketFooter):
-    name:  "application.ticket_footer"
-    value:  "S.E.U.O."
-    editType: STRING
-
-  db.LgSystemProperty(ticketHeader):
-    name:  "application.ticket_header"
-    value:  ""
-    editType: STRING
     
   db.LgSystemProperty(machineDescription):
     name:  "application.machine_description"

@@ -95,8 +95,6 @@ public class ReportZController extends Controller {
     static public void setRenderArgs(LgZ z) {
         renderArgs.put("z", z);
         renderArgs.put("currentDate", new Date());
-        renderArgs.put("ticketFooter", Configuration.getTicketFooter());
-        renderArgs.put("ticketHeader", Configuration.getTicketHeader());
         renderArgs.put("totals", z.getTotals());
     }
 }

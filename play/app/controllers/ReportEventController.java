@@ -2,7 +2,6 @@ package controllers;
 
 import java.util.Date;
 import java.util.List;
-import models.Configuration;
 import models.db.LgEvent;
 import play.data.binding.As;
 import play.mvc.Before;
@@ -57,7 +56,5 @@ public class ReportEventController extends Controller {
     static public void setRenderArgs(LgEvent event) {
         renderArgs.put("event", event);
         renderArgs.put("currentDate", new Date());
-        renderArgs.put("ticketFooter", Configuration.getTicketFooter());
-        renderArgs.put("ticketHeader", Configuration.getTicketHeader());
     }
 }

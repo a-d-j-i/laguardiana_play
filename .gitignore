@@ -15,25 +15,7 @@ PlayRunner/nbproject/private
 .project
 project/project
 project/target
-<<<<<<< HEAD:.gitignore
 .settings
-=======
-nbproject
->>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:.gitignore
 target
 test-result/*
 tmp
-<<<<<<< HEAD:.gitignore
-=======
-.history
-dist
-doc/schema.architect~
-.classpath
-.project
-.settings
-.*~$
-eclipse
-modules
-archive.pwd
-/PlayRunner/build/
->>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:.gitignore

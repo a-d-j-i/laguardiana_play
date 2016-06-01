@@ -101,17 +101,8 @@ public class Configuration {
         return getSystemProperty("application.machine_code");
     }
 
-<<<<<<< HEAD:play/app/models/Configuration.java
     public static String getMachineType() {
         return getSystemProperty("application.machine_type");
-=======
-    public static String getTicketFooter() {
-        return getSystemProperty("application.ticket_footer");
-    }
-
-    public static String getTicketHeader() {
-        return getSystemProperty("application.ticket_header");
->>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/models/Configuration.java
     }
 
     public static String getMachineDescription() {

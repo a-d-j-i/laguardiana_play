@@ -1,6 +1,5 @@
 package controllers;
 
-import devices.printer.Printer;
 import java.util.List;
 import models.BillDeposit;
 import models.EnvelopeDeposit;
@@ -16,10 +15,8 @@ public class PrinterController extends Controller {
             Logger.debug("Changing printer to %s", printer);
             ModelFacade.setCurrentPrinter(printer);
         }
-        Printer p = ModelFacade.getCurrentPrinter();
         if (request.isAjax()) {
             Object o[] = new Object[2];
-<<<<<<< HEAD:play/app/controllers/PrinterController.java
             o[0] = ModelFacade.getPrinterPort();
             o[1] = ModelFacade.getPrinterState();
             renderJSON(o);
@@ -28,19 +25,6 @@ public class PrinterController extends Controller {
         renderArgs.put("printerStatus", ModelFacade.getPrinterState());
         renderArgs.put("currentPrinter", ModelFacade.getPrinterPort());
 
-=======
-            if (p != null) {
-                o[0] = p.getPort();
-                o[1] = p.getInternalState().toString();
-            }
-            renderJSON(o);
-        }
-        renderArgs.put("printers", ModelFacade.getPrinters());
-        if (p != null) {
-            renderArgs.put("printerStatus", p.getInternalState());
-            renderArgs.put("currentPrinter", p.getPort());
-        }
->>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/controllers/PrinterController.java
         render();
     }
 

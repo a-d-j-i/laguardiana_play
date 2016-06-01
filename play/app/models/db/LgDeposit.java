@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
-import models.EnvelopeDeposit;
 import models.db.LgLov.LovCol;
 import models.events.DepositEvent;
 import models.lov.DepositUserCodeReference;
@@ -24,18 +23,11 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
     public enum FinishCause {
 
         FINISH_CAUSE_OK(false),
-<<<<<<< HEAD:play/app/models/db/LgDeposit.java
         FINISH_CAUSE_ERROR(true),
         FINISH_CAUSE_CANCEL(true),
         FINISH_CAUSE_BAG_REMOVED(true),
         FINISH_CAUSE_BAG_FULL(true),
         FINISH_STORING_ERROR(true),;
-=======
-        FINISH_CAUSE_CANCEL(true),
-        FINISH_CAUSE_BAG_REMOVED(true),
-        FINISH_CAUSE_BAG_FULL(true),;
-
->>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/models/db/LgDeposit.java
         final private boolean cancel;
 
         public boolean isCancel() {
@@ -181,15 +173,12 @@ abstract public class LgDeposit extends GenericModel implements java.io.Serializ
         return LgDeposit.find(
                 "select d from LgDeposit d where "
                 + " finishDate is not null "
-                + " and ( type != ? or ( type = ? and finishCause = ? ) )"
-                + " and not exists ("
+                + "and not exists ("
                 + " from LgExternalAppLog al, LgExternalApp ea"
                 + " where al.externalApp = ea and al.logType = ?"
                 + " and d.depositId = al.logSourceId"
                 + " and ea.appId = ?"
-                + ")",
-                EnvelopeDeposit.class.getSimpleName(), EnvelopeDeposit.class.getSimpleName(), FinishCause.FINISH_CAUSE_OK,
-                LgExternalAppLog.LOG_TYPES.DEPOSIT.name(), appId);
+                + ")", LgExternalAppLog.LOG_TYPES.DEPOSIT.name(), appId);
     }
 
     public static boolean process(int appId, int depositId, String resultCode) {
