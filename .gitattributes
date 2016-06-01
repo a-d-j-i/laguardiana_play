@@ -1,4 +1,8 @@
 archive.sh export-ignore  
 .gitattributes export-ignore  
 .gitignore export-ignore
+<<<<<<< HEAD
 version.txt export-subst
+=======
+version.h export-subst
+>>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253

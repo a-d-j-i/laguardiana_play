@@ -37,6 +37,8 @@ public class EnvelopeDeposit extends LgDeposit {
         args.put("providerCode", Configuration.getProviderDescription());
         args.put("branchCode", Configuration.getBranchCode());
         args.put("machineCode", Configuration.getMachineCode());
+        args.put("ticketFooter", Configuration.getTicketFooter());
+        args.put("ticketHeader", Configuration.getTicketHeader());
         args.put("deposit", this);
         args.put("currentDate", new Date());
     }

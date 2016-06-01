@@ -1,5 +1,6 @@
 LAST_TAG=`git describe --abbrev=0 --tags`
 
+<<<<<<< HEAD
 TMP_DIR="/tmp/cajero_$LAST_TAG.war"
 
 rm -rf "$TMP_DIR" 
@@ -10,6 +11,13 @@ popd
 
 pushd play
 play war -o "$TMP_DIR" --exclude "TODO:d.sh:build.xml:archive.sh:launcher.py:PlayRunner.jar:docs:app/bootstrap:app/controllers:app/devices:app/machines:app/models:app/validation:logs:nbproject:test:tmp:dist"
+=======
+git archive --format tgz --prefix "cajero_$LAST_TAG/" --output "/tmp/cajero_$LAST_TAG.tgz" $LAST_TAG
+#hg archive "/tmp/cajero_$LAST_TAGY.tgz"
+pushd /tmp
+zip -e "cajero_$LAST_TAG.zip" "cajero_$LAST_TAG.tgz" -P $PASS
+rm "/tmp/cajero_$LAST_TAG.tgz"
+>>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253
 popd
 
 pushd pic

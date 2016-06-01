@@ -83,6 +83,47 @@ public class ConfigController extends Controller {
                     ret[2] = String.format("Property %s not editable", property);
                     break;
             }
+<<<<<<< HEAD:play/app/controllers/ConfigController.java
+=======
+            renderJSON(ret);
+        }
+    }
+
+    public static void status() {
+        ManagerInterface.ManagerStatus gstatus = null;
+        String gerror = null;
+        Printer.PrinterStatus pstatus = null;
+        String ierror = null;
+
+        final ManagerInterface manager = ModelFacade.getGloryManager();
+        if (manager != null) {
+            gstatus = manager.getStatus();
+            gerror = manager.getStatus().toString();
+        }
+        if (!Configuration.isIgnoreIoBoard()) {
+            final IoBoard ioBoard = ModelFacade.getIoBoard();
+            if (ioBoard != null && ioBoard.getError() != null) {
+                ierror = ioBoard.getError().toString();
+            }
+        }
+        if (!Configuration.isIgnorePrinter() && !Configuration.isPrinterTest()) {
+            Printer p = ModelFacade.getCurrentPrinter();
+            if (p != null) {
+                pstatus = p.getInternalState();
+            }
+        }
+        if (request.isAjax()) {
+            renderJSON(ModelFacade.isError());
+        } else {
+            renderArgs.put("isError", ModelFacade.isError());
+            renderArgs.put("mstatus", ModelFacade.getState());
+            renderArgs.put("merror", ModelFacade.getError());
+            renderArgs.put("pstatus", pstatus);
+            renderArgs.put("gstatus", gstatus);
+            renderArgs.put("gerror", gerror);
+            renderArgs.put("ierror", ierror);
+            render();
+>>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/controllers/ConfigController.java
         }
         renderJSON(ret);
     }

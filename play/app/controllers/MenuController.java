@@ -1,5 +1,8 @@
 package controllers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import models.Configuration;
@@ -7,7 +10,10 @@ import models.ItemQuantity;
 import models.ModelFacade;
 import models.db.LgBag;
 import play.Logger;
+<<<<<<< HEAD:play/app/controllers/MenuController.java
 import play.i18n.Messages;
+=======
+>>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/controllers/MenuController.java
 import play.mvc.*;
 
 @With({Secure.class})
@@ -60,9 +66,29 @@ public class MenuController extends Controller {
 
     public static void otherMenu(String back) {
         String backAction = "MenuController.mainMenu";
+<<<<<<< HEAD:play/app/controllers/MenuController.java
         String[] buttons = {"MenuController.configMenu", "MenuController.accountingMenu", "MenuController.reportMenu"};
         String[] titles = {"other_menu.config", "other_menu.accounting", "other_menu.reports"};
         renderArgs.put("release", ModelFacade.getAppVersion());
+=======
+        String[] buttons = {"CRUD.index", "MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu"};
+        String[] titles = {"other_menu.db_admin", "other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports"};
+        File f = play.Play.getFile(".hg_archival.txt");
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(f);
+            byte[] data = new byte[(int) f.length()];
+            fis.read(data);
+            fis.close();
+            String s = new String(data, "UTF-8");
+            s = s.substring(s.indexOf("latesttag:") + "latesttag:".length(), s.lastIndexOf("latesttag"));
+            renderArgs.put("release", s);
+        } catch (StringIndexOutOfBoundsException ex) {
+            //Logger.error("Error reading release file : %s", ex.toString());
+        } catch (IOException ex) {
+            //Logger.error("Error reading release file : %s", ex.toString());
+        }
+>>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/controllers/MenuController.java
         renderMenuAndNavigate(back, backAction, buttons, titles, null);
     }
 

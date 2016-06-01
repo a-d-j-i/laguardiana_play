@@ -83,6 +83,8 @@ public class ReportBagController extends Controller {
     static public void setRenderArgs(LgBag b) {
         renderArgs.put("bag", b);
         renderArgs.put("currentDate", new Date());
+        renderArgs.put("ticketFooter", Configuration.getTicketFooter());
+        renderArgs.put("ticketHeader", Configuration.getTicketHeader());
         renderArgs.put("totals", b.getTotals());
     }
 }

@@ -138,7 +138,11 @@ public class ReportTotals {
                     return;
                 }
                 if (item instanceof EnvelopeDeposit) {
+<<<<<<< HEAD:play/app/models/ReportTotals.java
                     if (item.finishCause != null && !item.finishCause.isCancel()) {
+=======
+                    if (!item.finishCause.isCancel()) {
+>>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/models/ReportTotals.java
                         visitEnvelopeDeposit((EnvelopeDeposit) item);
                     }
                 } else if (item instanceof BillDeposit) {

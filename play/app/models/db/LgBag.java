@@ -185,8 +185,10 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         Date currDate = new Date();
         LgBag current = getCurrentBag();
         if (current.placementDate != null) {
-            Logger.warn("Cant place a bag (%s) now %s that was allready put in date %s",
+            String msg = String.format("Cant place a bag (%s) now %s that was allready put in date %s",
                     current.bagId.toString(), currDate.toString(), current.placementDate.toString());
+            BagEvent.save(current, msg);
+            Logger.warn(msg);
             return;
         }
         current.placementDate = currDate;
@@ -205,8 +207,13 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         final ItemQuantity ret = new ItemQuantity();
         LgDeposit.visitDeposits(deposits, new LgDeposit.DepositVisitor() {
             public void visit(LgDeposit item) {
+<<<<<<< HEAD:play/app/models/db/LgBag.java
                 if (item instanceof EnvelopeDeposit) {
                     if (item.finishCause != null && !item.finishCause.isCancel()) {
+=======
+                if (item.depositId.equals(currentDepositId) || !item.finishCause.isCancel()) {
+                    if (item instanceof EnvelopeDeposit) {
+>>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/models/db/LgBag.java
                         ret.envelopes++;
                     }
                 } else if (item instanceof BillDeposit) {

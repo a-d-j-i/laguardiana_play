@@ -92,7 +92,11 @@ public class ReportController extends Controller {
             this.bag_id = d.bag.bagId;
             this.user_id = d.user.externalId;
             this.gecos = d.user.gecos;
+<<<<<<< HEAD:play/app/controllers/ReportController.java
             this.canceled = (d.finishCause != null && d.finishCause.isCancel());
+=======
+            this.canceled = (d.finishCause.isCancel());
+>>>>>>> 5b6aebaccd5ff8e589943295d3e6f39d9c74b253:app/controllers/ReportController.java
             this.startDate = d.startDate;
             this.closeDate = d.closeDate;
             this.finishDate = d.finishDate;
