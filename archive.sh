@@ -1,3 +1,19 @@
+#!/bin/bash
+
+shopt -s nocasematch
+case "$1" in
+    *glory*) 
+        PDIR=play_glory
+        ;;
+    *mei*) 
+        PDIR=play_mei
+        ;;
+    *) 
+        echo "Usage $0 [MEI|GLORY]"
+        exit
+        ;;
+esac
+
 LAST_TAG=`git describe --abbrev=0 --tags`
 
 TMP_DIR="/tmp/cajero_$LAST_TAG.war"
@@ -8,7 +24,7 @@ pushd PlayRunner
 ant
 popd 
 
-pushd play
+pushd $PDIR
 play war -o "$TMP_DIR" --exclude "TODO:d.sh:build.xml:archive.sh:launcher.py:PlayRunner.jar:docs:app/bootstrap:app/controllers:app/devices:app/machines:app/models:app/validation:logs:nbproject:test:tmp:dist"
 popd
 
@@ -34,7 +50,7 @@ mkdir "$TMP_DIR/WEB-INF/pic"
 cp ./pic/transferhex.py "$TMP_DIR/WEB-INF/pic"
 cp ./pic/output/laguardiana.hex "$TMP_DIR/WEB-INF/pic"
 
-cp ./play/run.bat "$TMP_DIR/WEB-INF"
+cp ./$PDIR/run.bat "$TMP_DIR/WEB-INF"
 echo $LAST_TAG > "$TMP_DIR/WEB-INF/application/version.txt"
 
 mv "$TMP_DIR/WEB-INF" "$TMP_DIR/cajero"
