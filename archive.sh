@@ -2,11 +2,11 @@
 
 shopt -s nocasematch
 case "$1" in
-    *glory*) 
+    *gl*) 
         PDIR=play_glory
         LAST_TAG=`git describe --abbrev=0 --tags --match "*glory*"`
         ;;
-    *mei*) 
+    *me*) 
         PDIR=play_mei
         LAST_TAG=`git describe --abbrev=0 --tags --match "*mei*"`
         ;;
@@ -55,9 +55,7 @@ cp ./$PDIR/run.bat "$TMP_DIR/WEB-INF"
 echo $LAST_TAG > "$TMP_DIR/WEB-INF/application/version.txt"
 
 mv "$TMP_DIR/WEB-INF" "$TMP_DIR/cajero"
-if [ $# == 0 ]
-then
-    pushd "$TMP_DIR"
-    zip -re "/tmp/cajero_$LAST_TAG.zip" cajero
-    popd
-fi
+pushd "$TMP_DIR"
+zip -re "/tmp/cajero_$LAST_TAG.zip" cajero
+popd
+rm -rf  "$TMP_DIR"
