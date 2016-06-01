@@ -4,9 +4,11 @@ shopt -s nocasematch
 case "$1" in
     *glory*) 
         PDIR=play_glory
+        LAST_TAG=`git describe --abbrev=0 --tags --match "*glory*"`
         ;;
     *mei*) 
         PDIR=play_mei
+        LAST_TAG=`git describe --abbrev=0 --tags --match "*mei*"`
         ;;
     *) 
         echo "Usage $0 [MEI|GLORY]"
@@ -14,7 +16,6 @@ case "$1" in
         ;;
 esac
 
-LAST_TAG=`git describe --abbrev=0 --tags`
 
 TMP_DIR="/tmp/cajero_$LAST_TAG.war"
 
