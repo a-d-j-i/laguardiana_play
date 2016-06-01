@@ -1,5 +1,5 @@
 #{list items:_buttons, as:'b'}
-%{ def url = actionBridge."$b".call() }%
+%{ def url = play.mvc.Router.reverse( "$b" ) }%
 #{if _perms[ b ] }
 <li class="column">
     <div class="columna">

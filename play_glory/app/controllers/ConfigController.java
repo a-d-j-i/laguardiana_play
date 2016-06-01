@@ -36,6 +36,10 @@ public class ConfigController extends Controller {
     }
 
     public static void setProperty(String property, String value) {
+        if (property == null) {
+            Logger.error("Property is null");
+            index();
+        }
         if (!request.isAjax()) {
             index();
         }

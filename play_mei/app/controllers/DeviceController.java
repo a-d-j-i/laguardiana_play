@@ -95,6 +95,10 @@ public class DeviceController extends Controller {
     }
 
     public static void setDeviceProperty(Integer deviceId, String property, String value) {
+        if (deviceId == null || property == null || device == null) {
+            Logger.error("deviceId or property is null");
+            list();
+        }
         if (!request.isAjax()) {
             list();
         }
