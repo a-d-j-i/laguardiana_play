@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface.ManagerStatus;
@@ -46,12 +42,12 @@ public class BillDepositReadyToStore extends ActionState {
         }
         stateApi.cancelTimer();
         if (Configuration.isIgnoreShutter()) {
-            if (!stateApi.store()) {
+            if (!stateApi.store(false)) {
                 Logger.error("startBillDeposit can't deposit");
             }
         } else {
             stateApi.openGate();
-            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoring(stateApi)));
+            stateApi.setState(new WaitForOpenGate(stateApi, new BillDepositStoring(stateApi), false));
         }
     }
 
@@ -96,7 +92,7 @@ public class BillDepositReadyToStore extends ActionState {
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("ReadyToStoreEnvelopeDeposit onIoBoardEvent %s", status.toString());
-        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+        if (!stateApi.isBagReady(false)) {
             cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
         }
         if (delayedStore) {

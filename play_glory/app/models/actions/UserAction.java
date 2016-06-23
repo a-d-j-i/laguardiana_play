@@ -66,12 +66,12 @@ abstract public class UserAction {
             userActionApi.cancelDeposit();
         }
 
-        public boolean store() {
-            return userActionApi.store(currentDepositId);
+        public boolean store(boolean envelope) {
+            return userActionApi.store(currentDepositId, envelope);
         }
 
-        public boolean isIoBoardOk() {
-            return userActionApi.isIoBoardOk();
+        public boolean isBagReady(boolean envelope) {
+            return userActionApi.isBagReady(envelope);
         }
 
         public void withdraw() {

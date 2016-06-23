@@ -188,7 +188,7 @@ public class ModelFacade {
 //            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE || status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
             if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
                 // if bag not in place rotate current bag.
-                LgBag.withdrawBag(true);
+                ModelFacade.withdrawBag(true);
             }
             // Bag change.
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
@@ -271,8 +271,8 @@ public class ModelFacade {
             }
         }
 
-        public boolean store(Integer depositId) {
-            if (!isIoBoardOk()) {
+        public boolean store(Integer depositId, boolean envelope) {
+            if (!isBagReady(envelope)) {
                 return false;
             }
             return manager.storeDeposit(depositId);
@@ -317,8 +317,8 @@ public class ModelFacade {
             ioBoard.closeGate();
         }
 
-        public boolean isIoBoardOk() {
-            return ModelFacade.isIoBoardOk();
+        public boolean isBagReady(boolean envelope) {
+            return ModelFacade.isBagReady(envelope);
         }
 
         public List<LgBill> getCurrentBillList() {
@@ -380,7 +380,7 @@ public class ModelFacade {
             Logger.info("Can't start an action when on error");
             return;
         }
-        if (!Configuration.isIgnoreBag() && !isBagReady(false)) {
+        if (!isBagReady(false)) {
             Logger.info("Can't start bag not ready");
             return;
         }
@@ -605,30 +605,45 @@ public class ModelFacade {
         return manager.getCounter();
     }
 
-    public static boolean isIoBoardOk() {
+    public static boolean ioBoardReady() {
         IoBoard.IoBoardStatus status = ioBoard.getStatus();
+        Logger.debug("CURRENT IOBOARD STATUS : %s", status.toString());
+        if (Configuration.isIgnoreIoBoard() || status == null) {
+            return true;
+        }
 
-        if (!Configuration.isIgnoreIoBoard() && status != null && status.getError() != null) {
+        if (status.getError() != null) {
             Logger.error("Setting ioboard error : %s", status.getError());
             modelError.setError(status.getError());
             return false;
         }
-        if (!Configuration.isIgnoreBag()
-                && status != null && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+
+        if (!Configuration.isIgnoreBag() && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
             Logger.error("IoBoard bag not inplace can't store");
             //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
+            return false;
+        }
+
+        if (!Configuration.isReadyGate1(status.getGateState())) {
+            Logger.error("IoBoard gate1 not ready can't store");
+            return false;
+        }
+
+        if (!Configuration.isReadyGate2(status.getGateState())) {
+            Logger.error("IoBoard gate2 not ready can't store");
             return false;
         }
         return true;
     }
 
     public static boolean isBagReady(boolean envelope) {
+        if (!ModelFacade.ioBoardReady()) {
+            Logger.info("Can't start ioboard not ready");
+            return false;
+        }
+
         if (Configuration.isIgnoreBag()) {
             return true;
-        }
-        if (!ModelFacade.isIoBoardOk()) {
-            Logger.info("Can't start bag removed");
-            return false;
         }
         LgBag currentBag = LgBag.getCurrentBag();
         ItemQuantity iq = currentBag.getItemQuantity();
@@ -644,6 +659,15 @@ public class ModelFacade {
             return false;
         }
         return true;
+    }
+
+    public static void withdrawBag(boolean byIoBoard) {
+        LgBag currentBag = LgBag.getCurrentBag();
+        if (currentBag == null) {
+            Logger.error("CURRENT BAG IS NULL");
+        } else {
+            currentBag.withdrawBag(byIoBoard);
+        }
     }
 
     public static void setCurrentPrinter(String prt) {

@@ -19,10 +19,12 @@ import play.Logger;
 public class BagRemoved extends ActionState {
 
     final protected ActionState prevState;
+    final protected boolean envelope;
 
-    public BagRemoved(StateApi stateApi, ActionState prevState) {
+    public BagRemoved(StateApi stateApi, ActionState prevState, boolean envelope) {
         super(stateApi);
         this.prevState = prevState;
+        this.envelope = envelope;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class BagRemoved extends ActionState {
             stateApi.setError(ModelError.ERROR_CODE.SHUTTER_NOT_CLOSED,
                     String.format("ActionState shutter open %s %s", status.getShutterState().name(), name()));
         }
-        if (!Configuration.isIgnoreBag() && status.getBagAproveState() == IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
+        if (stateApi.isBagReady(envelope)) {
             stateApi.setState(prevState);
         }
     }

@@ -112,6 +112,16 @@
     name:  "io_board.ignore"
     value:  "false"
     editType: BOOLEAN
+
+  db.LgSystemProperty(ioBoardGate1Ignore):
+    name:  "io_board.ignore_gate_1"
+    value:  "false"
+    editType: BOOLEAN
+  
+  db.LgSystemProperty(ioBoardGate2Ignore):
+    name:  "io_board.ignore_gate_2"
+    value:  "false"
+    editType: BOOLEAN
       
   db.LgSystemProperty(ioBoardIgnoreShutter):
     name:  "io_board.ignore_shutter"
@@ -132,4 +142,15 @@
     name:  "print.max_paper_width"
     value:  "54"
     editType: INTEGER
+    
+  db.LgSystemProperty(isPrintOnBagManualRotate):
+    name: "application.print_on_bag_manual"
+    value:  "false"
+    editType: BOOLEAN
+ 
+  db.LgSystemProperty(isPrintOnBagAutoRotate):
+    name: "application.print_on_bag_auto"
+    value:  "false"
+    editType: BOOLEAN
+ 
      

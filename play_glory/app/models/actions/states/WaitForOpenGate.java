@@ -19,10 +19,12 @@ public class WaitForOpenGate extends ActionState {
 
     private boolean delayedStore = false;
     protected final ActionState nextAction;
+    protected final boolean envelope;
 
-    public WaitForOpenGate(StateApi stateApi, ActionState nextAction) {
+    public WaitForOpenGate(StateApi stateApi, ActionState nextAction, boolean envelope) {
         super(stateApi);
         this.nextAction = nextAction;
+        this.envelope = envelope;
     }
 
     @Override
@@ -45,13 +47,13 @@ public class WaitForOpenGate extends ActionState {
         if (!Configuration.isIgnoreShutter()) {
             switch (status.getShutterState()) {
                 case SHUTTER_OPEN:
-                    if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+                    if (!stateApi.isBagReady(envelope)) {
                         if (!delayedStore) {
                             delayedStore = true;
-                            stateApi.setState(new BagRemoved(stateApi, this));
+                            stateApi.setState(new BagRemoved(stateApi, this, envelope));
                         }
                     } else {
-                        store();
+                        store(envelope);
                     }
                     break;
                 case SHUTTER_CLOSED:
@@ -62,12 +64,10 @@ public class WaitForOpenGate extends ActionState {
                     break;
             }
         }
-        if (!Configuration.isIgnoreBag()) {
-            if (status.getBagAproveState() == IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-                if (delayedStore) {
-                    Logger.error("ReadyToStoreEnvelopeDeposit DELAYED STORE!!!");
-                    store();
-                }
+        if (stateApi.isBagReady(envelope)) {
+            if (delayedStore) {
+                Logger.error("ReadyToStoreEnvelopeDeposit DELAYED STORE!!!");
+                store(envelope);
             }
         }
     }
@@ -77,8 +77,8 @@ public class WaitForOpenGate extends ActionState {
         return nextAction.name();
     }
 
-    private void store() {
-        if (!stateApi.store()) {
+    private void store(boolean envelope) {
+        if (!stateApi.store(envelope)) {
             Logger.error("WaitForGate error calling store");
         }
     }

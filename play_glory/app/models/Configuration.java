@@ -44,6 +44,20 @@ public class Configuration {
         return isSystemProperty("io_board.ignore_bag");
     }
 
+    public static boolean isReadyGate1(Integer gateval) {
+        if (isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_1")) {
+            return true;
+        }
+        return 0 == (gateval & 0x1);
+    }
+
+    public static boolean isReadyGate2(Integer gateval) {
+        if (isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_2")) {
+            return true;
+        }
+        return 0 == (gateval & 0x2);
+    }
+
     public static boolean isIgnoreGlory() {
         return isSystemProperty("glory.ignore");
     }
@@ -103,6 +117,14 @@ public class Configuration {
 
     public static String getTicketHeader() {
         return getSystemProperty("application.ticket_header");
+    }
+
+    public static boolean isPrintOnBagManualRotate() {
+        return isSystemProperty("application.print_on_bag_auto");
+    }
+
+    public static boolean isPrintOnBagAutoRotate() {
+        return isSystemProperty("application.print_on_bag_manual");
     }
 
     public static String getMachineDescription() {
@@ -287,4 +309,5 @@ public class Configuration {
         }
         return false;
     }
+
 }

@@ -147,10 +147,9 @@ void main() {
             case 's':
             case 'S':
                 if (txBufSize() > 130) {
-                    printf("STATE : BAG %02d BAG_APROVED %d SHUTTER %02d LOCK %01d GATE %01d\r\n",
-                            bag_state, bag_aproved, shutter_st,
-                            (PORTA & 0x06) >> 2,
-                            ( counter_removed || lock_exec));
+                    printf("STATE : BAG %02d BAG_APROVED %d SHUTTER %02d LOCK %01d GATE %01d %01d\r\n",
+                            bag_state, bag_aproved, shutter_st, ( (PORTA & 0x06) >> 2 ),
+                            counter_removed, lock_exec);
                             printf("STATUS : A 0x%02X  B 0x%02X  C 0x%02X  D 0x%02X  BAG_SENSOR 0x%02X BAG_STATUS 0x%02X\r\n",
                             PORTA, PORTB, PORTC, PORTD, BAG_SENSOR(PORTD), bag_status);
                 }

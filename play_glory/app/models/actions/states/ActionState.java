@@ -85,7 +85,7 @@ abstract public class ActionState {
             cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_FULL);
             return false;
         }
-        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+        if (!stateApi.isBagReady(envelope)) {
             /*            delayedStore = true;
              stateApi.setState(new BagRemoved(stateApi, this));*/
             cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);

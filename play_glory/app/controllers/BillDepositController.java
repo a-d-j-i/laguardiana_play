@@ -69,7 +69,7 @@ public class BillDepositController extends CounterController {
         List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findEnabled();
         List<Currency> currencies = Currency.findEnabled();
 
-        if (!Configuration.isIgnoreBag() && !ModelFacade.isBagReady(false)) {
+        if (!ModelFacade.isBagReady(false)) {
             Application.index();
         }
         if (currencies.size() == 1

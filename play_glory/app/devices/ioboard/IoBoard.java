@@ -129,6 +129,7 @@ public class IoBoard {
         private final SHUTTER_STATE shutterState;
         private final BAG_APROVE_STATE bagAproveState;
         private final BAG_STATE bagState;
+        private final Integer gateState;
         private final IoBoardError error;
         private final String criticalEvent;
 
@@ -137,6 +138,7 @@ public class IoBoard {
             this.bagAproveState = currentState.bagAproveState;
             this.error = currentState.error;
             this.bagState = currentState.bagState;
+            this.gateState = currentState.gateState;
             this.criticalEvent = null;
         }
 
@@ -145,6 +147,7 @@ public class IoBoard {
             this.bagAproveState = currentState.bagAproveState;
             this.error = currentState.error;
             this.bagState = currentState.bagState;
+            this.gateState = currentState.gateState;
             this.criticalEvent = criticalEvent;
         }
 
@@ -168,9 +171,18 @@ public class IoBoard {
             return criticalEvent;
         }
 
+        public Integer getGateState() {
+            return gateState;
+        }
+
         @Override
         public String toString() {
-            return "IoBoardStatus{" + "shutterState=" + shutterState + ", bagAproveState=" + bagAproveState + ", bagState=" + bagState + ", error=" + error + ", criticalEvent=" + criticalEvent + '}';
+            return "IoBoardStatus{" + "shutterState=" + shutterState
+                    + ", bagAproveState=" + bagAproveState
+                    + ", bagState=" + bagState
+                    + ", gateState=" + gateState
+                    + ", error=" + error
+                    + ", criticalEvent=" + criticalEvent + '}';
         }
 
     }
@@ -189,10 +201,10 @@ public class IoBoard {
         private BAG_STATE bagState = null;
         private SHUTTER_STATE shutterState = null;
         private Integer lockState = null;
+        private Integer gateState = null;
         private BAG_APROVE_STATE bagAproveState = BAG_APROVE_STATE.BAG_APROVED;
 
-        synchronized private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt, Boolean bagAproved) {
-            //Logger.debug("IOBOARD setSTATE : bagSt %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
+        synchronized private void setSTATE(Integer bagSt, Integer shutterSt, Integer lockSt, Integer gateSt, Boolean bagAproved) {
             BAG_STATE bs = BAG_STATE.factory(bagSt);
             if (bs != bagState) {
                 bagState = bs;
@@ -205,6 +217,10 @@ public class IoBoard {
             }
             if (lockSt != lockState) {
                 lockState = lockSt;
+                setChanged();
+            }
+            if (gateSt != gateState) {
+                gateState = gateSt;
                 setChanged();
             }
             // The bag changed the state.
@@ -233,11 +249,12 @@ public class IoBoard {
             }
 
             if (hasChanged()) {
-                Logger.debug("IOBOARD setSTATE prev: bagSt %s, setShutterState : %s, setLockState : %d, bagAproved : %s", bagSt, shutterSt, lockSt, bagAproved);
-                Logger.debug("IOBOARD setSTATE next: bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
+                Logger.debug("IOBOARD setSTATE prev: bagSt %s, setShutterState : %s, setLockState : %d, setGateState : %d, bagAproved : %s",
+                        bagSt, shutterSt, lockSt, gateSt, bagAproved);
+                Logger.debug("IOBOARD setSTATE next: bagState %s, shutterState : %s, lockState : %d, gateState : %d, bagAproveState : %s",
+                        bagState, shutterState, lockState, gateState, bagAproveState);
                 notifyObservers(new IoBoardStatus(this));
             }
-            //Logger.debug("IOBOARD setSTATE : bagState %s, shutterState : %s, lockState : %d, bagAproveState : %s", bagState, shutterState, lockState, bagAproveState);
         }
 
         synchronized private void setStatusBytes(Byte A, Byte B, Byte C, Byte D, Byte BAG_SENSOR, Byte BAG_STATUS) {
@@ -370,8 +387,9 @@ public class IoBoard {
                             Boolean bagAproved = (Integer.parseInt(l.substring(27, 28), 10) == 1);
                             Integer shutterSt = Integer.parseInt(l.substring(37, 39), 10);
                             Integer lockSt = Integer.parseInt(l.substring(45, 46), 10);
+                            Integer gateSt = Integer.parseInt(l.substring(52, 53), 10);
                             // TODO: Lockin
-                            state.setSTATE(bagSt, shutterSt, lockSt, bagAproved);
+                            state.setSTATE(bagSt, shutterSt, lockSt, gateSt, bagAproved);
                         } catch (NumberFormatException e) {
                             Logger.warn("checkStatus invalid number: %s", e.getMessage());
                         }

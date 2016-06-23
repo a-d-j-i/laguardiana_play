@@ -73,7 +73,7 @@ public class BillDepositStoringEscrowFull extends BillDepositStoring {
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("BillDepositReadyToStoreEscrowFull onIoBoardEvent %s", status.toString());
-        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+        if (!stateApi.isBagReady(false)) {
             mustCancelBagRemoved = true;
         }
         super.onIoBoardEvent(status);

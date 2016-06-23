@@ -31,7 +31,7 @@ public class ReadyToStoreCounting extends IdleCounting {
 
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
-        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+        if (!stateApi.isBagReady(false)) {
             cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
         }
         super.onIoBoardEvent(status);

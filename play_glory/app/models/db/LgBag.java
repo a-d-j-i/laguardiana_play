@@ -1,15 +1,19 @@
 package models.db;
 
+import controllers.Secure;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.persistence.*;
 import models.BillDeposit;
 import models.Configuration;
 import models.EnvelopeDeposit;
 import models.ItemQuantity;
+import models.ModelFacade;
 import models.ReportTotals;
 import models.events.BagEvent;
 import play.Logger;
@@ -149,35 +153,42 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         return currentBag;
     }
 
-    synchronized public static void withdrawBag(boolean byIoBoard) {
-
-        LgBag current = getCurrentBag();
-        // If the bug was not placed by the ioboard then it can be withdrawn by the ioboard.
-        if (current.placementDate == null && byIoBoard) {
+    synchronized public void withdrawBag(boolean byIoBoard) {
+        // If the bag was not placed by the ioboard then it can be withdrawn by the ioboard.
+        if (placementDate == null && byIoBoard) {
             return;
         }
+
         // last bag was removed and is still no placed;
         /*Logger.debug("--------------------------> rotate bag current %s placement %s withdraw %s",
          current.bagId.toString(), current.placementDate, current.withdrawDate);*/
-        if (current.deposits.size() > 0 || byIoBoard) {
-            current.withdrawDate = new Date();
+        if (deposits.size() > 0 || byIoBoard) {
+            withdrawDate = new Date();
             if (byIoBoard) {
-                BagEvent.save(current, "Closing bag byIoBoard");
+                BagEvent.save(this, "Closing bag byIoBoard");
             } else {
-                BagEvent.save(current, "Closing bag manually");
+                BagEvent.save(this, "Closing bag manually");
             }
-            current.save();
-            Logger.debug("BAG REMOVED %d", current.bagId);
+            this.save();
+            Logger.debug("BAG REMOVED %d", bagId);
             LgBag newBag = new LgBag("AUTOMATIC_ROTATED_BY_APP");
             newBag.save();
             BagEvent.save(newBag, "Opening new bag");
             Logger.debug("BAG CREATED %d", newBag.bagId);
             JPA.em().getTransaction().commit();
+
+            if ((byIoBoard && Configuration.isPrintOnBagAutoRotate())
+                    || (!byIoBoard && Configuration.isPrintOnBagManualRotate())) {
+                Logger.debug("PRINTING BAG %d", bagId);
+                print(false);
+            }
         } else {
-            Logger.warn("this bag (%s) is empty so I'm going to reuse it", current.bagId.toString());
+            Logger.warn("this bag (%s) is empty so I'm going to reuse it", bagId.toString());
         }
+
     }
 
+    // Allways by ioboard.
     synchronized public static void placeBag() {
         Date currDate = new Date();
         LgBag current = getCurrentBag();
@@ -229,4 +240,21 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         return totals.getTotals(deposits);
     }
 
+    public void setRenderArgs(Map args) {
+        args.put("bag", this);
+        args.put("currentDate", new Date());
+        args.put("ticketFooter", Configuration.getTicketFooter());
+        args.put("ticketHeader", Configuration.getTicketHeader());
+        args.put("totals", getTotals());
+    }
+
+    public void print(boolean reprint) {
+        Map args = new HashMap();
+        // Print the ticket.
+        setRenderArgs(args);
+        if (reprint) {
+            args.put("reprint", "true");
+        }
+        ModelFacade.print("ReportBagController/print.html", args, Configuration.getPrintWidth(), Configuration.getBagPrintLen());
+    }
 }

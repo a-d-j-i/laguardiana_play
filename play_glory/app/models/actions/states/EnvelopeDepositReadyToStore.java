@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package models.actions.states;
 
 import static devices.glory.manager.ManagerInterface.MANAGER_STATE.JAM;
@@ -66,10 +62,9 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
     @Override
     public void onIoBoardEvent(IoBoard.IoBoardStatus status) {
         Logger.error("ReadyToStoreEnvelopeDeposit onIoBoardEvent %s", status.toString());
-        if (!Configuration.isIgnoreBag() && !stateApi.isIoBoardOk()) {
+        if (!stateApi.isBagReady(true)) {
             cancelWithCause(LgDeposit.FinishCause.FINISH_CAUSE_BAG_REMOVED);
-        }
-        if (!Configuration.isIgnoreBag() && stateApi.isIoBoardOk()) {
+        } else {
             if (delayedStore) {
                 Logger.error("ReadyToStoreEnvelopeDeposit DELAYED STORE!!!");
                 store();
@@ -80,13 +75,13 @@ public class EnvelopeDepositReadyToStore extends EnvelopeDepositStart {
 
     private void store() {
         if (Configuration.isIgnoreShutter()) {
-            if (!stateApi.store()) {
+            if (!stateApi.store(true)) {
                 Logger.error("EnvelopeDepositReadyToStore can't store");
             }
             stateApi.setState(new EnvelopeDepositStoring(stateApi));
         } else {
             stateApi.openGate();
-            stateApi.setState(new WaitForOpenGate(stateApi, new EnvelopeDepositStoring(stateApi)));
+            stateApi.setState(new WaitForOpenGate(stateApi, new EnvelopeDepositStoring(stateApi), true));
         }
 
     }

@@ -27,12 +27,12 @@ public class MenuController extends Controller {
         if (request.isAjax()) {
             Object[] o = new Object[3];
             o[0] = ModelFacade.printerNeedCheck();
-            o[1] = (!Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk());
+            o[1] = !ModelFacade.ioBoardReady();
             // I need space for at least one envelope. see ModelFacade->isBagReady too.
             o[2] = isBagFull;
             renderJSON(o);
         }
-        boolean bagRemoved = !Configuration.isIgnoreBag() && !ModelFacade.isIoBoardOk();
+        boolean bagRemoved = !ModelFacade.ioBoardReady();
         renderArgs.put("bagRemoved", bagRemoved);
         renderArgs.put("bagTotals", iq);
         renderArgs.put("bagFreeSpace", bagFreeSpace);

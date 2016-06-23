@@ -52,10 +52,13 @@
                         <p>BAG_STATE : <span id ="BAG_STATE">${status?.bagState?.name()}</span></p>
                         <p>SHUTTER_STATE : <span id ="SHUTTER_STATE">${status?.shutterState?.name()}</span></p>
                         <p>LOCK_STATE : 
-                            <span id ="LOCK_STATE">
-                                #{if (status?.lockState ) }Locked#{/if}
-                                #{else}UnLocked#{/else}
-                            </span>
+                            <span id ="LOCK_STATE">${status?.lockState}</span>
+                        </p>
+                        <p>GATE_STATE : 
+                            <span id ="GATE_STATE">${status?.gateState}</span>
+                            <span ID="gateA" class="circle">&nbsp;A&nbsp;</span>
+                            &nbsp;
+                            <span ID="gateB" class="circle">&nbsp;B&nbsp;</span>
                         </p>
                     </div>
                 </li>
@@ -74,8 +77,8 @@
         }
         return "0x" + number.toString(16).toUpperCase() + " : { " + number.toString(2).toUpperCase() + " }";
     }
-    doRefresh = function() {
-        $.getJSON('@{index}', function(data) {
+    doRefresh = function () {
+        $.getJSON('@{index}', function (data) {
 
             var error = data[ 0 ];
             var status = data[ 1 ];
@@ -89,6 +92,8 @@
                 $("#sensorB").css("background", "yellow");
                 $("#sensorC").css("background", "yellow");
                 $("#sensorD").css("background", "yellow");
+                $("#gateA").css("background", "yellow");
+                $("#gateB").css("background", "yellow");
             } else {
                 $("#ERROR_CODE").text("");
                 $("#ERROR_DETAIL").text("");
@@ -113,6 +118,18 @@
                 } else {
                     $("#sensorD").css("background", "green");
                 }
+                
+                if (status.gateState & 0x1) {
+                    $("#gateA").css("background", "red");
+                } else {
+                    $("#gateA").css("background", "green");
+                }
+                if (status.gateState & 0x2) {
+                    $("#gateB").css("background", "red");
+                } else {
+                    $("#gateB").css("background", "green");
+                }
+
             }
             $("#A").text(repr(status.A));
             $("#B").text(repr(status.B));
@@ -124,6 +141,7 @@
             $("#BAG_STATE").text(status.bagState);
             $("#SHUTTER_STATE").text(status.shutterState);
             $("#LOCK_STATE").text(status.lockState);
+            $("#GATE_STATE").text(status.gateState);
 
             doneRefresh();
         })
