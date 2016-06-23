@@ -20,118 +20,110 @@ public class Bootstrap extends Job {
     @Override
     public void doJob() {
         // Load roles.
-        if (Play.mode.isDev()) {
-            if (LgSystemProperty.find("select l from LgSystemProperty l where name = 'db_initialized'").fetch().isEmpty()) {
-                Fixtures.deleteDatabase();
-                LgSystemProperty l = new LgSystemProperty();
-                l.name = "db_initialized";
-                l.value = "done";
-                l.save();
+        if (LgSystemProperty.find("select l from LgSystemProperty l where name = 'db_initialized'").fetch().isEmpty()) {
+            Fixtures.deleteDatabase();
+            LgSystemProperty l = new LgSystemProperty();
+            l.name = "db_initialized";
+            l.value = "done";
+            l.save();
 
-                Logger.info("loading user-data.yml as no users were found!");
-                Fixtures.loadModels("user-data.yml");
-                // Menus
-                LgRole mainMenu = loadRolsResourcesAndAclsMenu("mainMenu");
-                LgRole otherMenu = loadRolsResourcesAndAclsMenu("otherMenu");
-                LgRole hardwareMenu = loadRolsResourcesAndAclsMenu("hardwareMenu");
-                LgRole printTemplateMenu = loadRolsResourcesAndAclsMenu("printTemplateMenu");
-                LgRole accountingMenu = loadRolsResourcesAndAclsMenu("accountingMenu");
-                LgRole reportMenu = loadRolsResourcesAndAclsMenu("reportMenu");
+            Logger.info("loading user-data.yml as no users were found!");
+            Fixtures.loadModels("user-data.yml");
+            // Menus
+            LgRole mainMenu = loadRolsResourcesAndAclsMenu("mainMenu");
+            LgRole otherMenu = loadRolsResourcesAndAclsMenu("otherMenu");
+            LgRole hardwareMenu = loadRolsResourcesAndAclsMenu("hardwareMenu");
+            LgRole printTemplateMenu = loadRolsResourcesAndAclsMenu("printTemplateMenu");
+            LgRole accountingMenu = loadRolsResourcesAndAclsMenu("accountingMenu");
+            LgRole reportMenu = loadRolsResourcesAndAclsMenu("reportMenu");
 
-                // Controllers
-                LgRole bill = loadRolsResourcesAndAcls(controllers.BillDepositController.class);
-                LgRole count = loadRolsResourcesAndAcls(controllers.CountController.class);
-                LgRole envelope = loadRolsResourcesAndAcls(controllers.EnvelopeDepositController.class);
-                LgRole filter = loadRolsResourcesAndAcls(controllers.FilterController.class);
-                LgRole glory = loadRolsResourcesAndAcls(controllers.GloryController.class);
-                LgRole manager = loadRolsResourcesAndAcls(controllers.GloryManagerController.class);
-                LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
-                LgRole counter = loadRolsResourcesAndAcls(controllers.CounterController.class);
-                LgRole report = loadRolsResourcesAndAcls(controllers.ReportController.class);
-                LgRole reportDesposit = loadRolsResourcesAndAcls(controllers.ReportDepositController.class);
-                LgRole reportZ = loadRolsResourcesAndAcls(controllers.ReportZController.class);
-                LgRole reportBag = loadRolsResourcesAndAcls(controllers.ReportBagController.class);
-                LgRole printer = loadRolsResourcesAndAcls(controllers.PrinterController.class);
+            // Controllers
+            LgRole bill = loadRolsResourcesAndAcls(controllers.BillDepositController.class);
+            LgRole count = loadRolsResourcesAndAcls(controllers.CountController.class);
+            LgRole envelope = loadRolsResourcesAndAcls(controllers.EnvelopeDepositController.class);
+            LgRole filter = loadRolsResourcesAndAcls(controllers.FilterController.class);
+            LgRole glory = loadRolsResourcesAndAcls(controllers.GloryController.class);
+            LgRole manager = loadRolsResourcesAndAcls(controllers.GloryManagerController.class);
+            LgRole ioboard = loadRolsResourcesAndAcls(controllers.IoBoardController.class);
+            LgRole counter = loadRolsResourcesAndAcls(controllers.CounterController.class);
+            LgRole report = loadRolsResourcesAndAcls(controllers.ReportController.class);
+            LgRole reportDesposit = loadRolsResourcesAndAcls(controllers.ReportDepositController.class);
+            LgRole reportZ = loadRolsResourcesAndAcls(controllers.ReportZController.class);
+            LgRole reportBag = loadRolsResourcesAndAcls(controllers.ReportBagController.class);
+            LgRole printer = loadRolsResourcesAndAcls(controllers.PrinterController.class);
 
-                // Reset and Storing reset
-                LgRole reset = new LgRole();
-                reset.name = "Reset";
-                reset.save();
-                createAcl( reset, "Application.reset");
-                LgRole storingReset = new LgRole();
-                storingReset.name = "StoringReset";
-                storingReset.save();
-                createAcl( storingReset, "Application.storingReset");
+            // Reset and Storing reset
+            LgRole reset = new LgRole();
+            reset.name = "Reset";
+            reset.save();
+            createAcl(reset, "Application.reset");
+            LgRole storingReset = new LgRole();
+            storingReset.name = "StoringReset";
+            storingReset.save();
+            createAcl(storingReset, "Application.storingReset");
 
-                // Add application envelope and bill to demo.
-                LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
-                /*guest.roles.add(appMin);
-                 appMin.users.add(guest);*/
-                guest.roles.add(counter);
-                counter.users.add(guest);
-                guest.save();
+            // Add application envelope and bill to demo.
+            LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
+            /*guest.roles.add(appMin);
+             appMin.users.add(guest);*/
+            guest.roles.add(counter);
+            counter.users.add(guest);
+            guest.save();
 
-                LgUser demo = LgUser.find("select u from LgUser u where username = 'demo'").first();
-                demo.roles.add(mainMenu);
-                mainMenu.users.add(demo);
+            LgUser demo = LgUser.find("select u from LgUser u where username = 'demo'").first();
+            demo.roles.add(mainMenu);
+            mainMenu.users.add(demo);
 
-                demo.roles.add(counter);
-                counter.users.add(demo);
-                demo.roles.add(bill);
-                bill.users.add(demo);
-                demo.roles.add(envelope);
-                envelope.users.add(demo);
-                demo.save();
+            demo.roles.add(counter);
+            counter.users.add(demo);
+            demo.roles.add(bill);
+            bill.users.add(demo);
+            demo.roles.add(envelope);
+            envelope.users.add(demo);
+            demo.save();
 
+            LgUser user = LgUser.find("select u from LgUser u where username = 'user'").first();
+            user.roles.add(mainMenu);
+            mainMenu.users.add(user);
 
+            user.roles.add(counter);
+            counter.users.add(user);
+            user.roles.add(bill);
+            bill.users.add(user);
+            user.save();
 
-                LgUser user = LgUser.find("select u from LgUser u where username = 'user'").first();
-                user.roles.add(mainMenu);
-                mainMenu.users.add(user);
+            LgUser supervisor = LgUser.find("select u from LgUser u where username = 'supervisor'").first();
+            supervisor.roles.add(mainMenu);
+            mainMenu.users.add(supervisor);
+            supervisor.roles.add(otherMenu);
+            otherMenu.users.add(supervisor);
+            supervisor.roles.add(accountingMenu);
+            accountingMenu.users.add(supervisor);
 
-                user.roles.add(counter);
-                counter.users.add(user);
-                user.roles.add(bill);
-                bill.users.add(user);
-                user.save();
+            supervisor.roles.add(counter);
+            counter.users.add(supervisor);
+            supervisor.roles.add(bill);
+            bill.users.add(supervisor);
+            supervisor.roles.add(envelope);
+            envelope.users.add(supervisor);
+            supervisor.roles.add(report);
+            report.users.add(supervisor);
+            supervisor.roles.add(reportBag);
+            reportBag.users.add(supervisor);
+            supervisor.roles.add(reportZ);
+            reportZ.users.add(supervisor);
+            supervisor.roles.add(reportDesposit);
+            reportDesposit.users.add(supervisor);
+            supervisor.save();
 
-
-
-                LgUser supervisor = LgUser.find("select u from LgUser u where username = 'supervisor'").first();
-                supervisor.roles.add(mainMenu);
-                mainMenu.users.add(supervisor);
-                supervisor.roles.add(otherMenu);
-                otherMenu.users.add(supervisor);
-                supervisor.roles.add(accountingMenu);
-                accountingMenu.users.add(supervisor);
-
-                supervisor.roles.add(counter);
-                counter.users.add(supervisor);
-                supervisor.roles.add(bill);
-                bill.users.add(supervisor);
-                supervisor.roles.add(envelope);
-                envelope.users.add(supervisor);
-                supervisor.roles.add(report);
-                report.users.add(supervisor);
-                supervisor.roles.add(reportBag);
-                reportBag.users.add(supervisor);
-                supervisor.roles.add(reportZ);
-                reportZ.users.add(supervisor);
-                supervisor.roles.add(reportDesposit);
-                reportDesposit.users.add(supervisor);
-                supervisor.save();
-
-
-                
-
-                Logger.info("loading lov-data.yml");
-                Fixtures.loadModels("lov-data.yml");
-                Logger.info("loading sys-props-data.yml");
-                Fixtures.loadModels("sys-props-data.yml");
-                Fixtures.loadModels("dev-data.yml");
-                Logger.info(String.format("Glory port : %s", Play.configuration.getProperty("glory.port")));
-            }
+            Logger.info("loading lov-data.yml");
+            Fixtures.loadModels("lov-data.yml");
+            Logger.info("loading sys-props-data.yml");
+            Fixtures.loadModels("sys-props-data.yml");
+            Fixtures.loadModels("dev-data.yml");
+            Logger.info(String.format("Glory port : %s", Play.configuration.getProperty("glory.port")));
         }
+
         // Start glory Manager
         //CounterFactory.getManager( Play.configuration.getProperty( "glory.port" ) );
         // Start Model Facade.
