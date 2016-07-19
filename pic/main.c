@@ -22,11 +22,17 @@ unsigned int i;
 unsigned int j;
 char must_beep = 0; // false
 char must_sound = 0; // false
+char must_sound_on_door = 0; // false
+char door_close_print = 0;
+char door_open_print = 0;
 char lock_print = 0;
 char unlock_print = 0;
 char lock_exec = 0;
 char counter_removed = 0;
 char counter_removed_printed = 0;
+long door_unlock_cnt = 0;
+extern unsigned long door_sol_switch;
+
 void main() {
     init();
     setupPorts();
@@ -38,7 +44,7 @@ void main() {
 
 
     //printf( "VERSION : " VERSION "\r\n" );
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < 50; i++) {
         for (j = 0; j < 5000; j++) {
             processUart();
         }
@@ -148,7 +154,7 @@ void main() {
             case 'S':
                 if (txBufSize() > 130) {
                     printf("STATE : BAG %02d BAG_APROVED %d SHUTTER %02d LOCK %01d GATE %01d %01d\r\n",
-                            bag_state, bag_aproved, shutter_st, ( (PORTA & 0x06) >> 2 ),
+                            bag_state, bag_aproved, shutter_st, ((PORTA & 0x0E) >> 2),
                             counter_removed, lock_exec);
                             printf("STATUS : A 0x%02X  B 0x%02X  C 0x%02X  D 0x%02X  BAG_SENSOR 0x%02X BAG_STATUS 0x%02X\r\n",
                             PORTA, PORTB, PORTC, PORTD, BAG_SENSOR(PORTD), bag_status);
@@ -162,13 +168,14 @@ void main() {
             case 'C':
                 closeShutter();
                 break;
-            case 'l':
-            case 'L':
-                PORTA = PORTA | 0x06;
-                break;
             case 'u':
             case 'U':
-                PORTA = PORTA & 0xF8;
+                if (door_unlock_cnt == 0 && !DOOR_OPENED) {
+                    door_unlock_cnt = DOOR_TIMEOUT;
+                            printf("CRITICAL: door unlocked\r\n");
+                            OPEN_DOOR;
+                            must_sound_on_door = 1;
+                }
                 break;
             case 0:
                 break;
@@ -176,25 +183,54 @@ void main() {
             case 'h':
             default:
                 if (txBufSize() > 130) {
-                    printf("Press O open / C close / S status / U,L UnLock door / E clear errors / B print bag mode / V version / H help\r\n");
+                    printf("Press O open / C close / S status / U UnLock door / E clear errors / B print bag mode / V version / H help\r\n");
                 }
                 break;
         }
 
+        if (DOOR_OPENED) {
+            if (door_close_print == 0) {
+                printf("CRITICAL: door closed\r\n");
+                door_close_print = 1;
+            }
+            door_open_print = 0;
+        } else {
+            if (door_open_print == 0) {
+                printf("CRITICAL: door open\r\n");
+                door_open_print=1;
+            }
+            door_close_print = 0;
+        }
+
+
+        // door_unlock_cnt decremented by timer until 1
+        if (door_unlock_cnt > 0) {
+            if (door_unlock_cnt == 1 || DOOR_OPENED) {
+                if (door_unlock_cnt == 1) {
+                    printf("CRITICAL: timeout waiting for door, locked\r\n");
+                } else {
+                    printf("CRITICAL: door locked\r\n");
+                }
+                door_unlock_cnt = 0;
+            }
+        } else {
+                    must_sound_on_door = 0;
+                    CLOSE_DOOR;
+        }
         // Shutter
-        processShutter();              
-        // Bag
-        processBagState();
-        processUart();
-        //flushUart();
+        processShutter();
+                // Bag
+                processBagState();
+                processUart();
+                //flushUart();
                 // BEEP
-        if (must_beep || must_sound) {
+        if (must_beep || must_sound || must_sound_on_door) {
             // Enable output.
             PORTC = PORTC | 0x04;
         } else {
             PORTC = PORTC & 0xFB;
         }
-        if (must_sound) {
+        if (must_sound || must_sound_on_door) {
             PORTE = PORTE | 0x04;
         } else if (must_beep) {
             beep_cnt++;
@@ -208,24 +244,24 @@ void main() {
             }
         } else {
             PORTE = PORTE & 0xFB;
-            beep_cnt = 0;
+                    beep_cnt = 0;
         }
         CHECK_COUNTER_REMOVED;
         if (counter_removed || lock_exec) {
             if (!counter_removed_printed) {
                 printf("CRITICAL: COUNTER REMOVED\r\n");
-                counter_removed_printed = 1;
+                        counter_removed_printed = 1;
             }
         } else {
             counter_removed_printed = 0;
         }
         if (lock_print) {
             lock_print = 0;
-            printf("CRITICAL: Lock executed\r\n");
+                    printf("CRITICAL: Lock executed\r\n");
         }
         if (unlock_print) {
             unlock_print = 0;
-            printf("CRITICAL: UnLock executed\r\n");
+                    printf("CRITICAL: UnLock executed\r\n");
         }
     }
 }

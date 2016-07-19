@@ -65,10 +65,12 @@ void TimerInterruptHandler() __interrupt ( 1 ) {
  */
 
 static long lock2_cnt = 0;
+unsigned long door_sol_switch = 0;
+
 void TimerInterruptHandler() __interrupt(1) {
     if (INTCONbits.INT0IF && INTCONbits.INT0IE) {
         if (lock_exec == 0) {
-            lock2_cnt = 10000;
+            lock2_cnt = 1000;
             lock_exec = 1;
             lock_print = 1;
         }
@@ -78,7 +80,7 @@ void TimerInterruptHandler() __interrupt(1) {
             if (lock2_cnt == 0) {
                 unlock_print = 1;
             }
-            lock2_cnt = 50000;
+            lock2_cnt = 5000;
             must_sound = 1;
             lock_exec = 0;
         }
@@ -87,10 +89,6 @@ void TimerInterruptHandler() __interrupt(1) {
         CHECK_COUNTER_REMOVED;
         INTCON3bits.INT2IF = 0;
     } else if (PIR2bits.TMR3IF & PIE2bits.TMR3IE) {
-        TMR3H = 0xfe;
-        TMR3L = 0x00;
-        PIR2bits.TMR3IF = 0; // ACK
-
         if (lock2_cnt == 0) {
             must_sound = 0;
             PORTAbits.RA7 = 0;
@@ -98,6 +96,26 @@ void TimerInterruptHandler() __interrupt(1) {
             lock2_cnt--;
             PORTAbits.RA7 = 1;
         }
+        if (door_unlock_cnt > 1) {
+            door_unlock_cnt--;
+        }
+        if (door_sol_switch < (DOOR_RETRY_TIME - DOOR_RETRY_ON)) {
+            OPEN_DOOR_SOL_OFF;
+        } else {
+            OPEN_DOOR_SOL_ON;
+        }
+        if (door_unlock_cnt > 0) {
+            if (door_sol_switch == 0) {
+                door_sol_switch = DOOR_RETRY_TIME;
+            } else {
+                door_sol_switch--;
+            }
+        } else {
+            door_sol_switch = 0;
+        }
+        TMR3H = 0xfe;
+        TMR3L = 0x00;
+        PIR2bits.TMR3IF = 0; // ACK
     }
 }
 
@@ -189,9 +207,9 @@ void timer_init(void) {
     T3CONbits.T3SYNC = 1; // ignored
 
     T3CONbits.TMR3CS = 0; // use internal clock fosc/4 = 2Mhz
-    // prescaler
-    T3CONbits.T3CKPS0 = 0;
-    T3CONbits.T3CKPS1 = 0;
+    // prescaler == 8 => 2mhz/8
+    T3CONbits.T3CKPS0 = 1;
+    T3CONbits.T3CKPS1 = 1;
 
     T3CONbits.TMR3ON = 1; // time on
 

@@ -76,7 +76,9 @@ void setupPorts() {
 	PORTA = 0;
 	LATA = 0;
         // Set RA7 transistor output.
-	TRISA &= 0x7F;
+	//TRISA &= 0x7F;
+        // Set RA7 transistor output and l298.
+	TRISA &= 0x40;
 
 	PORTC = 0;
 	LATC = 0;
