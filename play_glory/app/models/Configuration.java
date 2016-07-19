@@ -58,6 +58,13 @@ public class Configuration {
         return 0 == (gateval & 0x2);
     }
 
+    public static boolean isReadyGateDoor(Integer gateval) {
+        if (isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_door")) {
+            return true;
+        }
+        return 0 == (gateval & 0x4);
+    }
+
     public static boolean isIgnoreGlory() {
         return isSystemProperty("glory.ignore");
     }

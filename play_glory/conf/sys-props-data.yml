@@ -122,7 +122,12 @@
     name:  "io_board.ignore_gate_2"
     value:  "false"
     editType: BOOLEAN
-      
+    
+  db.LgSystemProperty(ioBoardGateDoorIgnore):
+    name:  "io_board.ignore_gate_Door"
+    value:  "false"
+    editType: BOOLEAN
+            
   db.LgSystemProperty(ioBoardIgnoreShutter):
     name:  "io_board.ignore_shutter"
     value:  "true"

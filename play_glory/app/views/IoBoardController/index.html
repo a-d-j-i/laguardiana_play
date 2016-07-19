@@ -59,6 +59,8 @@
                             <span ID="gateA" class="circle">&nbsp;A&nbsp;</span>
                             &nbsp;
                             <span ID="gateB" class="circle">&nbsp;B&nbsp;</span>
+                            &nbsp;
+                            <span ID="gateC" class="circle">&nbsp;P&nbsp;</span>
                         </p>
                     </div>
                 </li>
@@ -94,6 +96,7 @@
                 $("#sensorD").css("background", "yellow");
                 $("#gateA").css("background", "yellow");
                 $("#gateB").css("background", "yellow");
+                $("#gateC").css("background", "yellow");
             } else {
                 $("#ERROR_CODE").text("");
                 $("#ERROR_DETAIL").text("");
@@ -128,6 +131,11 @@
                     $("#gateB").css("background", "red");
                 } else {
                     $("#gateB").css("background", "green");
+                }
+                if (status.gateState & 0x4) {
+                    $("#gateC").css("background", "red");
+                } else {
+                    $("#gateC").css("background", "green");
                 }
 
             }

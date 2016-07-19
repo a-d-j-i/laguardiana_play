@@ -633,6 +633,11 @@ public class ModelFacade {
             Logger.error("IoBoard gate2 not ready can't store");
             return false;
         }
+
+        if (!Configuration.isReadyGateDoor(status.getGateState())) {
+            Logger.error("IoBoard gateDoor not ready can't store");
+            return false;
+        }
         return true;
     }
 
