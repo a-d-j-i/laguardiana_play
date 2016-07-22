@@ -109,3 +109,15 @@
     value:          true
     user:           [ admin ]
   
+  db.LgUser(collector):
+    externalApp:    PlayInternalApp
+    username:       collector
+    password:       collector
+    gecos:          "Gecos del Usario collector"
+    externalId:     0
+    locked:         #x42
+    creationDate:   2012-01-01
+    endDate:        2112-01-01    
+    roles:          []
+
+  

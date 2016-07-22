@@ -42,9 +42,11 @@ public class MenuController extends Controller {
         renderArgs.put("bagFull", isBagFull);
 
         String backAction = "MenuController.mainMenu";
-        String[] buttons = {"BillDepositController.start", "CountController.start", "EnvelopeDepositController.start", "FilterController.start"};
+        String[] buttons = {"BillDepositController.start", "CountController.start", "EnvelopeDepositController.start", "FilterController.start",
+                        "IoBoardController.unlockDoor"};
         String[] extraButtons = {"MenuController.otherMenu"};
-        String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter"};
+        String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter",
+                        "application.unlock_door"};
         String nextStep = renderMenuButtons(buttons, titles, extraButtons);
         if (nextStep == null || bagRemoved) {
             render();

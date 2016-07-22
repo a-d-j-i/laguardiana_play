@@ -22,6 +22,9 @@
                 <li class="column">
                     <div style="margin:20px;">
                         <a class="boton ${play.configuration['style.button_color']} full_width" href="@{index()}">status</a>
+                        #{if ( controllers.Secure.checkPermission( 'Application.unlockDoor', 'GET' ) ) }
+                        <a class="boton ${play.configuration['style.button_color']} full_width" href="@{unlockDoor()}">unlockDoor</a>
+                        #{/if}
                         <a class="boton ${play.configuration['style.button_color']} full_width" href="@{openGate()}">openGate</a>
                         <a class="boton ${play.configuration['style.button_color']} full_width" href="@{closeGate()}">closeGate</a>
                         <a class="boton ${play.configuration['style.button_color']} full_width" href="@{aproveBag()}">aproveBag</a>
@@ -121,7 +124,7 @@
                 } else {
                     $("#sensorD").css("background", "green");
                 }
-                
+
                 if (status.gateState & 0x1) {
                     $("#gateA").css("background", "red");
                 } else {

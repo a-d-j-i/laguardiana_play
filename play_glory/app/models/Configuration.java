@@ -45,21 +45,21 @@ public class Configuration {
     }
 
     public static boolean isReadyGate1(Integer gateval) {
-        if (isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_1")) {
+        if (gateval == null || isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_1")) {
             return true;
         }
         return 0 == (gateval & 0x1);
     }
 
     public static boolean isReadyGate2(Integer gateval) {
-        if (isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_2")) {
+        if (gateval == null || isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_2")) {
             return true;
         }
         return 0 == (gateval & 0x2);
     }
 
     public static boolean isReadyGateDoor(Integer gateval) {
-        if (isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_door")) {
+        if (gateval == null || isIgnoreIoBoard() || isSystemProperty("io_board.ignore_gate_door")) {
             return true;
         }
         return 0 == (gateval & 0x4);

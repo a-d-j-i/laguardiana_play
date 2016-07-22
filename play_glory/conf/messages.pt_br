@@ -21,7 +21,7 @@ secure.pass_forget=Não lembra seus dados?
 
 keyboard.continue=CONTINUAR
 keyboard.space=ESPAÇO
-
+application.unlock_door=DESTRAVAR A PORTA
 application.back=ATRÁS
 application.continue=CONTINUAR
 application.cancel=CANCELAR

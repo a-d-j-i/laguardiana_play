@@ -36,6 +36,11 @@ public class IoBoardController extends Application {
         }
     }
 
+    public static void unlockDoor() throws IOException {
+        ioBoard.unlockDoor();
+        Application.index();
+    }
+
     public static void openGate() throws IOException {
         ioBoard.openGate();
         index();

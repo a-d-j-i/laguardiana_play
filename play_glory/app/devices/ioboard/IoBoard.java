@@ -513,6 +513,11 @@ public class IoBoard {
         serialPort = null;
     }
 
+    public void unlockDoor() {
+        Logger.debug("unlockDoor");
+        statusThread.sendCmd('U');
+    }
+
     public void openGate() {
         Logger.debug("openGate");
         statusThread.sendCmd('O');

@@ -61,6 +61,19 @@ public class Bootstrap extends Job {
             storingReset.name = "StoringReset";
             storingReset.save();
             createAcl(storingReset, "Application.storingReset");
+            // Unlock Door
+            LgRole unlockDoor = new LgRole();
+            unlockDoor.name = "UnlockDoor";
+            unlockDoor.save();
+            createAcl(unlockDoor, "IoBoardController.unlockDoor");
+
+            // Add application envelope and bill to demo.
+            LgUser collector = LgUser.find("select u from LgUser u where username = 'collector'").first();
+            collector.roles.add(mainMenu);
+            mainMenu.users.add(collector);
+            collector.roles.add(unlockDoor);
+            unlockDoor.users.add(collector);
+            collector.save();
 
             // Add application envelope and bill to demo.
             LgUser guest = LgUser.find("select u from LgUser u where username = 'guest'").first();
