@@ -55,17 +55,17 @@ void init()
 	// ALL A/D disabled
 	ADCON1 |= 0x0F;
 
-// INT0,1 config
+// INT0,1,2 Enable
         INTCON2bits.INTEDG0 = 0;
-        INTCONbits.INT0IE = 1;
+        INTCONbits.INT0IE = 0;
 
         INTCON2bits.INTEDG1 = 0;
         INTCON3bits.INT1IP = 1;
-        INTCON3bits.INT1IE = 1;
+        INTCON3bits.INT1IE = 0;
 
         INTCON2bits.INTEDG2 = 0;
         INTCON3bits.INT2IP = 1;
-        INTCON3bits.INT2IE = 1;
+        INTCON3bits.INT2IE = 0;
         
 
         // BOOTLOADER

@@ -66,7 +66,6 @@ void TimerInterruptHandler() __interrupt ( 1 ) {
 
 static long lock2_cnt = 0;
 unsigned long door_sol_switch = 0;
-
 void TimerInterruptHandler() __interrupt(1) {
     if (INTCONbits.INT0IF && INTCONbits.INT0IE) {
         if (lock_exec == 0) {
@@ -86,7 +85,7 @@ void TimerInterruptHandler() __interrupt(1) {
         }
         INTCON3bits.INT1IF = 0;
     } else if (INTCON3bits.INT2IF && INTCON3bits.INT2IE) {
-        CHECK_COUNTER_REMOVED;
+        //CHECK_COUNTER_REMOVED;
         INTCON3bits.INT2IF = 0;
     } else if (PIR2bits.TMR3IF & PIE2bits.TMR3IE) {
         if (lock2_cnt == 0) {

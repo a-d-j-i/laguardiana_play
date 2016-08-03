@@ -48,7 +48,7 @@ extern char lock_exec;
 extern char counter_removed;
 extern long door_unlock_cnt;
 #define CHECK_COUNTER_REMOVED { counter_removed = ((PORTB & 0x1C ) >> 2 ); }
-#define DOOR_OPENED ((PORTB & 0x10) == 0x10)
+#define DOOR_OPENED ((counter_removed & 0x4) == 0x4)
 #define OPEN_DOOR { PORTA = PORTA | 0x06; }
 #define OPEN_DOOR_SOL_ON { PORTA = PORTA | 0x10; }
 #define OPEN_DOOR_SOL_OFF { PORTA = PORTA & 0xEF; }

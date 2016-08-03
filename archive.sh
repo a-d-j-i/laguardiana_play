@@ -54,6 +54,8 @@ function archive {
     cp ./pic/transferhex.py "$TMP_DIR/WEB-INF/pic"
     cp ./pic/output/laguardiana.hex "$TMP_DIR/WEB-INF/pic"
 
+    cp -r ./docs "$TMP_DIR/WEB-INF/docs"
+
     cp ./$PDIR/run.bat "$TMP_DIR/WEB-INF"
     echo $LAST_TAG > "$TMP_DIR/WEB-INF/application/version.txt"
 

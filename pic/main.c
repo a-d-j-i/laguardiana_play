@@ -29,8 +29,9 @@ char lock_print = 0;
 char unlock_print = 0;
 char lock_exec = 0;
 char counter_removed = 0;
-char counter_removed_printed = 0;
+char counter_removed_print = 0;
 long door_unlock_cnt = 0;
+char door_openend_on_start;
 extern unsigned long door_sol_switch;
 
 void main() {
@@ -42,7 +43,7 @@ void main() {
     INTCONbits.GIEL = 1; //enable interrupts
     INTCONbits.GIEH = 1;
 
-
+    door_openend_on_start = DOOR_OPENED;
     //printf( "VERSION : " VERSION "\r\n" );
     for (i = 0; i < 50; i++) {
         for (j = 0; j < 5000; j++) {
@@ -170,7 +171,8 @@ void main() {
                 break;
             case 'u':
             case 'U':
-                if (door_unlock_cnt == 0 && !DOOR_OPENED) {
+                if (door_unlock_cnt == 0) {
+                    door_openend_on_start = DOOR_OPENED;
                     door_unlock_cnt = DOOR_TIMEOUT;
                             printf("CRITICAL: door unlocked\r\n");
                             OPEN_DOOR;
@@ -188,24 +190,13 @@ void main() {
                 break;
         }
 
-        if (DOOR_OPENED) {
-            if (door_open_print == 0) {
-                printf("CRITICAL: door open\r\n");
-                door_open_print=1;
-            }
-            door_close_print = 0;
-        } else {
-            if (door_close_print == 0) {
-                printf("CRITICAL: door closed\r\n");
-                door_close_print = 1;
-            }
-            door_open_print = 0;
-        }
-
 
         // door_unlock_cnt decremented by timer until 1
         if (door_unlock_cnt > 0) {
-            if (door_unlock_cnt == 1 || DOOR_OPENED) {
+            if (door_unlock_cnt == 1 || 
+                    (DOOR_OPENED && !door_openend_on_start) || 
+                    (!DOOR_OPENED && door_openend_on_start) ) 
+            {
                 if (door_unlock_cnt == 1) {
                     printf("CRITICAL: timeout waiting for door, locked\r\n");
                 } else {
@@ -246,14 +237,29 @@ void main() {
             PORTE = PORTE & 0xFB;
                     beep_cnt = 0;
         }
+                
+                
+                
+        // PRINT STUFF        
         CHECK_COUNTER_REMOVED;
-        if (counter_removed || lock_exec) {
-            if (!counter_removed_printed) {
-                printf("CRITICAL: COUNTER REMOVED\r\n");
-                        counter_removed_printed = 1;
+        if (DOOR_OPENED) {
+            if (door_open_print == 0) {
+                printf("CRITICAL: door open\r\n");
+                door_open_print=1;
             }
+            door_close_print = 0;
         } else {
-            counter_removed_printed = 0;
+            if (door_close_print == 0) {
+                printf("CRITICAL: door closed\r\n");
+                door_close_print = 1;
+            }
+            door_open_print = 0;
+        }
+        if (counter_removed || lock_exec) {
+            if (counter_removed_print != (counter_removed & 0x03)) {
+                printf("CRITICAL: COUNTER REMOVED %01d\r\n", counter_removed);
+                counter_removed_print = (counter_removed & 0x03);
+            }
         }
         if (lock_print) {
             lock_print = 0;

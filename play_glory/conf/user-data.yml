@@ -52,7 +52,7 @@
   db.LgUser(admin):
     externalApp:    PlayInternalApp
     username:       admin
-    password:       X
+    password:       ""
     gecos:          "Gecos del Usario administrador"
     creationDate:   2012-01-01
     endDate:        2112-01-02    
@@ -96,7 +96,7 @@
   db.LgUser(supervisor):
     externalApp:    PlayInternalApp
     username:       supervisor
-    password:       supervisor
+    password:       ""
     gecos:          "Gecos del Usario supervisor"
     externalId:     0
     locked:         #x42
@@ -112,7 +112,7 @@
   db.LgUser(collector):
     externalApp:    PlayInternalApp
     username:       collector
-    password:       collector
+    password:       ""
     gecos:          "Gecos del Usario collector"
     externalId:     0
     locked:         #x42
