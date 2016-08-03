@@ -189,17 +189,17 @@ void main() {
         }
 
         if (DOOR_OPENED) {
-            if (door_close_print == 0) {
-                printf("CRITICAL: door closed\r\n");
-                door_close_print = 1;
-            }
-            door_open_print = 0;
-        } else {
             if (door_open_print == 0) {
                 printf("CRITICAL: door open\r\n");
                 door_open_print=1;
             }
             door_close_print = 0;
+        } else {
+            if (door_close_print == 0) {
+                printf("CRITICAL: door closed\r\n");
+                door_close_print = 1;
+            }
+            door_open_print = 0;
         }
 
 
