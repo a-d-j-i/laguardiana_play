@@ -40,15 +40,13 @@ typedef struct {
 #endif
 
 // UART
-extern char must_beep;
-extern char must_sound;
-extern char lock_print;
-extern char unlock_print;
-extern char lock_exec;
-extern char counter_removed;
-extern long door_unlock_cnt;
-#define CHECK_COUNTER_REMOVED { counter_removed = ((PORTB & 0x1C ) >> 2 ); }
-#define DOOR_OPENED ((counter_removed & 0x4) == 0x4)
+extern unsigned char must_beep;
+extern unsigned char must_sound;
+extern unsigned char counter_removed_bits;
+extern unsigned long door_unlock_cnt;
+#define CHECK_COUNTER_REMOVED { curr_counter_removed_bits = ((PORTB & 0x1C ) >> 2 ); }
+#define DOOR_OPENED ((counter_removed_bits & 0x4) == 0x4)
+#define COUNTER_REMOVED ((counter_removed_bits & 0x3))
 #define OPEN_DOOR { PORTA = PORTA | 0x06; }
 #define OPEN_DOOR_SOL_ON { PORTA = PORTA | 0x10; }
 #define OPEN_DOOR_SOL_OFF { PORTA = PORTA & 0xEF; }

@@ -20,19 +20,15 @@ unsigned char* currString = 0;
 
 unsigned int i;
 unsigned int j;
-char must_beep = 0; // false
-char must_sound = 0; // false
-char must_sound_on_door = 0; // false
-char door_close_print = 0;
-char door_open_print = 0;
-char lock_print = 0;
-char unlock_print = 0;
-char lock_exec = 0;
-char counter_removed = 0;
-char counter_removed_print = 0;
-long door_unlock_cnt = 0;
-char door_openend_on_start;
-extern unsigned long door_sol_switch;
+unsigned char must_beep = 0; // false
+unsigned char must_sound = 0; // false
+unsigned char must_sound_on_door = 0; // false
+unsigned char door_close_print = 0;
+unsigned char door_open_print = 0;
+unsigned char counter_removed_bits = 0;
+unsigned char counter_removed_print = 0;
+unsigned long door_unlock_cnt = 0;
+unsigned char door_openend_on_start;
 
 void main() {
     init();
@@ -43,7 +39,6 @@ void main() {
     INTCONbits.GIEL = 1; //enable interrupts
     INTCONbits.GIEH = 1;
 
-    door_openend_on_start = DOOR_OPENED;
     //printf( "VERSION : " VERSION "\r\n" );
     for (i = 0; i < 50; i++) {
         for (j = 0; j < 5000; j++) {
@@ -55,6 +50,7 @@ void main() {
     // Freeze the port value
     initBagState();
 
+    door_openend_on_start = DOOR_OPENED;
 
     for (;;) {
         loop_cnt++;
@@ -156,7 +152,7 @@ void main() {
                 if (txBufSize() > 130) {
                     printf("STATE : BAG %02d BAG_APROVED %d SHUTTER %02d LOCK %01d GATE %01d %01d\r\n",
                             bag_state, bag_aproved, shutter_st, ((PORTA & 0x0E) >> 2),
-                            counter_removed, lock_exec);
+                            counter_removed_bits, 0);
                             printf("STATUS : A 0x%02X  B 0x%02X  C 0x%02X  D 0x%02X  BAG_SENSOR 0x%02X BAG_STATUS 0x%02X\r\n",
                             PORTA, PORTB, PORTC, PORTD, BAG_SENSOR(PORTD), bag_status);
                 }
@@ -241,7 +237,6 @@ void main() {
                 
                 
         // PRINT STUFF        
-        CHECK_COUNTER_REMOVED;
         if (DOOR_OPENED) {
             if (door_open_print == 0) {
                 printf("CRITICAL: door open\r\n");
@@ -255,19 +250,13 @@ void main() {
             }
             door_open_print = 0;
         }
-        if (counter_removed || lock_exec) {
-            if (counter_removed_print != (counter_removed & 0x03)) {
-                printf("CRITICAL: COUNTER REMOVED %01d\r\n", counter_removed);
-                counter_removed_print = (counter_removed & 0x03);
+        if (counter_removed_print != COUNTER_REMOVED) {
+            if (COUNTER_REMOVED == 0) {
+                printf("CRITICAL: COUNTER PLACED\r\n");
+            } else {
+                printf("CRITICAL: COUNTER REMOVED %01d\r\n", COUNTER_REMOVED);
             }
-        }
-        if (lock_print) {
-            lock_print = 0;
-                    printf("CRITICAL: Lock executed\r\n");
-        }
-        if (unlock_print) {
-            unlock_print = 0;
-                    printf("CRITICAL: UnLock executed\r\n");
+            counter_removed_print = COUNTER_REMOVED;
         }
     }
 }
