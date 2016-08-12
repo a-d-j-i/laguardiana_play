@@ -8,6 +8,7 @@ import java.util.Map;
 import models.Configuration;
 import models.ItemQuantity;
 import models.ModelFacade;
+import models.ModelFacade.IoBoardCondition;
 import models.db.LgBag;
 import play.Logger;
 import play.mvc.*;
@@ -24,16 +25,16 @@ public class MenuController extends Controller {
             bagFreeSpace = (long) 0;
         }
         boolean isBagFull = Configuration.isBagFull(iq.bills - 1, iq.envelopes + 1);
+        IoBoardCondition bagReadyCondition = ModelFacade.ioBoardReadyCondition();
         if (request.isAjax()) {
             Object[] o = new Object[3];
             o[0] = ModelFacade.printerNeedCheck();
-            o[1] = !ModelFacade.ioBoardReady();
+            o[1] = bagReadyCondition;
             // I need space for at least one envelope. see ModelFacade->isBagReady too.
             o[2] = isBagFull;
             renderJSON(o);
         }
-        boolean bagRemoved = !ModelFacade.ioBoardReady();
-        renderArgs.put("bagRemoved", bagRemoved);
+        renderArgs.put("bagReadyCondition", bagReadyCondition);
         renderArgs.put("bagTotals", iq);
         renderArgs.put("bagFreeSpace", bagFreeSpace);
         renderArgs.put("checkPrinter", ModelFacade.printerNeedCheck());
@@ -48,7 +49,7 @@ public class MenuController extends Controller {
         String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter",
                         "application.unlock_door"};
         String nextStep = renderMenuButtons(buttons, titles, extraButtons);
-        if (nextStep == null || bagRemoved) {
+        if (nextStep == null || !bagReadyCondition.ready) {
             render();
         } else {
             if (back != null) {

@@ -605,40 +605,65 @@ public class ModelFacade {
         return manager.getCounter();
     }
 
-    public static boolean ioBoardReady() {
+    public static class IoBoardCondition {
+
+        public final boolean ready;
+        public final boolean error;
+        public final boolean bag_removed;
+        public final boolean gate1_ready;
+        public final boolean gate2_ready;
+        public final boolean door_ready;
+
+        public IoBoardCondition(boolean error, boolean bag_removed, boolean gate1_ready, boolean gate2_ready, boolean door_ready) {
+            this.error = error;
+            this.bag_removed = bag_removed;
+            this.gate1_ready = gate1_ready;
+            this.gate2_ready = gate2_ready;
+            this.door_ready = door_ready;
+            this.ready = (!error && !bag_removed && gate1_ready && gate2_ready && door_ready);
+        }
+
+    }
+
+    public static IoBoardCondition ioBoardReadyCondition() {
         IoBoard.IoBoardStatus status = ioBoard.getStatus();
         Logger.debug("CURRENT IOBOARD STATUS : %s", status.toString());
         if (Configuration.isIgnoreIoBoard() || status == null) {
-            return true;
+            return new IoBoardCondition(false, false, true, true, true);
         }
 
         if (status.getError() != null) {
             Logger.error("Setting ioboard error : %s", status.getError());
             modelError.setError(status.getError());
-            return false;
+            return new IoBoardCondition(true, false, true, true, true);
         }
 
+        boolean bag_removed = false;
         if (!Configuration.isIgnoreBag() && status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-            Logger.error("IoBoard bag not inplace can't store");
             //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
-            return false;
+            bag_removed = true;
         }
+        return new IoBoardCondition(false, bag_removed, 
+                Configuration.isReadyGate1(status.getGateState()), 
+                Configuration.isReadyGate2(status.getGateState()), 
+                Configuration.isReadyGateDoor(status.getGateState()));
+    }
 
-        if (!Configuration.isReadyGate1(status.getGateState())) {
+    public static boolean ioBoardReady() {
+        IoBoardCondition c = ioBoardReadyCondition();
+        if (c.bag_removed) {
+            Logger.error("IoBoard bag not inplace can't store");
+        }
+        if (!c.gate1_ready) {
             Logger.error("IoBoard gate1 not ready can't store");
-            return false;
         }
-
-        if (!Configuration.isReadyGate2(status.getGateState())) {
+        if (!c.gate2_ready) {
             Logger.error("IoBoard gate2 not ready can't store");
-            return false;
         }
-
-        if (!Configuration.isReadyGateDoor(status.getGateState())) {
+        if (!c.door_ready) {
             Logger.error("IoBoard gateDoor not ready can't store");
-            return false;
         }
-        return true;
+        return c.ready;
     }
 
     public static boolean isBagReady(boolean envelope) {

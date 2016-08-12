@@ -21,12 +21,16 @@
                     #{menuButtons buttons: buttons, perms: perms, titles: titles/}
                 </ul>
             </div>
-            <div id="bagFull" style="color: red; #{if !bagFull || bagRemoved }display: none;#{/if}">&{'application.bagFull'}<br/></div>
-            <div id="bagRemoved" style="color: red; #{if !bagRemoved}display: none;#{/if}">&{'application.bagRemoved'}</div><br/>
             &{'application.bagTotals', bagTotals.bills, bagTotals.envelopes }<br/>
             &{'application.bagSpace', bagFreeSpace }<br/>
-            <div id="checkPrinter" style="color: red; #{if !checkPrinter}display: none;#{/if}">&{'application.checkPrinter'}</div><br/>
-            <div id="lockedByUser" style="color: red; #{if !lockedByUser}display: none;#{/if}">&{'application.lockedByUser', lockedByUser }</div><br/>
+            <div id="bagFull" style="color: red; display: none;">&{'application.bagFull'}<br/></div>
+            <div id="bagError" style="color: red; display: none;">&{'application.bagError'}<br/></div>
+            <div id="bagRemoved" style="color: red; display: none;">&{'application.bagRemoved'}</div>
+            <div id="gate1_ready" style="color: red; display: none;">&{'application.gate1_not_ready'}</div>
+            <div id="gate2_ready" style="color: red; display: none;">&{'application.gate2_not_ready'}</div>
+            <div id="door_ready" style="color: red; display: none;">&{'application.door_not_ready'}</div>
+            <div id="lockedByUser" style="color: red; display: none;">&{'application.lockedByUser', lockedByUser }</div>
+            <div id="checkPrinter" style="color: red; display: none;">&{'application.checkPrinter'}</div>
         </div>
         <hr />
         #{menuBottomButtons}
@@ -42,29 +46,49 @@
 #{set 'moreScripts'}
 <script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
-    doRefresh = function() {
-        $.getJSON('@{MenuController.mainMenu}', function(data) {
+    doRefresh = function () {
+        $.getJSON('@{MenuController.mainMenu}', function (data) {
             var checkPrinter = data[ 0 ];
-            var bagRemoved = data[ 1 ];
+            var bagReadyCondition = data[ 1 ];
             var bagFull = data[ 2 ];
             if (checkPrinter) {
                 $("#checkPrinter").show();
             } else {
                 $("#checkPrinter").hide();
             }
-            if (bagRemoved) {
-                $("#bagRemoved").show();
+
+            var s = false;
+            if (!s && bagReadyCondition.error) {
+                $("#bagError").show();
+                s = true;
+            } else {
+                $("#bagError").hide();
+            }
+            if (!s && bagFull) {
+                $("#bagFull").show();
+                s = true;
+            } else {
                 $("#bagFull").hide();
+            }
+            if (!s && bagReadyCondition.bag_removed) {
+                $("#bagRemoved").show();
+                s = true;
             } else {
                 $("#bagRemoved").hide();
-                if (bagFull) {
-                    $("#bagFull").show();
+            }
+            var props = ["door_ready", "gate1_ready", "gate2_ready"];
+            for (var i in props) {
+                if (!s && !bagReadyCondition[props[i]]) {
+                    $("#" + props[i]).show();
+                    s = true;
                 } else {
-                    $("#bagFull").hide();
+                    $("#" + props[i]).hide();
                 }
             }
             doneRefresh();
-        }).fail( function() { window.location.href = "@{Secure.login()}" } );
+        }).fail(function () {
+            window.location.href = "@{Secure.login()}"
+        });
 
     }
 </script>

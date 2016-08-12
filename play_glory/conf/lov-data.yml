@@ -78,19 +78,19 @@
     slot:           28
     currency:       1
 
-  db.LgBillType(100pesos):
+  db.LgBillType(100pesos1):
     denomination:   100
     unitLov:        1
     slot:           29
     currency:       1
 
-  db.LgBillType(100pesos):
+  db.LgBillType(100pesos2):
     denomination:   100
     unitLov:        1
     slot:           30
     currency:       1
 
-  db.LgBillType(100pesos):
+  db.LgBillType(100pesos3):
     denomination:   100
     unitLov:        1
     slot:           31
