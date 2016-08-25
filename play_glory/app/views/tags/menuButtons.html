@@ -1,9 +1,9 @@
 #{list items:_buttons, as:'b'}
-%{ def url = play.mvc.Router.reverse( "$b" ) }%
-#{if _perms[ b ] }
+%{ def url = play.mvc.Router.reverse( "$b.action" ) }%
+#{if _perms[ b.action ] }
 <li class="column">
     <div class="columna">
-        <a href="${url}" class="boton ${play.configuration['style.button_color']} full_width separar">&{ _titles[ b ] }</a>
+        <a href="${url}" class="boton ${play.configuration['style.button_color']} full_width separar">&{ b.title }</a>
     </div>
 </li>
 #{/if}

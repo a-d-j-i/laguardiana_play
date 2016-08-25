@@ -3,7 +3,9 @@ package controllers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import models.Configuration;
 import models.ItemQuantity;
@@ -15,6 +17,24 @@ import play.mvc.*;
 
 @With({Secure.class})
 public class MenuController extends Controller {
+
+    final static public class MenuButton {
+
+        final public String action;
+        final public String title;
+        final public boolean auto_navigate;
+
+        public MenuButton(String action, String title) {
+            this(action, title, true);
+        }
+
+        public MenuButton(String action, String title, boolean auto_navigate) {
+            this.action = action;
+            this.title = title;
+            this.auto_navigate = auto_navigate;
+        }
+
+    }
 
     public static void mainMenu(String back) {
         LgBag currentBag = LgBag.getCurrentBag();
@@ -43,28 +63,30 @@ public class MenuController extends Controller {
         renderArgs.put("bagFull", isBagFull);
 
         String backAction = "MenuController.mainMenu";
-        String[] buttons = {"BillDepositController.start", "CountController.start", "EnvelopeDepositController.start", "FilterController.start",
-                        "IoBoardController.unlockDoor"};
-        String[] extraButtons = {"MenuController.otherMenu"};
-        String[] titles = {"main_menu.cash_deposit", "main_menu.count", "main_menu.envelope_deposit", "main_menu.filter",
-                        "application.unlock_door"};
-        String nextStep = renderMenuButtons(buttons, titles, extraButtons);
+        final MenuButton[] buttons = {new MenuButton("BillDepositController.start", "main_menu.cash_deposit"),
+            new MenuButton("CountController.start", "main_menu.count"),
+            new MenuButton("EnvelopeDepositController.start", "main_menu.envelope_deposit"),
+            new MenuButton("FilterController.start", "main_menu.filter"),
+            new MenuButton("IoBoardController.unlockDoor", "application.unlock_door", false)
+        };
+        final MenuButton[] extraButtons = {new MenuButton("MenuController.otherMenu", "main_menu.other_menu", false)};
+        String nextStep = renderMenuButtons(buttons, extraButtons);
         if (nextStep == null || !bagReadyCondition.ready) {
             render();
+        } else if (back != null) {
+            Secure.logout("Application.index");
         } else {
-            if (back != null) {
-                Secure.logout("Application.index");
-            } else {
-                Logger.debug("Main menu nextstep: %s", nextStep);
-                redirect(Router.getFullUrl(nextStep));
-            }
+            Logger.debug("Main menu nextstep: %s", nextStep);
+            redirect(Router.getFullUrl(nextStep));
         }
     }
 
     public static void otherMenu(String back) {
         String backAction = "MenuController.mainMenu";
-        String[] buttons = {"MenuController.hardwareMenu", "MenuController.accountingMenu", "MenuController.reportMenu"};
-        String[] titles = {"other_menu.hardware_admin", "other_menu.accounting", "other_menu.reports"};
+        final MenuButton[] buttons = {new MenuButton("MenuController.hardwareMenu", "other_menu.hardware_admin"),
+            new MenuButton("MenuController.accountingMenu", "other_menu.accounting"),
+            new MenuButton("MenuController.reportMenu", "other_menu.reports")
+        };
         File f = play.Play.getFile("version.txt");
         FileInputStream fis;
         try {
@@ -79,68 +101,73 @@ public class MenuController extends Controller {
         } catch (IOException ex) {
             Logger.error("Error reading release file : %s", ex.toString());
         }
-        renderMenuAndNavigate(back, backAction, buttons, titles, null);
+        renderMenuAndNavigate(back, backAction, buttons);
     }
 
     public static void hardwareMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"GloryController.index", "GloryManagerController.index", "IoBoardController.index",
-            "ConfigController.status", "PrinterController.listPrinters", "ConfigController.index"};
-//            "ConfigController.status", "PrinterController.listPrinters", "MenuController.printTemplateMenu"};
-        String[] titles = {"other_menu.glory_cmd", "other_menu.glory_manager", "other_menu.ioboard_cmd", "other_menu.status",
-            "other_menu.printer_list", "other_menu.config"};
-//            "other_menu.printer_list", "other_menu.printer_test"};
-        renderMenuAndNavigate(back, backAction, buttons, titles, null);
+        final MenuButton[] buttons = {new MenuButton("GloryController.index", "other_menu.glory_cmd"),
+            new MenuButton("GloryManagerController.index", "other_menu.glory_manager"),
+            new MenuButton("IoBoardController.index", "other_menu.ioboard_cmd"),
+            new MenuButton("ConfigController.status", "other_menu.status"),
+            new MenuButton("PrinterController.listPrinters", "other_menu.printer_list"),
+            new MenuButton("ConfigController.index", "other_menu.config")
+        };
+        renderMenuAndNavigate(back, backAction, buttons);
     }
 
     public static void printTemplateMenu(String back) {
         String backAction = "MenuController.hardwareMenu";
-        String[] buttons = {"PrinterController.billDeposit", "PrinterController.envelopeDeposit_finish",
-            "PrinterController.envelopeDeposit_start", "PrinterController.test"};
-        String[] titles = {"other_menu.print_billDeposit", "other_menu.print_envelopeDeposit_finish",
-            "other_menu.print_envelopeDeposit_start", "print_other_menu.test"};
-        renderMenuAndNavigate(back, backAction, buttons, titles, null);
+        final MenuButton[] buttons = {new MenuButton("PrinterController.billDeposit", "other_menu.print_billDeposit"),
+            new MenuButton("PrinterController.envelopeDeposit_finish", "other_menu.print_envelopeDeposit_finish"),
+            new MenuButton("PrinterController.envelopeDeposit_start", "other_menu.print_envelopeDeposit_start"),
+            new MenuButton("PrinterController.test", "print_other_menu.test")
+        };
+        renderMenuAndNavigate(back, backAction, buttons);
     }
 
     public static void accountingMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"ReportZController.print", "ReportZController.rotateZ", "ReportBagController.print", "ReportBagController.rotateBag"};
-        String[] titles = {"other_menu.current_z_totals", "other_menu.rotate_z", "other_menu.current_bag_totals",
-            "other_menu.rotate_bag"};
-        renderMenuAndNavigate(back, backAction, buttons, titles, null);
+        final MenuButton[] buttons = {new MenuButton("ReportZController.print", "other_menu.current_z_totals"),
+            new MenuButton("ReportZController.rotateZ", "other_menu.rotate_z"),
+            new MenuButton("ReportBagController.print", "other_menu.current_bag_totals"),
+            new MenuButton("ReportBagController.rotateBag", "other_menu.rotate_bag")
+        };
+        renderMenuAndNavigate(back, backAction, buttons);
     }
 
     public static void reportMenu(String back) {
         String backAction = "MenuController.otherMenu";
-        String[] buttons = {"ReportDepositController.list", "ReportBagController.list", "ReportZController.list", "ReportEventController.list",
-            "MenuController.unprocessedMenu"};
-        String[] titles = {"other_menu.list_deposits", "other_menu.list_bags", "other_menu.list_zs", "other_menu.list_events",
-            "other_menu.unprocessed_menu"};
-        renderMenuAndNavigate(back, backAction, buttons, titles, null);
+        final MenuButton[] buttons = {new MenuButton("ReportDepositController.list", "other_menu.list_deposits"),
+            new MenuButton("ReportBagController.list", "other_menu.list_bags"),
+            new MenuButton("ReportZController.list", "other_menu.list_zs"),
+            new MenuButton("ReportEventController.list", "other_menu.list_events"),
+            new MenuButton("MenuController.unprocessedMenu", "other_menu.unprocessed_menu")
+        };
+        renderMenuAndNavigate(back, backAction, buttons);
     }
 
     public static void unprocessedMenu(String back) {
         String backAction = "MenuController.unprocessedMenu";
-        String[] buttons = {"ReportController.unprocessedDeposits", "ReportController.unprocessedBags",
-            "ReportController.unprocessedZs", "ReportController.unprocessedEvents"
+        final MenuButton[] buttons = {new MenuButton("ReportController.unprocessedDeposits", "other_menu.unprocessed_deposits"),
+            new MenuButton("ReportController.unprocessedBags", "other_menu.unprocessed_bags"),
+            new MenuButton("ReportController.unprocessedZs", "other_menu.unprocessed_zs"),
+            new MenuButton("ReportController.unprocessedEvents", "other_menu.unprocessed_events")
         };
-        String[] titles = {"other_menu.unprocessed_deposits", "other_menu.unprocessed_bags",
-            "other_menu.unprocessed_zs", "other_menu.unprocessed_events"
-        };
-        renderMenuAndNavigate(back, backAction, buttons, titles, null);
+        renderMenuAndNavigate(back, backAction, buttons);
     }
 
     @Util
-    static String renderMenuButtons(String[] buttons, String[] titles, String[] extraButtons) {
+    static String renderMenuButtons(MenuButton[] buttons, MenuButton[] extraButtons) {
         int cnt = 0;
         Map<String, Boolean> perms = new HashMap<String, Boolean>();
-        Map<String, String> ts = new HashMap<String, String>();
-        String r = null;
+        List<MenuButton> ts = new ArrayList<MenuButton>();
+        MenuButton r = null;
         renderArgs.put("buttons", buttons);
         for (int i = 0; i < buttons.length; i++) {
-            ts.put(buttons[i], titles[i]);
-            boolean perm = Secure.checkPermission(buttons[i], "GET");
-            perms.put(buttons[i], perm);
+            ts.add(buttons[i]);
+            boolean perm = Secure.checkPermission(buttons[i].action, "GET");
+            perms.put(buttons[i].action, perm);
             if (perm) {
                 cnt++;
                 r = buttons[i];
@@ -148,8 +175,8 @@ public class MenuController extends Controller {
         }
         if (extraButtons != null) {
             for (int i = 0; i < extraButtons.length; i++) {
-                boolean perm = Secure.checkPermission(extraButtons[i], "GET");
-                perms.put(extraButtons[i], perm);
+                boolean perm = Secure.checkPermission(extraButtons[i].action, "GET");
+                perms.put(extraButtons[i].action, perm);
                 if (perm) {
                     cnt++;
                     r = extraButtons[i];
@@ -158,15 +185,15 @@ public class MenuController extends Controller {
         }
         renderArgs.put("titles", ts);
         renderArgs.put("perms", perms);
-        if (cnt == 1) {
-            return r;
+        if (cnt == 1 && r != null && r.auto_navigate) {
+            return r.action;
         }
         return null;
     }
 
     @Util
-    static void renderMenuAndNavigate(String back, String backAction, String[] buttons, String[] titles, String[] extraButtons) {
-        String nextStep = renderMenuButtons(buttons, titles, extraButtons);
+    static void renderMenuAndNavigate(String back, String backAction, MenuButton[] buttons) {
+        String nextStep = renderMenuButtons(buttons, null);
         if (nextStep != null) {
             if (back != null) {
                 redirect(Router.getFullUrl(backAction));
