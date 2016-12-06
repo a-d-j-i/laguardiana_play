@@ -118,18 +118,19 @@ public class DeviceFactory extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
+        Logger.debug("onApplicationStart " + Thread.currentThread().getName());
         eventExecutor = Executors.newSingleThreadExecutor();
     }
 
     @Override
     public void onApplicationStop() {
-        Logger.debug("onApplicationStop Close all ports");
+        Logger.debug("onApplicationStop Close all ports, thread: " + Thread.currentThread().getName());
         try {
             closeAll();
         } catch (Exception ex) {
             Logger.error("Exception in closeAll %s", ex.toString());
         }
-        Logger.debug("onApplicationStop Close all ports DONE");
+        Logger.debug("onApplicationStop Close all ports DONE, thread: " + Thread.currentThread().getName());
         try {
             eventExecutor.awaitTermination(3, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {

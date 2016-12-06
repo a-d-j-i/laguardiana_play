@@ -64,13 +64,14 @@ abstract public class ManagerCommandAbstract implements Runnable {
         return (mustCancel.get() || threadCommandApi.mustStop());
     }
 
-    boolean gotoNeutral(boolean canOpenEscrow, boolean forceEmptyHoper) {
+    boolean gotoNeutral(boolean canOpenEscrow, boolean forceEmptyHoper, boolean rotateBag) {
         boolean bagRotated = false;
         int remoteCancelRetries = 5;
         for (int i = 0; i < retries; i++) {
-            Logger.debug("GOTO NEUTRAL %s %s",
+            Logger.debug("GOTO NEUTRAL %s %s %s",
                     (canOpenEscrow ? "OPEN ESCROW" : ""),
-                    (forceEmptyHoper ? "FORCE EMPTY HOPER" : ""));
+                    (forceEmptyHoper ? "FORCE EMPTY HOPER" : ""),
+                    (rotateBag ? "ROTATE BAG" : ""));
 
             // If I can open the escrow then I must wait untill it is empty
             if (mustCancel()) {
@@ -122,11 +123,9 @@ abstract public class ManagerCommandAbstract implements Runnable {
                             setState(ManagerInterface.MANAGER_STATE.JAM);
                             if (gloryStatus.getD1Mode() == GloryState.D1Mode.normal_error_recovery_mode) {
                                 resetDevice();
-                            } else {
-                                if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
-                                    Logger.error("Error %s sending cmd : RemoteCancel", gloryStatus.getLastError());
-                                    return false;
-                                }
+                            } else if (!sendGCommand(new devices.glory.command.RemoteCancel())) {
+                                Logger.error("Error %s sending cmd : RemoteCancel", gloryStatus.getLastError());
+                                return false;
                             }
                             break;
                         case escrow_close_request:
@@ -235,7 +234,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
                                     break;
                                 }
                             }
-                            if (!bagRotated) {
+                            if (!bagRotated && rotateBag) {
+                                Logger.debug("ROTATING GLORY BAG");
                                 // Rotate the bag once to fix the glory proble.
                                 bagRotated = true;
                                 // set the time if possible, some times it fails, ignroe this

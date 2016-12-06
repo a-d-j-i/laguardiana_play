@@ -171,7 +171,7 @@ public class CountCommand extends ManagerCommandAbstract {
         boolean fakeCount = false;
         int count_retries = 0;
 
-        if (!gotoNeutral(false, false)) {
+        if (!gotoNeutral(false, false, false)) {
             return;
         }
         Logger.error("CountCommand Start CURRENCY %d", countData.currency.byteValue());
@@ -345,7 +345,7 @@ public class CountCommand extends ManagerCommandAbstract {
                             if (!openEscrow()) {
                                 return;
                             }
-                            gotoNeutral(true, true);
+                            gotoNeutral(true, true, false);
                             return;
                         }
                         if (gloryStatus.isRejectBillPresent()) {
@@ -359,7 +359,7 @@ public class CountCommand extends ManagerCommandAbstract {
                     break;
                 case abnormal_device:
                     setState(ManagerInterface.MANAGER_STATE.JAM);
-                    if (!gotoNeutral(true, true)) {
+                    if (!gotoNeutral(true, true, false)) {
                         return;
                     }
                     if (!sendGCommand(new devices.glory.command.SetDepositMode())) {
@@ -386,7 +386,7 @@ public class CountCommand extends ManagerCommandAbstract {
             }
             setState(ManagerInterface.MANAGER_STATE.CANCELING);
         }
-        gotoNeutral(true, false);
+        gotoNeutral(true, false, true);
     }
 
     public void storeDeposit(Integer sequenceNumber) {
@@ -414,7 +414,7 @@ public class CountCommand extends ManagerCommandAbstract {
 
         // Sometimes the BatchDataTransmition fails, trying randomly to see what can be.
         for (int i = 0; i < bills.length; i++) {
-            bills[ i] = 0;
+            bills[i] = 0;
         }
         if (!countData.isBatch) {
             /*if (!sendGloryCommand(new devices.glory.command.BatchDataTransmition(bills))) {
@@ -458,9 +458,9 @@ public class CountCommand extends ManagerCommandAbstract {
                         String.format("Invalid bill value %d %d %d", countData.currentSlot, current, desired)));
                 return false;
             }
-            bills[ countData.currentSlot] = desired - current;
-            Logger.debug("---------- slot %d batch billls : %d desired %d value %d", countData.currentSlot, bills[ countData.currentSlot], desired, current);
-            if (bills[ countData.currentSlot] != 0) {
+            bills[countData.currentSlot] = desired - current;
+            Logger.debug("---------- slot %d batch billls : %d desired %d value %d", countData.currentSlot, bills[countData.currentSlot], desired, current);
+            if (bills[countData.currentSlot] != 0) {
                 break;
             } else {
                 countData.currentSlot++;

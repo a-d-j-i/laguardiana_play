@@ -11,7 +11,7 @@ import play.db.jpa.GenericModel;
 abstract public class LgEvent extends GenericModel implements java.io.Serializable {
 
     @Id
-    @Column( name = "event_id", unique = true, nullable = false)
+    @Column(name = "event_id", unique = true, nullable = false)
     @GeneratedValue(generator = "LgEventGenerator")
     @SequenceGenerator(name = "LgEventGenerator", sequenceName = "lg_event_sequence")
     public Integer eventId;
@@ -20,15 +20,19 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
     public LgUser user;
     @Column(name = "event_source_id", nullable = true)
     public Integer eventSourceId;
-    @Temporal( TemporalType.TIMESTAMP)
-    @Column( name = "creation_date", nullable = false, length = 13)
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "creation_date", nullable = false, length = 13)
     public Date creationDate = new Date();
-    @Column( name = "message", nullable = true, length = 512)
+    @Column(name = "message", nullable = true, length = 512)
     public String message;
 
     public LgEvent(LgUser user, Integer eventSourceId, String message) {
         this.user = user;
-        this.message = message;
+        if (message.length() > 500) {
+            this.message = message.substring(0, 500) + "...";
+        } else {
+            this.message = message;
+        }
         this.eventSourceId = eventSourceId;
     }
 
@@ -86,4 +90,5 @@ abstract public class LgEvent extends GenericModel implements java.io.Serializab
         el.save();
         return true;
     }
+
 }

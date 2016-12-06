@@ -249,6 +249,10 @@ public class Configuration {
         return isProperty("style.useHardwareKeyboard");
     }
 
+    public static boolean useNumericKeyboard() {
+        return isProperty("style.useNumericKeyboard");
+    }
+
     public static String getDefaultPrinter() {
         String pc = getSystemProperty("printer.port");
         return pc;

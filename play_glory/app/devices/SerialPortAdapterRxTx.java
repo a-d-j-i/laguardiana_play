@@ -14,7 +14,7 @@ import play.Play;
 public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract implements SerialPortEventListener {
 
     public void serialEvent(SerialPortEvent spe) {
-        if (serialPort == null) {
+        if (serialPort == null || in == null) {
             Logger.error("Error reading serial port, port closed");
             return;
         }
@@ -34,12 +34,12 @@ public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract imple
             Logger.error("Error reading serial port %s", e.getMessage());
         }
     }
-    SerialPort serialPort;
-    InputStream in;
-    OutputStream out;
+    SerialPort serialPort = null;
+    InputStream in = null;
+    OutputStream out = null;
 
     // Hack the library path once!!!
-    {
+    static {
         String os = System.getProperty("os.name");
         if (os.indexOf("Win") == 0) {
             os = "Win";
@@ -97,7 +97,7 @@ public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract imple
                     serialPort.addEventListener(this);
                     serialPort.notifyOnDataAvailable(true);
                 } else {
-                    System.out.println("Error: Only serial ports are handled by this example.");
+                    Logger.error("Error: Only serial ports are handled by this example.");
                 }
             }
         } catch (Exception ex) {
@@ -111,16 +111,30 @@ public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract imple
     }
 
     public void close() throws IOException {
-        try {
-            if (serialPort != null) {
-                Logger.debug(String.format("Closing serial port %s", serialPort.getName()));
-                in.close();
-                out.close();
-                serialPort.close();
-                serialPort = null;
+        if (serialPort != null) {
+            Logger.debug(String.format("Closing serial port %s", serialPort.getName()));
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (Exception e) {
+                throw new IOException(String.format("Error closing serial port in"), e);
             }
-        } catch (Exception e) {
-            throw new IOException(String.format("Error closing serial port"), e);
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (Exception e) {
+                throw new IOException(String.format("Error closing serial port out"), e);
+            }
+            try {
+                if (serialPort != null) {
+                    serialPort.close();
+                }
+                serialPort = null;
+            } catch (Exception e) {
+                throw new IOException(String.format("Error closing serial port"), e);
+            }
         }
     }
 
@@ -130,7 +144,11 @@ public final class SerialPortAdapterRxTx extends SerialPortAdapterAbstract imple
         }
 
         try {
-            out.write(buffer);
+            if (out != null) {
+                out.write(buffer);
+            } else {
+                throw new IOException(String.format("Error writing to serial port %s, out is null", serialPort.getName()));
+            }
         } catch (IOException e) {
             throw new IOException(String.format("Error writing to serial port %s", serialPort.getName()), e);
         }

@@ -54,59 +54,84 @@
         </div>
         #{/if}
         #{else}
-        <div class="contenido_chico">
-            <div class="keyboard">
-                <ul class="on-11 same-height columns">
+            <div class="contenido_chico">
+                <div class="keyboard">
+                    #{if ( models.Configuration.useNumericKeyboard() ) }
+                            <ul class="on-3 same-height columns">
+                                <li class="column"></li>
+                                <li class="column"></li>
+                                <li class="column"><span><a class="element key" data-key="{backspace}">←</a></span></li>
 
-                    <li class="column"><span><a class="element key" data-key="1">1</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="2">2</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="3">3</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="4">4</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="5">5</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="6">6</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="7">7</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="8">8</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="9">9</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="0">0</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="{backspace}">←</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="7">7</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="8">8</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="9">9</a></span></li>
 
-                    <li class="column"><span><a class="element key" data-key="Q">Q</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="W">W</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="E">E</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="R">R</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="T">T</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="Y">Y</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="U">U</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="I">I</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="O">O</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="P">P</a></span></li>
-                    <li class="column"></li>
+                                <li class="column"><span><a class="element key" data-key="4">4</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="5">5</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="6">6</a></span></li>
 
-                    <li class="column"><span><a class="element key" data-key="A">A</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="S">S</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="D">D</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="F">F</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="G">G</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="H">H</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="J">J</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="K">K</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="L">L</a></span></li>
-                    <li class="span-2 column"><span><a class="element key" data-key=" ">&{'keyboard.space'}</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="1">1</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="2">2</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="3">3</a></span></li>
 
-                    <li class="column"><span><a class="element key" data-key="Z">Z</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="X">X</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="C">C</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="V">V</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="B">B</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="N">N</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="M">M</a></span></li>
-                    <li class="column"><span><a class="element key" data-key=".">.</a></span></li>
-                    <li class="column"><span><a class="element key" data-key="-">-</a></span></li>
-                    <li class="span-2 column"><span><a id="continueButton" href="#" class="element action">&{'keyboard.continue'}</a></span></li>
+                                <li class="column"></li>
+                                <li class="column"><span><a class="element key" data-key="0">0</a></span></li>
+                                <li class="column"><span><a id="continueButton" href="#" class="element action">&{'keyboard.continue'}</a></span></li>
+                            </ul>
+                    #{/if}
+                    #{else}
+                            <ul class="on-11 same-height columns">
 
-                </ul>
+                                <li class="column"><span><a class="element key" data-key="1">1</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="2">2</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="3">3</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="4">4</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="5">5</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="6">6</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="7">7</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="8">8</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="9">9</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="0">0</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="{backspace}">←</a></span></li>
+
+                                <li class="column"><span><a class="element key" data-key="Q">Q</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="W">W</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="E">E</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="R">R</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="T">T</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="Y">Y</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="U">U</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="I">I</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="O">O</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="P">P</a></span></li>
+                                <li class="column"></li>
+
+                                <li class="column"><span><a class="element key" data-key="A">A</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="S">S</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="D">D</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="F">F</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="G">G</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="H">H</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="J">J</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="K">K</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="L">L</a></span></li>
+                                <li class="span-2 column"><span><a class="element key" data-key=" ">&{'keyboard.space'}</a></span></li>
+
+                                <li class="column"><span><a class="element key" data-key="Z">Z</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="X">X</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="C">C</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="V">V</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="B">B</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="N">N</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="M">M</a></span></li>
+                                <li class="column"><span><a class="element key" data-key=".">.</a></span></li>
+                                <li class="column"><span><a class="element key" data-key="-">-</a></span></li>
+                                <li class="span-2 column"><span><a id="continueButton" href="#" class="element action">&{'keyboard.continue'}</a></span></li>
+
+                            </ul>
+                    #{/else}
+                </div>
             </div>
-        </div>
         #{/else}
         <div id="alerta" class="alerta_automatica alerta error" style="display: none;">
             <div id="alerta_titulo">&{ 'application.error' }</div>
