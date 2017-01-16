@@ -3,6 +3,7 @@ package playrunner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import play.Logger;
 import play.Play;
 
 /**
@@ -32,6 +33,8 @@ public class PlayRunner {
         Server server = new Server();
 
         try {
+            Logger.debug("START");
+            System.out.println("START");
             server.start();
             boolean done = false;
             while (!done) {
@@ -43,14 +46,20 @@ public class PlayRunner {
                     case 'c':
                     case 'x':
                     case 'q':
+                        Logger.debug("EXIT BY KEYBOARD");
+                        System.out.println("EXIT BY KEYBOARD");
                         done = true;
                         break;
                     default:
-                        Thread.sleep(100);
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                        }
                 }
             }
-        } catch (InterruptedException ex) {
         } finally {
+            Logger.debug("EXIT, CALLING STOP");
+            System.out.println("EXIT, CALLING STOP");
             server.stop();
             Play.stop();
         }
