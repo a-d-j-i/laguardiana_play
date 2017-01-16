@@ -16,6 +16,7 @@ import machines.status.MachineBillDepositStatus;
 import machines.status.MachineStatus;
 import models.BillDeposit;
 import models.BillQuantity;
+import models.Configuration;
 import play.Logger;
 
 /**
@@ -91,8 +92,10 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
             context.setCurrentQuantity((GloryDE50StatusCurrentCount) st);
             return;
         } else if (st.is(DeviceStatusError.class)) {
-            if (st.is(IoBoardStatusError.class) && ((IoBoardStatusError) st).canIgnore()) {
-                return;
+            if (st.is(IoBoardStatusError.class)) {
+                if (Configuration.isIgnoreIoBoard()) {
+                    return;
+                }
             }
             DeviceStatusError se = (DeviceStatusError) st;
             context.setCurrentState(new P500GloryDE50StateError(context, this, se.getError()));
@@ -133,7 +136,7 @@ public class P500GloryDE50StateBillDepositContinue extends MachineStateAbstract 
      super.onIoBoardEvent(status);
      }
      */
-    /*
+ /*
      @Override
      public void onGloryEvent(ManagerInterface.ManagerStatus m) {
      Logger.debug("%s glory event : %s", this.getClass().getSimpleName(), m.getState());

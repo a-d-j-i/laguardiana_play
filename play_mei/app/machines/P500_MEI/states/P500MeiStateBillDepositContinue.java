@@ -133,8 +133,10 @@ public class P500MeiStateBillDepositContinue extends MachineStateAbstract {
             });
             return;
         } else if (st.is(DeviceStatusError.class)) {
-            if (st.is(IoBoardStatusError.class) && ((IoBoardStatusError) st).canIgnore()) {
-                return;
+            if (st.is(IoBoardStatusError.class)) {
+                if (Configuration.isIgnoreIoBoard()) {
+                    return;
+                }
             }
             DeviceStatusError err = (DeviceStatusError) st;
             context.setCurrentState(new P500MeiStateError(this, context, err.getError()));

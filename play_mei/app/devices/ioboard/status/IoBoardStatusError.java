@@ -25,8 +25,4 @@ public class IoBoardStatusError extends DeviceStatusError implements DeviceStatu
         return this.getClass().equals(type);
     }
 
-    public boolean canIgnore() {
-        return Configuration.isIgnoreIoBoard();
-    }
-
 }
