@@ -6,7 +6,7 @@ from glob import glob
 
 my_path = os.path.dirname( os.path.realpath(__file__) )
 
-includes = [ 'cStringIO', 'ctypes', 'StringIO', 'threading', 'array', 'copy', 'errno', 'httplib', 'locale', 'math', \
+includes = [ 'cStringIO', 'ctypes', 'StringIO', 'threading', 'array', 'copy', 'errno', 'httplib', 'locale', 'math', 'psutil', \
                 'multiprocessing', 'os', 'platform', 'pprint', 'Queue', 'random', 're', 'select', 'shutil', \
                 'socket', 'string', 'subprocess', 'sys', 'threading', 'time', 'traceback', 'urllib', 'tempfile', \
                 'types', 'gc', 'signal', 'msvcrt', 'struct',  'zipimport', 'zlib', '_winreg', "logging", "logging.handlers" \
