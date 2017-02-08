@@ -21,28 +21,7 @@ public class FilterController extends CounterController {
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
-        //refresh session cache
-        if (ModelFacade.isLocked()) {
-            if (!request.isAjax()) {
-                CountController.counterError(null);
-            }
-        }
-        if (request.isAjax()) {
-            return;
-        }
-        String neededAction = ModelFacade.getNeededAction();
-        String neededController = ModelFacade.getNeededController();
-        if (neededAction == null || neededController == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start")) {
-                Logger.debug("wizardFixPage Redirect Application.index");
-                Application.index();
-            }
-        } else {
-            if (!(request.controller.equalsIgnoreCase(neededController))) {
-                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
-                redirect(Router.getFullUrl(neededController + "." + neededAction));
-            }
-        }
+        wizardFixPageInt();
     }
 
     static public class FormData {

@@ -42,6 +42,8 @@ class EnvelopeDepositStoring extends ActionState {
                 break;
             case INITIALIZING:
             case STORING:
+            case READY_TO_STORE:
+            case REMOVE_THE_BILLS_FROM_HOPER: // wait until this is done.
                 break;
             case ERROR:
                 cancelWithCause(FinishCause.FINISH_CAUSE_STORING_ERROR);

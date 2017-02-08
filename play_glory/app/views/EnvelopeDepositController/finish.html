@@ -25,7 +25,9 @@
                 <li class="column">
                     <!-- link cancelar -->
                     <div class="columna">
+                        #{if ( can_continue ) }
                         <a href="@{Application.index()}" class="boton full_width gris">&{ 'application.continue' }</a>
+                        #{/if}
                     </div>
                 </li>
                 <li class="column">

@@ -98,12 +98,20 @@ public class Configuration {
         return isSystemProperty("bill_deposit.show_reference2");
     }
 
+    public static Object billDepositCanContinueOnFinish() {
+        return isProperty("bill_deposit.can_continue_on_finish");
+    }
+
     public static Boolean mustShowEnvelopeDepositReference1() {
         return isSystemProperty("envelope_deposit.show_reference1");
     }
 
     public static Boolean mustShowEnvelopeDepositReference2() {
         return isSystemProperty("envelope_deposit.show_reference2");
+    }
+
+    public static Object envelopeDepositCanContinueOnFinish() {
+        return isProperty("envelope_deposit.can_continue_on_finish");
     }
 
     public static String getClientCode() {

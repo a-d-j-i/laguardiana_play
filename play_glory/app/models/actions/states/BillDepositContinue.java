@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package models.actions.states;
 
 import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
-import models.Configuration;
 import models.actions.UserAction.StateApi;
 import models.db.LgDeposit;
 import models.db.LgDeposit.FinishCause;

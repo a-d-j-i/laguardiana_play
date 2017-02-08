@@ -19,7 +19,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
-import play.mvc.Router;
 import play.mvc.With;
 import validation.FormCurrency;
 import validation.FormDepositUserCodeEnvelopeReference;
@@ -30,28 +29,7 @@ public class EnvelopeDepositController extends CounterController {
     @Before
     // currentAction allways valid
     static void wizardFixPage() {
-        //refresh session cache
-        if (ModelFacade.isLocked()) {
-            if (!request.isAjax()) {
-                CountController.counterError(null);
-            }
-        }
-        if (request.isAjax()) {
-            return;
-        }
-        String neededAction = ModelFacade.getNeededAction();
-        String neededController = ModelFacade.getNeededController();
-        if (neededAction == null || neededController == null) {
-            if (!request.actionMethod.equalsIgnoreCase("start")) {
-                Logger.debug("wizardFixPage Redirect Application.index");
-                Application.index();
-            }
-        } else {
-            if (!(request.controller.equalsIgnoreCase(neededController))) {
-                Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
-                redirect(Router.getFullUrl(neededController + "." + neededAction));
-            }
-        }
+        wizardFixPageInt();
     }
 
     static public class FormDataContent extends FormCurrency {
@@ -113,29 +91,27 @@ public class EnvelopeDepositController extends CounterController {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
             }
             params.flash(); // add http parameters to the flash scope
-        } else {
-            if (formData != null) {
-                LgEnvelope e = new LgEnvelope(0, formData.envelopeCode);
-                if (formData.cashData.amount > 0) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.CASH, formData.cashData.amount, formData.cashData.currency.numericId));
-                }
-                if (formData.checkData.amount > 0) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.CHECKS, formData.checkData.amount, formData.checkData.currency.numericId));
-                }
-                if (formData.ticketData.amount > 0) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.TICKETS, formData.ticketData.amount, formData.ticketData.currency.numericId));
-                }
-                if (formData.hasDocuments != null && formData.hasDocuments) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.DOCUMENTS, null, null));
-                }
-                if (formData.hasOthers != null && formData.hasOthers) {
-                    e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
-                }
-
-                EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
-                ModelFacade.startAction(currentAction);
-                mainLoop();
+        } else if (formData != null) {
+            LgEnvelope e = new LgEnvelope(0, formData.envelopeCode);
+            if (formData.cashData.amount > 0) {
+                e.addContent(new LgEnvelopeContent(EnvelopeContentType.CASH, formData.cashData.amount, formData.cashData.currency.numericId));
             }
+            if (formData.checkData.amount > 0) {
+                e.addContent(new LgEnvelopeContent(EnvelopeContentType.CHECKS, formData.checkData.amount, formData.checkData.currency.numericId));
+            }
+            if (formData.ticketData.amount > 0) {
+                e.addContent(new LgEnvelopeContent(EnvelopeContentType.TICKETS, formData.ticketData.amount, formData.ticketData.currency.numericId));
+            }
+            if (formData.hasDocuments != null && formData.hasDocuments) {
+                e.addContent(new LgEnvelopeContent(EnvelopeContentType.DOCUMENTS, null, null));
+            }
+            if (formData.hasOthers != null && formData.hasOthers) {
+                e.addContent(new LgEnvelopeContent(EnvelopeContentType.OTHERS, null, null));
+            }
+
+            EnvelopeDepositAction currentAction = new EnvelopeDepositAction((DepositUserCodeReference) formData.reference1.lov, formData.reference2, e, formData);
+            ModelFacade.startAction(currentAction);
+            mainLoop();
         }
         if (formData == null) {
             formData = new FormData();
@@ -197,6 +173,7 @@ public class EnvelopeDepositController extends CounterController {
             Application.index();
             return;
         }
+        renderArgs.put("can_continue", Configuration.envelopeDepositCanContinueOnFinish());
         renderArgs.put("clientCode", Configuration.getClientDescription());
         renderArgs.put("user", Secure.getCurrentUser());
         renderArgs.put("providerCode", Configuration.getProviderDescription());

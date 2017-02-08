@@ -2,7 +2,6 @@ package models.actions.states;
 
 import devices.glory.manager.ManagerInterface.ManagerStatus;
 import devices.ioboard.IoBoard;
-import models.Configuration;
 import models.actions.TimeoutTimer;
 import models.actions.UserAction.StateApi;
 import models.db.LgDeposit;

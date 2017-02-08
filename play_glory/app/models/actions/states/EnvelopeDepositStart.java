@@ -39,7 +39,6 @@ public class EnvelopeDepositStart extends ActionState {
             case PUT_THE_ENVELOPE_IN_THE_ESCROW:
                 stateApi.setState(new EnvelopeDepositReadyToStore(stateApi));
                 break;
-            case NEUTRAL:
             case CANCELING:
                 stateApi.setState(new Canceling(stateApi));
                 break;
@@ -48,6 +47,10 @@ public class EnvelopeDepositStart extends ActionState {
                 break;
             case JAM:
                 stateApi.setError(ModelError.ERROR_CODE.ESCROW_JAMED, "Escrow jamed");
+                break;
+            case NEUTRAL:
+            case REMOVE_THE_BILLS_FROM_HOPER:
+                // just wait.
                 break;
             default:
                 Logger.debug("EnvelopeDepositStart onGloryEvent invalid state %s %s", m.name(), name());

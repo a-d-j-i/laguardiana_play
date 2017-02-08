@@ -7,20 +7,20 @@
         <div class="contenido">
             <!-- datos del deposito -->
             #{if ( wasStored ) }
-                <div class="mensaje"><span>&{ 'summary.ticket' }</span></div>
-                <h2>&{ 'application.thanks', providerCode }</h2>
-                #{if ( formData.showReference1 ) }
-                    <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
-                #{/if}
-                #{if ( formData.showReference2 && formData.reference2 != "" ) }
-                    <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
-                #{/if}
-                <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.description}</p>
+            <div class="mensaje"><span>&{ 'summary.ticket' }</span></div>
+            <h2>&{ 'application.thanks', providerCode }</h2>
+            #{if ( formData.showReference1 ) }
+            <p>&{ 'counting_page.reference1_title' }: ${formData.reference1.lov}</p>
+            #{/if}
+            #{if ( formData.showReference2 && formData.reference2 != "" ) }
+            <p>&{ 'counting_page.reference2_title' }: ${formData.reference2}</p>
+            #{/if}
+            <p>&{ 'summary.total' }: ${depositTotal} ${formData.currency.currency.description}</p>
             #{/if}
             #{else }
-                <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled' }</span></div>
-                <h2>&{ 'application.thanks', providerCode }</h2>
-                &{ 'counting_page.deposit_canceled' }
+            <div class="mensaje" style='color:red;'><span>&{ 'counting_page.deposit_canceled' }</span></div>
+            <h2>&{ 'application.thanks', providerCode }</h2>
+            &{ 'counting_page.deposit_canceled' }
             #{/else}
             <!-- /datos del deposito -->
         </div>
@@ -29,7 +29,9 @@
             <ul class="columns">
                 <li class="fixed column" style="width: 50%">
                     <div class="columna">
+                        #{if ( can_continue ) }
                         <a href="@{Application.index()}" class="boton full_width gris">&{ 'application.continue' }</a>
+                        #{/if}
                     </div>
                 </li>
                 <li class="fixed column" style="width: 50%">
@@ -50,8 +52,9 @@
 <script type="text/javascript" charset="${_response_encoding}">
     function done() {
         window.location.href = "@{Secure.logout()}";
-    };
-    setTimeout(done,  ${play.configuration['finish_screen.timeout']});
+    }
+    ;
+            setTimeout(done, ${play.configuration['finish_screen.timeout']});
 
 </script>
 #{/set}

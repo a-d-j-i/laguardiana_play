@@ -12,6 +12,11 @@
     value:  "false"
     editType: BOOLEAN
     
+  db.LgSystemProperty(billDepositCanContinueOnFinish):
+    name:  "bill_deposit.can_continue_on_finish"
+    value:  "false"
+    editType: BOOLEAN
+    
   db.LgSystemProperty(envelopeDepositShowReference1):
     name:  "envelope_deposit.show_reference1"
     value:  "false"
@@ -19,6 +24,11 @@
     
   db.LgSystemProperty(envelopeDepositShowReference2):
     name:  "envelope_deposit.show_reference2"
+    value:  "false"
+    editType: BOOLEAN
+    
+  db.LgSystemProperty(envelopeDepositCanContinueOnFinish):
+    name:  "envelope_deposit.can_continue_on_finish"
     value:  "false"
     editType: BOOLEAN
     

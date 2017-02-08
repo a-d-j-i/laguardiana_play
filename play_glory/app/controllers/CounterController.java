@@ -24,27 +24,30 @@ import play.mvc.With;
 @With({Secure.class})
 public class CounterController extends Controller {
 
-    @Before
-    static void basicPropertiesAndFixWizard() throws Throwable {
+    protected static void wizardFixPageInt() {
+        //refresh session cache
+        if (ModelFacade.isLocked()) {
+            if (!request.isAjax()) {
+                CountController.counterError(null);
+            }
+        }
         if (request.isAjax()) {
             return;
         }
-        String neededController = ModelFacade.getNeededController();
-        if (neededController == null) {
-            return;
-        }
         String neededAction = ModelFacade.getNeededAction();
-        Logger.debug("Needed action : %s  Needed controller : %s", neededAction, neededController);
-        if (neededAction == null) {
-            return;
-        }
-        if (neededAction.equalsIgnoreCase("counterError")) {
-            neededController = "CounterController";
-        }
-        if (!request.controller.equalsIgnoreCase(neededController)
-                || !request.actionMethod.equalsIgnoreCase(neededAction)) {
-            Logger.debug("basicPropertiesAndFixWizard REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
-            redirect(Router.getFullUrl(neededController + "." + neededAction));
+        String neededController = ModelFacade.getNeededController();
+        if (neededAction == null || neededController == null) {
+            if (!request.actionMethod.equalsIgnoreCase("start")) {
+                Logger.debug("wizardFixPage Redirect Application.index");
+                Application.index();
+            }
+        } else if (!(request.controller.equalsIgnoreCase(neededController))) {
+            Logger.debug("wizardFixPage REDIRECT TO neededController %s : neededAction %s", neededController, neededAction);
+            String dest = neededController + "." + neededAction;
+            //boolean perm = Secure.checkPermission(dest, "GET");
+            //if (!perm) {
+            //}
+            redirect(Router.getFullUrl(dest));
         }
     }
 
