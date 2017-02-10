@@ -1,5 +1,6 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
 <center><img src="../public/images/${play.configuration['style.plogo']}"></center>
+#{print_num_tag copyNum: copyNum, copies: copies, printTktNum: printTktNum /}
 <br/>
 Contenido actual de la maquina<br/>
 en la bolsa ${ bag.bagId }, colocada el ${ bag.creationDate.format('dd/MM/yyyy HH:mm:ss') }<br/>

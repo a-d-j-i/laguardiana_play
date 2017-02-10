@@ -236,8 +236,8 @@ public class IoBoard {
                     if (bagAproved) {
                         Logger.debug("IOBOARD BAG APROVE CONFIRM");
                         bagAproveState = BAG_APROVE_STATE.BAG_APROVE_CONFIRM;
-                        setChanged();
                     }
+                    setChanged();
                     break;
                 case BAG_APROVE_CONFIRM:
                 case BAG_NOT_APROVED:
@@ -401,10 +401,8 @@ public class IoBoard {
                         } else {
                             state.setError(new IoBoardError(IoBoardError.ERROR_CODE.IOBOARD_FW_ERROR, l));
                         }
-                    } else {
-                        if (l.length() > 0) {
-                            Logger.warn("IOBOARD Ignoring line (%d): %s", l.length(), l);
-                        }
+                    } else if (l.length() > 0) {
+                        Logger.warn("IOBOARD Ignoring line (%d): %s", l.length(), l);
                     }
                 } catch (Exception ex) {
                     if (!(ex.getCause() instanceof TimeoutException)) {

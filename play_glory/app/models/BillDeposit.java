@@ -108,7 +108,9 @@ public class BillDeposit extends LgDeposit {
         if (reprint) {
             args.put("reprint", "true");
         }
-        ModelFacade.print("PrinterController/billDeposit.html", args, Configuration.getPrintWidth(), Configuration.getBillDepositPrintLen());
+        ModelFacade.print("PrinterController/billDeposit.html", args,
+                Configuration.getPrintWidth(), Configuration.getBillDepositPrintLen(),
+                Configuration.isBillDepositPrintTktNum(), Configuration.getBillDepositPrintCopies());
     }
 
     @Override

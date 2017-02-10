@@ -44,7 +44,9 @@ public class EnvelopeDeposit extends LgDeposit {
         if (reprint) {
             args.put("reprint", "true");
         }
-        ModelFacade.print("PrinterController/envelopeDeposit_finish.html", args, Configuration.getPrintWidth(), Configuration.getEvelopeFinishPrintLen());
+        ModelFacade.print("PrinterController/envelopeDeposit_finish.html", args,
+                Configuration.getPrintWidth(), Configuration.getEvelopeFinishPrintLen(),
+                Configuration.isEnvelopeDepositPrintTktNum(), Configuration.getEnvelopeDepositPrintCopies());
     }
 
     // Merge somehow with print...
@@ -54,7 +56,9 @@ public class EnvelopeDeposit extends LgDeposit {
         //List<DepositUserCodeReference> referenceCodes = DepositUserCodeReference.findAll();
         //List<Currency> currencies = Currency.findAll();
         setRenderArgs(args);
-        ModelFacade.print("PrinterController/envelopeDeposit_start.html", args, Configuration.getPrintWidth(), Configuration.getEvenlopeStartPrintLen());
+        ModelFacade.print("PrinterController/envelopeDeposit_start.html", args,
+                Configuration.getPrintWidth(), Configuration.getEvenlopeStartPrintLen(),
+                Configuration.isEnvelopeDepositPrintTktNum(), Configuration.getEnvelopeDepositPrintCopies());
     }
 
     @Override

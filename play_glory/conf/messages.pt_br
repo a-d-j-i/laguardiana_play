@@ -143,6 +143,11 @@ summary.machine_code=Terminal
 summary.reprint=Re-impresão
 summary.original=Original
 summary.copy=Copia
+summary.duplicate=Duplicado
+summary.triplicate=Triplicado
+summary.quadruplicate=Cuadruplicado
+summary.quintuplicate=Quintuplicado
+
 
 envelope_deposit.select_contents=Selecione os conteúdos do envelope
 envelope_deposit.contents=Conteúdos do envelope

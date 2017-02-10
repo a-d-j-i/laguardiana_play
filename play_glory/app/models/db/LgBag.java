@@ -130,22 +130,22 @@ public class LgBag extends GenericModel implements java.io.Serializable {
             Logger.error("There's no bag where to deposit, creating one!!");
             BagEvent.save(null, "There is no bag to deposit creating one");
             currentBag = new LgBag("AUTOMATIC_BY_APP");
+            // todo: review, check the withdrawBag->byIoBoard.
+            currentBag.placementDate = new Date();
             currentBag.save();
             JPA.em().getTransaction().commit();
-        } else {
-            if (bags.size() > 1) {
-                Iterator<LgBag> i = bags.iterator();
-                currentBag = i.next();
-                while (i.hasNext()) {
-                    LgBag toClose = i.next();
-                    toClose.withdrawDate = new Date();
-                    toClose.save();
-                    Logger.error("There are more than one open bag, closing the bag %d", toClose.bagId);
-                    BagEvent.save(toClose, String.format("There are more than one open bag, closing the bag %d", toClose.bagId));
-                }
-            } else {
-                currentBag = bags.get(0);
+        } else if (bags.size() > 1) {
+            Iterator<LgBag> i = bags.iterator();
+            currentBag = i.next();
+            while (i.hasNext()) {
+                LgBag toClose = i.next();
+                toClose.withdrawDate = new Date();
+                toClose.save();
+                Logger.error("There are more than one open bag, closing the bag %d", toClose.bagId);
+                BagEvent.save(toClose, String.format("There are more than one open bag, closing the bag %d", toClose.bagId));
             }
+        } else {
+            currentBag = bags.get(0);
         }
         if (currentBag == null) {
             Logger.error("APP ERROR bag = null");
@@ -180,7 +180,7 @@ public class LgBag extends GenericModel implements java.io.Serializable {
             if ((byIoBoard && Configuration.isPrintOnBagAutoRotate())
                     || (!byIoBoard && Configuration.isPrintOnBagManualRotate())) {
                 Logger.debug("PRINTING BAG %d", bagId);
-                print(false);
+                print(false, Configuration.isBagPrintTktNum(), Configuration.getBagPrintCopies());
             }
         } else {
             Logger.warn("this bag (%s) is empty so I'm going to reuse it", bagId.toString());
@@ -248,13 +248,15 @@ public class LgBag extends GenericModel implements java.io.Serializable {
         args.put("totals", getTotals());
     }
 
-    public void print(boolean reprint) {
+    public void print(boolean reprint, boolean isPrintTktNum, int copies) {
         Map args = new HashMap();
         // Print the ticket.
         setRenderArgs(args);
         if (reprint) {
             args.put("reprint", "true");
         }
-        ModelFacade.print("ReportBagController/print.html", args, Configuration.getPrintWidth(), Configuration.getBagPrintLen());
+        ModelFacade.print("ReportBagController/print.html", args,
+                Configuration.getPrintWidth(), Configuration.getBagPrintLen(),
+                isPrintTktNum, copies);
     }
 }

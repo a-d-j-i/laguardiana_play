@@ -63,7 +63,7 @@ public class PrinterController extends Controller {
 
     public static void test(String printer) {
         try {
-            ModelFacade.print(printer, "PrinterController/test.html", renderArgs.data, 77, 30);
+            ModelFacade.print(printer, "PrinterController/test.html", renderArgs.data, 77, 30, false, 1);
         } catch (Throwable ex) {
             Logger.error("ERROR PRINTING : %s %s %s", ex, ex.getMessage(), ex.getCause());
         }

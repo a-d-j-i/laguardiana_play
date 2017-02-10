@@ -58,7 +58,7 @@ public class ReportBagController extends Controller {
         } else {
             b = LgBag.findById(id);
         }
-        b.print(true);
+        b.print(true, false, 1);
         list(page, startDate, endDate);
     }
 
@@ -69,7 +69,7 @@ public class ReportBagController extends Controller {
 
     public static void print() {
         LgBag currentBag = LgBag.getCurrentBag();
-        currentBag.print(false);
+        currentBag.print(false, false, 1);
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentBag.bagId);
     }

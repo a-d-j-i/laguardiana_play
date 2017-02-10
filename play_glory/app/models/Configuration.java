@@ -16,6 +16,7 @@ import play.Play;
  */
 public class Configuration {
 
+    final public static int MAX_PRINT_COPIES = 5;
     final public static int EXTERNAL_APP_ID = 2;
 
     public static boolean isPrinterTest() {
@@ -99,7 +100,7 @@ public class Configuration {
     }
 
     public static Object billDepositCanContinueOnFinish() {
-        return isProperty("bill_deposit.can_continue_on_finish");
+        return isSystemProperty("bill_deposit.can_continue_on_finish");
     }
 
     public static Boolean mustShowEnvelopeDepositReference1() {
@@ -111,7 +112,7 @@ public class Configuration {
     }
 
     public static Object envelopeDepositCanContinueOnFinish() {
-        return isProperty("envelope_deposit.can_continue_on_finish");
+        return isSystemProperty("envelope_deposit.can_continue_on_finish");
     }
 
     public static String getClientCode() {
@@ -189,6 +190,14 @@ public class Configuration {
         }
     }
 
+    public static boolean isBagPrintTktNum() {
+        return isSystemProperty("print.bag_print_tkt_num");
+    }
+
+    public static int getBagPrintCopies() {
+        return getLimitedNum("print.bag_copies", 1, MAX_PRINT_COPIES, 1);
+    }
+
     public static int getZPrintLen() {
         try {
             return Integer.parseInt(getSystemProperty("print.minZLen"));
@@ -197,12 +206,28 @@ public class Configuration {
         }
     }
 
+    public static boolean isZPrintTktNum() {
+        return isSystemProperty("print.z_print_tkt_num");
+    }
+
+    public static int getZPrintCopies() {
+        return getLimitedNum("print.z_copies", 1, MAX_PRINT_COPIES, 1);
+    }
+
     static int getBillDepositPrintLen() {
         try {
             return Integer.parseInt(getSystemProperty("print.minBillDepositLen"));
         } catch (NumberFormatException e) {
             return 0;
         }
+    }
+
+    public static boolean isBillDepositPrintTktNum() {
+        return isSystemProperty("print.bill_deposit_print_tkt_num");
+    }
+
+    public static int getBillDepositPrintCopies() {
+        return getLimitedNum("print.bill_deposit_copies", 1, MAX_PRINT_COPIES, 1);
     }
 
     static int getEvelopeFinishPrintLen() {
@@ -219,6 +244,14 @@ public class Configuration {
         } catch (NumberFormatException e) {
             return 0;
         }
+    }
+
+    public static boolean isEnvelopeDepositPrintTktNum() {
+        return isSystemProperty("print.envelope_deposit_print_tkt_num");
+    }
+
+    public static int getEnvelopeDepositPrintCopies() {
+        return getLimitedNum("print.envelope_copies", 1, MAX_PRINT_COPIES, 1);
     }
 
     public static int getPrintWidth() {
@@ -327,6 +360,21 @@ public class Configuration {
             }
         }
         return false;
+    }
+
+    private static int getLimitedNum(String property, int min, int max, int def) {
+        int ret = def;
+        try {
+            ret = Integer.parseInt(getSystemProperty(property));
+            if (ret < min) {
+                ret = def;
+            }
+            if (ret > max) {
+                ret = max;
+            }
+        } catch (NumberFormatException e) {
+        }
+        return ret;
     }
 
 }

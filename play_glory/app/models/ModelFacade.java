@@ -186,7 +186,8 @@ public class ModelFacade {
             }
             Logger.debug("BAG STATUS : %s", status.toString());
 //            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE || status.getBagAproveState() != IoBoard.BAG_APROVE_STATE.BAG_APROVED) {
-            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
+            if (status.getBagState() != IoBoard.BAG_STATE.BAG_STATE_INPLACE
+                    || status.getBagAproveState() == IoBoard.BAG_APROVE_STATE.BAG_NOT_APROVED) {
                 // if bag not in place rotate current bag.
                 ModelFacade.withdrawBag(true);
             }
@@ -393,7 +394,9 @@ public class ModelFacade {
     synchronized public static void finishAction() {
         if (currentUserAction != null && currentUser != null) {
             ActionEvent.save(currentUserAction, "Finish", getNeededController());
-
+            if (!currentUserAction.canFinishAction()) {
+                Logger.debug("CALLED FINISH ACTION BUT CAN FINISH " + currentUserAction.toString());
+            }
             if (currentUserAction.canFinishAction() || modelError.isError()) {
                 currentUserAction.finish();
                 currentUserAction = null;
@@ -643,9 +646,9 @@ public class ModelFacade {
             //modelError.setError(ModelError.ERROR_CODE.BAG_NOT_INPLACE, "bag not in place");
             bag_removed = true;
         }
-        return new IoBoardCondition(false, bag_removed, 
-                Configuration.isReadyGate1(status.getGateState()), 
-                Configuration.isReadyGate2(status.getGateState()), 
+        return new IoBoardCondition(false, bag_removed,
+                Configuration.isReadyGate1(status.getGateState()),
+                Configuration.isReadyGate2(status.getGateState()),
                 Configuration.isReadyGateDoor(status.getGateState()));
     }
 
@@ -743,11 +746,11 @@ public class ModelFacade {
         return p.needCheck();
     }
 
-    public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
-        print(null, templateName, args, paperWidth, paperLen);
+    public static void print(String templateName, Map<String, Object> args, int paperWidth, int paperLen, boolean printTktNum, int copies) {
+        print(null, templateName, args, paperWidth, paperLen, printTktNum, copies);
     }
 
-    public static void print(String prt, String templateName, Map<String, Object> args, int paperWidth, int paperLen) {
+    public static void print(String prt, String templateName, Map<String, Object> args, int paperWidth, int paperLen, boolean printTktNum, int copies) {
         if (prt == null) {
             prt = Configuration.getDefaultPrinter();
             if (prt == null) {
@@ -762,7 +765,7 @@ public class ModelFacade {
             return;
         }
         Printer pp = DeviceFactory.getPrinter(prt);
-        pp.print(templateName, args, paperWidth, paperLen);
+        pp.print(templateName, args, paperWidth, paperLen, printTktNum, copies);
         if (pp != printer.get()) {
             //pp.close();
         }

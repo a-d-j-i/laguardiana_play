@@ -1,5 +1,6 @@
 #{extends 'PrinterController/ticket_160mm.html' /}
 <center><img src="../public/images/${play.configuration['style.plogo']}"></center>
+#{print_num_tag copyNum: copyNum, copies: copies, printTktNum: printTktNum /}
 <h3 style="margin-left: -30; text-align: justify; width: 70%; font-weight: bold;">
     &{ 'application.thanks', providerCode }
 </h3>

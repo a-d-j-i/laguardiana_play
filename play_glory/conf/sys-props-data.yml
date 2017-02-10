@@ -169,3 +169,40 @@
     editType: BOOLEAN
  
      
+     
+  db.LgSystemProperty(isBillDepositPrintTktNum):
+    name: "print.bill_deposit_print_tkt_num"
+    value:  "false"
+    editType: BOOLEAN
+  db.LgSystemProperty(billDepositCopies):
+    name:  "print.bill_deposit_copies"
+    value:  "1"
+    editType: INTEGER
+
+
+  db.LgSystemProperty(isEnvelopeDepositPrintTktNum):
+    name: "print.envelope_deposit_print_tkt_num"
+    value:  "false"
+    editType: BOOLEAN
+  db.LgSystemProperty(envelopeDepositCopies):
+    name:  "print.envelope_deposit_copies"
+    value:  "1"
+    editType: INTEGER
+
+  db.LgSystemProperty(isBagPrintTktNum):
+    name: "print.bag_print_tkt_num"
+    value:  "false"
+    editType: BOOLEAN
+  db.LgSystemProperty(BagCopies):
+    name:  "print.bag_copies"
+    value:  "1"
+    editType: INTEGER
+
+  db.LgSystemProperty(isZPrintTktNum):
+    name: "print.z_print_tkt_num"
+    value:  "false"
+    editType: BOOLEAN
+  db.LgSystemProperty(ZCopies):
+    name:  "print.z_copies"
+    value:  "1"
+    editType: INTEGER

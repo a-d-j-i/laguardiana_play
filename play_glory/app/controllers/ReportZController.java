@@ -69,16 +69,19 @@ public class ReportZController extends Controller {
         }
         setRenderArgs(z);
         renderArgs.put("reprint", "true");
-        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
+        ModelFacade.print("ReportZController/print.html", renderArgs.data,
+                Configuration.getPrintWidth(), Configuration.getZPrintLen(),
+                false, 1);
         list(page, startDate, endDate);
     }
 
     public static void rotateZ() {
         LgZ currentZ = LgZ.rotateZ();
         setRenderArgs(currentZ);
-        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
-        renderArgs.put("copy", "copy");
-        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
+        ModelFacade.print("ReportZController/print.html", renderArgs.data,
+                Configuration.getPrintWidth(), Configuration.getZPrintLen(),
+                Configuration.isZPrintTktNum(), Configuration.getZPrintCopies()
+        );
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentZ.zId);
     }
@@ -86,7 +89,9 @@ public class ReportZController extends Controller {
     public static void print() {
         LgZ currentZ = LgZ.getCurrentZ();
         setRenderArgs(currentZ);
-        ModelFacade.print("ReportZController/print.html", renderArgs.data, Configuration.getPrintWidth(), Configuration.getZPrintLen());
+        ModelFacade.print("ReportZController/print.html", renderArgs.data,
+                Configuration.getPrintWidth(), Configuration.getZPrintLen(),
+                false, 1);
         flash.put("backUrl", Router.reverse("MenuController.AccountingMenu"));
         detail(currentZ.zId);
     }

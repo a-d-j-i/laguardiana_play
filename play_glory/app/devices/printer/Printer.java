@@ -370,7 +370,7 @@ public class Printer extends Observable {
 
     }
 
-    public void print(String templateName, Map<String, Object> args, int desiredPaperWidth, int desiredPaperHeight) {
+    public void print(String templateName, Map<String, Object> args, int desiredPaperWidth, int desiredPaperHeight, boolean printTktNum, int copies) {
 
         if (!Configuration.isPrinterTest()) {
             if (port == null || !printers.containsKey(port)) {
@@ -397,146 +397,151 @@ public class Printer extends Observable {
         if (template == null) {
             state.setError(new PrinterError(PrinterError.ERROR_CODE.TEMPLATE_NOT_FOUND, String.format("Template %s not found", templateName)));
         }
-        args.put("currentDate", new Date());
-        String body = template.render(args);
-        //Logger.debug("PRINT : %s", body);
+        for (int i = 0; i < copies; i++) {
+            args.put("currentDate", new Date());
+            args.put("copies", copies);
+            args.put("printTktNum", printTktNum);
+            args.put("copyNum", i + 1);
+            String body = template.render(args);
+            //Logger.debug("PRINT : %s", body);
 
-        HTMLEditorKit kit = new HTMLEditorKit() {
-            // TODO: Test this.
-            @Override
-            public StyleSheet getStyleSheet() {
-                return super.getStyleSheet();
-            }
+            HTMLEditorKit kit = new HTMLEditorKit() {
+                // TODO: Test this.
+                @Override
+                public StyleSheet getStyleSheet() {
+                    return super.getStyleSheet();
+                }
 
-            @Override
-            public ViewFactory getViewFactory() {
-                return new HTMLFactory() {
-                    @Override
-                    public View create(Element elem) {
-                        View v = super.create(elem);
-                        if ((v != null) && (v instanceof ImageView)) {
-                            ((ImageView) v).setLoadsSynchronously(true);
+                @Override
+                public ViewFactory getViewFactory() {
+                    return new HTMLFactory() {
+                        @Override
+                        public View create(Element elem) {
+                            View v = super.create(elem);
+                            if ((v != null) && (v instanceof ImageView)) {
+                                ((ImageView) v).setLoadsSynchronously(true);
+                            }
+                            return v;
                         }
-                        return v;
-                    }
-                };
-            }
-        };
-        HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
-        try {
-            URI u;
+                    };
+                }
+            };
+            HTMLDocument doc = (HTMLDocument) (kit.createDefaultDocument());
             try {
-                u = new URI(Play.applicationPath.toURI() + "/PrinterController");
-            } catch (URISyntaxException ex) {
-                u = Play.applicationPath.toURI();
+                URI u;
+                try {
+                    u = new URI(Play.applicationPath.toURI() + "/PrinterController");
+                } catch (URISyntaxException ex) {
+                    u = Play.applicationPath.toURI();
+                }
+                //Logger.debug(u.toString());
+                doc.setBase(u.toURL());
+                Reader fin = new StringReader(body);
+                kit.read(fin, doc, 0);
+                fin.close();
+            } catch (IOException ex) {
+                state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "IOException : " + ex.toString()));
+            } catch (BadLocationException ex) {
+                state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "BadLocationException : " + ex.toString()));
             }
-            //Logger.debug(u.toString());
-            doc.setBase(u.toURL());
-            Reader fin = new StringReader(body);
-            kit.read(fin, doc, 0);
-            fin.close();
-        } catch (IOException ex) {
-            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "IOException : " + ex.toString()));
-        } catch (BadLocationException ex) {
-            state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "BadLocationException : " + ex.toString()));
-        }
 
-        final JEditorPane editor = new JEditorPane();
-        editor.setEditorKit(kit);
-        editor.setDocument(doc);
-        editor.setEditable(false);
+            final JEditorPane editor = new JEditorPane();
+            editor.setEditorKit(kit);
+            editor.setDocument(doc);
+            editor.setEditable(false);
 
-        Point po = editor.getLocation();
-        Dimension d = editor.getSize();
-        Logger.debug("EDITOR POSITION %f %f, EDITOR SIZE %f %f", po.getX(), po.getY(), d.getWidth(), d.getHeight());
-        try {
-            Paper pp = new Paper();
-            pp.setSize(1, 1);
-            pp.setImageableArea(0, 0, 1, 1);
-            PageFormat pageFormat = new PageFormat();
-            pageFormat.setPaper(pp);
-            VirtualGraphics vg = new VirtualGraphics();
-            editor.getPrintable(null, null).print(vg, pageFormat, 0);
-            Logger.debug("VirtualGraphics RESULT : %f %f, desired %f %f [mm]",
-                    vg.getWidthLimit() / MM, vg.getHeightLimit() / MM, paperWidth / MM, paperHeight / MM);
-            // I have a huge ticket, adjust tu calculated size
-            paperHeight = Math.max(paperHeight, vg.getHeightLimit());
-            paperWidth = Math.max(paperWidth, vg.getWidthLimit());
-        } catch (PrinterException ex) {
-            Logger.debug("Exception %s", ex);
-        }
-
-        Paper prePaper = new Paper();
-        prePaper.setSize(paperWidth, paperHeight);
-        prePaper.setImageableArea(0, 0, paperWidth, paperHeight);
-        PageFormat prePageFormat = new PageFormat();
-        prePageFormat.setPaper(prePaper);
-        printPageFormat("PRE VALIDATE", prePageFormat);
-        PageFormat postPageFormat = new PageFormat();
-        try {
-            java.awt.print.PrinterJob pj = java.awt.print.PrinterJob.getPrinterJob();
-            pj.setPrintService(p);
-            postPageFormat = pj.validatePage(prePageFormat);
-        } catch (PrinterException ex) {
-            Logger.error(ex.toString());
-        }
-        printPageFormat("POS VALIDATE", postPageFormat);
-
-        // Leave some fixed margin.
-        double desiredX = postPageFormat.getImageableWidth();
-        if (desiredPaperWidth > 0) {
-            desiredX = Math.min(desiredPaperWidth * MM, postPageFormat.getImageableWidth());
-        }
-        double desiredY = Math.max(desiredPaperHeight * MM, postPageFormat.getImageableHeight());
-        final double scalex = desiredX / prePageFormat.getImageableWidth() / 1.2;
-        final double scaley = desiredY / prePageFormat.getImageableHeight() / 1.1;
-        Logger.debug("CALCULATED SCALE %f %f, DESIRED %f %f", scalex, scaley, desiredX / MM, desiredY / MM);
-
-        //        EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
-        if (!Configuration.isPrinterTest()) {
+            Point po = editor.getLocation();
+            Dimension d = editor.getSize();
+            Logger.debug("EDITOR POSITION %f %f, EDITOR SIZE %f %f", po.getX(), po.getY(), d.getWidth(), d.getHeight());
             try {
-                Book book = new Book();
-                //                book.append(pnl, pageFormat);
-                book.append(new Printable() {
-                    //Printable p = editor.getPrintable(null, null);
+                Paper pp = new Paper();
+                pp.setSize(1, 1);
+                pp.setImageableArea(0, 0, 1, 1);
+                PageFormat pageFormat = new PageFormat();
+                pageFormat.setPaper(pp);
+                VirtualGraphics vg = new VirtualGraphics();
+                editor.getPrintable(null, null).print(vg, pageFormat, 0);
+                Logger.debug("VirtualGraphics RESULT : %f %f, desired %f %f [mm]",
+                        vg.getWidthLimit() / MM, vg.getHeightLimit() / MM, paperWidth / MM, paperHeight / MM);
+                // I have a huge ticket, adjust tu calculated size
+                paperHeight = Math.max(paperHeight, vg.getHeightLimit());
+                paperWidth = Math.max(paperWidth, vg.getWidthLimit());
+            } catch (PrinterException ex) {
+                Logger.debug("Exception %s", ex);
+            }
 
-                    public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-                        if (pageIndex >= 1) {
-                            return Printable.NO_SUCH_PAGE;
+            Paper prePaper = new Paper();
+            prePaper.setSize(paperWidth, paperHeight);
+            prePaper.setImageableArea(0, 0, paperWidth, paperHeight);
+            PageFormat prePageFormat = new PageFormat();
+            prePageFormat.setPaper(prePaper);
+            printPageFormat("PRE VALIDATE", prePageFormat);
+            PageFormat postPageFormat = new PageFormat();
+            try {
+                java.awt.print.PrinterJob pj = java.awt.print.PrinterJob.getPrinterJob();
+                pj.setPrintService(p);
+                postPageFormat = pj.validatePage(prePageFormat);
+            } catch (PrinterException ex) {
+                Logger.error(ex.toString());
+            }
+            printPageFormat("POS VALIDATE", postPageFormat);
+
+            // Leave some fixed margin.
+            double desiredX = postPageFormat.getImageableWidth();
+            if (desiredPaperWidth > 0) {
+                desiredX = Math.min(desiredPaperWidth * MM, postPageFormat.getImageableWidth());
+            }
+            double desiredY = Math.max(desiredPaperHeight * MM, postPageFormat.getImageableHeight());
+            final double scalex = desiredX / prePageFormat.getImageableWidth() / 1.2;
+            final double scaley = desiredY / prePageFormat.getImageableHeight() / 1.1;
+            Logger.debug("CALCULATED SCALE %f %f, DESIRED %f %f", scalex, scaley, desiredX / MM, desiredY / MM);
+
+            //        EditorPanePrinter pnl = new EditorPanePrinter(item, pp, new Insets(0, 0, 0, 0));
+            if (!Configuration.isPrinterTest()) {
+                try {
+                    Book book = new Book();
+                    //                book.append(pnl, pageFormat);
+                    book.append(new Printable() {
+                        //Printable p = editor.getPrintable(null, null);
+
+                        public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+                            if (pageIndex >= 1) {
+                                return Printable.NO_SUCH_PAGE;
+                            }
+
+                            Graphics2D g2d = (Graphics2D) graphics;
+                            g2d.scale(scalex, scaley);
+                            g2d.translate((int) pageFormat.getImageableX(), (int) pageFormat.getImageableY());
+                            editor.setLocation(0, 0);
+                            editor.setSize((int) pageFormat.getImageableWidth(), (int) pageFormat.getImageableHeight());
+                            editor.printAll(g2d);
+                            return Printable.PAGE_EXISTS;
+                            //return p.print(g2d, pageFormat, pageIndex);
                         }
+                    }, postPageFormat);
 
-                        Graphics2D g2d = (Graphics2D) graphics;
-                        g2d.scale(scalex, scaley);
-                        g2d.translate((int) pageFormat.getImageableX(), (int) pageFormat.getImageableY());
-                        editor.setLocation(0, 0);
-                        editor.setSize((int) pageFormat.getImageableWidth(), (int) pageFormat.getImageableHeight());
-                        editor.printAll(g2d);
-                        return Printable.PAGE_EXISTS;
-                        //return p.print(g2d, pageFormat, pageIndex);
-                    }
-                }, postPageFormat);
+                    Doc docc = new SimpleDoc(book, DocFlavor.SERVICE_FORMATTED.PAGEABLE, null);
+                    state.setState(PRINTER_STATE.PRINTER_PRINTING, "Printing");
 
-                Doc docc = new SimpleDoc(book, DocFlavor.SERVICE_FORMATTED.PAGEABLE, null);
-                state.setState(PRINTER_STATE.PRINTER_PRINTING, "Printing");
+                    DocPrintJob printJob = p.createPrintJob();
 
-                DocPrintJob printJob = p.createPrintJob();
+                    printJob.addPrintJobListener(new MyPrintJobListener());
+                    printJob.print(docc, null);
+                } catch (PrintException ex) {
+                    state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
+                }
+            } else {
+                JFrame frame = new JFrame("Main print frame");
+                //            pnl.setBackground(Color.black);
+                //            frame.add(pnl);
+                //to check the size: frame.setSize((int) paperWidth, (int) paperHeight);
+                frame.setBackground(Color.black);
+                frame.add(editor);
 
-                printJob.addPrintJobListener(new MyPrintJobListener());
-                printJob.print(docc, null);
-            } catch (PrintException ex) {
-                state.setError(new PrinterError(PrinterError.ERROR_CODE.IO_EXCEPTION, "PrintException : " + ex.toString()));
+                //frame.getContentPane().add(item);
+                frame.pack();
+                frame.setVisible(true);
             }
-        } else {
-            JFrame frame = new JFrame("Main print frame");
-            //            pnl.setBackground(Color.black);
-            //            frame.add(pnl);
-            //to check the size: frame.setSize((int) paperWidth, (int) paperHeight);
-            frame.setBackground(Color.black);
-            frame.add(editor);
-
-            //frame.getContentPane().add(item);
-            frame.pack();
-            frame.setVisible(true);
         }
     }
 

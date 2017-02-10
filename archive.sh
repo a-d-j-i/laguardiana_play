@@ -29,6 +29,8 @@ function archive {
     popd 
 
     pushd $PDIR
+    play clean
+    play dependencies
     play war -o "$TMP_DIR" --exclude "TODO:d.sh:build.xml:archive.sh:launcher.py:PlayRunner.jar:docs:app/bootstrap:app/controllers:app/devices:app/machines:app/models:app/validation:logs:nbproject:test:tmp:dist"
     popd
 

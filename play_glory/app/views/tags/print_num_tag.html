@@ -1,0 +1,16 @@
+#{if _printTktNum && _copies > 1} 
+<b>
+    #{if _copies == 2 } 
+        #{if _copyNum == 1}&{ 'summary.original' }#{/if}
+        #{else}&{ 'summary.copy' }#{/else}
+    #{/if}
+    #{else}
+        #{if _copyNum == 1}&{ 'summary.original' }#{/if}
+        #{elseif _copyNum == 2}&{ 'summary.duplicate' }#{/elseif}
+        #{elseif _copyNum == 3}&{ 'summary.triplicate' }#{/elseif}
+        #{elseif _copyNum == 4}&{ 'summary.quadruplicate' }#{/elseif}
+        #{elseif _copyNum == 5}&{ 'summary.quintuplicate' }#{/elseif}
+        #{else}INVALID#{/else}
+    #{/else}
+</b><br/>
+#{/if}
