@@ -12,7 +12,7 @@ void TimerInterruptHandler() __interrupt(1) {
         INTCON3bits.INT2IF = 0;
     } else if (PIR2bits.TMR3IF & PIE2bits.TMR3IE) {
         // Slow down detection.
-        CHECK_COUNTER_REMOVED;
+        curr_counter_removed_bits = COUNTER_REMOVED_BITS;
         if (curr_counter_removed_bits != counter_removed_bits) {
             if (counter_removed_cnt < 150) {
                 counter_removed_cnt++;

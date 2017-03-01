@@ -146,6 +146,7 @@ public class ModelFacade {
             }
         }
     }
+    static int aproveRetry = 0;
 
     static class OnIoBoardEvent extends DeviceFactoryEventJob {
 
@@ -195,14 +196,22 @@ public class ModelFacade {
             if (status.getBagState() == IoBoard.BAG_STATE.BAG_STATE_INPLACE) {
                 switch (status.getBagAproveState()) {
                     case BAG_NOT_APROVED:
+                        aproveRetry = 0;
                         ioBoard.aproveBag();
                         /*if (!manager.collect()) {
                          modelError.setError(ModelError.ERROR_CODE.ERROR_TRYING_TO_COLLECT, "error trying to collect");
                          }*/
                         break;
                     case BAG_APROVE_WAIT:
+                        aproveRetry++;
+                        if (aproveRetry > 5) {
+                            Logger.debug("APROVE RETRY");
+                            aproveRetry = 0;
+                            ioBoard.aproveBag();
+                        }
                         break;
                     case BAG_APROVED:
+                        aproveRetry = 0;
                         // Bag aproved, recover from error.
                         if (modelError.getErrorCode() == ModelError.ERROR_CODE.BAG_NOT_INPLACE) {
                             errorReset();
