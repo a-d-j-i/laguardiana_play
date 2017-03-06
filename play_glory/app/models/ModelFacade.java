@@ -84,6 +84,7 @@ public class ModelFacade {
         // Close unifnished deposits.
         LgDeposit.closeUnfinished();
         Configuration.initCrapId();
+        Logger.debug("APP VERSION : " + Configuration.getVersion());
     }
 
     interface BillListVisitor {

@@ -87,19 +87,9 @@ public class MenuController extends Controller {
             new MenuButton("MenuController.accountingMenu", "other_menu.accounting"),
             new MenuButton("MenuController.reportMenu", "other_menu.reports")
         };
-        File f = play.Play.getFile("version.txt");
-        FileInputStream fis;
-        try {
-            fis = new FileInputStream(f);
-            byte[] data = new byte[(int) f.length()];
-            fis.read(data);
-            fis.close();
-            String s = new String(data, "UTF-8");
+        String s = Configuration.getVersion();
+        if (s != null) {
             renderArgs.put("release", s);
-        } catch (StringIndexOutOfBoundsException ex) {
-            Logger.error("Error reading release file : %s", ex.toString());
-        } catch (IOException ex) {
-            Logger.error("Error reading release file : %s", ex.toString());
         }
         renderMenuAndNavigate(back, backAction, buttons);
     }

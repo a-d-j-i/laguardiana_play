@@ -4,7 +4,11 @@
  */
 package models;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.logging.Level;
 import models.db.LgSystemProperty;
 import static models.db.LgSystemProperty.setOrCreateProperty;
 import play.Logger;
@@ -377,4 +381,26 @@ public class Configuration {
         return ret;
     }
 
+    static public String getVersion() {
+        File f = play.Play.getFile("version.txt");
+        FileInputStream fis= null;
+        try {
+            fis = new FileInputStream(f);
+            byte[] data = new byte[(int) f.length()];
+            fis.read(data);
+            return new String(data, "UTF-8");
+        } catch (StringIndexOutOfBoundsException ex) {
+            Logger.error("Error reading release file : %s", ex.toString());
+        } catch (IOException ex) {
+            Logger.error("Error reading release file : %s", ex.toString());
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
+        return null;
+    }
 }

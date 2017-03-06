@@ -66,14 +66,12 @@ public class BillDepositController extends CounterController {
                 Logger.error("Wizard : %s %s", error.getKey(), error.message());
             }
             params.flash(); // add http parameters to the flash scope
-        } else {
-            if (formData != null) {
-                BillDepositAction currentAction = new BillDepositAction((DepositUserCodeReference) formData.reference1.lov,
-                        formData.reference2, formData.currency.currency, formData);
-                ModelFacade.startAction(currentAction);
-                mainLoop();
-                return;
-            }
+        } else if (formData != null) {
+            BillDepositAction currentAction = new BillDepositAction((DepositUserCodeReference) formData.reference1.lov,
+                    formData.reference2, formData.currency.currency, formData);
+            ModelFacade.startAction(currentAction);
+            mainLoop();
+            return;
         }
         if (formData == null) {
             formData = new FormData();
@@ -97,6 +95,7 @@ public class BillDepositController extends CounterController {
             o[1] = ModelFacade.getBillQuantities();
             o[2] = Messages.get(ModelFacade.getActionMessage());
             o[3] = totalSum;
+            Logger.debug(String.format("State %s, Quantities %s, Action %s, total %s", o));
             renderJSON(o, new BillValueSerializer(), new BillQuantitySerializer());
         } else {
             /*            long currentTotalSum = totalSum;
@@ -130,13 +129,14 @@ public class BillDepositController extends CounterController {
     }
 
     public static void finish() {
+        Logger.debug("BILL DEPOSIT FINISH");
         BillDeposit deposit = (BillDeposit) ModelFacade.getDeposit();
         FormData formData = (FormData) ModelFacade.getFormData();
         if (formData == null) {
             Application.index();
             return;
         }
-        renderArgs.put("can_continue",Configuration.billDepositCanContinueOnFinish());
+        renderArgs.put("can_continue", Configuration.billDepositCanContinueOnFinish());
         renderArgs.put("clientCode", Configuration.getClientDescription());
         renderArgs.put("user", Secure.getCurrentUser());
         renderArgs.put("providerCode", Configuration.getProviderDescription());
@@ -147,6 +147,7 @@ public class BillDepositController extends CounterController {
             renderArgs.put("depositTotal", total);
             renderArgs.put("depositId", deposit.depositId);
         }
+        Logger.debug("BILL DEPOSIT FINISH, CALLING FINISH ACTION");
         ModelFacade.finishAction();
         render();
     }
