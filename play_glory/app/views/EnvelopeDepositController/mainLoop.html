@@ -115,8 +115,14 @@
 <script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
 
-    doRefresh = function() {
-        $.getJSON('@{mainLoop}', function(data) {
+    var deposit_finished = false;
+    doRefresh = function () {
+        $.getJSON('@{mainLoop}', function (data) {
+            if (deposit_finished) {
+                window.location.href = deposit_finished;
+                doneRefresh();
+                return;
+            }
             var status = data[ 0 ];
             var billData = data[ 1 ];
             if (status != null && status.toString() != 'null') {
@@ -145,30 +151,41 @@
 
                 if (status == 'IDLE' || status == 'JAM' || status == 'CANCELING' || status == 'STORING' || status == 'REMOVE_REJECTED_BILLS' || status == 'BAG_REMOVED') {
                 } else if (status == 'FINISH') {
-                    window.location.href = "@{finish}";
+                    deposit_finished = "@{finish}";
+                    window.location.href = deposit_finished;
+                    doneRefresh();
                     return;
                 } else if (status == 'READY_TO_STORE') {
                     //                    $( '.continueButton' ).attr( { 'class' : 'boton ${play.configuration['style.button_color']}'});
                 } else if (status == 'ERROR') {
-                    window.location.href = "@{counterError()}";
+                    deposit_finished = "@{counterError()}";
+                    window.location.href = deposit_finished;
+                    doneRefresh();
+                    return;
                 } else {
                     alert("Invalid status : " + status + " last status : " + lastStatus);
                 }
                 lastStatus = status
             }
             doneRefresh();
-        }).fail( function() { window.location.href = "@{Secure.login()}" } );
+        }).fail(function () {
+            window.location.href = "@{Secure.login()}"
+        });
     };
 
 
-    $('.continueButton').click(function(event) {
-        $.getJSON('@{accept()}', function(data) {
-        });
+    $('.continueButton').click(function (event) {
+        if (!deposit_finished) {
+            $.getJSON('@{accept()}', function (data) {
+            });
+        }
     });
 
-    $('.cancelButton').click(function(event) {
-        $.getJSON('@{cancel()}', function(data) {
-        });
+    $('.cancelButton').click(function (event) {
+        if (!deposit_finished) {
+            $.getJSON('@{cancel()}', function (data) {
+            });
+        }
     });
 </script>
 #{/set}

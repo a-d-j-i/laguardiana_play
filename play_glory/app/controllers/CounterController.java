@@ -11,7 +11,6 @@ import devices.printer.Printer.PrinterStatus;
 import models.Configuration;
 import models.ModelFacade;
 import play.Logger;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
 import play.mvc.With;
