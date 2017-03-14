@@ -23,6 +23,11 @@ public class BillDepositStoring extends ActionState {
     }
 
     @Override
+    public void cancel() {
+        //ignore
+    }
+
+    @Override
     public String name() {
         return "STORING";
     }
