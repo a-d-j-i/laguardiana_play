@@ -114,7 +114,7 @@
 #{set 'moreScripts'}
 <script src="@{'/public/javascripts/main_loop.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 <script type="text/javascript" charset="${_response_encoding}">
-
+    var deposit_finished = false;
     var deposit_finished = false;
     doRefresh = function () {
         $.getJSON('@{mainLoop}', function (data) {

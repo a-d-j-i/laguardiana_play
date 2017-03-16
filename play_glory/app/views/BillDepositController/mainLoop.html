@@ -176,15 +176,12 @@
     var deposit_finished = false;
     doRefresh = function () {
         $.getJSON('@{mainLoop}', function (data) {
-
             if (deposit_finished) {
                 window.location.href = deposit_finished;
                 doneRefresh();
                 return;
             }
-
             var status = data[ 0 ];
-
             if (status != null && status.toString() != 'null') {
                 if (status == 'IDLE' || status == 'REMOVE_THE_BILLS_FROM_ESCROW' || status == 'TIMEOUT_WARNING' || status == 'CANCELING' || status == 'READY_TO_STORE' || status == 'CONTINUE_DEPOSIT') {
                 } else if (status == 'STORING') {

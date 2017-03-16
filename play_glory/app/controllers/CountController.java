@@ -13,7 +13,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
-import play.mvc.Router;
 import validation.FormCurrency;
 
 public class CountController extends CounterController {
