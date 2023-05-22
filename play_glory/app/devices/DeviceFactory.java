@@ -68,8 +68,8 @@ public class DeviceFactory extends PlayPlugin {
             return gloryDevices.get(port);
         }
         Logger.info(String.format("Configuring glory on serial port %s", port));
-        //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
         PortConfiguration gloryPortConf = new PortConfiguration(PORTSPEED.BAUDRATE_9600, PORTBITS.BITS_7, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_EVEN);
+        // SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port, gloryPortConf );
         SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, gloryPortConf);
         Logger.info(String.format("Configuring glory"));
         Glory device = new Glory(serialPort);
@@ -85,8 +85,8 @@ public class DeviceFactory extends PlayPlugin {
             return ioBoardDevices.get(port);
         }
         Logger.info(String.format("Configuring ioboard on serial port %s", port));
-        //SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port );
         PortConfiguration iBoardPortConf = new PortConfiguration(version.getBaudRate(), PORTBITS.BITS_8, PORTSTOPBITS.STOP_BITS_1, PORTPARITY.PARITY_NONE);
+        // SerialPortAdapterInterface serialPort = new SerialPortAdapterJSSC( port, iBoardPortConf );
         SerialPortAdapterInterface serialPort = new SerialPortAdapterRxTx(port, iBoardPortConf);
         Logger.info(String.format("Configuring glory"));
         IoBoard device = new IoBoard(serialPort, version);

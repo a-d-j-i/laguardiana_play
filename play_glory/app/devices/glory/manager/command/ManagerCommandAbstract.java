@@ -26,6 +26,8 @@ abstract public class ManagerCommandAbstract implements Runnable {
     final static boolean DEBUG = false;
     final static int retries = 0xfff;
 
+    public abstract void run();
+
     static protected class CommandData {
 
         private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();

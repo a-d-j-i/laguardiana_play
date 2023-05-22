@@ -8,10 +8,12 @@ import devices.glory.manager.ManagerInterface;
 import devices.ioboard.IoBoard;
 import devices.printer.Printer;
 import java.util.List;
+import jobs.PurgeDatabase;
 import models.Configuration;
 import models.ModelFacade;
 import models.db.LgSystemProperty;
 import play.Logger;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -129,6 +131,12 @@ public class ConfigController extends Controller {
             renderArgs.put("ierror", ierror);
             render();
         }
+    }
+
+    public static void purgeDatabase() {
+        F.Promise p = new PurgeDatabase().now();
+        await(p);
+        MenuController.accountingMenu(null);
     }
 
 }

@@ -121,7 +121,8 @@ public class MenuController extends Controller {
         final MenuButton[] buttons = {new MenuButton("ReportZController.print", "other_menu.current_z_totals"),
             new MenuButton("ReportZController.rotateZ", "other_menu.rotate_z"),
             new MenuButton("ReportBagController.print", "other_menu.current_bag_totals"),
-            new MenuButton("ReportBagController.rotateBag", "other_menu.rotate_bag")
+            new MenuButton("ReportBagController.rotateBag", "other_menu.rotate_bag"),
+            new MenuButton("ConfigController.purgeDatabase", "other_menu.purge_database")
         };
         renderMenuAndNavigate(back, backAction, buttons);
     }

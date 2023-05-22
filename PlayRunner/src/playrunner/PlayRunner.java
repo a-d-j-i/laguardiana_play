@@ -52,7 +52,7 @@ public class PlayRunner {
                         break;
                     default:
                         try {
-                            Thread.sleep(100);
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                         }
                 }

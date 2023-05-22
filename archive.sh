@@ -57,6 +57,10 @@ function archive {
     cp ./pic/output/laguardiana.hex "$TMP_DIR/WEB-INF/pic"
 
 
+    mkdir "$TMP_DIR/WEB-INF/launcher/scripts"
+    cp ./scripts/install_task.bat "$TMP_DIR/WEB-INF/launcher/scripts"
+    cp ./scripts/pg_backup.bat "$TMP_DIR/WEB-INF/launcher/sctipts"
+
     mkdir "$TMP_DIR/WEB-INF/docs"
     gs  -o "$TMP_DIR/WEB-INF/docs/IOBoard.pdf" \
         -sDEVICE=pdfwrite \

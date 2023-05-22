@@ -81,6 +81,7 @@ other_menu.current_z_totals=Recaudacion actual
 other_menu.rotate_z=Cierre contable
 other_menu.current_bag_totals=Dinero en Bolsa
 other_menu.rotate_bag=Cambiar Bolsa
+other_menu.purge_database=Purgar base de datos
 
 other_menu.unprocessed_menu=Objectos a procesar
 other_menu.unprocessed_zs=Zs a procesar
